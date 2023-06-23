@@ -1,1 +1,0 @@
-package iudx.ogc.rs.authenticator;

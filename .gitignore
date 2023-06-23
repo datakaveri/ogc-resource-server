@@ -64,6 +64,3 @@ build/
 *.zip
 *.tar.gz
 *.rar
-
-### Secrets ###
-secrets/

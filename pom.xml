@@ -24,7 +24,7 @@
         <maven-surefire-report-plugin.version>3.0.0-M7</maven-surefire-report-plugin.version>
         <openjdk.version>11</openjdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <exec.mainClass>iudx.ogc.rs.deploy.Deployer</exec.mainClass>
+        <exec.mainClass>ogc.rs.deploy.Deployer</exec.mainClass>
     </properties>
 
     <dependencyManagement>
@@ -187,9 +187,46 @@
                         <configuration>
                             <dataFile>target/jacoco.exec</dataFile>
                             <outputDirectory>target/jacoco-site</outputDirectory>
+                            <excludes>
+                                <!-- classes are excluded since they are not testable or don't add
+                                    any value if test cases are written. -->
+                                <!-- ApiServerVerticle testing is covered in integration for now. -->
+                                <exclude>ogc/rs/apiserver/ApiServerVerticle.class</exclude>
+                                <exclude>**/*VertxEBProxy.class</exclude>
+                                <exclude>**/Constants.class</exclude>
+                                <exclude>**/*VertxProxyHandler.class</exclude>
+                                <exclude>**/*Verticle.class</exclude>
+
+                                <!-- class present in generated-sources -->
+                                <exclude>**/JwtDataConverter.class</exclude>
+
+                                <!-- service proxy interfaces -->
+                                <exclude>ogc/rs/database/DatabaseService.class</exclude>
+                                <exclude>ogc/rs/authentication/AuthenticationService.class</exclude>
+                                <exclude>ogc/rs/metering/MeteringService.class</exclude>
+
+                                <!-- deployment helper classes -->
+                                <exclude>ogc/rs/deploy/*.class</exclude>
+                            </excludes>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>${maven-pmd-plugin.version}</version>
+                <configuration>
+                    <targetJdk>${openjdk.version}</targetJdk>
+                    <rulesets>
+                        <ruleset>./iudx-pmd-ruleset.xml</ruleset>
+                    </rulesets>
+                    <printFailingErrors>true</printFailingErrors>
+                    <!--<maxAllowedViolations>622</maxAllowedViolations>-->
+                    <excludeRoots>
+                        <excludeRoot>target/generated-sources</excludeRoot>
+                    </excludeRoots>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -283,7 +320,7 @@
                     <execution>
                         <id>ogc-resource-server</id>
                         <configuration>
-                            <mainClass>iudx.ogc.rs.deploy.Deployer </mainClass>
+                            <mainClass>ogc.rs.deploy.Deployer</mainClass>
                             <systemProperties>
                                 <systemProperty>
                                     <key>vertx.logger-delegate-factory-class-name</key>
