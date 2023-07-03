@@ -1,0 +1,12 @@
+openapi: 3.1.2
+
+schemes:
+  - "http"
+  - "https"
+
+info:
+  title: "OGC Resource Server APIs"
+  version: 0.0.1
+
+paths:
+  /collections:
