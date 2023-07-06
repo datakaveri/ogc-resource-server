@@ -1,0 +1,2760 @@
+{
+	"info": {
+		"_postman_id": "3ae53bd2-63dd-494d-969b-adc6dc5d048f",
+		"name": "OGC Compliant IUDX Resource Server v0.0.1",
+		"description": "Components/APIs used in the OGC Compliant Resource Server.\n\nOGC Features API standard can be found at\n\n[\"OGC API - Features - Part 1: Core corrigendum standard\"](https://docs.opengeospatial.org/is/17-069r4/17-069r4.html).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28022201"
+	},
+	"item": [
+		{
+			"name": "Feature Collections",
+			"item": [
+				{
+					"name": "{collectionId}",
+					"item": [
+						{
+							"name": "items",
+							"item": [
+								{
+									"name": "fetch features",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/geo+json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/collections/:collectionId/items?limit=10&bbox=&datetime=<string>",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"collections",
+												":collectionId",
+												"items"
+											],
+											"query": [
+												{
+													"key": "limit",
+													"value": "10",
+													"description": "The optional limit parameter limits the number of items that are presented in the response document.\n\nOnly items are counted that are on the first level of the collection in the response document.\nNested objects contained within the explicitly requested items shall not be counted.\n\nMinimum = 1. Maximum = 10000. Default = 10."
+												},
+												{
+													"key": "bbox",
+													"value": "",
+													"description": "Only features that have a geometry that intersects the bounding box are selected.\nThe bounding box is provided as four or six numbers, depending on whether the\ncoordinate reference system includes a vertical axis (height or depth):\n\n* Lower left corner, coordinate axis 1\n* Lower left corner, coordinate axis 2\n* Minimum value, coordinate axis 3 (optional)\n* Upper right corner, coordinate axis 1\n* Upper right corner, coordinate axis 2\n* Maximum value, coordinate axis 3 (optional)\n\nIf the value consists of four numbers, the coordinate reference system is\nWGS 84 longitude/latitude (http://www.opengis.net/def/crs/OGC/1.3/CRS84)\nunless a different coordinate reference system is specified in the parameter `bbox-crs`.\n\nIf the value consists of six numbers, the coordinate reference system is WGS 84\nlongitude/latitude/ellipsoidal height (http://www.opengis.net/def/crs/OGC/0/CRS84h)\nunless a different coordinate reference system is specified in the parameter `bbox-crs`.\n\nThe query parameter `bbox-crs` is specified in OGC API - Features - Part 2: Coordinate\nReference Systems by Reference.\n\nFor WGS 84 longitude/latitude the values are in most cases the sequence of\nminimum longitude, minimum latitude, maximum longitude and maximum latitude.\nHowever, in cases where the box spans the antimeridian the first value\n(west-most box edge) is larger than the third value (east-most box edge).\n\nIf the vertical axis is included, the third and the sixth number are\nthe bottom and the top of the 3-dimensional bounding box.\n\nIf a feature has multiple spatial geometry properties, it is the decision of the\nserver whether only a single spatial geometry property is used to determine\nthe extent or all relevant geometries."
+												},
+												{
+													"key": "datetime",
+													"value": "<string>",
+													"description": "Either a date-time or an interval. Date and time expressions adhere to RFC 3339.\nIntervals may be bounded or half-bounded (double-dots at start or end).\n\nExamples:\n\n* A date-time: \"2018-02-12T23:20:50Z\"\n* A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\"\n* Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"\n\nOnly features that have a temporal property that intersects the value of\n`datetime` are selected.\n\nIf a feature has multiple temporal properties, it is the decision of the\nserver whether only a single temporal property is used to determine\nthe extent or all relevant temporal properties."
+												}
+											],
+											"variable": [
+												{
+													"key": "collectionId",
+													"value": "<string>",
+													"description": "(Required) local identifier of a collection"
+												}
+											]
+										},
+										"description": "Fetch features of the feature collection with id `collectionId`.\n\nEvery feature in a dataset belongs to a collection. A dataset may\nconsist of multiple feature collections. A feature collection is often a\ncollection of features of a similar type, based on a common schema.\n\nUse content negotiation to request HTML or GeoJSON."
+									},
+									"response": [
+										{
+											"name": "The response is a document consisting of features in the collection.\nThe features included in the response are determined by the server\nbased on the query parameters of the request. To support access to\nlarger collections without overloading the client, t",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/geo+json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/collections/:collectionId/items?limit=10&bbox=&datetime=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"collections",
+														":collectionId",
+														"items"
+													],
+													"query": [
+														{
+															"key": "limit",
+															"value": "10"
+														},
+														{
+															"key": "bbox",
+															"value": ""
+														},
+														{
+															"key": "datetime",
+															"value": "<string>"
+														}
+													],
+													"variable": [
+														{
+															"key": "collectionId",
+															"value": "<string>",
+															"description": "(Required) local identifier of a collection"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/geo+json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"type\": \"<string>\",\n  \"features\": [\n    {\n      \"type\": \"<string>\",\n      \"geometry\": {\n        \"type\": \"<string>\",\n        \"coordinates\": [\n          \"<number>\",\n          \"<number>\"\n        ]\n      },\n      \"properties\": \"<object>\",\n      \"id\": \"<string>\",\n      \"links\": [\n        {\n          \"href\": \"<string>\",\n          \"rel\": \"<string>\",\n          \"type\": \"<string>\",\n          \"hreflang\": \"<string>\",\n          \"title\": \"<string>\",\n          \"length\": \"<integer>\"\n        },\n        {\n          \"href\": \"<string>\",\n          \"rel\": \"<string>\",\n          \"type\": \"<string>\",\n          \"hreflang\": \"<string>\",\n          \"title\": \"<string>\",\n          \"length\": \"<integer>\"\n        }\n      ]\n    },\n    {\n      \"type\": \"<string>\",\n      \"geometry\": {\n        \"type\": \"<string>\",\n        \"coordinates\": [\n          \"<number>\",\n          \"<number>\"\n        ]\n      },\n      \"properties\": \"<object>\",\n      \"id\": \"<string>\",\n      \"links\": [\n        {\n          \"href\": \"<string>\",\n          \"rel\": \"<string>\",\n          \"type\": \"<string>\",\n          \"hreflang\": \"<string>\",\n          \"title\": \"<string>\",\n          \"length\": \"<integer>\"\n        },\n        {\n          \"href\": \"<string>\",\n          \"rel\": \"<string>\",\n          \"type\": \"<string>\",\n          \"hreflang\": \"<string>\",\n          \"title\": \"<string>\",\n          \"length\": \"<integer>\"\n        }\n      ]\n    }\n  ],\n  \"links\": [\n    {\n      \"href\": \"<string>\",\n      \"rel\": \"<string>\",\n      \"type\": \"<string>\",\n      \"hreflang\": \"<string>\",\n      \"title\": \"<string>\",\n      \"length\": \"<integer>\"\n    },\n    {\n      \"href\": \"<string>\",\n      \"rel\": \"<string>\",\n      \"type\": \"<string>\",\n      \"hreflang\": \"<string>\",\n      \"title\": \"<string>\",\n      \"length\": \"<integer>\"\n    }\n  ],\n  \"timeStamp\": \"<dateTime>\",\n  \"numberMatched\": \"<integer>\",\n  \"numberReturned\": \"<integer>\"\n}"
+										},
+										{
+											"name": "A query parameter has an invalid value.",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/collections/:collectionId/items?limit=10&bbox=&datetime=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"collections",
+														":collectionId",
+														"items"
+													],
+													"query": [
+														{
+															"key": "limit",
+															"value": "10"
+														},
+														{
+															"key": "bbox",
+															"value": ""
+														},
+														{
+															"key": "datetime",
+															"value": "<string>"
+														}
+													],
+													"variable": [
+														{
+															"key": "collectionId",
+															"value": "<string>",
+															"description": "(Required) local identifier of a collection"
+														}
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"code\": \"<string>\",\n  \"description\": \"<string>\"\n}"
+										},
+										{
+											"name": "The requested resource does not exist on the server. For example, a path parameter had an incorrect value.",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/collections/:collectionId/items?limit=10&bbox=&datetime=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"collections",
+														":collectionId",
+														"items"
+													],
+													"query": [
+														{
+															"key": "limit",
+															"value": "10"
+														},
+														{
+															"key": "bbox",
+															"value": ""
+														},
+														{
+															"key": "datetime",
+															"value": "<string>"
+														}
+													],
+													"variable": [
+														{
+															"key": "collectionId",
+															"value": "<string>",
+															"description": "(Required) local identifier of a collection"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "A server error occurred.",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/collections/:collectionId/items?limit=10&bbox=&datetime=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"collections",
+														":collectionId",
+														"items"
+													],
+													"query": [
+														{
+															"key": "limit",
+															"value": "10"
+														},
+														{
+															"key": "bbox",
+															"value": ""
+														},
+														{
+															"key": "datetime",
+															"value": "<string>"
+														}
+													],
+													"variable": [
+														{
+															"key": "collectionId",
+															"value": "<string>",
+															"description": "(Required) local identifier of a collection"
+														}
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"code\": \"<string>\",\n  \"description\": \"<string>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "fetch a single feature",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/geo+json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/collections/:collectionId/items/:featureId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"collections",
+												":collectionId",
+												"items",
+												":featureId"
+											],
+											"variable": [
+												{
+													"key": "collectionId",
+													"value": "<string>",
+													"description": "(Required) local identifier of a collection"
+												},
+												{
+													"key": "featureId",
+													"value": "<string>",
+													"description": "(Required) local identifier of a feature"
+												}
+											]
+										},
+										"description": "Fetch the feature with id `featureId` in the feature collection\nwith id `collectionId`.\n\nUse content negotiation to request HTML or GeoJSON."
+									},
+									"response": [
+										{
+											"name": "fetch the feature with id `featureId` in the feature collection\nwith id `collectionId`",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/geo+json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/collections/:collectionId/items/:featureId",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"collections",
+														":collectionId",
+														"items",
+														":featureId"
+													],
+													"variable": [
+														{
+															"key": "collectionId",
+															"value": "<string>",
+															"description": "(Required) local identifier of a collection"
+														},
+														{
+															"key": "featureId",
+															"value": "<string>",
+															"description": "(Required) local identifier of a feature"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/geo+json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"type\": \"<string>\",\n  \"geometry\": {\n    \"type\": \"<string>\",\n    \"coordinates\": [\n      \"<number>\",\n      \"<number>\"\n    ]\n  },\n  \"properties\": \"<object>\",\n  \"id\": \"<string>\",\n  \"links\": [\n    {\n      \"href\": \"<string>\",\n      \"rel\": \"<string>\",\n      \"type\": \"<string>\",\n      \"hreflang\": \"<string>\",\n      \"title\": \"<string>\",\n      \"length\": \"<integer>\"\n    },\n    {\n      \"href\": \"<string>\",\n      \"rel\": \"<string>\",\n      \"type\": \"<string>\",\n      \"hreflang\": \"<string>\",\n      \"title\": \"<string>\",\n      \"length\": \"<integer>\"\n    }\n  ]\n}"
+										},
+										{
+											"name": "The requested resource does not exist on the server. For example, a path parameter had an incorrect value.",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/collections/:collectionId/items/:featureId",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"collections",
+														":collectionId",
+														"items",
+														":featureId"
+													],
+													"variable": [
+														{
+															"key": "collectionId",
+															"value": "<string>",
+															"description": "(Required) local identifier of a collection"
+														},
+														{
+															"key": "featureId",
+															"value": "<string>",
+															"description": "(Required) local identifier of a feature"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "A server error occurred.",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/collections/:collectionId/items/:featureId",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"collections",
+														":collectionId",
+														"items",
+														":featureId"
+													],
+													"variable": [
+														{
+															"key": "collectionId",
+															"value": "<string>",
+															"description": "(Required) local identifier of a collection"
+														},
+														{
+															"key": "featureId",
+															"value": "<string>",
+															"description": "(Required) local identifier of a feature"
+														}
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"code\": \"<string>\",\n  \"description\": \"<string>\"\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "describe the feature collection with id `collectionId`",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/collections/:collectionId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"collections",
+										":collectionId"
+									],
+									"variable": [
+										{
+											"key": "collectionId",
+											"value": "<string>",
+											"description": "(Required) local identifier of a collection"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Information about the feature collection with id `collectionId`.\n\nThe response contains a link to the items in the collection\n(path `/collections/{collectionId}/items`, link relation `items`)\nas well as key information about the collection. This informati",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/collections/:collectionId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"collections",
+												":collectionId"
+											],
+											"variable": [
+												{
+													"key": "collectionId",
+													"value": "<string>",
+													"description": "(Required) local identifier of a collection"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"id\": \"<string>\",\n  \"links\": [\n    {\n      \"href\": \"<string>\",\n      \"rel\": \"<string>\",\n      \"type\": \"<string>\",\n      \"hreflang\": \"<string>\",\n      \"title\": \"<string>\",\n      \"length\": \"<integer>\"\n    },\n    {\n      \"href\": \"<string>\",\n      \"rel\": \"<string>\",\n      \"type\": \"<string>\",\n      \"hreflang\": \"<string>\",\n      \"title\": \"<string>\",\n      \"length\": \"<integer>\"\n    }\n  ],\n  \"title\": \"<string>\",\n  \"description\": \"<string>\",\n  \"extent\": {\n    \"spatial\": {\n      \"crs\": \"http://www.opengis.net/def/crs/OGC/1.3/CRS84\"\n    },\n    \"temporal\": {\n      \"interval\": [\n        [\n          \"<dateTime>\",\n          \"<dateTime>\"\n        ]\n      ],\n      \"trs\": \"http://www.opengis.net/def/uom/ISO-8601/0/Gregorian\"\n    }\n  },\n  \"itemType\": \"feature\",\n  \"crs\": [\n    \"http://www.opengis.net/def/crs/OGC/1.3/CRS84\"\n  ]\n}"
+								},
+								{
+									"name": "The requested resource does not exist on the server. For example, a path parameter had an incorrect value.",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/collections/:collectionId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"collections",
+												":collectionId"
+											],
+											"variable": [
+												{
+													"key": "collectionId",
+													"value": "<string>",
+													"description": "(Required) local identifier of a collection"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "A server error occurred.",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/collections/:collectionId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"collections",
+												":collectionId"
+											],
+											"variable": [
+												{
+													"key": "collectionId",
+													"value": "<string>",
+													"description": "(Required) local identifier of a collection"
+												}
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"code\": \"<string>\",\n  \"description\": \"<string>\"\n}"
+								}
+							]
+						},
+						{
+							"name": "describe the feature collection with `collectionId` with spatial parameter (bbox [single])",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/collections/:collectionId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"collections",
+										":collectionId"
+									],
+									"variable": [
+										{
+											"key": "collectionId",
+											"value": "<string>",
+											"description": "(Required) local identifier of a collection"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Information about the feature collection with id `collectionId`.\n\nThe response contains a link to the items in the collection\n(path `/collections/{collectionId}/items`, link relation `items`)\nas well as key information about the collection. This informati",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/collections/:collectionId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"collections",
+												":collectionId"
+											],
+											"variable": [
+												{
+													"key": "collectionId",
+													"value": "<string>",
+													"description": "(Required) local identifier of a collection"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"id\": \"<string>\",\n  \"links\": [\n    {\n      \"href\": \"<string>\",\n      \"rel\": \"<string>\",\n      \"type\": \"<string>\",\n      \"hreflang\": \"<string>\",\n      \"title\": \"<string>\",\n      \"length\": \"<integer>\"\n    },\n    {\n      \"href\": \"<string>\",\n      \"rel\": \"<string>\",\n      \"type\": \"<string>\",\n      \"hreflang\": \"<string>\",\n      \"title\": \"<string>\",\n      \"length\": \"<integer>\"\n    }\n  ],\n  \"title\": \"<string>\",\n  \"description\": \"<string>\",\n  \"extent\": {\n    \"spatial\": {\n      \"crs\": \"http://www.opengis.net/def/crs/OGC/1.3/CRS84\"\n    },\n    \"temporal\": {\n      \"interval\": [\n        [\n          \"<dateTime>\",\n          \"<dateTime>\"\n        ]\n      ],\n      \"trs\": \"http://www.opengis.net/def/uom/ISO-8601/0/Gregorian\"\n    }\n  },\n  \"itemType\": \"feature\",\n  \"crs\": [\n    \"http://www.opengis.net/def/crs/OGC/1.3/CRS84\"\n  ]\n}"
+								},
+								{
+									"name": "The requested resource does not exist on the server. For example, a path parameter had an incorrect value.",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/collections/:collectionId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"collections",
+												":collectionId"
+											],
+											"variable": [
+												{
+													"key": "collectionId",
+													"value": "<string>",
+													"description": "(Required) local identifier of a collection"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "A server error occurred.",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/collections/:collectionId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"collections",
+												":collectionId"
+											],
+											"variable": [
+												{
+													"key": "collectionId",
+													"value": "<string>",
+													"description": "(Required) local identifier of a collection"
+												}
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"code\": \"<string>\",\n  \"description\": \"<string>\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "the feature collections in the dataset",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/collections",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"collections"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "The feature collections shared by this API.\n\nThe dataset is organized as one or more feature collections. This resource\nprovides information about and access to the collections.\n\nThe response contains the list of collections. For each collection, a link\nt",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/collections",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"collections"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"links\": [\n    {\n      \"href\": \"<string>\",\n      \"rel\": \"<string>\",\n      \"type\": \"<string>\",\n      \"hreflang\": \"<string>\",\n      \"title\": \"<string>\",\n      \"length\": \"<integer>\"\n    },\n    {\n      \"href\": \"<string>\",\n      \"rel\": \"<string>\",\n      \"type\": \"<string>\",\n      \"hreflang\": \"<string>\",\n      \"title\": \"<string>\",\n      \"length\": \"<integer>\"\n    }\n  ],\n  \"collections\": [\n    {\n      \"id\": \"<string>\",\n      \"links\": [\n        {\n          \"href\": \"<string>\",\n          \"rel\": \"<string>\",\n          \"type\": \"<string>\",\n          \"hreflang\": \"<string>\",\n          \"title\": \"<string>\",\n          \"length\": \"<integer>\"\n        },\n        {\n          \"href\": \"<string>\",\n          \"rel\": \"<string>\",\n          \"type\": \"<string>\",\n          \"hreflang\": \"<string>\",\n          \"title\": \"<string>\",\n          \"length\": \"<integer>\"\n        }\n      ],\n      \"title\": \"<string>\",\n      \"description\": \"<string>\",\n      \"extent\": {\n        \"spatial\": {\n          \"crs\": \"http://www.opengis.net/def/crs/OGC/1.3/CRS84\"\n        },\n        \"temporal\": {\n          \"interval\": [\n            [\n              \"<dateTime>\",\n              \"<dateTime>\"\n            ]\n          ],\n          \"trs\": \"http://www.opengis.net/def/uom/ISO-8601/0/Gregorian\"\n        }\n      },\n      \"itemType\": \"feature\",\n      \"crs\": [\n        \"http://www.opengis.net/def/crs/OGC/1.3/CRS84\"\n      ]\n    },\n    {\n      \"id\": \"<string>\",\n      \"links\": [\n        {\n          \"href\": \"<string>\",\n          \"rel\": \"<string>\",\n          \"type\": \"<string>\",\n          \"hreflang\": \"<string>\",\n          \"title\": \"<string>\",\n          \"length\": \"<integer>\"\n        },\n        {\n          \"href\": \"<string>\",\n          \"rel\": \"<string>\",\n          \"type\": \"<string>\",\n          \"hreflang\": \"<string>\",\n          \"title\": \"<string>\",\n          \"length\": \"<integer>\"\n        }\n      ],\n      \"title\": \"<string>\",\n      \"description\": \"<string>\",\n      \"extent\": {\n        \"spatial\": {\n          \"crs\": \"http://www.opengis.net/def/crs/OGC/1.3/CRS84\"\n        },\n        \"temporal\": {\n          \"interval\": [\n            [\n              \"<dateTime>\",\n              \"<dateTime>\"\n            ]\n          ],\n          \"trs\": \"http://www.opengis.net/def/uom/ISO-8601/0/Gregorian\"\n        }\n      },\n      \"itemType\": \"feature\",\n      \"crs\": [\n        \"http://www.opengis.net/def/crs/OGC/1.3/CRS84\"\n      ]\n    }\n  ]\n}"
+						},
+						{
+							"name": "A server error occurred.",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/collections",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"collections"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"code\": \"<string>\",\n  \"description\": \"<string>\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Get Tokens",
+			"item": [
+				{
+					"name": "Get Open Resource (feature Collection) Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"openResourceToken\", jsonData.results.accessToken);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "clientId",
+								"value": "{{clientID}}",
+								"type": "text"
+							},
+							{
+								"key": "clientSecret",
+								"value": "{{clientSecret}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"itemId\": \"rs.iudx.io\",\n  \"itemType\": \"resource_server\",\n  \"role\": \"consumer\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://{{auth-url}}/{{dxAuthBasePath}}/token",
+							"protocol": "https",
+							"host": [
+								"{{auth-url}}"
+							],
+							"path": [
+								"{{dxAuthBasePath}}",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Secure Resource Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"secureResourceToken\", jsonData.results.accessToken);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "clientId",
+								"value": "{{clientID}}",
+								"type": "text"
+							},
+							{
+								"key": "clientSecret",
+								"value": "{{clientSecret}}",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"itemId\": \"iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta\", \n  \"itemType\": \"resource\",\n  \"role\": \"consumer\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://{{auth-url}}/{{dxAuthBasePath}}/token",
+							"protocol": "https",
+							"host": [
+								"{{auth-url}}"
+							],
+							"path": [
+								"{{dxAuthBasePath}}",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Secure Resource Token for feature collection",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"secureFeatureResourceToken\", jsonData.results.accessToken);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "clientId",
+								"value": "{{collectionClientId}}",
+								"type": "text"
+							},
+							{
+								"key": "clientSecret",
+								"value": "{{collectionClientSecret}}",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"itemId\": \"datakaveri.org/254ee63ac91d837f550784d6512990e23d30549b/soi.iudx.io/administrative_boundaries/district_hq\", \n  \"itemType\": \"resource\",\n  \"role\": \"consumer\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://{{auth-url}}/{{dxAuthBasePath}}/token",
+							"protocol": "https",
+							"host": [
+								"{{auth-url}}"
+							],
+							"path": [
+								"{{dxAuthBasePath}}",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Consumer Audit",
+			"item": [
+				{
+					"name": "200 (success) Get Data Read Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"successful operations\");",
+									"    pm.expect(body).to.have.property(\"type\", \"urn:dx:gsx:success\");",
+									"",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{secureResourceToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/consumer/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2022-11-20T14:20:00Z&endTime=2022-11-21T14:20:00Z&api=/{{basePath}}/entities",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2022-11-20T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-11-21T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entities"
+								},
+								{
+									"key": "id",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 (success) Get Data Count Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"successful operations\");",
+									"    const resultsjsonData = body.results[0];",
+									"    pm.expect(resultsjsonData).to.have.property(\"total\", 26172);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{delegateToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/consumer/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2022-11-20T00:00:00Z&endTime=2022-11-21T16:00:00Z&api=/{{basePath}}/entities",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2022-11-20T00:00:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-11-21T16:00:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entities"
+								},
+								{
+									"key": "id",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "204 (success) Get Data Count Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 204 (no Content)\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{secureResourceToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/consumer/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2020-07-01T14:20:00Z&endTime=2020-07-10T15:23:00Z&api=/{{basePath}}/entities&options=count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2020-07-01T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2020-07-10T15:23:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entities"
+								},
+								{
+									"key": "options",
+									"value": "count"
+								},
+								{
+									"key": "id",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 (failure) Invalid date-interval",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 400 (Bad request)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{consumerToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/consumer/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2022-07-01T14:20:00Z&endTime=2022-08-15T15:23:00Z&api=/{{basePath}}/entities&options=count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2022-07-01T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-08-15T15:23:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entities"
+								},
+								{
+									"key": "options",
+									"value": "count"
+								},
+								{
+									"key": "id",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 (failure) Get Data Read Query Count > 10000",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 400 (Bad request)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{secureResourceToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/consumer/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2022-05-01T14:20:00Z&endTime=2022-05-15T15:23:00Z&api=/{{basePath}}/entities",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2022-05-01T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-05-15T15:23:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entities"
+								},
+								{
+									"key": "id",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 (failure) Missing time-relation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 400 (Bad request)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{secureResourceToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/consumer/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&time=2022-07-01T14:20:00Z&endTime=2022-08-15T15:23:00Z&api=/{{basePath}}/entities&options=count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "time",
+									"value": "2022-07-01T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-08-15T15:23:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entities"
+								},
+								{
+									"key": "options",
+									"value": "count"
+								},
+								{
+									"key": "id",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 (failure) invalid-parameter empty-response read query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 400 (Bad request)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{secureResourceToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/consumer/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&time=2022-07-01T14:20:00Z&endTime=2022-08-15T15:23:00Z&api=/{{basePath}}/entities&options=count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "time",
+									"value": "2022-07-01T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-08-15T15:23:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entities"
+								},
+								{
+									"key": "options",
+									"value": "count"
+								},
+								{
+									"key": "id",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "401 (not authorized) Get Data Read Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 401 (Not Authorized)\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Not Authorized\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "abcd",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/consumer/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2022-05-01T14:20:00Z&endTime=2022-05-10T15:23:00Z&api=/{{basePath}}/entities",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2022-05-01T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-05-10T15:23:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entities"
+								},
+								{
+									"key": "id",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "401 (not authorized) Get Data Count Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 401 (Not Authorized)\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Not Authorized\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "abcd",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/consumer/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2022-05-01T14:20:00Z&endTime=2022-05-10T15:23:00Z&api=/{{basePath}}/entities",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2022-05-01T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-05-10T15:23:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entities"
+								},
+								{
+									"key": "id",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Provider Audit",
+			"item": [
+				{
+					"name": "200 (success) Get Data Read Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"successful operations\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{delegateToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2022-11-20T14:20:00Z&endTime=2022-11-21T14:20:00Z&api=/{{basePath}}/entities&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2022-11-20T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-11-21T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entities"
+								},
+								{
+									"key": "providerID",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 (success) Get Data Count Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"successful operations\");",
+									"    const resultsjsonData = body.results[0];",
+									"    pm.expect(resultsjsonData).to.have.property(\"total\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{delegateToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2022-11-20T14:20:00Z&endTime=2022-11-21T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2022-11-20T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-11-21T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entityOperations/query"
+								},
+								{
+									"key": "providerID",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
+								},
+								{
+									"key": "consumer",
+									"value": "15c7506f-c800-48d6-adeb-0542b03947c6",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "204 (success) Get Data Count Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 204 (no Content)\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{delegateToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2020-11-20T14:20:00Z&endTime=2020-12-02T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2020-11-20T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2020-12-02T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entityOperations/query"
+								},
+								{
+									"key": "providerID",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
+								},
+								{
+									"key": "consumer",
+									"value": "15c7506f-c800-48d6-adeb-0542b03947c6",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 (failure) Get Data Read Query count > 10000",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 400 (Bad request)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{delegateToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2022-04-01T14:20:00Z&endTime=2022-04-15T14:20:00Z&api=/{{basePath}}/entities&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2022-04-01T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-04-15T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entities"
+								},
+								{
+									"key": "providerID",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 (failure) Invalid date time",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{delegateToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2021-11-20T14:20:00Z&endTime=2022-11-24T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2021-11-20T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-11-24T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entityOperations/query"
+								},
+								{
+									"key": "providerID",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
+								},
+								{
+									"key": "consumer",
+									"value": "15c7506f-c800-48d6-adeb-0542b03947c6",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 (failure) Missing time relation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 400 (Bad request)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{delegateToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2021-11-20T14:20:00Z&endTime=2022-11-24T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2021-11-20T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-11-24T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entityOperations/query"
+								},
+								{
+									"key": "providerID",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
+								},
+								{
+									"key": "consumer",
+									"value": "15c7506f-c800-48d6-adeb-0542b03947c6",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 (failure) invalid-parameter empty-reponse read query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 400 (Bad request)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{delegateToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2020-07-01T14:20:00Z&endTime=2020-07-15T14:20:00Z&api=/{{basePath}}/entities&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2020-07-01T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2020-07-15T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entities"
+								},
+								{
+									"key": "providerID",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "401 (not authorized) Get Data Read Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 401 (Not Authorized)\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Not Authorized\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "abcd",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2022-06-01T14:20:00Z&endTime=2022-06-15T14:20:00Z&api=/{{basePath}}/entities&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2022-06-01T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-06-15T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entities"
+								},
+								{
+									"key": "providerID",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "401 (not authorized) Get Data Count Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 401 (Not Authorized)\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Not Authorized\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "abcd",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2022-05-01T14:20:00Z&endTime=2022-05-15T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2022-05-01T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-05-15T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entityOperations/query"
+								},
+								{
+									"key": "providerID",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
+								},
+								{
+									"key": "consumer",
+									"value": "15c7506f-c800-48d6-adeb-0542b03947c6",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "404 (failure) resource not found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 404 (Not Found)\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Not Found\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{delegateToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/90a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2020-07-01T14:20:00Z&endTime=2020-07-15T14:20:00Z&api=/{{basePath}}/entities&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{basePath}}",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "iisc.ac.in/90a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+								},
+								{
+									"key": "timerel",
+									"value": "during"
+								},
+								{
+									"key": "time",
+									"value": "2020-07-01T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2020-07-15T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entities"
+								},
+								{
+									"key": "providerID",
+									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "landing page",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						""
+					]
+				},
+				"description": "The landing page provides links to the API definition, the conformance\nstatements and to the feature collections in this dataset."
+			},
+			"response": [
+				{
+					"name": "The landing page provides links to the API definition\n(link relations `service-desc` and `service-doc`),\nthe Conformance declaration (path `/conformance`,\nlink relation `conformance`), and the Feature\nCollections (path `/collections`, link relation\n`data`",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n  \"links\": [\n    {\n      \"href\": \"<string>\",\n      \"rel\": \"<string>\",\n      \"type\": \"<string>\",\n      \"hreflang\": \"<string>\",\n      \"title\": \"<string>\",\n      \"length\": \"<integer>\"\n    },\n    {\n      \"href\": \"<string>\",\n      \"rel\": \"<string>\",\n      \"type\": \"<string>\",\n      \"hreflang\": \"<string>\",\n      \"title\": \"<string>\",\n      \"length\": \"<integer>\"\n    }\n  ],\n  \"title\": \"<string>\",\n  \"description\": \"<string>\"\n}"
+				},
+				{
+					"name": "A server error occurred.",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"status": "Internal Server Error",
+					"code": 500,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n  \"code\": \"<string>\",\n  \"description\": \"<string>\"\n}"
+				}
+			]
+		},
+		{
+			"name": "information about specifications that this API conforms to",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/conformance",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"conformance"
+					]
+				},
+				"description": "A list of all conformance classes specified in a standard that the\nserver conforms to."
+			},
+			"response": [
+				{
+					"name": "The URIs of all conformance classes supported by the server.\n\nTo support \"generic\" clients that want to access multiple\nOGC API Features implementations - and not \"just\" a specific\nAPI / server, the server declares the conformance\nclasses it implements an",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/conformance",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"conformance"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n  \"conformsTo\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}"
+				},
+				{
+					"name": "A server error occurred.",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/conformance",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"conformance"
+							]
+						}
+					},
+					"status": "Internal Server Error",
+					"code": 500,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n  \"code\": \"<string>\",\n  \"description\": \"<string>\"\n}"
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://www.example.org/ogcapi",
+			"type": "string"
+		},
+		{
+			"key": "uuidOfResource",
+			"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
+		}
+	]
+}
