@@ -130,6 +130,7 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-openapi</artifactId>
+            <version>4.4.4</version>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>
@@ -156,6 +157,18 @@
             <version>${maven-pmd-plugin.version}</version>
             <type>maven-plugin</type>
         </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web-client</artifactId>
+            <version>4.4.4</version>
+        </dependency>
+        <dependency>
+            <groupId>io.reactiverse</groupId>
+            <artifactId>reactiverse-junit5-web-client</artifactId>
+            <version>0.3.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -324,11 +337,7 @@
                             <systemProperties>
                                 <systemProperty>
                                     <key>vertx.logger-delegate-factory-class-name</key>
-                                    <value>io.vertx.core.logging.Log4j2LogDelegateFactory</value><dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-checkstyle-plugin</artifactId>
-            <version>${maven-checkstyle-plugin-google.version}</version>
-        </dependency>
+                                    <value>io.vertx.core.logging.Log4j2LogDelegateFactory</value>
                                 </systemProperty>
                             </systemProperties>
                             <arguments>
@@ -336,7 +345,7 @@
                                 <argument>{project.build.directory}/${project.artifactId}-dev-${project.version}-fat.jar
                                 </argument>
                                 <argument>-c</argument>
-                                <argument>./configs/config.json</argument>
+                                <argument>./secrets/configs/dev.json</argument>
                             </arguments>
                         </configuration>
                     </execution>
