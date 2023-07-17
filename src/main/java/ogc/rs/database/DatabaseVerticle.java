@@ -16,11 +16,9 @@ public class DatabaseVerticle extends AbstractVerticle {
     private static final Logger LOGGER = LogManager.getLogger(DatabaseService.class);
     private MessageConsumer<JsonObject> consumer;
     private ServiceBinder binder;
-
     private PgConnectOptions connectOptions;
     private PoolOptions poolOptions;
     private PgPool pool;
-
     private String databaseIp;
     private int databasePort;
     private String databaseName;
@@ -33,10 +31,10 @@ public class DatabaseVerticle extends AbstractVerticle {
     @Override
     public void start() throws Exception {
 
-        databaseIp = config().getString("databaseIp");
+        databaseIp = config().getString("databaseHost");
         databasePort = config().getInteger("databasePort");
         databaseName = config().getString("databaseName");
-        databaseUserName = config().getString("databaseUserName");
+        databaseUserName = config().getString("databaseUser");
         databasePassword = config().getString("databasePassword");
         poolSize = config().getInteger("poolSize");
 
