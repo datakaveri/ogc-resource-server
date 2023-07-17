@@ -1,14 +1,18 @@
 {
   "collections": [
     {
-      "id": "2cb4209b-3c65-4891-b38a-7b812b119a56",
+      "id": "79e24c53-1b58-4feb-bd8f-f26341f3ca04",
       "links": [
         {
-        "href": "http://localhost/ogc/collections/district_hq",
+        "href": "http://localhost/collections/district_hq",
         "rel": "data",
         "title": "Indian District Headquarters",
         "description": "Geographic information of district headquarters in India"
         }
+      ],
+      "itemType": "feature",
+      "crs": [
+        "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
       ]
     }
   ]
