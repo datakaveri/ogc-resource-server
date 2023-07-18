@@ -21,7 +21,7 @@ def main():
             print(f'''fid- {fid}, count- {count}''')
             row_to_json = json.dumps(row)
             cursor.execute(f'''update public.district_hq set properties = '{row_to_json}' where fid={fid}''')
-            count+=1;
+            count+=1
         # the same column_names string/list can be passed here from the config    
         # for column_name in column_names:
         #    cursor.execute(f'''alter table district_hq drop column {column_name}''')
