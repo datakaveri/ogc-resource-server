@@ -2,6 +2,7 @@ package ogc.rs.apiserver;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -92,19 +93,32 @@ public class ApiServerVerticle extends AbstractVerticle {
                       HttpServerResponse response = routingContext.response();
                       response.sendFile("docs/conformance.json");
                   });
+
           routerBuilder
               .operation(COLLECTIONS_API)
-              .handler(routingContext -> {
-                  HttpServerResponse response = routingContext.response();
-                response.sendFile("docs/collections.json");
-                  // call the dbService
-                  // create the response
-              });
+              .handler(this::getCollections)
+              .handler(this::putCommonResponseHeaders)
+              .handler(this::buildResponse);
+
           routerBuilder
               .operation(COLLECTION_API)
               .handler(this::getCollection)
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
+
+          /* routerBuilder
+          *   .operation(FEATURES_API)
+          *   .handler(this::getFeatures)
+          *   .handler(this::putCommonResponseHeaders)
+          *   .handler(this::buildResponse)
+          * */
+
+            /*  routerBuilder
+             *  .operation(FEATURE_API)
+             *  .handler(this::getFeatures)
+             *  .handler(this::putCommonResponseHeaders)
+             *  .handler(this::buildResponse)
+             * */
 
           router = routerBuilder.createRouter();
           router
@@ -140,17 +154,86 @@ public class ApiServerVerticle extends AbstractVerticle {
       // validation logic here?
 
       String collectionId = routingContext.pathParam("collectionId");
-      System.out.println("collectionId- "+collectionId);
+      LOGGER.debug("collectionId- {}", collectionId);
       dbService.getCollection(collectionId)
           .onSuccess(success -> {
             // write your success story
-            JsonObject response = new JsonObject();
             LOGGER.debug("Success! - {}", success.encodePrettily());
-              response.put("id",success.getString("id"));
+              routingContext.put("response", success.toString());
+              routingContext.put("status_code", 200);
+           // }
+            routingContext.next();
+          })
+          .onFailure(failed -> {
+            // well, you tried
+            if (failed instanceof OgcException){
+              routingContext.put("response",((OgcException) failed).getJson().toString());
+              routingContext.put("status_code", 404);
+            }
+            else{
+              routingContext.put("response", new OgcException("InternalServerError", "Something broke").getJson().toString());
+              routingContext.put("status_code", 500);
+            }
+            routingContext.next();
+          });
+  }
+
+  private void getCollections(RoutingContext routingContext) {
+    // validation logic here?
+
+    dbService.getCollections()
+        .onSuccess(success -> {
+          // write your success story
+          LOGGER.debug("Success! - {}", success.encodePrettily());
+          routingContext.put("response", success.toString());
+          routingContext.put("status_code", 200);
+          // }
+          routingContext.next();
+        })
+        .onFailure(failed -> {
+          // well, you tried
+          if (failed instanceof OgcException){
+            routingContext.put("response",((OgcException) failed).getJson().toString());
+            routingContext.put("status_code", 404);
+          }
+          else{
+            routingContext.put("response", new OgcException("InternalServerError", "Something broke"));
+            routingContext.put("status_code", 500);
+          }
+          routingContext.next();
+        });
+  }
+  private void putCommonResponseHeaders(RoutingContext routingContext) {
+    routingContext.response()
+         .putHeader(HEADER_CONTENT_TYPE, MIME_APPLICATION_JSON)
+         .putHeader("Cache-Control", "no-cache, no-store,  must-revalidate,max-age=0")
+         .putHeader("Pragma", "no-cache")
+         .putHeader("Expires", "0")
+         .putHeader("X-Content-Type-Options", "nosniff");
+     routingContext.next();
+//        router.route().handler(requestHandler -> {
+//            requestHandler
+//                    .response()
+//
+//            requestHandler.next();
+//        });
+    }
+
+    /* private void getFeatures(RoutingContext routingContext) {
+      // validation logic here?
+      --> check if query params exists [limit, bbox, datetime, filter]
+      --> send params as a JsonObject, null if missing
+            {limit:null/value, bbox: , datetime: , filter: }
+      --> dbService.getFeatures(JsonObject) --> returns <JsonArray> features
+      --> handle exception
+      String collectionId = routingContext.pathParam("collectionId");
+      MultiMap params = routingContext.queryParams();
+      dbService.getFeatures(collectionId, Multimap queryParams)
+          .onSuccess(success -> {
+            // write your success story
+            LOGGER.debug("Success! - {}", success.encodePrettily());
               // TODO: Add base_path from config
-              response.put("links", new JsonArray().add(new JsonObject().put("href","http://localhost/collections/"
-                  +success.getString("collection_name")).put("rel","data")));
-              routingContext.put("response",response.toString());
+              routingContext.put("response",success.toString());
               routingContext.put("status_code", 200);
            // }
             routingContext.next();
@@ -167,21 +250,36 @@ public class ApiServerVerticle extends AbstractVerticle {
             }
             routingContext.next();
           });
-  }
+  }*/
 
-  private void putCommonResponseHeaders(RoutingContext routingContext) {
-    routingContext.response()
-         .putHeader(HEADER_CONTENT_TYPE, MIME_APPLICATION_JSON)
-         .putHeader("Cache-Control", "no-cache, no-store,  must-revalidate,max-age=0")
-         .putHeader("Pragma", "no-cache")
-         .putHeader("Expires", "0")
-         .putHeader("X-Content-Type-Options", "nosniff");
-     routingContext.next();
-//        router.route().handler(requestHandler -> {
-//            requestHandler
-//                    .response()
-//
-//            requestHandler.next();
-//        });
-    }
+  /* private void getFeature(RoutingContext routingContext) {
+      // validation logic here?
+      --> /collections/:collectionId/items/:itemId
+      --> same as /collections/:collectionId
+      String featureId = routingContext.pathParam("featureId");
+      System.out.println("collectionId- "+collectionId);
+      dbService.getFeature(collectionId, featureId)
+          .onSuccess(success -> {
+            // write your success story
+            JsonObject response = new JsonObject();
+            LOGGER.debug("Success! - {}", success.encodePrettily());
+              // TODO: Add base_path from config
+              routingContext.put("response",success.toString());
+              routingContext.put("status_code", 200);
+           // }
+            routingContext.next();
+          })
+          .onFailure(failed -> {
+            // well, you tried
+            if (failed instanceof OgcException){
+              routingContext.put("response",((OgcException) failed).getJson().toString());
+              routingContext.put("status_code", 404);
+            }
+            else{
+              routingContext.put("response", new OgcException("InternalServerError", "Something broke"));
+              routingContext.put("status_code", 500);
+            }
+            routingContext.next();
+          });
+  }*/
 }
