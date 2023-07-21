@@ -30,6 +30,9 @@ public class Constants {
 
     public static final String COLLECTION_API = "describeCollection";
 
+    public static final String FEATURES_API = "getFeatures";
+
+    public static final String FEATURE_API = "getFeature";
 
 
 
