@@ -31,8 +31,8 @@ public class FeatureQueryBuilder {
 
   public void setBbox(String coordinates) {
     coordinates = coordinates.concat(",4326");
-    // TODO: validation for lat, lon values (0<=lat<=90, 0<=lon<=180); also order(lat,lon or lon,lat)
-    this.bbox = "st_intersects(geogc, st_makeenvelope(" + coordinates + "))";
+    // TODO: validation for lat, lon values (0<=lat<=90, 0<=lon<=180);
+    this.bbox = "st_intersects(geom, st_makeenvelope(" + coordinates + "))";
     this.additionalParams = "where";
   }
 
@@ -49,22 +49,22 @@ public class FeatureQueryBuilder {
     // do your sql string building stuff here
     if (this.bbox.isEmpty() && this.datetime.isEmpty() && this.filter.isEmpty()
         && this.additionalParams.isEmpty()) {
-      this.sqlString = String.format("select itemType as type, st_asgeojson(geogc) as geometry, properties" +
+      this.sqlString = String.format("select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, properties" +
         " from %1$s limit %2$d"
         , this.tableName, this.limit);
     }
     if (!bbox.isEmpty()) {
-      this.sqlString = String.format("select itemType as type, st_asgeojson(geogc) as geometry, properties" +
+      this.sqlString = String.format("select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, properties" +
               " from %1$s %3$s %4$s limit %2$d"
           ,this.tableName,this.limit, this.additionalParams, this.bbox);
     }
     if (!filter.isEmpty()) {
-      this.sqlString = String.format("select itemType as type, st_asgeojson(geogc) as geometry, properties" +
+      this.sqlString = String.format("select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, properties" +
               " from %1$s %3$s %4$s limit %2$d"
           ,this.tableName,this.limit, this.additionalParams, this.filter);
     }
     if (!bbox.isEmpty() && !filter.isEmpty()) {
-      this.sqlString = String.format("select itemType as type, st_asgeojson(geogc) as geometry, properties" +
+      this.sqlString = String.format("select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, properties" +
               " from %1$s %3$s %4$s and %5$s limit %2$d"
           ,this.tableName,this.limit, this.additionalParams, this.bbox, this.filter);
     }

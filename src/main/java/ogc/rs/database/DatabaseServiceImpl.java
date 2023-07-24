@@ -201,7 +201,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                         result.fail(new OgcException("NotFound", "Collection not found"));
                         return;
                     }
-                    String sqlQuery = "Select itemType as type, st_asgeojson(geogc) as geometry, properties from "
+                    String sqlQuery = "Select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, properties from "
                         + collectionId + " where id=$1::UUID" ;
                     conn.preparedQuery(sqlQuery)
                         .collecting(collector).execute(Tuple.of(UUID.fromString(featureId)))
