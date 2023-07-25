@@ -110,25 +110,8 @@ public class DatabaseServiceImpl implements DatabaseService{
         Promise<JsonObject> result = Promise.promise();
         Collector<Row, ? , String> collectorT = Collectors.mapping(row -> row.getString("to_regclass"), Collectors.joining());
         Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
-       /* check the json to figure out what sql query needs to be used
-            * limit int, ex. 10,100, etc
-            * bbox string,ex. "[10,20,30,40]", "[10,20,30,40,50,60]"
-            * datetime string, ex. "2023-04-23T10:10:30-..", "..-2023-04-23T10:10:30", "2023-04-23T10:10:30-2023-04-23T10:10:40"
-            *   !!! should not worry about datetime since district_hq does not have time property
-            * filter string
-            * SQL Query = buildSqlQuery(params);
-        * buildSqlQuery can be a builder/fluent class, with functions limit(),bbox(),datetime(),filter(), and
-            *   [build() --> which will build the query string]
-        * if (limit is !null) --> .limit($params.getInteger(limit))
-            * if (bbox is !null) --> .bbox($params.getString(bbox))
-            * if (datetime is !null) --> .datetime($params.getString(datetime))
-            * if (filter is !null)--> .filter($params.getString(filter))
-            * essentially would look like sqlString = new buildSqlQuery()
-            *                                           .limit()
-            *                                           .bbox()
-            *                                           .filter(based on properties field in the db) --> validation??
-        *                                           .build();*/
         String sqlQuery;
+
         FeatureQueryBuilder featureQuery = new FeatureQueryBuilder(collectionId);
         if (queryParams.containsKey("limit"))
             featureQuery.setLimit(Integer.parseInt(queryParams.get("limit")));
@@ -136,8 +119,10 @@ public class DatabaseServiceImpl implements DatabaseService{
             featureQuery.setBbox(queryParams.get("bbox"));
         if (queryParams.containsKey("datetime"))
             featureQuery.setDatetime(queryParams.get("datetime"));
+        if (queryParams.containsKey("offset"))
+            featureQuery.setOffset(Integer.parseInt(queryParams.get("offset")));
         Set<String> keys =  queryParams.keySet();
-        Set<String> predefinedKeys = Set.of("limit", "bbox", "datetime");
+        Set<String> predefinedKeys = Set.of("limit", "bbox", "datetime", "offset");
         keys.removeAll(predefinedKeys);
         String[] key = keys.toArray(new String[keys.size()]);
         if (!keys.isEmpty())
@@ -172,17 +157,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                     LOGGER.error("Failed at to_regclass- {}",fail.getMessage());
                     result.fail("Error!");
                 }));
-            /*.onSuccess(success -> {
-                System.out.println("Success!!! - " + success.toString());
-                if (success.isEmpty())
-                    result.fail(new OgcException("NotFound", "Features not found"));
-                else
-                    result.complete(new JsonArray(success));
-            })
-            .onFailure(fail -> {
-                LOGGER.error("Failed at getFeatures- {}",fail.getMessage());
-                result.fail("Error!");
-            });*/
+
         return result.future();
     }
 
@@ -221,22 +196,6 @@ public class DatabaseServiceImpl implements DatabaseService{
                     LOGGER.error("Failed at to_regclass- {}",fail.getMessage());
                     result.fail("Error!");
                 }));
-//        client.withConnection(conn ->
-//                conn.preparedQuery("Select itemType as type, st_asgeojson(geoc) as geometry, properties from $1::text"
-//                        + " where id = $2::uuid")
-//                    .collecting(collector)
-//                    .execute(Tuple.of(collectionId, UUID.fromString(featureId))).map(SqlResult::value))
-//            .onSuccess(success -> {
-//                System.out.println("Success!!! - " + success.toString());
-//                if (success.isEmpty())
-//                    result.fail(new OgcException("NotFound", "Feature not found"));
-//                else
-//                    result.complete(success.get(0));
-//            })
-//            .onFailure(fail -> {
-//                LOGGER.error("Failed at getFeature- {}",fail.getMessage());
-//                result.fail("Error!");
-//            });
 
         return result.future();
     }

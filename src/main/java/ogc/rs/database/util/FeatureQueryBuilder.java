@@ -10,10 +10,12 @@ public class FeatureQueryBuilder {
   private String filter;
   private String additionalParams;
   private String sqlString;
+  private int offset;
 
   public FeatureQueryBuilder(String tableName) {
     this.tableName = tableName;
     limit = 10;
+    offset = 0;
     bbox = "";
     datetime = "";
     filter = "";
@@ -21,12 +23,16 @@ public class FeatureQueryBuilder {
     sqlString = "";
   }
 
-  public FeatureQueryBuilder setLimit(int limit) {
+  public void setLimit(int limit) {
     if(limit > 1000 || limit < 1) {
-      return this;
+      return;
     }
     this.limit = limit;
-    return this;
+  }
+  public void setOffset(int offset) {
+    if (offset > 1000)
+      return;
+    this.offset = offset-1;
   }
 
   public void setBbox(String coordinates) {
@@ -47,30 +53,30 @@ public class FeatureQueryBuilder {
 
   public String buildSqlString() {
     // do your sql string building stuff here
-    if (this.bbox.isEmpty() && this.datetime.isEmpty() && this.filter.isEmpty()
-        && this.additionalParams.isEmpty()) {
-      this.sqlString = String.format("select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, properties" +
-        " from %1$s limit %2$d"
-        , this.tableName, this.limit);
-    }
+    
+    this.sqlString = String.format("select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, properties" +
+            " from %1$s limit %2$d offset %3$d"
+        , this.tableName, this.limit, this.offset);
+
     if (!bbox.isEmpty()) {
       this.sqlString = String.format("select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, properties" +
-              " from %1$s %3$s %4$s limit %2$d"
-          ,this.tableName,this.limit, this.additionalParams, this.bbox);
+              " from %1$s %3$s %4$s limit %2$d offset %5$d"
+          ,this.tableName,this.limit, this.additionalParams, this.bbox, this.offset);
     }
     if (!filter.isEmpty()) {
       this.sqlString = String.format("select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, properties" +
-              " from %1$s %3$s %4$s limit %2$d"
-          ,this.tableName,this.limit, this.additionalParams, this.filter);
+              " from %1$s %3$s %4$s limit %2$d offset %5$d"
+          ,this.tableName,this.limit, this.additionalParams, this.filter, this.offset);
     }
     if (!bbox.isEmpty() && !filter.isEmpty()) {
       this.sqlString = String.format("select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, properties" +
-              " from %1$s %3$s %4$s and %5$s limit %2$d"
-          ,this.tableName,this.limit, this.additionalParams, this.bbox, this.filter);
+              " from %1$s %3$s %4$s and %5$s limit %2$d offset %6$d"
+          ,this.tableName,this.limit, this.additionalParams, this.bbox, this.filter, this.offset);
     }
 
     System.out.println("<builder>Sql query- " + sqlString);
     return sqlString;
   }
+
 
 }
