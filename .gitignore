@@ -66,4 +66,5 @@ build/
 *.rar
 
 ### secrets ###
-secrets/configs/*
+./secrets/configs/*
+
