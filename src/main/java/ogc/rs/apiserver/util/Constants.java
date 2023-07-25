@@ -19,4 +19,20 @@ public class Constants {
     public static final String PUBLIC_TOKEN = "public";
     public static final String HEADER_PUBLIC_KEY = "publicKey";
     public static final String HEADER_RESPONSE_FILE_FORMAT = "format";
+
+    public static final String MIME_APPLICATION_JSON = "application/json";
+
+    public static final String LANDING_PAGE = "getLandingPage";
+    public static final String CONFORMANCE_CLASSES = "getConformanceClasses";
+
+    public static final String OPENAPI_SPEC = "/api";
+    public static final String COLLECTIONS_API = "getCollections";
+
+    public static final String COLLECTION_API = "describeCollection";
+
+
+
+
+
+
 }

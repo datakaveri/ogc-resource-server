@@ -5,16 +5,24 @@ import io.vertx.core.Future;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
-import static ogc.rs.apiserver.util.Constants.*;
+import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Set;
+
+import static ogc.rs.apiserver.util.Constants.*;
+import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
 
 /**
  * The OGC Resource Server API Verticle.
@@ -37,7 +45,8 @@ import java.util.Set;
 public class ApiServerVerticle extends AbstractVerticle {
     private static final Logger LOGGER = LogManager.getLogger(ApiServerVerticle.class);
     private Router router;
-    private String dxApiBasePath;
+    private String ogcBasePath;
+    private DatabaseService dbService;
 
 
     /**
@@ -50,46 +59,130 @@ public class ApiServerVerticle extends AbstractVerticle {
     @Override
     public void start() throws Exception {
 
-        Set<String> allowedHeaders = Set.of(HEADER_TOKEN, HEADER_CONTENT_LENGTH, HEADER_CONTENT_TYPE, HEADER_HOST
-            ,HEADER_ORIGIN, HEADER_REFERER, HEADER_ACCEPT, HEADER_ALLOW_ORIGIN);
+      Set<String> allowedHeaders = Set.of(HEADER_TOKEN, HEADER_CONTENT_LENGTH, HEADER_CONTENT_TYPE, HEADER_HOST
+          ,HEADER_ORIGIN, HEADER_REFERER, HEADER_ACCEPT, HEADER_ALLOW_ORIGIN);
 
-        Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS);
+      Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS);
 
-        /* Get base paths from config */
-        dxApiBasePath = config().getString("dxApiBasePath");
-        Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/IUDX-OGC-RS-V0.0.1.yaml");
-        routerBuilderFut.compose(routerBuilder -> {
 
-            LOGGER.debug("Info: Mounting routes from OpenApi3 spec");
+      /* Get base paths from config */
+      ogcBasePath = config().getString("ogcBasePath");
+      Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/openapiv3_0.yaml");
+      routerBuilderFut.compose(routerBuilder -> {
 
-            RouterBuilderOptions factoryOptions =
-                    new RouterBuilderOptions().setMountResponseContentTypeHandler(true);
+          LOGGER.debug("Info: Mounting routes from OpenApi3 spec");
 
-            routerBuilder.rootHandler(CorsHandler.create("*").allowedHeaders(allowedHeaders)
-                    .allowedMethods(allowedMethods));
-            routerBuilder.rootHandler(BodyHandler.create(false));
-            router = routerBuilder.createRouter();
-            return null;
-        });
+          RouterBuilderOptions factoryOptions =
+                  new RouterBuilderOptions().setMountResponseContentTypeHandler(true);
 
-        // TODO: ssl configuration
-        HttpServerOptions serverOptions = new HttpServerOptions();
-        serverOptions.setCompressionSupported(true).setCompressionLevel(5);
-        int port = config().getInteger("httpPort") == null ? 8080 : config().getInteger("httpPort");
-        LOGGER.info("Info: Starting HTTP server at port " + port);
-        HttpServer server = vertx.createHttpServer(serverOptions);
-        server.requestHandler(router).listen(port);
+          routerBuilder.rootHandler(CorsHandler.create("*").allowedHeaders(allowedHeaders)
+                  .allowedMethods(allowedMethods));
+          routerBuilder.rootHandler(BodyHandler.create());
+          try {
+          routerBuilder
+              .operation(LANDING_PAGE)
+              .handler(
+                  routingContext -> {
+                      HttpServerResponse response = routingContext.response();
+                      response.sendFile("docs/landingPage.json");
+                  });
+          routerBuilder
+              .operation(CONFORMANCE_CLASSES)
+              .handler(
+                  routingContext -> {
+                      HttpServerResponse response = routingContext.response();
+                      response.sendFile("docs/conformance.json");
+                  });
+          routerBuilder
+              .operation(COLLECTIONS_API)
+              .handler(routingContext -> {
+                  HttpServerResponse response = routingContext.response();
+                response.sendFile("docs/collections.json");
+                  // call the dbService
+                  // create the response
+              });
+          routerBuilder
+              .operation(COLLECTION_API)
+              .handler(this::getCollection)
+              .handler(this::putCommonResponseHeaders)
+              .handler(this::buildResponse);
+
+          router = routerBuilder.createRouter();
+          router
+            .get(OPENAPI_SPEC)
+            .handler(
+                routingContext -> {
+                  HttpServerResponse response = routingContext.response();
+                  response.sendFile("docs/openapiv3_0.json");
+                });
+          } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+          }
+
+          dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
+          // TODO: ssl configuration
+          HttpServerOptions serverOptions = new HttpServerOptions();
+          serverOptions.setCompressionSupported(true).setCompressionLevel(5);
+          int port = config().getInteger("httpPort") == null ? 8080 : config().getInteger("httpPort");
+
+          HttpServer server = vertx.createHttpServer(serverOptions);
+          return server.requestHandler(router).listen(port);
+          }).onSuccess(success -> LOGGER.info("Started HTTP server at port:" + success.actualPort()))
+          .onFailure(Throwable::printStackTrace);;
     }
-    private void putCommonResponseHeaders() {
-        router.route().handler(requestHandler -> {
-            requestHandler
-                    .response()
-                    .putHeader("Cache-Control", "no-cache, no-store,  must-revalidate,max-age=0")
-                    .putHeader("Pragma", "no-cache")
-                    .putHeader("Expires", "0")
-                    .putHeader("X-Content-Type-Options", "nosniff");
-            requestHandler.next();
-        });
-    }
 
+  private void buildResponse(RoutingContext routingContext) {
+      routingContext.response().setStatusCode(routingContext.get("status_code"))
+          .end((String) routingContext.get("response"));
+  }
+
+  private void getCollection(RoutingContext routingContext) {
+      // validation logic here?
+
+      String collectionId = routingContext.pathParam("collectionId");
+      System.out.println("collectionId- "+collectionId);
+      dbService.getCollection(collectionId)
+          .onSuccess(success -> {
+            // write your success story
+            JsonObject response = new JsonObject();
+            LOGGER.debug("Success! - {}", success.encodePrettily());
+              response.put("id",success.getString("id"));
+              // TODO: Add base_path from config
+              response.put("links", new JsonArray().add(new JsonObject().put("href","http://localhost/collections/"
+                  +success.getString("collection_name")).put("rel","data")));
+              routingContext.put("response",response.toString());
+              routingContext.put("status_code", 200);
+           // }
+            routingContext.next();
+          })
+          .onFailure(failed -> {
+            // well, you tried
+            if (failed instanceof OgcException){
+              routingContext.put("response",((OgcException) failed).getJson().toString());
+              routingContext.put("status_code", 404);
+            }
+            else{
+              routingContext.put("response", new OgcException("InternalServerError", "Something broke"));
+              routingContext.put("status_code", 500);
+            }
+            routingContext.next();
+          });
+  }
+
+  private void putCommonResponseHeaders(RoutingContext routingContext) {
+    routingContext.response()
+         .putHeader(HEADER_CONTENT_TYPE, MIME_APPLICATION_JSON)
+         .putHeader("Cache-Control", "no-cache, no-store,  must-revalidate,max-age=0")
+         .putHeader("Pragma", "no-cache")
+         .putHeader("Expires", "0")
+         .putHeader("X-Content-Type-Options", "nosniff");
+     routingContext.next();
+//        router.route().handler(requestHandler -> {
+//            requestHandler
+//                    .response()
+//
+//            requestHandler.next();
+//        });
+    }
 }

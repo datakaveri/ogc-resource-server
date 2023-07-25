@@ -17,6 +17,6 @@ public interface DatabaseService {
     // TODO:
     // Future<JsonObject> to Future<DO> class.
 
-    Future<JsonObject>  executeQuery(final String query);
+    Future<JsonObject>  getCollection(final String collectionId);
 
 }

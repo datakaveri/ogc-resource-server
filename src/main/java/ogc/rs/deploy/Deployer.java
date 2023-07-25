@@ -10,8 +10,6 @@ import io.vertx.core.eventbus.EventBusOptions;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -48,7 +46,7 @@ public class Deployer {
 
         String config;
         try {
-            config = new String(Files.readAllBytes(Paths.get(configPath)), StandardCharsets.UTF_8);
+            config = Files.readString(Paths.get(configPath));
         } catch (Exception e) {
             LOGGER.fatal("Couldn't read configuration file");
             return;
@@ -62,7 +60,7 @@ public class Deployer {
         recursiveDeploy(vertx, configuration, 0);
     }
 
-    private static JsonObject getConfigForModule(int moduleIndex,JsonObject configurations) {
+    private static JsonObject getConfigForModule(int moduleIndex, JsonObject configurations) {
         JsonObject commonConfigs=configurations.getJsonObject("commonConfig");
         JsonObject config = configurations.getJsonArray("modules").getJsonObject(moduleIndex);
         return config.mergeIn(commonConfigs, true);
