@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   version: 1.0.1
   title: OGC Compliant IUDX GSX Server
-  summary: OpenAPI 3.0 Specifications for OGC Compliant IUDX GSX Server to retrieve feature data
+  # summary: OpenAPI 3.0 Specifications for OGC Compliant IUDX GSX Server to retrieve feature data
   description: |-
     OGC compliant Features and Common API definitions.
     Includes Schema and Response Objects.

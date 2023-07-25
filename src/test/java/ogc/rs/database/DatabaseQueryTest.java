@@ -72,5 +72,4 @@ public class DatabaseQueryTest {
         // check the name of the collection, should be district_hq
         // can check various properties
     }
-
 }
