@@ -57,7 +57,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
         /* Get base paths from config */
         dxApiBasePath = config().getString("dxApiBasePath");
-        Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/openapi.yml");
+        Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/IUDX-OGC-RS-V0.0.1.yaml");
         routerBuilderFut.compose(routerBuilder -> {
 
             LOGGER.debug("Info: Mounting routes from OpenApi3 spec");
