@@ -64,6 +64,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
       Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS);
 
+
       /* Get base paths from config */
       ogcBasePath = config().getString("ogcBasePath");
       Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/openapiv3_0.yaml");

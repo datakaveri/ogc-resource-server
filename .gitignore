@@ -64,3 +64,6 @@ build/
 *.zip
 *.tar.gz
 *.rar
+
+### secrets ###
+secrets/configs/*
