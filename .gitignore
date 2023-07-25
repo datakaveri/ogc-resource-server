@@ -68,3 +68,6 @@ build/
 ### Python virtual environment files ###
 ./scripts/venv
 
+### secrets ###
+./secrets/configs/*
+
