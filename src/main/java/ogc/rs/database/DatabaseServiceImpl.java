@@ -13,6 +13,7 @@ import ogc.rs.database.util.FeatureQueryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -38,7 +39,7 @@ public class DatabaseServiceImpl implements DatabaseService{
             .onSuccess(success -> {
                 LOGGER.debug("DB result - {}", success);
                 if (success.isEmpty())
-                    result.fail(new OgcException("NotFound", "Collection not found"));
+                result.fail(new OgcException(404, "NotFound", "Collection not found"));
                 else {
                     JsonObject result_ogc =  buildCollectionResult(success);
                     LOGGER.debug("Built OGC Collection Response - {}", result_ogc);
@@ -117,8 +118,15 @@ public class DatabaseServiceImpl implements DatabaseService{
             featureQuery.setLimit(Integer.parseInt(queryParams.get("limit")));
         if (queryParams.containsKey("bbox"))
             featureQuery.setBbox(queryParams.get("bbox"));
-        if (queryParams.containsKey("datetime"))
-            featureQuery.setDatetime(queryParams.get("datetime"));
+        if (queryParams.containsKey("datetime")) {
+            try {
+                featureQuery.setDatetime(queryParams.get("datetime"));
+            } catch (DateTimeParseException e) {
+                System.out.println("<DbServiceImpl> " + e.getMessage());
+                result.fail(new OgcException(400, "BadRequest", "Time parameter not in ISO format"));
+                return result.future();
+            }
+        }
         if (queryParams.containsKey("offset"))
             featureQuery.setOffset(Integer.parseInt(queryParams.get("offset")));
         Set<String> keys =  queryParams.keySet();
@@ -135,14 +143,14 @@ public class DatabaseServiceImpl implements DatabaseService{
                 .execute(Tuple.of(collectionId))
                 .onSuccess(conn1 -> {
                     if (conn1.value().equals("null")) {
-                        result.fail(new OgcException("NotFound", "Collection not found"));
+                        result.fail(new OgcException(404, "NotFound", "Collection not found"));
                         return;
                     }
                     conn.preparedQuery(sqlQuery)
                     .collecting(collector).execute().map(SqlResult::value)
                         .onSuccess(success -> {
                             if (success.isEmpty())
-                                result.fail(new OgcException("NotFound", "Features not found"));
+                                result.fail(new OgcException(404, "NotFound", "Features not found"));
                             else
                                 result.complete(new JsonObject()
                                     .put("type","FeatureCollection")
@@ -173,7 +181,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                 .execute(Tuple.of(collectionId))
                 .onSuccess(conn1 -> {
                     if (conn1.value().equals("null")) {
-                        result.fail(new OgcException("NotFound", "Collection not found"));
+                        result.fail(new OgcException(404, "NotFound", "Collection not found"));
                         return;
                     }
                     String sqlQuery = "Select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, properties from "
@@ -183,7 +191,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                         .map(SqlResult::value)
                         .onSuccess(success -> {
                             if (success.isEmpty())
-                                result.fail(new OgcException("NotFound", "Features not found"));
+                                result.fail(new OgcException(404, "NotFound", "Features not found"));
                             else
                                 result.complete(success.get(0));
                         })
