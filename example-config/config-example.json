@@ -17,8 +17,7 @@
       "databaseIP": "",
       "databasePort": 1234,
       "dbUser": "",
-      "dbPassword": "",
-      "timeLimit": "test,2020-10-22T00:00:00Z,10"
+      "dbPassword": ""
     },
     {
       "id": "iudx.ogc.rs.authenticator.AuthenticationVerticle",
@@ -28,8 +27,7 @@
       "authServerHost": "",
       "catServerHost": "",
       "catServerPort": 443,
-      "jwtIgnoreExpiry": false,
-      "enableLimits": false
+      "jwtIgnoreExpiry": false
     },
     {
       "id": "iudx.ogc.rs.databroker.DataBrokerVerticle",
@@ -56,10 +54,7 @@
       "postgresDatabaseName": "",
       "postgresDatabaseUserName": "",
       "postgresDatabasePassword": "",
-      "postgrespoolSize": 25,
-
-      "brokerAmqpIp":"",
-      "brokerAmqpPort":1234
+      "postgrespoolSize": 25
     },
     {
       "id": "iudx.ogc.rs.apiserver.ApiServerVerticle",
