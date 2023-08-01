@@ -15,6 +15,7 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
+import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
@@ -103,6 +104,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
           routerBuilder
               .operation(COLLECTION_API)
+              .handler(AuthHandler.create(vertx))
               .handler(this::getCollection)
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
@@ -147,47 +149,49 @@ public class ApiServerVerticle extends AbstractVerticle {
     }
 
   private void buildResponse(RoutingContext routingContext) {
-      routingContext.response().setStatusCode(routingContext.get("status_code"))
+      routingContext.response().setStatusCode(routingContext.get("statusCode"))
           .end((String) routingContext.get("response"));
   }
 
   private void getCollection(RoutingContext routingContext) {
-      // validation logic here?
 
-      String collectionId = routingContext.pathParam("collectionId");
-      LOGGER.debug("collectionId- {}", collectionId);
-      dbService.getCollection(collectionId)
-          .onSuccess(success -> {
-            // write your success story
-            LOGGER.debug("Success! - {}", success.encodePrettily());
-              routingContext.put("response", success.toString());
-              routingContext.put("status_code", 200);
-           // }
-            routingContext.next();
-          })
-          .onFailure(failed -> {
-            // well, you tried
-            if (failed instanceof OgcException){
-              routingContext.put("response",((OgcException) failed).getJson().toString());
-              routingContext.put("status_code", 404);
-            }
-            else{
-              routingContext.put("response", new OgcException("InternalServerError", "Something broke").getJson().toString());
-              routingContext.put("status_code", 500);
-            }
-            routingContext.next();
-          });
+    String collectionId = routingContext.pathParam("collectionId");
+    LOGGER.debug("collectionId- {}", collectionId);
+    if (!(Boolean) routingContext.get("isAuthorised")){
+      routingContext.next();
+      return;
+    }
+    dbService.getCollection(collectionId)
+      .onSuccess(success -> {
+        // write your success story
+        LOGGER.debug("Success! - {}", success.encodePrettily());
+          routingContext.put("response", success.toString());
+          routingContext.put("statusCode", 200);
+       // }
+        routingContext.next();
+      })
+      .onFailure(failed -> {
+        // well, you tried
+        if (failed instanceof OgcException){
+          routingContext.put("response",((OgcException) failed).getJson().toString());
+          routingContext.put("statusCode", 404);
+        }
+        else{
+          routingContext.put("response", new OgcException("InternalServerError", "Something broke").getJson().toString());
+          routingContext.put("statusCode", 500);
+        }
+        routingContext.next();
+      });
   }
 
   private void getCollections(RoutingContext routingContext) {
     // validation logic here?
-
     dbService.getCollections()
         .onSuccess(success -> {
           // write your success story
           LOGGER.debug("Success! - {}", success.encodePrettily());
           routingContext.put("response", success.toString());
-          routingContext.put("status_code", 200);
+          routingContext.put("statusCode", 200);
           // }
           routingContext.next();
         })
@@ -195,11 +199,11 @@ public class ApiServerVerticle extends AbstractVerticle {
           // well, you tried
           if (failed instanceof OgcException){
             routingContext.put("response",((OgcException) failed).getJson().toString());
-            routingContext.put("status_code", 404);
+            routingContext.put("statusCode", 404);
           }
           else{
             routingContext.put("response", new OgcException("InternalServerError", "Something broke"));
-            routingContext.put("status_code", 500);
+            routingContext.put("statusCode", 500);
           }
           routingContext.next();
         });

@@ -16,6 +16,7 @@ import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -34,9 +35,9 @@ public class DatabaseServiceImpl implements DatabaseService{
         Promise<JsonObject> result = Promise.promise();
         Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
-           conn.preparedQuery("Select * from collections_details where id = $1::text")
+           conn.preparedQuery("Select id, title, description from collections_details where id = $1::uuid")
                .collecting(collector)
-               .execute(Tuple.of(collectionId)).map(SqlResult::value))
+               .execute(Tuple.of(UUID.fromString(collectionId))).map(SqlResult::value))
             .onSuccess(success -> {
                 LOGGER.debug("DB result - {}", success);
                 if (success.isEmpty())
@@ -58,6 +59,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         JsonObject collection = success.get(0);
         // collection.put("id",collection.getString("id"));
         collection.put("links", new JsonArray()
+            // TODO: pull the baseURL from the config
             .add(new JsonObject()
                 .put("href","http://localhost/collections/" + collection.getString("id"))
                 .put("rel","self")
@@ -76,7 +78,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
             //TODO: here we can use limit (default or provided by the user)
-                conn.preparedQuery("Select * from collections_details")
+                conn.preparedQuery("Select id, title, description from collections_details")
                     .collecting(collector)
                     .execute()
                     .map(SqlResult::value))
