@@ -281,7 +281,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             routingContext.put("status_code", 404);
           }
           else{
-            routingContext.put("response", new OgcException("InternalServerError", "Something broke"));
+            routingContext.put("response", new OgcException(500, "InternalServerError", "Something broke"));
             routingContext.put("status_code", 500);
           }
           routingContext.next();

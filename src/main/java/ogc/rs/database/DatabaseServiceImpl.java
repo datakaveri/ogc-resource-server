@@ -109,9 +109,10 @@ public class DatabaseServiceImpl implements DatabaseService{
     public Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams) {
         LOGGER.info("getFeatures");
         Promise<JsonObject> result = Promise.promise();
-        Collector<Row, ? , String> collectorT = Collectors.mapping(row -> row.getString("to_regclass"), Collectors.joining());
+        Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0),
+            row -> row.getInteger("count"));
         Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
-        String sqlQuery;
+        String sqlQuery, sqlCountQuery;
 
         FeatureQueryBuilder featureQuery = new FeatureQueryBuilder(collectionId);
         if (queryParams.containsKey("limit"))
@@ -136,33 +137,54 @@ public class DatabaseServiceImpl implements DatabaseService{
         if (!keys.isEmpty())
             featureQuery.setFilter(key[0], queryParams.get(key[0]));
         sqlQuery = featureQuery.buildSqlString();
+        sqlCountQuery = featureQuery.buildSqlString("count");
         System.out.println("<DBService> Sql query- " + sqlQuery);
+        LOGGER.debug("Count Query- {}", sqlCountQuery);
         client.withConnection(conn ->
-            conn.preparedQuery("select to_regclass($1::text)")
+            conn.preparedQuery("select count(*) from collections_details where id = $1::uuid")
                 .collecting(collectorT)
-                .execute(Tuple.of(collectionId))
+                .execute(Tuple.of(UUID.fromString(collectionId)))
                 .onSuccess(conn1 -> {
-                    if (conn1.value().equals("null")) {
+                  LOGGER.debug("Count collection- {}", conn1.value().get("count"));
+                    if (conn1.value().get("count") == 0) {
                         result.fail(new OgcException(404, "NotFound", "Collection not found"));
                         return;
                     }
-                    conn.preparedQuery(sqlQuery)
-                    .collecting(collector).execute().map(SqlResult::value)
-                        .onSuccess(success -> {
-                            if (success.isEmpty())
-                                result.fail(new OgcException(404, "NotFound", "Features not found"));
-                            else
-                                result.complete(new JsonObject()
-                                    .put("type","FeatureCollection")
-                                    .put("features",new JsonArray(success)));
-                        })
-                        .onFailure(failed -> {
-                            LOGGER.error("Failed at getFeatures- {}",failed.getMessage());
-                            result.fail("Error!");
+                    JsonObject resultJson = new JsonObject();
+                    conn.preparedQuery(sqlCountQuery)
+                        .collecting(collectorT).execute()
+                            .onSuccess(count -> {
+                              LOGGER.debug("Feature Count- {}",count.value().get("count"));
+                              int totalCount = count.value().get("count");
+                                resultJson.put("numberMatched", totalCount);
+                                int numReturn = Math.min(featureQuery.getLimit(), totalCount);
+                                resultJson.put("numberReturned", numReturn );
+                            })
+                            .onFailure(countFail -> {
+                                LOGGER.error("Failed to get the count of number of features!");
+                                result.fail("Error!");
+                            })
+                        .compose(sql -> {
+                            conn.preparedQuery(sqlQuery)
+                                .collecting(collector).execute().map(SqlResult::value)
+                                .onSuccess(success -> {
+                                    if (success.isEmpty())
+                                        result.fail(new OgcException(404, "NotFound", "Features not found"));
+                                    else {
+                                        result.complete(resultJson
+                                            .put("type","FeatureCollection")
+                                            .put("features",new JsonArray(success)));
+                                    }
+                                })
+                                .onFailure(failed -> {
+                                    LOGGER.error("Failed at getFeatures- {}",failed.getMessage());
+                                    result.fail("Error!");
+                                });
+                            return result.future();
                         });
                 })
                 .onFailure(fail -> {
-                    LOGGER.error("Failed at to_regclass- {}",fail.getMessage());
+                    LOGGER.error("Failed at find_collection- {}",fail.getMessage());
                     result.fail("Error!");
                 }));
 
@@ -174,18 +196,19 @@ public class DatabaseServiceImpl implements DatabaseService{
         LOGGER.info("getFeature");
         Promise<JsonObject> result = Promise.promise();
         Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
-        Collector<Row, ? , String> collectorT = Collectors.mapping(row -> row.getString("to_regclass"), Collectors.joining());
-        client.withConnection(conn ->
-            conn.preparedQuery("select to_regclass($1::text)")
+      Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0)
+          , row -> row.getInteger("count"));
+      client.withConnection(conn ->
+            conn.preparedQuery("select count(*) from collections_details where id = $1::uuid")
                 .collecting(collectorT)
-                .execute(Tuple.of(collectionId))
+                .execute(Tuple.of(UUID.fromString(collectionId)))
                 .onSuccess(conn1 -> {
-                    if (conn1.value().equals("null")) {
+                    if (conn1.value().get("count") == 0) {
                         result.fail(new OgcException(404, "NotFound", "Collection not found"));
                         return;
                     }
-                    String sqlQuery = "Select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, properties from "
-                        + collectionId + " where id=$1::UUID" ;
+                    String sqlQuery = "Select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, " +
+                        "properties from \"" + collectionId + "\" where id=$1::UUID" ;
                     conn.preparedQuery(sqlQuery)
                         .collecting(collector).execute(Tuple.of(UUID.fromString(featureId)))
                         .map(SqlResult::value)
