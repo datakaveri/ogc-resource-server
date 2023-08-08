@@ -39,17 +39,13 @@ public class FeatureQueryBuilder {
 
   public void setBbox(String coordinates) {
     coordinates = coordinates.concat(",4326");
-    // TODO: validation for lat, lon values (0<=lat<=90, 0<=lon<=180);
+    //TODO: validation for lat, lon values (0<=lat<=90, 0<=lon<=180);
     this.bbox = "st_intersects(geom, st_makeenvelope(" + coordinates + "))";
     this.additionalParams = "where";
   }
 
   public void setDatetime(String datetime) throws DateTimeParseException {
-    // ../date-time --> before date-time
-    // date-time/.. --> after date-time
-    // date-time/date-time --> between date-time(s)
-    // date-time --> equals date-time
-    // add an if statement to make sure the time is in ISO format
+
     this.additionalParams = "where";
     ZonedDateTime zone;
     DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
@@ -63,7 +59,7 @@ public class FeatureQueryBuilder {
       zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
       this.datetime = " datetime < '".concat(dateTimeArr[1]).concat("'").replace("T"," ");
   }
-    else if (dateTimeArr[1].equals("..")) { // after
+    else if (dateTimeArr[1].equals("..")) { // -- after
       zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
       this.datetime = " datetime > '".concat(dateTimeArr[0]).concat("'").replace("T"," ");
     }
@@ -82,8 +78,7 @@ public class FeatureQueryBuilder {
   }
 
   public String buildSqlString() {
-    // do your sql string building stuff here
-    // TODO: refactor to build the sql query
+    //TODO: refactor to build the sql query
     this.sqlString = String.format("select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, properties" +
             " from \"%1$s\" limit %2$d offset %3$d"
         , this.tableName, this.limit, this.offset);

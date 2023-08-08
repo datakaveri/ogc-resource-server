@@ -55,7 +55,6 @@ public class DatabaseServiceImpl implements DatabaseService{
 
     private JsonObject buildCollectionResult(List<JsonObject> success) {
         JsonObject collection = success.get(0);
-        // collection.put("id",collection.getString("id"));
         collection.put("links", new JsonArray()
             .add(new JsonObject()
                 .put("href","http://localhost/collections/" + collection.getString("id"))
@@ -74,7 +73,6 @@ public class DatabaseServiceImpl implements DatabaseService{
         Promise<JsonArray> result = Promise.promise();
         Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
-                //TODO: here we can use limit (default or provided by the user)
                 conn.preparedQuery("Select * from collections_details")
                     .collecting(collector)
                     .execute()
