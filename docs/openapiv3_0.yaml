@@ -279,13 +279,6 @@ components:
         type: array
         items:
           type: number
-        oneOf:
-          - type: array
-            minItems: 4
-            maxItems: 4
-          - type: array
-            minItems: 6
-            maxItems: 6
     datetime:
       name: datetime
       in: query

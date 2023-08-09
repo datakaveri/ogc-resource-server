@@ -20,6 +20,8 @@ import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static ogc.rs.apiserver.util.Constants.*;
@@ -107,19 +109,20 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
 
-          /* routerBuilder
-          *   .operation(FEATURES_API)
-          *   .handler(this::getFeatures)
-          *   .handler(this::putCommonResponseHeaders)
-          *   .handler(this::buildResponse)
-          * */
+          routerBuilder
+               .operation(FEATURES_API)
+               .handler(this::getFeatures)
+               .handler(this::putCommonResponseHeaders)
+               .handler(this::buildResponse);
 
-            /*  routerBuilder
-             *  .operation(FEATURE_API)
-             *  .handler(this::getFeatures)
-             *  .handler(this::putCommonResponseHeaders)
-             *  .handler(this::buildResponse)
-             * */
+
+          routerBuilder
+           .operation(FEATURE_API)
+           .handler(this::getFeature)
+           .handler(this::putCommonResponseHeaders)
+           .handler(this::buildResponse);
+
+
 
           router = routerBuilder.createRouter();
           router
@@ -146,59 +149,117 @@ public class ApiServerVerticle extends AbstractVerticle {
           .onFailure(Throwable::printStackTrace);;
     }
 
+  private void getFeature(RoutingContext routingContext) {
+
+    String collectionId = routingContext.pathParam("collectionId");
+    String featureId = routingContext.pathParam("featureId");
+    System.out.println("collectionId- " + collectionId + " featureId- " + featureId);
+    dbService.getFeature(collectionId, featureId)
+        .onSuccess(success -> {
+          LOGGER.debug("Success! - {}", success.encodePrettily());
+          // TODO: Add base_path from config
+          routingContext.put("response",success.toString());
+          routingContext.put("status_code", 200);
+          routingContext.next();
+        })
+        .onFailure(failed -> {
+          if (failed instanceof OgcException){
+            routingContext.put("response",((OgcException) failed).getJson().toString());
+            routingContext.put("status_code", ((OgcException) failed).getStatusCode());
+          }
+          else{
+            OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
+            routingContext.put("response", ogcException.getJson().toString());
+            routingContext.put("status_code", ogcException.getStatusCode());
+          }
+          routingContext.next();
+        });
+
+  }
+
+  private void getFeatures(RoutingContext routingContext) {
+
+    String collectionId = routingContext.pathParam("collectionId");
+    Map<String, String> queryParamsMap = new HashMap<>();
+    try {
+      MultiMap queryParams = routingContext.queryParams();
+      queryParams.forEach(param -> queryParamsMap.put(param.getKey(), param.getValue()));
+    } catch (NullPointerException ne) {
+      OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
+      routingContext.put("response", ogcException.getJson().toString());
+      routingContext.put("status_code", ogcException.getStatusCode());
+      routingContext.next();
+      return;
+    }
+    System.out.println("<APIServer> QP- "+queryParamsMap);
+    dbService.getFeatures(collectionId, queryParamsMap)
+        .onSuccess(success -> {
+          LOGGER.debug("Success! - {}", success.encodePrettily());
+          // TODO: Add base_path from config
+          routingContext.put("response",success.toString());
+          routingContext.put("status_code", 200);
+          routingContext.next();
+        })
+        .onFailure(failed -> {
+          if (failed instanceof OgcException){
+            routingContext.put("response",((OgcException) failed).getJson().toString());
+            routingContext.put("status_code", ((OgcException) failed).getStatusCode());
+          }
+          else{
+            OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
+            routingContext.put("response", ogcException.getJson().toString());
+            routingContext.put("status_code", ogcException.getStatusCode());
+          }
+          routingContext.next();
+        });
+  }
+
   private void buildResponse(RoutingContext routingContext) {
       routingContext.response().setStatusCode(routingContext.get("status_code"))
           .end((String) routingContext.get("response"));
   }
 
   private void getCollection(RoutingContext routingContext) {
-      // validation logic here?
 
       String collectionId = routingContext.pathParam("collectionId");
       LOGGER.debug("collectionId- {}", collectionId);
       dbService.getCollection(collectionId)
           .onSuccess(success -> {
-            // write your success story
             LOGGER.debug("Success! - {}", success.encodePrettily());
-              routingContext.put("response", success.toString());
-              routingContext.put("status_code", 200);
-           // }
+            routingContext.put("response", success.toString());
+            routingContext.put("status_code", 200);
             routingContext.next();
           })
           .onFailure(failed -> {
-            // well, you tried
             if (failed instanceof OgcException){
               routingContext.put("response",((OgcException) failed).getJson().toString());
-              routingContext.put("status_code", 404);
+              routingContext.put("status_code", ((OgcException) failed).getStatusCode());
             }
             else{
-              routingContext.put("response", new OgcException("InternalServerError", "Something broke").getJson().toString());
-              routingContext.put("status_code", 500);
+              OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
+              routingContext.put("response", ogcException.getJson().toString());
+              routingContext.put("status_code", ogcException.getStatusCode());
             }
             routingContext.next();
           });
   }
 
   private void getCollections(RoutingContext routingContext) {
-    // validation logic here?
 
     dbService.getCollections()
         .onSuccess(success -> {
-          // write your success story
           LOGGER.debug("Success! - {}", success.encodePrettily());
           routingContext.put("response", success.toString());
           routingContext.put("status_code", 200);
-          // }
           routingContext.next();
         })
         .onFailure(failed -> {
-          // well, you tried
           if (failed instanceof OgcException){
             routingContext.put("response",((OgcException) failed).getJson().toString());
             routingContext.put("status_code", 404);
           }
           else{
-            routingContext.put("response", new OgcException("InternalServerError", "Something broke"));
+            routingContext.put("response", new OgcException(500, "InternalServerError", "Something broke"));
             routingContext.put("status_code", 500);
           }
           routingContext.next();
@@ -212,75 +273,5 @@ public class ApiServerVerticle extends AbstractVerticle {
          .putHeader("Expires", "0")
          .putHeader("X-Content-Type-Options", "nosniff");
      routingContext.next();
-//        router.route().handler(requestHandler -> {
-//            requestHandler
-//                    .response()
-//
-//            requestHandler.next();
-//        });
     }
-
-    /* private void getFeatures(RoutingContext routingContext) {
-      // validation logic here?
-      --> check if query params exists [limit, bbox, datetime, filter]
-      --> send params as a JsonObject, null if missing
-            {limit:null/value, bbox: , datetime: , filter: }
-      --> dbService.getFeatures(JsonObject) --> returns <JsonArray> features
-      --> handle exception
-      String collectionId = routingContext.pathParam("collectionId");
-      MultiMap params = routingContext.queryParams();
-      dbService.getFeatures(collectionId, Multimap queryParams)
-          .onSuccess(success -> {
-            // write your success story
-            LOGGER.debug("Success! - {}", success.encodePrettily());
-              // TODO: Add base_path from config
-              routingContext.put("response",success.toString());
-              routingContext.put("status_code", 200);
-           // }
-            routingContext.next();
-          })
-          .onFailure(failed -> {
-            // well, you tried
-            if (failed instanceof OgcException){
-              routingContext.put("response",((OgcException) failed).getJson().toString());
-              routingContext.put("status_code", 404);
-            }
-            else{
-              routingContext.put("response", new OgcException("InternalServerError", "Something broke"));
-              routingContext.put("status_code", 500);
-            }
-            routingContext.next();
-          });
-  }*/
-
-  /* private void getFeature(RoutingContext routingContext) {
-      // validation logic here?
-      --> /collections/:collectionId/items/:itemId
-      --> same as /collections/:collectionId
-      String featureId = routingContext.pathParam("featureId");
-      System.out.println("collectionId- "+collectionId);
-      dbService.getFeature(collectionId, featureId)
-          .onSuccess(success -> {
-            // write your success story
-            JsonObject response = new JsonObject();
-            LOGGER.debug("Success! - {}", success.encodePrettily());
-              // TODO: Add base_path from config
-              routingContext.put("response",success.toString());
-              routingContext.put("status_code", 200);
-           // }
-            routingContext.next();
-          })
-          .onFailure(failed -> {
-            // well, you tried
-            if (failed instanceof OgcException){
-              routingContext.put("response",((OgcException) failed).getJson().toString());
-              routingContext.put("status_code", 404);
-            }
-            else{
-              routingContext.put("response", new OgcException("InternalServerError", "Something broke"));
-              routingContext.put("status_code", 500);
-            }
-            routingContext.next();
-          });
-  }*/
 }
