@@ -52,23 +52,8 @@ public class DatabaseServiceImpl implements DatabaseService{
         return result.future();
     }
 
-    private JsonObject buildCollectionResult(List<JsonObject> success) {
-        JsonObject collection = success.get(0);
-        collection.put("links", new JsonArray()
-            .add(new JsonObject()
-                .put("href","http://localhost/collections/" + collection.getString("id"))
-                .put("rel","self")
-                .put("title", collection.getString("title"))
-                .put("description", collection.getString("description"))))
-            .put("itemType", "feature")
-            .put("crs", new JsonArray().add("http://www.opengis.net/def/crs/ESPG/0/4326"));
-        collection.remove("title");
-        collection.remove("description");
-        return collection;
-    }
-
     public Future<List<JsonObject>> getCollections() {
-        JsonArray collections = new JsonArray();
+
         Promise<List<JsonObject>> result = Promise.promise();
         Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
