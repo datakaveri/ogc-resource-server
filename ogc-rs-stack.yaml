@@ -7,7 +7,7 @@ networks:
 
 services:
   ogc-rs:
-    image: ghcr.io/datakaveri/ogc-resource-server:1.0.0-alpha-e779fef
+    image: iudx/ogc-rs-dev:latest
     volumes:
      - type: tmpfs
        target: /tmp/
