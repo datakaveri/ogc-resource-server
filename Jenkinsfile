@@ -13,7 +13,7 @@ pipeline {
         }
       }
     }
-    stage('Deploy consent-manager') {
+    stage('Deploy ogc-resource-server') {
       steps{
         script{
           sh "ssh ubuntu@adex-swarm 'docker service update ogc-rs_ogc-rs --force'"
