@@ -1,8 +1,13 @@
 package ogc.rs.apiserver;
 
+import static ogc.rs.apiserver.util.Constants.*;
+import static ogc.rs.common.Constants.*;
+import static ogc.rs.metering.util.MeteringConstant.*;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
+import io.vertx.core.Promise;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -16,8 +21,16 @@ import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import ogc.rs.apiserver.handlers.AuthHandler;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.Set;
+import ogc.rs.apiserver.service.CatalogueService;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.database.DatabaseService;
+import ogc.rs.databroker.DataBrokerService;
+import ogc.rs.metering.MeteringService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,7 +66,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     private String ogcBasePath;
     private String hostName;
     private DatabaseService dbService;
-
+    private MeteringService meteringService;
 
     /**
      * This method is used to start the Verticle. It deploys a verticle in a cluster/single instance, reads the
@@ -69,8 +82,6 @@ public class ApiServerVerticle extends AbstractVerticle {
           ,HEADER_ORIGIN, HEADER_REFERER, HEADER_ACCEPT, HEADER_ALLOW_ORIGIN);
 
       Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS);
-
-
       /* Get base paths from config */
       ogcBasePath = config().getString("ogcBasePath");
       hostName = config().getString("hostName");
@@ -128,8 +139,6 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
 
-
-
           router = routerBuilder.createRouter();
           router
             .get(OPENAPI_SPEC)
@@ -144,6 +153,8 @@ public class ApiServerVerticle extends AbstractVerticle {
           }
 
           dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
+          meteringService = MeteringService.createProxy(vertx,METERING_SERVICE_ADDRESS);
+
           // TODO: ssl configuration
           HttpServerOptions serverOptions = new HttpServerOptions();
           serverOptions.setCompressionSupported(true).setCompressionLevel(5);
@@ -330,7 +341,7 @@ public class ApiServerVerticle extends AbstractVerticle {
          .putHeader("X-Content-Type-Options", "nosniff");
      routingContext.next();
     }
-
+    
   private JsonObject buildCollectionResult(List<JsonObject> success) {
     JsonObject collection = success.get(0);
     collection.put("properties", new JsonObject());

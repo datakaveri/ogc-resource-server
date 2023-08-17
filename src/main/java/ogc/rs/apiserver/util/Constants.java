@@ -27,6 +27,13 @@ public class Constants {
 
     public static final String OPENAPI_SPEC = "/api";
     public static final String COLLECTIONS_API = "getCollections";
+    public static final String EPOCH_TIME = "epochTime";
+    public static final String ISO_TIME = "isoTime";
+    public static final String RESPONSE_SIZE = "response_size";
+    public static final String PROVIDER_ID = "providerID";
+    public static final String ID = "id";
+    public static final String API = "api";
+    public static final String API_ENDPOINT = "apiEndpoint";
 
     public static final String COLLECTION_API = "describeCollection";
 
