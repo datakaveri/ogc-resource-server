@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS auditing_ogc
    userid varchar NOT NULL,
    epochtime numeric NOT NULL,
    resourceid varchar NOT NULL,
-   isotime varchar NOT NULL,
    providerid varchar NOT NULL,
    itemType varchar NOT NULL,
    size numeric NOT NULL,
