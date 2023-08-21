@@ -1,27 +1,19 @@
 package ogc.rs.metering;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.rabbitmq.RabbitMQClient;
-import io.vertx.rabbitmq.RabbitMQOptions;
-import ogc.rs.common.VirtualHosts;
 import ogc.rs.database.DatabaseService;
-import ogc.rs.databroker.DataBrokerService;
-import ogc.rs.databroker.DataBrokerServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -49,7 +41,7 @@ public class MeteringServiceTest {
     static void startVertex(Vertx vertx, VertxTestContext vertxTestContext) {
         vertxObj = vertx;
         databroker = mock(DataBrokerService.class);
-        meteringService = new MeteringServiceImpl(vertx, databaseService,config,databroker);
+        meteringService = new MeteringServiceImpl(vertx, databaseService,config, databroker);
         vertxTestContext.completeNow();
     }
 

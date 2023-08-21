@@ -30,24 +30,6 @@
       "jwtIgnoreExpiry": false
     },
     {
-      "id": "ogc.rs.databroker.DataBrokerVerticle",
-      "verticleInstances": 1,
-      "dataBrokerIP": "",
-      "dataBrokerPort": "",
-      "dataBrokerUserName": "",
-      "dataBrokerPassword": "",
-      "dataBrokerManagementPort": 9090,
-      "connectionTimeout": 6000,
-      "requestedHeartbeat": 60,
-      "handshakeTimeout": 6000,
-      "requestedChannelMax": 5,
-      "networkRecoveryInterval": 500,
-      "automaticRecoveryEnabled": true,
-      "prodVhost":"",
-      "internalVhost": "",
-      "externalVhost":""
-    },
-    {
       "id": "iudx.ogc.rs.apiserver.ApiServerVerticle",
       "isWorkerVerticle":false,
       "ssl": true,
@@ -62,7 +44,21 @@
       "id": "ogc.rs.metering.MeteringVerticle",
       "verticleInstances": 1,
       "catServerHost": "",
-      "catServerPort": 123
+      "catServerPort": 123,
+      "dataBrokerIP": "",
+      "dataBrokerPort": "",
+      "dataBrokerUserName": "",
+      "dataBrokerPassword": "",
+      "dataBrokerManagementPort": 9090,
+      "connectionTimeout": 6000,
+      "requestedHeartbeat": 60,
+      "handshakeTimeout": 6000,
+      "requestedChannelMax": 5,
+      "networkRecoveryInterval": 500,
+      "automaticRecoveryEnabled": true,
+      "prodVhost":"",
+      "internalVhost": "",
+      "externalVhost":""
     },
     {
       "id":"iudx.resource.server.database.postgres.PostgresVerticle",

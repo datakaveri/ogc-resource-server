@@ -3,22 +3,17 @@ package ogc.rs.metering;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.*;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
-import io.vertx.ext.web.client.predicate.ResponsePredicate;
+import io.vertx.rabbitmq.RabbitMQClient;
 import ogc.rs.apiserver.service.CatalogueService;
 import ogc.rs.apiserver.util.Response;
-import ogc.rs.apiserver.util.ResponseUrn;
 import ogc.rs.database.DatabaseService;
-import ogc.rs.databroker.DataBrokerService;
 import ogc.rs.metering.util.QueryBuilder;
-import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static ogc.rs.common.Constants.DATABROKER_SERVICE_ADDRESS;
 import static ogc.rs.metering.util.MeteringConstant.*;
 
 public class MeteringServiceImpl implements MeteringService {
@@ -29,21 +24,22 @@ public class MeteringServiceImpl implements MeteringService {
   final String path;
   private final QueryBuilder queryBuilder = new QueryBuilder();
   private final ObjectMapper objectMapper = new ObjectMapper();
-  public DataBrokerService rmqService;
   public CatalogueService catalogueService;
   WebClient catWebClient;
+  DataBrokerService dataBrokerService;
+
 
   public MeteringServiceImpl(
       Vertx vertx,
       DatabaseService databaseService,
       JsonObject config,
-      DataBrokerService dataBrokerService) {
+      DataBrokerService dataBrokerService ) {
     WebClientOptions options = new WebClientOptions();
     options.setTrustAll(true).setVerifyHost(false).setSsl(true);
     catWebClient = WebClient.create(vertx, options);
+    this.dataBrokerService = dataBrokerService;
     host = config.getString("catServerHost");
     port = config.getInteger("catServerPort");
-    this.rmqService = dataBrokerService;
     this.catBasePath = config.getString("dxCatalogueBasePath");
     this.path = catBasePath + CAT_SEARCH_PATH;
     catalogueService = new CatalogueService(vertx, config);
@@ -60,17 +56,10 @@ public class MeteringServiceImpl implements MeteringService {
     JsonObject writeMessage = queryBuilder.buildMessageForRmq(request);
     LOGGER.info("write message =  {}", writeMessage);
     // TODO: Change Exchange Name after discussion
-    rmqService
-        .publishMessage(EXCHANGE_NAME, ROUTING_KEY, writeMessage)
+        dataBrokerService.publishMessage(EXCHANGE_NAME, ROUTING_KEY, writeMessage)
         .onSuccess(
             successHandler -> {
-              Response response =
-                  new Response.Builder()
-                      .withUrn(ResponseUrn.SUCCESS_URN.getUrn())
-                      .withStatus(HttpStatus.SC_OK)
-                      .withDetail(ResponseUrn.SUCCESS_URN.getMessage())
-                      .build();
-              promise.complete(response.toJson());
+              promise.complete();
               LOGGER.info("inserted into rmq");
             })
         .onFailure(
@@ -98,4 +87,5 @@ public class MeteringServiceImpl implements MeteringService {
   public Future<JsonObject> summaryOverview(JsonObject request) {
     return null;
   }
+
 }

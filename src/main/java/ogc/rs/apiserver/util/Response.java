@@ -16,6 +16,7 @@ import io.vertx.core.json.JsonObject;
  * </p>
  * 
  */
+//TODO: Remove if not needed
 public class Response {
 
   private String type;
