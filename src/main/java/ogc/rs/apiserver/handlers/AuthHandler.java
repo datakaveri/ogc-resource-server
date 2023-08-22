@@ -35,7 +35,9 @@ public class AuthHandler implements Handler<RoutingContext> {
       if (token == null || id == null) {
         LOGGER.error("Null values for either token or id!");
         context.put("isAuthorised",  false);
-        context.put("response", new OgcException("401", "NotAuthorised").getJson().toString());
+        context.put("response",
+            new OgcException(401, "Not Authorised", "User is not Authorised. Please contact IUDX AAA Server.")
+                .getJson().toString());
         context.put("statusCode", 401);
         context.next();
         return;
@@ -68,7 +70,9 @@ public class AuthHandler implements Handler<RoutingContext> {
                       context.put("statusCode", 404);
                   }
               } else {
-                  context.put("response", new OgcException("401", "NotAuthorised").getJson().toString());
+                  context.put("response",
+                      new OgcException(401, "Not Authorised",
+                          "User is not authorised. Please contact IUDX AAA Server.").getJson().toString());
                   context.put("statusCode", 401);
               }
               context.next();
