@@ -145,7 +145,8 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
             promise.complete(true);
         else {
             LOGGER.error("Resource Ids don't match! id- {}, jwtId- {}", id, idFromJwt);
-            promise.fail(new OgcException("401", "NotAuthorised"));
+            promise.fail(new OgcException(401, "Not Authorised", "User is not authorised. Please contact IUDX AAA " +
+                "Server."));
         }
         return promise.future();
     }
@@ -182,7 +183,8 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
         }
         JsonArray access = jwtData.getCons() != null ? jwtData.getCons().getJsonArray("access") : null;
         if (access == null)
-            promise.fail(new OgcException("401", "NotAuthorised"));
+            promise.fail(new OgcException(401, "Not Authorised", "User is not authorised. Please contact IUDX AAA " +
+                "Server."));
         else {
             if (access.contains("api")
                 && jwtData.getRole().equalsIgnoreCase("consumer")) {
@@ -212,7 +214,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                 .map(SqlResult::value))
             .onSuccess(success -> {
                 if (success.isEmpty()){
-                    promise.fail(new OgcException("404", "Collection not found"));
+                    promise.fail(new OgcException(404, "Not found", "Collection not found"));
                 }
                 else {
                     String access = success.get(0).getString("access");
@@ -226,7 +228,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
             })
             .onFailure(fail -> {
                 LOGGER.error("Something went wrong at isOpenResource: {}", fail.getMessage() );
-                promise.fail(new OgcException("500", "Internal Server Error"));
+                promise.fail(new OgcException(500, "Internal Server Error","Internal Server Error"));
             });
         return promise.future();
     }
@@ -238,7 +240,8 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
             promise.complete(true);
         else {
             LOGGER.error("Audience value does not match aud- {} and audJwt- {}", audience, jwtData.getAud());
-            promise.fail(new OgcException("401", "NotAuthorised"));
+            promise.fail(new OgcException(401, "Not Authorised", "User is not authorised. Please contact IUDX AAA " +
+                "Server."));
         }
         return promise.future();
     }
@@ -258,7 +261,8 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
             })
             .onFailure(failed -> {
                 LOGGER.error("Cannot decode/validate JWT Token: {}", failed.getMessage());
-                promise.fail(new OgcException("401", "NotAuthorized" ));
+                promise.fail(new OgcException(401, "Not Authorised", "User is not authorised. Please contact IUDX AAA " +
+                    "Server." ));
             });
         return promise.future();
     }
