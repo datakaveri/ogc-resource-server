@@ -69,5 +69,5 @@ build/
 ./scripts/venv
 
 ### secrets ###
-./secrets/configs/*
+secrets/configs/*
 

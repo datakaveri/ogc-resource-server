@@ -12,7 +12,11 @@ import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.database.util.FeatureQueryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import java.sql.SQLOutput;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collector;
@@ -51,9 +55,9 @@ public class DatabaseServiceImpl implements DatabaseService{
             });
         return result.future();
     }
-
+    
+    @Override
     public Future<List<JsonObject>> getCollections() {
-
         Promise<List<JsonObject>> result = Promise.promise();
         Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
