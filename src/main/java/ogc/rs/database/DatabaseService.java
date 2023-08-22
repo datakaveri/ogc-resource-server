@@ -7,6 +7,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
+import java.util.List;
 import java.util.Map;
 
 @VertxGen
@@ -19,8 +21,8 @@ public interface DatabaseService {
     // TODO:
     // Future<JsonObject> to Future<DO> class.
 
-    Future<JsonArray>  getCollections();
-    Future<JsonObject>  getCollection(final String collectionId);
+    Future<List<JsonObject>>  getCollections();
+    Future<List<JsonObject>>  getCollection(final String collectionId);
 
     Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams);
 

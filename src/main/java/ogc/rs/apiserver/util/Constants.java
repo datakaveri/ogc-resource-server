@@ -34,6 +34,7 @@ public class Constants {
 
     public static final String FEATURE_API = "getFeature";
 
+    public static final String COLLECTIONS = "collections";
 
 
 

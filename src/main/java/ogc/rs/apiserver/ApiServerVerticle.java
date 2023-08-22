@@ -21,9 +21,7 @@ import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
@@ -50,6 +48,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     private static final Logger LOGGER = LogManager.getLogger(ApiServerVerticle.class);
     private Router router;
     private String ogcBasePath;
+    private String hostName;
     private DatabaseService dbService;
 
 
@@ -71,6 +70,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
       /* Get base paths from config */
       ogcBasePath = config().getString("ogcBasePath");
+      hostName = config().getString("hostName");
       Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/openapiv3_0.yaml");
       routerBuilderFut.compose(routerBuilder -> {
 
@@ -222,7 +222,6 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   private void getCollection(RoutingContext routingContext) {
-    
       String collectionId = routingContext.pathParam("collectionId");
       LOGGER.debug("collectionId- {}", collectionId);
       if (!(Boolean) routingContext.get("isAuthorised")){
@@ -231,9 +230,10 @@ public class ApiServerVerticle extends AbstractVerticle {
       }
       dbService.getCollection(collectionId)
           .onSuccess(success -> {
-            LOGGER.debug("Success! - {}", success.encodePrettily());
-            routingContext.put("response", success.toString());
-            routingContext.put("statusCode", 200);
+            LOGGER.debug("Success! - {}", success.toString());
+            JsonObject jsonResult = buildCollectionResult(success);
+            routingContext.put("response", jsonResult.toString());
+            routingContext.put("status_code", 200);
             routingContext.next();
           })
           .onFailure(failed -> {
@@ -254,9 +254,23 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     dbService.getCollections()
         .onSuccess(success -> {
-          LOGGER.debug("Success! - {}", success.encodePrettily());
-          routingContext.put("response", success.toString());
-          routingContext.put("statusCode", 200);
+          JsonArray collections  = new JsonArray();
+          success.forEach(collection -> {
+                        try {
+                            JsonObject json;
+                            List<JsonObject> tempArray = new ArrayList<>();
+                            tempArray.add(collection);
+                            json = buildCollectionResult(tempArray);
+                            collections.add(json);
+                        } catch (Exception e) {
+                            LOGGER.error("Something went wrong here: {}", e.getMessage());
+                            routingContext.put("response", new OgcException(500, "InternalServerError", "Something broke"));
+                            routingContext.put("status_code", 500);
+                            routingContext.next();
+                        }
+                    });
+          routingContext.put("response", collections.toString());
+          routingContext.put("status_code", 200);
           routingContext.next();
         })
         .onFailure(failed -> {
@@ -280,4 +294,19 @@ public class ApiServerVerticle extends AbstractVerticle {
          .putHeader("X-Content-Type-Options", "nosniff");
      routingContext.next();
     }
+
+  private JsonObject buildCollectionResult(List<JsonObject> success) {
+    JsonObject collection = success.get(0);
+    collection.put("links", new JsonArray()
+            .add(new JsonObject()
+                .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id"))
+                .put("rel","self")
+                .put("title", collection.getString("title"))
+                .put("description", collection.getString("description"))))
+        .put("itemType", "feature")
+        .put("crs", new JsonArray().add("http://www.opengis.net/def/crs/ESPG/0/4326"));
+    collection.remove("title");
+    collection.remove("description");
+    return collection;
+  }
 }
