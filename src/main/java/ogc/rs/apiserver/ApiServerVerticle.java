@@ -233,7 +233,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             LOGGER.debug("Success! - {}", success.toString());
             JsonObject jsonResult = buildCollectionResult(success);
             routingContext.put("response", jsonResult.toString());
-            routingContext.put("status_code", 200);
+            routingContext.put("statusCode", 200);
             routingContext.next();
           })
           .onFailure(failed -> {
@@ -265,12 +265,12 @@ public class ApiServerVerticle extends AbstractVerticle {
                         } catch (Exception e) {
                             LOGGER.error("Something went wrong here: {}", e.getMessage());
                             routingContext.put("response", new OgcException(500, "InternalServerError", "Something broke"));
-                            routingContext.put("status_code", 500);
+                            routingContext.put("statusCode", 500);
                             routingContext.next();
                         }
                     });
           routingContext.put("response", collections.toString());
-          routingContext.put("status_code", 200);
+          routingContext.put("statusCode", 200);
           routingContext.next();
         })
         .onFailure(failed -> {
