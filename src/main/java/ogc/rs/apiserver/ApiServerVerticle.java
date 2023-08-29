@@ -106,23 +106,24 @@ public class ApiServerVerticle extends AbstractVerticle {
 
           routerBuilder
               .operation(COLLECTION_API)
-              .handler(AuthHandler.create(vertx))
               .handler(this::getCollection)
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
 
           routerBuilder
-               .operation(FEATURES_API)
-               .handler(this::getFeatures)
-               .handler(this::putCommonResponseHeaders)
-               .handler(this::buildResponse);
+              .operation(FEATURES_API)
+              .handler(AuthHandler.create(vertx))
+              .handler(this::getFeatures)
+              .handler(this::putCommonResponseHeaders)
+              .handler(this::buildResponse);
 
 
           routerBuilder
-           .operation(FEATURE_API)
-           .handler(this::getFeature)
-           .handler(this::putCommonResponseHeaders)
-           .handler(this::buildResponse);
+              .operation(FEATURE_API)
+              .handler(AuthHandler.create(vertx))
+              .handler(this::getFeature)
+              .handler(this::putCommonResponseHeaders)
+              .handler(this::buildResponse);
 
 
 
@@ -154,6 +155,10 @@ public class ApiServerVerticle extends AbstractVerticle {
   private void getFeature(RoutingContext routingContext) {
 
     String collectionId = routingContext.pathParam("collectionId");
+    if (!(Boolean) routingContext.get("isAuthorised")){
+      routingContext.next();
+      return;
+    }
     String featureId = routingContext.pathParam("featureId");
     System.out.println("collectionId- " + collectionId + " featureId- " + featureId);
     dbService.getFeature(collectionId, featureId)
@@ -180,8 +185,11 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   private void getFeatures(RoutingContext routingContext) {
-
     String collectionId = routingContext.pathParam("collectionId");
+    if (!(Boolean) routingContext.get("isAuthorised")){
+      routingContext.next();
+      return;
+    }
     Map<String, String> queryParamsMap = new HashMap<>();
     try {
       MultiMap queryParams = routingContext.queryParams();
@@ -224,10 +232,6 @@ public class ApiServerVerticle extends AbstractVerticle {
   private void getCollection(RoutingContext routingContext) {
       String collectionId = routingContext.pathParam("collectionId");
       LOGGER.debug("collectionId- {}", collectionId);
-      if (!(Boolean) routingContext.get("isAuthorised")){
-        routingContext.next();
-        return;
-      }
       dbService.getCollection(collectionId)
           .onSuccess(success -> {
             LOGGER.debug("Success! - {}", success.toString());
