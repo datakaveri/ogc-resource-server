@@ -124,7 +124,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
             .onSuccess(success -> {
                 success.put("isAuthorised", true);
                 result.complete(success);
-                LOGGER.debug("Congratulations! It worked. Nothing went wrong: {}", (success).toString());
+                LOGGER.debug("Congratulations! It worked. {}", (success).toString());
                 //
             })
             .onFailure(failed -> {

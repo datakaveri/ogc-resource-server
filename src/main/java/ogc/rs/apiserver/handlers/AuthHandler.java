@@ -61,19 +61,14 @@ public class AuthHandler implements Handler<RoutingContext> {
               context.put("isAuthorised", false);
               LOGGER.debug("isAuthorised? {}", context.get("isAuthorised").toString());
               if (failed instanceof OgcException){
-                  if(((OgcException) failed).getJson().getString("code").equals("401")) {
-                      context.put("response", ((OgcException) failed).getJson().toString());
-                      context.put("statusCode", 401);
-                  }
-                  if(((OgcException) failed).getJson().getString("code").equals("404")) {
-                      context.put("response", ((OgcException) failed).getJson().toString());
-                      context.put("statusCode", 404);
-                  }
+                context.put("statusCode", ((OgcException) failed).getStatusCode());
+                context.put("response", ((OgcException) failed).getJson().toString());
               } else {
                   context.put("response",
-                      new OgcException(401, "Not Authorised",
-                          "User is not authorised. Please contact IUDX AAA Server.").getJson().toString());
-                  context.put("statusCode", 401);
+                      new OgcException(500, "Internal Server Error",
+                          "Internal Server Error").getJson().toString());
+                  context.put("statusCode", 500);
+                LOGGER.debug("statusCode? {}", context.get("statusCode").toString());
               }
               context.next();
           });
