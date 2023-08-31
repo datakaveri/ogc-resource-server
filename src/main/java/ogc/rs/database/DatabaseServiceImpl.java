@@ -12,9 +12,7 @@ import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.database.util.FeatureQueryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import java.sql.SQLOutput;
-import java.util.ArrayList;
-import java.util.Collections;
+
 import java.util.List;
 import java.util.UUID;
 import java.time.format.DateTimeParseException;
@@ -26,9 +24,11 @@ public class DatabaseServiceImpl implements DatabaseService{
     private static final Logger LOGGER = LogManager.getLogger(DatabaseServiceImpl.class);
 
     private final PgPool client;
+    private final JsonObject datetimeConfig;
 
-    public DatabaseServiceImpl(final PgPool pgClient) {
+    public DatabaseServiceImpl(JsonObject config, final PgPool pgClient) {
         this.client = pgClient;
+        this.datetimeConfig = config;
     }
 
     @Override
@@ -96,7 +96,7 @@ public class DatabaseServiceImpl implements DatabaseService{
             featureQuery.setBbox(queryParams.get("bbox"));
         if (queryParams.containsKey("datetime")) {
             try {
-                featureQuery.setDatetime(queryParams.get("datetime"));
+                featureQuery.setDatetime(datetimeConfig.getString(collectionId), queryParams.get("datetime"));
             } catch (DateTimeParseException e) {
                 System.out.println("<DbServiceImpl> " + e.getMessage());
                 result.fail(new OgcException(400, "BadRequest", "Time parameter not in ISO format"));

@@ -44,32 +44,36 @@ public class FeatureQueryBuilder {
     this.additionalParams = "where";
   }
 
-  public void setDatetime(String datetime) throws DateTimeParseException {
+  public void setDatetime(String datetimeKey,String datetime) throws DateTimeParseException {
 
     this.additionalParams = "where";
+    String datetimeFormat = "'yyyy-mm-dd\"T\"HH24:MI:SS\"Z\"'";
     ZonedDateTime zone;
     DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+//    datetime query where clause -
+//    to_timestamp(properties ->> 'datetimeKey', 'datetimeFormat') 'operator' 'datetime' (from request);
+    String concatString =
+        " to_timestamp(properties ->> '" .concat(datetimeKey).concat("',").concat(datetimeFormat).concat(") ");
     if (!datetime.contains("/")) {
       zone = ZonedDateTime.parse(datetime, formatter);
-      this.datetime = " datetime = '".concat(datetime).concat("'").replace("T"," ");
+      this.datetime = concatString.concat("= '").concat(datetime).concat("'");
       return;
     }
     String[] dateTimeArr = datetime.split("/");
         if (dateTimeArr[0].equals("..")) { // -- before
       zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
-      this.datetime = " datetime < '".concat(dateTimeArr[1]).concat("'").replace("T"," ");
+      this.datetime = concatString.concat("<'").concat(dateTimeArr[1]).concat("'");
   }
     else if (dateTimeArr[1].equals("..")) { // -- after
       zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
-      this.datetime = " datetime > '".concat(dateTimeArr[0]).concat("'").replace("T"," ");
+      this.datetime = concatString.concat(">'").concat(dateTimeArr[0]).concat("'");
     }
     else {
       zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
       zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
-      this.datetime = " datetime between '".concat(dateTimeArr[0]).concat("' and '").concat(dateTimeArr[1])
-          .concat("'").replace("T"," ");
+      this.datetime = concatString.concat(" between '").concat(dateTimeArr[0]).concat("' and '")
+          .concat(dateTimeArr[1]).concat("'");
     }
-
   }
 
   public void setFilter(String key, String value) {
