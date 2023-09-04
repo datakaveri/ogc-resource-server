@@ -1,17 +1,17 @@
 package ogc.rs.metering;
 
+import static ogc.rs.common.Constants.*;
+import static ogc.rs.metering.util.MeteringConstant.*;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQOptions;
 import io.vertx.serviceproxy.ServiceBinder;
-import ogc.rs.common.VirtualHosts;
 import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import static ogc.rs.common.Constants.*;
 
 public class MeteringVerticle extends AbstractVerticle {
   private static final Logger LOGGER = LogManager.getLogger(MeteringVerticle.class);
@@ -19,37 +19,24 @@ public class MeteringVerticle extends AbstractVerticle {
   private MessageConsumer<JsonObject> consumer;
   private MeteringService metering;
   private DatabaseService databaseService;
-  private String dataBrokerIp;
-  private int dataBrokerPort;
-  private String dataBrokerUserName;
-  private String dataBrokerPassword;
-  private int connectionTimeout;
-  private int requestedHeartbeat;
-  private int handshakeTimeout;
-  private int requestedChannelMax;
-  private int networkRecoveryInterval;
-  private boolean automaticRecoveryEnabled;
-  private String virtualHost;
-  private RabbitMQOptions config;
-  private RabbitMQClient client;
   private DataBrokerService dataBrokerService;
 
   @Override
   public void start() throws Exception {
-    dataBrokerIp = config().getString("dataBrokerIP");
-    dataBrokerPort = config().getInteger("dataBrokerPort");
-    dataBrokerUserName = config().getString("dataBrokerUserName");
-    dataBrokerPassword = config().getString("dataBrokerPassword");
-    connectionTimeout = config().getInteger("connectionTimeout");
-    requestedHeartbeat = config().getInteger("requestedHeartbeat");
-    handshakeTimeout = config().getInteger("handshakeTimeout");
-    requestedChannelMax = config().getInteger("requestedChannelMax");
-    networkRecoveryInterval = config().getInteger("networkRecoveryInterval");
-    automaticRecoveryEnabled = config().getBoolean("automaticRecoveryEnabled");
-    virtualHost = config().getString(VirtualHosts.IUDX_INTERNAL.value);
+    String dataBrokerIp = config().getString("dataBrokerIP");
+    int dataBrokerPort = config().getInteger("dataBrokerPort");
+    String dataBrokerUserName = config().getString("dataBrokerUserName");
+    String dataBrokerPassword = config().getString("dataBrokerPassword");
+    int connectionTimeout = config().getInteger("connectionTimeout");
+    int requestedHeartbeat = config().getInteger("requestedHeartbeat");
+    int handshakeTimeout = config().getInteger("handshakeTimeout");
+    int requestedChannelMax = config().getInteger("requestedChannelMax");
+    int networkRecoveryInterval = config().getInteger("networkRecoveryInterval");
+    boolean automaticRecoveryEnabled = config().getBoolean("automaticRecoveryEnabled");
+    String virtualHost = config().getString("internalVhost");
 
     /* Configure the RabbitMQ Data Broker client with input from config files. */
-
+    RabbitMQOptions config;
     config = new RabbitMQOptions();
     config.setUser(dataBrokerUserName);
     config.setPassword(dataBrokerPassword);
@@ -62,7 +49,7 @@ public class MeteringVerticle extends AbstractVerticle {
     config.setNetworkRecoveryInterval(networkRecoveryInterval);
     config.setAutomaticRecoveryEnabled(automaticRecoveryEnabled);
     config.setVirtualHost(virtualHost);
-
+    RabbitMQClient client;
     client = RabbitMQClient.create(vertx, config);
 
     binder = new ServiceBinder(vertx);

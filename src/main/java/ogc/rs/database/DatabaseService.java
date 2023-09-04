@@ -3,7 +3,9 @@ package ogc.rs.database;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -27,4 +29,5 @@ public interface DatabaseService {
     Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams);
 
     Future<JsonObject> getFeature(String collectionId, String featureId);
+    Future<JsonObject> executeQuery(String query);
 }

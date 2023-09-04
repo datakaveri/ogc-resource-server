@@ -30,7 +30,7 @@ public class Constants {
     public static final String EPOCH_TIME = "epochTime";
     public static final String ISO_TIME = "isoTime";
     public static final String RESPONSE_SIZE = "response_size";
-    public static final String PROVIDER_ID = "providerID";
+    public static final String PROVIDER_ID = "providerId";
     public static final String ID = "id";
     public static final String API = "api";
     public static final String ITEM_TYPE = "itemType";
@@ -43,8 +43,5 @@ public class Constants {
     public static final String FEATURE_API = "getFeature";
 
     public static final String COLLECTIONS = "collections";
-
-
-
-
+    
 }
