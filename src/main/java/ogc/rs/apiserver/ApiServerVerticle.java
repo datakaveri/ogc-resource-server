@@ -21,6 +21,9 @@ import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 import static ogc.rs.apiserver.util.Constants.*;
@@ -192,10 +195,37 @@ public class ApiServerVerticle extends AbstractVerticle {
     }
     Map<String, String> queryParamsMap = new HashMap<>();
     try {
+      String datetime;
       MultiMap queryParams = routingContext.queryParams();
       queryParams.forEach(param -> queryParamsMap.put(param.getKey(), param.getValue()));
+      ZonedDateTime zone;
+      DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+      if (queryParamsMap.containsKey("datetime")) {
+        datetime =  queryParamsMap.get("datetime");
+        if (!datetime.contains("/")) {
+          zone = ZonedDateTime.parse(datetime, formatter);
+        } else if (datetime.contains("/")) {
+          String[] dateTimeArr = datetime.split("/");
+          if (dateTimeArr[0].equals("..")) { // -- before
+            zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
+          }
+          else if (dateTimeArr[1].equals("..")) { // -- after
+            zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
+          }
+          else {
+            zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
+            zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
+          }
+        }
+      }
     } catch (NullPointerException ne) {
       OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
+      routingContext.put("response", ogcException.getJson().toString());
+      routingContext.put("statusCode", ogcException.getStatusCode());
+      routingContext.next();
+      return;
+    } catch (DateTimeParseException dtpe) {
+      OgcException ogcException = new OgcException(400, "Bad Request", "Time parameter not in ISO format");
       routingContext.put("response", ogcException.getJson().toString());
       routingContext.put("statusCode", ogcException.getStatusCode());
       routingContext.next();
