@@ -44,7 +44,7 @@ public class DatabaseServiceImpl implements DatabaseService{
             .onSuccess(success -> {
                 LOGGER.debug("DB result - {}", success);
                 if (success.isEmpty())
-                result.fail(new OgcException(404, "NotFound", "Collection not found"));
+                result.fail(new OgcException(404, "Not found", "Collection not found"));
                 else {
                     LOGGER.debug("Built OGC Collection Response - {}", success);
                     result.complete(success);
@@ -114,7 +114,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                 .onSuccess(conn1 -> {
                   LOGGER.debug("Count collection- {}", conn1.value().get(0).getInteger("count"));
                   if (conn1.value().get(0).getInteger("count") == 0) {
-                    result.fail(new OgcException(404, "NotFound", "Collection not found"));
+                    result.fail(new OgcException(404, "Not found", "Collection not found"));
                     return;
                   }
                   if (conn1.value().get(0).getString("datetime_key") != null && datetimeValue != null ){
@@ -145,7 +145,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                             .collecting(collector).execute().map(SqlResult::value)
                             .onSuccess(success -> {
                               if (success.isEmpty())
-                                result.fail(new OgcException(404, "NotFound", "Features not found"));
+                                result.fail(new OgcException(404, "Not found", "Features not found"));
                               else {
                                 result.complete(resultJson
                                     .put("type","FeatureCollection")
@@ -179,7 +179,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                 .execute(Tuple.of(UUID.fromString(collectionId)))
                 .onSuccess(conn1 -> {
                     if (conn1.value().get("count") == 0) {
-                        result.fail(new OgcException(404, "NotFound", "Collection not found"));
+                        result.fail(new OgcException(404, "Not found", "Collection not found"));
                         return;
                     }
                     String sqlQuery = "Select id, itemType as type, cast(st_asgeojson(geom) as json) as geometry, " +
@@ -189,7 +189,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                         .map(SqlResult::value)
                         .onSuccess(success -> {
                             if (success.isEmpty())
-                                result.fail(new OgcException(404, "NotFound", "Features not found"));
+                                result.fail(new OgcException(404, "Not found", "Feature not found"));
                             else
                                 result.complete(success.get(0));
                         })
