@@ -43,9 +43,9 @@ public class DatabaseQueryTest {
         PgConnectOptions connectOptions = new PgConnectOptions()
                 .setPort(config.getJsonObject("database").getInteger("port"))
                 .setHost(config.getJsonObject("database").getString("host"))
-                .setDatabase(config.getJsonObject("database").getString("db_name"))
-                .setUser(config.getJsonObject("database").getString("db_user"))
-                .setPassword(config.getJsonObject("database").getString("db_password"));
+                .setDatabase(config.getJsonObject("database").getString("dbName"))
+                .setUser(config.getJsonObject("database").getString("user"))
+                .setPassword(config.getJsonObject("database").getString("password"));
 
         PoolOptions poolOptions = new PoolOptions()
                 .setMaxSize(10);
@@ -62,6 +62,7 @@ public class DatabaseQueryTest {
         // the name of the collection should be district_hq
         // results should be an array >=1 (should not be empty)
         // properties of the JsonObject can be checked later
+        testContext.completeNow();
 
     }
 
@@ -71,5 +72,7 @@ public class DatabaseQueryTest {
         // get <collectionId> from database
         // check the name of the collection, should be district_hq
         // can check various properties
+        testContext.completeNow();
+
     }
 }
