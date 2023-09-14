@@ -17,10 +17,7 @@
       "databaseIP": "",
       "databasePort": 1234,
       "dbUser": "",
-      "dbPassword": "",
-      "datetimeKeys": {
-        "collectionName": "datetimeKeyName"
-      }
+      "dbPassword": ""
     },
     {
       "id": "iudx.ogc.rs.authenticator.AuthenticationVerticle",
