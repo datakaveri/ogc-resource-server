@@ -27,9 +27,8 @@ public class DatabaseServiceImpl implements DatabaseService{
     private final PgPool client;
     private final JsonObject datetimeConfig;
 
-    public DatabaseServiceImpl(JsonObject config, final PgPool pgClient) {
+    public DatabaseServiceImpl(final PgPool pgClient) {
         this.client = pgClient;
-        this.datetimeConfig = config;
     }
 
     @Override
