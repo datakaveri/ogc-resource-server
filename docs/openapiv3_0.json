@@ -16,7 +16,7 @@
   },
   "servers": [
     {
-      "url": "http://ogc.iudx.io",
+      "url": "https://ogc.iudx.io",
       "description": "OGC-Resource-Server"
     }
   ],
@@ -71,17 +71,17 @@
                 "examples": {
                   "Example 1": {
                     "value": {
-                      "title": "Administrative Boundaries of India",
-                      "description": "Information on Indian administrative boundaries.",
+                      "title": "Cities in state",
+                      "description": "Information about cities in a state.",
                       "links": [
                         {
-                          "href": "https://ogc.iudx.io/",
+                          "href": "https://ogc.iudx.io",
                           "rel": "self",
                           "type": "application/json",
                           "title": "this document"
                         },
                         {
-                          "href": "http://ogc.iudx.io/api",
+                          "href": "https://ogc.iudx.io/api",
                           "rel": "service-desc",
                           "type": "application/vnd.oai.openapi+json;version=3.0",
                           "title": "the API definition"
@@ -465,23 +465,6 @@
             "examples": {
               "default": {
                 "value": {
-                  "extent": {
-                    "spatial": {
-                      "geometry": {
-                        "type": "Point",
-                        "coordinates": [
-                          91.27129661478112,
-                          23.828385729333068
-                        ]
-                      }
-                    }
-                  },
-                  "temporal": {
-                    "interval": [
-                      "2020-11-03T15:12:08+05:30",
-                      null
-                    ]
-                  },
                   "links": [
                     {
                       "href": "https://ogc.iudx.io/collections",
@@ -493,14 +476,14 @@
                   "collections": [
                     {
                       "id": "fd6ef7c5-b18c-48e6-94e3-81037706763d",
-                      "title": "Indian District Headquarters",
-                      "description": "Geographic information of district headquarters in India",
+                      "title": "Districts in India",
+                      "description": "Geographic information of districts in India",
                       "links": [
                         {
                           "href": "https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items",
                           "rel": "items",
                           "type": "application/geo+json",
-                          "title": "Indian District Headquarters"
+                          "title": "Districts in India"
                         }
                       ]
                     }
@@ -521,39 +504,22 @@
             "examples": {
               "collection": {
                 "value": {
-                  "extent": {
-                    "spatial": {
-                      "geometry": {
-                        "type": "Point",
-                        "coordinates": [
-                          91.27129661478112,
-                          23.828385729333068
-                        ]
-                      }
-                    },
-                    "temporal": {
-                      "interval": [
-                        "2020-11-03T15:12:08+05:30",
-                        "null"
-                      ]
-                    }
-                  },
                   "id": "fd6ef7c5-b18c-48e6-94e3-81037706763d",
                   "itemType": "feature",
-                  "title": "Indian District Headquarters",
-                  "description": "Geographic information of district headquarters in India",
+                  "title": "Districts in India",
+                  "description": "Geographic information of districts in India",
                   "links": [
                     {
                       "href": "https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items",
                       "rel": "items",
                       "type": "application/geo+json",
-                      "title": "Indian District Headquarters"
+                      "title": "Districts in India"
                     },
                     {
                       "href": "https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d",
                       "rel": "self",
                       "type": "application/geo+json",
-                      "title": "Indian District Headquarters"
+                      "title": "Districts in India"
                     }
                   ]
                 }
@@ -704,9 +670,6 @@
       "landingPage": {
         "type": "object",
         "properties": {
-          "type": {
-            "type": "string"
-          },
           "title": {
             "type": "string"
           },
@@ -823,62 +786,25 @@
           },
           "rel": {
             "type": "string",
-            "example": "alternate"
+            "example": "self"
           },
           "type": {
             "type": "string",
             "example": "application/geo+json"
           },
-          "hreflang": {
-            "type": "string",
-            "example": "en"
-          },
           "title": {
             "type": "string",
-            "example": "Indian District Headquarters"
-          },
-          "length": {
-            "type": "integer"
+            "example": "Districts in India"
           }
         },
         "required": [
-          "href"
+          "href",
+          "rel"
         ]
       },
       "collection": {
         "type": "object",
         "properties": {
-          "extent": {
-            "type": "object",
-            "properties": {
-              "spatial": {
-                "type": "object",
-                "properties": {
-                  "bbox": {
-                    "type": "array",
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "number",
-                        "format": "float"
-                      }
-                    }
-                  }
-                }
-              },
-              "temporal": {
-                "type": "object",
-                "properties": {
-                  "interval": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "id": {
             "type": "string"
           },
@@ -894,14 +820,38 @@
           "links": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/link"
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "rel": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              }
             }
           }
         },
-        "required": [
-          "id",
-          "links"
-        ]
+        "example": {
+          "id": "fd6ef7c5-b18c-48e6-94e3-81037702863d",
+          "itemType": "feature",
+          "title": "Districts in India",
+          "description": "Information about districts in India",
+          "links": [
+            {
+              "href": "https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037702863d",
+              "rel": "self",
+              "type": "application/geo+json",
+              "title": "Districts in India"
+            }
+          ]
+        }
       },
       "featureCollectionGeoJSON": {
         "type": "object",
