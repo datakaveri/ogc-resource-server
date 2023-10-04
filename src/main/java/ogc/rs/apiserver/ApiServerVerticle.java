@@ -298,7 +298,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                             collections.add(json);
                         } catch (Exception e) {
                             LOGGER.error("Something went wrong here: {}", e.getMessage());
-                            routingContext.put("response", new OgcException(500, "InternalServerError", "Something broke"));
+                            routingContext.put("response", new OgcException(500, "InternalServerError", "Something " +
+                                "broke").getJson().toString());
                             routingContext.put("statusCode", 500);
                             routingContext.next();
                         }
@@ -313,7 +314,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             routingContext.put("statusCode", 404);
           }
           else{
-            routingContext.put("response", new OgcException(500, "InternalServerError", "Something broke"));
+            routingContext.put("response", new OgcException(500, "InternalServerError", "Something broke").getJson().toString());
             routingContext.put("statusCode", 500);
           }
           routingContext.next();
@@ -331,16 +332,29 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   private JsonObject buildCollectionResult(List<JsonObject> success) {
     JsonObject collection = success.get(0);
+    collection.put("properties", new JsonObject());
+    if (collection.getString("datetime_key") != null && !collection.getString("datetime_key").isEmpty() )
+      collection.getJsonObject("properties").put("datetimeParameter", collection.getString("datetime_key"));
     collection.put("links", new JsonArray()
             .add(new JsonObject()
                 .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id"))
                 .put("rel","self")
                 .put("title", collection.getString("title"))
-                .put("description", collection.getString("description"))))
+                .put("description", collection.getString("description")))
+            .add(new JsonObject()
+                .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id") + "/items")
+                .put("rel","items")
+                .put("type", "application/geo+json"))
+            .add(new JsonObject()
+                .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id") + "/items" +
+                    "/{featureId}")
+                .put("rel","item")
+                .put("title", "Link template for collection features").put("templated", true)))
         .put("itemType", "feature")
         .put("crs", new JsonArray().add("http://www.opengis.net/def/crs/ESPG/0/4326"));
     collection.remove("title");
     collection.remove("description");
+    collection.remove("datetime_key");
     return collection;
   }
 }

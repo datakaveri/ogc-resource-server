@@ -37,7 +37,8 @@ public class DatabaseServiceImpl implements DatabaseService{
         Promise<List<JsonObject>> result = Promise.promise();
         Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
-           conn.preparedQuery("Select id, title, description from collections_details where id = $1::UUID")
+           conn.preparedQuery("Select id, title, description, datetime_key from collections_details where id = " +
+                   "$1::UUID")
                .collecting(collector)
                .execute(Tuple.of(UUID.fromString( collectionId))).map(SqlResult::value))
             .onSuccess(success -> {
@@ -61,7 +62,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         Promise<List<JsonObject>> result = Promise.promise();
         Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
-                conn.preparedQuery("Select id, title, description from collections_details")
+                conn.preparedQuery("Select id, title, description, datetime_key from collections_details")
                     .collecting(collector)
                     .execute()
                     .map(SqlResult::value))
