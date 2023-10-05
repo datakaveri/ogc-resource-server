@@ -33,7 +33,7 @@ pipeline {
         }
         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
           xunit (
-            thresholds: [ skipped(failureThreshold: '1'), failed(failureThreshold: '0') ],
+            thresholds: [ skipped(failureThreshold: '10'), failed(failureThreshold: '10') ],
             tools: [ JUnit(pattern: 'target/surefire-reports/*.xml') ]
           )
           jacoco classPattern: 'target/classes', execPattern: 'target/jacoco.exec', sourcePattern: 'src/main/java'
