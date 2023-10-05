@@ -178,7 +178,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
           }
           else{
-            OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
+            OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
             routingContext.put("response", ogcException.getJson().toString());
             routingContext.put("statusCode", ogcException.getStatusCode());
           }
@@ -219,7 +219,7 @@ public class ApiServerVerticle extends AbstractVerticle {
         }
       }
     } catch (NullPointerException ne) {
-      OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
+      OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
       routingContext.put("response", ogcException.getJson().toString());
       routingContext.put("statusCode", ogcException.getStatusCode());
       routingContext.next();
@@ -246,7 +246,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
           }
           else{
-            OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
+            OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
             routingContext.put("response", ogcException.getJson().toString());
             routingContext.put("statusCode", ogcException.getStatusCode());
           }
@@ -276,7 +276,7 @@ public class ApiServerVerticle extends AbstractVerticle {
               routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
             }
             else{
-              OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
+              OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
               routingContext.put("response", ogcException.getJson().toString());
               routingContext.put("statusCode", ogcException.getStatusCode());
             }
@@ -298,7 +298,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                             collections.add(json);
                         } catch (Exception e) {
                             LOGGER.error("Something went wrong here: {}", e.getMessage());
-                            routingContext.put("response", new OgcException(500, "InternalServerError", "Something " +
+                            routingContext.put("response", new OgcException(500, "Internal Server Error", "Something " +
                                 "broke").getJson().toString());
                             routingContext.put("statusCode", 500);
                             routingContext.next();
@@ -314,7 +314,8 @@ public class ApiServerVerticle extends AbstractVerticle {
             routingContext.put("statusCode", 404);
           }
           else{
-            routingContext.put("response", new OgcException(500, "InternalServerError", "Something broke").getJson().toString());
+            routingContext.put("response",
+                new OgcException(500, "Internal Server Error", "Internal Server Error").getJson().toString());
             routingContext.put("statusCode", 500);
           }
           routingContext.next();

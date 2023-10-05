@@ -25,7 +25,6 @@ public class DatabaseServiceImpl implements DatabaseService{
     private static final Logger LOGGER = LogManager.getLogger(DatabaseServiceImpl.class);
 
     private final PgPool client;
-    private final JsonObject datetimeConfig;
 
     public DatabaseServiceImpl(final PgPool pgClient) {
         this.client = pgClient;
@@ -91,32 +90,36 @@ public class DatabaseServiceImpl implements DatabaseService{
         row -> row.getString("datetime_key"));
       Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
       String datetimeValue;
-        FeatureQueryBuilder featureQuery = new FeatureQueryBuilder(collectionId);
-        if (queryParams.containsKey("limit"))
-            featureQuery.setLimit(Integer.parseInt(queryParams.get("limit")));
-        if (queryParams.containsKey("bbox"))
-            featureQuery.setBbox(queryParams.get("bbox"));
+      FeatureQueryBuilder featureQuery = new FeatureQueryBuilder(collectionId);
+      if (queryParams.containsKey("limit"))
+          featureQuery.setLimit(Integer.parseInt(queryParams.get("limit")));
+      if (queryParams.containsKey("bbox"))
+          featureQuery.setBbox(queryParams.get("bbox"));
       //TODO: convert individual DB calls to a transaction
       datetimeValue = queryParams.getOrDefault("datetime", null);
       if (queryParams.containsKey("offset"))
             featureQuery.setOffset(Integer.parseInt(queryParams.get("offset")));
-        Set<String> keys =  queryParams.keySet();
-        Set<String> predefinedKeys = Set.of("limit", "bbox", "datetime", "offset");
-        keys.removeAll(predefinedKeys);
-        String[] key = keys.toArray(new String[keys.size()]);
-        if (!keys.isEmpty())
-            featureQuery.setFilter(key[0], queryParams.get(key[0]));
+      Set<String> keys =  queryParams.keySet();
+      Set<String> predefinedKeys = Set.of("limit", "bbox", "datetime", "offset");
+      keys.removeAll(predefinedKeys);
+      String[] key = keys.toArray(new String[keys.size()]);
+      if (!keys.isEmpty())
+          featureQuery.setFilter(key[0], queryParams.get(key[0]));
       client.withConnection(conn ->
         conn.preparedQuery("select datetime_key, count(id) from collections_details " +
                     "where id = $1::uuid group by id, datetime_key")
                 .collecting(collector)
                 .execute(Tuple.of(UUID.fromString(collectionId)))
                 .onSuccess(conn1 -> {
-                  LOGGER.debug("Count collection- {}", conn1.value().get(0).getInteger("count"));
-                  if (conn1.value().get(0).getInteger("count") == 0) {
+                  if(conn1.rowCount() == 0) {
                     result.fail(new OgcException(404, "Not found", "Collection not found"));
                     return;
                   }
+//                  if (conn1.value().get(0).getInteger("count") == 0) {
+//                    result.fail(new OgcException(404, "Not found", "Collection not found"));
+//                    return;
+//                  }
+                  LOGGER.debug("Count collection- {}", conn1.value().get(0).getInteger("count"));
                   if (conn1.value().get(0).getString("datetime_key") != null && datetimeValue != null ){
                     LOGGER.debug("datetimeKey: {}, datetimeValue: {}"
                         ,conn1.value().get(0).getString("datetime_key"), datetimeValue);
