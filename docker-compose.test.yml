@@ -1,0 +1,57 @@
+version: '3.7'
+
+networks:
+  ogc-net:
+    driver: bridge
+
+services:  
+  test:
+    image: ghcr.io/datakaveri/ogc-rs-test:latest
+    volumes:
+      - ./src/:/usr/share/app/src
+      - /home/ubuntu/configs/ogc-config-dev.json:/usr/share/app/configs/config.json
+      - ./docker/runTests.sh:/usr/share/app/docker/runTests.sh
+      - ${WORKSPACE}:/tmp/test
+      - type: volume
+        source: ogc-volume
+        target: /usr/share/app/storage/temp-dir
+    restart: on-failure
+    networks:
+      - ogc-net
+    logging:
+         driver: "json-file"
+         options:
+             max-file: "5"
+             max-size: "100m"
+    command: bash -c "exec java -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -jar ./fatjar.jar  --host $$(hostname) -c configs/config.json"
+
+  perfTest:
+    image: ghcr.io/datakaveri/ogc-rs-dev:latest
+    volumes:
+      - /home/ubuntu/configs/ogc-config-dev.json:/usr/share/app/configs/config.json
+      - type: volume
+        source: ogc-volume
+        target: /usr/share/app/storage/temp-dir
+    depends_on:
+      - "zookeeper"
+    ports:
+      - "8443:8080"
+    restart: on-failure
+    networks:
+      - ogc-net
+    logging:
+         driver: "json-file"
+         options:
+             max-file: "5"
+             max-size: "100m"
+    command: bash -c "exec java -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -jar ./fatjar.jar  --host $$(hostname) -c configs/config.json"
+
+  zookeeper:
+    image: zookeeper:latest
+    expose: 
+      - "2181"
+    networks:
+      - ogc-net
+
+volumes:
+  ogc-volume:
