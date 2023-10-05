@@ -123,7 +123,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
           routerBuilder
               .operation(FEATURE_API)
-             // .handler(AuthHandler.create(vertx))
+          //    .handler(AuthHandler.create(vertx))
               .handler(this::getFeature)
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
@@ -158,10 +158,10 @@ public class ApiServerVerticle extends AbstractVerticle {
   private void getFeature(RoutingContext routingContext) {
 
     String collectionId = routingContext.pathParam("collectionId");
-    // if (!(Boolean) routingContext.get("isAuthorised")){
-    //   routingContext.next();
-    //   return;
-    // }
+//    if (!(Boolean) routingContext.get("isAuthorised")){
+//      routingContext.next();
+//      return;
+//    }
     String featureId = routingContext.pathParam("featureId");
     System.out.println("collectionId- " + collectionId + " featureId- " + featureId);
     dbService.getFeature(collectionId, featureId)
@@ -189,10 +189,10 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   private void getFeatures(RoutingContext routingContext) {
     String collectionId = routingContext.pathParam("collectionId");
-    // if (!(Boolean) routingContext.get("isAuthorised")){
-    //   routingContext.next();
-    //   return;
-    // }
+//    if (!(Boolean) routingContext.get("isAuthorised")){
+//      routingContext.next();
+//      return;
+//    }
     Map<String, String> queryParamsMap = new HashMap<>();
     try {
       String datetime;
