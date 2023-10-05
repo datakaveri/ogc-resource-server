@@ -21,6 +21,9 @@ import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 import static ogc.rs.apiserver.util.Constants.*;
@@ -175,7 +178,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
           }
           else{
-            OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
+            OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
             routingContext.put("response", ogcException.getJson().toString());
             routingContext.put("statusCode", ogcException.getStatusCode());
           }
@@ -192,10 +195,37 @@ public class ApiServerVerticle extends AbstractVerticle {
 //    }
     Map<String, String> queryParamsMap = new HashMap<>();
     try {
+      String datetime;
       MultiMap queryParams = routingContext.queryParams();
       queryParams.forEach(param -> queryParamsMap.put(param.getKey(), param.getValue()));
+      ZonedDateTime zone;
+      DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+      if (queryParamsMap.containsKey("datetime")) {
+        datetime =  queryParamsMap.get("datetime");
+        if (!datetime.contains("/")) {
+          zone = ZonedDateTime.parse(datetime, formatter);
+        } else if (datetime.contains("/")) {
+          String[] dateTimeArr = datetime.split("/");
+          if (dateTimeArr[0].equals("..")) { // -- before
+            zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
+          }
+          else if (dateTimeArr[1].equals("..")) { // -- after
+            zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
+          }
+          else {
+            zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
+            zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
+          }
+        }
+      }
     } catch (NullPointerException ne) {
-      OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
+      OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
+      routingContext.put("response", ogcException.getJson().toString());
+      routingContext.put("statusCode", ogcException.getStatusCode());
+      routingContext.next();
+      return;
+    } catch (DateTimeParseException dtpe) {
+      OgcException ogcException = new OgcException(400, "Bad Request", "Time parameter not in ISO format");
       routingContext.put("response", ogcException.getJson().toString());
       routingContext.put("statusCode", ogcException.getStatusCode());
       routingContext.next();
@@ -216,7 +246,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
           }
           else{
-            OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
+            OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
             routingContext.put("response", ogcException.getJson().toString());
             routingContext.put("statusCode", ogcException.getStatusCode());
           }
@@ -246,7 +276,7 @@ public class ApiServerVerticle extends AbstractVerticle {
               routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
             }
             else{
-              OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
+              OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
               routingContext.put("response", ogcException.getJson().toString());
               routingContext.put("statusCode", ogcException.getStatusCode());
             }
@@ -268,7 +298,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                             collections.add(json);
                         } catch (Exception e) {
                             LOGGER.error("Something went wrong here: {}", e.getMessage());
-                            routingContext.put("response", new OgcException(500, "InternalServerError", "Something broke"));
+                            routingContext.put("response", new OgcException(500, "Internal Server Error", "Something " +
+                                "broke").getJson().toString());
                             routingContext.put("statusCode", 500);
                             routingContext.next();
                         }
@@ -283,7 +314,8 @@ public class ApiServerVerticle extends AbstractVerticle {
             routingContext.put("statusCode", 404);
           }
           else{
-            routingContext.put("response", new OgcException(500, "InternalServerError", "Something broke"));
+            routingContext.put("response",
+                new OgcException(500, "Internal Server Error", "Internal Server Error").getJson().toString());
             routingContext.put("statusCode", 500);
           }
           routingContext.next();
@@ -301,16 +333,29 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   private JsonObject buildCollectionResult(List<JsonObject> success) {
     JsonObject collection = success.get(0);
+    collection.put("properties", new JsonObject());
+    if (collection.getString("datetime_key") != null && !collection.getString("datetime_key").isEmpty() )
+      collection.getJsonObject("properties").put("datetimeParameter", collection.getString("datetime_key"));
     collection.put("links", new JsonArray()
             .add(new JsonObject()
                 .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id"))
                 .put("rel","self")
                 .put("title", collection.getString("title"))
-                .put("description", collection.getString("description"))))
+                .put("description", collection.getString("description")))
+            .add(new JsonObject()
+                .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id") + "/items")
+                .put("rel","items")
+                .put("type", "application/geo+json"))
+            .add(new JsonObject()
+                .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id") + "/items" +
+                    "/{featureId}")
+                .put("rel","item")
+                .put("title", "Link template for collection features").put("templated", true)))
         .put("itemType", "feature")
         .put("crs", new JsonArray().add("http://www.opengis.net/def/crs/ESPG/0/4326"));
     collection.remove("title");
     collection.remove("description");
+    collection.remove("datetime_key");
     return collection;
   }
 }

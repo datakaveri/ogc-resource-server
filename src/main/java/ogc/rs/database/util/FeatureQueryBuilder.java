@@ -1,5 +1,6 @@
 package ogc.rs.database.util;
 
+import java.sql.SQLOutput;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -14,6 +15,8 @@ public class FeatureQueryBuilder {
   private String sqlString;
   private int offset;
 
+  private String datetimeKey;
+
   public FeatureQueryBuilder(String tableName) {
     this.tableName = tableName;
     limit = 10;
@@ -23,6 +26,7 @@ public class FeatureQueryBuilder {
     filter = "";
     additionalParams = "";
     sqlString = "";
+    datetimeKey = "";
   }
 
   public void setLimit(int limit) {
@@ -44,37 +48,40 @@ public class FeatureQueryBuilder {
     this.additionalParams = "where";
   }
 
-  public void setDatetime(String datetime) throws DateTimeParseException {
-
+  public void setDatetime(String datetime) {
+    if (datetimeKey.isEmpty()) {
+      return;
+    }
     this.additionalParams = "where";
-    ZonedDateTime zone;
-    DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+    String datetimeFormat = "'yyyy-mm-dd\"T\"HH24:MI:SS\"Z\"'";
+//    datetime query where clause -
+//    to_timestamp(properties ->> 'datetimeKey', 'datetimeFormat') 'operator' 'datetime' (from request);
+    String concatString =
+        " to_timestamp(properties ->> '" .concat(datetimeKey).concat("',").concat(datetimeFormat).concat(") ");
     if (!datetime.contains("/")) {
-      zone = ZonedDateTime.parse(datetime, formatter);
-      this.datetime = " datetime = '".concat(datetime).concat("'").replace("T"," ");
+      this.datetime = concatString.concat("= '").concat(datetime).concat("'");
       return;
     }
     String[] dateTimeArr = datetime.split("/");
-        if (dateTimeArr[0].equals("..")) { // -- before
-      zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
-      this.datetime = " datetime < '".concat(dateTimeArr[1]).concat("'").replace("T"," ");
+      if (dateTimeArr[0].equals("..")) { // -- before\
+      this.datetime = concatString.concat("<'").concat(dateTimeArr[1]).concat("'");
   }
     else if (dateTimeArr[1].equals("..")) { // -- after
-      zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
-      this.datetime = " datetime > '".concat(dateTimeArr[0]).concat("'").replace("T"," ");
+      this.datetime = concatString.concat(">'").concat(dateTimeArr[0]).concat("'");
     }
     else {
-      zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
-      zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
-      this.datetime = " datetime between '".concat(dateTimeArr[0]).concat("' and '").concat(dateTimeArr[1])
-          .concat("'").replace("T"," ");
+      this.datetime = concatString.concat(" between '").concat(dateTimeArr[0]).concat("' and '")
+          .concat(dateTimeArr[1]).concat("'");
     }
-
   }
 
   public void setFilter(String key, String value) {
     this.filter = "properties->>'" + key + "'='" + value + "'";
     this.additionalParams = "where";
+  }
+
+  public void setDatetimeKey(String datetimeKey) {
+    this.datetimeKey = datetimeKey;
   }
 
   public String buildSqlString() {
