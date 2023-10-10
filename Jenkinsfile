@@ -115,9 +115,6 @@ pipeline {
             }
           }
         }
-        failure{
-          error "Test failure. Stopping pipeline execution!"
-        }
         cleanup{
           script{
             sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
