@@ -10,6 +10,7 @@ services:
     volumes:
       - ./src/:/usr/share/app/src
       - /home/ubuntu/configs/ogc-config-dev.json:/usr/share/app/configs/config.json
+      - /home/ubuntu/configs/ogc-config-test.json:/usr/share/app/configs/test.json
       - ./docker/runTests.sh:/usr/share/app/docker/runTests.sh
       - ${WORKSPACE}:/tmp/test
       - type: volume
