@@ -343,14 +343,16 @@ public class ApiServerVerticle extends AbstractVerticle {
                 .put("title", collection.getString("title"))
                 .put("description", collection.getString("description")))
             .add(new JsonObject()
-                .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id") + "/items")
-                .put("rel","items")
-                .put("type", "application/geo+json"))
+                .put("href", hostName + ogcBasePath + COLLECTIONS + collection.getString("id") + "/items")
+                .put("rel", "items")
+                .put("title", collection.getString("title"))
+                .put("type","application/geo+json"))
             .add(new JsonObject()
-                .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id") + "/items" +
-                    "/{featureId}")
-                .put("rel","item")
-                .put("title", "Link template for collection features").put("templated", true)))
+                .put("href",
+                    hostName + ogcBasePath + COLLECTIONS + collection.getString("id") + "/items/{featureId}")
+                .put("rel", "item")
+                .put("title", "Link template for " + collection.getString("id") + " features")
+                .put("templated","true")))
         .put("itemType", "feature")
         .put("crs", new JsonArray().add("http://www.opengis.net/def/crs/ESPG/0/4326"));
     collection.remove("title");
