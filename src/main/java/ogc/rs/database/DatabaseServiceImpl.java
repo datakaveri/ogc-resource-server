@@ -270,7 +270,6 @@ public class DatabaseServiceImpl implements DatabaseService{
       result.fail(new OgcException(404, "Not found", "Collection not found"));
       return result.future();
     }
-        
     if (queryParams.isEmpty()) {
        result.complete(Map.of(DEFAULT_SERVER_CRS,4326));
        return result.future();
@@ -375,7 +374,8 @@ public class DatabaseServiceImpl implements DatabaseService{
               if (success.isEmpty()) {
                 LOGGER.error("Collections table is empty!");
                 result.fail("Error!");
-              } else {
+              }
+              else {
                 LOGGER.debug("Collections Result: {}", success.toString());
                 result.complete(success);
               }
@@ -385,6 +385,32 @@ public class DatabaseServiceImpl implements DatabaseService{
               LOGGER.error("Failed to getCollections! - {}", fail.getMessage());
               result.fail("Error!");
             });
+    return result.future();
+  }
+
+  @Override
+  public Future<List<JsonObject>> getTileMatrixSets() {
+    LOGGER.info("getTileMatrixSets");
+    Promise<List<JsonObject>> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+    client.withConnection(conn ->
+            conn.preparedQuery("Select id, title, uri from tilematrixsets_relation")
+                .collecting(collector)
+                .execute()
+                .map(SqlResult::value))
+        .onSuccess(success -> {
+          if (success.isEmpty()) {
+            LOGGER.error("TileMatrixSet_relation table is empty!");
+            result.fail(new OgcException(404, "Not found", "TileMatrixSets (tiling scheme) not found"));
+          } else {
+            LOGGER.debug("TileMatrixSets Result: {}", success.toString());
+            result.complete(success);
+          }
+        })
+        .onFailure(fail -> {
+          LOGGER.error("Failed to getTileMatrixSetsRelation(tiling scheme)! - {}", fail.getMessage());
+          result.fail("Error!");
+        });
     return result.future();
   }
 
@@ -426,5 +452,93 @@ public class DatabaseServiceImpl implements DatabaseService{
               result.fail("Error!");
             });
     return result.future();
+  }
+  public Future<List<JsonObject>> getTileMatrixSetMetaData(String tileMatrixSet) {
+    LOGGER.info("getTileMatrixSetMetaData");
+    Promise<List<JsonObject>> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+    client.withConnection(conn ->
+            conn.preparedQuery("Select tmsr.id as id, tmsr.title as title, tmsr.uri as uri, pointoforigin, tilewidth," +
+                    " tileheight, crs, tmsm.tilematrix_id, tmsm.title as tilematrixmeta_title, tmsm.description, " +
+                    "scaledenminator, cellsize, corneroforigin, matrixwidth, matrixheight" +
+                    " from tilematrixsets_relation as tmsr join tilematrixset_metadata tmsm on" +
+                    " tmsr.id = tmsm.tilematrixset_id where tmsr.id = $1::text")
+                .collecting(collector)
+                .execute(Tuple.of(tileMatrixSet))
+                .map(SqlResult::value))
+        .onSuccess(success -> {
+          if (success.isEmpty()) {
+            LOGGER.error("TileMatrixSet_relation or TileMatrixset_metadata table is empty!");
+            result.fail(new OgcException(404, "Not found", "TileMatrixSets (tiling scheme) not found"));
+          } else {
+            LOGGER.debug("TileMatrices Result: {}", success.toString());
+            result.complete(success);
+          }
+        })
+        .onFailure(fail -> {
+          LOGGER.error("Failed to getTileMatrixSetsRelation(tiling scheme)! - {}", fail.getMessage());
+          result.fail("Error!");
+        });
+    return result.future();
+  }
+
+  @Override
+  public Future<List<JsonObject>> getTileMatrixSetRelation(String collectionId) {
+    LOGGER.info("getTileMatrixSetRelation");
+    Promise<List<JsonObject>> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+    client.withConnection(conn ->
+            conn.preparedQuery("select cd.id as collection_id, cd.title as collection_title, cd.description, crs," +
+                    " tmsr.id as tilematrixset, tmsr.title as tilematrixset_title, uri, datatype" +
+                    " from collections_details as cd join tilematrixsets_relation as tmsr on cd.id = tmsr.collection_id" +
+                    " where cd.id = $1::uuid")
+                .collecting(collector)
+                .execute(Tuple.of(collectionId))
+                .map(SqlResult::value))
+        .onSuccess(success -> {
+          if (success.isEmpty()) {
+            LOGGER.error("TileMatrixSet_relation or collections_details table is empty!");
+            result.fail(new OgcException(404, "Not found", "TileSetList not found"));
+          } else {
+            LOGGER.debug("TileSets Result: {}", success.toString());
+            result.complete(success);
+          }
+        })
+        .onFailure(fail -> {
+          LOGGER.error("Failed to getTileSetList! - {}", fail.getMessage());
+          result.fail("Error!");
+        });
+    return result.future();
+
+  }
+
+  @Override
+  public Future<List<JsonObject>> getTileMatrixSetRelation(String collectionId, String tileMatrixSetId) {
+    LOGGER.info("getTileMatrixSetRelation<collId,tileMatrixSetId>");
+    Promise<List<JsonObject>> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+    client.withConnection(conn ->
+            conn.preparedQuery("select cd.id as collection_id, cd.title as collection_title, cd.description, crs," +
+                    " tmsr.id as tilematrixset, tmsr.title as tilematrixset_title, uri, datatype" +
+                    " from collections_details as cd join tilematrixsets_relation as tmsr on cd.id = tmsr.collection_id" +
+                    " where cd.id = $1::uuid and tmsr.id = $2::text")
+                .collecting(collector)
+                .execute(Tuple.of(collectionId, tileMatrixSetId))
+                .map(SqlResult::value))
+        .onSuccess(success -> {
+          if (success.isEmpty()) {
+            LOGGER.error("TileMatrixSet_relation or collections_details table is empty!");
+            result.fail(new OgcException(404, "Not found", "TileSetList not found"));
+          } else {
+            LOGGER.debug("TileSets Result: {}", success.toString());
+            result.complete(success);
+          }
+        })
+        .onFailure(fail -> {
+          LOGGER.error("Failed to getTileSetList! - {}", fail.getMessage());
+          result.fail("Error!");
+        });
+    return result.future();
+
   }
 }

@@ -14,27 +14,24 @@ public class Constants {
     public static final String HEADER_REFERER = "Referer";
     public static final String HEADER_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
     public static final String HEADER_OPTIONS = "options";
-
     public static final String COUNT_HEADER = "Count";
     public static final String PUBLIC_TOKEN = "public";
     public static final String HEADER_PUBLIC_KEY = "publicKey";
     public static final String HEADER_RESPONSE_FILE_FORMAT = "format";
-
     public static final String MIME_APPLICATION_JSON = "application/json";
-
     public static final String LANDING_PAGE = "getLandingPage";
     public static final String CONFORMANCE_CLASSES = "getConformanceClasses";
-
     public static final String OPENAPI_SPEC = "/api";
     public static final String COLLECTIONS_API = "getCollections";
-
     public static final String COLLECTION_API = "describeCollection";
-
     public static final String FEATURES_API = "getFeatures";
-
     public static final String FEATURE_API = "getFeature";
-
     public static final String COLLECTIONS = "collections";
+    public static final String TILEMATRIXSETS_API = "getTileMatrixSetsList";
+    public static final String TILEMATRIXSET_API = "getTileMatrixSet";
+    public static final String TILESETSLIST_API = ".collection.map.getTileSetsList";
+    public static final String TILESET_API = ".collection.map.getTileSet";
+    public static final String TILE_API = ".collection.map.getTile";
 
     public static final String ITEMS = "items";
 

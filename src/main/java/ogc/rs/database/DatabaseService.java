@@ -21,6 +21,7 @@ public interface DatabaseService {
     // Future<JsonObject> to Future<DO> class.
 
     Future<List<JsonObject>>  getCollections();
+
     Future<List<JsonObject>>  getCollection(final String collectionId);
 
     Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams, Map<String, Integer> crs);
@@ -36,4 +37,10 @@ public interface DatabaseService {
 
     Future<List<JsonObject>> getStacCollection(String collectionId);
 
+    Future<List<JsonObject>> getTileMatrixSets();
+
+    Future<List<JsonObject>> getTileMatrixSetMetaData(String tileMatrixSet);
+
+    Future<List<JsonObject>> getTileMatrixSetRelation(String collectionId);
+    Future<List<JsonObject>> getTileMatrixSetRelation(String collectionId, String tileMatrixSetId);
 }

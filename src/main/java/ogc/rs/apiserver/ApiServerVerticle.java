@@ -10,6 +10,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -151,31 +152,61 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
 
-                routerBuilderStac
-                    .operation("getStacLandingPage")
-                    .handler(this::stacCatalog)
-                    .handler(this::putCommonResponseHeaders)
-                    .handler(this::buildResponse);
+          routerBuilderStac
+              .operation("getStacLandingPage")
+              .handler(this::stacCatalog)
+              .handler(this::putCommonResponseHeaders)
+              .handler(this::buildResponse);
 
-                routerBuilderStac
-                    .operation("getStacCollections")
-                    .handler(this::stacCollections)
-                    .handler(this::putCommonResponseHeaders)
-                    .handler(this::buildResponse);
+          routerBuilderStac
+              .operation("getStacCollections")
+              .handler(this::stacCollections)
+              .handler(this::putCommonResponseHeaders)
+              .handler(this::buildResponse);
 
-                routerBuilderStac
-                    .operation("describeStacCollection")
-                    .handler(this::getStacCollection)
-                    .handler(this::putCommonResponseHeaders)
-                    .handler(this::buildResponse);
+          routerBuilder
+              .operation(TILEMATRIXSETS_API)
+              .handler(this::getTileMatrixSetList)
+              .handler(this::putCommonResponseHeaders)
+              .handler(this::buildResponse);
 
-                routerBuilderStac
-                    .operation("getConformanceDeclaration")
-                    .handler(
-                        routingContext -> {
-                          HttpServerResponse response = routingContext.response();
-                          response.sendFile("docs/stacConformance.json");
-                        });
+          routerBuilder
+                .operation(TILEMATRIXSET_API)
+                .handler(this::getTileMatrixSet)
+                .handler(this::putCommonResponseHeaders)
+                .handler(this::buildResponse);
+
+          routerBuilder
+              .operation(TILESETSLIST_API)
+              .handler(this::getTileSetList)
+              .handler(this::putCommonResponseHeaders)
+              .handler(this::buildResponse);
+
+          routerBuilder
+              .operation(TILESET_API)
+              .handler(this::getTileSet)
+              .handler(this::putCommonResponseHeaders)
+              .handler(this::buildResponse);
+
+          routerBuilder
+              .operation(TILE_API)
+              .handler(this::getTile)
+              .handler(this::putCommonResponseHeaders)
+              .handler(this::buildResponse);
+
+          routerBuilderStac
+              .operation("describeStacCollection")
+              .handler(this::getStacCollection)
+              .handler(this::putCommonResponseHeaders)
+              .handler(this::buildResponse);
+
+          routerBuilderStac
+              .operation("getConformanceDeclaration")
+              .handler(
+                  routingContext -> {
+                    HttpServerResponse response = routingContext.response();
+                    response.sendFile("docs/stacConformance.json");
+                  });
 
                 Router ogcRouter = routerBuilder.createRouter();
                 Router stacRouter = routerBuilderStac.createRouter();
@@ -409,8 +440,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                             collections.add(json);
                         } catch (Exception e) {
                             LOGGER.error("Something went wrong here: {}", e.getMessage());
-                            routingContext.put("response", new OgcException(500, "Internal Server Error", "Something " +
-                                "broke").getJson().toString());
+                            routingContext.put("response",
+                                new OgcException(500, "Internal Server Error", "Internal Server Error").getJson().toString());
                             routingContext.put("statusCode", 500);
                             routingContext.next();
                         }
@@ -440,6 +471,175 @@ public class ApiServerVerticle extends AbstractVerticle {
           routingContext.next();
         });
   }
+
+  private void getTile(RoutingContext routingContext) {
+      String collectionId = routingContext.pathParam("collectionId");
+      String tileMatrixSetId = routingContext.pathParam("tileMatrixSetId");
+      String tileMatrixId = routingContext.pathParam("tileMatrixId");
+      String tileRow = routingContext.pathParam("tileRow");
+      String tileCol = routingContext.pathParam("tileCol");
+
+      //s3-fuse?
+
+  }
+
+  private void getTileSet(RoutingContext routingContext) {
+    String collectionId = routingContext.pathParam("collectionId");
+    String tileMatrixSetId = routingContext.pathParam("tileMatrixSetId");
+    //select cd.id as collection_id, cd.title as collection_title, cd.description, crs, tmsr.id as tilematrixset
+    // , tmsr.title as tilematrixset_title, uri, datatype from collections_details as cd
+    // join tilematrixsets_relation as tmsr on cd.id = tmsr.collection_id
+    // where cd.id = '7768c21c-64f1-49a8-acc5-7d1e6126393e'::uuid and tmsr.id = 'tileMatrixSetId';
+    dbService.getTileMatrixSetRelation(collectionId, tileMatrixSetId)
+        .onSuccess(success -> {
+          JsonObject tileSetResponse = buildTileSetResponse(collectionId, success.get(0).getString("tilematrixset")
+              , success.get(0).getString("tilematrixseturi"), success.get(0).getString("crs"),
+              success.get(0).getString("datatype"));
+          tileSetResponse.put("title", success.get(0).getString("tilematrixset_title"));
+          routingContext.put("response", tileSetResponse.toString());
+          routingContext.put("statusCode", 200);
+          routingContext.next();
+        })
+        .onFailure(failed -> {
+          if (failed instanceof OgcException){
+            routingContext.put("response",((OgcException) failed).getJson().toString());
+            routingContext.put("statusCode", 404);
+          }
+          else{
+            routingContext.put("response",
+                new OgcException(500, "Internal Server Error", "Internal Server Error").getJson().toString());
+            routingContext.put("statusCode", 500);
+          }
+          routingContext.next();
+        });
+
+  }
+
+  private void getTileSetList(RoutingContext routingContext) {
+      // requires links to tilematrixseturi
+      // a link to self that says which is below
+      // collection details for a tileset
+//   [
+//    {
+//      "href": "http://data.example.com/collections/buildings/tiles",
+//        "rel": "http://www.opengis.net/def/rel/ogc/1.0/tilesets-map",
+//        "type": "application/json",
+//        "title": "List of available map tilesets for the collection of Bonn buildings"
+//    }
+//   ]
+    //
+    String collectionId = routingContext.pathParam("collectionId");
+    //select cd.id as collection_id, cd.title as collection_title, cd.description, crs, tmsr.id as tilematrixset
+    // , tmsr.title as tilematrixset_title, uri, datatype from collections_details as cd
+    // join tilematrixsets_relation as tmsr on cd.id = tmsr.collection_id
+    // where cd.id = '7768c21c-64f1-49a8-acc5-7d1e6126393e'::uuid;
+    dbService.getTileMatrixSetRelation(collectionId)
+        .onSuccess(success -> {
+          // this should return a list of tileMatrixSet
+          JsonObject tileSetListResponse = new JsonObject().put("links", new JsonObject()
+              .put("href", hostName + ogcBasePath + COLLECTIONS + collectionId + "/map/tiles")
+              .put("rel", "self")
+              .put("type", "application/geo+json")
+              .put("title", collectionId + " tileset data"));
+          JsonArray tileSets = new JsonArray();
+          success.forEach(tileMatrixSet -> {
+              tileSets.add(buildTileSetResponse(collectionId, tileMatrixSet.getString("tileMatrixSet"),
+                  tileMatrixSet.getString("uri"),tileMatrixSet.getString("crs"), tileMatrixSet.getString("datatype")));
+          });
+          tileSetListResponse.put("tilesets", tileSets);
+          routingContext.put("response", tileSetListResponse.toString());
+          routingContext.put("statusCode", 200);
+          routingContext.next();
+        })
+        .onFailure(failed -> {
+          if (failed instanceof OgcException){
+            routingContext.put("response",((OgcException) failed).getJson().toString());
+            routingContext.put("statusCode", 404);
+          }
+          else{
+            routingContext.put("response",
+                new OgcException(500, "Internal Server Error", "Internal Server Error").getJson().toString());
+            routingContext.put("statusCode", 500);
+          }
+          routingContext.next();
+        });
+  }
+
+  private void getTileMatrixSet(RoutingContext routingContext) {
+    String tileMatrixSetId = routingContext.pathParam("tileMatrixSetId");
+    // select * from tilematrixsets_relation as tmsr join tilematrixset_metadata tmsm
+    // on tmsr.id = tmsm.tilematrixset_id where tmsr.id = 'WebMercatorQuad'
+    dbService.getTileMatrixSetMetaData(tileMatrixSetId)
+        .onSuccess(success -> {
+            //drop collection_id, tilematrixset_id,
+          //will return everything, we have to parse and store the individual matrices in the format of tileMatrices
+          JsonObject tileMatrixSetResponse = new JsonObject();
+          JsonObject tempDbRes = success.get(0);
+          tileMatrixSetResponse.put("title", tempDbRes.getString("title"))
+              .put("id", tempDbRes.getString("tilematrixsetid"))
+              .put("uri", tempDbRes.getString("uri"))
+              .put("crs", tempDbRes.getString("crs"));
+          JsonArray tileMatrices = new JsonArray();
+          success.forEach(tileMatrix -> {
+            //TODO: Streamline this build
+            tileMatrices.add(buildTileMatrices(tempDbRes.getString("tilematrix_id"),
+                tempDbRes.getString("tilematrixmeta_title"), tempDbRes.getString("scaledenominator")
+                , tempDbRes.getString("cellsize"), tempDbRes.getString("tilewidth"),
+                tempDbRes.getString("tileheight"), tempDbRes.getString("matrixwidth"),
+                    tempDbRes.getString("matrixheight")));
+          });
+          tileMatrixSetResponse.put("tileMatrices", tileMatrices);
+          routingContext.put("response", tileMatrixSetResponse.toString());
+          routingContext.put("statusCode", 200);
+          routingContext.next();
+        })
+        .onFailure(failed -> {
+          if (failed instanceof OgcException){
+            routingContext.put("response",((OgcException) failed).getJson().toString());
+            routingContext.put("statusCode", 404);
+          }
+          else{
+            routingContext.put("response",
+                new OgcException(500, "Internal Server Error", "Internal Server Error").getJson().toString());
+            routingContext.put("statusCode", 500);
+          }
+          routingContext.next();
+        });
+  }
+
+  private void getTileMatrixSetList(RoutingContext routingContext) {
+    // select *-collection_id from tilematrixsets_relation
+    dbService.getTileMatrixSets()
+        .onSuccess(success -> {
+          //convert into HTTP response
+          //select id, title, uri from tilematrixsets_relation ;
+          JsonArray tileMatrixSets = new JsonArray();
+          success.forEach(tileMatrixSet -> {
+            tileMatrixSet.put("links", new JsonObject()
+                .put("rel","self")
+                .put("href",hostName + ogcBasePath + "/tileMatrixSets/" + tileMatrixSet.getString("id"))
+                .put("type", "application/json")
+                .put("title", tileMatrixSet.getString("title")));
+            tileMatrixSets.add(tileMatrixSet);
+          });
+          routingContext.put("response", new JsonObject().put("tileMatrixSets", tileMatrixSets).toString());
+          routingContext.put("statusCode", 200);
+          routingContext.next();
+        })
+        .onFailure(failed -> {
+          if (failed instanceof OgcException){
+            routingContext.put("response",((OgcException) failed).getJson().toString());
+            routingContext.put("statusCode", 404);
+          }
+          else{
+            routingContext.put("response",
+                new OgcException(500, "Internal Server Error", "Internal Server Error").getJson().toString());
+            routingContext.put("statusCode", 500);
+          }
+          routingContext.next();
+        });
+  }
+
   private void putCommonResponseHeaders(RoutingContext routingContext) {
     routingContext.response()
          .putHeader(HEADER_CONTENT_TYPE, MIME_APPLICATION_JSON)
@@ -803,5 +1003,45 @@ public class ApiServerVerticle extends AbstractVerticle {
     }
 
     return link;
+  }
+  private JsonObject buildTileSetResponse(String collectionId, String tileMatrixSet,
+                                          String tileMatrixSetUri, String crs, String dataType) {
+    // templated URL example
+    // = https://ogc.iud.io/collections/{collectionId}/tiles/{tileMatrixSet}//{tileMatrix}/{tileRow}/{tileCol}
+    String templatedTileUrl = hostName + ogcBasePath + COLLECTIONS + collectionId + "/map/tiles" + tileMatrixSet
+        + "/{tileMatrix}/{tileRow}/{tileCol}.png";
+    JsonArray linkObject = new JsonArray().add(new JsonObject()
+            .put("href", tileMatrixSetUri)
+            .put("rel", "self")
+            .put("type","application/json")
+            .put("title", collectionId.concat(" tileset tiled using" +  tileMatrixSet)))
+        .add(new JsonObject().put("href",
+                hostName + ogcBasePath + COLLECTIONS + collectionId + "/map/tiles" + tileMatrixSet)
+            .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/tiling-scheme")
+            .put("type","application/json")
+            .put("title", "Definition of " + tileMatrixSet + " TileMatrixSet"))
+        .add(new JsonObject()
+            .put("href", templatedTileUrl)
+            .put("templated", true)
+            .put("rel", "item")
+            .put("type", "image/png")
+            .put("title", "Templated link for retrieving the tiles in PNG"));
+    return new JsonObject().put("tileMatrixSetURI", tileMatrixSetUri)
+            .put("dataType", dataType)
+            .put("crs", crs)
+            .put("links", linkObject);
+  }
+
+  private JsonObject buildTileMatrices(String id, String title, String scaleDenominator, String cellSize,
+                                       String tileWidth, String tileHeight, String matrixWidth, String matrixHeight) {
+      return new JsonObject()
+          .put("title", title)
+          .put("id", id)
+          .put("scaleDenominator", scaleDenominator)
+          .put("cellSize", cellSize)
+          .put("tileWidth", tileWidth)
+          .put("tileHeight", tileHeight)
+          .put("matrixWidth", matrixWidth)
+          .put("matrixHeight", matrixHeight);
   }
 }
