@@ -486,14 +486,10 @@ public class ApiServerVerticle extends AbstractVerticle {
   private void getTileSet(RoutingContext routingContext) {
     String collectionId = routingContext.pathParam("collectionId");
     String tileMatrixSetId = routingContext.pathParam("tileMatrixSetId");
-    //select cd.id as collection_id, cd.title as collection_title, cd.description, crs, tmsr.id as tilematrixset
-    // , tmsr.title as tilematrixset_title, uri, datatype from collections_details as cd
-    // join tilematrixsets_relation as tmsr on cd.id = tmsr.collection_id
-    // where cd.id = '7768c21c-64f1-49a8-acc5-7d1e6126393e'::uuid and tmsr.id = 'tileMatrixSetId';
-    dbService.getTileMatrixSetRelation(collectionId, tileMatrixSetId)
+    dbService.getTileMatrixSetRelationOverload(collectionId, tileMatrixSetId)
         .onSuccess(success -> {
           JsonObject tileSetResponse = buildTileSetResponse(collectionId, success.get(0).getString("tilematrixset")
-              , success.get(0).getString("tilematrixseturi"), success.get(0).getString("crs"),
+              , success.get(0).getString("uri"), success.get(0).getString("crs"),
               success.get(0).getString("datatype"));
           tileSetResponse.put("title", success.get(0).getString("tilematrixset_title"));
           routingContext.put("response", tileSetResponse.toString());
@@ -516,34 +512,17 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   private void getTileSetList(RoutingContext routingContext) {
-      // requires links to tilematrixseturi
-      // a link to self that says which is below
-      // collection details for a tileset
-//   [
-//    {
-//      "href": "http://data.example.com/collections/buildings/tiles",
-//        "rel": "http://www.opengis.net/def/rel/ogc/1.0/tilesets-map",
-//        "type": "application/json",
-//        "title": "List of available map tilesets for the collection of Bonn buildings"
-//    }
-//   ]
-    //
     String collectionId = routingContext.pathParam("collectionId");
-    //select cd.id as collection_id, cd.title as collection_title, cd.description, crs, tmsr.id as tilematrixset
-    // , tmsr.title as tilematrixset_title, uri, datatype from collections_details as cd
-    // join tilematrixsets_relation as tmsr on cd.id = tmsr.collection_id
-    // where cd.id = '7768c21c-64f1-49a8-acc5-7d1e6126393e'::uuid;
     dbService.getTileMatrixSetRelation(collectionId)
         .onSuccess(success -> {
-          // this should return a list of tileMatrixSet
           JsonObject tileSetListResponse = new JsonObject().put("links", new JsonObject()
-              .put("href", hostName + ogcBasePath + COLLECTIONS + collectionId + "/map/tiles")
+              .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/map/tiles")
               .put("rel", "self")
               .put("type", "application/geo+json")
               .put("title", collectionId + " tileset data"));
           JsonArray tileSets = new JsonArray();
           success.forEach(tileMatrixSet -> {
-              tileSets.add(buildTileSetResponse(collectionId, tileMatrixSet.getString("tileMatrixSet"),
+              tileSets.add(buildTileSetResponse(collectionId, tileMatrixSet.getString("tilematrixset"),
                   tileMatrixSet.getString("uri"),tileMatrixSet.getString("crs"), tileMatrixSet.getString("datatype")));
           });
           tileSetListResponse.put("tilesets", tileSets);
@@ -567,8 +546,6 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   private void getTileMatrixSet(RoutingContext routingContext) {
     String tileMatrixSetId = routingContext.pathParam("tileMatrixSetId");
-    // select * from tilematrixsets_relation as tmsr join tilematrixset_metadata tmsm
-    // on tmsr.id = tmsm.tilematrixset_id where tmsr.id = 'WebMercatorQuad'
     dbService.getTileMatrixSetMetaData(tileMatrixSetId)
         .onSuccess(success -> {
             //drop collection_id, tilematrixset_id,
@@ -576,17 +553,18 @@ public class ApiServerVerticle extends AbstractVerticle {
           JsonObject tileMatrixSetResponse = new JsonObject();
           JsonObject tempDbRes = success.get(0);
           tileMatrixSetResponse.put("title", tempDbRes.getString("title"))
-              .put("id", tempDbRes.getString("tilematrixsetid"))
+              .put("id", tempDbRes.getString("id"))
               .put("uri", tempDbRes.getString("uri"))
               .put("crs", tempDbRes.getString("crs"));
           JsonArray tileMatrices = new JsonArray();
           success.forEach(tileMatrix -> {
             //TODO: Streamline this build
-            tileMatrices.add(buildTileMatrices(tempDbRes.getString("tilematrix_id"),
-                tempDbRes.getString("tilematrixmeta_title"), tempDbRes.getString("scaledenominator")
-                , tempDbRes.getString("cellsize"), tempDbRes.getString("tilewidth"),
-                tempDbRes.getString("tileheight"), tempDbRes.getString("matrixwidth"),
-                    tempDbRes.getString("matrixheight")));
+            JsonObject tempTileMatrix = buildTileMatrices(tileMatrix.getString("tilematrix_id"),
+                tileMatrix.getString("tilematrixmeta_title"), tileMatrix.getString("scaledenominator")
+                , tileMatrix.getString("cellsize"), tileMatrix.getString("tilewidth"),
+                tileMatrix.getString("tileheight"), tileMatrix.getString("matrixwidth"),
+                tileMatrix.getString("matrixheight"));
+            tileMatrices.add(tempTileMatrix);
           });
           tileMatrixSetResponse.put("tileMatrices", tileMatrices);
           routingContext.put("response", tileMatrixSetResponse.toString());
@@ -608,16 +586,13 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   private void getTileMatrixSetList(RoutingContext routingContext) {
-    // select *-collection_id from tilematrixsets_relation
     dbService.getTileMatrixSets()
         .onSuccess(success -> {
-          //convert into HTTP response
-          //select id, title, uri from tilematrixsets_relation ;
           JsonArray tileMatrixSets = new JsonArray();
           success.forEach(tileMatrixSet -> {
             tileMatrixSet.put("links", new JsonObject()
                 .put("rel","self")
-                .put("href",hostName + ogcBasePath + "/tileMatrixSets/" + tileMatrixSet.getString("id"))
+                .put("href",hostName + ogcBasePath + "tileMatrixSets/" + tileMatrixSet.getString("id"))
                 .put("type", "application/json")
                 .put("title", tileMatrixSet.getString("title")));
             tileMatrixSets.add(tileMatrixSet);
@@ -1008,7 +983,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                                           String tileMatrixSetUri, String crs, String dataType) {
     // templated URL example
     // = https://ogc.iud.io/collections/{collectionId}/tiles/{tileMatrixSet}//{tileMatrix}/{tileRow}/{tileCol}
-    String templatedTileUrl = hostName + ogcBasePath + COLLECTIONS + collectionId + "/map/tiles" + tileMatrixSet
+    String templatedTileUrl = hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/map/tiles/" + tileMatrixSet
         + "/{tileMatrix}/{tileRow}/{tileCol}.png";
     JsonArray linkObject = new JsonArray().add(new JsonObject()
             .put("href", tileMatrixSetUri)
@@ -1016,7 +991,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             .put("type","application/json")
             .put("title", collectionId.concat(" tileset tiled using" +  tileMatrixSet)))
         .add(new JsonObject().put("href",
-                hostName + ogcBasePath + COLLECTIONS + collectionId + "/map/tiles" + tileMatrixSet)
+                hostName + ogcBasePath + "tileMatrixSets/" + tileMatrixSet)
             .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/tiling-scheme")
             .put("type","application/json")
             .put("title", "Definition of " + tileMatrixSet + " TileMatrixSet"))

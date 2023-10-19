@@ -808,9 +808,7 @@ components:
         code: Not Found
         description: Resource not found
     all-collections:
-      enum:
-        - Bangalore City drainage
-        - Deforestation in Bangalore
+      type: string
     tileMatrixSets:
       enum:
         - WebMercatorQuad

@@ -42,5 +42,7 @@ public interface DatabaseService {
     Future<List<JsonObject>> getTileMatrixSetMetaData(String tileMatrixSet);
 
     Future<List<JsonObject>> getTileMatrixSetRelation(String collectionId);
-    Future<List<JsonObject>> getTileMatrixSetRelation(String collectionId, String tileMatrixSetId);
+
+    Future<List<JsonObject>> getTileMatrixSetRelationOverload(String collectionId, String tileMatrixSetId);
+
 }

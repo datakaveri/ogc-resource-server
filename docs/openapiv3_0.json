@@ -1082,10 +1082,7 @@
         }
       },
       "all-collections": {
-        "enum": [
-          "Bangalore City drainage",
-          "Deforestation in Bangalore"
-        ]
+        "type": "string"
       },
       "tileMatrixSets": {
         "enum": [

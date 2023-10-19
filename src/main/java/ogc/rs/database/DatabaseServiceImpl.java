@@ -408,7 +408,7 @@ public class DatabaseServiceImpl implements DatabaseService{
           }
         })
         .onFailure(fail -> {
-          LOGGER.error("Failed to getTileMatrixSetsRelation(tiling scheme)! - {}", fail.getMessage());
+          LOGGER.error("Failed to getTileMatrixSets(tiling scheme)! - {}", fail.getMessage());
           result.fail("Error!");
         });
     return result.future();
@@ -460,7 +460,7 @@ public class DatabaseServiceImpl implements DatabaseService{
     client.withConnection(conn ->
             conn.preparedQuery("Select tmsr.id as id, tmsr.title as title, tmsr.uri as uri, pointoforigin, tilewidth," +
                     " tileheight, crs, tmsm.tilematrix_id, tmsm.title as tilematrixmeta_title, tmsm.description, " +
-                    "scaledenminator, cellsize, corneroforigin, matrixwidth, matrixheight" +
+                    "scaledenominator, cellsize, corneroforigin, matrixwidth, matrixheight" +
                     " from tilematrixsets_relation as tmsr join tilematrixset_metadata tmsm on" +
                     " tmsr.id = tmsm.tilematrixset_id where tmsr.id = $1::text")
                 .collecting(collector)
@@ -488,8 +488,8 @@ public class DatabaseServiceImpl implements DatabaseService{
     Promise<List<JsonObject>> result = Promise.promise();
     Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
     client.withConnection(conn ->
-            conn.preparedQuery("select cd.id as collection_id, cd.title as collection_title, cd.description, crs," +
-                    " tmsr.id as tilematrixset, tmsr.title as tilematrixset_title, uri, datatype" +
+            conn.preparedQuery("select cd.id as collection_id, cd.title as collection_title, cd.description, tmsr.crs" +
+                    ", tmsr.id as tilematrixset, tmsr.title as tilematrixset_title, uri, datatype" +
                     " from collections_details as cd join tilematrixsets_relation as tmsr on cd.id = tmsr.collection_id" +
                     " where cd.id = $1::uuid")
                 .collecting(collector)
@@ -513,13 +513,13 @@ public class DatabaseServiceImpl implements DatabaseService{
   }
 
   @Override
-  public Future<List<JsonObject>> getTileMatrixSetRelation(String collectionId, String tileMatrixSetId) {
+  public Future<List<JsonObject>> getTileMatrixSetRelationOverload(String collectionId, String tileMatrixSetId) {
     LOGGER.info("getTileMatrixSetRelation<collId,tileMatrixSetId>");
     Promise<List<JsonObject>> result = Promise.promise();
     Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
     client.withConnection(conn ->
-            conn.preparedQuery("select cd.id as collection_id, cd.title as collection_title, cd.description, crs," +
-                    " tmsr.id as tilematrixset, tmsr.title as tilematrixset_title, uri, datatype" +
+            conn.preparedQuery("select cd.id as collection_id, cd.title as collection_title, cd.description, tmsr.crs" +
+                    " as crs, tmsr.id as tilematrixset, tmsr.title as tilematrixset_title, uri, datatype" +
                     " from collections_details as cd join tilematrixsets_relation as tmsr on cd.id = tmsr.collection_id" +
                     " where cd.id = $1::uuid and tmsr.id = $2::text")
                 .collecting(collector)
