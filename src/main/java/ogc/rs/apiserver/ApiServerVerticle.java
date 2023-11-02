@@ -407,7 +407,11 @@ public class ApiServerVerticle extends AbstractVerticle {
       dbService.getCollection(collectionId)
           .onSuccess(success -> {
             LOGGER.debug("Success! - {}", success.toString());
-            JsonObject jsonResult = buildCollectionResult(success);
+            JsonObject jsonResult = new JsonObject();
+            if (success.get(0).getString("type").equalsIgnoreCase("feature"))
+              jsonResult = buildCollectionFeatureResult(success);
+            else if (success.get(0).getString("type").equalsIgnoreCase("tile"))
+              jsonResult = buildCollectionTileResult(success);
             routingContext.put("response", jsonResult.toString());
             routingContext.put("statusCode", 200);
             routingContext.next();
@@ -433,10 +437,13 @@ public class ApiServerVerticle extends AbstractVerticle {
           JsonArray collections  = new JsonArray();
           success.forEach(collection -> {
                         try {
-                            JsonObject json;
+                            JsonObject json = new JsonObject();
                             List<JsonObject> tempArray = new ArrayList<>();
                             tempArray.add(collection);
-                            json = buildCollectionResult(tempArray);
+                            if (collection.getString("type").equalsIgnoreCase("feature"))
+                              json = buildCollectionFeatureResult(tempArray);
+                            else if (collection.getString("type").equalsIgnoreCase("tile"))
+                              json = buildCollectionTileResult(tempArray);
                             collections.add(json);
                         } catch (Exception e) {
                             LOGGER.error("Something went wrong here: {}", e.getMessage());
@@ -471,7 +478,6 @@ public class ApiServerVerticle extends AbstractVerticle {
           routingContext.next();
         });
   }
-
   private void getTile(RoutingContext routingContext) {
       String collectionId = routingContext.pathParam("collectionId");
       String tileMatrixSetId = routingContext.pathParam("tileMatrixSetId");
@@ -628,7 +634,7 @@ public class ApiServerVerticle extends AbstractVerticle {
      routingContext.next();
     }
 
-  private JsonObject buildCollectionResult(List<JsonObject> success) {
+  private JsonObject buildCollectionFeatureResult(List<JsonObject> success) {
     JsonObject collection = success.get(0);
     JsonObject extent = new JsonObject();
     collection.put("properties", new JsonObject());
@@ -658,12 +664,38 @@ public class ApiServerVerticle extends AbstractVerticle {
                 .put("rel", "item")
                 .put("title", "Link template for " + collection.getString("id") + " features")
                 .put("templated","true")))
-        .put("itemType", "feature");
+                .put("itemType", collection.getString("type"))
+                .put("crs", new JsonArray().add(collection.getString("crs")));
+
     collection.remove("title");
     collection.remove("description");
-    collection.remove("datetime_key");
     collection.remove("bbox");
     collection.remove("temporal");
+    collection.remove("datetime_key");
+    collection.remove("type");
+    return collection;
+  }
+  private JsonObject buildCollectionTileResult(List<JsonObject> collections) {
+    JsonObject collection = collections.get(0);
+    collection.put("itemType", collection.getString("type"));
+    collection.put("links",  new JsonArray()
+        .add(new JsonObject()
+            .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id"))
+            .put("rel", "self")
+            .put("type", "application/json")
+            .put("title", "This document"))
+        .add(new JsonObject()
+            .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id") + "/map/tiles")
+            .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/tilesets-map")
+            .put("type", "application/json")
+            .put("title","List of available map tilesets for the collection of " + collection.getString("id"))));
+    collection.put("extent", new JsonObject()
+        .put("spatial", collection.getJsonArray("bbox"))
+        .put("temporal", collection.getJsonArray("temporal")));
+    collection.remove("bbox");
+    collection.remove("temporal");
+    collection.remove("datetime_key");
+    collection.remove("type");
     return collection;
   }
 
@@ -986,12 +1018,13 @@ public class ApiServerVerticle extends AbstractVerticle {
     String templatedTileUrl = hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/map/tiles/" + tileMatrixSet
         + "/{tileMatrix}/{tileRow}/{tileCol}.png";
     JsonArray linkObject = new JsonArray().add(new JsonObject()
-            .put("href", tileMatrixSetUri)
+            .put("href", hostName + ogcBasePath + COLLECTIONS + "/"  + collectionId + "/map/tiles")
             .put("rel", "self")
             .put("type","application/json")
             .put("title", collectionId.concat(" tileset tiled using" +  tileMatrixSet)))
         .add(new JsonObject().put("href",
-                hostName + ogcBasePath + "tileMatrixSets/" + tileMatrixSet)
+                "https://raw.githubusercontent.com/opengeospatial/2D-Tile-Matrix-Set/master/registry/json" +
+                    "/WebMercatorQuad.json")
             .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/tiling-scheme")
             .put("type","application/json")
             .put("title", "Definition of " + tileMatrixSet + " TileMatrixSet"))

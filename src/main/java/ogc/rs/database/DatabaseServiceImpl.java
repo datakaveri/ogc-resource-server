@@ -161,7 +161,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                     featureQuery.setDatetime(datetimeValue);
                   }
                   LOGGER.debug("datetime_key: {}",conn1.value().get(0).getString("datetime_key"));
-                  LOGGER.debug("Sql Query- {}", featureQuery.buildSqlString());
+                  LOGGER.debug("<DBService> Sql query- {} ",  featureQuery.buildSqlString());
                   LOGGER.debug("Count Query- {}", featureQuery.buildSqlString("count"));
                   JsonObject resultJson = new JsonObject();
                   conn.preparedQuery(featureQuery.buildSqlString("count"))
