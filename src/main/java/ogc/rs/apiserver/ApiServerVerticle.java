@@ -30,7 +30,7 @@ import java.util.*;
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
 import static ogc.rs.common.Constants.METERING_SERVICE_ADDRESS;
-import static ogc.rs.metering.util.MeteringConstant.USER_ID;
+import static ogc.rs.metering.util.MeteringConstant.*;
 
 /**
  * The OGC Resource Server API Verticle.
@@ -148,7 +148,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                     }
 
                     dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
-                    meteringService = MeteringService.createProxy(vertx,METERING_SERVICE_ADDRESS);
+                    meteringService = MeteringService.createProxy(vertx, METERING_SERVICE_ADDRESS);
                     // TODO: ssl configuration
                     HttpServerOptions serverOptions = new HttpServerOptions();
                     serverOptions.setCompressionSupported(true).setCompressionLevel(5);
@@ -420,8 +420,8 @@ public class ApiServerVerticle extends AbstractVerticle {
         entries.put("options", request.headers().get("options"));
         entries.put("resourceId", request.getParam("id"));
         entries.put("api", request.getParam("api"));
-        entries.put("offset", request.getParam("offset"));
-        entries.put("limit", request.getParam("limit"));
+        entries.put("offset", request.getParam(OFFSETPARAM));
+        entries.put("limit", request.getParam(LIMITPARAM));
 
         LOGGER.debug(entries);
         Promise<Void> promise = Promise.promise();
