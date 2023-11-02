@@ -12,7 +12,7 @@ import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-// TODO: Replace this with odc-db
+// TODO: Code BLock to be removed
 public class CatalogueService {
   private static final Logger LOGGER = LogManager.getLogger(CatalogueService.class);
   final String host;
