@@ -1,0 +1,98 @@
+[
+  {
+    "description": "This object represents Collections in a SpatioTemporal Asset Catalog.",
+    "stac_version": "1.0.0",
+    "type": "Collection",
+    "id": "af1c526b-283e-441b-a4fb-09e6760de9c7",
+    "license": "CC-BY-4.0",
+    "title": "Simple Example Collection",
+    "extent": {
+      "spatial": {
+        "bbox": [
+          [
+            -180,
+            -90,
+            180,
+            90
+          ]
+        ]
+      },
+      "temporal": {
+        "interval": [
+          [
+            "2022-01-01T00:00:00Z",
+            "2022-12-31T23:59:59Z"
+          ]
+        ]
+      }
+    },
+    "links": [
+      {
+        "href": "https://ogc.iudx.io/collections/af1c526b-283e-441b-a4fb-09e6760de9c7",
+        "rel": "self",
+        "title": "Buildings in Bangalore Google",
+        "description": "Buildings in Bangalore provided by Google"
+      },
+      {
+        "href": "https://ogc.iudx.io/collections/af1c526b-283e-441b-a4fb-09e6760de9c7/items",
+        "rel": "items",
+        "title": "Buildings in Bangalore Google",
+        "type": "application/geo+json"
+      },
+      {
+        "href": "https://ogc.iudx.io/collections/af1c526b-283e-441b-a4fb-09e6760de9c7/items/{featureId}",
+        "rel": "item",
+        "title": "Link template for af1c526b-283e-441b-a4fb-09e6760de9c7 features",
+        "templated": "true"
+      }
+    ]
+  },
+  {
+    "description": "This object represents Collections in a SpatioTemporal Asset Catalog.",
+    "stac_version": "1.0.0",
+    "type": "Collection",
+    "id": "f64743f6-1f74-4ada-8020-45cfb2d08a1b",
+    "license": "CC-BY-4.0",
+    "title": "Simple Example Collection",
+    "extent": {
+      "spatial": {
+        "bbox": [
+          [
+            -180,
+            -90,
+            180,
+            90
+          ]
+        ]
+      },
+      "temporal": {
+        "interval": [
+          [
+            "2022-01-01T00:00:00Z",
+            "2022-12-31T23:59:59Z"
+          ]
+        ]
+      }
+    },
+    "links": [
+      {
+        "href": "https://ogc.iudx.io/collections/f64743f6-1f74-4ada-8020-45cfb2d08a1b",
+        "rel": "self",
+        "title": "Buildings in Bangalore MS",
+        "description": "Buildings in Bangalore provided by Microsoft"
+      },
+      {
+        "href": "https://ogc.iudx.io/collections/f64743f6-1f74-4ada-8020-45cfb2d08a1b/items",
+        "rel": "items",
+        "title": "Buildings in Bangalore MS",
+        "type": "application/geo+json"
+      },
+      {
+        "href": "https://ogc.iudx.io/collections/f64743f6-1f74-4ada-8020-45cfb2d08a1b/items/{featureId}",
+        "rel": "item",
+        "title": "Link template for f64743f6-1f74-4ada-8020-45cfb2d08a1b features",
+        "templated": "true"
+      }
+    ]
+  }
+]
