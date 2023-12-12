@@ -9,7 +9,7 @@ services:
     image: ghcr.io/datakaveri/ogc-rs-test:latest
     volumes:
       - ./src/:/usr/share/app/src
-      - /home/ubuntu/configs/ogc-dev.json:/usr/share/app/configs/config.json
+      - /home/ubuntu/configs/ogc-config-dev.json:/usr/share/app/configs/config.json
       - /home/ubuntu/configs/ogc-config-test.json:/usr/share/app/configs/test.json
       - ./docker/runTests.sh:/usr/share/app/docker/runTests.sh
       - ${WORKSPACE}:/tmp/test
@@ -29,7 +29,7 @@ services:
   perfTest:
     image: ghcr.io/datakaveri/ogc-rs-dev:latest
     volumes:
-      - /home/ubuntu/configs/ogc-dev.json:/usr/share/app/configs/config.json
+      - /home/ubuntu/configs/ogc-config-dev.json:/usr/share/app/configs/config.json
       - type: volume
         source: ogc-volume
         target: /usr/share/app/storage/temp-dir
