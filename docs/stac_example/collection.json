@@ -28,13 +28,13 @@
     },
     "links": [
       {
-        "href": "https://ogc.iudx.io/catalog/{catalogId}",
+        "href": "https://ogc.iudx.io/catalog",
         "rel": "root",
         "type": "application/json",
         "title": "Link to the STAC catalog"
       },
       {
-        "href": "https://ogc.iudx.io/catalog/{catalogId}",
+        "href": "https://ogc.iudx.io/catalog",
         "rel": "parent",
         "type": "application/json",
         "title": "Link to the STAC catalog"
@@ -94,13 +94,13 @@
     },
     "links": [
       {
-        "href": "https://ogc.iudx.io/catalog/{catalogId}",
+        "href": "https://ogc.iudx.io/catalog",
         "rel": "root",
         "type": "application/json",
         "title": "Link to the STAC catalog"
       },
       {
-        "href": "https://ogc.iudx.io/catalog/{catalogId}",
+        "href": "https://ogc.iudx.io/catalog",
         "rel": "parent",
         "type": "application/json",
         "title": "Link to the STAC catalog"
