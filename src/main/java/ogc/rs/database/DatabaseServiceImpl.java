@@ -55,7 +55,7 @@ public class DatabaseServiceImpl implements DatabaseService{
             });
         return result.future();
     }
-    
+
     @Override
     public Future<List<JsonObject>> getCollections() {
         Promise<List<JsonObject>> result = Promise.promise();
@@ -208,4 +208,10 @@ public class DatabaseServiceImpl implements DatabaseService{
 
         return result.future();
     }
+
+  @Override
+  public Future<JsonObject> getProcesses() {
+    return null;
+  }
+
 }
