@@ -230,11 +230,129 @@ paths:
       servers:
         - url: 'https://ogc.iudx.io'
           description: OGC-Resource-Server
+  '/stac/':
+    get:
+      tags:
+        - Features
+      summary: Landing Page
+      description: |-
+        Returns the root STAC Catalog or STAC Collection that is the entry point
+        for users to browse with STAC Browser or for search engines to crawl.
+        This can either return a single STAC Collection or more commonly a STAC
+        catalog.
+
+        The landing page provides links to the
+        API definition (link relations `service-desc` and `service-doc`)
+        and the STAC records such as collections/catalogs (link relation `child`)
+        or items (link relation `item`).
+
+        Extensions may add additional links with new relation types.
+      operationId: getStacLandingPage
+      responses:
+        '200':
+          $ref: '#/components/responses/CatalogLandingPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /stacConformance:
+    get:
+      tags:
+        - Features
+      summary: information about specifications that this API conforms to
+      description: |-
+        A list of all conformance classes specified in a standard that the
+        server conforms to.
+      operationId: getConformanceDeclaration
+      responses:
+        '200':
+          $ref: '#/components/responses/ConformanceDeclaration'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  '/stac/collections':
+    get:
+      tags:
+        - Features
+      summary: the feature collections in the dataset
+      description: >-
+        A body of Feature Collections that belong or are used together with
+        additional links.
+        
+        Request may not return the full set of metadata per Feature Collection.
+      operationId: getStacCollections
+      responses:
+        '200':
+          $ref: '#/components/responses/StacCollections'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  '/stac/collections/{collectionId}/items':
+    get:
+      tags:
+        - Features
+      summary: fetch features
+      description: |-
+        Fetch features of the feature collection with id `collectionId`.
+
+        Every feature in a dataset belongs to a collection. A dataset may
+        consist of multiple feature collections. A feature collection is often a
+        collection of features of a similar type, based on a common schema.
+      operationId: getStacFeatures
+      parameters:
+        - $ref: '#/components/parameters/collectionId'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/bbox'
+        - $ref: '#/components/parameters/datetime'
+      responses:
+        '200':
+          $ref: '#/components/responses/StacFeatures'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  '/search':
+    get:
+      summary: Search STAC items with simple filtering.
+      operationId: getItemSearch
+      description: |-
+        Retrieve Items matching filters. Intended as a shorthand API for simple
+        queries.
+        
+        This method is required to implement.
+        
+        If this endpoint is implemented on a server, it is required to add a
+        link referring to this endpoint with `rel` set to `search` to the
+        `links` array in `GET /`. As `GET` is the default method, the `method`
+        may not be set explicitly in the link.
+      tags:
+        - Item Search
+      parameters:
+        - $ref: "#/components/parameters/bbox"
+        - $ref: "#/components/parameters/intersects"
+        - $ref: "#/components/parameters/datetime"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/ids"
+        - $ref: "#/components/parameters/collectionsArray"
+      responses:
+        '200':
+          $ref: "#/components/responses/ItemCollection"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          $ref: "#/components/responses/ServerError"
+
 tags:
   - name: Capabilities
     description: Essential characteristics of OGC APIs
   - name: Data
     description: Access to data belonging to a collection (features)
+  - name: Item Search
+    description: essential characteristics of a STAC API
+  - name: Features
+    description: essential characteristics of a STAC API
 components:
   parameters:
     bbox:
@@ -374,6 +492,36 @@ components:
       required: true
       schema:
         type: string
+    ids:
+      name: ids
+      in: query
+      description: |-
+        Array of Item ids to return.
+      required: false
+      schema:
+        $ref: "#/components/schemas/ids"
+      explode: false
+    intersects:
+      name: intersects
+      in: query
+      description: |-
+        The optional intersects parameter filters the result Items in the same was as bbox, only with
+        a GeoJSON Geometry rather than a bbox.
+      required: false
+      schema:
+        $ref: "#/components/schemas/geometryGeoJSON"
+      style: form
+      explode: false
+    collectionsArray:
+      name: collections
+      in: query
+      description: |
+        Array of Collection IDs to include in the search for items.
+        Only Item objects in one of the provided collections will be searched
+      required: false
+      schema:
+        $ref: "#/components/schemas/collectionsArray"
+      explode: false
   responses:
     LandingPage:
       description: |-
@@ -549,6 +697,208 @@ components:
                   hq: AMBALA
                   state: HARYANA
                   datetime: '2023-07-25 07:22:36 UTC'
+    CatalogLandingPage:
+      description: |-
+        The landing page provides links to the API definition
+        (link relations `service-desc` and `service-doc`).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/catalogLandingPage'
+          example:
+            type: Catalog
+            stac_version: 1.0.0
+            id: f47ac10b-58cc-4372-a567-0e02b2c3d479
+            description: This object represents a Catalog in a SpatioTemporal Asset Catalog.
+            conformsTo:
+              - https://api.stacspec.org/v1.0.0/core
+            links:
+              - rel: child
+                href: https://ogc.iudx.io/collections/af1c526b-283e-441b-a4fb-09e6760de9c7
+                type: application/json
+                title: Link to the STAC collection
+              - rel: child
+                href: https://ogc.iudx.io/collections/f64743f6-1f74-4ada-8020-45cfb2d08a1b
+                type: application/json
+                title: Link to the STAC collection
+              - rel: self
+                href: https://ogc.iudx.io/catalog
+                type: application/json
+                title: Link to the STAC catalog
+              - rel: root
+                href: https://ogc.iudx.io/catalog
+                type: application/json
+                title: Link to the STAC catalog
+    StacCollections:
+      description: >-
+        The feature collections shared by this API.
+        The dataset is organized as one or more feature collections. This
+        resource provides information about and access to the collections.
+        The response contains the list of collections. For each collection, a
+        link to the items in the collection (path `/collections/{collectionId}/items`,
+        link relation `items`) as well as key information about the collection.
+
+        This information includes:
+        * A local identifier for the collection that is unique for the dataset;
+        * A list of coordinate reference systems (CRS) in which geometries may 
+        be returned by the server. The first CRS is the default coordinate
+        reference system (the default is always WGS 84 with axis order
+        longitude/latitude);
+        * An optional title and description for the collection;
+        * An optional extent that can be used to provide an indication of the
+        spatial and temporal extent of the collection - typically derived from
+        the data;
+        * An optional indicator about the type of the items in the collection
+        (the default value, if the indicator is not provided, is 'feature').
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/stacCollections'
+          examples:
+            default:
+              value:
+                links:
+                  - href: 'https://ogc.iudx.io/collections'
+                    rel: self
+                    type: application/json
+                    title: this document
+                collections:
+                  - id: fd6ef7c5-b18c-48e6-94e3-81037706763d
+                    stac_version: 1.0.0
+                    type: Collection
+                    title: Districts in India
+                    description: Geographic information of districts in India
+                    license: proprietary
+                    extent:
+                      spatial:
+                        bbox:
+                          - -180
+                          - 56
+                          - -180
+                          - 83
+                      temporal:
+                        interval:
+                          - '2015-06-23T00:00:00Z'
+                          - '2019-07-10T13:44:56Z'
+                    links:
+                      - href: 'https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items'
+                        rel: items
+                        type: application/geo+json
+                        title: Districts in India
+                      - href: 'https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d'
+                        rel: self
+                        type: application/geo+json
+                        title: Districts in India
+    StacFeatures:
+      description: |-
+        The response is a document consisting of features in the collection.
+        The features included in the response are determined by the server
+        based on the query parameters of the request. To support access to
+        larger collections without overloading the client, the API supports
+        paged access using `limit` and `offset` paramters.
+      content:
+        application/geo+json:
+          schema:
+            $ref: '#/components/schemas/stacFeatureCollectionGeoJSON'
+          examples:
+            default:
+              value:
+                type: FeatureCollection
+                links:
+                  - href: 'https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items'
+                    rel: self
+                    type: application/geo+json
+                    title: this document
+                  - href: 'https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items?offset=10&limit=2'
+                    rel: next
+                    type: application/geo+json
+                    title: next page
+                numberMatched: 123
+                numberReturned: 2
+                features:
+                  - type: Feature
+                    stac_version: 1.0.0
+                    id: 4f449c78-3233-4c07-824c-08f7d45cee0e
+                    geometry:
+                      type: Point
+                      coordinates:
+                        - 76.787052042
+                        - 30.37598763
+                    bbox:
+                      - -76.787052042
+                      - 30.37598763
+                      - -76.787052042
+                      - 30.37598763
+                    links:
+                      - "rel": self
+                        "href": https://ogc.iudx.io/collections/af1c526b-283e-441b-a4fb-09e6760de9c7/items/4f449c78-3233-4c07-824c-08f7d45cee0e
+                        "type": application/json
+                        "title": Link to this STAC Item
+                      - "rel": collection
+                        "href": https://ogc.iudx.io/collections/af1c526b-283e-441b-a4fb-09e6760de9c7
+                        "type": application/json
+                        "title": Link to this collection of STAC item
+                    properties:
+                      datetime: '2018-02-12T00:00:00Z'
+                    assets:
+                      analytic:
+                        href: http://cool-sat.com/static-catalog/CS3/20160503_132130_04/analytic.tif
+                        title: 4-Band Analytic
+                        type: image/tiff; application=geotiff; profile=cloud-optimized
+                timeStamp: 2017-08-17T08:05:32Z
+    ItemCollection:
+      description: A Feature Collection
+      content:
+        application/geo+json:
+          schema:
+            $ref: '#/components/schemas/itemCollection'
+          examples:
+            default:
+              value:
+                type: FeatureCollection
+                links:
+                  - href: 'https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items'
+                    rel: self
+                    type: application/geo+json
+                    title: this document
+                  - href: 'https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items?offset=10&limit=2'
+                    rel: next
+                    type: application/geo+json
+                    title: next page
+                numberMatched: 123
+                numberReturned: 2
+                features:
+                  - type: Feature
+                    stac_version: 1.0.0
+                    id: 4f449c78-3233-4c07-824c-08f7d45cee0e
+                    geometry:
+                      type: Point
+                      coordinates:
+                        - 76.787052042
+                        - 30.37598763
+                    bbox:
+                      - -76.787052042
+                      - 30.37598763
+                      - -76.787052042
+                      - 30.37598763
+                    links:
+                      - "rel": self
+                        "href": https://ogc.iudx.io/collections/af1c526b-283e-441b-a4fb-09e6760de9c7/items/4f449c78-3233-4c07-824c-08f7d45cee0e
+                        "type": application/json
+                        "title": Link to this STAC Item
+                      - "rel": collection
+                        "href": https://ogc.iudx.io/collections/af1c526b-283e-441b-a4fb-09e6760de9c7
+                        "type": application/json
+                        "title": Link to this collection of STAC item
+                    properties:
+                      datetime: '2018-02-12T00:00:00Z'
+                    assets:
+                      analytic:
+                        href: http://cool-sat.com/static-catalog/CS3/20160503_132130_04/analytic.tif
+                        title: 4-Band Analytic
+                        type: image/tiff; application=geotiff; profile=cloud-optimized
+                timeStamp: 2017-08-17T08:05:32Z
+
     InvalidParameter:
       description: A query parameter has an invalid value.
       content:
@@ -565,6 +915,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/exception500'
+    BadRequest:
+      description: An error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/exception400'
   schemas:
     landingPage:
       type: object
@@ -749,6 +1105,7 @@ components:
         - $ref: '#/components/schemas/polygonGeoJSON'
         - $ref: '#/components/schemas/multipolygonGeoJSON'
         - $ref: '#/components/schemas/geometrycollectionGeoJSON'
+
     pointGeoJSON:
       type: object
       properties:
@@ -763,6 +1120,7 @@ components:
       required:
         - type
         - coordinates
+
     multipointGeoJSON:
       type: object
       properties:
@@ -887,6 +1245,595 @@ components:
         of items in the "features" array.
       minimum: 0
       example: 10
+    catalogLandingPage:
+      type: object
+      required:
+        - stac_version
+        - type
+        - id
+        - description
+        - links
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              href:
+                type: string
+              rel:
+                type: string
+              type:
+                type: string
+              title:
+                type: string
+            required:
+              - href
+              - rel
+        stac_version:
+          type: string
+        stac_extensions:
+          type: array
+          uniqueItems: true
+          items:
+            anyOf:
+              - title: Reference to a JSON Schema
+                type: string
+                format: uri
+              - title: Reference to a core extension
+                type: string
+    stacCollections:
+      type: object
+      required:
+        - links
+        - collections
+      properties:
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              href:
+                type: string
+              rel:
+                type: string
+              type:
+                type: string
+              title:
+                type: string
+            required:
+              - href
+              - rel
+        collections:
+          type: array
+          items:
+            $ref: '#/components/schemas/stacCollection'
+    stacCollection:
+      type: object
+      required:
+        - stac_version
+        - type
+        - id
+        - description
+        - license
+        - extent
+        - links
+      properties:
+        id:
+          description: identifier of the collection used, for example, in URIs
+          type: string
+        title:
+          description: human readable title of the collection
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+          description: >-
+            Detailed multi-line description to fully explain the catalog or
+            collection.
+
+            [CommonMark 0.29](http://commonmark.org/) syntax MAY be used for
+            rich text representation.
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              href:
+                type: string
+              rel:
+                type: string
+              type:
+                type: string
+              title:
+                type: string
+            required:
+              - href
+              - rel
+        stac_version:
+          type: string
+        stac_extensions:
+          type: array
+          uniqueItems: true
+          items:
+            anyOf:
+              - title: Reference to a JSON Schema
+                type: string
+                format: uri
+              - title: Reference to a core extension
+                type: string
+        keywords:
+          type: array
+          description: List of keywords describing the collection.
+          items:
+            type: string
+        license:
+          type: string
+          description: |-
+            License(s) of the data as a SPDX
+            [License identifier](https://spdx.org/licenses/). Alternatively, use
+            `proprietary` if the license is not on the SPDX license list or
+            `various` if multiple licenses apply. In these two cases links to the
+            license texts SHOULD be added, see the `license` link relation type.
+
+            Non-SPDX licenses SHOULD add a link to the license text with the
+            `license` relation in the links section. The license text MUST NOT be
+            provided as a value of this field. If there is no public license URL
+            available, it is RECOMMENDED to host the license text and
+            link to it.
+        extent:
+          type: object
+          description: >-
+            The extent of the features in the collection. In the Core only spatial
+            and temporal extents are specified. Extensions may add additional 
+            members to represent other extents, for example, thermal or pressure 
+            ranges.
+            
+            The first item in the array describes the overall extent of the data. 
+            All subsequent items describe more precise extents, e.g., 
+            to identify clusters of data.
+            
+            Clients only interested in the overall extent will only need to
+            access the first item in each array.
+          required:
+            - spatial
+            - temporal
+          properties:
+            spatial:
+              description: The spatial extent of the features in the collection.
+              type: object
+              required:
+                - bbox
+              properties:
+                bbox:
+                  description: >-
+                    One or more bounding boxes that describe the spatial extent of
+                    the dataset.
+
+
+                    The first bounding box describes the overall spatial
+                    extent of the data. All subsequent bounding boxes describe 
+                    more precise bounding boxes, e.g., to identify clusters of data.
+                    Clients only interested in the overall spatial extent will
+                    only need to access the first item in each array.
+                  type: array
+                  minItems: 1
+                  items:
+                    description: >-
+                      Each bounding box is provided as four or six numbers,
+                      depending on whether the coordinate reference system includes
+                      a vertical axis
+                      
+                      (height or depth):
+                      
+                      * Lower left corner, coordinate axis 1
+                      
+                      * Lower left corner, coordinate axis 2
+                      
+                      * Minimum value, coordinate axis 3 (optional)
+                      
+                      * Upper right corner, coordinate axis 1
+                      
+                      * Upper right corner, coordinate axis 2
+                      
+                      * Maximum value, coordinate axis 3 (optional)
+                      
+                      The coordinate reference system of the values is WGS 84
+                      longitude/latitude 
+                      (http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a
+                      different coordinate
+                      reference system is specified in `crs`.
+                      
+                      For WGS 84 longitude/latitude the values are in most cases the
+                      sequence of minimum longitude, minimum latitude, 
+                      maximum longitude and maximum latitude.
+
+                      However, in cases where the box spans the antimeridian the
+                      first value (west-most box edge) is larger than the third 
+                      value (east-most box edge).
+                      
+                      If the vertical axis is included, the third and the sixth 
+                      number are the bottom and the top of the 3-dimensional 
+                      bounding box.
+                      
+                      If a feature has multiple spatial geometry properties, it is
+                      the decision of the server whether only a single spatial 
+                      geometry property is used to determine the extent or all 
+                      relevant geometries.
+                    type: array
+                    minItems: 4
+                    maxItems: 6
+                    items:
+                      type: number
+                    example:
+                      - -180
+                      - -90
+                      - 180
+                      - 90
+                crs:
+                  description: >-
+                    Coordinate reference system of the coordinates in the spatial
+                    extent
+
+                    (property `bbox`). The default reference system is WGS 84
+                    longitude/latitude.
+
+                    In the Core this is the only supported coordinate reference
+                    system.
+
+                    Extensions may support additional coordinate reference systems
+                    and add additional enum values.
+                  type: string
+                  enum:
+                    - http://www.opengis.net/def/crs/OGC/1.3/CRS84
+                  default: http://www.opengis.net/def/crs/OGC/1.3/CRS84
+            temporal:
+              description: The temporal extent of the features in the collection.
+              type: object
+              required:
+                - interval
+              properties:
+                interval:
+                  description: >-
+                    One or more time intervals that describe the temporal extent of
+                    the dataset.
+
+                    The first time interval describes the overall
+                    temporal extent of the data. All subsequent time intervals 
+                    describe more precise time intervals, e.g., to identify 
+                    clusters of data.
+                    
+                    Clients only interested in the overall extent will only need
+                    to access the first item in each array.
+                  type: array
+                  minItems: 1
+                  items:
+                    description: >-
+                      Begin and end times of the time interval. The timestamps
+                      are in the coordinate reference system specified in `trs`. By
+                      default this is the Gregorian calendar.
+                      
+                      The value `null` is supported and indicates an open time
+                      interval.
+                    type: array
+                    minItems: 2
+                    maxItems: 2
+                    items:
+                      type: string
+                      format: date-time
+                      nullable: true
+                    example:
+                      - '2011-11-11T12:22:11Z'
+                      - null
+                trs:
+                  description: >-
+                    Coordinate reference system of the coordinates in the temporal
+                    extent
+
+                    (property `interval`). The default reference system is the
+                    Gregorian calendar.
+
+                    In the Core this is the only supported temporal reference
+                    system.
+
+                    Extensions may support additional temporal reference systems and
+                    add additional enum values.
+                  type: string
+                  enum:
+                    - http://www.opengis.net/def/uom/ISO-8601/0/Gregorian
+                  default: http://www.opengis.net/def/uom/ISO-8601/0/Gregorian
+        summaries:
+          description: |-
+            Summaries are either a unique set of all available values *or*
+            statistics. Statistics by default only specify the range (minimum
+            and maximum values), but can optionally be accompanied by additional
+            statistical values. The range can specify the potential range of
+            values, but it is recommended to be as precise as possible. The set
+            of values must contain at least one element and it is strongly
+            recommended to list all values. It is recommended to list as many
+            properties as reasonable so that consumers get a full overview of
+            the Collection. Properties that are covered by the Collection
+            specification (e.g. `providers` and `license`) may not be repeated
+            in the summaries.
+          type: object
+          additionalProperties:
+            oneOf:
+              - type: array
+                title: Set of values
+                items:
+                  description: A value of any type.
+              - type: object
+                title: Statistics
+                description: |-
+                  By default, only ranges with a minimum and a maximum value can
+                  be specified. Ranges can be specified for ordinal values only,
+                  which means they need to have a rank order. Therefore, ranges
+                  can only be specified for numbers and some special types of
+                  strings. Examples: grades (A to F), dates or times.
+                  Implementors are free to add other derived statistical values
+                  to the object, for example `mean` or `stddev`.
+                required:
+                  - min
+                  - max
+                properties:
+                  min:
+                    anyOf:
+                      - type: string
+                      - type: number
+                  max:
+                    anyOf:
+                      - type: string
+                      - type: number
+    datetime:
+      type: string
+      format: date-time
+      nullable: true
+      description: >-
+        The searchable date and time of the assets, in UTC.
+
+        It is formatted according to [RFC 3339, section
+        5.6](https://tools.ietf.org/html/rfc3339#section-5.6).
+
+        `null` is allowed, but requires `start_datetime` and `end_datetime` from
+        common metadata to be set.
+      example: '2018-02-12T00:00:00Z'
+    properties:
+      type: object
+      required:
+        - datetime
+      description: provides the core metadata fields plus extensions
+      properties:
+        datetime:
+          $ref: '#/components/schemas/datetime'
+      additionalProperties:
+        description: >-
+          Any additional properties added in via Item specification or
+          extensions.
+    assets:
+      type: object
+      additionalProperties:
+        type: object
+        required:
+          - href
+        properties:
+          href:
+            type: string
+            format: url
+            description: Link to the asset object
+          title:
+            type: string
+            description: Displayed title
+          description:
+            type: string
+            description: >-
+              Multi-line description to explain the asset.
+
+
+              [CommonMark 0.29](http://commonmark.org/) syntax MAY be used for
+              rich text representation.
+          type:
+            type: string
+          roles:
+            type: array
+            items:
+              type: string
+            description: Purposes of the asset
+    item:
+      description: >-
+        A GeoJSON Feature augmented with foreign members that contain values
+        relevant to a STAC entity
+      type: object
+      required:
+        - stac_version
+        - id
+        - type
+        - geometry
+        - bbox
+        - links
+        - properties
+        - assets
+      properties:
+        stac_version:
+          type: string
+        stac_extensions:
+          type: array
+          uniqueItems: true
+          items:
+            anyOf:
+              - title: Reference to a JSON Schema
+                type: string
+                format: uri
+              - title: Reference to a core extension
+                type: string
+        id:
+          description: identifier of the collection used, for example, in URIs
+          type: string
+        bbox:
+          $ref: '#/components/schemas/bbox'
+        geometry:
+          $ref: '#/components/schemas/geometryGeoJSON'
+        type:
+          type: string
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              href:
+                type: string
+              rel:
+                type: string
+              type:
+                type: string
+              title:
+                type: string
+            required:
+              - href
+              - rel
+        properties:
+          $ref: '#/components/schemas/properties'
+        assets:
+          $ref: '#/components/schemas/assets'
+    timeStamp:
+      description: >-
+        This property indicates the time and date when the response was
+        generated.
+      type: string
+      format: date-time
+    schemas-featureCollectionGeoJSON:
+      type: object
+      required:
+        - type
+        - features
+      properties:
+        type:
+          type: string
+          enum:
+            - FeatureCollection
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/featureGeoJSON'
+    stacFeatureCollectionGeoJSON:
+      allOf:
+        - $ref: '#/components/schemas/schemas-featureCollectionGeoJSON'
+        - type: object
+          required:
+            - features
+          properties:
+            features:
+              type: array
+              items:
+                $ref: '#/components/schemas/item'
+            links:
+              type: array
+              items:
+                type: object
+                required:
+                  - href
+                  - rel
+                properties:
+                  href:
+                    type: string
+                  rel:
+                    type: string
+                  type:
+                    type: string
+                  title:
+                    type: string
+            timeStamp:
+              $ref: '#/components/schemas/timeStamp'
+            numberMatched:
+              $ref: '#/components/schemas/numberMatched'
+            numberReturned:
+              $ref: '#/components/schemas/numberReturned'
+    ids:
+      type: array
+      description: |-
+        Array of Item ids to return.
+      items:
+        type: string
+    itemCollection:
+      description: >-
+        A GeoJSON FeatureCollection augmented with foreign members that contain values relevant to a STAC entity
+      type: object
+      required:
+        - features
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - FeatureCollection
+        features:
+          type: array
+          items:
+            $ref: "#/components/schemas/item"
+        links:
+          type: array
+          description: >-
+            An array of links. Can be used for pagination, e.g. by providing a link
+            with the `next` relation type.
+          items:
+            $ref: "#/components/schemas/link"
+        numberMatched:
+          type: integer
+          minimum: 0
+        numberReturned:
+          type: integer
+          minimum: 0
+    collectionsArray:
+      type: array
+      description: |-
+        Array of Collection IDs to include in the search for items.
+        Only Item objects in one of the provided collections will be searched.
+      items:
+        type: string
+    bbox:
+      description: |-
+        Only features that have a geometry that intersects the bounding box are
+        selected. The bounding box is provided as four or six numbers,
+        depending on whether the coordinate reference system includes a
+        vertical axis (elevation or depth):
+
+        * Lower left corner, coordinate axis 1
+        * Lower left corner, coordinate axis 2  
+        * Lower left corner, coordinate axis 3 (optional) 
+        * Upper right corner, coordinate axis 1 
+        * Upper right corner, coordinate axis 2 
+        * Upper right corner, coordinate axis 3 (optional)
+
+        The coordinate reference system of the values is WGS84
+        longitude/latitude (http://www.opengis.net/def/crs/OGC/1.3/CRS84).
+
+        For WGS84 longitude/latitude the values are in most cases the sequence
+        of minimum longitude, minimum latitude, maximum longitude and maximum
+        latitude. However, in cases where the box spans the antimeridian the
+        first value (west-most box edge) is larger than the third value
+        (east-most box edge).
+
+        If a feature has multiple spatial geometry properties, it is the
+        decision of the server whether only a single spatial geometry property
+        is used to determine the extent or all relevant geometries.
+
+        Example: The bounding box of the New Zealand Exclusive Economic Zone in
+        WGS 84 (from 160.6°E to 170°W and from 55.95°S to 25.89°S) would be
+        represented in JSON as `[160.6, -55.95, -170, -25.89]` and in a query as
+        `bbox=160.6,-55.95,-170,-25.89`.
+      type: array
+      minItems: 4
+      maxItems: 6
+      items:
+        type: number
     exception400:
       type: object
       properties:
