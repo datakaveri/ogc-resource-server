@@ -37,11 +37,7 @@ public class Constants {
 
     public static final String STAC = "stac";
     public static final String STAC_OPENAPI_SPEC = "/stac/api";
-
-
-
-
-
-
-
+    public static final String PROCESSES_API = "getProcesses";
+    public static final String CONTENT_TYPE = "content-type";
+    public static final String APPLICATION_JSON = "application/json";
 }

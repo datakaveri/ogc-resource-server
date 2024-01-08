@@ -9,7 +9,8 @@
     "dxCatalogueBasePath": "/iudx/cat/v1",
     "dxAuthBasePath": "/auth/v1",
     "hostName": "https://server.url.com",
-    "catalogId": "stac"
+    "catalogId": "stac",
+    "baseUrl": "https://baseUrl:8443"
   },
   "modules": [
     {
@@ -19,7 +20,8 @@
       "databaseIP": "",
       "databasePort": 1234,
       "dbUser": "",
-      "dbPassword": ""
+      "dbPassword": "",
+      "processesTableName": ""
     },
     {
       "id": "iudx.ogc.rs.authenticator.AuthenticationVerticle",

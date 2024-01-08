@@ -113,6 +113,26 @@ paths:
       servers:
         - url: 'https://ogc.iudx.io'
           description: OGC-Resource-Server
+  /processes:
+    get:
+      tags:
+        - ProcessList
+      summary: retrieve the list of available processes
+      description: |-
+        The list of processes contains a summary of each process the OGC API - Processes offers, including the link to a more detailed description
+        of the process.
+      operationId: getProcesses
+      parameters:
+        - $ref: '#/components/parameters/limit'
+      responses:
+        "200":
+          description: Information about the available processes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/processList'
+        "500":
+          $ref: '#/components/responses/ServerError'
   /collections:
     get:
       tags:
@@ -122,9 +142,9 @@ paths:
         It will fetch the list of feature collections to DX Data Consumers based on the required format with default limit and offset values supplied. This API provides a birds-eye-view for all avialable Feature Collections. The dataset is organized as one or more feature collections. This resource provides information about and access to the collections.
         The response contains the list of collections. For each collection, a link to the items in the collection (path `/collections/{collectionId}/items`, link relation `items`) as well as key information about the collection. This information includes-
         * A local identifier for the collection that is unique for the dataset.
-        * A list of coordinate reference systems (CRS) in which geometries may be returned by the server. The first CRS is the default coordinate reference system (the default is always WGS 84 with axis order longitude/latitude). 
+        * A list of coordinate reference systems (CRS) in which geometries may be returned by the server. The first CRS is the default coordinate reference system (the default is always WGS 84 with axis order longitude/latitude).
         * An optional title and description for the collection.
-        * An optional extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data. 
+        * An optional extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data.
         * An optional indicator about the type of the items in the collection (the default value, if the indicator is not provided, is 'feature').
       operationId: getCollections
       responses:
@@ -143,9 +163,9 @@ paths:
       description: |-
         The response contains a link to the items in the collection (path `/collections/{collectionId}/items`, link relation `items`) as well as key information about the collection. This information includes-
         * A local identifier for the collection that is unique for the dataset.
-        * A list of coordinate reference systems (CRS) in which geometries may be returned by the server. The first CRS is the default coordinate reference system (the default is always WGS 84 with axis order longitude/latitude). 
+        * A list of coordinate reference systems (CRS) in which geometries may be returned by the server. The first CRS is the default coordinate reference system (the default is always WGS 84 with axis order longitude/latitude).
         * An optional title and description for the collection.
-        * An optional extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data. 
+        * An optional extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data.
         * An optional indicator about the type of the items in the collection (the default value, if the indicator is not provided, is 'feature').
       operationId: describeCollection
       parameters:
@@ -463,8 +483,8 @@ components:
       name: offset
       in: query
       description: |-
-        OGC Resource server also offers way to paginate the result for queries. 
-        If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records 
+        OGC Resource server also offers way to paginate the result for queries.
+        If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records
         to be returned.
 
         Minimum = 0. Maximum = 1000. Default = 10.
@@ -1479,3 +1499,89 @@ components:
         - maxTileRow
         - minTileCol
         - maxTileCol
+    processList:
+      required:
+        - links
+        - processes
+      type: object
+      properties:
+        processes:
+          type: array
+          items:
+            $ref: '#/components/schemas/processSummary'
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/processesLink'
+
+    processSummary:
+      allOf:
+        - $ref: '#/components/schemas/descriptionType'
+        - type: object
+          required:
+            - id
+            - version
+          properties:
+            id:
+              type: string
+              example: 'fd6ef7c5-b18c-48e6-94e3-81037706763d'
+            version:
+              type: string
+              example: '1.0.0'
+            jobControlOptions:
+              type: array
+              items:
+                $ref: '#/components/schemas/jobControlOptions'
+            outputTransmission:
+              type: array
+              items:
+                $ref: '#/components/schemas/transmissionMode'
+            links:
+              type: array
+              items:
+                $ref: '#/components/schemas/processLink'
+    descriptionType:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'EchoProcess'
+    jobControlOptions:
+      type: string
+      enum:
+        - sync-execute
+        - async-execute
+        - dismiss
+    transmissionMode:
+      type: string
+      default: value
+      enum:
+        - value
+        - reference
+    processLink:
+      type: object
+      properties:
+        href:
+          type: string
+          example: 'https://ogc.iudx.io/processes/fd6ef7c5-b18c-48e6-94e3-81037706763d'
+        rel:
+          type: string
+          example: self
+        type:
+          type: string
+          example: application/json
+        title:
+          type: string
+          example: Echo Process
+    processesLink:
+      type: object
+      properties:
+        href:
+          type: string
+          example: 'https://ogc.iudx.io/processes?f=json'
+        rel:
+          type: string
+          example: self
+        type:
+          type: string
+          example: application/json
