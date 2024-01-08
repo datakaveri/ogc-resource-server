@@ -32,7 +32,8 @@ public class Constants {
 
     public static final String FEATURES_API = "getFeatures";
     public static final String PROCESSES_API = "getProcesses";
-
+  public static final String CONTENT_TYPE = "content-type";
+  public static final String APPLICATION_JSON = "application/json";
 
     public static final String FEATURE_API = "getFeature";
 

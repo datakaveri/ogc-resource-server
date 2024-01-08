@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import ogc.rs.apiserver.handlers.FailureHandler;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
@@ -89,6 +90,7 @@ public class ApiServerVerticle extends AbstractVerticle {
         HEADER_REFERER, HEADER_ACCEPT, HEADER_ALLOW_ORIGIN);
 
     Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS);
+    FailureHandler failureHandler = new FailureHandler();
 
 
     /* Get base paths from config */
@@ -129,7 +131,7 @@ public class ApiServerVerticle extends AbstractVerticle {
           routerBuilder.operation(PROCESSES_API)
             // .handler(AuthHandler.create(vertx))
             .handler(this::getProcesses).handler(this::putCommonResponseHeaders)
-            .handler(this::buildResponse);
+            .handler(this::buildResponse).failureHandler(failureHandler);
 
 
           routerBuilder.operation(FEATURE_API)
@@ -191,7 +193,24 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   private void getProcesses(RoutingContext routingContext) {
+    int limit = Integer.parseInt(routingContext.queryParams().get("limit"));
 
+    dbService.getProcesses(limit).onSuccess(successResult -> {
+      routingContext.put("response", successResult.toString());
+      routingContext.put("statusCode", 200);
+      routingContext.next();
+    }).onFailure(failed -> {
+      if (failed instanceof OgcException) {
+        routingContext.put("response", ((OgcException) failed).getJson().toString());
+        routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+      } else {
+        OgcException ogcException =
+          new OgcException(500, "Internal Server Error", "Internal Server Error");
+        routingContext.put("response", ogcException.getJson().toString());
+        routingContext.put("statusCode", ogcException.getStatusCode());
+      }
+      routingContext.next();
+    });
   }
 
   private void getFeatures(RoutingContext routingContext) {

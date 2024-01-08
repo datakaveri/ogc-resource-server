@@ -20,10 +20,10 @@ services:
     networks:
       - ogc-net
     logging:
-         driver: "json-file"
-         options:
-             max-file: "5"
-             max-size: "100m"
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "100m"
     command: bash -c "docker/runTests.sh"
 
   perfTest:
@@ -41,10 +41,10 @@ services:
     networks:
       - ogc-net
     logging:
-         driver: "json-file"
-         options:
-             max-file: "5"
-             max-size: "100m"
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "100m"
     command: bash -c "exec java -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -jar ./fatjar.jar  --host $$(hostname) -c configs/config.json"
 
   zookeeper:

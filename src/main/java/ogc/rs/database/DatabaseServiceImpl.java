@@ -15,9 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.UUID;
-import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -25,9 +23,10 @@ public class DatabaseServiceImpl implements DatabaseService{
     private static final Logger LOGGER = LogManager.getLogger(DatabaseServiceImpl.class);
 
     private final PgPool client;
-
-    public DatabaseServiceImpl(final PgPool pgClient) {
+    private final JsonObject config;
+    public DatabaseServiceImpl(final PgPool pgClient,JsonObject config) {
         this.client = pgClient;
+        this.config = config;
     }
 
     @Override
@@ -210,8 +209,53 @@ public class DatabaseServiceImpl implements DatabaseService{
     }
 
   @Override
-  public Future<JsonObject> getProcesses() {
-    return null;
-  }
+  public Future<JsonObject> getProcesses(int limit) {
+    Promise<JsonObject> promise = Promise.promise();
+    String sqlQuery = "select * from "+ config.getString("processesTableName") +" limit $1;";
+    client.withConnection(
+      conn -> conn.preparedQuery(sqlQuery).execute(Tuple.of(limit))
+        .onSuccess(rowSet -> {
+          if (rowSet.size() == 0) {
+            promise.fail(new OgcException(404, "Not found", "Process not found"));
+          } else {
+            String baseUrl = config.getString("baseUrl");
+            JsonArray processesArray = new JsonArray();
+            JsonArray linkArray = new JsonArray();
+            JsonObject linkObject =
+              new JsonObject().put("type", "application/json").put("rel", "self");
+            for (Row row : rowSet) {
+              JsonObject processesObject = new JsonObject();
+              processesObject.put("id", String.valueOf(row.getUUID("id")));
+              processesObject.put("title", row.getString("title"));
+              processesObject.put("version", row.getString("version"));
 
+              JsonArray jobControlOptionsArray = new JsonArray().add(row.getString("mode"));
+              processesObject.put("jobControlOptions", jobControlOptionsArray);
+
+              JsonArray outputTransmissionArray = new JsonArray().add(row.getString("response"));
+              processesObject.put("outputTransmission", outputTransmissionArray);
+
+              JsonArray tempLinkArray = new JsonArray();
+              linkObject.put("title", row.getString("description"));
+              linkObject.put("href",
+                baseUrl.concat("/processes/").concat(String.valueOf(row.getUUID("id"))));
+
+              tempLinkArray.add(linkObject.copy());
+              processesObject.put("links", tempLinkArray);
+
+              processesArray.add(processesObject);
+            }
+            JsonObject result = new JsonObject().put("processes", processesArray);
+            linkObject.put("href", baseUrl.concat("/processes"));
+            linkObject.remove("title");
+            linkArray.add(linkObject.copy());
+            result.put("links", linkArray);
+            promise.complete(result);
+          }
+        }).onFailure(fail -> {
+          LOGGER.error("Failed to get processes- {}", fail.getMessage());
+          promise.fail("Error!");
+        }));
+    return promise.future();
+  }
 }

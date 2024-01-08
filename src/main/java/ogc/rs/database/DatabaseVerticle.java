@@ -27,7 +27,7 @@ public class DatabaseVerticle extends AbstractVerticle {
     private int poolSize;
 
     private DatabaseService dbService;
-
+    private JsonObject config;
     @Override
     public void start() throws Exception {
 
@@ -37,7 +37,7 @@ public class DatabaseVerticle extends AbstractVerticle {
         databaseUserName = config().getString("databaseUser");
         databasePassword = config().getString("databasePassword");
         poolSize = config().getInteger("poolSize");
-
+        config= config();
         this.connectOptions =
                 new PgConnectOptions()
                         .setPort(databasePort)
@@ -51,7 +51,7 @@ public class DatabaseVerticle extends AbstractVerticle {
         this.poolOptions = new PoolOptions().setMaxSize(poolSize);
         this.pool = PgPool.pool(vertx, connectOptions, poolOptions);
 
-        dbService = new DatabaseServiceImpl(this.pool);
+        dbService = new DatabaseServiceImpl(this.pool,this.config);
 
         binder = new ServiceBinder(vertx);
         consumer = binder.setAddress(DATABASE_SERVICE_ADDRESS).register(DatabaseService.class, dbService);
