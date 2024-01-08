@@ -51,7 +51,8 @@ public class DatabaseVerticle extends AbstractVerticle {
         this.poolOptions = new PoolOptions().setMaxSize(poolSize);
         this.pool = PgPool.pool(vertx, connectOptions, poolOptions);
 
-        dbService = new DatabaseServiceImpl(this.pool);
+        dbService = new DatabaseServiceImpl(this.pool,this.config());
+
         binder = new ServiceBinder(vertx);
         consumer = binder.setAddress(DATABASE_SERVICE_ADDRESS).register(DatabaseService.class, dbService);
         LOGGER.info("Database verticle started.");
