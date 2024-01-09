@@ -1,5 +1,7 @@
 package ogc.rs.database;
 
+import static ogc.rs.database.util.Constants.PROCESSES_TABLE_NAME;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -560,7 +562,7 @@ public class DatabaseServiceImpl implements DatabaseService{
     @Override
     public Future<JsonObject> getProcesses(int limit) {
       Promise<JsonObject> promise = Promise.promise();
-      String sqlQuery = "select * from "+ config.getString("processesTableName") +" limit $1;";
+      String sqlQuery = "select * from "+ PROCESSES_TABLE_NAME +" limit $1;";
       client.withConnection(
         conn -> conn.preparedQuery(sqlQuery).execute(Tuple.of(limit))
           .onSuccess(rowSet -> {
