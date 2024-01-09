@@ -18,8 +18,7 @@
       "databaseIP": "",
       "databasePort": 1234,
       "dbUser": "",
-      "dbPassword": "",
-      "processesTableName": ""
+      "dbPassword": ""
     },
     {
       "id": "iudx.ogc.rs.authenticator.AuthenticationVerticle",
