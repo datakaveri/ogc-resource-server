@@ -583,6 +583,9 @@ public class DatabaseServiceImpl implements DatabaseService{
                 processesObject.put("id", String.valueOf(row.getUUID("id")));
                 processesObject.put("title", row.getString("title"));
                 processesObject.put("version", row.getString("version"));
+                processesObject.put("description",row.getString("description"));
+                String[] keywords = row.getArrayOfStrings("keywords");
+                processesObject.put("keywords",Arrays.toString(keywords));
 
                 JsonArray jobControlOptionsArray = new JsonArray().add(row.getString("mode"));
                 processesObject.put("jobControlOptions", jobControlOptionsArray);
@@ -591,7 +594,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                 processesObject.put("outputTransmission", outputTransmissionArray);
 
                 JsonArray tempLinkArray = new JsonArray();
-                linkObject.put("title", row.getString("description"));
+                linkObject.put("title", "Process description as JSON");
                 linkObject.put("href",
                   baseUrl.concat("/processes/").concat(String.valueOf(row.getUUID("id"))));
 
