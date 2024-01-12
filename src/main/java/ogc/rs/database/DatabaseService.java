@@ -46,4 +46,5 @@ public interface DatabaseService {
     Future<List<JsonObject>> getTileMatrixSetRelationOverload(String collectionId, String tileMatrixSetId);
 
     Future<JsonObject> getProcesses(int limit);
+    Future<JsonObject> getProcess(String processId);
 }

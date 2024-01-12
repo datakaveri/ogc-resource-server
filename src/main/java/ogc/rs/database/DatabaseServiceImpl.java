@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
@@ -559,63 +560,80 @@ public class DatabaseServiceImpl implements DatabaseService{
     return result.future();
   }
 
-    @Override
-    public Future<JsonObject> getProcesses(int limit) {
-      Promise<JsonObject> promise = Promise.promise();
-      String sqlQuery = "select * from "+ PROCESSES_TABLE_NAME +" limit $1;";
-      client.withConnection(
-        conn -> conn.preparedQuery(sqlQuery).execute(Tuple.of(limit))
-          .onSuccess(rowSet -> {
+  @Override
+  public Future<JsonObject> getProcesses(int limit) {
+    Promise<JsonObject> promise = Promise.promise();
+    String sqlQuery =
+      "SELECT version, id, title, description, mode AS \"jobControlOptions\", keywords, response AS \"outputTransmission\" FROM " +
+        PROCESSES_TABLE_NAME + " LIMIT $1;";
+    executeQueryAndHandleResult(limit, promise, sqlQuery);
+    return promise.future();
+  }
 
-            if (rowSet.size() == 0) {
-              promise.fail(new OgcException(404, "Not found", "Process not found"));
-            }
-            else {
+  @Override
+  public Future<JsonObject> getProcess(String processId) {
+    Promise<JsonObject> promise = Promise.promise();
+    String sqlQuery =
+      "SELECT version, id, title, description, mode AS \"jobControlOptions\", keywords, response AS \"outputTransmission\"," +
+        " input as inputs, output as outputs FROM " + PROCESSES_TABLE_NAME + " WHERE id=$1::UUID;";
+    executeQueryAndHandleResult(UUID.fromString(processId), promise, sqlQuery);
+    return promise.future();
+  }
 
-              String baseUrl = config.getString("baseUrl");
-              JsonArray processesArray = new JsonArray();
-              JsonArray linkArray = new JsonArray();
-              JsonObject linkObject =
-                new JsonObject().put("type", "application/json").put("rel", "self");
+  private void executeQueryAndHandleResult(Object parameter, Promise<JsonObject> promise,
+                                           String sqlQuery) {
+    client.withConnection(
+      conn -> conn.preparedQuery(sqlQuery).execute(Tuple.of(parameter)).onSuccess(rowSet -> {
+        if (rowSet.size() == 0) {
+          promise.fail(new OgcException(404, "Not found", "Process not found"));
+        } else {
+          JsonObject result = handleRowSet(rowSet);
+          if (parameter instanceof Integer) {
+            promise.complete(result);
+          } else {
+            result.remove("links");
+            promise.complete(result);
+          }
+        }
+      }).onFailure(fail -> handleFailure(fail, promise)));
+  }
 
-              for (Row row : rowSet) {
-                JsonObject processesObject = new JsonObject();
-                processesObject.put("id", String.valueOf(row.getUUID("id")));
-                processesObject.put("title", row.getString("title"));
-                processesObject.put("version", row.getString("version"));
-                processesObject.put("description",row.getString("description"));
-                String[] keywords = row.getArrayOfStrings("keywords");
-                processesObject.put("keywords",Arrays.toString(keywords));
+  private JsonObject handleRowSet(RowSet<Row> rowSet) {
+    List<JsonObject> jsonObjects = new ArrayList<>();
+    String baseUrl = config.getString("baseUrl");
 
-                JsonArray jobControlOptionsArray = new JsonArray().add(row.getString("mode"));
-                processesObject.put("jobControlOptions", jobControlOptionsArray);
-
-                JsonArray outputTransmissionArray = new JsonArray().add(row.getString("response"));
-                processesObject.put("outputTransmission", outputTransmissionArray);
-
-                JsonArray tempLinkArray = new JsonArray();
-                linkObject.put("title", "Process description as JSON");
-                linkObject.put("href",
-                  baseUrl.concat("/processes/").concat(String.valueOf(row.getUUID("id"))));
-
-                tempLinkArray.add(linkObject.copy());
-                processesObject.put("links", tempLinkArray);
-
-                processesArray.add(processesObject);
-              }
-
-              JsonObject result = new JsonObject().put("processes", processesArray);
-              linkObject.put("href", baseUrl.concat("/processes"));
-              linkObject.remove("title");
-              linkArray.add(linkObject.copy());
-              result.put("links", linkArray);
-              promise.complete(result);
-
-            }
-          }).onFailure(fail -> {
-            LOGGER.error("Failed to get processes- {}", fail.getMessage());
-            promise.fail("Error!");
-          }));
-      return promise.future();
+    for (Row row : rowSet) {
+      JsonObject tempProcessObj = row.toJson();
+      JsonArray tempLinkArray = createLinkArray(baseUrl, row);
+      tempProcessObj.put("links", tempLinkArray);
+      jsonObjects.add(tempProcessObj);
     }
+
+    JsonObject result = new JsonObject().put("processes", jsonObjects);
+    JsonArray linkArray = createLinkArray(baseUrl, null);
+    result.put("links", linkArray);
+    return result;
+  }
+
+  private JsonArray createLinkArray(String baseUrl, Row row) {
+    JsonArray linkArray = new JsonArray();
+    JsonObject linkObject = new JsonObject().put("type", "application/json").put("rel", "self");
+
+    if (row != null) {
+      linkObject.put("title", "Process description as JSON");
+      linkObject.put("href",
+        baseUrl.concat("/processes/").concat(String.valueOf(row.getUUID("id"))));
+    } else {
+      linkObject.put("href", baseUrl.concat("/processes"));
+    }
+
+    linkArray.add(linkObject.copy());
+    return linkArray;
+  }
+
+  private void handleFailure(Throwable fail, Promise<JsonObject> promise) {
+    LOGGER.error("Failed to get processes- {}", fail.getMessage());
+    promise.fail("Error!");
+  }
+
 }
