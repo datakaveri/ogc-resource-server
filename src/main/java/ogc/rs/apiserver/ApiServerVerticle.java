@@ -135,6 +135,11 @@ public class ApiServerVerticle extends AbstractVerticle {
             .handler(this::getProcesses).handler(this::putCommonResponseHeaders)
             .handler(this::buildResponse).failureHandler(failureHandler);
 
+          routerBuilder.operation(PROCESS_API)
+            // .handler(AuthHandler.create(vertx))
+            .handler(this::getProcess).handler(this::putCommonResponseHeaders)
+            .handler(this::buildResponse).failureHandler(failureHandler);
+
           router = routerBuilder.createRouter();
           router
             .get(OPENAPI_SPEC)
@@ -278,6 +283,27 @@ public class ApiServerVerticle extends AbstractVerticle {
       routingContext.next();
     });
   }
+
+  private void getProcess(RoutingContext routingContext) {
+    String processId = routingContext.pathParams().get("processId");
+    dbService.getProcess(processId).onSuccess(successResult -> {
+      routingContext.put("response", successResult.toString());
+      routingContext.put("statusCode", 200);
+      routingContext.next();
+    }).onFailure(failed -> {
+      if (failed instanceof OgcException) {
+        routingContext.put("response", ((OgcException) failed).getJson().toString());
+        routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+      } else {
+        OgcException ogcException =
+          new OgcException(500, "Internal Server Error", "Internal Server Error");
+        routingContext.put("response", ogcException.getJson().toString());
+        routingContext.put("statusCode", ogcException.getStatusCode());
+      }
+      routingContext.next();
+    });
+  }
+
   private void buildResponse(RoutingContext routingContext) {
       routingContext.response().setStatusCode(routingContext.get("statusCode"))
           .end((String) routingContext.get("response"));

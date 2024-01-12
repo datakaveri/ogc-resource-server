@@ -5,7 +5,6 @@ import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
@@ -28,4 +27,5 @@ public interface DatabaseService {
 
     Future<JsonObject> getFeature(String collectionId, String featureId);
     Future<JsonObject> getProcesses(int limit);
+    Future<JsonObject> getProcess(String processId);
 }

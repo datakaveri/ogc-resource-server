@@ -131,6 +131,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/processList'
+        '400':
+          $ref: '#/components/responses/InvalidParameter'
         "500":
           $ref: '#/components/responses/ServerError'
   /collections:
@@ -248,6 +250,38 @@ paths:
       servers:
         - url: 'https://ogc.iudx.io'
           description: OGC-Resource-Server
+
+  '/processes/{processId}':
+    get:
+      tags:
+        - ProcessDescription
+      summary: retrieve a process description
+      description: |-
+        The process description contains information about inputs and outputs and a link to the execution-endpoint for the process.
+      operationId: getProcessDescription
+      parameters:
+        - $ref : '#/components/parameters/processId'
+      responses:
+        "200":
+          description: A process description.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/process'
+              examples:
+                processDescription:
+                  summary: A Process Description example
+                  externalValue: ../../examples/json/ProcessDescription.json
+        "404":
+          description: The requested URI was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+
 tags:
   - name: Capabilities
     description: Essential characteristics of OGC APIs
@@ -372,6 +406,14 @@ components:
       required: true
       schema:
         type: string
+    processId:
+      name: processId
+      in: path
+      description: local identifier of a process
+      required: true
+      schema:
+        type: string
+        format: uuid
   responses:
     LandingPage:
       description: |-
@@ -879,6 +921,24 @@ components:
         of items in the "features" array.
       minimum: 0
       example: 10
+    exception:
+      title: Exception Schema
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string-a716-44665541400
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+      additionalProperties: true
+      description: JSON schema for exceptions based on RFC 7807
     exception400:
       type: object
       properties:
@@ -905,6 +965,19 @@ components:
       example:
         code: Internal Server Error
         description: Internal Server Error
+    process:
+      allOf:
+        - $ref: '#/components/schemas/processSummary'
+        - type: object
+          properties:
+            inputs:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/inputDescription'
+            outputs:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/outputDescription'
     processList:
       required:
         - links
@@ -919,7 +992,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/processesLink'
-
     processSummary:
       allOf:
         - $ref: '#/components/schemas/descriptionType'
@@ -951,7 +1023,53 @@ components:
       properties:
         title:
           type: string
-          example: 'EchoProcess'
+        description:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/metadata'
+        additionalParameters:
+          allOf:
+            - $ref: '#/components/schemas/metadata'
+            - type: object
+              properties:
+                parameters:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/additionalParameter'
+    additionalParameter:
+      required:
+        - name
+        - value
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: array
+          items:
+            oneOf:
+              - type: string
+              - type: number
+              - type: integer
+              - type: array
+                items:
+                  type: object
+              - type: object
+    metadata:
+      type: object
+      properties:
+        title:
+          type: string
+        role:
+          type: string
+        href:
+          type: string
     jobControlOptions:
       type: string
       enum:
@@ -991,3 +1109,173 @@ components:
         type:
           type: string
           example: application/json
+    inputDescription:
+      allOf:
+        - $ref: '#/components/schemas/descriptionType'
+        - required:
+            - schema
+          type: object
+          properties:
+            minOccurs:
+              type: integer
+              default: 1
+            maxOccurs:
+              oneOf:
+                - type: integer
+                  default: 1
+                - type: string
+                  enum:
+                    - unbounded
+            schema:
+              $ref: '#/components/schemas/schema'
+    outputDescription:
+      allOf:
+        - $ref: '#/components/schemas/descriptionType'
+        - required:
+            - schema
+          type: object
+          properties:
+            schema:
+              $ref: '#/components/schemas/schema'
+    schema:
+      oneOf:
+        - $ref: '#/components/schemas/reference'
+        - type: object
+          properties:
+            title:
+              type: string
+            multipleOf:
+              minimum: 0
+              exclusiveMinimum: true
+              type: number
+            maximum:
+              type: number
+            exclusiveMaximum:
+              type: boolean
+              default: false
+            minimum:
+              type: number
+            exclusiveMinimum:
+              type: boolean
+              default: false
+            maxLength:
+              minimum: 0
+              type: integer
+            minLength:
+              minimum: 0
+              type: integer
+              default: 0
+            pattern:
+              type: string
+              format: regex
+            maxItems:
+              minimum: 0
+              type: integer
+            minItems:
+              minimum: 0
+              type: integer
+              default: 0
+            uniqueItems:
+              type: boolean
+              default: false
+            maxProperties:
+              minimum: 0
+              type: integer
+            minProperties:
+              minimum: 0
+              type: integer
+              default: 0
+            required:
+              minItems: 1
+              uniqueItems: true
+              type: array
+              items:
+                type: string
+            enum:
+              minItems: 1
+              uniqueItems: false
+              type: array
+              items:
+                type: object
+            type:
+              type: string
+              enum:
+                - array
+                - boolean
+                - integer
+                - number
+                - object
+                - string
+            not:
+              oneOf:
+                - $ref: '#/components/schemas/schema'
+                - $ref: '#/components/schemas/reference'
+            allOf:
+              type: array
+              items:
+                oneOf:
+                  - $ref: '#/components/schemas/schema'
+                  - $ref: '#/components/schemas/reference'
+            oneOf:
+              type: array
+              items:
+                oneOf:
+                  - $ref: '#/components/schemas/schema'
+                  - $ref: '#/components/schemas/reference'
+            anyOf:
+              type: array
+              items:
+                oneOf:
+                  - $ref: '#/components/schemas/schema'
+                  - $ref: '#/components/schemas/reference'
+            items:
+              oneOf:
+                - $ref: '#/components/schemas/schema'
+                - $ref: '#/components/schemas/reference'
+            properties:
+              type: object
+              additionalProperties:
+                oneOf:
+                  - $ref: '#/components/schemas/schema'
+                  - $ref: '#/components/schemas/reference'
+            additionalProperties:
+              oneOf:
+                - $ref: '#/components/schemas/schema'
+                - $ref: '#/components/schemas/reference'
+                - type: boolean
+              default: true
+            description:
+              type: string
+            format:
+              type: string
+            default:
+              type: object
+            nullable:
+              type: boolean
+              default: false
+            readOnly:
+              type: boolean
+              default: false
+            writeOnly:
+              type: boolean
+              default: false
+            example:
+              type: object
+            deprecated:
+              type: boolean
+              default: false
+            contentMediaType:
+              type: string
+            contentEncoding:
+              type: string
+            contentSchema:
+              type: string
+          additionalProperties: false
+    reference:
+      required:
+        - ref
+      type: object
+      properties:
+        ref:
+          type: string
+          format: uri-reference

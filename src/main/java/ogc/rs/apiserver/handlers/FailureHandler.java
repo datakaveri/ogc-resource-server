@@ -18,19 +18,15 @@ public class FailureHandler implements Handler<RoutingContext> {
   @Override
   public void handle(RoutingContext routingContext) {
     Throwable failure = routingContext.failure();
-    LOGGER.debug("Exception caught");
     /* exceptions from OpenAPI specification*/
-    if (failure instanceof ValidationException
-      || failure instanceof BodyProcessorException
-      || failure instanceof RequestPredicateException
-      || failure instanceof ParameterProcessorException) {
-      OgcException ogcException =
-        new OgcException(400, "Bad Request", failure.getCause().getMessage());
-      routingContext
-        .response()
-        .putHeader(CONTENT_TYPE, APPLICATION_JSON)
-        .setStatusCode(HttpStatus.SC_BAD_REQUEST)
-        .end(ogcException.getJson().toString());
+    if (failure instanceof ValidationException || failure instanceof BodyProcessorException ||
+      failure instanceof RequestPredicateException ||
+      failure instanceof ParameterProcessorException || failure instanceof NumberFormatException) {
+      String failureMessage =
+        failure.getCause() == null ? "Bad Request" : failure.getCause().getMessage();
+      OgcException ogcException = new OgcException(400, "Bad Request", failureMessage);
+      routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON)
+        .setStatusCode(HttpStatus.SC_BAD_REQUEST).end(ogcException.getJson().toString());
     }
     if (routingContext.response().ended()) {
       LOGGER.debug("Already ended");

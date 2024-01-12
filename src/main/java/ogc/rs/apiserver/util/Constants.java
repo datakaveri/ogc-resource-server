@@ -36,6 +36,7 @@ public class Constants {
 
     public static final String COLLECTIONS = "collections";
     public static final String PROCESSES_API = "getProcesses";
+    public static final String PROCESS_API = "getProcessDescription";
     public static final String CONTENT_TYPE = "content-type";
     public static final String APPLICATION_JSON = "application/json";
 
