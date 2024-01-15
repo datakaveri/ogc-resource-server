@@ -928,7 +928,7 @@ components:
       type: object
       properties:
         type:
-          type: string-a716-44665541400
+          type: string
         title:
           type: string
         status:
