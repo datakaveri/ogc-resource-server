@@ -167,6 +167,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                           response.sendFile("docs/conformance.json");
                         });
 
+
                 Router ogcRouter = routerBuilder.createRouter();
                 Router stacRouter = routerBuilderStac.createRouter();
                 router = Router.router(vertx);
@@ -580,6 +581,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             });
   }
 
+
   private void stacCatalog(RoutingContext routingContext) {
     try {
       String jsonFilePath = "docs/getStacLandingPage.json";
@@ -634,5 +636,6 @@ public class ApiServerVerticle extends AbstractVerticle {
     }
 
     return link;
+
   }
 }

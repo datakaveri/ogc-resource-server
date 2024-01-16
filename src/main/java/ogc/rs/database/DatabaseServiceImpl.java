@@ -254,6 +254,7 @@ public class DatabaseServiceImpl implements DatabaseService{
        result.complete(Map.of(DEFAULT_SERVER_CRS,4326));
        return result.future();
     }
+
     if (!queryParams.containsKey("crs") && !queryParams.containsKey("bbox-crs")) {
       result.complete(Map.of(DEFAULT_SERVER_CRS, 4326));
       return result.future();
@@ -330,6 +331,7 @@ public class DatabaseServiceImpl implements DatabaseService{
   }
 
 
+
   @Override
   public Future<List<JsonObject>> getStacCollections() {
     Promise<List<JsonObject>> result = Promise.promise();
@@ -340,6 +342,7 @@ public class DatabaseServiceImpl implements DatabaseService{
             conn ->
                 conn.preparedQuery(
                         "Select id, title, description, bbox, temporal,license from collections_details")
+
                     .collecting(collector)
                     .execute()
                     .map(SqlResult::value))
