@@ -27,4 +27,7 @@ public interface DatabaseService {
     Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams);
 
     Future<JsonObject> getFeature(String collectionId, String featureId);
+
+    Future<List<JsonObject>>  getStacCollections();
+
 }
