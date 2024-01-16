@@ -547,8 +547,17 @@ public class ApiServerVerticle extends AbstractVerticle {
         .put(
             "extent",
             new JsonObject()
-                .put("spatial", new JsonObject().put("bbox", collection.getJsonArray("bbox")))
-                .put("temporal", collection.getJsonArray("temporal")));
+                .put(
+                    "spatial",
+                    new JsonObject()
+                        .put("bbox", new JsonArray().add(collection.getJsonArray("bbox"))))
+                .put(
+                    "temporal",
+                    new JsonObject()
+                        .put(
+                            "interval",
+                            new JsonArray()
+                                .add(new JsonArray().add(collection.getJsonArray("temporal"))))));
     collection.remove("bbox");
     collection.remove("temporal");
 
