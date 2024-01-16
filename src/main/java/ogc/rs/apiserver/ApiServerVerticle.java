@@ -145,6 +145,7 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
 
+
                 routerBuilderStac
                     .operation("getStacLandingPage")
                     .handler(this::stacCatalog)
@@ -156,6 +157,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                     .handler(this::stacCollections)
                     .handler(this::putCommonResponseHeaders)
                     .handler(this::buildResponse);
+
 
                 routerBuilderStac
                     .operation("getConformanceDeclaration")
