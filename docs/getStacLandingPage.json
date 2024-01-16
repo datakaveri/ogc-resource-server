@@ -1,0 +1,26 @@
+{
+  "type": "Catalog",
+  "stac_version": "1.0.0",
+  "id": "stac",
+  "description": "This object represents a Catalog in a SpatioTemporal Asset Catalog.",
+  "links": [
+    {
+      "rel": "child",
+      "href": "https://ogc.iudx.io/collections/collections_details",
+      "type": "application/json",
+      "title": "Link to the STAC collection"
+    },
+    {
+      "rel": "self",
+      "href": "https://ogc.iudx.io/stac/",
+      "type": "application/json",
+      "title": "Link to the STAC catalog"
+    },
+    {
+      "rel": "root",
+      "href": "https://ogc.iudx.io/stac/",
+      "type": "application/json",
+      "title": "Link to the STAC catalog"
+    }
+  ]
+}
