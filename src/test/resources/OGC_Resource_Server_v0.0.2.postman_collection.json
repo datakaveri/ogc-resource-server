@@ -4957,6 +4957,24 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "fetch collections",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/stac/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stac",
+								""
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
