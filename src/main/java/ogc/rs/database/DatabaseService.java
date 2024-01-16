@@ -31,4 +31,7 @@ public interface DatabaseService {
     Future<Void> matchFilterWithProperties(String collectionId, Map<String, String> queryParams);
 
     Future<Map<String, Integer>> isCrsValid(String collectionId, Map<String, String> crs);
+
+    Future<List<JsonObject>>  getStacCollections();
+
 }
