@@ -252,10 +252,24 @@ paths:
         '200':
           $ref: '#/components/responses/CatalogLandingPage'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  description:
+                    type: string
+              examples:
+                Example 1:
+                  value:
+                    code: Bad Request
+                    description: Missing/Invalid parameters
         '500':
           $ref: '#/components/responses/ServerError'
-  /stacConformance:
+  /stac/conformance:
     get:
       tags:
         - Features
@@ -310,39 +324,10 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidParameter'
         '500':
           $ref: '#/components/responses/ServerError'
-  '/search':
-    get:
-      summary: Search STAC items with simple filtering.
-      operationId: getItemSearch
-      description: |-
-        Retrieve Items matching filters. Intended as a shorthand API for simple
-        queries.
-        
-        This method is required to implement.
-        
-        If this endpoint is implemented on a server, it is required to add a
-        link referring to this endpoint with `rel` set to `search` to the
-        `links` array in `GET /`. As `GET` is the default method, the `method`
-        may not be set explicitly in the link.
-      tags:
-        - Item Search
-      parameters:
-        - $ref: "#/components/parameters/bbox"
-        - $ref: "#/components/parameters/intersects"
-        - $ref: "#/components/parameters/datetime"
-        - $ref: "#/components/parameters/limit"
-        - $ref: "#/components/parameters/ids"
-        - $ref: "#/components/parameters/collectionsArray"
-      responses:
-        '200':
-          $ref: "#/components/responses/ItemCollection"
-        '404':
-          $ref: "#/components/responses/NotFound"
-        '500':
-          $ref: "#/components/responses/ServerError"
+
 
 tags:
   - name: Capabilities
@@ -492,36 +477,6 @@ components:
       required: true
       schema:
         type: string
-    ids:
-      name: ids
-      in: query
-      description: |-
-        Array of Item ids to return.
-      required: false
-      schema:
-        $ref: "#/components/schemas/ids"
-      explode: false
-    intersects:
-      name: intersects
-      in: query
-      description: |-
-        The optional intersects parameter filters the result Items in the same was as bbox, only with
-        a GeoJSON Geometry rather than a bbox.
-      required: false
-      schema:
-        $ref: "#/components/schemas/geometryGeoJSON"
-      style: form
-      explode: false
-    collectionsArray:
-      name: collections
-      in: query
-      description: |
-        Array of Collection IDs to include in the search for items.
-        Only Item objects in one of the provided collections will be searched
-      required: false
-      schema:
-        $ref: "#/components/schemas/collectionsArray"
-      explode: false
   responses:
     LandingPage:
       description: |-
@@ -1074,177 +1029,6 @@ components:
       required:
         - type
         - features
-    featureGeoJSON:
-      type: object
-      properties:
-        type:
-          enum:
-            - Feature
-        geometry:
-          $ref: '#/components/schemas/geometryGeoJSON'
-        properties:
-          type: object
-        id:
-          oneOf:
-            - type: string
-            - type: integer
-        links:
-          type: array
-          items:
-            $ref: '#/components/schemas/link'
-      required:
-        - type
-        - geometry
-        - properties
-    geometryGeoJSON:
-      oneOf:
-        - $ref: '#/components/schemas/pointGeoJSON'
-        - $ref: '#/components/schemas/multipointGeoJSON'
-        - $ref: '#/components/schemas/linestringGeoJSON'
-        - $ref: '#/components/schemas/multilinestringGeoJSON'
-        - $ref: '#/components/schemas/polygonGeoJSON'
-        - $ref: '#/components/schemas/multipolygonGeoJSON'
-        - $ref: '#/components/schemas/geometrycollectionGeoJSON'
-
-    pointGeoJSON:
-      type: object
-      properties:
-        type:
-          enum:
-            - Point
-        coordinates:
-          type: array
-          minItems: 2
-          items:
-            type: number
-      required:
-        - type
-        - coordinates
-
-    multipointGeoJSON:
-      type: object
-      properties:
-        type:
-          enum:
-            - MultiPoint
-        coordinates:
-          type: array
-          items:
-            type: array
-            minItems: 2
-            items:
-              type: number
-      required:
-        - type
-        - coordinates
-    linestringGeoJSON:
-      type: object
-      properties:
-        type:
-          enum:
-            - LineString
-        coordinates:
-          type: array
-          minItems: 2
-          items:
-            type: array
-            minItems: 2
-            items:
-              type: number
-      required:
-        - type
-        - coordinates
-    multilinestringGeoJSON:
-      type: object
-      properties:
-        type:
-          enum:
-            - MultiLineString
-        coordinates:
-          type: array
-          items:
-            type: array
-            minItems: 2
-            items:
-              type: array
-              minItems: 2
-              items:
-                type: number
-      required:
-        - type
-        - coordinates
-    polygonGeoJSON:
-      type: object
-      properties:
-        type:
-          enum:
-            - Polygon
-        coordinates:
-          type: array
-          items:
-            type: array
-            minItems: 4
-            items:
-              type: array
-              minItems: 2
-              items:
-                type: number
-      required:
-        - type
-        - coordinates
-    multipolygonGeoJSON:
-      type: object
-      properties:
-        type:
-          enum:
-            - MultiPolygon
-        coordinates:
-          type: array
-          items:
-            type: array
-            items:
-              type: array
-              minItems: 4
-              items:
-                type: array
-                minItems: 2
-                items:
-                  type: number
-      required:
-        - type
-        - coordinates
-    geometrycollectionGeoJSON:
-      type: object
-      properties:
-        type:
-          enum:
-            - GeometryCollection
-        geometries:
-          type: array
-          items:
-            $ref: '#/components/schemas/geometryGeoJSON'
-      required:
-        - type
-        - geometries
-    numberMatched:
-      type: integer
-      description: |-
-        The number of features of the feature type that match the selection
-        parameters like `bbox`.
-      minimum: 0
-      example: 127
-    numberReturned:
-      type: integer
-      description: |-
-        The number of features in the feature collection.
-
-        A server may omit this information in a response, if the information
-        about the number of features is not known or difficult to compute.
-
-        If the value is provided, the value shall be identical to the number
-        of items in the "features" array.
-      minimum: 0
-      example: 10
     catalogLandingPage:
       type: object
       required:
@@ -1593,136 +1377,6 @@ components:
                     anyOf:
                       - type: string
                       - type: number
-    datetime:
-      type: string
-      format: date-time
-      nullable: true
-      description: >-
-        The searchable date and time of the assets, in UTC.
-
-        It is formatted according to [RFC 3339, section
-        5.6](https://tools.ietf.org/html/rfc3339#section-5.6).
-
-        `null` is allowed, but requires `start_datetime` and `end_datetime` from
-        common metadata to be set.
-      example: '2018-02-12T00:00:00Z'
-    properties:
-      type: object
-      required:
-        - datetime
-      description: provides the core metadata fields plus extensions
-      properties:
-        datetime:
-          $ref: '#/components/schemas/datetime'
-      additionalProperties:
-        description: >-
-          Any additional properties added in via Item specification or
-          extensions.
-    assets:
-      type: object
-      additionalProperties:
-        type: object
-        required:
-          - href
-        properties:
-          href:
-            type: string
-            format: url
-            description: Link to the asset object
-          title:
-            type: string
-            description: Displayed title
-          description:
-            type: string
-            description: >-
-              Multi-line description to explain the asset.
-
-
-              [CommonMark 0.29](http://commonmark.org/) syntax MAY be used for
-              rich text representation.
-          type:
-            type: string
-          roles:
-            type: array
-            items:
-              type: string
-            description: Purposes of the asset
-    item:
-      description: >-
-        A GeoJSON Feature augmented with foreign members that contain values
-        relevant to a STAC entity
-      type: object
-      required:
-        - stac_version
-        - id
-        - type
-        - geometry
-        - bbox
-        - links
-        - properties
-        - assets
-      properties:
-        stac_version:
-          type: string
-        stac_extensions:
-          type: array
-          uniqueItems: true
-          items:
-            anyOf:
-              - title: Reference to a JSON Schema
-                type: string
-                format: uri
-              - title: Reference to a core extension
-                type: string
-        id:
-          description: identifier of the collection used, for example, in URIs
-          type: string
-        bbox:
-          $ref: '#/components/schemas/bbox'
-        geometry:
-          $ref: '#/components/schemas/geometryGeoJSON'
-        type:
-          type: string
-        links:
-          type: array
-          items:
-            type: object
-            properties:
-              href:
-                type: string
-              rel:
-                type: string
-              type:
-                type: string
-              title:
-                type: string
-            required:
-              - href
-              - rel
-        properties:
-          $ref: '#/components/schemas/properties'
-        assets:
-          $ref: '#/components/schemas/assets'
-    timeStamp:
-      description: >-
-        This property indicates the time and date when the response was
-        generated.
-      type: string
-      format: date-time
-    schemas-featureCollectionGeoJSON:
-      type: object
-      required:
-        - type
-        - features
-      properties:
-        type:
-          type: string
-          enum:
-            - FeatureCollection
-        features:
-          type: array
-          items:
-            $ref: '#/components/schemas/featureGeoJSON'
     stacFeatureCollectionGeoJSON:
       allOf:
         - $ref: '#/components/schemas/schemas-featureCollectionGeoJSON'
@@ -1756,19 +1410,122 @@ components:
               $ref: '#/components/schemas/numberMatched'
             numberReturned:
               $ref: '#/components/schemas/numberReturned'
-    ids:
-      type: array
-      description: |-
-        Array of Item ids to return.
-      items:
-        type: string
-    itemCollection:
+    featureGeoJSON:
+      type: object
+      properties:
+        type:
+          enum:
+            - Feature
+        geometry:
+          $ref: '#/components/schemas/geometryGeoJSON'
+        properties:
+          type: object
+        id:
+          oneOf:
+            - type: string
+            - type: integer
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/link'
+      required:
+        - type
+        - geometry
+        - properties
+    geometryGeoJSON:
+      oneOf:
+        - $ref: '#/components/schemas/pointGeoJSON'
+        - $ref: '#/components/schemas/multipointGeoJSON'
+        - $ref: '#/components/schemas/linestringGeoJSON'
+        - $ref: '#/components/schemas/multilinestringGeoJSON'
+        - $ref: '#/components/schemas/polygonGeoJSON'
+        - $ref: '#/components/schemas/multipolygonGeoJSON'
+        - $ref: '#/components/schemas/geometrycollectionGeoJSON'
+    pointGeoJSON:
+      type: object
+      properties:
+        type:
+          enum:
+            - Point
+        coordinates:
+          type: array
+          minItems: 2
+          items:
+            type: number
+      required:
+        - type
+        - coordinates
+    multipointGeoJSON:
+      type: object
+      properties:
+        type:
+          enum:
+            - MultiPoint
+        coordinates:
+          type: array
+          items:
+            type: array
+            minItems: 2
+            items:
+              type: number
+      required:
+        - type
+        - coordinates
+    item:
       description: >-
-        A GeoJSON FeatureCollection augmented with foreign members that contain values relevant to a STAC entity
+        A GeoJSON Feature augmented with foreign members that contain values
+        relevant to a STAC entity
       type: object
       required:
-        - features
+        - stac_version
+        - id
         - type
+        - geometry
+        - bbox
+        - links
+        - properties
+        - assets
+      properties:
+        stac_version:
+          type: string
+        stac_extensions:
+          type: array
+          uniqueItems: true
+          items:
+            anyOf:
+              - title: Reference to a JSON Schema
+                type: string
+                format: uri
+              - title: Reference to a core extension
+                type: string
+    linestringGeoJSON:
+      type: object
+      properties:
+        type:
+          enum:
+            - LineString
+        coordinates:
+          type: array
+          minItems: 2
+          items:
+            type: array
+            minItems: 2
+            items:
+              type: number
+      required:
+        - type
+        - coordinates
+    timeStamp:
+      description: >-
+        This property indicates the time and date when the response was
+        generated.
+      type: string
+      format: date-time
+    schemas-featureCollectionGeoJSON:
+      type: object
+      required:
+        - type
+        - features
       properties:
         type:
           type: string
@@ -1777,27 +1534,98 @@ components:
         features:
           type: array
           items:
-            $ref: "#/components/schemas/item"
-        links:
+            $ref: '#/components/schemas/featureGeoJSON'
+    multilinestringGeoJSON:
+      type: object
+      properties:
+        type:
+          enum:
+            - MultiLineString
+        coordinates:
           type: array
-          description: >-
-            An array of links. Can be used for pagination, e.g. by providing a link
-            with the `next` relation type.
           items:
-            $ref: "#/components/schemas/link"
-        numberMatched:
-          type: integer
-          minimum: 0
-        numberReturned:
-          type: integer
-          minimum: 0
-    collectionsArray:
-      type: array
+            type: array
+            minItems: 2
+            items:
+              type: array
+              minItems: 2
+              items:
+                type: number
+      required:
+        - type
+        - coordinates
+    polygonGeoJSON:
+      type: object
+      properties:
+        type:
+          enum:
+            - Polygon
+        coordinates:
+          type: array
+          items:
+            type: array
+            minItems: 4
+            items:
+              type: array
+              minItems: 2
+              items:
+                type: number
+      required:
+        - type
+        - coordinates
+    multipolygonGeoJSON:
+      type: object
+      properties:
+        type:
+          enum:
+            - MultiPolygon
+        coordinates:
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              minItems: 4
+              items:
+                type: array
+                minItems: 2
+                items:
+                  type: number
+      required:
+        - type
+        - coordinates
+    geometrycollectionGeoJSON:
+      type: object
+      properties:
+        type:
+          enum:
+            - GeometryCollection
+        geometries:
+          type: array
+          items:
+            $ref: '#/components/schemas/geometryGeoJSON'
+      required:
+        - type
+        - geometries
+    numberMatched:
+      type: integer
       description: |-
-        Array of Collection IDs to include in the search for items.
-        Only Item objects in one of the provided collections will be searched.
-      items:
-        type: string
+        The number of features of the feature type that match the selection
+        parameters like `bbox`.
+      minimum: 0
+      example: 127
+    numberReturned:
+      type: integer
+      description: |-
+        The number of features in the feature collection.
+
+        A server may omit this information in a response, if the information
+        about the number of features is not known or difficult to compute.
+
+        If the value is provided, the value shall be identical to the number
+        of items in the "features" array.
+      minimum: 0
+      example: 10
     bbox:
       description: |-
         Only features that have a geometry that intersects the bounding box are
@@ -1834,6 +1662,35 @@ components:
       maxItems: 6
       items:
         type: number
+    itemCollection:
+      description: >-
+        A GeoJSON FeatureCollection augmented with foreign members that contain values relevant to a STAC entity
+      type: object
+      required:
+        - features
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - FeatureCollection
+        features:
+          type: array
+          items:
+            $ref: "#/components/schemas/item"
+        links:
+          type: array
+          description: >-
+            An array of links. Can be used for pagination, e.g. by providing a link
+            with the `next` relation type.
+          items:
+            $ref: "#/components/schemas/link"
+        numberMatched:
+          type: integer
+          minimum: 0
+        numberReturned:
+          type: integer
+          minimum: 0
     exception400:
       type: object
       properties:
