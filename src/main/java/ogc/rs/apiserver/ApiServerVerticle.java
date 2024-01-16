@@ -134,7 +134,13 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
 
-
+                routerBuilder
+                    .operation("getStacLandingPage")
+                    .handler(
+                        routingContext -> {
+                          HttpServerResponse response = routingContext.response();
+                          response.sendFile("docs/getStacLandingPage.json");
+                        });
 
           router = routerBuilder.createRouter();
           router

@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "3ae53bd2-63dd-494d-969b-adc6dc5d048f",
+		"_postman_id": "05a5d959-70a8-4527-a438-999113805fb8",
 		"name": "OGC Resource Server v0.0.2",
 		"description": "Components/APIs used in the OGC Compliant Resource Server.\n\nOGC Features API standard can be found at\n\n[\"OGC API - Features - Part 1: Core corrigendum standard\"](https://docs.opengeospatial.org/is/17-069r4/17-069r4.html).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "28022201"
+		"_exporter_id": "27217689"
 	},
 	"item": [
 		{
@@ -4936,6 +4936,29 @@
 				}
 			],
 			"description": "Tiles pertaining to a collection"
+		},
+		{
+			"name": "STAC",
+			"item": [
+				{
+					"name": "landing page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/stac/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stac",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "landing page",
