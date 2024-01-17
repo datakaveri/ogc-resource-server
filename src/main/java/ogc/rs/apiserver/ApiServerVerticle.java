@@ -591,8 +591,8 @@ public class ApiServerVerticle extends AbstractVerticle {
       String type = stacLandingPage.getString("type");
       String description = stacLandingPage.getString("description");
       String title = stacLandingPage.getString("title");
+      String stacVersion = stacLandingPage.getString("stacVersion");
       String catalogId = config().getString("catalogId");
-      String stacVersion = config().getString("stacVersion");
 
       JsonArray links =
           new JsonArray()
@@ -636,6 +636,4 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     return link;
   }
-
-
- }
+}
