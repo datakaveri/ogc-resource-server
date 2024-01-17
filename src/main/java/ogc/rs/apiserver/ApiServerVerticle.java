@@ -3,6 +3,8 @@ package ogc.rs.apiserver;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -15,7 +17,6 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
-import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
@@ -130,11 +131,9 @@ public class ApiServerVerticle extends AbstractVerticle {
 
                 routerBuilder
                     .operation("getStacLandingPage")
-                    .handler(
-                        routingContext -> {
-                          HttpServerResponse response = routingContext.response();
-                          response.sendFile("docs/getStacLandingPage.json");
-                        });
+                    .handler(this::stacCatalog)
+                    .handler(this::putCommonResponseHeaders)
+                    .handler(this::buildResponse);
 
                 routerBuilder
                     .operation("getStacCollections")
@@ -419,6 +418,62 @@ public class ApiServerVerticle extends AbstractVerticle {
             });
   }
 
+  private void stacCatalog(RoutingContext routingContext) {
+    try {
+      String jsonFilePath = "docs/getStacLandingPage.json";
+      FileSystem fileSystem = vertx.fileSystem();
+      Buffer buffer = fileSystem.readFileBlocking(jsonFilePath);
+      JsonObject stacLandingPage = new JsonObject(buffer.toString());
+
+      String type = stacLandingPage.getString("type");
+      String description = stacLandingPage.getString("description");
+      String title = stacLandingPage.getString("title");
+      String catalogId = config().getString("catalogId");
+      String stacVersion = config().getString("stacVersion");
+
+      JsonArray links =
+          new JsonArray()
+              .add(createLink("root", STAC, title))
+              .add(createLink("self", STAC, title))
+              .add(createLink("child", STAC + "/" + COLLECTIONS + "/{collectionId}", null));
+
+      JsonObject catalog =
+          new JsonObject()
+              .put("type", type)
+              .put("description", description)
+              .put("id", catalogId)
+              .put("stac_version", stacVersion)
+              .put("links", links);
+
+      routingContext.put("response", catalog.encode());
+      routingContext.put("statusCode", 200);
+      routingContext.next();
+    } catch (Exception e) {
+      LOGGER.debug("Error reading the JSON file: {}", e.getMessage());
+      routingContext.put(
+          "response",
+          new OgcException(500, "Internal Server Error", "Something " + "broke")
+              .getJson()
+              .toString());
+      routingContext.put("statusCode", 500);
+      routingContext.next();
+    }
+  }
+
+  private JsonObject createLink(String rel, String href, String title) {
+    JsonObject link =
+        new JsonObject()
+            .put("rel", rel)
+            .put("href", hostName + ogcBasePath + href)
+            .put("type", "application/json");
+
+    if (title != null) {
+      link.put("title", title);
+    }
+
+    return link;
+  }
+
   private JsonObject buildStacCollectionResult(List<JsonObject> success) {
     JsonObject collection = success.get(0);
     collection
@@ -443,6 +498,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                             hostName
                                 + ogcBasePath
                                 + STAC
+                                + "/"
                                 + COLLECTIONS
                                 + "/"
                                 + collection.getString("id"))
