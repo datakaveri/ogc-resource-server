@@ -384,8 +384,65 @@ public class ApiServerVerticle extends AbstractVerticle {
                       JsonObject json;
                       List<JsonObject> tempArray = new ArrayList<>();
                       tempArray.add(collection);
-                      json = buildStacCollectionResult(tempArray);
-                      collections.add(json);
+                      String jsonFilePath = "docs/getStacLandingPage.json";
+                      FileSystem fileSystem = vertx.fileSystem();
+                      Buffer buffer = fileSystem.readFileBlocking(jsonFilePath);
+                      JsonObject stacMetadata = new JsonObject(buffer.toString());
+                      String license = stacMetadata.getString("stacLicense");
+                      String stacVersion = stacMetadata.getString("stacVersion");
+                      JsonObject singleCollection = tempArray.get(0);
+                      singleCollection
+                          .put("type", "Collection")
+                          .put(
+                              "links",
+                              new JsonArray()
+                                  .add(createLink("root", STAC + "/", null))
+                                  .add(createLink("parent", STAC + "/", null))
+                                  .add(
+                                      createLink(
+                                          "self",
+                                          STAC
+                                              + "/"
+                                              + COLLECTIONS
+                                              + "/"
+                                              + collection.getString("id"),
+                                          collection.getString("title")))
+                                  .add(
+                                      createLink(
+                                          "items",
+                                          STAC
+                                              + "/"
+                                              + COLLECTIONS
+                                              + "/"
+                                              + collection.getString("id")
+                                              + "/"
+                                              + ITEMS,
+                                          collection.getString("title"))))
+                          .put("stac_version", stacVersion)
+                          .put("license", license)
+                          .put(
+                              "extent",
+                              new JsonObject()
+                                  .put(
+                                      "spatial",
+                                      new JsonObject()
+                                          .put(
+                                              "bbox",
+                                              new JsonArray().add(collection.getJsonArray("bbox"))))
+                                  .put(
+                                      "temporal",
+                                      new JsonObject()
+                                          .put(
+                                              "interval",
+                                              new JsonArray()
+                                                  .add(
+                                                      new JsonArray()
+                                                          .add(
+                                                              collection.getJsonArray(
+                                                                  "temporal"))))));
+                      singleCollection.remove("bbox");
+                      singleCollection.remove("temporal");
+                      collections.add(singleCollection);
                     } catch (Exception e) {
                       LOGGER.error("Something went wrong here: {}", e.getMessage());
                       routingContext.put(
@@ -428,8 +485,8 @@ public class ApiServerVerticle extends AbstractVerticle {
       String type = stacLandingPage.getString("type");
       String description = stacLandingPage.getString("description");
       String title = stacLandingPage.getString("title");
+      String stacVersion = stacLandingPage.getString("stacVersion");
       String catalogId = config().getString("catalogId");
-      String stacVersion = config().getString("stacVersion");
 
       JsonArray links =
           new JsonArray()
@@ -472,73 +529,5 @@ public class ApiServerVerticle extends AbstractVerticle {
     }
 
     return link;
-  }
-
-  private JsonObject buildStacCollectionResult(List<JsonObject> success) {
-    JsonObject collection = success.get(0);
-    collection
-        .put("type", "Collection")
-        .put(
-            "links",
-            new JsonArray()
-                .add(
-                    new JsonObject()
-                        .put("href", hostName + ogcBasePath + STAC + "/")
-                        .put("rel", "root")
-                        .put("type", "application/json"))
-                .add(
-                    new JsonObject()
-                        .put("href", hostName + ogcBasePath + STAC + "/")
-                        .put("rel", "parent")
-                        .put("type", "application/json"))
-                .add(
-                    new JsonObject()
-                        .put(
-                            "href",
-                            hostName
-                                + ogcBasePath
-                                + STAC
-                                + "/"
-                                + COLLECTIONS
-                                + "/"
-                                + collection.getString("id"))
-                        .put("rel", "self")
-                        .put("type", "application/json")
-                        .put("title", collection.getString("title")))
-                .add(
-                    new JsonObject()
-                        .put(
-                            "href",
-                            hostName
-                                + ogcBasePath
-                                + STAC
-                                + COLLECTIONS
-                                + "/"
-                                + collection.getString("id")
-                                + "/"
-                                + ITEMS)
-                        .put("rel", "items")
-                        .put("title", collection.getString("title"))
-                        .put("type", "application/geo+json")))
-        .put("stac_version", config().getString("stacVersion"))
-        .put("license", config().getString("stacLicense"))
-        .put(
-            "extent",
-            new JsonObject()
-                .put(
-                    "spatial",
-                    new JsonObject()
-                        .put("bbox", new JsonArray().add(collection.getJsonArray("bbox"))))
-                .put(
-                    "temporal",
-                    new JsonObject()
-                        .put(
-                            "interval",
-                            new JsonArray()
-                                .add(new JsonArray().add(collection.getJsonArray("temporal"))))));
-    collection.remove("bbox");
-    collection.remove("temporal");
-
-    return collection;
   }
 }
