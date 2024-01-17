@@ -588,12 +588,11 @@ public class ApiServerVerticle extends AbstractVerticle {
       FileSystem fileSystem = vertx.fileSystem();
       Buffer buffer = fileSystem.readFileBlocking(jsonFilePath);
       JsonObject stacLandingPage = new JsonObject(buffer.toString());
-
       String type = stacLandingPage.getString("type");
       String description = stacLandingPage.getString("description");
       String title = stacLandingPage.getString("title");
-      String stacVersion = stacLandingPage.getString("stacVersion");
       String catalogId = config().getString("catalogId");
+      String stacVersion = config().getString("stacVersion");
 
       JsonArray links =
           new JsonArray()
@@ -636,6 +635,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     }
 
     return link;
-
   }
-}
+
+
+ }
