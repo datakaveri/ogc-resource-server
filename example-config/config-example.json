@@ -5,7 +5,7 @@
   ],
   "clusterId": "ogc-rs-cluster",
   "commonConfig" : {
-    "dxApiBasePath" : "/ogc/v1",
+    "ogcBasePath" : "/",
     "dxCatalogueBasePath": "/iudx/cat/v1",
     "dxAuthBasePath": "/auth/v1",
     "hostName": "https://server.url.com",
