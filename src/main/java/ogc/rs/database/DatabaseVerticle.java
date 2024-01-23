@@ -52,11 +52,11 @@ public class DatabaseVerticle extends AbstractVerticle {
         this.pool = PgPool.pool(vertx, connectOptions, poolOptions);
 
         dbService = new DatabaseServiceImpl(this.pool);
-
         binder = new ServiceBinder(vertx);
         consumer = binder.setAddress(DATABASE_SERVICE_ADDRESS).register(DatabaseService.class, dbService);
         LOGGER.info("Database verticle started.");
-    }
+
+   }
 
     @Override
     public void stop() {

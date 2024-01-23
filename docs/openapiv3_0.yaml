@@ -189,6 +189,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/bbox'
+        - $ref: '#/components/parameters/bbox-crs'
+        - $ref: '#/components/parameters/crs'
         - $ref: '#/components/parameters/datetime'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/collectionId'
@@ -277,8 +279,28 @@ components:
       explode: false
       schema:
         type: array
+        minItems: 4
+        maxItems: 6
         items:
           type: number
+    bbox-crs:
+      name: bbox-crs
+      in: query
+      required: false
+      schema:
+        type: string
+        format: uri
+      style: form
+      explode: false
+    crs:
+      name: crs
+      in: query
+      required: false
+      schema:
+        type: string
+        format: uri
+      style: form
+      explode: false
     datetime:
       name: datetime
       in: query
@@ -336,7 +358,7 @@ components:
       schema:
         type: integer
         minimum: 0
-        maximum: 1000
+        maximum: 2000000
         default: 10
     collectionId:
       name: collectionId
@@ -646,6 +668,12 @@ components:
           type: string
         description:
           type: string
+        crs:
+          description: a global list of CRS identifiers that are supported by spatial feature collections offered by the service
+          type: array
+          items:
+            type: string
+            format: uri
         links:
           type: array
           items:

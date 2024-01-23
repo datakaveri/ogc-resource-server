@@ -5,7 +5,6 @@ import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
@@ -24,7 +23,12 @@ public interface DatabaseService {
     Future<List<JsonObject>>  getCollections();
     Future<List<JsonObject>>  getCollection(final String collectionId);
 
-    Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams);
+    Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams, Map<String, Integer> crs);
 
-    Future<JsonObject> getFeature(String collectionId, String featureId);
+    Future<JsonObject> getFeature(String collectionId, String featureId, Map<String, String> queryParams, Map<String,
+        Integer> crs);
+
+    Future<Void> matchFilterWithProperties(String collectionId, Map<String, String> queryParams);
+
+    Future<Map<String, Integer>> isCrsValid(String collectionId, Map<String, String> crs);
 }

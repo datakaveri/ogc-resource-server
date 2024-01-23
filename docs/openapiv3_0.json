@@ -236,6 +236,12 @@
             "$ref": "#/components/parameters/bbox"
           },
           {
+            "$ref": "#/components/parameters/bbox-crs"
+          },
+          {
+            "$ref": "#/components/parameters/crs"
+          },
+          {
             "$ref": "#/components/parameters/datetime"
           },
           {
@@ -324,9 +330,33 @@
         "explode": false,
         "schema": {
           "type": "array",
+          "minItems": 4,
+          "maxItems": 6,
           "items": {
             "type": "number"
           }
+        }
+      },
+      "bbox-crs": {
+        "name": "bbox-crs",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "crs": {
+        "name": "crs",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "string",
+          "format": "uri"
         }
       },
       "datetime": {
@@ -364,7 +394,7 @@
         "schema": {
           "type": "integer",
           "minimum": 0,
-          "maximum": 1000,
+          "maximum": 2000000,
           "default": 10
         }
       },
@@ -817,6 +847,14 @@
           "description": {
             "type": "string"
           },
+          "crs": {
+            "type": "array",
+            "description": "a global list of CRS identifiers that are supported by spatial feature collections offered by the service",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
           "links": {
             "type": "array",
             "items": {
@@ -857,6 +895,7 @@
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "FeatureCollection"
             ]
@@ -889,6 +928,7 @@
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "Feature"
             ]
@@ -951,6 +991,7 @@
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "Point"
             ]
@@ -972,6 +1013,7 @@
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "MultiPoint"
             ]
@@ -996,6 +1038,7 @@
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "LineString"
             ]
@@ -1021,6 +1064,7 @@
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "MultiLineString"
             ]
@@ -1049,6 +1093,7 @@
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "Polygon"
             ]
@@ -1077,6 +1122,7 @@
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "MultiPolygon"
             ]
@@ -1108,6 +1154,7 @@
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "GeometryCollection"
             ]
