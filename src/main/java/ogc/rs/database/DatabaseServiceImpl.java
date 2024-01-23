@@ -628,7 +628,7 @@ public class DatabaseServiceImpl implements DatabaseService{
 
   private JsonObject handleRowSet(RowSet<Row> rowSet) {
     List<JsonObject> jsonObjects = new ArrayList<>();
-    String baseUrl = config.getString("baseUrl");
+    String baseUrl = config.getString("hostName");
 
     for (Row row : rowSet) {
       JsonObject tempProcessObj = row.toJson();
