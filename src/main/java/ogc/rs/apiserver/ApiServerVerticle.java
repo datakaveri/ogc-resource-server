@@ -10,7 +10,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.Json;
+import io.vertx.core.http.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -21,12 +21,14 @@ import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.apiserver.util.awss3.AWS4SignerBase;
+import ogc.rs.apiserver.util.awss3.AWS4SignerForAuthorizationHeader;
 import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -64,6 +66,10 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     JsonArray allCrsSupported = new JsonArray();
 
+    static final String S3_BUCKET = System.getenv("S3_BUCKET");
+    static final String S3_REGION = System.getenv("S3_REGION");
+    static final String S3_ACCESS_KEY = System.getenv("S3_ACCESS_KEY");
+    static final String S3_SECRET_KEY = System.getenv("S3_SECRET_KEY");
 
     /**
      * This method is used to start the Verticle. It deploys a verticle in a cluster/single instance, reads the
@@ -479,14 +485,72 @@ public class ApiServerVerticle extends AbstractVerticle {
         });
   }
   private void getTile(RoutingContext routingContext) {
-      String collectionId = routingContext.pathParam("collectionId");
-      String tileMatrixSetId = routingContext.pathParam("tileMatrixSetId");
-      String tileMatrixId = routingContext.pathParam("tileMatrixId");
-      String tileRow = routingContext.pathParam("tileRow");
-      String tileCol = routingContext.pathParam("tileCol");
+    String collectionId = routingContext.pathParam("collectionId");
+    String tileMatrixSetId = routingContext.pathParam("tileMatrixSetId");
+    String tileMatrixId = routingContext.pathParam("tileMatrix");
+    String tileRow = routingContext.pathParam("tileRow");
+    String tileCol = routingContext.pathParam("tileCol");
+    String strUrl = "https://" + S3_BUCKET + ".s3." + S3_REGION + ".amazonaws.com" + "/" + tileMatrixSetId
+        + "/" + collectionId + "/" + tileMatrixId + "/" + tileRow + "/" + tileCol + ".png";
+    HttpServerResponse response = routingContext.response();
+    // need to set chunked for streaming response because Content-Length cannot be determined
+    // beforehand.
+    response.setChunked(true);
+    HttpClient httpClient = vertx.createHttpClient(new HttpClientOptions().setSsl(true));
+    response.putHeader("Content-Type", "image/png");
 
-      //s3-fuse?
+    URL url;
+    try {
+      url = new URL(strUrl);
+    } catch (MalformedURLException e) {
+      LOGGER.error("Internal Server Error, {}", "Malformed URL");
+      routingContext.put("response",
+          new OgcException(500, "Internal Server Error", "Internal Server Error").getJson().toString());
+      routingContext.put("statusCode", 500);
+      return;
+    }
 
+    Map<String, String> headers = new HashMap<String, String>();
+    headers.put("x-amz-content-sha256", AWS4SignerBase.EMPTY_BODY_SHA256);
+
+    AWS4SignerForAuthorizationHeader signer =
+        new AWS4SignerForAuthorizationHeader(url, "GET", "s3", S3_REGION);
+
+    String signedAuthorizationHeader = signer.computeSignature(headers, null, // no query parameters
+        AWS4SignerBase.EMPTY_BODY_SHA256, S3_ACCESS_KEY, S3_SECRET_KEY);
+
+    headers.put("Authorization", signedAuthorizationHeader);
+
+    httpClient.request(HttpMethod.GET, url.getDefaultPort(), url.getHost(), url.getPath())
+        .compose(req -> {
+          headers.forEach(req::putHeader);
+          return req.send();
+        })
+        .compose(res -> {
+          if (res.statusCode() == 404) {
+            return Future.failedFuture(new OgcException(404, "Not Found", "Tile not found."));
+          } else if (res.statusCode() == 200) {
+            return res.pipeTo(response);
+          } else {
+            LOGGER.error("Internal Server Error, Something went wrong here.");
+            return Future.failedFuture(new OgcException(500, "Internal Server Error", "Internal Server Error"));
+          }
+        })
+        .onSuccess(res -> {
+          return;
+        })
+        .onFailure(failed -> {
+            if (failed instanceof OgcException){
+              routingContext.put("response",((OgcException) failed).getJson().toString());
+              routingContext.put("statusCode", 404);
+            }
+            else{
+              routingContext.put("response",
+                  new OgcException(500, "Internal Server Error", "Internal Server Error").getJson().toString());
+              routingContext.put("statusCode", 500);
+            }
+            routingContext.next();
+        });
   }
 
   private void getTileSet(RoutingContext routingContext) {
