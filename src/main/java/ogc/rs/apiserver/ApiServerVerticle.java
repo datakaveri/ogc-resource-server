@@ -6,10 +6,7 @@ import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.http.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -60,13 +57,11 @@ public class ApiServerVerticle extends AbstractVerticle {
     private String hostName;
     private DatabaseService dbService;
     private Buffer ogcLandingPageBuf;
-
-    JsonArray allCrsSupported = new JsonArray();
-
-    static final String S3_BUCKET = System.getenv("S3_BUCKET");
-    static final String S3_REGION = System.getenv("S3_REGION");
-    static final String S3_ACCESS_KEY = System.getenv("S3_ACCESS_KEY");
-    static final String S3_SECRET_KEY = System.getenv("S3_SECRET_KEY");
+    private HttpClient httpClient;
+    static String S3_BUCKET;
+    static String S3_REGION;
+    static String S3_ACCESS_KEY;
+    static String S3_SECRET_KEY;
 
     /**
      * This method is used to start the Verticle. It deploys a verticle in a cluster/single instance, reads the
@@ -87,10 +82,14 @@ public class ApiServerVerticle extends AbstractVerticle {
       /* Get base paths from config */
       ogcBasePath = config().getString("ogcBasePath");
       hostName = config().getString("hostName");
-
       /* Initialize OGC landing page buffer - since configured hostname needs to be in it */
       String landingPageTemplate = vertx.fileSystem().readFileBlocking("docs/landingPage.json").toString();
       ogcLandingPageBuf = Buffer.buffer(landingPageTemplate.replace("$HOSTNAME", hostName));
+
+      S3_BUCKET = config().getString("s3BucketName");
+      S3_REGION = config().getString("s3Region");
+      S3_ACCESS_KEY = config().getString("s3AccessKey");
+      S3_SECRET_KEY = config().getString("s3SecretKey");
 
       Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/openapiv3_0.yaml");
       Future<RouterBuilder> routerBuilderStacFut =
@@ -245,7 +244,9 @@ public class ApiServerVerticle extends AbstractVerticle {
           HttpServer server = vertx.createHttpServer(serverOptions);
           return server.requestHandler(router).listen(port);
           }).onSuccess(success -> LOGGER.info("Started HTTP server at port:" + success.actualPort()))
-          .onFailure(Throwable::printStackTrace);;
+          .onFailure(Throwable::printStackTrace);
+
+      httpClient = vertx.createHttpClient(new HttpClientOptions().setSsl(true));
     }
 
   private void getFeature(RoutingContext routingContext) {
@@ -487,14 +488,12 @@ public class ApiServerVerticle extends AbstractVerticle {
     String tileMatrixId = routingContext.pathParam("tileMatrix");
     String tileRow = routingContext.pathParam("tileRow");
     String tileCol = routingContext.pathParam("tileCol");
-//    String strUrl = "https://" + S3_BUCKET + ".s3." + S3_REGION + ".amazonaws.com" + "/" + tileMatrixSetId
-//        + "/" + collectionId + "/" + tileMatrixId + "/" + tileRow + "/" + tileCol + ".png";
     HttpServerResponse response = routingContext.response();
     // need to set chunked for streaming response because Content-Length cannot be determined
     // beforehand.
     response.setChunked(true);
     response.putHeader("Content-Type", "image/png");
-    DataFromS3 dataFromS3 = new DataFromS3(vertx);
+    DataFromS3 dataFromS3 = new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
     String urlString = dataFromS3.getFullyQualifiedTileUrlString(collectionId, tileMatrixSetId, tileMatrixId, tileRow,
         tileCol);
     dataFromS3.setUrlFromString(urlString);

@@ -24,19 +24,22 @@ public class DataFromS3 {
   private static HttpClient client;
 
   private String s3Url;
-  static final String S3_BUCKET = System.getenv("S3_BUCKET");
-  static final String S3_REGION = System.getenv("S3_REGION");
-  static final String S3_ACCESS_KEY = System.getenv("S3_ACCESS_KEY");
-  static final String S3_SECRET_KEY = System.getenv("S3_SECRET_KEY");
+  static String S3_BUCKET;
+  static String S3_REGION;
+  static String S3_ACCESS_KEY;
+  static String S3_SECRET_KEY;
   private final Map<String, String> headers;
   private URL url;
 
-  public DataFromS3(Vertx vertx) {
+  public DataFromS3(HttpClient client, String bucket, String region, String accessKey, String secretKey) {
     this.s3Url = "https://" + S3_BUCKET + ".s3." + S3_REGION + ".amazonaws.com" + "/";
-    client = vertx.createHttpClient(new HttpClientOptions().setSsl(true));
+    S3_BUCKET = bucket;
+    S3_REGION = region;
+    S3_ACCESS_KEY = accessKey;
+    S3_SECRET_KEY = secretKey;
+    DataFromS3.client = client;
     this.headers = new HashMap<>();
   }
-
   public Future<HttpClientResponse> getTileFromS3() {
     Promise <HttpClientResponse> response  = Promise.promise();
     client.request(HttpMethod.GET, url.getDefaultPort(), url.getHost(), url.getPath())
