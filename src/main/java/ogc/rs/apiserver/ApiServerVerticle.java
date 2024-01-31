@@ -21,6 +21,8 @@ import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -28,6 +30,7 @@ import java.util.*;
 
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
+import static ogc.rs.common.Constants.DEFAULT_SERVER_CRS;
 
 /**
  * The OGC Resource Server API Verticle.
@@ -54,6 +57,8 @@ public class ApiServerVerticle extends AbstractVerticle {
     private String hostName;
     private DatabaseService dbService;
 
+    JsonArray allCrsSupported = new JsonArray();
+
 
     /**
      * This method is used to start the Verticle. It deploys a verticle in a cluster/single instance, reads the
@@ -74,6 +79,7 @@ public class ApiServerVerticle extends AbstractVerticle {
       /* Get base paths from config */
       ogcBasePath = config().getString("ogcBasePath");
       hostName = config().getString("hostName");
+
       Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/openapiv3_0.yaml");
       routerBuilderFut.compose(routerBuilder -> {
 
@@ -164,12 +170,28 @@ public class ApiServerVerticle extends AbstractVerticle {
 //    }
     String featureId = routingContext.pathParam("featureId");
     System.out.println("collectionId- " + collectionId + " featureId- " + featureId);
-    dbService.getFeature(collectionId, featureId)
+    Map<String, String> queryParamsMap = new HashMap<>();
+    MultiMap queryParams = routingContext.queryParams();
+    queryParams.forEach(param -> queryParamsMap.put(param.getKey(), param.getValue()));
+    LOGGER.debug("<APIServer> QP- {}",queryParamsMap);
+    Future<Map<String, Integer>> isCrsValid = dbService.isCrsValid(collectionId, queryParamsMap);
+    isCrsValid
+        .compose(crs -> dbService.getFeature(collectionId, featureId, queryParamsMap, crs))
         .onSuccess(success -> {
           LOGGER.debug("Success! - {}", success.encodePrettily());
           // TODO: Add base_path from config
+          success.put("links", new JsonArray()
+              .add(new JsonObject()
+                  .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items/" + featureId)
+                  .put("rel", "self")
+                  .put("type", "application/geo+json"))
+              .add(new JsonObject()
+                  .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId)
+                  .put("rel", "collection")
+                  .put("type", "application/json")));
           routingContext.put("response",success.toString());
           routingContext.put("statusCode", 200);
+          routingContext.put("crs", "<" + queryParamsMap.getOrDefault("crs", DEFAULT_SERVER_CRS) + ">");
           routingContext.next();
         })
         .onFailure(failed -> {
@@ -194,50 +216,85 @@ public class ApiServerVerticle extends AbstractVerticle {
 //      return;
 //    }
     Map<String, String> queryParamsMap = new HashMap<>();
-    try {
-      String datetime;
-      MultiMap queryParams = routingContext.queryParams();
-      queryParams.forEach(param -> queryParamsMap.put(param.getKey(), param.getValue()));
-      ZonedDateTime zone;
-      DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
-      if (queryParamsMap.containsKey("datetime")) {
-        datetime =  queryParamsMap.get("datetime");
-        if (!datetime.contains("/")) {
-          zone = ZonedDateTime.parse(datetime, formatter);
-        } else if (datetime.contains("/")) {
-          String[] dateTimeArr = datetime.split("/");
-          if (dateTimeArr[0].equals("..")) { // -- before
-            zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
+    MultiMap queryParams = routingContext.queryParams();
+    queryParams.forEach(param -> queryParamsMap.put(param.getKey(), param.getValue()));
+    LOGGER.debug("<APIServer> QP- {}",queryParamsMap);
+    Future<Map<String, Integer>> isCrsValid = dbService.isCrsValid(collectionId, queryParamsMap);
+    isCrsValid
+        .compose(crsss -> dbService.matchFilterWithProperties(collectionId, queryParamsMap))
+//    Future<Void> matchFiltersWithProperties = dbService.matchFilterWithProperties(collectionId, queryParamsMap);
+//    matchFiltersWithProperties
+        .compose(datetimeCheck -> {
+          try {
+            String datetime;
+            ZonedDateTime zone, zone2;
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+            if (queryParamsMap.containsKey("datetime")) {
+              datetime =  queryParamsMap.get("datetime");
+              if (!datetime.contains("/")) {
+                zone = ZonedDateTime.parse(datetime, formatter);
+              } else if (datetime.contains("/")) {
+                String[] dateTimeArr = datetime.split("/");
+                if (dateTimeArr[0].equals("..")) { // -- before
+                  zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
+                }
+                else if (dateTimeArr[1].equals("..")) { // -- after
+                  zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
+                }
+                else {
+                  zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
+                  zone2 = ZonedDateTime.parse(dateTimeArr[1], formatter);
+                  if (zone2.isBefore(zone)){
+                    OgcException ogcException = new OgcException(400, "Bad Request", "After time cannot be lesser " +
+                        "than Before time");
+                    return Future.failedFuture(ogcException);
+                  }
+                }
+              }
+            }
+          } catch (NullPointerException ne) {
+            OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
+            return Future.failedFuture(ogcException);
+          } catch (DateTimeParseException dtpe) {
+            OgcException ogcException = new OgcException(400, "Bad Request", "Time parameter not in ISO format");
+            return Future.failedFuture(ogcException);
           }
-          else if (dateTimeArr[1].equals("..")) { // -- after
-            zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
-          }
-          else {
-            zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
-            zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
-          }
-        }
-      }
-    } catch (NullPointerException ne) {
-      OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
-      routingContext.put("response", ogcException.getJson().toString());
-      routingContext.put("statusCode", ogcException.getStatusCode());
-      routingContext.next();
-      return;
-    } catch (DateTimeParseException dtpe) {
-      OgcException ogcException = new OgcException(400, "Bad Request", "Time parameter not in ISO format");
-      routingContext.put("response", ogcException.getJson().toString());
-      routingContext.put("statusCode", ogcException.getStatusCode());
-      routingContext.next();
-      return;
-    }
-    System.out.println("<APIServer> QP- "+queryParamsMap);
-    dbService.getFeatures(collectionId, queryParamsMap)
+          return Future.succeededFuture();
+        })
+        .compose(dbCall -> dbService.getFeatures(collectionId, queryParamsMap, isCrsValid.result()))
         .onSuccess(success -> {
           LOGGER.debug("Success! - {}", success.encodePrettily());
           // TODO: Add base_path from config
+          int next, offset=1, limit=10;
+          if (queryParamsMap.containsKey("offset")){
+            offset = Integer.parseInt(queryParamsMap.get("offset"));
+          }
+          if (queryParamsMap.containsKey("limit")){
+            limit = Math.min(10000, Integer.parseInt(queryParamsMap.get("limit")));
+          }
+          next = offset + limit;
+          success.put("links", new JsonArray()
+                  .add(new JsonObject()
+                      .put("href", hostName + ogcBasePath + "/" + COLLECTIONS + "/" + collectionId + "/items")
+                      .put("rel", "self")
+                      .put("type", "application/geo+json"))
+                  .add(new JsonObject()
+                      .put("href", hostName + ogcBasePath + "/" + COLLECTIONS + "/" + collectionId + "/items")
+                      .put("rel", "alternate")
+                      .put("type", "application/geo+json")))
+              .put("timeStamp", Instant.now().toString());
+          if (next < success.getInteger("numberMatched")) {
+            success.getJsonArray("links")
+                .add(new JsonObject()
+                    .put("href",
+                        hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items?offset=" + next + "&limit" +
+                            "=" + limit)
+                    .put("rel", "next")
+                    .put("type", "application/geo+json" ));
+          }
           routingContext.put("response",success.toString());
           routingContext.put("statusCode", 200);
+          routingContext.put("crs", "<" + queryParamsMap.getOrDefault("crs", DEFAULT_SERVER_CRS) + ">");
           routingContext.next();
         })
         .onFailure(failed -> {
@@ -252,6 +309,7 @@ public class ApiServerVerticle extends AbstractVerticle {
           }
           routingContext.next();
         });
+
   }
 
   private void buildResponse(RoutingContext routingContext) {
@@ -304,7 +362,15 @@ public class ApiServerVerticle extends AbstractVerticle {
                             routingContext.next();
                         }
                     });
-          routingContext.put("response", collections.toString());
+          JsonObject featureCollections = new JsonObject()
+              .put("links", new JsonArray()
+                  .add(new JsonObject()
+                      .put("href", hostName + ogcBasePath + "/" + COLLECTIONS)
+                      .put("rel", "self")
+                      .put("type", "application/json")
+                      .put("title", "This document")))
+              .put("collections", collections);
+          routingContext.put("response", featureCollections.toString());
           routingContext.put("statusCode", 200);
           routingContext.next();
         })
@@ -328,14 +394,25 @@ public class ApiServerVerticle extends AbstractVerticle {
          .putHeader("Pragma", "no-cache")
          .putHeader("Expires", "0")
          .putHeader("X-Content-Type-Options", "nosniff");
+    // include crs when features - /items api is accessed
+    if (routingContext.data().containsKey("crs"))
+      routingContext.response().putHeader("Content-Crs", (String) routingContext.get("crs"));
      routingContext.next();
     }
 
   private JsonObject buildCollectionResult(List<JsonObject> success) {
     JsonObject collection = success.get(0);
+    JsonObject extent = new JsonObject();
     collection.put("properties", new JsonObject());
     if (collection.getString("datetime_key") != null && !collection.getString("datetime_key").isEmpty() )
       collection.getJsonObject("properties").put("datetimeParameter", collection.getString("datetime_key"));
+    if (collection.getJsonArray("bbox") != null)
+      extent.put("spatial", new JsonObject().put("bbox", new JsonArray().add(collection.getJsonArray("bbox"))));
+    if (collection.getJsonArray("temporal") != null)
+      extent.put("temporal", new JsonObject().put("interval",
+          new JsonArray().add(collection.getJsonArray("temporal"))));
+    if (!extent.isEmpty())
+      collection.put("extent", extent);
     collection.put("links", new JsonArray()
             .add(new JsonObject()
                 .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id"))
@@ -353,11 +430,12 @@ public class ApiServerVerticle extends AbstractVerticle {
                 .put("rel", "item")
                 .put("title", "Link template for " + collection.getString("id") + " features")
                 .put("templated","true")))
-        .put("itemType", "feature")
-        .put("crs", new JsonArray().add("http://www.opengis.net/def/crs/ESPG/0/4326"));
+        .put("itemType", "feature");
     collection.remove("title");
     collection.remove("description");
     collection.remove("datetime_key");
+    collection.remove("bbox");
+    collection.remove("temporal");
     return collection;
   }
 }
