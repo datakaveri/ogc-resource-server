@@ -1,6 +1,6 @@
 CREATE TYPE item_type AS ENUM ('OGC_FEATURES', 'OGC_TILES', 'STAC');
 
-ALTER TABLE collections_details ADD COLUMN temp_item_type item_type;
+ALTER TABLE collections_details ADD COLUMN temp_item_type item_type NOT NULL;
 
 UPDATE collections_details
 SET item_type = CASE
@@ -13,3 +13,5 @@ END;
 ALTER TABLE collections_details DROP COLUMN type;
 
 ALTER TABLE collections_details RENAME COLUMN temp_item_type TO type;
+
+Alter TABLE collections_details ADD COLUMN license VARCHAR(255);
