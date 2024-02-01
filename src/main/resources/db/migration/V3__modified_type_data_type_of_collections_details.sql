@@ -14,4 +14,4 @@ ALTER TABLE collections_details DROP COLUMN type;
 
 ALTER TABLE collections_details RENAME COLUMN temp_item_type TO type;
 
-Alter TABLE collections_details ADD COLUMN license VARCHAR(255);
+
