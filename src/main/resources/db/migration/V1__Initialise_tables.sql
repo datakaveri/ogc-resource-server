@@ -65,8 +65,8 @@ ALTER TYPE access_enum OWNER TO ${flyway:user};
 --
 
 CREATE TYPE execution_mode AS ENUM (
-    'async',
-    'sync'
+    'ASYNC',
+    'SYNC'
 );
 
 
@@ -90,54 +90,16 @@ ALTER TYPE role_enum OWNER TO ${flyway:user};
 --
 
 CREATE TYPE transmission_mode AS ENUM (
-    'value',
-    'reference'
+    'VALUE',
+    'REFERENCE'
 );
 
 
 ALTER TYPE transmission_mode OWNER TO ${flyway:user};
 
---
--- Name: get_geom_values(); Type: FUNCTION; Schema: schema; Owner: iudx_gis_user
---
-
-CREATE FUNCTION get_geom_values() RETURNS TABLE(id uuid, geom geometry)
-    LANGUAGE plpgsql
-    AS $$
-declare
-  table_name text;
-  query_text text;
-  record_row RECORD;
-begin
-  for record_row in select id from collections_details
-  LOOP
-   table_name := record_row.id::text;
-   query_text := 'SELECT id, geom FROM' || table_name || 'AS dynamic_table' ;
-   return QUERY EXECUTE query_text;
-  end LOOP;
-END;
-$$;
-
-
-ALTER FUNCTION get_geom_values() OWNER TO ${flyway:user};
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
-
---
--- Name: ac; Type: TABLE; Schema: ; Owner: iudx_gis_user
---
-
-CREATE TABLE ac (
-    id uuid DEFAULT public.gen_random_uuid(),
-    geom geometry(Geometry,4326),
-    properties jsonb,
-    itemtype character varying(20) DEFAULT 'Feature'::character varying
-);
-
-
-ALTER TABLE ac OWNER TO ${flyway:user};
 
 --
 -- Name: ri_details; Type: TABLE; Schema: -; Owner: iudx_gis_user
@@ -168,21 +130,6 @@ CREATE TABLE auditing_ogc (
 
 
 ALTER TABLE auditing_ogc OWNER TO ${flyway:user};
-
---
--- Name: catalog_test; Type: TABLE; Schema: -; Owner: iudx_gis_user
---
-
-CREATE TABLE catalog_test (
-    type character varying(255),
-    stac_version character varying(255),
-    id character varying(255),
-    title character varying(255),
-    description character varying(255)
-);
-
-
-ALTER TABLE catalog_test OWNER TO ${flyway:user};
 
 --
 -- Name: collection_supported_crs; Type: TABLE; Schema: -; Owner: iudx_gis_user
@@ -459,10 +406,3 @@ ALTER TABLE ONLY collections_details
 
 ALTER TABLE ONLY ri_details
     ADD CONSTRAINT users_fk FOREIGN KEY (role_id) REFERENCES roles(user_id);
-
---
--- Name: TABLE auditing_ogc; Type: ACL; Schema: -; Owner: postgres
---
-
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE auditing_ogc TO ${flyway:user};
-
