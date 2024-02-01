@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS jobs_table
 	input jsonb,
 	output jsonb,
 	progress decimal(4,2),
-	status status_type NOT NULL,
+	status job_status_type NOT NULL,
 	type job_type NOT NULL,
 	message varchar,
 	CONSTRAINT job_id_pk PRIMARY KEY (id),
