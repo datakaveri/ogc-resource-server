@@ -33,5 +33,5 @@ public interface DatabaseService {
     Future<Map<String, Integer>> isCrsValid(String collectionId, Map<String, String> crs);
 
     Future<List<JsonObject>>  getStacCollections();
-
+    
 }

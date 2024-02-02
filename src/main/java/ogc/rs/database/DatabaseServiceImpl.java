@@ -329,6 +329,7 @@ public class DatabaseServiceImpl implements DatabaseService{
     return result.future();
   }
 
+
   @Override
   public Future<List<JsonObject>> getStacCollections() {
     Promise<List<JsonObject>> result = Promise.promise();
