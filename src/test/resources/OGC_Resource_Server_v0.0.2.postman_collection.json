@@ -4964,13 +4964,31 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/stac/",
+							"raw": "{{baseUrl}}/stac/collections",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"stac",
-								""
+								"collections"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "information about specifications that this API conforms to",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/stac/conformance",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stac",
+								"conformance"
 							]
 						}
 					},

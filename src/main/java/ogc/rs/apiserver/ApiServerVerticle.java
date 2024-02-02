@@ -1,6 +1,7 @@
 package ogc.rs.apiserver;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
@@ -82,7 +83,13 @@ public class ApiServerVerticle extends AbstractVerticle {
       hostName = config().getString("hostName");
 
       Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/openapiv3_0.yaml");
-      routerBuilderFut.compose(routerBuilder -> {
+      Future<RouterBuilder> routerBuilderStacFut =
+        RouterBuilder.create(vertx, "docs/stacopenapiv3_0.yaml");
+      CompositeFuture.all(routerBuilderFut, routerBuilderStacFut)
+        .compose(
+            result -> {
+              RouterBuilder routerBuilder = result.resultAt(0);
+              RouterBuilder routerBuilderStac = result.resultAt(1);
 
           LOGGER.debug("Info: Mounting routes from OpenApi3 spec");
 
@@ -92,6 +99,9 @@ public class ApiServerVerticle extends AbstractVerticle {
           routerBuilder.rootHandler(CorsHandler.create("*").allowedHeaders(allowedHeaders)
                   .allowedMethods(allowedMethods));
           routerBuilder.rootHandler(BodyHandler.create());
+          routerBuilderStac.rootHandler(CorsHandler.create("*").allowedHeaders(allowedHeaders)
+                        .allowedMethods(allowedMethods));
+          routerBuilderStac.rootHandler(BodyHandler.create());
           try {
           routerBuilder
               .operation(LANDING_PAGE)
@@ -135,30 +145,43 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
 
-                routerBuilder
+                routerBuilderStac
                     .operation("getStacLandingPage")
                     .handler(this::stacCatalog)
                     .handler(this::putCommonResponseHeaders)
                     .handler(this::buildResponse);
 
-                routerBuilder
+                routerBuilderStac
                     .operation("getStacCollections")
                     .handler(this::stacCollections)
                     .handler(this::putCommonResponseHeaders)
                     .handler(this::buildResponse);
 
-          router = routerBuilder.createRouter();
-          router
-            .get(OPENAPI_SPEC)
-            .handler(
-                routingContext -> {
-                  HttpServerResponse response = routingContext.response();
-                  response.sendFile("docs/openapiv3_0.json");
-                });
-          } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-          }
+                routerBuilderStac
+                    .operation("getConformanceDeclaration")
+                    .handler(
+                        routingContext -> {
+                          HttpServerResponse response = routingContext.response();
+                          response.sendFile("docs/conformance.json");
+                        });
+
+                Router ogcRouter = routerBuilder.createRouter();
+                Router stacRouter = routerBuilderStac.createRouter();
+                router = Router.router(vertx);
+                router.route("/*").subRouter(stacRouter);
+                router.route("/*").subRouter(ogcRouter);
+
+                router
+                    .get(OPENAPI_SPEC)
+                    .handler(
+                        routingContext -> {
+                          HttpServerResponse response = routingContext.response();
+                          response.sendFile("docs/openapiv3_0.json");
+                        });
+              } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e.getMessage());
+              }
 
           dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
           // TODO: ssl configuration
@@ -466,9 +489,12 @@ public class ApiServerVerticle extends AbstractVerticle {
                       FileSystem fileSystem = vertx.fileSystem();
                       Buffer buffer = fileSystem.readFileBlocking(jsonFilePath);
                       JsonObject stacMetadata = new JsonObject(buffer.toString());
-                      String license = stacMetadata.getString("stacLicense");
                       String stacVersion = stacMetadata.getString("stacVersion");
                       JsonObject singleCollection = tempArray.get(0);
+                      if (singleCollection.getString("license") == null
+                          || collection.getString("license").isEmpty()) {
+                        singleCollection.put("license", stacMetadata.getString("stacLicense"));
+                      }
                       singleCollection
                           .put("type", "Collection")
                           .put(
@@ -497,7 +523,6 @@ public class ApiServerVerticle extends AbstractVerticle {
                                               + ITEMS,
                                           collection.getString("title"))))
                           .put("stac_version", stacVersion)
-                          .put("license", license)
                           .put(
                               "extent",
                               new JsonObject()
