@@ -218,7 +218,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         .withConnection(
             conn ->
                 conn.preparedQuery(
-                        "Select id, title, description, bbox, temporal from collections_details")
+                        "Select id, title, description, bbox, temporal,license from collections_details")
                     .collecting(collector)
                     .execute()
                     .map(SqlResult::value))
