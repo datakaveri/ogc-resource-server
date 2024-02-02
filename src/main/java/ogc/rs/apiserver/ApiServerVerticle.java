@@ -145,7 +145,6 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
 
-
                 routerBuilderStac
                     .operation("getStacLandingPage")
                     .handler(this::stacCatalog)
@@ -166,7 +165,6 @@ public class ApiServerVerticle extends AbstractVerticle {
                           HttpServerResponse response = routingContext.response();
                           response.sendFile("docs/conformance.json");
                         });
-
 
                 Router ogcRouter = routerBuilder.createRouter();
                 Router stacRouter = routerBuilderStac.createRouter();

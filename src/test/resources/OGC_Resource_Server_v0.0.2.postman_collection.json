@@ -4938,6 +4938,65 @@
 			"description": "Tiles pertaining to a collection"
 		},
 		{
+	"name": "STAC",
+			"item": [
+				{
+					"name": "landing page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/stac/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stac",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "fetch collections",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/stac/collections",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stac",
+								"collections"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "information about specifications that this API conforms to",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/stac/conformance",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stac",
+								"conformance"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "landing page",
 			"event": [
 				{
