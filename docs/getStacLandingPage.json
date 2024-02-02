@@ -1,0 +1,7 @@
+{
+  "stacVersion": "1.0.0",
+  "type": "Catalog",
+  "description": "This object represents a Catalog in a SpatioTemporal Asset Catalog.",
+  "title": "Link to the STAC catalog",
+  "stacLicense": "proprietary"
+}
