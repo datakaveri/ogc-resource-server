@@ -329,8 +329,6 @@ public class DatabaseServiceImpl implements DatabaseService{
     return result.future();
   }
 
-
-
   @Override
   public Future<List<JsonObject>> getStacCollections() {
     Promise<List<JsonObject>> result = Promise.promise();
@@ -359,6 +357,6 @@ public class DatabaseServiceImpl implements DatabaseService{
               LOGGER.error("Failed to getCollections! - {}", fail.getMessage());
               result.fail("Error!");
             });
-      return result.future();
+    return result.future();
   }
 }
