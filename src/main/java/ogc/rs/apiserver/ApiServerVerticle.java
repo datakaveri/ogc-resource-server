@@ -142,6 +142,12 @@ public class ApiServerVerticle extends AbstractVerticle {
                           response.sendFile("docs/getStacLandingPage.json");
                         });
 
+                routerBuilder
+                    .operation("getStacCollections")
+                    .handler(this::stacCollections)
+                    .handler(this::putCommonResponseHeaders)
+                    .handler(this::buildResponse);
+
           router = routerBuilder.createRouter();
           router
             .get(OPENAPI_SPEC)
@@ -442,6 +448,110 @@ public class ApiServerVerticle extends AbstractVerticle {
     collection.remove("datetime_key");
     collection.remove("bbox");
     collection.remove("temporal");
+    return collection;
+  }
+
+  private void stacCollections(RoutingContext routingContext) {
+    dbService
+        .getStacCollections()
+        .onSuccess(
+            success -> {
+              JsonArray collections = new JsonArray();
+              success.forEach(
+                  collection -> {
+                    try {
+                      JsonObject json;
+                      List<JsonObject> tempArray = new ArrayList<>();
+                      tempArray.add(collection);
+                      json = buildStacCollectionResult(tempArray);
+                      collections.add(json);
+                    } catch (Exception e) {
+                      LOGGER.error("Something went wrong here: {}", e.getMessage());
+                      routingContext.put(
+                          "response",
+                          new OgcException(500, "Internal Server Error", "Something " + "broke")
+                              .getJson()
+                              .toString());
+                      routingContext.put("statusCode", 500);
+                      routingContext.next();
+                    }
+                  });
+              routingContext.put("response", collections.toString());
+              routingContext.put("statusCode", 200);
+              routingContext.next();
+            })
+        .onFailure(
+            failed -> {
+              if (failed instanceof OgcException) {
+                routingContext.put("response", ((OgcException) failed).getJson().toString());
+                routingContext.put("statusCode", 404);
+              } else {
+                routingContext.put(
+                    "response",
+                    new OgcException(500, "Internal Server Error", "Internal Server Error")
+                        .getJson()
+                        .toString());
+                routingContext.put("statusCode", 500);
+              }
+              routingContext.next();
+            });
+  }
+
+  private JsonObject buildStacCollectionResult(List<JsonObject> success) {
+    JsonObject collection = success.get(0);
+    collection
+        .put("type", "Collection")
+        .put(
+            "links",
+            new JsonArray()
+                .add(
+                    new JsonObject()
+                        .put("href", hostName + ogcBasePath + STAC + "/")
+                        .put("rel", "root")
+                        .put("type", "application/json"))
+                .add(
+                    new JsonObject()
+                        .put("href", hostName + ogcBasePath + STAC + "/")
+                        .put("rel", "parent")
+                        .put("type", "application/json"))
+                .add(
+                    new JsonObject()
+                        .put(
+                            "href",
+                            hostName
+                                + ogcBasePath
+                                + STAC
+                                + COLLECTIONS
+                                + "/"
+                                + collection.getString("id"))
+                        .put("rel", "self")
+                        .put("type", "application/json")
+                        .put("title", collection.getString("title")))
+                .add(
+                    new JsonObject()
+                        .put(
+                            "href",
+                            hostName
+                                + ogcBasePath
+                                + STAC
+                                + COLLECTIONS
+                                + "/"
+                                + collection.getString("id")
+                                + "/"
+                                + ITEMS)
+                        .put("rel", "items")
+                        .put("title", collection.getString("title"))
+                        .put("type", "application/geo+json")))
+        .put("stac_version", config().getString("stacVersion"))
+        .put("license", config().getString("stacLicense"))
+        .put(
+            "extent",
+            new JsonObject()
+                .put("spatial", new JsonObject().put("bbox", collection.getJsonArray("bbox")))
+                .put("temporal", collection.getJsonArray("temporal")));
+    collection.remove("bbox");
+    collection.remove("temporal");
+
     return collection;
   }
 }

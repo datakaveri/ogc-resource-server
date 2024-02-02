@@ -60,7 +60,7 @@ public class DatabaseServiceImpl implements DatabaseService{
             });
         return result.future();
     }
-    
+
     @Override
     public Future<List<JsonObject>> getCollections() {
         Promise<List<JsonObject>> result = Promise.promise();
@@ -327,5 +327,38 @@ public class DatabaseServiceImpl implements DatabaseService{
             }));
 
     return result.future();
+  }
+
+
+
+  @Override
+  public Future<List<JsonObject>> getStacCollections() {
+    Promise<List<JsonObject>> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+    client
+        .withConnection(
+            conn ->
+                conn.preparedQuery(
+                        "Select id, title, description, bbox, temporal from collections_details")
+                    .collecting(collector)
+                    .execute()
+                    .map(SqlResult::value))
+        .onSuccess(
+            success -> {
+              if (success.isEmpty()) {
+                LOGGER.error("Collections table is empty!");
+                result.fail("Error!");
+              } else {
+                LOGGER.debug("Collections Result: {}", success.toString());
+                result.complete(success);
+              }
+            })
+        .onFailure(
+            fail -> {
+              LOGGER.error("Failed to getCollections! - {}", fail.getMessage());
+              result.fail("Error!");
+            });
+      return result.future();
   }
 }

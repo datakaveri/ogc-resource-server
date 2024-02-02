@@ -36,6 +36,12 @@ public class Constants {
 
     public static final String COLLECTIONS = "collections";
 
+    public static final String ITEMS = "items";
+
+    public static final String STAC = "stac";
+
+
+
 
 
 
