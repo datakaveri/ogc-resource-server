@@ -309,11 +309,11 @@ public class ApiServerVerticle extends AbstractVerticle {
           next = offset + limit;
           success.put("links", new JsonArray()
                   .add(new JsonObject()
-                      .put("href", hostName + ogcBasePath + "/" + COLLECTIONS + "/" + collectionId + "/items")
+                      .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items")
                       .put("rel", "self")
                       .put("type", "application/geo+json"))
                   .add(new JsonObject()
-                      .put("href", hostName + ogcBasePath + "/" + COLLECTIONS + "/" + collectionId + "/items")
+                      .put("href", hostName + ogcBasePath  + COLLECTIONS + "/" + collectionId + "/items")
                       .put("rel", "alternate")
                       .put("type", "application/geo+json")))
               .put("timeStamp", Instant.now().toString());
