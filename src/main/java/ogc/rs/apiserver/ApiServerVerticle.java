@@ -58,6 +58,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     private String ogcBasePath;
     private String hostName;
     private DatabaseService dbService;
+    private Buffer ogcLandingPageBuf;
 
     JsonArray allCrsSupported = new JsonArray();
 
@@ -81,6 +82,10 @@ public class ApiServerVerticle extends AbstractVerticle {
       /* Get base paths from config */
       ogcBasePath = config().getString("ogcBasePath");
       hostName = config().getString("hostName");
+      
+      /* Initialize OGC landing page buffer - since configured hostname needs to be in it */
+      String landingPageTemplate = vertx.fileSystem().readFileBlocking("docs/landingPage.json").toString();
+      ogcLandingPageBuf = Buffer.buffer(landingPageTemplate.replace("$HOSTNAME", hostName));
 
       Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/openapiv3_0.yaml");
       Future<RouterBuilder> routerBuilderStacFut =
@@ -108,7 +113,7 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(
                   routingContext -> {
                       HttpServerResponse response = routingContext.response();
-                      response.sendFile("docs/landingPage.json");
+                      response.end(ogcLandingPageBuf);
                   });
           routerBuilder
               .operation(CONFORMANCE_CLASSES)
