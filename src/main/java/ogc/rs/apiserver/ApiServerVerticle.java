@@ -399,7 +399,7 @@ public class ApiServerVerticle extends AbstractVerticle {
           JsonObject featureCollections = new JsonObject()
               .put("links", new JsonArray()
                   .add(new JsonObject()
-                      .put("href", hostName + ogcBasePath + "/" + COLLECTIONS)
+                      .put("href", hostName + ogcBasePath + COLLECTIONS)
                       .put("rel", "self")
                       .put("type", "application/json")
                       .put("title", "This document")))
