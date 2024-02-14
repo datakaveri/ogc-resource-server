@@ -610,7 +610,7 @@ public class ApiServerVerticle extends AbstractVerticle {
               .add(
                   new JsonObject()
                       .put("rel", "service-desc")
-                      .put("href", hostName + ogcBasePath + "api")
+                      .put("href", hostName + ogcBasePath + "stac/api")
                       .put("type", "application/vnd.oai.openapi+json;version=3.0")
                       .put("title", "API definition for endpoints in JSON format"));
       dbService
