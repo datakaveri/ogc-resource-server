@@ -183,6 +183,13 @@ public class ApiServerVerticle extends AbstractVerticle {
                           HttpServerResponse response = routingContext.response();
                           response.sendFile("docs/openapiv3_0.json");
                         });
+                router
+                    .get(STAC_OPENAPI_SPEC)
+                    .handler(
+                        routingContext -> {
+                          HttpServerResponse response = routingContext.response();
+                          response.sendFile("docs/stacopenapiv3_0.json");
+                        });
               } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
@@ -597,7 +604,15 @@ public class ApiServerVerticle extends AbstractVerticle {
       String catalogId = config().getString("catalogId");
 
       JsonArray links =
-          new JsonArray().add(createLink("root", STAC, title)).add(createLink("self", STAC, title));
+          new JsonArray()
+              .add(createLink("root", STAC, title))
+              .add(createLink("self", STAC, title))
+              .add(
+                  new JsonObject()
+                      .put("rel", "service-desc")
+                      .put("href", hostName + ogcBasePath + "api")
+                      .put("type", "application/vnd.oai.openapi+json;version=3.0")
+                      .put("title", "API definition for endpoints in JSON format"));
       dbService
           .getStacCollections()
           .onSuccess(

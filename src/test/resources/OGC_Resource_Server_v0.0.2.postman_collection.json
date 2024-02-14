@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "05a5d959-70a8-4527-a438-999113805fb8",
+		"_postman_id": "dcb82923-cb6a-47fd-bb88-14434f33555e",
 		"name": "OGC Resource Server v0.0.2",
 		"description": "Components/APIs used in the OGC Compliant Resource Server.\n\nOGC Features API standard can be found at\n\n[\"OGC API - Features - Part 1: Core corrigendum standard\"](https://docs.opengeospatial.org/is/17-069r4/17-069r4.html).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -4946,13 +4946,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/stac/",
+							"raw": "{{baseUrl}}/stac",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"stac",
-								""
+								"stac"
 							]
 						}
 					},
@@ -4989,6 +4988,24 @@
 							"path": [
 								"stac",
 								"conformance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "STAC API specification details using OpenAPI",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/stac/api",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stac",
+								"api"
 							]
 						}
 					},
