@@ -35,8 +35,8 @@ public class AuthenticationVerticle extends AbstractVerticle {
     private ServiceBinder binder;
     private MessageConsumer<JsonObject> consumer;
     private WebClient webClient;
-    private String dxApiBasePath;
-    static WebClient createWebClient(Vertx vertx, JsonObject config) {
+
+  static WebClient createWebClient(Vertx vertx, JsonObject config) {
         return createWebClient(vertx, config, false);
     }
     static WebClient createWebClient(Vertx vertxObj, JsonObject config, boolean testing) {
@@ -72,8 +72,7 @@ public class AuthenticationVerticle extends AbstractVerticle {
                                 + "do not set IgnoreExpiration in production!!");
                     }
 
-                    dxApiBasePath = config().getString("dxApiBasePath");
-                    JWTAuth jwtAuth = JWTAuth.create(vertx, jwtAuthOptions);
+                  JWTAuth jwtAuth = JWTAuth.create(vertx, jwtAuthOptions);
                     jwtAuthenticationService =
                         new JwtAuthenticationServiceImpl(
                             vertx, jwtAuth, config());
