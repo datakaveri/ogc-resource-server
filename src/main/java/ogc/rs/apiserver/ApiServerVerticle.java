@@ -167,7 +167,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                     .handler(
                         routingContext -> {
                           HttpServerResponse response = routingContext.response();
-                          response.sendFile("docs/conformance.json");
+                          response.sendFile("docs/stacConformance.json");
                         });
 
                 Router ogcRouter = routerBuilder.createRouter();
@@ -523,17 +523,20 @@ public class ApiServerVerticle extends AbstractVerticle {
                                               + "/"
                                               + collection.getString("id"),
                                           collection.getString("title")))
-                                  .add(
-                                      createLink(
-                                          "items",
-                                          STAC
-                                              + "/"
-                                              + COLLECTIONS
-                                              + "/"
-                                              + collection.getString("id")
-                                              + "/"
-                                              + ITEMS,
-                                          collection.getString("title"))))
+                              //                                  .add(
+                              //                                      createLink(
+                              //                                          "items",
+                              //                                          STAC
+                              //                                              + "/"
+                              //                                              + COLLECTIONS
+                              //                                              + "/"
+                              //                                              +
+                              // collection.getString("id")
+                              //                                              + "/"
+                              //                                              + ITEMS,
+                              //
+                              // collection.getString("title")))
+                              )
                           .put("stac_version", stacVersion)
                           .put(
                               "extent",
@@ -593,9 +596,12 @@ public class ApiServerVerticle extends AbstractVerticle {
   private void stacCatalog(RoutingContext routingContext) {
     try {
       String jsonFilePath = "docs/getStacLandingPage.json";
+      String conformanceFilePath = "docs/stacConformance.json";
       FileSystem fileSystem = vertx.fileSystem();
       Buffer buffer = fileSystem.readFileBlocking(jsonFilePath);
+      Buffer conformanceBuffer = fileSystem.readFileBlocking(conformanceFilePath);
       JsonObject stacLandingPage = new JsonObject(buffer.toString());
+      JsonObject stacConformance = new JsonObject(conformanceBuffer.toString());
 
       String type = stacLandingPage.getString("type");
       String description = stacLandingPage.getString("description");
@@ -612,7 +618,18 @@ public class ApiServerVerticle extends AbstractVerticle {
                       .put("rel", "service-desc")
                       .put("href", hostName + ogcBasePath + "stac/api")
                       .put("type", "application/vnd.oai.openapi+json;version=3.0")
-                      .put("title", "API definition for endpoints in JSON format"));
+                      .put("title", "API definition for endpoints in JSON format"))
+              .add(
+                  new JsonObject()
+                      .put("rel", "data")
+                      .put("href", hostName + ogcBasePath + "stac/collections")
+                      .put("type", "application/json"))
+              .add(
+                  new JsonObject()
+                      .put("rel", "conformance")
+                      .put("href", hostName + ogcBasePath + "stac/conformance")
+                      .put("type", "application/json")
+                      .put("title", "STAC/WFS3 conformance classes implemented by this server"));
       dbService
           .getStacCollections()
           .onSuccess(
@@ -642,7 +659,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                         .put("description", description)
                         .put("id", catalogId)
                         .put("stac_version", stacVersion)
-                        .put("links", links);
+                        .put("links", links)
+                        .put("conformsTo", stacConformance.getJsonArray("conformsTo"));
 
                 routingContext.put("response", catalog.encode());
                 routingContext.put("statusCode", 200);
