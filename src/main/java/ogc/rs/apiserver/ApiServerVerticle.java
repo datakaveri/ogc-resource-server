@@ -82,7 +82,7 @@ public class ApiServerVerticle extends AbstractVerticle {
       /* Get base paths from config */
       ogcBasePath = config().getString("ogcBasePath");
       hostName = config().getString("hostName");
-      
+
       /* Initialize OGC landing page buffer - since configured hostname needs to be in it */
       String landingPageTemplate = vertx.fileSystem().readFileBlocking("docs/landingPage.json").toString();
       ogcLandingPageBuf = Buffer.buffer(landingPageTemplate.replace("$HOSTNAME", hostName));
@@ -597,22 +597,58 @@ public class ApiServerVerticle extends AbstractVerticle {
       String catalogId = config().getString("catalogId");
 
       JsonArray links =
-          new JsonArray()
-              .add(createLink("root", STAC, title))
-              .add(createLink("self", STAC, title))
-              .add(createLink("child", STAC + "/" + COLLECTIONS + "/{collectionId}", null));
+          new JsonArray().add(createLink("root", STAC, title)).add(createLink("self", STAC, title));
+      dbService
+          .getStacCollections()
+          .onSuccess(
+              success -> {
+                success.forEach(
+                    collection -> {
+                      try {
+                        links.add(
+                            createLink(
+                                "child",
+                                STAC + "/" + COLLECTIONS + "/" + collection.getString("id"),
+                                collection.getString("title")));
+                      } catch (Exception e) {
+                        LOGGER.error("Something went wrong here: {}", e.getMessage());
+                        routingContext.put(
+                            "response",
+                            new OgcException(500, "Internal Server Error", "Something " + "broke")
+                                .getJson()
+                                .toString());
+                        routingContext.put("statusCode", 500);
+                        routingContext.next();
+                      }
+                    });
+                JsonObject catalog =
+                    new JsonObject()
+                        .put("type", type)
+                        .put("description", description)
+                        .put("id", catalogId)
+                        .put("stac_version", stacVersion)
+                        .put("links", links);
 
-      JsonObject catalog =
-          new JsonObject()
-              .put("type", type)
-              .put("description", description)
-              .put("id", catalogId)
-              .put("stac_version", stacVersion)
-              .put("links", links);
+                routingContext.put("response", catalog.encode());
+                routingContext.put("statusCode", 200);
+                routingContext.next();
+              })
+          .onFailure(
+              failed -> {
+                if (failed instanceof OgcException) {
+                  routingContext.put("response", ((OgcException) failed).getJson().toString());
+                  routingContext.put("statusCode", 404);
+                } else {
+                  routingContext.put(
+                      "response",
+                      new OgcException(500, "Internal Server Error", "Internal Server Error")
+                          .getJson()
+                          .toString());
+                  routingContext.put("statusCode", 500);
+                }
+                routingContext.next();
+              });
 
-      routingContext.put("response", catalog.encode());
-      routingContext.put("statusCode", 200);
-      routingContext.next();
     } catch (Exception e) {
       LOGGER.debug("Error reading the JSON file: {}", e.getMessage());
       routingContext.put(
