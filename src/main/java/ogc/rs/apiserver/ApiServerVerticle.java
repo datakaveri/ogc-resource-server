@@ -167,7 +167,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                     .handler(
                         routingContext -> {
                           HttpServerResponse response = routingContext.response();
-                          response.sendFile("docs/conformance.json");
+                          response.sendFile("docs/stacConformance.json");
                         });
 
                 Router ogcRouter = routerBuilder.createRouter();
@@ -612,7 +612,19 @@ public class ApiServerVerticle extends AbstractVerticle {
                       .put("rel", "service-desc")
                       .put("href", hostName + ogcBasePath + "stac/api")
                       .put("type", "application/vnd.oai.openapi+json;version=3.0")
-                      .put("title", "API definition for endpoints in JSON format"));
+                      .put("title", "API definition for endpoints in JSON format"))
+              .add(
+                  new JsonObject()
+                      .put("rel", "data")
+                      .put(
+                          "href", "https://planetarycomputer.microsoft.com/api/stac/v1/collections")
+                      .put("type", "application/json"))
+              .add(
+                  new JsonObject()
+                      .put("rel", "conformance")
+                      .put("href", hostName + ogcBasePath + "stac/conformance")
+                      .put("type", "application/json")
+                      .put("title", "STAC/WFS3 conformance classes implemented by this server"));
       dbService
           .getStacCollections()
           .onSuccess(
