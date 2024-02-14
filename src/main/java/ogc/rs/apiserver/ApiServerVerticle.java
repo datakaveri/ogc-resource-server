@@ -523,17 +523,20 @@ public class ApiServerVerticle extends AbstractVerticle {
                                               + "/"
                                               + collection.getString("id"),
                                           collection.getString("title")))
-                                  .add(
-                                      createLink(
-                                          "items",
-                                          STAC
-                                              + "/"
-                                              + COLLECTIONS
-                                              + "/"
-                                              + collection.getString("id")
-                                              + "/"
-                                              + ITEMS,
-                                          collection.getString("title"))))
+                              //                                  .add(
+                              //                                      createLink(
+                              //                                          "items",
+                              //                                          STAC
+                              //                                              + "/"
+                              //                                              + COLLECTIONS
+                              //                                              + "/"
+                              //                                              +
+                              // collection.getString("id")
+                              //                                              + "/"
+                              //                                              + ITEMS,
+                              //
+                              // collection.getString("title")))
+                              )
                           .put("stac_version", stacVersion)
                           .put(
                               "extent",
@@ -593,9 +596,12 @@ public class ApiServerVerticle extends AbstractVerticle {
   private void stacCatalog(RoutingContext routingContext) {
     try {
       String jsonFilePath = "docs/getStacLandingPage.json";
+      String conformanceFilePath = "docs/stacConformance.json";
       FileSystem fileSystem = vertx.fileSystem();
       Buffer buffer = fileSystem.readFileBlocking(jsonFilePath);
+      Buffer conformanceBuffer = fileSystem.readFileBlocking(conformanceFilePath);
       JsonObject stacLandingPage = new JsonObject(buffer.toString());
+      JsonObject stacConformance = new JsonObject(conformanceBuffer.toString());
 
       String type = stacLandingPage.getString("type");
       String description = stacLandingPage.getString("description");
@@ -616,8 +622,7 @@ public class ApiServerVerticle extends AbstractVerticle {
               .add(
                   new JsonObject()
                       .put("rel", "data")
-                      .put(
-                          "href", "https://planetarycomputer.microsoft.com/api/stac/v1/collections")
+                      .put("href", hostName + ogcBasePath + "stac/collections")
                       .put("type", "application/json"))
               .add(
                   new JsonObject()
@@ -654,7 +659,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                         .put("description", description)
                         .put("id", catalogId)
                         .put("stac_version", stacVersion)
-                        .put("links", links);
+                        .put("links", links)
+                        .put("conformsTo", stacConformance.getJsonArray("conformsTo"));
 
                 routingContext.put("response", catalog.encode());
                 routingContext.put("statusCode", 200);
