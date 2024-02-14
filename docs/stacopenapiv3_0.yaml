@@ -16,7 +16,7 @@ servers:
   - url: 'https://ogc.iudx.io'
     description: OGC-Resource-Server
 paths:
-  '/stac/':
+  '/stac':
     get:
       tags:
         - Features
