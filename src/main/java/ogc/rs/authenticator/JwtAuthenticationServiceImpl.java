@@ -204,7 +204,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
 
     private Future<Boolean> isOpenResource(String id) {
         Promise<Boolean> promise = Promise.promise();
-        String sqlString = "select access from access_view where id = $1::uuid";
+        String sqlString = "select access from ri_details where id = $1::uuid";
         Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
 
         pooledClient.withConnection(conn ->
