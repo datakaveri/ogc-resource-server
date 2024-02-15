@@ -514,8 +514,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                           || singleCollection.getString("license").isEmpty()) {
                         singleCollection.put("license", stacMetadata.getString("stacLicense"));
                       }
-                      if (singleCollection.getString("temporal") == null
-                          || singleCollection.getString("temporal").isEmpty()) {
+                      if (singleCollection.getJsonArray("temporal") == null
+                          || singleCollection.getJsonArray("temporal").isEmpty()) {
                         singleCollection.put("temporal", new JsonArray().add(null).add(null));
                       }
                       singleCollection
@@ -715,8 +715,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                 FileSystem fileSystem = vertx.fileSystem();
                 Buffer buffer = fileSystem.readFileBlocking(jsonFilePath);
                 JsonObject stacMetadata = new JsonObject(buffer.toString());
-                if (jsonResult.getString("temporal") == null
-                    || jsonResult.getString("temporal").isEmpty()) {
+                if (jsonResult.getJsonArray("temporal") == null
+                    || jsonResult.getJsonArray("temporal").isEmpty()) {
                   jsonResult.put("temporal", new JsonArray().add(null).add(null));
                 }
                 if (jsonResult.getString("license") == null
