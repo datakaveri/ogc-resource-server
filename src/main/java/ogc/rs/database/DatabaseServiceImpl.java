@@ -359,4 +359,37 @@ public class DatabaseServiceImpl implements DatabaseService{
             });
     return result.future();
   }
+
+  @Override
+  public Future<List<JsonObject>> getStacCollection(String collectionId) {
+    LOGGER.info("getFeature");
+    Promise<List<JsonObject>> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+    client
+        .withConnection(
+            conn ->
+                conn.preparedQuery(
+                        "SELECT id, title, description, bbox, temporal, license FROM collections_details where id = $1::uuid")
+                    .collecting(collector)
+                    .execute(Tuple.of(UUID.fromString(collectionId)))
+                    .map(SqlResult::value))
+        .onSuccess(
+            success -> {
+              LOGGER.debug("DB result - {}", success);
+              if (success.isEmpty())
+                result.fail(new OgcException(404, "Not found", "Collection not found"));
+              else {
+                LOGGER.debug("Built OGC Collection Response - {}", success);
+
+                result.complete(success);
+              }
+            })
+        .onFailure(
+            fail -> {
+              LOGGER.error("Failed at getCollection- {}", fail.getMessage());
+              result.fail("Error!");
+            });
+    return result.future();
+  }
 }

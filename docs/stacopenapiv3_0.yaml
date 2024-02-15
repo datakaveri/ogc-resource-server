@@ -28,7 +28,7 @@ paths:
         catalog.
 
         The landing page provides links to the
-        API definition (link relations `service-desc` and `service-doc`)
+        API definition (link relations `service-desc` and `conformance`)
         and the STAC records such as collections/catalogs (link relation `child`)
         or items (link relation `item`).
 
@@ -113,6 +113,34 @@ paths:
           $ref: '#/components/responses/InvalidParameter'
         '500':
           $ref: '#/components/responses/ServerError'
+  '/stac/collections/{collectionId}':
+    get:
+      tags:
+        - Features
+      summary: describe the STAC collection with id `collectionId`
+      description: |-
+        This information includes-
+        * A local identifier for the collection that is unique for the dataset.
+        * title and description for the collection.
+        * extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data. 
+        * An indicator about the type of the items in the collection .
+        * An indicator about the stac version used.
+        * License of the collection (default value is proprietary)
+
+      operationId: describeStacCollection
+      parameters:
+        - $ref: '#/components/parameters/collectionId'
+      responses:
+        '200':
+          $ref: '#/components/responses/stacCollection'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      servers:
+        - url: 'https://ogc.iudx.io'
+          description: OGC-Resource-Server
+
 
 
 tags:
@@ -415,6 +443,29 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/exception400'
+    stacCollection:
+      description: Information about the feature collection with id `collectionId`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/stacCollection'
+          examples:
+            collection:
+              value:
+                id: fd6ef7c5-b18c-48e6-94e3-81037706763d
+                type: collection
+                title: Districts in India
+                description: Geographic information of districts in India
+                license: proprietary
+                links:
+                  - href: 'https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items'
+                    rel: items
+                    type: application/geo+json
+                    title: Districts in India
+                  - href: 'https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d'
+                    rel: self
+                    type: application/geo+json
+                    title: Districts in India
   schemas:
     confClasses:
       type: object
@@ -1071,3 +1122,4 @@ components:
       example:
         code: Internal Server Error
         description: Internal Server Error
+

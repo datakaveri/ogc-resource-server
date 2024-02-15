@@ -5010,6 +5010,30 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "describe the  STAC collection with id `collectionId`",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/stac/collections/1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stac",
+								"collections",
+								"1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
