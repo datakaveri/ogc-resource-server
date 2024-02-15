@@ -164,6 +164,12 @@ public class ApiServerVerticle extends AbstractVerticle {
                     .handler(this::buildResponse);
 
                 routerBuilderStac
+                    .operation("describeStacCollection")
+                    .handler(this::getStacCollection)
+                    .handler(this::putCommonResponseHeaders)
+                    .handler(this::buildResponse);
+
+                routerBuilderStac
                     .operation("getConformanceDeclaration")
                     .handler(
                         routingContext -> {
@@ -505,8 +511,12 @@ public class ApiServerVerticle extends AbstractVerticle {
                       String stacVersion = stacMetadata.getString("stacVersion");
                       JsonObject singleCollection = tempArray.get(0);
                       if (singleCollection.getString("license") == null
-                          || collection.getString("license").isEmpty()) {
+                          || singleCollection.getString("license").isEmpty()) {
                         singleCollection.put("license", stacMetadata.getString("stacLicense"));
+                      }
+                      if (singleCollection.getString("temporal") == null
+                          || singleCollection.getString("temporal").isEmpty()) {
+                        singleCollection.put("temporal", new JsonArray().add(null).add(null));
                       }
                       singleCollection
                           .put("type", "Collection")
@@ -554,11 +564,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                                           .put(
                                               "interval",
                                               new JsonArray()
-                                                  .add(
-                                                      new JsonArray()
-                                                          .add(
-                                                              collection.getJsonArray(
-                                                                  "temporal"))))));
+                                                  .add(collection.getJsonArray("temporal")))));
                       singleCollection.remove("bbox");
                       singleCollection.remove("temporal");
                       collections.add(singleCollection);
@@ -693,6 +699,88 @@ public class ApiServerVerticle extends AbstractVerticle {
       routingContext.put("statusCode", 500);
       routingContext.next();
     }
+  }
+
+  private void getStacCollection(RoutingContext routingContext) {
+    String collectionId = routingContext.pathParam("collectionId");
+    LOGGER.debug("collectionId- {}", collectionId);
+    dbService
+        .getStacCollection(collectionId)
+        .onSuccess(
+            collection -> {
+              LOGGER.debug("Success! - {}", collection.toString());
+              JsonObject jsonResult = collection.get(0);
+              try {
+                String jsonFilePath = "docs/getStacLandingPage.json";
+                FileSystem fileSystem = vertx.fileSystem();
+                Buffer buffer = fileSystem.readFileBlocking(jsonFilePath);
+                JsonObject stacMetadata = new JsonObject(buffer.toString());
+                if (jsonResult.getString("temporal") == null
+                    || jsonResult.getString("temporal").isEmpty()) {
+                  jsonResult.put("temporal", new JsonArray().add(null).add(null));
+                }
+                if (jsonResult.getString("license") == null
+                    || jsonResult.getString("license").isEmpty()) {
+                  jsonResult.put("license", stacMetadata.getString("stacLicense"));
+                }
+                String stacVersion = stacMetadata.getString("stacVersion");
+                jsonResult
+                    .put("type", "Collection")
+                    .put(
+                        "links",
+                        new JsonArray()
+                            .add(createLink("root", STAC + "/", null))
+                            .add(createLink("parent", STAC + "/", null))
+                            .add(
+                                createLink(
+                                    "self",
+                                    STAC + "/" + COLLECTIONS + "/" + jsonResult.getString("id"),
+                                    jsonResult.getString("title"))))
+                    .put("stac_version", stacVersion)
+                    .put(
+                        "extent",
+                        new JsonObject()
+                            .put(
+                                "spatial",
+                                new JsonObject()
+                                    .put(
+                                        "bbox",
+                                        new JsonArray().add(jsonResult.getJsonArray("bbox"))))
+                            .put(
+                                "temporal",
+                                new JsonObject()
+                                    .put(
+                                        "interval",
+                                        new JsonArray().add(jsonResult.getJsonArray("temporal")))));
+                jsonResult.remove("bbox");
+                jsonResult.remove("temporal");
+              } catch (Exception e) {
+                LOGGER.error("Something went wrong here: {}", e.getMessage());
+                routingContext.put(
+                    "response",
+                    new OgcException(500, "Internal Server Error", "Something " + "broke")
+                        .getJson()
+                        .toString());
+                routingContext.put("statusCode", 500);
+                routingContext.next();
+              }
+              routingContext.put("response", jsonResult.toString());
+              routingContext.put("statusCode", 200);
+              routingContext.next();
+            })
+        .onFailure(
+            failed -> {
+              if (failed instanceof OgcException) {
+                routingContext.put("response", ((OgcException) failed).getJson().toString());
+                routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+              } else {
+                OgcException ogcException =
+                    new OgcException(500, "Internal Server Error", "Internal Server Error");
+                routingContext.put("response", ogcException.getJson().toString());
+                routingContext.put("statusCode", ogcException.getStatusCode());
+              }
+              routingContext.next();
+            });
   }
 
   private JsonObject createLink(String rel, String href, String title) {
