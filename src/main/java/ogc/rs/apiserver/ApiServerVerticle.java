@@ -498,10 +498,10 @@ public class ApiServerVerticle extends AbstractVerticle {
         .onSuccess(
             success -> {
               JsonArray collections = new JsonArray();
+              JsonObject nestedCollections = new JsonObject();
               success.forEach(
                   collection -> {
                     try {
-                      JsonObject json;
                       List<JsonObject> tempArray = new ArrayList<>();
                       tempArray.add(collection);
                       String jsonFilePath = "docs/getStacLandingPage.json";
@@ -523,8 +523,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                           .put(
                               "links",
                               new JsonArray()
-                                  .add(createLink("root", STAC + "/", null))
-                                  .add(createLink("parent", STAC + "/", null))
+                                  .add(createLink("root", STAC, null))
+                                  .add(createLink("parent", STAC, null))
                                   .add(
                                       createLink(
                                           "self",
@@ -568,6 +568,14 @@ public class ApiServerVerticle extends AbstractVerticle {
                       singleCollection.remove("bbox");
                       singleCollection.remove("temporal");
                       collections.add(singleCollection);
+                      nestedCollections
+                          .put("collections", collections)
+                          .put(
+                              "links",
+                              new JsonArray()
+                                  .add(createLink("root", STAC, null))
+                                  .add(createLink("parent", STAC, null))
+                                  .add(createLink("self", STAC + "/" + COLLECTIONS, null)));
                     } catch (Exception e) {
                       LOGGER.error("Something went wrong here: {}", e.getMessage());
                       routingContext.put(
@@ -579,7 +587,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                       routingContext.next();
                     }
                   });
-              routingContext.put("response", collections.toString());
+              routingContext.put("response", nestedCollections.toString());
               routingContext.put("statusCode", 200);
               routingContext.next();
             })
