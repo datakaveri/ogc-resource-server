@@ -34,6 +34,13 @@ public class DatabaseServiceImpl implements DatabaseService{
     public Future<List<JsonObject>> getCollection(String collectionId) {
         LOGGER.info("getCollection");
         Promise<List<JsonObject>> result = Promise.promise();
+        
+        /* TODO : Remove once spec validation is being done */
+        if (!collectionId.matches(UUID_REGEX)) {
+          result.fail(new OgcException(404, "Not found", "Collection not found"));
+          return result.future();
+        }
+        
         Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
            conn.preparedQuery("select collections_details.id, title, description, datetime_key," +
@@ -95,6 +102,13 @@ public class DatabaseServiceImpl implements DatabaseService{
                                           Map<String, Integer> crs) {
       LOGGER.info("getFeatures");
       Promise<JsonObject> result = Promise.promise();
+      
+      /* TODO : Remove once spec validation is being done */
+      if (!collectionId.matches(UUID_REGEX)) {
+        result.fail(new OgcException(404, "Not found", "Collection not found"));
+        return result.future();
+      }
+      
       Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0),
           row -> row.getInteger("count"));
       Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
@@ -250,6 +264,13 @@ public class DatabaseServiceImpl implements DatabaseService{
   @Override
   public Future<Map<String, Integer>> isCrsValid(String collectionId, Map<String, String> queryParams) {
     Promise<Map<String, Integer>> result = Promise.promise();
+    
+    /* TODO : Remove once spec validation is being done */
+    if (!collectionId.matches(UUID_REGEX)) {
+      result.fail(new OgcException(404, "Not found", "Collection not found"));
+      return result.future();
+    }
+        
     if (queryParams.isEmpty()) {
        result.complete(Map.of(DEFAULT_SERVER_CRS,4326));
        return result.future();
@@ -291,6 +312,13 @@ public class DatabaseServiceImpl implements DatabaseService{
                                        Map<String, Integer> crs) {
     LOGGER.info("getFeature");
     Promise<JsonObject> result = Promise.promise();
+
+    /* TODO : Remove once spec validation is being done */
+    if (!collectionId.matches(UUID_REGEX)) {
+      result.fail(new OgcException(404, "Not found", "Collection not found"));
+      return result.future();
+    }
+    
     Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
     Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0)
       , row -> row.getInteger("count"));
@@ -364,6 +392,13 @@ public class DatabaseServiceImpl implements DatabaseService{
   public Future<List<JsonObject>> getStacCollection(String collectionId) {
     LOGGER.info("getFeature");
     Promise<List<JsonObject>> result = Promise.promise();
+
+    /* TODO : Remove once spec validation is being done */
+    if (!collectionId.matches(UUID_REGEX)) {
+      result.fail(new OgcException(404, "Not found", "Collection not found"));
+      return result.future();
+    }
+
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());
     client
