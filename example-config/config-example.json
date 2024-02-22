@@ -67,24 +67,16 @@
       "httpPort" : 8080,
       "verticleInstances": 8,
       "catServerHost": "",
-      "catServerPort": 123
+      "catServerPort": 123,
+      "s3BucketName": "bucket-name",
+      "s3Region": "aws-region",
+      "s3AccessKey": "",
+      "s3SecretKey": ""
     },
     {
       "id": "iudx.ogc.rs.metering.MeteringVerticle",
       "isWorkerVerticle":false,
       "verticleInstances": 1
-    },
-    {
-      "id":"iudx.resource.server.database.postgres.PostgresVerticle",
-      "isWorkerVerticle":false,
-      "verticleInstances": 1,
-      "databaseIp": "localhost",
-      "databasePort": 5432,
-      "databaseName": "",
-      "databaseUserName": "",
-      "databasePassword": "",
-      "poolSize": 25
-
     }
   ]
 }
