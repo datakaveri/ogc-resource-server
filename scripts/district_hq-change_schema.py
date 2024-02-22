@@ -10,8 +10,9 @@ def main():
         # async later? 
         print (f'''Connection to {conn} successful''')
         # here you can pass the string as column_names for different schema/collections
-        # this schema belongs to collection district_hq
-        cursor.execute("select fid, hq, area, town, state, taluk, district, objectid, indiadpt_, perimeter, indiadpt_i from public.district_hq")
+        table_name = '<table_name>'
+        columns = ''
+        cursor.execute(f"select {columns} from {table_name}")
         rows = cursor.fetchall()
         count = 1
         # column_names = ['fid','objectid', 'area', 'perimeter', 'indiadpt_', 'indiadpt_i', 'hq', 'town', 'state', 'taluk', 'district']
@@ -23,7 +24,7 @@ def main():
             row_to_json = json.dumps(row)
             # NOTE: properties column should exist beforehand
             # alter table <tablename> add column properties jsonb default '{}'            
-            sql_str = '''update public.district_hq set properties = %s::json where fid=%s'''
+            sql_str = f'''update {table_name} set properties = %s::json where fid=%s'''
             cursor.execute(sql_str, (row_to_json,fid))
             count+=1
         # the same column_names string/list can be passed here from the config    
