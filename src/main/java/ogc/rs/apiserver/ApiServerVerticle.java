@@ -1,5 +1,6 @@
 package ogc.rs.apiserver;
 
+import io.swagger.v3.core.util.Json;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -950,7 +951,7 @@ public class ApiServerVerticle extends AbstractVerticle {
         .onSuccess(
             collection -> {
               LOGGER.debug("Success! - {}", collection.toString());
-              JsonObject jsonResult = collection.get(0);
+              JsonObject jsonResult = collection;
               try {
                 String jsonFilePath = "docs/getStacLandingPage.json";
                 FileSystem fileSystem = vertx.fileSystem();
@@ -993,6 +994,22 @@ public class ApiServerVerticle extends AbstractVerticle {
                                     .put(
                                         "interval",
                                         new JsonArray().add(jsonResult.getJsonArray("temporal")))));
+                if (jsonResult.containsKey("assets")) {
+                  JsonObject assets = new JsonObject();
+
+                  jsonResult
+                      .getJsonArray("assets")
+                      .forEach(
+                          assetJson -> {
+                            JsonObject asset = new JsonObject();
+                            asset.mergeIn((JsonObject) assetJson);
+                            asset.remove("asset_name");
+                            asset.remove("stac_collections_id");
+                            assets.put(((JsonObject) assetJson).getString("asset_name"), asset);
+                          });
+                  jsonResult.put("assets", assets);
+                }
+
                 jsonResult.remove("bbox");
                 jsonResult.remove("temporal");
               } catch (Exception e) {

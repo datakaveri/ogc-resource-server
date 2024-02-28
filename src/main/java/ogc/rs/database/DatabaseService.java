@@ -35,7 +35,7 @@ public interface DatabaseService {
 
     Future<List<JsonObject>>  getStacCollections();
 
-    Future<List<JsonObject>> getStacCollection(String collectionId);
+    Future<JsonObject> getStacCollection(String collectionId);
 
     Future<List<JsonObject>> getTileMatrixSets();
 
