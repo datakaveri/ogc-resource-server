@@ -427,7 +427,7 @@ public class DatabaseServiceImpl implements DatabaseService{
 
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());
-    Collector<Row, ?, List<JsonObject>> collectorT =
+    Collector<Row, ?, List<JsonObject>> assetCollector =
         Collectors.mapping(Row::toJson, Collectors.toList());
     client.withConnection(
         conn ->
@@ -446,15 +446,14 @@ public class DatabaseServiceImpl implements DatabaseService{
                       String query =
                           "SELECT * from stac_assets where stac_collections_id = $1::uuid";
                       conn.preparedQuery(query)
-                          .collecting(collectorT)
+                          .collecting(assetCollector)
                           .execute(Tuple.of(UUID.fromString(collectionId)))
                           .map(SqlResult::value)
                           .onSuccess(
-                              conn1 -> {
-                                if (!conn1.isEmpty()) {
-                                  collection.put("assets", conn1);
+                              assetResult -> {
+                                if (!assetResult.isEmpty()) {
+                                  collection.put("assets", assetResult);
                                 }
-                                LOGGER.debug("55555555555555555" + collection);
                                 result.complete(collection);
                               })
                           .onFailure(
