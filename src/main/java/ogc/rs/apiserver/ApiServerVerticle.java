@@ -1003,9 +1003,22 @@ public class ApiServerVerticle extends AbstractVerticle {
                           assetJson -> {
                             JsonObject asset = new JsonObject();
                             asset.mergeIn((JsonObject) assetJson);
-                            asset.remove("asset_name");
+                            String href =
+                                hostName
+                                    + ogcBasePath
+                                    + STAC
+                                    + "/"
+                                    + COLLECTIONS
+                                    + "/"
+                                    + asset.getString("stac_collections_id")
+                                    + "/assets/"
+                                    + asset.getString("id");
+                            asset.put("href", href);
+                            asset.put("file:size", asset.getInteger("size"));
+                            asset.remove("size");
+                            asset.remove("id");
                             asset.remove("stac_collections_id");
-                            assets.put(((JsonObject) assetJson).getString("asset_name"), asset);
+                            assets.put(((JsonObject) assetJson).getString("id"), asset);
                           });
                   jsonResult.put("assets", assets);
                 }
