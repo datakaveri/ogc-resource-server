@@ -317,7 +317,7 @@ public class DatabaseServiceImpl implements DatabaseService{
       result.fail(new OgcException(404, "Not found", "Collection not found"));
       return result.future();
     }
-    
+
     Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
     Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0)
       , row -> row.getInteger("count"));
@@ -415,9 +415,9 @@ public class DatabaseServiceImpl implements DatabaseService{
   }
 
   @Override
-  public Future<List<JsonObject>> getStacCollection(String collectionId) {
+  public Future<JsonObject> getStacCollection(String collectionId) {
     LOGGER.info("getFeature");
-    Promise<List<JsonObject>> result = Promise.promise();
+    Promise<JsonObject> result = Promise.promise();
 
     /* TODO : Remove once spec validation is being done */
     if (!collectionId.matches(UUID_REGEX)) {
@@ -427,30 +427,46 @@ public class DatabaseServiceImpl implements DatabaseService{
 
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());
-    client
-        .withConnection(
-            conn ->
-                conn.preparedQuery(
-                        "SELECT id, title, description, bbox, temporal, license FROM collections_details where id = $1::uuid")
-                    .collecting(collector)
-                    .execute(Tuple.of(UUID.fromString(collectionId)))
-                    .map(SqlResult::value))
-        .onSuccess(
-            success -> {
-              LOGGER.debug("DB result - {}", success);
-              if (success.isEmpty())
-                result.fail(new OgcException(404, "Not found", "Collection not found"));
-              else {
-                LOGGER.debug("Built OGC Collection Response - {}", success);
-
-                result.complete(success);
-              }
-            })
-        .onFailure(
-            fail -> {
-              LOGGER.error("Failed at getCollection- {}", fail.getMessage());
-              result.fail("Error!");
-            });
+    Collector<Row, ?, List<JsonObject>> assetCollector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+    client.withConnection(
+        conn ->
+            conn.preparedQuery(
+                    "SELECT id, title, description, bbox, temporal, license FROM collections_details where id = $1::uuid")
+                .collecting(collector)
+                .execute(Tuple.of(UUID.fromString(collectionId)))
+                .map(SqlResult::value)
+                .onSuccess(
+                    success -> {
+                      LOGGER.debug("DB result - {}", success);
+                      if (success.equals(0)) {
+                        result.fail(new OgcException(404, "Not found", "Collection not found"));
+                      }
+                      JsonObject collection = success.get(0);
+                      String query =
+                          "SELECT * from stac_collections_assets where stac_collections_id = $1::uuid";
+                      conn.preparedQuery(query)
+                          .collecting(assetCollector)
+                          .execute(Tuple.of(UUID.fromString(collectionId)))
+                          .map(SqlResult::value)
+                          .onSuccess(
+                              assetResult -> {
+                                if (!assetResult.isEmpty()) {
+                                  collection.put("assets", assetResult);
+                                }
+                                result.complete(collection);
+                              })
+                          .onFailure(
+                              failed -> {
+                                LOGGER.error("Failed at getFeature- {}", failed.getMessage());
+                                result.fail("Error!");
+                              });
+                    })
+                .onFailure(
+                    fail -> {
+                      LOGGER.error("Failed at getCollection- {}", fail.getMessage());
+                      result.fail("Error!");
+                    }));
     return result.future();
   }
   public Future<List<JsonObject>> getTileMatrixSetMetaData(String tileMatrixSet) {
@@ -539,6 +555,5 @@ public class DatabaseServiceImpl implements DatabaseService{
           result.fail("Error!");
         });
     return result.future();
-
   }
 }
