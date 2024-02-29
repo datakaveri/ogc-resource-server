@@ -1,6 +1,5 @@
 package ogc.rs.apiserver;
 
-import io.swagger.v3.core.util.Json;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;

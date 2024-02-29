@@ -444,7 +444,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                       }
                       JsonObject collection = success.get(0);
                       String query =
-                          "SELECT * from stac_assets where stac_collections_id = $1::uuid";
+                          "SELECT * from stac_collections_assets where stac_collections_id = $1::uuid";
                       conn.preparedQuery(query)
                           .collecting(assetCollector)
                           .execute(Tuple.of(UUID.fromString(collectionId)))

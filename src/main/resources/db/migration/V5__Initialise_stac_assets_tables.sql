@@ -1,6 +1,6 @@
 CREATE TYPE asset_role_enum AS ENUM ('thumbnail', 'overview', 'data', 'metadata');
 
-CREATE TABLE stac_assets (
+CREATE TABLE stac_collections_assets (
     id UUID PRIMARY KEY DEFAULT public.gen_random_uuid(),
     stac_collections_id UUID REFERENCES collections_details(id) not null,
     title VARCHAR(255) not null,
