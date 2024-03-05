@@ -29,8 +29,6 @@ public interface DatabaseService {
     Future<JsonObject> getFeature(String collectionId, String featureId, Map<String, String> queryParams, Map<String,
         Integer> crs);
 
-    Future<Void> matchFilterWithProperties(String collectionId, Map<String, String> queryParams);
-
     Future<Map<String, Integer>> isCrsValid(String collectionId, Map<String, String> crs);
 
     Future<List<JsonObject>>  getStacCollections();

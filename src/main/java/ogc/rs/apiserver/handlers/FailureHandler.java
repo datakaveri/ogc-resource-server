@@ -1,7 +1,5 @@
 package ogc.rs.apiserver.handlers;
 
-import static ogc.rs.apiserver.util.Constants.APPLICATION_JSON;
-import static ogc.rs.apiserver.util.Constants.CONTENT_TYPE;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.BodyProcessorException;
@@ -13,6 +11,8 @@ import ogc.rs.apiserver.util.ProcessException;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import static ogc.rs.apiserver.util.Constants.*;
 
 public class FailureHandler implements Handler<RoutingContext> {
   private static final Logger LOGGER = LogManager.getLogger(FailureHandler.class);
@@ -26,7 +26,7 @@ public class FailureHandler implements Handler<RoutingContext> {
       String failureMessage =
         failure.getCause() == null ? "Bad Request" : failure.getCause().getMessage();
       OgcException ogcException = new OgcException(400, "Bad Request", failureMessage);
-      routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON)
+      routingContext.response().putHeader(HEADER_CONTENT_TYPE, MIME_APPLICATION_JSON)
         .setStatusCode(HttpStatus.SC_BAD_REQUEST).end(ogcException.getJson().toString());
     }
     else if (failure instanceof OgcException) {

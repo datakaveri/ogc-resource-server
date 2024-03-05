@@ -106,7 +106,7 @@ public class FeatureQueryBuilder {
   }
 
   public void setFilter(String key, String value) {
-    this.filter = "properties->>'" + key + "'='" + value + "'";
+    this.filter = key + "=" + value;
     this.additionalParams = "where";
   }
 
@@ -116,48 +116,48 @@ public class FeatureQueryBuilder {
 
   public String buildSqlString() {
     //TODO: refactor to build the sql query
-    this.sqlString = String.format("select id, itemType as type, %4$s as geometry, properties" +
+    this.sqlString = String.format("select id, itemType as type, %4$s as geometry" +
             " from \"%1$s\" limit %2$d offset %3$d"
         , this.tableName, this.limit, this.offset, this.geoColumn);
 
     if (!bbox.isEmpty()) {
-      this.sqlString = String.format("select id, itemType as type, %6$s as geometry, properties" +
+      this.sqlString = String.format("select id, itemType as type, %6$s as geometry" +
               " from \"%1$s\" %3$s %4$s limit %2$d offset %5$d"
           ,this.tableName,this.limit, this.additionalParams, this.bbox, this.offset, this.geoColumn);
     }
 
     if(!datetime.isEmpty() ){
-      this.sqlString = String.format("select id, itemType as type, %6$s as geometry, properties " +
+      this.sqlString = String.format("select id, itemType as type, %6$s as geometry " +
               " from \"%1$s\" %3$s %4$s limit %2$d offset %5$d"
           ,this.tableName,this.limit, this.additionalParams, this.datetime, this.offset, this.geoColumn);
     }
 
     if (!filter.isEmpty()) {
-      this.sqlString = String.format("select id, itemType as type, %6$s as geometry, properties" +
+      this.sqlString = String.format("select id, itemType as type, %6$s as geometry" +
               " from \"%1$s\" %3$s %4$s limit %2$d offset %5$d"
           ,this.tableName,this.limit, this.additionalParams, this.filter, this.offset, this.geoColumn);
     }
 
     if (!bbox.isEmpty() && !filter.isEmpty()) {
-      this.sqlString = String.format("select id, itemType as type, %7$s as geometry, properties" +
+      this.sqlString = String.format("select id, itemType as type, %7$s as geometry" +
               " from \"%1$s\" %3$s %4$s and %5$s limit %2$d offset %6$d"
           ,this.tableName,this.limit, this.additionalParams, this.bbox, this.filter, this.offset, this.geoColumn);
     }
 
     if (!bbox.isEmpty() && !datetime.isEmpty()) {
-      this.sqlString = String.format("select id, itemType as type, %7$s as geometry, properties" +
+      this.sqlString = String.format("select id, itemType as type, %7$s as geometry" +
               " from \"%1$s\" %3$s %4$s and %5$s limit %2$d offset %6$d"
           ,this.tableName,this.limit, this.additionalParams, this.bbox, this.datetime, this.offset, this.geoColumn);
     }
 
     if (!datetime.isEmpty() && !filter.isEmpty()) {
-      this.sqlString = String.format("select id, itemType as type, %7$s as geometry, properties" +
+      this.sqlString = String.format("select id, itemType as type, %7$s as geometry" +
               " from \"%1$s\" %3$s %4$s and %5$s limit %2$d offset %6$d"
           ,this.tableName,this.limit, this.additionalParams, this.datetime, this.filter, this.offset, this.geoColumn);
     }
 
     if (!bbox.isEmpty() && !filter.isEmpty() && !datetime.isEmpty()) {
-      this.sqlString = String.format("select id, itemType as type, %8$s as geometry, properties" +
+      this.sqlString = String.format("select id, itemType as type, %8$s as geometry" +
               " from \"%1$s\" %3$s %4$s and %5$s and %7$s limit %2$d offset %6$d"
           ,this.tableName,this.limit, this.additionalParams, this.bbox, this.filter, this.offset, this.datetime,
           this.geoColumn);

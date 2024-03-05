@@ -227,41 +227,6 @@ public class DatabaseServiceImpl implements DatabaseService{
     return result.future();
   }
 
-  public Future<Void> matchFilterWithProperties(String collectionId, Map<String, String> queryParams) {
-      Promise<Void> result = Promise.promise();
-      if (queryParams.isEmpty()) {
-         result.complete();
-         return result.future();
-      }
-      Set<String> keys =  queryParams.keySet();
-      keys.removeAll(predefinedKeys);
-      if (keys.isEmpty()) {
-        result.complete();
-        return result.future();
-      }
-      client.withConnection(conn ->
-          conn.preparedQuery("select jsonb_object_keys(properties) as filter_keys from \"" + collectionId + "\" group" +
-                  " by " +
-                  "filter_keys")
-              .execute()
-              .onSuccess(success -> {
-                Set<String> propertiesKeys = new HashSet<>();
-                for(Row row: success){
-                  propertiesKeys.add(row.getString("filter_keys"));
-                }
-                LOGGER.debug("properties keys: {}", propertiesKeys);
-                if (propertiesKeys.containsAll(keys))
-                  result.complete();
-                else
-                  result.fail(new OgcException(400, "Bad Request", "Query parameter is invalid"));
-              })
-              .onFailure(failed -> {
-                LOGGER.debug("DB query Failed!! {}", failed.getMessage());
-                result.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
-              }));
-      return result.future();
-  }
-
   @Override
   public Future<Map<String, Integer>> isCrsValid(String collectionId, Map<String, String> queryParams) {
     Promise<Map<String, Integer>> result = Promise.promise();
@@ -324,35 +289,22 @@ public class DatabaseServiceImpl implements DatabaseService{
       , row -> row.getInteger("count"));
     String srid = String.valueOf(crs.get(queryParams.getOrDefault("crs", DEFAULT_SERVER_CRS)));
     String geoColumn = "cast(st_asgeojson(st_transform(geom," + srid + "),9,0) as json)";
+    String sqlQuery = "Select id, itemType as type," + geoColumn + " as geometry, " +
+        "properties from \"" + collectionId + "\" where id=$1::UUID" ;
     client.withConnection(conn ->
-        conn.preparedQuery("select count(*) from collections_details where id = $1::uuid")
-            .collecting(collectorT)
-            .execute(Tuple.of(UUID.fromString(collectionId)))
-            .onSuccess(conn1 -> {
-                if (conn1.value().get("count") == 0) {
-                    result.fail(new OgcException(404, "Not found", "Collection not found"));
-                    return;
-                }
-                String sqlQuery = "Select id, itemType as type," + geoColumn + " as geometry, " +
-                    "properties from \"" + collectionId + "\" where id=$2::UUID" ;
-                conn.preparedQuery(sqlQuery)
-                    .collecting(collector).execute(Tuple.of(geoColumn, UUID.fromString(featureId)))
-                    .map(SqlResult::value)
-                    .onSuccess(success -> {
-                        if (success.isEmpty())
-                            result.fail(new OgcException(404, "Not found", "Feature not found"));
-                        else
-                            result.complete(success.get(0));
-                    })
-                    .onFailure(failed -> {
-                        LOGGER.error("Failed at getFeature- {}",failed.getMessage());
-                        result.fail("Error!");
-                    });
-            })
-            .onFailure(fail -> {
-                LOGGER.error("Failed at to_regclass- {}",fail.getMessage());
-                result.fail("Error!");
-            }));
+        conn.preparedQuery(sqlQuery)
+          .collecting(collector).execute(Tuple.of(UUID.fromString(featureId)))
+          .map(SqlResult::value)
+          .onSuccess(success -> {
+            if (success.isEmpty())
+              result.fail(new OgcException(404, "Not found", "Feature not found"));
+            else
+              result.complete(success.get(0));
+          })
+          .onFailure(failed -> {
+            LOGGER.error("Failed at getFeature- {}",failed.getMessage());
+            result.fail("Error!");
+          }));
       return result.future();
   }
 
