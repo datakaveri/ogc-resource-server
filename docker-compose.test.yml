@@ -6,7 +6,7 @@ networks:
 
 services:  
   test:
-    image: ghcr.io/datakaveri/ogc-rs-test:latest
+    image: ghcr.io/datakaveri/geoserver-test:latest
     volumes:
       - ./src/:/usr/share/app/src
       - /home/ubuntu/configs/ogc-config-dev.json:/usr/share/app/configs/config.json
@@ -27,7 +27,7 @@ services:
     command: bash -c "docker/runTests.sh"
 
   perfTest:
-    image: ghcr.io/datakaveri/ogc-rs-dev:latest
+    image: ghcr.io/datakaveri/geoserver-dev:latest
     volumes:
       - /home/ubuntu/configs/ogc-config-dev.json:/usr/share/app/configs/config.json
       - type: volume
