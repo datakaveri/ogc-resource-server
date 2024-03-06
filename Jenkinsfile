@@ -1,9 +1,8 @@
 pipeline {
 
   environment {
-    devRegistry = 'ghcr.io/datakaveri/ogc-rs-dev'
-    deplRegistry = 'ghcr.io/datakaveri/ogc-rs-depl'
-    testRegistry = 'ghcr.io/datakaveri/ogc-rs-test:latest'
+    devRegistry = 'ghcr.io/datakaveri/geoserver-dev'
+    testRegistry = 'ghcr.io/datakaveri/geoserver-test:latest'
     registryUri = 'https://ghcr.io'
     registryCredential = 'datakaveri-ghcr'
     GIT_HASH = GIT_COMMIT.take(7)
@@ -139,18 +138,20 @@ pipeline {
         }
       }
       stages {
-        stage('Build image locally in swarm') {
-          steps{
-            script{
-              sh "ssh ubuntu@adex-swarm 'cd /home/ubuntu/ogc-resource-server; git pull;'"
-              sh "ssh ubuntu@adex-swarm 'cd /home/ubuntu/ogc-resource-server; docker build -t iudx/ogc-rs-dev:latest -f docker/dev.dockerfile .'"
+        stage('Push Images') {
+          steps {
+            script {
+              docker.withRegistry( registryUri, registryCredential ) {
+                devImage.push("1.0.0-alpha-${env.GIT_HASH}")
+                deplImage.push("1.0.0-alpha-${env.GIT_HASH}")
+              }
             }
           }
         }
         stage('Deploy ogc-resource-server') {
           steps{
             script{
-              sh "ssh ubuntu@adex-swarm 'docker service update ogc-rs_ogc-rs --force'"
+              sh "ssh ubuntu@adex-swarm 'docker service update ogc-rs_ogc-rs --image ghcr.io/datakaveri/geoserver-dev:1.0.0-alpha-${env.GIT_HASH}'"
             }
           }
         }
