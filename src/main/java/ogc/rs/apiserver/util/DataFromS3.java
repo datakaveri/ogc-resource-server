@@ -32,11 +32,11 @@ public class DataFromS3 {
   private URL url;
 
   public DataFromS3(HttpClient client, String bucket, String region, String accessKey, String secretKey) {
-    this.s3Url = "https://" + S3_BUCKET + ".s3." + S3_REGION + ".amazonaws.com" + "/";
     S3_BUCKET = bucket;
     S3_REGION = region;
     S3_ACCESS_KEY = accessKey;
     S3_SECRET_KEY = secretKey;
+    this.s3Url = "https://" + S3_BUCKET + ".s3." + S3_REGION + ".amazonaws.com" + "/";
     DataFromS3.client = client;
     this.headers = new HashMap<>();
   }
@@ -89,6 +89,12 @@ public class DataFromS3 {
                                                 String tileRow, String tileCol) {
     this.s3Url = this.s3Url + tileMatrixSetId + "/" + collection + "/" + tileMatrixId + "/" + tileRow + "/" + tileCol +
         ".png";
+    return s3Url;
+  }
+
+  public String getFullyQualifiedStacUrlString (String stacUrl) {
+
+    this.s3Url = this.s3Url + stacUrl;
     return s3Url;
   }
 }

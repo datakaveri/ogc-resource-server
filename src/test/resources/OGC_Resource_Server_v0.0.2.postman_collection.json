@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "dcb82923-cb6a-47fd-bb88-14434f33555e",
+		"_postman_id": "bff865d3-dec7-4aab-a013-c84d3ddf1ce5",
 		"name": "OGC Resource Server v0.0.2",
 		"description": "Components/APIs used in the OGC Compliant Resource Server.\n\nOGC Features API standard can be found at\n\n[\"OGC API - Features - Part 1: Core corrigendum standard\"](https://docs.opengeospatial.org/is/17-069r4/17-069r4.html).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -5022,14 +5022,42 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/stac/collections/1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a",
+							"raw": "{{baseUrl}}/stac/collections/d3852e4e-9325-450a-a278-b5eaa89ad4b0",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"stac",
 								"collections",
-								"1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a"
+								"d3852e4e-9325-450a-a278-b5eaa89ad4b0"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "fetches the  STAC asset with id `assetId`",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "token",
+								"value": "{{assetSecureResourceToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/assets/446a2a68-8648-4a70-9163-07ac0d891613",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"assets",
+								"446a2a68-8648-4a70-9163-07ac0d891613"
 							]
 						}
 					},

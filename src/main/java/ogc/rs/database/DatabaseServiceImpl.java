@@ -556,4 +556,35 @@ public class DatabaseServiceImpl implements DatabaseService{
         });
     return result.future();
   }
+
+  @Override
+  public Future<JsonObject> getAssets(String assetId) {
+    LOGGER.info("get details of assets");
+    Promise<JsonObject> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+    client
+        .withConnection(
+            conn ->
+                conn.preparedQuery("select * from stac_collections_assets where id = $1::uuid")
+                    .collecting(collector)
+                    .execute(Tuple.of(UUID.fromString(assetId)))
+                    .map(SqlResult::value))
+        .onSuccess(
+            success -> {
+              if (success.isEmpty()) {
+                LOGGER.error("Given assets is not present");
+                result.fail(new OgcException(404, "Not found", "Asset not found"));
+              } else {
+                LOGGER.debug("Asset Result: {}", success.get(0));
+                result.complete(success.get(0));
+              }
+            })
+        .onFailure(
+            fail -> {
+              LOGGER.error("Failed to get assets! - {}", fail.getMessage());
+              result.fail("Error!");
+            });
+    return result.future();
+  }
 }

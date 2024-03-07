@@ -202,6 +202,13 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
 
+              routerBuilderStac
+                      .operation("getAsset")
+                      .handler(AuthHandler.create(vertx))
+                      .handler(this::getAssets)
+                      .handler(this::putCommonResponseHeaders)
+                      .handler(this::buildResponse);
+
           routerBuilderStac
               .operation("getConformanceDeclaration")
               .handler(
@@ -1003,15 +1010,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                             JsonObject asset = new JsonObject();
                             asset.mergeIn((JsonObject) assetJson);
                             String href =
-                                hostName
-                                    + ogcBasePath
-                                    + STAC
-                                    + "/"
-                                    + COLLECTIONS
-                                    + "/"
-                                    + asset.getString("stac_collections_id")
-                                    + "/assets/"
-                                    + asset.getString("id");
+                                hostName + ogcBasePath + "assets/" + asset.getString("id");
                             asset.put("href", href);
                             asset.put("file:size", asset.getInteger("size"));
                             asset.remove("size");
@@ -1050,6 +1049,61 @@ public class ApiServerVerticle extends AbstractVerticle {
                 routingContext.put("statusCode", ogcException.getStatusCode());
               }
               routingContext.next();
+            });
+  }
+
+  private void getAssets(RoutingContext routingContext) {
+    String assetId = routingContext.pathParam("assetId");
+    HttpServerResponse response = routingContext.response();
+    response.setChunked(true);
+    if (!(Boolean) routingContext.get("isAuthorised")) {
+      routingContext.next();
+      return;
+    }
+    dbService
+        .getAssets(assetId)
+        .onSuccess(
+            handler -> {
+              response.putHeader("Content-Type", handler.getString("type"));
+              DataFromS3 dataFromS3 =
+                  new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
+              String urlString =
+                  dataFromS3.getFullyQualifiedStacUrlString(handler.getString("href"));
+              dataFromS3.setUrlFromString(urlString);
+              dataFromS3.setSignatureHeader();
+              dataFromS3
+                  .getTileFromS3()
+                  .onSuccess(success -> success.pipeTo(response))
+                  .onFailure(
+                      failed -> {
+                        if (failed instanceof OgcException) {
+                          routingContext.put(
+                              "response", ((OgcException) failed).getJson().toString());
+                          routingContext.put("statusCode", 404);
+                        } else {
+                          routingContext.put(
+                              "response",
+                              new OgcException(
+                                      500, "Internal Server Error", "Internal Server Error")
+                                  .getJson()
+                                  .toString());
+                          routingContext.put("statusCode", 500);
+                        }
+                        routingContext.next();
+                      });
+            })
+        .onFailure(
+            failed -> {
+                if (failed instanceof OgcException) {
+                    routingContext.put("response", ((OgcException) failed).getJson().toString());
+                    routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+                } else {
+                    OgcException ogcException =
+                            new OgcException(500, "Internal Server Error", "Internal Server Error");
+                    routingContext.put("response", ogcException.getJson().toString());
+                    routingContext.put("statusCode", ogcException.getStatusCode());
+                }
+                routingContext.next();
             });
   }
 
