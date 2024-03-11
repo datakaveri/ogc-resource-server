@@ -283,6 +283,7 @@
         "description": "local identifier of an asset",
         "required": true,
         "schema": {
+          "type": "string",
           "format": "uuid"
         }
       }
