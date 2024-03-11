@@ -137,6 +137,58 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
         return result.future();
     }
 
+  @Override
+  public Future<JsonObject> assetApiCheck(JsonObject requestJson, JsonObject authenticationInfo) {
+    Promise<JsonObject> result = Promise.promise();
+    String assetId, token;
+    try {
+      assetId = authenticationInfo.getString("id");
+      token = authenticationInfo.getString("token");
+    } catch (NullPointerException e) {
+      LOGGER.error("NullPointer Exception while getting JSONObj values");
+      result.fail("NullPointer error!");
+      return result.future();
+    }
+    Future<JWTData> jwtDecodeFut = decodeJwt(token);
+    ResultContainer resultIntermediate = new ResultContainer();
+    assert jwtDecodeFut != null;
+    jwtDecodeFut
+        .compose(
+            decode -> {
+              resultIntermediate.jwtData = decode;
+              LOGGER.debug(
+                  "Intermediate JWTData: {}\n", resultIntermediate.jwtData.toJson().toString());
+              return isValidAudience(resultIntermediate.jwtData);
+            })
+        .compose(
+            audience -> {
+              LOGGER.debug("Valid Audience: {}\n", audience);
+              // check for revoked client here before returning true
+              return Future.succeededFuture(true);
+            })
+        .compose(
+            validClient -> {
+              // check for something else that I don't understand
+              LOGGER.debug("Revoked client is always {}", validClient);
+              return validateAssetAccess(assetId, resultIntermediate.jwtData);
+            })
+        .onSuccess(
+            success -> {
+              success.put("isAuthorised", true);
+              result.complete(success);
+              LOGGER.debug("Congratulations! It worked. {}", (success).toString());
+            })
+        .onFailure(
+            failed -> {
+              LOGGER.error(
+                  "Something went wrong while authentication or authorisation:(\n Show message {}",
+                  failed.getMessage());
+              result.fail(failed);
+            });
+
+    return result.future();
+  }
+
     private Future<Boolean> isValidId(JWTData jwtData, String id) {
         // check if the id in the token matches the id in the request/path param.
         Promise<Boolean> promise = Promise.promise();
@@ -271,4 +323,105 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
         JWTData jwtData;
         boolean isOpen;
     }
+
+  /**
+   * The validateAssetAccess method validates if the assetID is present or not. It then checks for
+   * the collectionId associate with it and verifies it with the token.
+   *
+   * @param assetId which is a String
+   * @param jwtData The JWTData object containing relevant information extracted from the JWT.
+   * @return A Future<JsonObject> representing the result of the validation. If successful, the
+   *     JsonObject contains authorization details. If unsuccessful, the Future is completed with an
+   *     OgcException.
+   */
+  private Future<JsonObject> validateAssetAccess(String assetId, JWTData jwtData) {
+    Promise<JsonObject> promise = Promise.promise();
+    String idFromJwt = jwtData.getIid().split(":")[1];
+    if ( jwtData.getIid().split(":")[0].equals("rs")) {
+        promise.fail(new OgcException(401,
+                "Not Authorised",
+                "User is not authorised. Please contact IUDX AAA " + "Server."));
+        return promise.future();
+    }
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+
+    pooledClient
+        .withConnection(
+            conn ->
+                conn.preparedQuery(
+                        "select id, stac_collections_id from stac_collections_assets where id = $1::uuid")
+                    .collecting(collector)
+                    .execute(Tuple.of(UUID.fromString(assetId)))
+                    .map(SqlResult::value))
+        .onSuccess(
+            success -> {
+              if (success.isEmpty()) {
+                promise.fail(new OgcException(404, "Not Found", "Asset not found"));
+
+              } else {
+                LOGGER.debug("Asset Found {} ", success.get(0));
+                if (success.get(0).getString("stac_collections_id").equals(idFromJwt)) {
+                  LOGGER.debug("Collection Id Validated");
+
+                  JsonArray access =
+                      jwtData.getCons() != null ? jwtData.getCons().getJsonArray("access") : null;
+
+                  if (access == null)
+                    promise.fail(
+                        new OgcException(
+                            401,
+                            "Not Authorised",
+                            "User is not authorised. Please contact IUDX AAA " + "Server."));
+                  else {
+                    if (access.contains("api") && jwtData.getRole().equalsIgnoreCase("consumer")) {
+                      JsonObject results = new JsonObject();
+                      results.put("iid", idFromJwt);
+                      results.put("userId", jwtData.getSub());
+                      results.put("role", jwtData.getRole());
+                      results.put(
+                          "expiry",
+                          LocalDateTime.ofInstant(
+                                  Instant.ofEpochSecond(
+                                      Long.parseLong(jwtData.getExp().toString())),
+                                  ZoneId.systemDefault())
+                              .toString());
+                      promise.complete(results);
+                    }
+
+                    if (jwtData.getRole().equalsIgnoreCase("provider")) {
+                      JsonObject results = new JsonObject();
+                      results.put("iid", idFromJwt);
+                      results.put("userId", jwtData.getSub());
+                      results.put("role", jwtData.getRole());
+                      results.put(
+                          "expiry",
+                          LocalDateTime.ofInstant(
+                                  Instant.ofEpochSecond(
+                                      Long.parseLong(jwtData.getExp().toString())),
+                                  ZoneId.systemDefault())
+                              .toString());
+                      promise.complete(results);
+                    }
+                  }
+
+                } else {
+
+                  LOGGER.error("Collection associated with asset is not same as in token");
+                  promise.fail(new OgcException(401, "Not Authorised", "Invalid Collection Id"));
+                }
+              }
+            })
+        .onFailure(
+            fail -> {
+              LOGGER.error("Asset not found");
+              promise.fail(
+                  new OgcException(
+                      401,
+                      "Not Authorised",
+                      "User is not authorised. Please contact IUDX AAA " + "Server."));
+            });
+
+    return promise.future();
+  }
 }

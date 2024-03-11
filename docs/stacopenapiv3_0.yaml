@@ -140,6 +140,27 @@ paths:
       servers:
         - url: 'https://ogc.iudx.io'
           description: OGC-Resource-Server
+  '/assets/{assetId}':
+    get:
+      tags:
+        - Features
+      summary: gets the assets links that can be used to download assets
+      description: |-
+        Based on the 'assetId', it gives the link to asset that can be downloaded
+      operationId: getAsset
+      parameters:
+        - $ref: '#/components/parameters/assetId'
+      responses:
+        '200':
+          description: Downloads the file associated with the asset identified by 'assetId'.
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      servers:
+        - url: 'https://ogc.iudx.io'
+          description: OGC-Resource-Server
+
 
 
 
@@ -258,6 +279,14 @@ components:
       required: true
       schema:
         type: string
+    assetId:
+      name: assetId
+      in: path
+      description: local identifier of an asset
+      required: true
+      schema:
+        type: string
+        format: uuid
   responses:
     CatalogLandingPage:
       description: |-
@@ -466,6 +495,7 @@ components:
                     rel: self
                     type: application/geo+json
                     title: Districts in India
+
   schemas:
     confClasses:
       type: object
