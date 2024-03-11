@@ -152,7 +152,7 @@ paths:
         - $ref: '#/components/parameters/assetId'
       responses:
         '200':
-          $ref: '#/components/responses/asset'
+          description: Downloads the file associated with the asset identified by 'assetId'.
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -494,24 +494,6 @@ components:
                     rel: self
                     type: application/geo+json
                     title: Districts in India
-    asset:
-      description: Information about the asset associated with the collection with id 'assetId'.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/asset'
-          examples:
-            asset:
-              value:
-                id: 446a2a68-8648-4a70-9163-07ac0d891613
-                stac_collections_id: a5a6e26f-d252-446d-b7dd-4d50ea945102
-                title: thumbnail
-                href: www.path.jpg
-                type: image/jpeg
-                size: 1024
-                role:
-                  - thumbnail
-                  - overview
 
   schemas:
     confClasses:
@@ -1169,30 +1151,4 @@ components:
       example:
         code: Internal Server Error
         description: Internal Server Error
-    asset:
-      type: object
-      required:
-        - href
-      properties:
-        id:
-          description: identifier of the asset used, for example in URIs.
-          type: string
-        stac_collections_id:
-          description: identifier of the collection used, for example in URIs.
-          type: string
-        title:
-          description: human readable title of the collection
-          type: string
-        href:
-          type: string
-        type:
-          type: string
-        size:
-          type: integer
-        role:
-          type: array
-          items:
-            $ref: '#/components/schemas/assetRole'
-    assetRole:
-      type: string
 
