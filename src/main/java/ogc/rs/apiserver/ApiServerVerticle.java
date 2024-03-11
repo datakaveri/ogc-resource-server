@@ -1054,12 +1054,12 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   private void getAssets(RoutingContext routingContext) {
     String assetId = routingContext.pathParam("assetId");
-    HttpServerResponse response = routingContext.response();
-    response.setChunked(true);
     if (!(Boolean) routingContext.get("isAuthorised")) {
       routingContext.next();
       return;
     }
+    HttpServerResponse response = routingContext.response();
+    response.setChunked(true);
     dbService
         .getAssets(assetId)
         .onSuccess(

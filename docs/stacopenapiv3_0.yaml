@@ -143,7 +143,7 @@ paths:
   '/assets/{assetId}':
     get:
       tags:
-        - Fetaures
+        - Features
       summary: gets the assets links that can be used to download assets
       description: |-
         Based on the 'assetId', it gives the link to asset that can be downloaded
@@ -285,7 +285,7 @@ components:
       description: local identifier of an asset
       required: true
       schema:
-        type: string
+        format: uuid
   responses:
     CatalogLandingPage:
       description: |-
