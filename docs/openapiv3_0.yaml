@@ -606,6 +606,7 @@ components:
       examples:
         default:
           value: 15
+
     processId:
       name: processId
       in: path

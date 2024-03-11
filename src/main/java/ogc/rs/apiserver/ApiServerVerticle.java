@@ -156,7 +156,6 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::getFeature)
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
-
           routerBuilderStac
               .operation("getStacLandingPage")
               .handler(this::stacCatalog)
@@ -168,9 +167,15 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::stacCollections)
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
+
           routerBuilder.operation(PROCESSES_API)
             // .handler(AuthHandler.create(vertx))
             .handler(this::getProcesses).handler(this::putCommonResponseHeaders)
+            .handler(this::buildResponse).failureHandler(failureHandler);
+
+          routerBuilder.operation(PROCESS_API)
+            // .handler(AuthHandler.create(vertx))
+            .handler(this::getProcess).handler(this::putCommonResponseHeaders)
             .handler(this::buildResponse).failureHandler(failureHandler);
 
           routerBuilder
@@ -241,10 +246,6 @@ public class ApiServerVerticle extends AbstractVerticle {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
               }
-          routerBuilder.operation(PROCESS_API)
-            // .handler(AuthHandler.create(vertx))
-            .handler(this::getProcess).handler(this::putCommonResponseHeaders)
-            .handler(this::buildResponse).failureHandler(failureHandler);
 
           dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
           // TODO: ssl configuration
@@ -430,7 +431,6 @@ public class ApiServerVerticle extends AbstractVerticle {
       routingContext.next();
     });
   }
-
   private void getProcess(RoutingContext routingContext) {
     String processId = routingContext.pathParams().get("processId");
     dbService.getProcess(processId).onSuccess(successResult -> {

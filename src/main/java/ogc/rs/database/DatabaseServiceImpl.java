@@ -608,7 +608,6 @@ public class DatabaseServiceImpl implements DatabaseService{
       tempProcessObj.put("links", tempLinkArray);
       jsonObjects.add(tempProcessObj);
     }
-
     JsonObject result = new JsonObject().put("processes", jsonObjects);
     JsonArray linkArray = createLinkArray(baseUrl, null);
     result.put("links", linkArray);
