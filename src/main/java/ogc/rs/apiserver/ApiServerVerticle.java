@@ -168,10 +168,16 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::stacCollections)
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
+
           routerBuilder.operation(PROCESSES_API)
             // .handler(AuthHandler.create(vertx))
             .handler(this::getProcesses).handler(this::putCommonResponseHeaders)
             .handler(this::buildResponse).failureHandler(failureHandler);
+
+            routerBuilder.operation(PROCESS_API)
+              // .handler(AuthHandler.create(vertx))
+              .handler(this::getProcess).handler(this::putCommonResponseHeaders)
+              .handler(this::buildResponse).failureHandler(failureHandler);
 
           routerBuilder
               .operation(TILEMATRIXSETS_API)
@@ -248,10 +254,6 @@ public class ApiServerVerticle extends AbstractVerticle {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
               }
-          routerBuilder.operation(PROCESS_API)
-            // .handler(AuthHandler.create(vertx))
-            .handler(this::getProcess).handler(this::putCommonResponseHeaders)
-            .handler(this::buildResponse).failureHandler(failureHandler);
 
           dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
           // TODO: ssl configuration
