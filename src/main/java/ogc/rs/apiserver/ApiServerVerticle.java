@@ -15,6 +15,8 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
+import io.vertx.ext.web.validation.RequestParameters;
+import io.vertx.ext.web.validation.ValidationHandler;
 import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.util.DataFromS3;
 import ogc.rs.apiserver.handlers.FailureHandler;
@@ -172,7 +174,8 @@ public class ApiServerVerticle extends AbstractVerticle {
           routerBuilder.operation(PROCESSES_API)
             // .handler(AuthHandler.create(vertx))
             .handler(this::getProcesses).handler(this::putCommonResponseHeaders)
-            .handler(this::buildResponse).failureHandler(failureHandler);
+            .handler(this::buildResponse)
+            .failureHandler(failureHandler);
 
             routerBuilder.operation(PROCESS_API)
               // .handler(AuthHandler.create(vertx))
@@ -420,8 +423,9 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   }
   private void getProcesses(RoutingContext routingContext) {
-    int limit = Integer.parseInt(routingContext.queryParams().get("limit"));
+    RequestParameters paramsFromOasValidation = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
 
+    int limit = paramsFromOasValidation.queryParameter("limit").getInteger();
     dbService.getProcesses(limit).onSuccess(successResult -> {
       routingContext.put("response", successResult.toString());
       routingContext.put("statusCode", 200);
