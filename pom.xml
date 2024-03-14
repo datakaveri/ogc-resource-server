@@ -10,7 +10,7 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <vertx.version>4.3.4</vertx.version>
+        <vertx.version>4.5.4</vertx.version>
         <junit-jupiter-engine.version>5.10.2</junit-jupiter-engine.version>
         <apache-log4j2.version>2.23.1</apache-log4j2.version>
         <lmax-disruptor.version>4.0.0</lmax-disruptor.version>
@@ -131,12 +131,12 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-openapi</artifactId>
-            <version>4.4.4</version>
+            <version>4.5.4</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-validation</artifactId>
-            <version>4.4.4</version>
+            <version>4.5.4</version>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>
@@ -177,7 +177,7 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-client</artifactId>
-            <version>4.4.4</version>
+            <version>4.5.4</version>
         </dependency>
         <dependency>
             <groupId>io.reactiverse</groupId>
