@@ -189,6 +189,10 @@
             <version>0.3.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-rabbitmq-client</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

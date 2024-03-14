@@ -1,9 +1,6 @@
 package ogc.rs.apiserver;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.CompositeFuture;
-import io.vertx.core.Future;
-import io.vertx.core.MultiMap;
+import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.*;
@@ -22,19 +19,25 @@ import ogc.rs.apiserver.util.DataFromS3;
 import ogc.rs.apiserver.handlers.FailureHandler;
 
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.database.DatabaseService;
+import ogc.rs.metering.MeteringService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static ogc.rs.apiserver.util.Constants.*;
-import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
-import static ogc.rs.common.Constants.DEFAULT_SERVER_CRS;
+import static ogc.rs.common.Constants.*;
+import static ogc.rs.common.Constants.ROLE;
+import static ogc.rs.metering.util.MeteringConstant.*;
+import static ogc.rs.metering.util.MeteringConstant.USER_ID;
 
 /**
  * The OGC Resource Server API Verticle.
@@ -66,6 +69,8 @@ public class ApiServerVerticle extends AbstractVerticle {
     static String S3_REGION;
     static String S3_ACCESS_KEY;
     static String S3_SECRET_KEY;
+    CatalogueService catalogueService;
+    MeteringService meteringService;
 
     /**
      * This method is used to start the Verticle. It deploys a verticle in a cluster/single instance, reads the
@@ -87,6 +92,10 @@ public class ApiServerVerticle extends AbstractVerticle {
       /* Get base paths from config */
       ogcBasePath = config().getString("ogcBasePath");
       hostName = config().getString("hostName");
+
+      catalogueService = new CatalogueService(vertx,config());
+      meteringService = MeteringService.createProxy(vertx, METERING_SERVICE_ADDRESS);
+
       /* Initialize OGC landing page buffer - since configured hostname needs to be in it */
       String landingPageTemplate = vertx.fileSystem().readFileBlocking("docs/landingPage.json").toString();
       ogcLandingPageBuf = Buffer.buffer(landingPageTemplate.replace("$HOSTNAME", hostName));
@@ -99,65 +108,76 @@ public class ApiServerVerticle extends AbstractVerticle {
       Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/openapiv3_0.yaml");
       Future<RouterBuilder> routerBuilderStacFut =
         RouterBuilder.create(vertx, "docs/stacopenapiv3_0.yaml");
-      CompositeFuture.all(routerBuilderFut, routerBuilderStacFut)
+        Future<RouterBuilder> routerBuilderMeteringFut =
+                RouterBuilder.create(vertx, "docs/dxmeteringopenapiv3_0.yaml");
+    CompositeFuture.all(routerBuilderFut, routerBuilderStacFut, routerBuilderMeteringFut)
         .compose(
             result -> {
               RouterBuilder routerBuilder = result.resultAt(0);
               RouterBuilder routerBuilderStac = result.resultAt(1);
+              RouterBuilder routerBuilderMetering = result.resultAt(2);
 
-          LOGGER.debug("Info: Mounting routes from OpenApi3 spec");
+              LOGGER.debug("Info: Mounting routes from OpenApi3 spec");
 
-          RouterBuilderOptions factoryOptions =
+              RouterBuilderOptions factoryOptions =
                   new RouterBuilderOptions().setMountResponseContentTypeHandler(true);
 
-          routerBuilder.rootHandler(CorsHandler.create("*").allowedHeaders(allowedHeaders)
-                  .allowedMethods(allowedMethods));
-          routerBuilder.rootHandler(BodyHandler.create());
-          routerBuilderStac.rootHandler(CorsHandler.create("*").allowedHeaders(allowedHeaders)
-                        .allowedMethods(allowedMethods));
-          routerBuilderStac.rootHandler(BodyHandler.create());
-          try {
-          routerBuilder
-              .operation(LANDING_PAGE)
-              .handler(
-                  routingContext -> {
-                      HttpServerResponse response = routingContext.response();
-                      response.end(ogcLandingPageBuf);
-                  });
-          routerBuilder
-              .operation(CONFORMANCE_CLASSES)
-              .handler(
-                  routingContext -> {
-                      HttpServerResponse response = routingContext.response();
-                      response.sendFile("docs/conformance.json");
-                  });
+              routerBuilder.rootHandler(
+                  CorsHandler.create("*")
+                      .allowedHeaders(allowedHeaders)
+                      .allowedMethods(allowedMethods));
+              routerBuilder.rootHandler(BodyHandler.create());
+              routerBuilderStac.rootHandler(
+                  CorsHandler.create("*")
+                      .allowedHeaders(allowedHeaders)
+                      .allowedMethods(allowedMethods));
+              routerBuilderStac.rootHandler(BodyHandler.create());
+              routerBuilderMetering.rootHandler(
+                  CorsHandler.create("*")
+                      .allowedHeaders(allowedHeaders)
+                      .allowedMethods(allowedMethods));
+              routerBuilderMetering.rootHandler(BodyHandler.create());
+              try {
+                routerBuilder
+                    .operation(LANDING_PAGE)
+                    .handler(
+                        routingContext -> {
+                          HttpServerResponse response = routingContext.response();
+                          response.end(ogcLandingPageBuf);
+                        });
+                routerBuilder
+                    .operation(CONFORMANCE_CLASSES)
+                    .handler(
+                        routingContext -> {
+                          HttpServerResponse response = routingContext.response();
+                          response.sendFile("docs/conformance.json");
+                        });
 
-          routerBuilder
-              .operation(COLLECTIONS_API)
-              .handler(this::getCollections)
-              .handler(this::putCommonResponseHeaders)
-              .handler(this::buildResponse);
+                routerBuilder
+                    .operation(COLLECTIONS_API)
+                    .handler(this::getCollections)
+                    .handler(this::putCommonResponseHeaders)
+                    .handler(this::buildResponse);
 
-          routerBuilder
-              .operation(COLLECTION_API)
-              .handler(this::getCollection)
-              .handler(this::putCommonResponseHeaders)
-              .handler(this::buildResponse);
+                routerBuilder
+                    .operation(COLLECTION_API)
+                    .handler(this::getCollection)
+                    .handler(this::putCommonResponseHeaders)
+                    .handler(this::buildResponse);
 
-          routerBuilder
-              .operation(FEATURES_API)
-              .handler(AuthHandler.create(vertx))
-              .handler(this::getFeatures)
-              .handler(this::putCommonResponseHeaders)
-              .handler(this::buildResponse);
+                routerBuilder
+                    .operation(FEATURES_API)
+                    .handler(AuthHandler.create(vertx))
+                    .handler(this::getFeatures)
+                    .handler(this::putCommonResponseHeaders)
+                    .handler(this::buildResponse);
 
-
-          routerBuilder
-              .operation(FEATURE_API)
-              .handler(AuthHandler.create(vertx))
-              .handler(this::getFeature)
-              .handler(this::putCommonResponseHeaders)
-              .handler(this::buildResponse);
+                routerBuilder
+                    .operation(FEATURE_API)
+                    .handler(AuthHandler.create(vertx))
+                    .handler(this::getFeature)
+                    .handler(this::putCommonResponseHeaders)
+                    .handler(this::buildResponse);
 
           routerBuilderStac
               .operation(STAC_CATALOG_API)
@@ -171,6 +191,12 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
 
+                routerBuilder
+                    .operation(TILEMATRIXSETS_API)
+                    .handler(this::getTileMatrixSetList)
+                    .handler(this::putCommonResponseHeaders)
+                    .handler(this::buildResponse);
+
           routerBuilder.operation(PROCESSES_API)
             // .handler(AuthHandler.create(vertx))
             .handler(this::getProcesses).handler(this::putCommonResponseHeaders)
@@ -182,41 +208,54 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::getProcess).handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse).failureHandler(failureHandler);
 
-          routerBuilder
-              .operation(TILEMATRIXSETS_API)
-              .handler(this::getTileMatrixSetList)
-              .handler(this::putCommonResponseHeaders)
-              .handler(this::buildResponse);
+                routerBuilder
+                    .operation(TILEMATRIXSET_API)
+                    .handler(this::getTileMatrixSet)
+                    .handler(this::putCommonResponseHeaders)
+                    .handler(this::buildResponse);
 
-          routerBuilder
-                .operation(TILEMATRIXSET_API)
-                .handler(this::getTileMatrixSet)
-                .handler(this::putCommonResponseHeaders)
-                .handler(this::buildResponse);
+                routerBuilder
+                    .operation(TILESETSLIST_API)
+                    .handler(this::getTileSetList)
+                    .handler(this::putCommonResponseHeaders)
+                    .handler(this::buildResponse);
 
-          routerBuilder
-              .operation(TILESETSLIST_API)
-              .handler(this::getTileSetList)
-              .handler(this::putCommonResponseHeaders)
-              .handler(this::buildResponse);
+                routerBuilder
+                    .operation(TILESET_API)
+                    .handler(this::getTileSet)
+                    .handler(this::putCommonResponseHeaders)
+                    .handler(this::buildResponse);
 
-          routerBuilder
-              .operation(TILESET_API)
-              .handler(this::getTileSet)
-              .handler(this::putCommonResponseHeaders)
-              .handler(this::buildResponse);
+                routerBuilder
+                    .operation(TILE_API)
+                    .handler(this::getTile)
+                    .handler(this::putCommonResponseHeaders)
+                    .handler(this::buildResponse);
 
-          routerBuilder
-              .operation(TILE_API)
-              .handler(this::getTile)
-              .handler(this::putCommonResponseHeaders)
-              .handler(this::buildResponse);
+                routerBuilderMetering
+                    .operation(SUMMARY_AUDIT_API)
+                    .handler(this::getSummary)
+                    .handler(this::putCommonResponseHeaders)
+                    .handler(this::buildResponse);
 
-          routerBuilderStac
-              .operation(STAC_COLLECTION_API)
-              .handler(this::getStacCollection)
-              .handler(this::putCommonResponseHeaders)
-              .handler(this::buildResponse);
+
+                routerBuilderMetering
+                    .operation(OVERVIEW_AUDIT_API)
+                    .handler(this::getMonthlyOverview)
+                    .handler(this::putCommonResponseHeaders)
+                    .handler(this::buildResponse);
+
+                  routerBuilderMetering
+                          .operation(CONSUMER_AUDIT_API)
+                          .handler(this::getConsumerAuditDetail)
+                          .handler(this::putCommonResponseHeaders)
+                          .handler(this::buildResponse);
+
+                  routerBuilderMetering
+                          .operation(PROVIDER_AUDIT_API)
+                          .handler(this::getProviderAuditDetail)
+                          .handler(this::putCommonResponseHeaders)
+                          .handler(this::buildResponse);
 
               routerBuilderStac
                       .operation(ASSET_API)
@@ -224,6 +263,11 @@ public class ApiServerVerticle extends AbstractVerticle {
                       .handler(this::getAssets)
                       .handler(this::putCommonResponseHeaders)
                       .handler(this::buildResponse);
+                  routerBuilderStac
+                          .operation(STAC_COLLECTION_API)
+                          .handler(this::getStacCollection)
+                          .handler(this::putCommonResponseHeaders)
+                          .handler(this::buildResponse);
 
           routerBuilderStac
               .operation(STAC_CONFORMANCE_CLASSES)
@@ -235,9 +279,11 @@ public class ApiServerVerticle extends AbstractVerticle {
 
                 Router ogcRouter = routerBuilder.createRouter();
                 Router stacRouter = routerBuilderStac.createRouter();
+                Router meteringRouter = routerBuilderMetering.createRouter();
                 router = Router.router(vertx);
                 router.route("/*").subRouter(stacRouter);
                 router.route("/*").subRouter(ogcRouter);
+                router.route("/*").subRouter(meteringRouter);
 
                 router
                     .get(OPENAPI_SPEC)
@@ -253,21 +299,30 @@ public class ApiServerVerticle extends AbstractVerticle {
                           HttpServerResponse response = routingContext.response();
                           response.sendFile("docs/stacopenapiv3_0.json");
                         });
+                router
+                    .get(METERING_OPENAPI_SPEC) // TODO: need to discussion
+                    .handler(
+                        routingContext -> {
+                          HttpServerResponse response = routingContext.response();
+                          response.sendFile("docs/dxmeteringopenapiv3_0.json");
+                        });
               } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
               }
 
-          dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
-          // TODO: ssl configuration
-          HttpServerOptions serverOptions = new HttpServerOptions();
-          serverOptions.setCompressionSupported(true).setCompressionLevel(5);
-          int port = config().getInteger("httpPort") == null ? 8080 : config().getInteger("httpPort");
+              dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
+              // TODO: ssl configuration
+              HttpServerOptions serverOptions = new HttpServerOptions();
+              serverOptions.setCompressionSupported(true).setCompressionLevel(5);
+              int port =
+                  config().getInteger("httpPort") == null ? 8080 : config().getInteger("httpPort");
 
-          HttpServer server = vertx.createHttpServer(serverOptions);
-          return server.requestHandler(router).listen(port);
-          }).onSuccess(success -> LOGGER.info("Started HTTP server at port:" + success.actualPort()))
-          .onFailure(Throwable::printStackTrace);
+              HttpServer server = vertx.createHttpServer(serverOptions);
+              return server.requestHandler(router).listen(port);
+            })
+        .onSuccess(success -> LOGGER.info("Started HTTP server at port:" + success.actualPort()))
+        .onFailure(Throwable::printStackTrace);
 
       HttpClientOptions httpCliOptions = new HttpClientOptions().setSsl(true);
 
@@ -1244,5 +1299,225 @@ public class ApiServerVerticle extends AbstractVerticle {
           .put("tileHeight", tileHeight)
           .put("matrixWidth", matrixWidth)
           .put("matrixHeight", matrixHeight);
+  }
+
+  // TODO: Used this for auditing purposes
+  private Future<Void> updateAuditTable(RoutingContext context) {
+    JsonObject authInfo = (JsonObject) context.data().get("authInfo");
+    String id = authInfo.getString(ID);
+    Promise<Void> promise = Promise.promise();
+    JsonObject request = new JsonObject();
+    // TODO: Fill json data what ever is required
+    request.put(REQUEST_JSON, "jsonObject");
+
+    catalogueService
+        .getCatItem(id)
+        .onComplete(
+            relHandler -> {
+              if (relHandler.succeeded()) {
+                JsonObject cacheResult = relHandler.result();
+                // Comment here , if we need type (item_type) then we can use this
+                /*String type =
+                cacheResult.containsKey(RESOURCE_GROUP) ? "RESOURCE" : "RESOURCE_GROUP";*/
+                String resourceGroup =
+                    cacheResult.containsKey(RESOURCE_GROUP)
+                        ? cacheResult.getString(RESOURCE_GROUP)
+                        : cacheResult.getString(ID);
+                ZonedDateTime zst = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
+                String role = authInfo.getString(ROLE);
+                String drl = authInfo.getString(DRL);
+                if (role.equalsIgnoreCase("delegate") && drl != null) {
+                  request.put(DELEGATOR_ID, authInfo.getString(DID));
+                } else {
+                  request.put(DELEGATOR_ID, authInfo.getString(USER_ID));
+                }
+                String providerId = cacheResult.getString("provider");
+                long time = zst.toInstant().toEpochMilli();
+                String isoTime = zst.truncatedTo(ChronoUnit.SECONDS).toString();
+
+                request.put(RESOURCE_GROUP, resourceGroup);
+                /*request.put(TYPE_KEY, type);*/
+                // Comment here , if we need type (item_type) then we can use this
+                request.put(EPOCH_TIME, time);
+                request.put(ISO_TIME, isoTime);
+                request.put(USER_ID, authInfo.getValue(USER_ID));
+                request.put(ID, authInfo.getValue(ID));
+                request.put(API, authInfo.getValue(API_ENDPOINT));
+                request.put(RESPONSE_SIZE, context.data().get(RESPONSE_SIZE));
+                request.put(PROVIDER_ID, providerId);
+                meteringService
+                    .insertMeteringValuesInRmq(request)
+                    .onComplete(
+                        handler -> {
+                          if (handler.succeeded()) {
+                            LOGGER.info("message published in RMQ.");
+                            promise.complete();
+                          } else {
+                            LOGGER.error("failed to publish message in RMQ.");
+                            promise.complete();
+                          }
+                        });
+              } else {
+                LOGGER.debug("Item not found and failed to call metering service");
+              }
+            });
+
+    return promise.future();
+  }
+
+  private void getSummary(RoutingContext routingContext) {
+    Promise<JsonObject> promise = Promise.promise();
+    HttpServerRequest request = routingContext.request();
+    LOGGER.trace("Info: getSummary Started.");
+    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
+    authInfo.put(STARTT, request.getParam(STARTT));
+    authInfo.put(ENDT, request.getParam(ENDT));
+    JsonObject responseJson =
+        new JsonObject().put("type", "urn:dx:rs:success").put("title", "success");
+    meteringService
+        .summaryOverview(authInfo)
+        .onComplete(
+            handler -> {
+              if (handler.succeeded()) {
+                LOGGER.debug("Successful");
+                responseJson.put("results", handler.result().getJsonArray("result"));
+                promise.complete(responseJson);
+                routingContext.put("response", responseJson.toString());
+                routingContext.put("statusCode", 200);
+                routingContext.next();
+              } else {
+                // TODO: Handle 400 / 401
+                LOGGER.error("Fail: Bad request");
+                promise.fail(handler.cause().getMessage());
+                routingContext.put("response", handler.cause().getMessage());
+                routingContext.put("statusCode", 400);
+                routingContext.next();
+              }
+            });
+      promise.future();
+  }
+
+  private void getMonthlyOverview(RoutingContext routingContext) {
+    Promise<JsonObject> promise = Promise.promise();
+    HttpServerRequest request = routingContext.request();
+    LOGGER.trace("Info: getMonthlyOverview Started." + routingContext.data().get("authInfo"));
+    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
+    authInfo.put(STARTT, request.getParam(STARTT));
+    authInfo.put(ENDT, request.getParam(ENDT));
+    JsonObject responseJson =
+        new JsonObject().put("type", "urn:dx:rs:success").put("title", "success");
+    meteringService
+        .monthlyOverview(authInfo)
+        .onComplete(
+            handler -> {
+              if (handler.succeeded()) {
+                LOGGER.debug("Successful");
+                responseJson.put("results", handler.result().getJsonArray("result"));
+                promise.complete(responseJson);
+                routingContext.put("response", responseJson.toString());
+                routingContext.put("statusCode", 200);
+                routingContext.next();
+              } else {
+                // TODO: Handle 400 / 401
+                LOGGER.error("Fail: Bad request");
+                promise.fail(handler.cause().getMessage());
+                routingContext.put("response", handler.cause().getMessage());
+                routingContext.put("statusCode", 400);
+                routingContext.next();
+              }
+            });
+      promise.future();
+  }
+
+  private void getProviderAuditDetail(RoutingContext routingContext) {
+    LOGGER.trace("Info: getProviderAuditDetail Started.");
+    JsonObject entries = new JsonObject();
+    JsonObject provider = (JsonObject) routingContext.data().get("authInfo");
+    HttpServerRequest request = routingContext.request();
+
+    entries.put("endPoint", provider.getString("apiEndpoint"));
+    entries.put("userid", provider.getString("userid"));
+    entries.put("iid", provider.getString("iid"));
+    entries.put("startTime", request.getParam("time"));
+    entries.put("endTime", request.getParam("endTime"));
+    entries.put("timeRelation", request.getParam("timerel"));
+    entries.put("providerId", request.getParam("providerId"));
+    entries.put("consumerID", request.getParam("consumer"));
+    entries.put("resourceId", request.getParam("id"));
+    entries.put("api", request.getParam("api"));
+    entries.put("options", request.headers().get("options"));
+    entries.put("offset", request.getParam(OFFSETPARAM));
+    entries.put("limit", request.getParam(LIMITPARAM));
+
+    LOGGER.debug(entries);
+    Promise<JsonObject> promise = Promise.promise();
+    JsonObject responseJson =
+        new JsonObject().put("type", "urn:dx:rs:success").put("title", "success");
+    meteringService
+        .executeReadQuery(entries)
+        .onComplete(
+            handler -> {
+              if (handler.succeeded()) {
+                LOGGER.debug("Table Reading Done.");
+                responseJson.put("results", handler.result().getJsonArray("result"));
+                promise.complete(responseJson);
+                routingContext.put("response", responseJson.toString());
+                routingContext.put("statusCode", 200);
+                routingContext.next();
+              } else {
+                // TODO: Handle 400 / 401
+                LOGGER.error("Table reading failed.");
+                promise.fail(handler.cause().getMessage());
+                routingContext.put("response", handler.cause().getMessage());
+                routingContext.put("statusCode", 400);
+                routingContext.next();
+              }
+            });
+      promise.future();
+  }
+
+  private void getConsumerAuditDetail(RoutingContext routingContext) {
+    LOGGER.trace("Info: getConsumerAuditDetail Started.");
+
+    JsonObject entries = new JsonObject();
+    JsonObject consumer = (JsonObject) routingContext.data().get("authInfo");
+    HttpServerRequest request = routingContext.request();
+
+    entries.put("userid", consumer.getString("userid"));
+    entries.put("endPoint", consumer.getString("apiEndpoint"));
+    entries.put("startTime", request.getParam("time"));
+    entries.put("endTime", request.getParam("endTime"));
+    entries.put("timeRelation", request.getParam("timerel"));
+    entries.put("options", request.headers().get("options"));
+    entries.put("resourceId", request.getParam("id"));
+    entries.put("api", request.getParam("api"));
+    entries.put("offset", request.getParam(OFFSETPARAM));
+    entries.put("limit", request.getParam(LIMITPARAM));
+
+    LOGGER.debug(entries);
+    Promise<JsonObject> promise = Promise.promise();
+    JsonObject responseJson =
+        new JsonObject().put("type", "urn:dx:rs:success").put("title", "success");
+    meteringService
+        .executeReadQuery(entries)
+        .onComplete(
+            handler -> {
+              if (handler.succeeded()) {
+                LOGGER.debug("Table Reading Done.");
+                responseJson.put("results", handler.result().getJsonArray("result"));
+                promise.complete(responseJson);
+                routingContext.put("response", responseJson.toString());
+                routingContext.put("statusCode", 200);
+                routingContext.next();
+              } else {
+                // TODO: Handle 400 / 401
+                LOGGER.error("Table reading failed.");
+                promise.fail(handler.cause());
+                routingContext.put("response", handler.cause().getMessage());
+                routingContext.put("statusCode", 400);
+                routingContext.next();
+              }
+            });
+      promise.future();
   }
 }

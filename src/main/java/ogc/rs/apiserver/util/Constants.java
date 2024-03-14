@@ -41,6 +41,7 @@ public class Constants {
     public static final String PROCESS_API = "getProcessDescription";
     public static final String CONTENT_TYPE = "content-type";
     public static final String APPLICATION_JSON = "application/json";
+
     public static final String STAC_CATALOG_API = "getStacLandingPage";
     public static final String STAC_COLLECTIONS_API = "getStacCollections";
     public static final String STAC_COLLECTION_API = "describeStacCollection";
@@ -48,6 +49,10 @@ public class Constants {
     public static final String STAC_CONFORMANCE_CLASSES = "getConformanceDeclaration";
 
 
-
-
+  // Header params
+  public static final String METERING_OPENAPI_SPEC = "/metering/api";
+  public static final String CONSUMER_AUDIT_API = "consumer/audit";
+  public static final String PROVIDER_AUDIT_API = "provider/audit";
+  public static final String SUMMARY_AUDIT_API = "summary";
+  public static final String OVERVIEW_AUDIT_API = "overview";
 }
