@@ -11,7 +11,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <vertx.version>4.3.4</vertx.version>
-        <junit-jupiter-engine.version>5.8.2</junit-jupiter-engine.version>
+        <junit-jupiter-engine.version>5.10.2</junit-jupiter-engine.version>
         <apache-log4j2.version>2.17.1</apache-log4j2.version>
         <lmax-disruptor.version>3.4.4</lmax-disruptor.version>
         <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
