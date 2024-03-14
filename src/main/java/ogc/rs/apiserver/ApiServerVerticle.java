@@ -698,7 +698,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                 .put("title", "Link template for " + collection.getString("id") + " features")
                 .put("templated","true")))
                 .put("itemType", collection.getString("type"))
-                .put("crs", new JsonArray().add(collection.getString("crs")));
+                .put("crs", collection.getJsonArray("crs"));
 
     collection.remove("title");
     collection.remove("description");
