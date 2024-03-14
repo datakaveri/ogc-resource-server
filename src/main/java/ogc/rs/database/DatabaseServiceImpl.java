@@ -45,7 +45,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         client.withConnection(conn ->
            conn.preparedQuery("select collections_details.id, title, description, datetime_key," +
                    " array_agg(crs_to_srid.crs) as crs, collections_details.crs as \"storageCrs\"," +
-                   " bbox, temporal" +
+                   " bbox, temporal, type" +
                    " from collections_details join collection_supported_crs" +
                    " on collections_details.id = collection_supported_crs.collection_id join crs_to_srid" +
                    " on crs_to_srid.id = collection_supported_crs.crs_id group by collections_details.id" +
@@ -74,7 +74,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
                 conn.preparedQuery("select collections_details.id, title, array_agg(crs_to_srid.crs) as crs, " +
-                        "collections_details.crs as \"storageCrs\", description, datetime_key, bbox, temporal" +
+                        "collections_details.crs as \"storageCrs\", description, datetime_key, bbox, temporal, type" +
                         " from collections_details join collection_supported_crs" +
                         " on collections_details.id = collection_supported_crs.collection_id" +
                         " join crs_to_srid on crs_to_srid.id = collection_supported_crs.crs_id" +
