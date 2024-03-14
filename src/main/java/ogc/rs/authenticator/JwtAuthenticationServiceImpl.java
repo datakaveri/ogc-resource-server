@@ -337,12 +337,6 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
   private Future<JsonObject> validateAssetAccess(String assetId, JWTData jwtData) {
     Promise<JsonObject> promise = Promise.promise();
     String idFromJwt = jwtData.getIid().split(":")[1];
-    if ( jwtData.getIid().split(":")[0].equals("rs")) {
-        promise.fail(new OgcException(401,
-                "Not Authorised",
-                "User is not authorised. Please contact IUDX AAA " + "Server."));
-        return promise.future();
-    }
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());
 
@@ -358,63 +352,93 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
             success -> {
               if (success.isEmpty()) {
                 promise.fail(new OgcException(404, "Not Found", "Asset not found"));
-
-              } else {
-                LOGGER.debug("Asset Found {} ", success.get(0));
-                if (success.get(0).getString("stac_collections_id").equals(idFromJwt)) {
-                  LOGGER.debug("Collection Id Validated");
-
-                  JsonArray access =
-                      jwtData.getCons() != null ? jwtData.getCons().getJsonArray("access") : null;
-
-                  if (access == null)
-                    promise.fail(
-                        new OgcException(
-                            401,
-                            "Not Authorised",
-                            "User is not authorised. Please contact IUDX AAA " + "Server."));
-                  else {
-                    if (access.contains("api") && jwtData.getRole().equalsIgnoreCase("consumer")) {
-                      JsonObject results = new JsonObject();
-                      results.put("iid", idFromJwt);
-                      results.put("userId", jwtData.getSub());
-                      results.put("role", jwtData.getRole());
-                      results.put(
-                          "expiry",
-                          LocalDateTime.ofInstant(
-                                  Instant.ofEpochSecond(
-                                      Long.parseLong(jwtData.getExp().toString())),
-                                  ZoneId.systemDefault())
-                              .toString());
-                      promise.complete(results);
-                    }
-
-                    if (jwtData.getRole().equalsIgnoreCase("provider")) {
-                      JsonObject results = new JsonObject();
-                      results.put("iid", idFromJwt);
-                      results.put("userId", jwtData.getSub());
-                      results.put("role", jwtData.getRole());
-                      results.put(
-                          "expiry",
-                          LocalDateTime.ofInstant(
-                                  Instant.ofEpochSecond(
-                                      Long.parseLong(jwtData.getExp().toString())),
-                                  ZoneId.systemDefault())
-                              .toString());
-                      promise.complete(results);
-                    }
-                  }
-
-                } else {
-
-                  LOGGER.error("Collection associated with asset is not same as in token");
-                  promise.fail(new OgcException(401, "Not Authorised", "Invalid Collection Id"));
-                }
+                return;
               }
+              LOGGER.debug("Asset Found {} ", success.get(0));
+              isOpenResource(success.get(0).getString("stac_collections_id"))
+                  .onComplete(
+                      resourceResult -> {
+                          boolean openResource = jwtData.getIid().split(":")[0].equals("rs")
+                                  && jwtData.getIid().split(":")[1].equals("ogc.iudx.io");
+                        if (resourceResult.succeeded()
+                            && openResource) {
+                          LOGGER.debug("Resource is Open, Access Granted.");
+                          JsonObject results = new JsonObject();
+                          results.put("iid", idFromJwt);
+                          results.put("userId", jwtData.getSub());
+                          results.put("role", jwtData.getRole());
+                          results.put(
+                              "expiry",
+                              LocalDateTime.ofInstant(
+                                      Instant.ofEpochSecond(
+                                          Long.parseLong(jwtData.getExp().toString())),
+                                      ZoneId.systemDefault())
+                                  .toString());
+                          promise.complete(results);
+                          return;
+                        }
+                        if (resourceResult.failed() && openResource) {
+                          LOGGER.debug(
+                              "Collection does not exist in the table: "
+                                  + resourceResult.cause().getMessage());
+                          promise.fail(resourceResult.cause());
+                          return;
+                        }
+                        LOGGER.debug("Not an open resource");
+                        if (!success.get(0).getString("stac_collections_id").equals(idFromJwt)) {
+                          LOGGER.error("Collection associated with asset is not same as in token");
+                          promise.fail(
+                              new OgcException(401, "Not Authorised", "Invalid Collection Id"));
+                          return;
+                        }
+                        LOGGER.debug("Collection Id in token Validated ");
+                        if (jwtData.getRole().equalsIgnoreCase("provider")) {
+                          JsonObject results = new JsonObject();
+                          results.put("iid", idFromJwt);
+                          results.put("userId", jwtData.getSub());
+                          results.put("role", jwtData.getRole());
+                          results.put(
+                              "expiry",
+                              LocalDateTime.ofInstant(
+                                      Instant.ofEpochSecond(
+                                          Long.parseLong(jwtData.getExp().toString())),
+                                      ZoneId.systemDefault())
+                                  .toString());
+                          promise.complete(results);
+                          return;
+                        }
+                        JsonArray access =
+                            jwtData.getCons() != null
+                                ? jwtData.getCons().getJsonArray("access")
+                                : null;
+                        if (access == null)
+                          promise.fail(
+                              new OgcException(
+                                  401,
+                                  "Not Authorised",
+                                  "User is not authorised. Please contact IUDX AAA " + "Server."));
+                        else {
+                          if (access.contains("api")
+                              && jwtData.getRole().equalsIgnoreCase("consumer")) {
+                            JsonObject results = new JsonObject();
+                            results.put("iid", idFromJwt);
+                            results.put("userId", jwtData.getSub());
+                            results.put("role", jwtData.getRole());
+                            results.put(
+                                "expiry",
+                                LocalDateTime.ofInstant(
+                                        Instant.ofEpochSecond(
+                                            Long.parseLong(jwtData.getExp().toString())),
+                                        ZoneId.systemDefault())
+                                    .toString());
+                            promise.complete(results);
+                          }
+                        }
+                      });
             })
         .onFailure(
             fail -> {
-              LOGGER.error("Asset not found");
+              LOGGER.error("Asset not found" + fail.getMessage());
               promise.fail(
                   new OgcException(
                       401,
