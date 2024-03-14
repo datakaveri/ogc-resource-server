@@ -1,11 +1,14 @@
 package ogc.rs.database;
 
+import static ogc.rs.database.util.Constants.PROCESSES_TABLE_NAME;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
@@ -24,9 +27,9 @@ public class DatabaseServiceImpl implements DatabaseService{
     private static final Logger LOGGER = LogManager.getLogger(DatabaseServiceImpl.class);
 
     private final PgPool client;
-
-    public DatabaseServiceImpl(final PgPool pgClient) {
-        this.client = pgClient;
+    private final JsonObject config;
+    public DatabaseServiceImpl(final PgPool pgClient,JsonObject config) {
+        this.client = pgClient;this.config=config;
     }
     public Set<String> predefinedKeys = Set.of("limit", "bbox", "datetime", "offset", "bbox-crs", "crs");
 
@@ -34,13 +37,13 @@ public class DatabaseServiceImpl implements DatabaseService{
     public Future<List<JsonObject>> getCollection(String collectionId) {
         LOGGER.info("getCollection");
         Promise<List<JsonObject>> result = Promise.promise();
-        
+
         /* TODO : Remove once spec validation is being done */
         if (!collectionId.matches(UUID_REGEX)) {
           result.fail(new OgcException(404, "Not found", "Collection not found"));
           return result.future();
         }
-        
+
         Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
            conn.preparedQuery("select collections_details.id, title, description, datetime_key," +
@@ -102,13 +105,13 @@ public class DatabaseServiceImpl implements DatabaseService{
                                           Map<String, Integer> crs) {
       LOGGER.info("getFeatures");
       Promise<JsonObject> result = Promise.promise();
-      
+
       /* TODO : Remove once spec validation is being done */
       if (!collectionId.matches(UUID_REGEX)) {
         result.fail(new OgcException(404, "Not found", "Collection not found"));
         return result.future();
       }
-      
+
       Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0),
           row -> row.getInteger("count"));
       Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
@@ -264,7 +267,7 @@ public class DatabaseServiceImpl implements DatabaseService{
   @Override
   public Future<Map<String, Integer>> isCrsValid(String collectionId, Map<String, String> queryParams) {
     Promise<Map<String, Integer>> result = Promise.promise();
-    
+
     /* TODO : Remove once spec validation is being done */
     if (!collectionId.matches(UUID_REGEX)) {
       result.fail(new OgcException(404, "Not found", "Collection not found"));
@@ -587,4 +590,78 @@ public class DatabaseServiceImpl implements DatabaseService{
             });
     return result.future();
   }
+  public Future<JsonObject> getProcesses(int limit) {
+    Promise<JsonObject> promise = Promise.promise();
+    String sqlQuery =
+      "SELECT version, id, title, description, mode AS \"jobControlOptions\", keywords, response AS \"outputTransmission\" FROM " +
+        PROCESSES_TABLE_NAME + " LIMIT $1;";
+    executeQueryAndHandleResult(limit, promise, sqlQuery);
+    return promise.future();
+  }
+  @Override
+  public Future<JsonObject> getProcess(String processId) {
+    Promise<JsonObject> promise = Promise.promise();
+    String sqlQuery =
+      "SELECT version, id, title, description, mode AS \"jobControlOptions\", keywords, response AS \"outputTransmission\"," +
+        " input as inputs, output as outputs FROM " + PROCESSES_TABLE_NAME + " WHERE id=$1::UUID;";
+    executeQueryAndHandleResult(UUID.fromString(processId), promise, sqlQuery);
+    return promise.future();
+  }
+
+  private void executeQueryAndHandleResult(Object parameter, Promise<JsonObject> promise,
+                                           String sqlQuery) {
+    client.withConnection(
+      conn -> conn.preparedQuery(sqlQuery).execute(Tuple.of(parameter)).onSuccess(rowSet -> {
+        if (rowSet.size() == 0) {
+          promise.fail(new OgcException(404, "Not found", "Process not found"));
+        } else {
+          JsonObject result = handleRowSet(rowSet);
+          if (parameter instanceof Integer) {
+            promise.complete(result);
+          } else {
+            result.remove("links");
+            promise.complete(result);
+          }
+        }
+      }).onFailure(fail -> handleFailure(fail, promise)));
+  }
+
+  private JsonObject handleRowSet(RowSet<Row> rowSet) {
+    List<JsonObject> jsonObjects = new ArrayList<>();
+    String baseUrl = config.getString("hostName");
+
+    for (Row row : rowSet) {
+      JsonObject tempProcessObj = row.toJson();
+      JsonArray tempLinkArray = createLinkArray(baseUrl, row);
+      tempProcessObj.put("links", tempLinkArray);
+      jsonObjects.add(tempProcessObj);
+    }
+
+    JsonObject result = new JsonObject().put("processes", jsonObjects);
+    JsonArray linkArray = createLinkArray(baseUrl, null);
+    result.put("links", linkArray);
+    return result;
+  }
+
+  private JsonArray createLinkArray(String baseUrl, Row row) {
+    JsonArray linkArray = new JsonArray();
+    JsonObject linkObject = new JsonObject().put("type", "application/json").put("rel", "self");
+
+    if (row != null) {
+      linkObject.put("title", "Process description as JSON");
+      linkObject.put("href",
+        baseUrl.concat("/processes/").concat(String.valueOf(row.getUUID("id"))));
+    } else {
+      linkObject.put("href", baseUrl.concat("/processes"));
+    }
+
+    linkArray.add(linkObject.copy());
+    return linkArray;
+  }
+
+  private void handleFailure(Throwable fail, Promise<JsonObject> promise) {
+    LOGGER.error("Failed to get processes- {}", fail.getMessage());
+    promise.fail("Error!");
+  }
+
 }

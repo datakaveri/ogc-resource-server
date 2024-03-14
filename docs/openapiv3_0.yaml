@@ -113,6 +113,67 @@ paths:
       servers:
         - url: 'https://ogc.iudx.io'
           description: OGC-Resource-Server
+  /processes:
+    get:
+      tags:
+        - ProcessList
+      summary: retrieve the list of available processes
+      description: |-
+        The list of processes contains a summary of each process the OGC API - Processes offers, including the link to a more detailed description
+        of the process.
+      operationId: getProcesses
+      parameters:
+        - $ref: '#/components/parameters/limit'
+      responses:
+        "200":
+          description: Information about the available processes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/processList'
+              example:
+                processes:
+                  - version: "1.0.0"
+                    id: "cc0eb191-7f66-4663-8afa-cfd644de5839"
+                    title: "CollectionOnboarding"
+                    description: "Process for onboarding a collection"
+                    jobControlOptions:
+                      - "value"
+                    keywords:
+                      - "collection"
+                      - "onboarding"
+                    outputTransmission:
+                      - "async"
+                    links:
+                      - href: "https://ogc.iudx.io/processes/cc0eb191-7f66-4663-8afa-cfd644de5839"
+                        rel: "self"
+                        type: "application/json"
+                        title: "Process description as JSON"
+                  - version: "2.0.0"
+                    id: "550e8400-e29b-41d4-a716-446655440002"
+                    title: "Hello World"
+                    description: "An example process that takes a name as input, and echoes it back as output. Intended to demonstrate a simple process with a single literal input."
+                    jobControlOptions:
+                      - "value"
+                    keywords:
+                      - "hello world"
+                      - "example"
+                      - "echo"
+                    outputTransmission:
+                      - "sync"
+                    links:
+                      - href: "https://ogc.iudx.io/processes/550e8400-e29b-41d4-a716-446655440002"
+                        rel: "self"
+                        type: "application/json"
+                        title: "Process description as JSON"
+                links:
+                  - href: "https://ogc.iudx.io/processes"
+                    rel: "self"
+                    type: "application/json"
+        '400':
+          $ref: '#/components/responses/InvalidParameter'
+        "500":
+          $ref: '#/components/responses/ServerError'
   /collections:
     get:
       tags:
@@ -122,9 +183,9 @@ paths:
         It will fetch the list of feature collections to DX Data Consumers based on the required format with default limit and offset values supplied. This API provides a birds-eye-view for all avialable Feature Collections. The dataset is organized as one or more feature collections. This resource provides information about and access to the collections.
         The response contains the list of collections. For each collection, a link to the items in the collection (path `/collections/{collectionId}/items`, link relation `items`) as well as key information about the collection. This information includes-
         * A local identifier for the collection that is unique for the dataset.
-        * A list of coordinate reference systems (CRS) in which geometries may be returned by the server. The first CRS is the default coordinate reference system (the default is always WGS 84 with axis order longitude/latitude). 
+        * A list of coordinate reference systems (CRS) in which geometries may be returned by the server. The first CRS is the default coordinate reference system (the default is always WGS 84 with axis order longitude/latitude).
         * An optional title and description for the collection.
-        * An optional extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data. 
+        * An optional extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data.
         * An optional indicator about the type of the items in the collection (the default value, if the indicator is not provided, is 'feature').
       operationId: getCollections
       responses:
@@ -143,9 +204,9 @@ paths:
       description: |-
         The response contains a link to the items in the collection (path `/collections/{collectionId}/items`, link relation `items`) as well as key information about the collection. This information includes-
         * A local identifier for the collection that is unique for the dataset.
-        * A list of coordinate reference systems (CRS) in which geometries may be returned by the server. The first CRS is the default coordinate reference system (the default is always WGS 84 with axis order longitude/latitude). 
+        * A list of coordinate reference systems (CRS) in which geometries may be returned by the server. The first CRS is the default coordinate reference system (the default is always WGS 84 with axis order longitude/latitude).
         * An optional title and description for the collection.
-        * An optional extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data. 
+        * An optional extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data.
         * An optional indicator about the type of the items in the collection (the default value, if the indicator is not provided, is 'feature').
       operationId: describeCollection
       parameters:
@@ -342,6 +403,81 @@ paths:
       servers:
         - url: 'https://ogc.iudx.io'
           description: OGC-Resource-Server
+  '/processes/{processId}':
+    get:
+      tags:
+        - ProcessDescription
+      summary: retrieve a process description
+      description: |-
+        The process description contains information about inputs and outputs and a link to the execution-endpoint for the process.
+      operationId: getProcessDescription
+      parameters:
+        - $ref : '#/components/parameters/processId'
+      responses:
+        "200":
+          description: A process description.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/process'
+              example:
+                processes:
+                  - version: "2.0.0"
+                    id: "550e8400-e29b-41d4-a716-446655440002"
+                    title: "Hello World"
+                    description: "An example process that takes a name as input, and echoes it back as output. Intended to demonstrate a simple process with a single literal input."
+                    jobControlOptions:
+                      - "value"
+                    keywords:
+                      - "hello world"
+                      - "example"
+                      - "echo"
+                    outputTransmission:
+                      - "sync"
+                    inputs:
+                      name:
+                        title: "Name"
+                        schema:
+                          type: "string"
+                        keywords:
+                          - "full name"
+                          - "personal"
+                        metadata: null
+                        maxOccurs: 1
+                        minOccurs: 1
+                        description: "The name of the person or entity that you wish to be echoed back as an output"
+                      message:
+                        title: "Message"
+                        schema:
+                          type: "string"
+                        keywords:
+                          - "message"
+                        metadata: null
+                        maxOccurs: 1
+                        minOccurs: 0
+                        description: "An optional message to echo as well"
+                    outputs:
+                      echo:
+                        title: "Hello, world"
+                        schema:
+                          type: "object"
+                          contentMediaType: "application/json"
+                        description: "A \"hello world\" echo with the name and (optional) message submitted for processing"
+                    links:
+                      - type: "application/json"
+                        rel: "self"
+                        title: "Process description as JSON"
+                        href: "https://ogc.iudx.io/processes/550e8400-e29b-41d4-a716-446655440002"
+        "404":
+          description: The requested URI was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception404'
+            text/html:
+              schema:
+                type: string
+
 tags:
   - name: Capabilities
     description: Essential characteristics of OGC APIs
@@ -446,7 +582,6 @@ components:
       in: query
       description: |-
         The optional limit parameter limits the number of items that are presented in the response document.
-
         Only items are counted that are on the first level of the collection in the response document.
         Nested objects contained within the explicitly requested items shall not be counted.
 
@@ -463,8 +598,8 @@ components:
       name: offset
       in: query
       description: |-
-        OGC Resource server also offers way to paginate the result for queries. 
-        If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records 
+        OGC Resource server also offers way to paginate the result for queries.
+        If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records
         to be returned.
 
         Minimum = 0. Maximum = 1000. Default = 10.
@@ -553,6 +688,14 @@ components:
       examples:
         default:
           value: 15
+    processId:
+      name: processId
+      in: path
+      description: local identifier of a process
+      required: true
+      schema:
+        type: string
+        format: uuid
   responses:
     LandingPage:
       description: |-
@@ -1479,3 +1622,317 @@ components:
         - maxTileRow
         - minTileCol
         - maxTileCol
+    process:
+      allOf:
+        - $ref: '#/components/schemas/processSummary'
+        - type: object
+          properties:
+            inputs:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/inputDescription'
+            outputs:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/outputDescription'
+    processList:
+      required:
+        - links
+        - processes
+      type: object
+      properties:
+        processes:
+          type: array
+          items:
+            $ref: '#/components/schemas/processSummary'
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/processesLink'
+    processSummary:
+      allOf:
+        - $ref: '#/components/schemas/descriptionType'
+        - type: object
+          required:
+            - id
+            - version
+          properties:
+            id:
+              type: string
+              example: 'fd6ef7c5-b18c-48e6-94e3-81037706763d'
+            version:
+              type: string
+              example: '1.0.0'
+            jobControlOptions:
+              type: array
+              items:
+                $ref: '#/components/schemas/jobControlOptions'
+            outputTransmission:
+              type: array
+              items:
+                $ref: '#/components/schemas/transmissionMode'
+            links:
+              type: array
+              items:
+                $ref: '#/components/schemas/processLink'
+    descriptionType:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/metadata'
+        additionalParameters:
+          allOf:
+            - $ref: '#/components/schemas/metadata'
+            - type: object
+              properties:
+                parameters:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/additionalParameter'
+    additionalParameter:
+      required:
+        - name
+        - value
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: array
+          items:
+            oneOf:
+              - type: string
+              - type: number
+              - type: integer
+              - type: array
+                items:
+                  type: object
+              - type: object
+    metadata:
+      type: object
+      properties:
+        title:
+          type: string
+        role:
+          type: string
+        href:
+          type: string
+    jobControlOptions:
+      type: string
+      enum:
+        - sync-execute
+        - async-execute
+        - dismiss
+    transmissionMode:
+      type: string
+      default: value
+      enum:
+        - value
+        - reference
+    processLink:
+      type: object
+      properties:
+        href:
+          type: string
+          example: 'https://ogc.iudx.io/processes/fd6ef7c5-b18c-48e6-94e3-81037706763d'
+        rel:
+          type: string
+          example: self
+        type:
+          type: string
+          example: application/json
+        title:
+          type: string
+          example: Echo Process
+    processesLink:
+      type: object
+      properties:
+        href:
+          type: string
+          example: 'https://ogc.iudx.io/processes?f=json'
+        rel:
+          type: string
+          example: self
+        type:
+          type: string
+          example: application/json
+    inputDescription:
+      allOf:
+        - $ref: '#/components/schemas/descriptionType'
+        - required:
+            - schema
+          type: object
+          properties:
+            minOccurs:
+              type: integer
+              default: 1
+            maxOccurs:
+              oneOf:
+                - type: integer
+                  default: 1
+                - type: string
+                  enum:
+                    - unbounded
+            schema:
+              $ref: '#/components/schemas/schema'
+    outputDescription:
+      allOf:
+        - $ref: '#/components/schemas/descriptionType'
+        - required:
+            - schema
+          type: object
+          properties:
+            schema:
+              $ref: '#/components/schemas/schema'
+    schema:
+      oneOf:
+        - $ref: '#/components/schemas/reference'
+        - type: object
+          properties:
+            title:
+              type: string
+            multipleOf:
+              minimum: 0
+              exclusiveMinimum: true
+              type: number
+            maximum:
+              type: number
+            exclusiveMaximum:
+              type: boolean
+              default: false
+            minimum:
+              type: number
+            exclusiveMinimum:
+              type: boolean
+              default: false
+            maxLength:
+              minimum: 0
+              type: integer
+            minLength:
+              minimum: 0
+              type: integer
+              default: 0
+            pattern:
+              type: string
+              format: regex
+            maxItems:
+              minimum: 0
+              type: integer
+            minItems:
+              minimum: 0
+              type: integer
+              default: 0
+            uniqueItems:
+              type: boolean
+              default: false
+            maxProperties:
+              minimum: 0
+              type: integer
+            minProperties:
+              minimum: 0
+              type: integer
+              default: 0
+            required:
+              minItems: 1
+              uniqueItems: true
+              type: array
+              items:
+                type: string
+            enum:
+              minItems: 1
+              uniqueItems: false
+              type: array
+              items:
+                type: object
+            type:
+              type: string
+              enum:
+                - array
+                - boolean
+                - integer
+                - number
+                - object
+                - string
+            not:
+              oneOf:
+                - $ref: '#/components/schemas/schema'
+                - $ref: '#/components/schemas/reference'
+            allOf:
+              type: array
+              items:
+                oneOf:
+                  - $ref: '#/components/schemas/schema'
+                  - $ref: '#/components/schemas/reference'
+            oneOf:
+              type: array
+              items:
+                oneOf:
+                  - $ref: '#/components/schemas/schema'
+                  - $ref: '#/components/schemas/reference'
+            anyOf:
+              type: array
+              items:
+                oneOf:
+                  - $ref: '#/components/schemas/schema'
+                  - $ref: '#/components/schemas/reference'
+            items:
+              oneOf:
+                - $ref: '#/components/schemas/schema'
+                - $ref: '#/components/schemas/reference'
+            properties:
+              type: object
+              additionalProperties:
+                oneOf:
+                  - $ref: '#/components/schemas/schema'
+                  - $ref: '#/components/schemas/reference'
+            additionalProperties:
+              oneOf:
+                - $ref: '#/components/schemas/schema'
+                - $ref: '#/components/schemas/reference'
+                - type: boolean
+              default: true
+            description:
+              type: string
+            format:
+              type: string
+            default:
+              type: object
+            nullable:
+              type: boolean
+              default: false
+            readOnly:
+              type: boolean
+              default: false
+            writeOnly:
+              type: boolean
+              default: false
+            example:
+              type: object
+            deprecated:
+              type: boolean
+              default: false
+            contentMediaType:
+              type: string
+            contentEncoding:
+              type: string
+            contentSchema:
+              type: string
+          additionalProperties: false
+    reference:
+      required:
+        - ref
+      type: object
+      properties:
+        ref:
+          type: string
+          format: uri-reference
