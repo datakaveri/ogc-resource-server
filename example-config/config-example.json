@@ -10,7 +10,7 @@
     "dxAuthBasePath": "/auth/v1",
     "hostName": "https://server.url.com",
     "catalogId": "stac",
-    "baseUrl": "https://baseUrl:8443"
+    "domain": "server.url.com"
   },
   "modules": [
     {
