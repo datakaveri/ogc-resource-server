@@ -42,7 +42,7 @@ public class AuthHandler implements Handler<RoutingContext> {
       String path = context.normalizedPath();
       boolean isProcessExecution = path.matches(PROCESS_EXECUTION_REGEX) || path.matches(JOB_STATUS_REGEX);
       token = request.headers().get(HEADER_TOKEN);
-      id = context.pathParam("collectionId");
+      id = context.normalizedPath().split("/")[2];
       if (context.request().path().substring(1, 7).equals("assets")) {
         id = context.pathParam("assetId");
       }

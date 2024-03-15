@@ -1,19 +1,37 @@
 package ogc.rs.apiserver;
 
-import io.vertx.core.*;
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
+import io.vertx.core.MultiMap;
+import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
-import io.vertx.core.http.*;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.CorsHandler;
-import io.vertx.ext.web.openapi.RouterBuilder;
-import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import io.vertx.ext.web.validation.RequestParameters;
 import io.vertx.ext.web.validation.ValidationHandler;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.handlers.FailureHandler;
 import ogc.rs.apiserver.util.DataFromS3;
@@ -27,21 +45,11 @@ import ogc.rs.processes.ProcessesRunnerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.metering.util.MeteringConstant.*;
 import static ogc.rs.metering.util.MeteringConstant.ROLE;
 import static ogc.rs.metering.util.MeteringConstant.USER_ID;
-
 
 /**
  * The OGC Resource Server API Verticle.
@@ -79,306 +87,103 @@ public class ApiServerVerticle extends AbstractVerticle {
   private JobsService jobsService;
 
 
+  JsonArray allCrsSupported = new JsonArray();
+    
   /**
-   * This method is used to start the Verticle. It deploys a verticle in a cluster/single instance,
-   * reads the configuration, obtains a proxy for the Event bus services exposed through service
-   * discovery, start an HTTPs server at port 8443 or an HTTP server at port 8080.
+   * This method is used to start the Verticle. It deploys a verticle in a cluster/single instance, reads the
+   * configuration, obtains a proxy for the Event bus services exposed through service discovery,
+   * start an HTTPs server at port 8443 or an HTTP server at port 8080.
    *
    * @throws Exception which is a startup exception TODO Need to add documentation for all the
    */
   @Override
   public void start() throws Exception {
 
-    Set<String> allowedHeaders =
-        Set.of(
-            HEADER_TOKEN,
-            HEADER_CONTENT_LENGTH,
-            HEADER_CONTENT_TYPE,
-            HEADER_HOST,
-            HEADER_ORIGIN,
-            HEADER_REFERER,
-            HEADER_ACCEPT,
-            HEADER_ALLOW_ORIGIN);
-      Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS);
-      FailureHandler failureHandler = new FailureHandler();
-
       /* Get base paths from config */
     ogcBasePath = config().getString("ogcBasePath");
     hostName = config().getString("hostName");
+
     catalogueService = new CatalogueService(vertx, config());
     meteringService = MeteringService.createProxy(vertx, METERING_SERVICE_ADDRESS);
+
     /* Initialize OGC landing page buffer - since configured hostname needs to be in it */
     String landingPageTemplate = vertx.fileSystem().readFileBlocking("docs/landingPage.json").toString();
     ogcLandingPageBuf = Buffer.buffer(landingPageTemplate.replace("$HOSTNAME", hostName));
 
+    /* Initialize S3-related things */
     S3_BUCKET = config().getString("s3BucketName");
     S3_REGION = config().getString("s3Region");
     S3_ACCESS_KEY = config().getString("s3AccessKey");
     S3_SECRET_KEY = config().getString("s3SecretKey");
 
-    Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/openapiv3_0.json");
-    Future<RouterBuilder> routerBuilderStacFut =
-        RouterBuilder.create(vertx, "docs/stacopenapiv3_0.yaml");
-    Future<RouterBuilder> routerBuilderMeteringFut =
-        RouterBuilder.create(vertx, "docs/dxmeteringopenapiv3_0.yaml");
-    CompositeFuture.all(routerBuilderFut, routerBuilderStacFut, routerBuilderMeteringFut)
-        .compose(
-            result -> {
-              RouterBuilder routerBuilder = result.resultAt(0);
-              RouterBuilder routerBuilderStac = result.resultAt(1);
-              RouterBuilder routerBuilderMetering = result.resultAt(2);
+    processService = ProcessesRunnerService.createProxy(vertx,PROCESSING_SERVICE_ADDRESS);
+    dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
+    jobsService = JobsService.createProxy(vertx,JOBS_SERVICE_ADDRESS);
 
-              LOGGER.debug("Info: Mounting routes from OpenApi3 spec");
+    // TODO: ssl configuration
+    HttpServerOptions serverOptions = new HttpServerOptions();
+    serverOptions.setCompressionSupported(true).setCompressionLevel(5);
+    int port = config().getInteger("httpPort") == null ? 8080 : config().getInteger("httpPort");
+    
+    HttpServer server = vertx.createHttpServer(serverOptions);
+    
+    router = Router.router(vertx);
 
-              RouterBuilderOptions factoryOptions =
-                  new RouterBuilderOptions().setMountResponseContentTypeHandler(true).setMountNotImplementedHandler(true);
-              routerBuilder.setOptions(factoryOptions);
-              routerBuilder.rootHandler(
-                  CorsHandler.create("*")
-                      .allowedHeaders(allowedHeaders)
-                      .allowedMethods(allowedMethods));
-              routerBuilder.rootHandler(BodyHandler.create());
-              routerBuilderStac.rootHandler(
-                  CorsHandler.create("*")
-                      .allowedHeaders(allowedHeaders)
-                      .allowedMethods(allowedMethods));
-              routerBuilderStac.rootHandler(BodyHandler.create());
-              routerBuilderMetering.rootHandler(
-                  CorsHandler.create("*")
-                      .allowedHeaders(allowedHeaders)
-                      .allowedMethods(allowedMethods));
-              routerBuilderMetering.rootHandler(BodyHandler.create());
-              try {
-                routerBuilder
-                    .operation(LANDING_PAGE)
-                    .handler(
-                        routingContext -> {
-                          HttpServerResponse response = routingContext.response();
-                          response.end(ogcLandingPageBuf);
-                        });
-                routerBuilder
-                    .operation(CONFORMANCE_CLASSES)
-                    .handler(
-                        routingContext -> {
-                          HttpServerResponse response = routingContext.response();
-                          response.sendFile("docs/conformance.json");
-                        });
-                routerBuilder
-                  .operation(COLLECTIONS_API)
-                  .handler(this::getCollections)
-                  .handler(this::putCommonResponseHeaders)
-                  .handler(this::buildResponse)
-                  .failureHandler(failureHandler);
-
-              routerBuilder
-                  .operation(COLLECTION_API)
-                  .handler(this::getCollection)
-                  .handler(this::putCommonResponseHeaders)
-                  .handler(this::buildResponse)
-                  .failureHandler(failureHandler);
-
-              routerBuilder
-                  .operation(FEATURES_API)
-                  .handler(AuthHandler.create(vertx))
-                  .handler(this::validateQueryParams)
-                  .handler(this::getFeatures)
-                  .handler(this::putCommonResponseHeaders)
-                  .handler(this::buildResponse)
-                  .failureHandler(failureHandler);
-
-
-              routerBuilder
-                  .operation(FEATURE_API)
-                  .handler(AuthHandler.create(vertx))
-                  .handler(this::validateQueryParams)
-                  .handler(this::getFeature)
-                  .handler(this::putCommonResponseHeaders)
-                  .handler(this::buildResponse)
-                  .failureHandler(failureHandler);
-
-              routerBuilderStac
-                  .operation(STAC_CATALOG_API)
-                  .handler(this::stacCatalog)
-                  .handler(this::putCommonResponseHeaders)
-                  .handler(this::buildResponse);
-
-              routerBuilderStac
-                  .operation(STAC_COLLECTIONS_API)
-                  .handler(this::stacCollections)
-                  .handler(this::putCommonResponseHeaders)
-                  .handler(this::buildResponse);
-
-              routerBuilder
-                  .operation(EXECUTE_API)
-                  .handler(AuthHandler.create(vertx))
-                  .handler(this::executeJob)
-                  .handler(this::putCommonResponseHeaders)
-                  .handler(this::buildResponse)
-                  .failureHandler(failureHandler);
-
-              routerBuilder
-                  .operation(PROCESSES_API)
-                  .handler(this::getProcesses)
-                  .handler(this::putCommonResponseHeaders)
-                  .handler(this::buildResponse)
-                  .failureHandler(failureHandler);
-
-              routerBuilder
-                  .operation(PROCESS_API)
-                  .handler(this::getProcess)
-                  .handler(this::putCommonResponseHeaders)
-                  .handler(this::buildResponse)
-                  .failureHandler(failureHandler);
-
-            routerBuilder
-                .operation(TILEMATRIXSETS_API)
-                .handler(this::getTileMatrixSetList)
-                .handler(this::putCommonResponseHeaders)
-                .handler(this::buildResponse)
-                .failureHandler(failureHandler);
-
-            routerBuilder
-                  .operation(TILEMATRIXSET_API)
-                  .handler(this::getTileMatrixSet)
-                  .handler(this::putCommonResponseHeaders)
-                  .handler(this::buildResponse)
-                  .failureHandler(failureHandler);
-
-            routerBuilder
-                .operation(TILESETSLIST_API)
-                .handler(this::getTileSetList)
-                .handler(this::putCommonResponseHeaders)
-                .handler(this::buildResponse)
-                .failureHandler(failureHandler);
-
-            routerBuilder
-                .operation(TILESET_API)
-                .handler(this::getTileSet)
-                .handler(this::putCommonResponseHeaders)
-                .handler(this::buildResponse)
-                .failureHandler(failureHandler);
-
-            routerBuilder
-                .operation(TILE_API)
-                .handler(this::getTile)
-                .handler(this::putCommonResponseHeaders)
-                .handler(this::buildResponse);
-
-
-            routerBuilder
-                .operation(STATUS_API)
-                .handler(AuthHandler.create(vertx))
-                .handler(this::getStatus)
-                .handler(this::putCommonResponseHeaders)
-                .handler(this::buildResponse)
-                  .failureHandler(failureHandler);
-
-            routerBuilderMetering
-                .operation(SUMMARY_AUDIT_API)
-                .handler(this::getSummary)
-                .handler(this::putCommonResponseHeaders)
-                .handler(this::buildResponse);
-
-
-            routerBuilderMetering
-                .operation(OVERVIEW_AUDIT_API)
-                .handler(this::getMonthlyOverview)
-                .handler(this::putCommonResponseHeaders)
-                .handler(this::buildResponse);
-
-              routerBuilderMetering
-                      .operation(CONSUMER_AUDIT_API)
-                      .handler(this::getConsumerAuditDetail)
-                      .handler(this::putCommonResponseHeaders)
-                      .handler(this::buildResponse);
-
-              routerBuilderMetering
-                      .operation(PROVIDER_AUDIT_API)
-                      .handler(this::getProviderAuditDetail)
-                      .handler(this::putCommonResponseHeaders)
-                      .handler(this::buildResponse);
-
-              routerBuilderStac
-                      .operation(ASSET_API)
-                      .handler(AuthHandler.create(vertx))
-                      .handler(this::getAssets)
-                      .handler(this::putCommonResponseHeaders)
-                      .handler(this::buildResponse);
-              routerBuilderStac
-                      .operation(STAC_COLLECTION_API)
-                      .handler(this::getStacCollection)
-                      .handler(this::putCommonResponseHeaders)
-                      .handler(this::buildResponse);
-
-              routerBuilderStac
-                  .operation(STAC_CONFORMANCE_CLASSES)
-                  .handler(
-                      routingContext -> {
-                        HttpServerResponse response = routingContext.response();
-                        response.sendFile("docs/stacConformance.json");
-                      });
-
-                Router ogcRouter = routerBuilder.createRouter();
-                Router stacRouter = routerBuilderStac.createRouter();
-                Router meteringRouter = routerBuilderMetering.createRouter();
-                router = Router.router(vertx);
-                router.route("/*").subRouter(stacRouter);
-                router.route("/*").subRouter(ogcRouter);
-                router.route("/*").subRouter(meteringRouter);
-
-                router
-                    .get(OPENAPI_SPEC)
-                    .handler(
-                        routingContext -> {
-                          HttpServerResponse response = routingContext.response();
-                          response.putHeader(
-                              "Content-Type", "application/vnd.oai.openapi+json;version=3.0");
-                          response.sendFile("docs/openapiv3_0.json");
-                        });
-                router
-                    .get(STAC_OPENAPI_SPEC)
-                    .handler(
-                        routingContext -> {
-                          HttpServerResponse response = routingContext.response();
-                          response.putHeader(
-                              "Content-Type", "application/vnd.oai.openapi+json;version=3.0");
-                          response.sendFile("docs/stacopenapiv3_0.json");
-                        });
-                router
-                    .get(METERING_OPENAPI_SPEC) // TODO: need to discussion
-                    .handler(
-                        routingContext -> {
-                          HttpServerResponse response = routingContext.response();
-                          response.sendFile("docs/dxmeteringopenapiv3_0.json");
-                        });
-              } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException(e.getMessage());
-              }
-
-          processService = ProcessesRunnerService.createProxy(vertx,PROCESSING_SERVICE_ADDRESS);
-          dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
-          jobsService = JobsService.createProxy(vertx,JOBS_SERVICE_ADDRESS);
-          // TODO: ssl configuration
-          HttpServerOptions serverOptions = new HttpServerOptions();
-          int port = config().getInteger("httpPort") == null ? 8080 : config().getInteger("httpPort");
-              HttpServer server = vertx.createHttpServer(serverOptions);
-              return server.requestHandler(router).listen(port);
-            })
-        .onSuccess(success -> LOGGER.info("Started HTTP server at port:" + success.actualPort()))
-        .onFailure(Throwable::printStackTrace);
-
-      HttpClientOptions httpCliOptions = new HttpClientOptions().setSsl(true);
-
-      if(System.getProperty("s3.mock") != null){
-          LOGGER.fatal("S3 is being mocked!! Are you testing something?");
-          httpCliOptions.setTrustAll(true).setVerifyHost(false);
+    /*
+     * Start server only once router has at least one route (it will have only one, '/' since both
+     * the OGC and STAC sub-routers are bound to that path).
+     * 
+     * Check every second for 20 seconds if router has been created. If it has, start server.
+     */ 
+    AtomicInteger waitForRouterCounter = new AtomicInteger(20);
+    vertx.setPeriodic(1000, wait -> {
+        
+      if (!router.getRoutes().isEmpty()) {
+        vertx.cancelTimer(wait);
+        server.requestHandler(router).listen(port)
+            .onSuccess(
+                success -> LOGGER.info("Started HTTP server at port:" + success.actualPort()))
+            .onFailure(Throwable::printStackTrace);
+      } else {
+        LOGGER.info("Waiting for router to be initialized");
+        
+        waitForRouterCounter.decrementAndGet();
+        if (waitForRouterCounter.intValue() == 0) {
+          LOGGER.fatal("Router not initialized - Failed to start HTTP server");
+          
+          vertx.cancelTimer(wait);
+          throw new RuntimeException();
+        }
       }
+    });
 
-      httpClient = vertx.createHttpClient(httpCliOptions);
+    HttpClientOptions httpCliOptions = new HttpClientOptions().setSsl(true);
+
+    if(System.getProperty("s3.mock") != null){
+        LOGGER.fatal("S3 is being mocked!! Are you testing something?");
+        httpCliOptions.setTrustAll(true).setVerifyHost(false);
     }
 
-  private void executeJob(RoutingContext routingContext) {
+    httpClient = vertx.createHttpClient(httpCliOptions);
+  }
+
+  /**
+   * Reset {@link ApiServerVerticle#router} by clearing it and then adding all routers in
+   * <code>routerList</code> as sub-routers at the root path.
+   * 
+   * @param routerList list of routers to be added as sub-routers
+   */
+  public void resetRouter(List<Router> routerList) {
+    router.clear();
+    routerList.forEach(subrouter -> router.route("/*").subRouter(subrouter));
+  }
+
+  public void sendOgcLandingPage(RoutingContext routingContext) {
+    HttpServerResponse response = routingContext.response();
+    response.end(ogcLandingPageBuf);
+  }
+
+  public void executeJob(RoutingContext routingContext) {
 
     RequestParameters paramsFromOasValidation =
       routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
@@ -405,7 +210,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     });
   }
 
-  private void getStatus(RoutingContext routingContext) {
+  public void getStatus(RoutingContext routingContext) {
 
     RequestParameters paramsFromOasValidation =
       routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
@@ -428,10 +233,9 @@ public class ApiServerVerticle extends AbstractVerticle {
       routingContext.put("statusCode", processException.getStatusCode());
       routingContext.next();
     });
-
   }
-
-  private void getFeature(RoutingContext routingContext) {
+  
+  public void getFeature(RoutingContext routingContext) {
 
     if (!(Boolean) routingContext.get("isAuthorised")){
       routingContext.next();
@@ -480,8 +284,8 @@ public class ApiServerVerticle extends AbstractVerticle {
               routingContext.next();
             });
   }
-
-  private void getFeatures(RoutingContext routingContext) {
+  
+  public void getFeatures(RoutingContext routingContext) {
 
     if (!(Boolean) routingContext.get("isAuthorised")){
       routingContext.next();
@@ -584,7 +388,8 @@ public class ApiServerVerticle extends AbstractVerticle {
           routingContext.next();
         });
   }
-  private void getProcesses(RoutingContext routingContext) {
+
+  public void getProcesses(RoutingContext routingContext) {
     RequestParameters paramsFromOasValidation = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
 
     int limit = paramsFromOasValidation.queryParameter("limit").getInteger();
@@ -600,7 +405,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     });
   }
 
-  private void getProcess(RoutingContext routingContext) {
+  public void getProcess(RoutingContext routingContext) {
     String processId = routingContext.pathParams().get("processId");
     dbService.getProcess(processId).onSuccess(successResult -> {
       routingContext.put("response", successResult.toString());
@@ -615,13 +420,14 @@ public class ApiServerVerticle extends AbstractVerticle {
     });
   }
 
-  private void buildResponse(RoutingContext routingContext) {
-    routingContext.response()
+  public void buildResponse(RoutingContext routingContext) {
+    routingContext
+        .response()
         .setStatusCode(routingContext.get("statusCode"))
         .end((String) routingContext.get("response"));
   }
 
-  private void validateQueryParams(RoutingContext routingContext) {
+  public void validateQueryParams(RoutingContext routingContext) {
       Set<String> queryParamsInRequest = routingContext.queryParams().names();
       RequestParameters paramsOasValidation = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
       Set<String> allParamsDefinedInOas = paramsOasValidation.toJson().getJsonObject("query").fieldNames();
@@ -633,7 +439,8 @@ public class ApiServerVerticle extends AbstractVerticle {
       } else
         routingContext.next();
   }
-  private void getCollection(RoutingContext routingContext) {
+
+  public void getCollection(RoutingContext routingContext) {
       String collectionId = routingContext.request().path().split("/")[2];
       LOGGER.debug("collectionId- {}", collectionId);
       dbService.getCollection(collectionId)
@@ -662,7 +469,7 @@ public class ApiServerVerticle extends AbstractVerticle {
           });
   }
 
-  private void getCollections(RoutingContext routingContext) {
+  public void getCollections(RoutingContext routingContext) {
 
     dbService.getCollections()
         .onSuccess(success -> {
@@ -713,7 +520,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             });
   }
 
-  private void getTile(RoutingContext routingContext) {
+  public void getTile(RoutingContext routingContext) {
     String collectionId = routingContext.pathParam("collectionId");
     String tileMatrixSetId = routingContext.pathParam("tileMatrixSetId");
     String tileMatrixId = routingContext.pathParam("tileMatrix");
@@ -751,7 +558,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             });
   }
 
-  private void getTileSet(RoutingContext routingContext) {
+  public void getTileSet(RoutingContext routingContext) {
     String collectionId = routingContext.pathParam("collectionId");
     String tileMatrixSetId = routingContext.pathParam("tileMatrixSetId");
     dbService
@@ -785,7 +592,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             });
   }
 
-  private void getTileSetList(RoutingContext routingContext) {
+  public void getTileSetList(RoutingContext routingContext) {
     String collectionId = routingContext.pathParam("collectionId");
     dbService.getTileMatrixSetRelation(collectionId)
         .onSuccess(success -> {
@@ -823,7 +630,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             });
   }
 
-  private void getTileMatrixSet(RoutingContext routingContext) {
+  public void getTileMatrixSet(RoutingContext routingContext) {
     String tileMatrixSetId = routingContext.pathParam("tileMatrixSetId");
     dbService.getTileMatrixSetMetaData(tileMatrixSetId)
         .onSuccess(success -> {
@@ -872,7 +679,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             });
   }
 
-  private void getTileMatrixSetList(RoutingContext routingContext) {
+  public void getTileMatrixSetList(RoutingContext routingContext) {
     dbService.getTileMatrixSets()
         .onSuccess(success -> {
               JsonArray tileMatrixSets = new JsonArray();
@@ -904,7 +711,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             });
   }
 
-  private void putCommonResponseHeaders(RoutingContext routingContext) {
+  public void putCommonResponseHeaders(RoutingContext routingContext) {
     routingContext.response()
         .putHeader(HEADER_CONTENT_TYPE, MIME_APPLICATION_JSON)
         .putHeader("Cache-Control", "no-cache, no-store,  must-revalidate,max-age=0")
@@ -983,7 +790,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     return collection;
   }
 
-  private void stacCollections(RoutingContext routingContext) {
+  public void stacCollections(RoutingContext routingContext) {
     dbService
         .getStacCollections()
         .onSuccess(
@@ -1119,7 +926,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             });
   }
 
-  private void stacCatalog(RoutingContext routingContext) {
+  public void stacCatalog(RoutingContext routingContext) {
     try {
       String jsonFilePath = "docs/getStacLandingPage.json";
       String conformanceFilePath = "docs/stacConformance.json";
@@ -1220,8 +1027,8 @@ public class ApiServerVerticle extends AbstractVerticle {
     }
   }
 
-  private void getStacCollection(RoutingContext routingContext) {
-    String collectionId = routingContext.pathParam("collectionId");
+  public void getStacCollection(RoutingContext routingContext) {
+    String collectionId = routingContext.normalizedPath().split("/")[3];
     LOGGER.debug("collectionId- {}", collectionId);
     dbService
         .getStacCollection(collectionId)
@@ -1323,7 +1130,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             });
   }
 
-  private void getAssets(RoutingContext routingContext) {
+  public void getAssets(RoutingContext routingContext) {
     String assetId = routingContext.pathParam("assetId");
     if (!(Boolean) routingContext.get("isAuthorised")) {
       routingContext.next();
@@ -1451,7 +1258,7 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   // TODO: Used this for auditing purposes
-  private Future<Void> updateAuditTable(RoutingContext context) {
+  public Future<Void> updateAuditTable(RoutingContext context) {
     JsonObject authInfo = (JsonObject) context.data().get("authInfo");
     String id = authInfo.getString(ID);
     Promise<Void> promise = Promise.promise();
@@ -1514,7 +1321,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     return promise.future();
   }
 
-  private void getSummary(RoutingContext routingContext) {
+  public void getSummary(RoutingContext routingContext) {
     Promise<JsonObject> promise = Promise.promise();
     HttpServerRequest request = routingContext.request();
     LOGGER.trace("Info: getSummary Started.");
@@ -1546,7 +1353,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     promise.future();
   }
 
-  private void getMonthlyOverview(RoutingContext routingContext) {
+  public void getMonthlyOverview(RoutingContext routingContext) {
     Promise<JsonObject> promise = Promise.promise();
     HttpServerRequest request = routingContext.request();
     LOGGER.trace("Info: getMonthlyOverview Started." + routingContext.data().get("authInfo"));
@@ -1578,7 +1385,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     promise.future();
   }
 
-  private void getProviderAuditDetail(RoutingContext routingContext) {
+  public void getProviderAuditDetail(RoutingContext routingContext) {
     LOGGER.trace("Info: getProviderAuditDetail Started.");
     JsonObject entries = new JsonObject();
     JsonObject provider = (JsonObject) routingContext.data().get("authInfo");
@@ -1629,7 +1436,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     promise.future();
   }
 
-  private void getConsumerAuditDetail(RoutingContext routingContext) {
+  public void getConsumerAuditDetail(RoutingContext routingContext) {
     LOGGER.trace("Info: getConsumerAuditDetail Started.");
 
     JsonObject entries = new JsonObject();
