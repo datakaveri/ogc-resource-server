@@ -48,6 +48,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
     private String databaseUserName;
     private String databasePassword;
     private int poolSize;
+  private String domain;
 
     public JwtAuthenticationServiceImpl(Vertx vertx, JWTAuth jwtAuth, JsonObject config) {
         this.jwtAuth = jwtAuth;
@@ -58,6 +59,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
         this.databaseUserName = config.getString("databaseUser");
         this.databasePassword = config.getString("databasePassword");
         this.poolSize = config.getInteger("poolSize");
+        this.domain = config.getString("domain");
         this.connectOptions =
             new PgConnectOptions()
                 .setPort(databasePort)
@@ -360,7 +362,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                       resourceResult -> {
                         boolean openResource =
                             jwtData.getIid().split(":")[0].equals("rs")
-                                && jwtData.getIid().split(":")[1].equals("ogc.iudx.io");
+                                && jwtData.getIid().split(":")[1].equals(domain);
                         if (resourceResult && openResource) {
                           LOGGER.debug("Resource is Open, Access Granted.");
                           JsonObject results = new JsonObject();
@@ -400,21 +402,20 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                                     .toString());
                             promise.complete(results);
                             return;
-                          }
-                          JsonArray access =
-                              jwtData.getCons() != null
-                                  ? jwtData.getCons().getJsonArray("access")
-                                  : null;
-                          if (access == null)
-                            promise.fail(
-                                new OgcException(
-                                    401,
-                                    "Not Authorised",
-                                    "User is not authorised. Please contact IUDX AAA "
-                                        + "Server."));
-                          else {
-                            if (access.contains("api")
-                                && jwtData.getRole().equalsIgnoreCase("consumer")) {
+                          } else if (jwtData.getRole().equalsIgnoreCase("consumer")) {
+                            JsonArray access =
+                                jwtData.getCons() != null
+                                    ? jwtData.getCons().getJsonArray("access")
+                                    : null;
+                            if (access == null)
+                              promise.fail(
+                                  new OgcException(
+                                      401,
+                                      "Not Authorised",
+                                      "User is not authorised. Please contact IUDX AAA "
+                                          + "Server."));
+                            if (access.contains("api")) {
+
                               JsonObject results = new JsonObject();
                               results.put("iid", idFromJwt);
                               results.put("userId", jwtData.getSub());
@@ -429,19 +430,29 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                               promise.complete(results);
                               return;
                             }
+                          } else {
+                            LOGGER.debug(
+                                "Not a producer or consumer token. It is of role {} ",
+                                jwtData.getRole());
+                            promise.fail(
+                                new OgcException(
+                                    401,
+                                    "Not Authorised",
+                                    "User is not authorised. Please contact IUDX AAA "
+                                        + "Server."));
                           }
                         }
                       })
                   .onFailure(
                       fail -> {
-                        LOGGER.error("Collection not present in table" + fail.getMessage());
+                        LOGGER.error("Collection not present in table: {} ", fail.getMessage());
                         promise.fail(fail);
                       });
               ;
             })
         .onFailure(
             fail -> {
-              LOGGER.error("Asset not found: " + fail.getMessage());
+              LOGGER.error("Asset not found: {} ", fail.getMessage());
               promise.fail(fail);
             });
 
