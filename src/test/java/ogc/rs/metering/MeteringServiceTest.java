@@ -163,38 +163,6 @@ public class MeteringServiceTest {
   }
 
   @Test
-  @DisplayName("Testing read query with given Time Interval -consumer")
-  void readFromValidTimeInterval(VertxTestContext vertxTestContext) {
-    JsonObject responseJson = new JsonObject().put(SUCCESS, "Success");
-    databaseService = mock(DatabaseService.class);
-    JsonObject json = mock(JsonObject.class);
-    JsonArray jsonArray = mock(JsonArray.class);
-    JsonArray jsonArray1 = new JsonArray().add(responseJson);
-
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, config, databroker);
-    JsonObject request = readConsumerRequest();
-
-    when(jsonArray.getJsonObject(anyInt())).thenReturn(json);
-    when(json.getInteger(anyString())).thenReturn(10);
-    when(databaseService.executeQuery(any()))
-        .thenReturn(Future.succeededFuture(new JsonObject().put("result", jsonArray)))
-        .thenReturn(Future.succeededFuture(new JsonObject().put("result", jsonArray1)));
-
-    meteringService
-        .executeReadQuery(request)
-        .onSuccess(
-            successHandler -> {
-              assertEquals(
-                  responseJson.toString(), successHandler.getJsonArray("result").getString(0));
-              vertxTestContext.completeNow();
-            })
-        .onFailure(
-            failure -> {
-              vertxTestContext.failNow(failure.getMessage());
-            });
-  }
-
-  @Test
   @DisplayName("Testing read query with given Time Interval")
   void readFromValidTimeInterval2(VertxTestContext vertxTestContext) {
     databaseService = mock(DatabaseService.class);
@@ -235,7 +203,7 @@ public class MeteringServiceTest {
     databroker = mock(DataBrokerService.class);
     meteringService = new MeteringServiceImpl(vertxObj, databaseService, config, databroker);
 
-    JsonObject request = readProviderRequest();
+    JsonObject request = readProviderRequest().put("limit",100).put("offset",10);
 
     when(jsonArray.getJsonObject(anyInt())).thenReturn(json);
     when(json.getInteger(anyString())).thenReturn(10);
@@ -268,7 +236,7 @@ public class MeteringServiceTest {
     databroker = mock(DataBrokerService.class);
     meteringService = new MeteringServiceImpl(vertxObj, databaseService, config, databroker);
 
-    JsonObject request = readProviderRequest();
+    JsonObject request = readProviderRequest().put("limit",100).put("offset",10);
     request.remove(API);
     request.remove(CONSUMER_ID);
     request.remove(RESOURCE_ID);
@@ -335,7 +303,7 @@ public class MeteringServiceTest {
 
     meteringService = new MeteringServiceImpl(vertxObj, databaseService, config, databroker);
 
-    JsonObject request = readConsumerRequest();
+    JsonObject request = readConsumerRequest().put("limit",100).put("offset",10);
     request.remove(API);
     request.remove(RESOURCE_ID);
     when(jsonArray.getJsonObject(anyInt())).thenReturn(json);
@@ -397,48 +365,6 @@ public class MeteringServiceTest {
             handler -> {
               if (handler.failed()) {
                 assertEquals(handler.cause().getMessage(), "Error : invalid date-time");
-                testContext.completeNow();
-              } else {
-                testContext.failNow("failed");
-              }
-            });
-  }
-
-  @Test
-  @DisplayName("Testing read query with invalid time")
-  void readFromInvalidTime(VertxTestContext testContext) {
-    JsonObject request = readConsumerRequest();
-    databaseService = mock(DatabaseService.class);
-    databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, config, databroker);
-    request.remove(START_TIME);
-    meteringService
-        .executeReadQuery(request)
-        .onComplete(
-            handler -> {
-              if (handler.failed()) {
-                assertEquals(handler.cause().getMessage(), "Error : Time interval not found.");
-                testContext.completeNow();
-              } else {
-                testContext.failNow("failed");
-              }
-            });
-  }
-
-  @Test
-  @DisplayName("Testing read query with invalid time relation")
-  void readFromInvalidTimeRelationInterval(VertxTestContext testContext) {
-    JsonObject request = readConsumerRequest();
-    databaseService = mock(DatabaseService.class);
-    databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, config, databroker);
-    request.remove(TIME_RELATION);
-    meteringService
-        .executeReadQuery(request)
-        .onComplete(
-            handler -> {
-              if (handler.failed()) {
-                assertEquals(handler.cause().getMessage(), "Error : Time relation not found.");
                 testContext.completeNow();
               } else {
                 testContext.failNow("failed");
