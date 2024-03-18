@@ -36,14 +36,12 @@ public class QueryBuilder {
     String api = request.getString(API);
     String providerId = request.getString(PROVIDER_ID);
     String consumerId = request.getString(CONSUMER_ID);
-    String databaseTableName = request.getString(DATABASE_TABLE_NAME);
     StringBuilder query = null;
 
     if (providerId != null) {
       query =
           new StringBuilder(
               PROVIDERID_TIME_INTERVAL_COUNT_QUERY
-                  .replace("$0", databaseTableName)
                   .replace("$1", startTime)
                   .replace("$2", endTime)
                   .replace("$3", providerId));
@@ -60,7 +58,6 @@ public class QueryBuilder {
       query =
           new StringBuilder(
               CONSUMERID_TIME_INTERVAL_COUNT_QUERY
-                  .replace("$0", databaseTableName)
                   .replace("$1", startTime)
                   .replace("$2", endTime)
                   .replace("$3", userId));
@@ -85,12 +82,10 @@ public class QueryBuilder {
       String resourceId = jsonObject.getString(RESOURCE_ID);
       String api = jsonObject.getString(API);
       String providerId = jsonObject.getString(PROVIDER_ID);
-      String databaseTableName = jsonObject.getString(DATABASE_TABLE_NAME);
 
       query =
           new StringBuilder(
               PROVIDERID_TIME_INTERVAL_READ_QUERY
-                  .replace("$0", databaseTableName)
                   .replace("$1", startTime)
                   .replace("$2", endTime)
                   .replace("$3", providerId));
@@ -113,11 +108,10 @@ public class QueryBuilder {
       String resourceId = jsonObject.getString(RESOURCE_ID);
       String userId = jsonObject.getString(USER_ID);
       String api = jsonObject.getString(API);
-      String databaseTableName = jsonObject.getString(DATABASE_TABLE_NAME);
+
       query =
           new StringBuilder(
               CONSUMERID_TIME_INTERVAL_READ_QUERY
-                  .replace("$0", databaseTableName)
                   .replace("$1", startTime)
                   .replace("$2", endTime)
                   .replace("$3", userId));
@@ -172,8 +166,7 @@ public class QueryBuilder {
                     .replace("$0", timeSeriesToFirstDay)
                     .replace("$1", endTime)
                     .replace("$2", startTime)
-                    .replace("$3", endTime)
-                    .replace("$a", request.getString(DATABASE_TABLE_NAME)));
+                    .replace("$3", endTime));
       } else if (role.equalsIgnoreCase("consumer")) {
         String userId = request.getString(USER_ID);
         monthQuery =
@@ -185,8 +178,7 @@ public class QueryBuilder {
                     .replace("$1", endTime)
                     .replace("$2", startTime)
                     .replace("$3", endTime)
-                    .replace("$4", userId)
-                    .replace("$a", request.getString(DATABASE_TABLE_NAME)));
+                    .replace("$4", userId));
       } else if (role.equalsIgnoreCase("provider") || role.equalsIgnoreCase("delegate")) {
         String providerId = request.getString("providerid");
         LOGGER.debug("Provider = {}", providerId);
@@ -199,8 +191,7 @@ public class QueryBuilder {
                     .replace("$1", endTime)
                     .replace("$2", startTime)
                     .replace("$3", endTime)
-                    .replace("$4", providerId)
-                    .replace("$a", request.getString(DATABASE_TABLE_NAME)));
+                    .replace("$4", providerId));
       }
     } else {
       if (role.equalsIgnoreCase("admin")) {
@@ -211,8 +202,7 @@ public class QueryBuilder {
                     .replace("$0", timeYearBack)
                     .replace("$1", utcTime.toString())
                     .replace("$2", timeYearBack)
-                    .replace("$3", utcTime.toString())
-                    .replace("$a", request.getString(DATABASE_TABLE_NAME)));
+                    .replace("$3", utcTime.toString()));
       } else if (role.equalsIgnoreCase("consumer")) {
         String userId = request.getString(USER_ID);
         monthQuery =
@@ -224,8 +214,7 @@ public class QueryBuilder {
                     .replace("$1", utcTime.toString())
                     .replace("$2", timeYearBack)
                     .replace("$3", utcTime.toString())
-                    .replace("$4", userId)
-                    .replace("$a", request.getString(DATABASE_TABLE_NAME)));
+                    .replace("$4", userId));
       } else if (role.equalsIgnoreCase("provider") || role.equalsIgnoreCase("delegate")) {
         String providerId = request.getString("providerid");
         LOGGER.debug("Provider = {}", providerId);
@@ -238,8 +227,7 @@ public class QueryBuilder {
                     .replace("$1", utcTime.toString())
                     .replace("$2", timeYearBack)
                     .replace("$3", utcTime.toString())
-                    .replace("$4", providerId)
-                    .replace("$a", request.getString(DATABASE_TABLE_NAME)));
+                    .replace("$4", providerId));
       }
     }
 
@@ -251,9 +239,7 @@ public class QueryBuilder {
     String endTime = request.getString(ENDT);
     String role = request.getString(ROLE);
 
-    StringBuilder summaryQuery =
-        new StringBuilder(
-            SUMMARY_QUERY_FOR_METERING.replace("$a", request.getString(DATABASE_TABLE_NAME)));
+    StringBuilder summaryQuery = new StringBuilder(SUMMARY_QUERY_FOR_METERING);
     if (startTime != null && endTime != null) {
       summaryQuery.append(
           " where time between '$2' AND '$3' ".replace("$2", startTime).replace("$3", endTime));

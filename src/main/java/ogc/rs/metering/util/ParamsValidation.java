@@ -14,18 +14,6 @@ public class ParamsValidation {
 
   public JsonObject paramsCheck(JsonObject request) {
 
-    if (request.getString(TIME_RELATION) == null
-        || !(request.getString(TIME_RELATION).equals(DURING)
-            || request.getString(TIME_RELATION).equals(BETWEEN))) {
-      LOGGER.debug("Info: " + TIME_RELATION_NOT_FOUND);
-      return new JsonObject().put(ERROR, TIME_RELATION_NOT_FOUND);
-    }
-
-    if (request.getString(START_TIME) == null || request.getString(END_TIME) == null) {
-      LOGGER.debug("Info: " + TIME_NOT_FOUND);
-      return new JsonObject().put(ERROR, TIME_NOT_FOUND);
-    }
-
     if (request.getString(USER_ID) == null || request.getString(USER_ID).isEmpty()) {
       LOGGER.debug("Info: " + USERID_NOT_FOUND);
       request.put(ERROR, USERID_NOT_FOUND);

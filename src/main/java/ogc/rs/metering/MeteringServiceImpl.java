@@ -35,7 +35,6 @@ public class MeteringServiceImpl implements MeteringService {
   String summaryOverview;
   JsonArray jsonArray;
   JsonArray resultJsonArray;
-  String databaseTableName;
   int loopi;
 
   public MeteringServiceImpl(
@@ -46,7 +45,6 @@ public class MeteringServiceImpl implements MeteringService {
     this.dataBrokerService = dataBrokerService;
     this.databaseService = databaseService;
     catalogueService = new CatalogueService(vertx, config);
-    this.databaseTableName = config.getString("databaseTableName");
   }
 
   @Override
@@ -59,8 +57,6 @@ public class MeteringServiceImpl implements MeteringService {
       promise.fail("Error : " + validationCheck.getString(ERROR));
       return promise.future();
     }
-
-    request.put(DATABASE_TABLE_NAME, databaseTableName);
 
     String count = request.getString("options");
     if (count == null) {
@@ -111,20 +107,9 @@ public class MeteringServiceImpl implements MeteringService {
 
   private Future<JsonObject> readMethod(JsonObject request) {
     Promise<JsonObject> promise = Promise.promise();
-    String limit;
-    String offset;
-    if (request.getString(LIMITPARAM) == null) {
-      limit = "2000";
-      request.put(LIMITPARAM, limit);
-    } else {
-      limit = request.getString(LIMITPARAM);
-    }
-    if (request.getString(OFFSETPARAM) == null) {
-      offset = "0";
-      request.put(OFFSETPARAM, offset);
-    } else {
-      offset = request.getString(OFFSETPARAM);
-    }
+    int offset = request.getInteger(OFFSETPARAM);
+    int limit = request.getInteger(LIMITPARAM);
+
     queryPg = queryBuilder.buildReadQueryForPg(request);
     LOGGER.info("read query = {}", queryPg);
 
@@ -218,7 +203,6 @@ public class MeteringServiceImpl implements MeteringService {
         return promise.future();
       }
     }
-    request.put(DATABASE_TABLE_NAME, databaseTableName);
 
     String role = request.getString(ROLE);
     if (role.equalsIgnoreCase("admin") || role.equalsIgnoreCase("consumer")) {
@@ -285,8 +269,6 @@ public class MeteringServiceImpl implements MeteringService {
         return promise.future();
       }
     }
-
-    request.put(DATABASE_TABLE_NAME, databaseTableName);
 
     String role = request.getString(ROLE);
     if (role.equalsIgnoreCase("admin") || role.equalsIgnoreCase("consumer")) {

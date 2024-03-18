@@ -77,7 +77,6 @@
     {
       "id": "ogc.rs.metering.MeteringVerticle",
       "verticleInstances": 1,
-      "databaseTableName": "",
       "catServerHost": "",
       "catServerPort": 123,
       "dataBrokerIP": "",

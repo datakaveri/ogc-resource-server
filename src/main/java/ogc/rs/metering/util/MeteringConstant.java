@@ -22,9 +22,9 @@ public class MeteringConstant {
   public static final String RESOURCE_ID = "resourceId";
   public static final String CONSUMER_ID = "consumerID";
   public static final String PROVIDERID_TIME_INTERVAL_COUNT_QUERY =
-      "SELECT count(*) FROM $0 where time between '$1' and '$2' and providerid='$3'";
+      "SELECT count(*) FROM auditing_ogc where time between '$1' and '$2' and providerid='$3'";
   public static final String CONSUMERID_TIME_INTERVAL_COUNT_QUERY =
-      "SELECT count(*) FROM $0 where time between '$1' and '$2' and userid='$3'";
+      "SELECT count(*) FROM auditing_ogc where time between '$1' and '$2' and userid='$3'";
   public static final String TOTALHITS = "totalHits";
   public static final String LIMITPARAM = "limit";
   public static final String OFFSETPARAM = "offset";
@@ -32,9 +32,9 @@ public class MeteringConstant {
   public static final String RESOURCEID_QUERY = " and resourceid = '$5' ";
   public static final String USER_ID_QUERY = " and userid='$6' ";
   public static final String PROVIDERID_TIME_INTERVAL_READ_QUERY =
-      "SELECT * FROM $0 where time between '$1' and '$2' and providerid='$3'";
+      "SELECT * FROM auditing_ogc where time between '$1' and '$2' and providerid='$3'";
   public static final String CONSUMERID_TIME_INTERVAL_READ_QUERY =
-      "SELECT * FROM $0 where time between '$1' and '$2' and userid='$3'";
+      "SELECT * FROM auditing_ogc where time between '$1' and '$2' and userid='$3'";
   public static final String ORDER_BY = " ORDER BY time";
   public static final String OFFSET_QUERY = " offset $8";
   public static final String LIMIT_QUERY = " limit $7";
@@ -56,14 +56,15 @@ public class MeteringConstant {
           + "LEFT  JOIN (\n"
           + "   SELECT date_trunc('month', time)::date AS day\n"
           + "        , count(api) as counts \n"
-          + "   FROM   $a\n"
+          + "   FROM   auditing_ogc \n"
           + "   WHERE  time between '$2'\n"
           + "   AND '$3'\n";
   public static final String GROUPBY =
       "\n" + "   GROUP  BY 1\n" + "   ) t USING (day)\n" + "ORDER  BY day";
   public static final String COLLECTION_DETAILS_QUERY =
       "select * from collections_details where id = '$1'";
-  public static final String SUMMARY_QUERY_FOR_METERING = "select resourceid,count(*) from $a ";
+  public static final String SUMMARY_QUERY_FOR_METERING =
+      "select resourceid,count(*) from auditing_ogc ";
   public static final String USERID_SUMMARY = " and userid = '$9' ";
   public static final String USERID_SUMMARY_WITHOUT_TIME = " userid = '$9' ";
   public static final String PROVIDERID_SUMMARY = " and providerid = '$8' ";

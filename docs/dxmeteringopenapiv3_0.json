@@ -226,7 +226,8 @@
         "in": "query",
         "description": "This parameter specifies the <b>start time</b> for the summary-query in `ISO8601` format. <br/> Data exchange currently accepts `IST` and `UTC` time zones.",
         "schema": {
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         }
       },
       "summary_endtime": {
@@ -234,7 +235,8 @@
         "in": "query",
         "description": "This parameter specifies the <b>end time</b> for the summary-query in `ISO8601` format. <br/> Data exchange currently accepts `IST` and `UTC` time zones.",
         "schema": {
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         }
       },
       "provider_audit_options": {
@@ -285,16 +287,18 @@
         "description": "This parameter specifies the <b>start time</b> for the temporal-query in `ISO8601` format. <br/> data exchange currently accepts `IST` and `UTC` time zones for the temporal query.",
         "required": true,
         "schema": {
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         }
       },
       "provider_audit_endtime": {
-        "name": "endtime",
+        "name": "endTime",
         "in": "query",
         "description": "This parameter specifies the <b>end time</b> for the temporal-query in `ISO8601` format. <br/> data exchange currently accepts `IST` and `UTC` time zones for the temporal query.",
         "required": true,
         "schema": {
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         }
       },
       "provider_audit_consumer": {
@@ -302,7 +306,9 @@
         "in": "query",
         "description": "Id of consumer",
         "schema": {
-          "type": "string"
+          "type": "string",
+          "format": "uuid",
+          "maxLength": 36
         }
       },
       "provider_audit_providerId": {
@@ -310,7 +316,9 @@
         "in": "query",
         "description": "Id of the provider",
         "schema": {
-          "type": "string"
+          "type": "string",
+          "format": "uuid",
+          "maxLength": 36
         }
       },
       "provider_audit_offset": {
@@ -318,7 +326,9 @@
         "in": "query",
         "description": "This parameter specifies the <b>offset</b> for the read metering query. <br/> By default offset value is 0 and we can give offset value according our need.",
         "schema": {
-          "type": "string"
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
         }
       },
       "provider_audit_limit": {
@@ -326,7 +336,9 @@
         "in": "query",
         "description": "This parameter specifies the <b>limit</b> for the read metering query. <br/> By default limit value is 2000 and we can give limit value according our need.",
         "schema": {
-          "type": "string"
+          "type": "integer",
+          "minimum": 1,
+          "default": 2000
         }
       }
     },
@@ -560,8 +572,8 @@
                     "time": "2022-11-25T14:13:01"
                   }
                 ],
-                "limit": "2000",
-                "offset": "0",
+                "limit": 2000,
+                "offset": 0,
                 "totalHits": 568
               }
             }

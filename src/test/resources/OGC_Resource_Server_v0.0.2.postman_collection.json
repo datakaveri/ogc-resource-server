@@ -4366,7 +4366,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/consumer/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=during&time=2023-06-12T14:20:00Z&endTime=2023-09-05T14:20:00Z&offset=0&limit=2000",
+							"raw": "{{baseUrl}}/consumer/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2023-06-12T14:20:00Z&endTime=2023-09-05T14:20:00Z&offset=0&limit=2000",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -4381,7 +4381,7 @@
 								},
 								{
 									"key": "timerel",
-									"value": "during"
+									"value": "between"
 								},
 								{
 									"key": "time",
@@ -4454,7 +4454,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=during&time=2023-06-20T14:20:00Z&endTime=2023-07-05T14:20:00Z",
+							"raw": "{{baseUrl}}/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=between&time=2023-06-20T14:20:00Z&endTime=2023-07-05T14:20:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -4469,7 +4469,7 @@
 								},
 								{
 									"key": "timerel",
-									"value": "during"
+									"value": "between"
 								},
 								{
 									"key": "time",
@@ -4521,7 +4521,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=during&time=2021-10-20T14:20:00Z&endTime=2021-10-24T14:20:00Z",
+							"raw": "{{baseUrl}}/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=between&time=2021-10-20T14:20:00Z&endTime=2021-10-24T14:20:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -4536,7 +4536,7 @@
 								},
 								{
 									"key": "timerel",
-									"value": "during"
+									"value": "between"
 								},
 								{
 									"key": "time",
@@ -4599,7 +4599,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=during&time=2021-12-20T14:20:00Z",
+							"raw": "{{baseUrl}}/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=between&time=2021-12-20T14:20:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -4614,7 +4614,7 @@
 								},
 								{
 									"key": "timerel",
-									"value": "during"
+									"value": "between"
 								},
 								{
 									"key": "time",
@@ -4684,7 +4684,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=during&time=2023-06-05T14:20:00Z&endTime=2023-09-05T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97&consumer=15c7506f-c800-48d6-adeb-0542b03947c6&offset=0&limit=2000",
+							"raw": "{{baseUrl}}/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2023-06-05T14:20:00Z&endTime=2023-09-05T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97&consumer=15c7506f-c800-48d6-adeb-0542b03947c6&offset=0&limit=2000",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -4699,7 +4699,7 @@
 								},
 								{
 									"key": "timerel",
-									"value": "during"
+									"value": "between"
 								},
 								{
 									"key": "time",
@@ -4778,7 +4778,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/provider/audit?id=83c2e5c2-3574-4e11-9530-2b1fbdfce832&timerel=during&time=2021-11-20T14:20:00Z&endTime=2021-12-02T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=b2c27f3f-2524-4a84-816e-91f9ab23f837",
+							"raw": "{{baseUrl}}/provider/audit?id=83c2e5c2-3574-4e11-9530-2b1fbdfce832&timerel=between&time=2021-11-20T14:20:00Z&endTime=2021-12-02T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=b2c27f3f-2524-4a84-816e-91f9ab23f837",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -4793,7 +4793,7 @@
 								},
 								{
 									"key": "timerel",
-									"value": "during"
+									"value": "between"
 								},
 								{
 									"key": "time",
@@ -4864,7 +4864,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=during&time=2023-06-05T14:20:00Z&endTime=2023-09-05T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97",
+							"raw": "{{baseUrl}}/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2023-06-05T14:20:00Z&endTime=2023-09-05T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -4879,7 +4879,7 @@
 								},
 								{
 									"key": "timerel",
-									"value": "during"
+									"value": "between"
 								},
 								{
 									"key": "time",
@@ -4939,7 +4939,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=during&time=2020-11-20T14:20:00Z&endTime=2020-11-24T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97",
+							"raw": "{{baseUrl}}/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2020-11-20T14:20:00Z&endTime=2020-11-24T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -4954,7 +4954,7 @@
 								},
 								{
 									"key": "timerel",
-									"value": "during"
+									"value": "between"
 								},
 								{
 									"key": "time",
@@ -5025,7 +5025,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/provider/audit?id=83c2e5c2-3574-4e11-9530-2b1fbdfce832&timerel=during&endTime=2021-11-02T14:20:00Z&providerID=b2c27f3f-2524-4a84-816e-91f9ab23f837",
+							"raw": "{{baseUrl}}/provider/audit?id=83c2e5c2-3574-4e11-9530-2b1fbdfce832&timerel=between&endTime=2021-11-02T14:20:00Z&providerID=b2c27f3f-2524-4a84-816e-91f9ab23f837",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -5040,7 +5040,7 @@
 								},
 								{
 									"key": "timerel",
-									"value": "during"
+									"value": "betweeen"
 								},
 								{
 									"key": "time",

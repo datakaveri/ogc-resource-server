@@ -23,7 +23,7 @@ public class CatalogueService {
 
   public CatalogueService(Vertx vertx, JsonObject config) {
     WebClientOptions options = new WebClientOptions();
-    options.setTrustAll(true).setVerifyHost(false).setSsl(true);
+    options.setTrustAll(false).setVerifyHost(true).setSsl(true);
     catWebClient = WebClient.create(vertx, options);
     host = config.getString("catServerHost");
     port = config.getInteger("catServerPort");
