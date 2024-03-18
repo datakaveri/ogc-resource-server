@@ -252,7 +252,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                   propertiesKeys.add(row.getString("filter_keys"));
                 }
                 LOGGER.debug("properties keys: {}", propertiesKeys);
-                if (propertiesKeys.contains(keys))
+                if (propertiesKeys.containsAll(keys))
                   result.complete();
                 else
                   result.fail(new OgcException(400, "Bad Request", "Query parameter is invalid"));
