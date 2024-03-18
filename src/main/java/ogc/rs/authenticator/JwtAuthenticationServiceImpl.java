@@ -384,7 +384,10 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                             LOGGER.error(
                                 "Collection associated with asset is not same as in token");
                             promise.fail(
-                                new OgcException(401, "Not Authorised", "Invalid Collection Id"));
+                                new OgcException(
+                                    401,
+                                    "Not Authorised",
+                                    "Collection associated with asset is not same as in token"));
                             return;
                           }
                           LOGGER.debug("Collection Id in token Validated ");
@@ -438,9 +441,18 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                                 new OgcException(
                                     401,
                                     "Not Authorised",
-                                    "User is not authorised. Please contact IUDX AAA "
-                                        + "Server."));
+                                    "Not a producer or consumer token. It is of role {} "
+                                        + jwtData.getRole()));
                           }
+                        } else {
+                          LOGGER.debug(
+                              "resource is open. Token is secure of role {} ", jwtData.getRole());
+                          promise.fail(
+                              new OgcException(
+                                  401,
+                                  "Not Authorised",
+                                  "Resource is OPEN. Token is SECURE of role {} "
+                                      + jwtData.getRole()));
                         }
                       })
                   .onFailure(
