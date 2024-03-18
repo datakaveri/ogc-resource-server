@@ -441,6 +441,14 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                                     "User is not authorised. Please contact IUDX AAA "
                                         + "Server."));
                           }
+                        } else {
+                          LOGGER.debug(
+                              "resource is open. Token is secure of role {} ", jwtData.getRole());
+                          promise.fail(
+                              new OgcException(
+                                  401,
+                                  "Not Authorised",
+                                  "User is not authorised. Please contact IUDX AAA " + "Server."));
                         }
                       })
                   .onFailure(
