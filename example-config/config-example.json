@@ -71,7 +71,18 @@
       "s3BucketName": "bucket-name",
       "s3Region": "aws-region",
       "s3AccessKey": "",
-      "s3SecretKey": ""
+      "s3SecretKey": "",
+      "databaseIP": "",
+      "databasePort": 1234,
+      "dbUser": "",
+      "dbPassword": "",
+      "geomSpecificMaxLimits" : {
+        "MULTILINESTRING" : 100,
+        "LINESTRING" : 100,
+        "POINT" : 10000,
+        "MULTIPOLYGON" : 10000,
+        "POLYGON" : 10
+      }
     },
     {
       "id": "ogc.rs.metering.MeteringVerticle",
