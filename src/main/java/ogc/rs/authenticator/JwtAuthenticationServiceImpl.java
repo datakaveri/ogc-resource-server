@@ -3,22 +3,16 @@ package ogc.rs.authenticator;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.jwt.JWTAuth;
-import io.vertx.ext.web.client.HttpResponse;
-import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.client.WebClientOptions;
-import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
-import net.sf.saxon.expr.Token;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.authenticator.model.JWTData;
 import org.apache.logging.log4j.LogManager;
@@ -32,11 +26,8 @@ import java.util.UUID;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static ogc.rs.authenticator.Constants.CAT_SEARCH_PATH;
-
 public class JwtAuthenticationServiceImpl implements AuthenticationService {
     private static final Logger LOGGER = LogManager.getLogger(JwtAuthenticationServiceImpl.class);
-    static WebClient catClient;
     final JWTAuth jwtAuth;
     final String audience;
     private PgConnectOptions connectOptions;
@@ -199,8 +190,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
             promise.complete(true);
         else {
             LOGGER.error("Resource Ids don't match! id- {}, jwtId- {}", id, idFromJwt);
-            promise.fail(new OgcException(401, "Not Authorised", "User is not authorised. Please contact IUDX AAA " +
-                "Server."));
+            promise.fail(ogcException(401,"Not Authorized","User is not authorised. Please contact IUDX AAA "));
         }
         return promise.future();
     }
@@ -237,8 +227,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
         }
         JsonArray access = jwtData.getCons() != null ? jwtData.getCons().getJsonArray("access") : null;
         if (access == null)
-            promise.fail(new OgcException(401, "Not Authorised", "User is not authorised. Please contact IUDX AAA " +
-                "Server."));
+            promise.fail(ogcException(401,"Not Authorized","User is not authorised. Please contact IUDX AAA "));
         else {
             if (access.contains("api")
                 && jwtData.getRole().equalsIgnoreCase("consumer")) {
@@ -268,7 +257,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                 .map(SqlResult::value))
             .onSuccess(success -> {
                 if (success.isEmpty()){
-                    promise.fail(new OgcException(404, "Not found", "Collection not found"));
+                    promise.fail(ogcException(404,"Not found", "Collection not found"));
                 }
                 else {
                     String access = success.get(0).getString("access");
@@ -287,15 +276,16 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
         return promise.future();
     }
 
-    private Future<Boolean> isValidAudience(JWTData jwtData) {
+
+
+  private Future<Boolean> isValidAudience(JWTData jwtData) {
         // check if the audience is valid
         Promise<Boolean> promise = Promise.promise();
         if (audience != null && audience.equalsIgnoreCase(jwtData.getAud()))
             promise.complete(true);
         else {
             LOGGER.error("Audience value does not match aud- {} and audJwt- {}", audience, jwtData.getAud());
-            promise.fail(new OgcException(401, "Not Authorised", "User is not authorised. Please contact IUDX AAA " +
-                "Server."));
+            promise.fail(ogcException(401,"Not Authorized","User is not authorised. Please contact IUDX AAA "));
         }
         return promise.future();
     }
@@ -315,8 +305,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
             })
             .onFailure(failed -> {
                 LOGGER.error("Cannot decode/validate JWT Token: {}", failed.getMessage());
-                promise.fail(new OgcException(401, "Not Authorised", "User is not authorised. Please contact IUDX AAA " +
-                    "Server." ));
+                promise.fail(ogcException(401,"Not Authorized","User is not authorised. Please contact IUDX AAA "));
             });
         return promise.future();
     }
@@ -383,11 +372,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                           if (!success.get(0).getString("stac_collections_id").equals(idFromJwt)) {
                             LOGGER.error(
                                 "Collection associated with asset is not same as in token");
-                            promise.fail(
-                                new OgcException(
-                                    401,
-                                    "Not Authorised",
-                                    "Collection associated with asset is not same as in token"));
+                            promise.fail(ogcException(401,"Not Authorized","Invalid collection id"));
                             return;
                           }
                           LOGGER.debug("Collection Id in token Validated ");
@@ -411,12 +396,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                                     ? jwtData.getCons().getJsonArray("access")
                                     : null;
                             if (access == null)
-                              promise.fail(
-                                  new OgcException(
-                                      401,
-                                      "Not Authorised",
-                                      "User is not authorised. Please contact IUDX AAA "
-                                          + "Server."));
+                              promise.fail(ogcException(401,"Not Authorized","User is not authorised. Please contact IUDX AAA "));
                             if (access.contains("api")) {
 
                               JsonObject results = new JsonObject();
@@ -469,5 +449,83 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
             });
 
     return promise.future();
+  }
+  @Override
+  public Future<JsonObject> executionApiCheck(JsonObject authenticationInfo, JsonObject requestJson) {
+    Promise<JsonObject> result = Promise.promise();
+    String token;
+    LOGGER.info("in jwt "+authenticationInfo);
+
+    try {
+      token = authenticationInfo.getString("token");
+    } catch (NullPointerException e) {
+      LOGGER.error("NullPointer Exception while getting JSONObj values");
+      result.fail("NullPointer error!");
+      return result.future();
+    }
+    Future<JWTData> jwtDecodeFut = decodeJwt(token);
+    ResultContainer resultIntermediate = new ResultContainer();
+    assert jwtDecodeFut != null;
+    jwtDecodeFut
+      .compose(
+        decode -> {
+          resultIntermediate.jwtData = decode;
+          LOGGER.debug(
+            "Intermediate JWTData: {}", resultIntermediate.jwtData.toJson());
+          return isValidAudience(resultIntermediate.jwtData);
+        }).compose(audience -> {
+        LOGGER.debug("Valid Audience: {}\n" , audience);
+        // check for revoked client here before returning true
+        return Future.succeededFuture(true);
+      })
+      .compose(
+        revokedClient -> {
+          LOGGER.debug("Valid Audience: {}", revokedClient);
+          // check for valid iid, should be iid[1]==aud
+          return isValidId(resultIntermediate.jwtData,resultIntermediate.jwtData.getAud());
+        })
+      .compose(
+        validIid -> {
+          // check for valid access
+          LOGGER.debug("Valid iid {}", validIid);
+          return validateExecutionAccess(resultIntermediate.jwtData);
+        })
+      .onSuccess(
+        validExecutionAccess -> {
+          validExecutionAccess.put("isAuthorised", true);
+          result.complete(validExecutionAccess);
+          LOGGER.debug("Congratulations! It worked. {}", (validExecutionAccess).toString());
+        })
+      .onFailure(
+        failed -> {
+          LOGGER.error(
+            "Something went wrong while authentication or authorisation: {}",
+            failed.getMessage());
+          result.fail(failed);
+        });
+
+    return result.future();
+  }
+  private Future<JsonObject> validateExecutionAccess(JWTData jwtData) {
+    Promise<JsonObject> promise = Promise.promise();
+    String idFromJwt = jwtData.getIid().split(":")[1];
+
+    LOGGER.debug("Validating access for execution ");
+    if (jwtData.getRole().equalsIgnoreCase("provider")) {
+      JsonObject results = new JsonObject();
+      results.put("iid", idFromJwt);
+      results.put("userId", jwtData.getSub());
+      results.put("role", jwtData.getRole());
+      promise.complete(results);
+    } else {
+      LOGGER.debug(
+        "Not a provider token. It is of role {} ",
+        jwtData.getRole());
+      promise.fail(ogcException(401,"Not Authorized","User is not authorised. Please contact IUDX AAA "));
+    }
+    return promise.future();
+  }
+  private OgcException ogcException(int i, String notFound, String collectionNotFound) {
+    return new OgcException(i, notFound, collectionNotFound);
   }
 }

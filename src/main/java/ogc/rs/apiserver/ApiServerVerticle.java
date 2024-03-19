@@ -10,6 +10,11 @@ import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.*;
+import io.vertx.core.Promise;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -30,11 +35,11 @@ import java.util.*;
 import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.util.DataFromS3;
 import ogc.rs.apiserver.handlers.FailureHandler;
-
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.database.DatabaseService;
 import ogc.rs.metering.MeteringService;
+import ogc.rs.processes.ProcessesRunnerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -70,6 +75,8 @@ public class ApiServerVerticle extends AbstractVerticle {
   private DatabaseService dbService;
   private Buffer ogcLandingPageBuf;
   private HttpClient httpClient;
+  private ProcessesRunnerService processService;
+
 
   /**
    * This method is used to start the Verticle. It deploys a verticle in a cluster/single instance,
@@ -91,8 +98,6 @@ public class ApiServerVerticle extends AbstractVerticle {
             HEADER_REFERER,
             HEADER_ACCEPT,
             HEADER_ALLOW_ORIGIN);
-
-
       Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS);
       FailureHandler failureHandler = new FailureHandler();
 
@@ -205,14 +210,16 @@ public class ApiServerVerticle extends AbstractVerticle {
                     .handler(this::putCommonResponseHeaders)
                     .handler(this::buildResponse);
 
-          routerBuilder.operation(PROCESSES_API)
-            // .handler(AuthHandler.create(vertx))
+                routerBuilder.operation(EXECUTE_API).handler(AuthHandler.create(vertx))
+                  .handler(this::executeJob).handler(this::putCommonResponseHeaders)
+                  .handler(this::buildResponse).failureHandler(failureHandler);
+
+                routerBuilder.operation(PROCESSES_API)
             .handler(this::getProcesses).handler(this::putCommonResponseHeaders)
             .handler(this::buildResponse)
             .failureHandler(failureHandler);
 
             routerBuilder.operation(PROCESS_API)
-              // .handler(AuthHandler.create(vertx))
               .handler(this::getProcess).handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse).failureHandler(failureHandler);
 
@@ -319,13 +326,12 @@ public class ApiServerVerticle extends AbstractVerticle {
                 throw new RuntimeException(e.getMessage());
               }
 
-              dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
-              // TODO: ssl configuration
-              HttpServerOptions serverOptions = new HttpServerOptions();
-              serverOptions.setCompressionSupported(true).setCompressionLevel(5);
-              int port =
-                  config().getInteger("httpPort") == null ? 8080 : config().getInteger("httpPort");
-
+          processService = ProcessesRunnerService.createProxy(vertx,PROCESSING_SERVICE_ADDRESS);
+          dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
+          // TODO: ssl configuration
+          HttpServerOptions serverOptions = new HttpServerOptions();
+          serverOptions.setCompressionSupported(true).setCompressionLevel(5);
+          int port = config().getInteger("httpPort") == null ? 8080 : config().getInteger("httpPort");
               HttpServer server = vertx.createHttpServer(serverOptions);
               return server.requestHandler(router).listen(port);
             })
@@ -342,7 +348,41 @@ public class ApiServerVerticle extends AbstractVerticle {
       httpClient = vertx.createHttpClient(httpCliOptions);
     }
 
+  private void executeJob(RoutingContext routingContext) {
 
+    RequestParameters paramsFromOasValidation =
+      routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+    JsonObject requestBody = paramsFromOasValidation.body().getJsonObject().getJsonObject("inputs");
+    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
+    requestBody.put("processId", paramsFromOasValidation.pathParameter("processId").getString())
+      .put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
+
+    processService.run(requestBody, handler -> {
+
+      if (handler.succeeded()) {
+        LOGGER.debug("Process started successfully.");
+        routingContext.response().headers().add("Location", handler.result().getString("location"));
+        handler.result().remove("location");
+        routingContext.put("response", handler.result().toString());
+        routingContext.put("statusCode", 201);
+        routingContext.next();
+      } else {
+        if (handler.cause().getMessage().equals("Process does not exist.")) {
+          routingContext.put("response",
+            new JsonObject().put("code", "Not Found").put("description", "Resource not found")
+              .toString());
+          routingContext.put("statusCode", 404);
+          routingContext.next();
+        } else {
+          routingContext.put("response", new JsonObject().put("code", "Internal Server Error")
+            .put("description", handler.cause().getMessage()).toString());
+          routingContext.put("statusCode", 500);
+          routingContext.next();
+        }
+      }
+    });
+
+  }
   private void getFeature(RoutingContext routingContext) {
 
     String collectionId = routingContext.pathParam("collectionId");
