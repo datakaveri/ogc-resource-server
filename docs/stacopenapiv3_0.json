@@ -142,38 +142,6 @@
         }
       }
     },
-    "/stac/collections/{collectionId}": {
-      "get": {
-        "tags": [
-          "Features"
-        ],
-        "summary": "describe the STAC collection with id `collectionId`",
-        "description": "This information includes-\n* A local identifier for the collection that is unique for the dataset.\n* title and description for the collection.\n* extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data. \n* An indicator about the type of the items in the collection .\n* An indicator about the stac version used.\n* License of the collection (default value is proprietary)",
-        "operationId": "describeStacCollection",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/collectionId"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/stacCollection"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "servers": [
-          {
-            "url": "https://ogc.iudx.io",
-            "description": "OGC-Resource-Server"
-          }
-        ]
-      }
-    },
     "/assets/{assetId}": {
       "get": {
         "tags": [
