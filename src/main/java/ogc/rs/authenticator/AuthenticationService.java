@@ -61,4 +61,5 @@ Future<JsonObject> tokenIntrospect(JsonObject request, JsonObject authentication
    * @return AuthenticationService which is a service
    */
   Future<JsonObject> assetApiCheck(JsonObject requestJson, JsonObject authInfo);
+  Future<JsonObject> executionApiCheck(JsonObject authenticationInfo, JsonObject requestJson);
 }

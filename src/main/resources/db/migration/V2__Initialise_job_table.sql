@@ -13,13 +13,14 @@ CREATE TABLE IF NOT EXISTS jobs_table
 	finished_at timestamp without time zone DEFAULT NULL,
 	input jsonb,
 	output jsonb,
-	progress decimal(4,2),
+	progress decimal(5,2),
 	status job_status_type NOT NULL,
 	type job_type NOT NULL,
 	message varchar,
 	CONSTRAINT job_id_pk PRIMARY KEY (id),
 	CONSTRAINT process_id_fk FOREIGN KEY(process_id) REFERENCES processes_table(id)
 );
+
 
 ALTER TABLE jobs_table OWNER TO ${flyway:user};
 

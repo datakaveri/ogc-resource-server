@@ -477,7 +477,66 @@ paths:
             text/html:
               schema:
                 type: string
-
+  '/processes/{processId}/execution':
+    post:
+      tags:
+        - Execute
+      summary: execute a process.
+      description: "Create a new job by initiating the execution of a specified process identified by the 'processId'."
+      operationId: executeProcess
+      parameters:
+        - name: processId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Mandatory JSON payload for the execute request.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/execute'
+            example:
+              input:
+                filename: 'FileName.gpkg'
+                description: 'Description of the file'
+                title: "Title of the file"
+                resourceId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                version: "1.0.0"
+              response: 'raw'
+        required: true
+      responses:
+        "201":
+          description: Started asynchronous execution. Created job.
+          headers:
+            Location:
+              description: URL to check the status of the execution/job.
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusInfo'
+        "400":
+          description: The requested URI was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception400'
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception500'
+            text/html:
+              schema:
+                type: string
 tags:
   - name: Capabilities
     description: Essential characteristics of OGC APIs
@@ -1110,6 +1169,36 @@ components:
       required:
         - type
         - features
+    execute:
+      type: object
+      properties:
+        inputs:
+          type: object
+          additionalProperties:
+            oneOf:
+              - $ref: '#/components/schemas/inlineOrRefData'
+              - type: array
+                items:
+                  $ref: '#/components/schemas/inlineOrRefData'
+        response:
+          type: string
+          default: raw
+          enum:
+            - raw
+            - document
+    inlineOrRefData:
+      oneOf:
+        - $ref: '#/components/schemas/inputValueNoObject'
+
+    inputValueNoObject:
+      oneOf:
+        - type: string
+        - type: number
+        - type: integer
+        - type: boolean
+        - type: array
+          items:
+            type: string
     featureGeoJSON:
       type: object
       properties:
@@ -1936,3 +2025,32 @@ components:
         ref:
           type: string
           format: uri-reference
+    statusInfo:
+      required:
+        - jobID
+        - status
+        - type
+      type: object
+      properties:
+        jobID:
+          type: string
+          format: uuid
+        processId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+            - PROCESS
+
+        status:
+          $ref: '#/components/schemas/statusCode'
+    statusCode:
+      type: string
+      nullable: false
+      enum:
+        - ACCEPTED
+        - RUNNING
+        - SUCCESSFUL
+        - FAILED
+        - DISMISSED

@@ -21,12 +21,38 @@ public class FailureHandler implements Handler<RoutingContext> {
     /* exceptions from OpenAPI specification*/
     if (failure instanceof ValidationException || failure instanceof BodyProcessorException ||
       failure instanceof RequestPredicateException ||
-      failure instanceof ParameterProcessorException || failure instanceof NumberFormatException) {
+      failure instanceof ParameterProcessorException || failure instanceof NumberFormatException ) {
       String failureMessage =
         failure.getCause() == null ? "Bad Request" : failure.getCause().getMessage();
       OgcException ogcException = new OgcException(400, "Bad Request", failureMessage);
       routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON)
         .setStatusCode(HttpStatus.SC_BAD_REQUEST).end(ogcException.getJson().toString());
+    }
+    else if (failure instanceof OgcException) {
+    LOGGER.debug("failure in handler ");
+      routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON)
+        .setStatusCode((((OgcException) failure).getStatusCode())).end(((OgcException) failure).getJson().toString());
+      return;
+//                context.next();
+    }
+    else if(failure instanceof NullPointerException) {
+      LOGGER.error("NPE Internal error "+failure.fillInStackTrace());
+
+      routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON)
+        .setStatusCode((((OgcException) failure).getStatusCode())).end(((OgcException) failure).getJson().toString());
+
+      return;
+
+    }
+
+    else {
+      LOGGER.error("Internal server Error "+failure.fillInStackTrace());
+
+      routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON)
+        .setStatusCode((((OgcException) failure).getStatusCode())).end(((OgcException) failure).getJson().toString());
+
+      return;
+
     }
     if (routingContext.response().ended()) {
       LOGGER.debug("Already ended");
