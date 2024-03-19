@@ -48,4 +48,12 @@ public interface DatabaseService {
     Future<JsonObject> getProcesses(int limit);
     Future<JsonObject> getProcess(String processId);
 
+
+    /**
+     * Get OGC Feature Collection metadata to be used for OpenAPI spec generation.
+     * 
+     * @param existingCollectionUuidIds UUID IDs of collections that are already part of the spec.
+     * @return list of {@link JsonObject}, which is cast to the required type by the caller.
+     */
+    Future<List<JsonObject>> getOgcFeatureCollectionMetadataForOasSpec(List<String> existingCollectionUuidIds);
 }
