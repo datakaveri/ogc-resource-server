@@ -26,6 +26,8 @@ public class Constants {
     public static final String COLLECTION_API = "describeCollection";
     public static final String FEATURES_API = "getFeatures";
     public static final String FEATURE_API = "getFeature";
+
+    public static final String EXECUTE_API = "executeProcess";
     public static final String COLLECTIONS = "collections";
     public static final String TILEMATRIXSETS_API = "getTileMatrixSetsList";
     public static final String TILEMATRIXSET_API = "getTileMatrixSet";
@@ -41,13 +43,12 @@ public class Constants {
     public static final String PROCESS_API = "getProcessDescription";
     public static final String CONTENT_TYPE = "content-type";
     public static final String APPLICATION_JSON = "application/json";
+<<<<<<< HEAD
     public static final String STAC_CATALOG_API = "getStacLandingPage";
     public static final String STAC_COLLECTIONS_API = "getStacCollections";
     public static final String STAC_COLLECTION_API = "describeStacCollection";
     public static final String ASSET_API = "getAsset";
     public static final String STAC_CONFORMANCE_CLASSES = "getConformanceDeclaration";
-
-
-
+    public static final String EXECUTION_REGEX= "/processes/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/execution";
 
 }

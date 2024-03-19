@@ -7,6 +7,11 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.*;
+import io.vertx.core.Promise;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -20,9 +25,10 @@ import io.vertx.ext.web.validation.ValidationHandler;
 import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.util.DataFromS3;
 import ogc.rs.apiserver.handlers.FailureHandler;
-
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.database.DatabaseService;
+import ogc.rs.processes.ProcessService;
+import ogc.rs.processes.ProcessesRunnerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -66,6 +72,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     static String S3_REGION;
     static String S3_ACCESS_KEY;
     static String S3_SECRET_KEY;
+    private ProcessesRunnerService processService;
 
     /**
      * This method is used to start the Verticle. It deploys a verticle in a cluster/single instance, reads the
@@ -82,7 +89,6 @@ public class ApiServerVerticle extends AbstractVerticle {
 
       Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS);
       FailureHandler failureHandler = new FailureHandler();
-
 
       /* Get base paths from config */
       ogcBasePath = config().getString("ogcBasePath");
@@ -171,6 +177,12 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
 
+          routerBuilder.operation(EXECUTE_API)
+              .handler(AuthHandler.create(vertx))
+              .handler(this::executeJob)
+              .handler(this::putCommonResponseHeaders)
+              .handler(this::buildResponse).failureHandler(failureHandler);
+
           routerBuilder.operation(PROCESSES_API)
             // .handler(AuthHandler.create(vertx))
             .handler(this::getProcesses).handler(this::putCommonResponseHeaders)
@@ -258,6 +270,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                 throw new RuntimeException(e.getMessage());
               }
 
+          processService = ProcessesRunnerService.createProxy(vertx,"ogc.rs.processes.service");
           dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
           // TODO: ssl configuration
           HttpServerOptions serverOptions = new HttpServerOptions();
@@ -279,6 +292,42 @@ public class ApiServerVerticle extends AbstractVerticle {
       httpClient = vertx.createHttpClient(httpCliOptions);
     }
 
+  private void executeJob(RoutingContext routingContext) {
+
+    RequestParameters paramsFromOasValidation = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+    JsonObject requestBody = paramsFromOasValidation.body().getJsonObject().getJsonObject("inputs");
+//    requestBody.put("outputs", routingContext.getBodyAsJson().getJsonObject("outputs"));
+    LOGGER.info("requstBodt "+requestBody);
+    LOGGER.info("requstBodt "+paramsFromOasValidation.pathParametersNames());
+
+    requestBody.put("processId", paramsFromOasValidation.pathParameter("processId").getString());
+
+    processService.run(requestBody, handler -> {
+
+      if (handler.succeeded()) {
+        LOGGER.info("handler result here " + handler.result());
+        LOGGER.info("handler success");
+        routingContext.response().headers().add("Location", handler.result().getString("location"));
+        handler.result().remove("location");
+        routingContext.put("response", handler.result().toString());
+        routingContext.put("statusCode", 201);
+        routingContext.next();
+      } else {
+        if (handler.cause().getMessage().equals("Process not found.")) {
+          LOGGER.error("handler fail "+handler.cause().getMessage());
+          routingContext.put("response", new JsonObject().put("code","Bad request").put("description",handler.cause().getMessage()).toString());
+          routingContext.put("statusCode", 400);
+          routingContext.next();
+        } else {
+          LOGGER.error("handler fail "+handler.cause().getMessage());
+          routingContext.put("response", new JsonObject().put("code","Internal Server Error").put("description",handler.cause().getMessage()).toString());
+          routingContext.put("statusCode", 500);
+          routingContext.next();
+        }
+      }
+    });
+
+  }
   private void getFeature(RoutingContext routingContext) {
 
     String collectionId = routingContext.pathParam("collectionId");
