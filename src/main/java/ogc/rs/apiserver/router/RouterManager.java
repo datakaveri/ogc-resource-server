@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -125,19 +124,19 @@ public class RouterManager {
     /* Load all implementations of the GisEntityInterface using SPI */
     ServiceLoader<GisEntityInterface> loader = ServiceLoader.load(GisEntityInterface.class);
 
-    @SuppressWarnings("rawtypes")
-    List<Future> oasFragmentsListFut =
+    List<Future<OasFragments>> oasFragmentsListFut =
         loader.stream().map(entity -> entity.get().generateNewSpecFragments(ogcOasTemplate,
             stacOasTemplate, dbService, config)).collect(Collectors.toList());
 
-    CompositeFuture.all(oasFragmentsListFut).compose(futuresResult -> {
+    Future<Void> createSpecsAndSetRouters = Future.all(oasFragmentsListFut).compose(futuresResult -> {
 
       List<OasFragments> oasFragmentsList = futuresResult.list();
 
       return updateAndWriteSpecFiles(oasFragmentsList, ogcOasTemplate, stacOasTemplate)
           .compose(res -> buildAndUpdateRoutersInApiServInstances());
-
-    }).onSuccess(succ -> {
+    });
+        
+    createSpecsAndSetRouters.onSuccess(succ -> {
       LOGGER.info(
           "Generated specs from templates and initialized routers in all ApiServerVerticles successfully");
     }).onFailure(err -> {
@@ -169,12 +168,11 @@ public class RouterManager {
     /* Load all implementations of the GisEntityInterface using SPI */
     ServiceLoader<GisEntityInterface> loader = ServiceLoader.load(GisEntityInterface.class);
 
-    @SuppressWarnings("rawtypes")
-    List<Future> oasFragmentsListFut = loader.stream().map(
+    List<Future<OasFragments>> oasFragmentsListFut = loader.stream().map(
         entity -> entity.get().generateNewSpecFragments(ogcOasFile, stacOasFile, dbService, config))
         .collect(Collectors.toList());
 
-    CompositeFuture.all(oasFragmentsListFut).compose(futuresResult -> {
+    Future.all(oasFragmentsListFut).compose(futuresResult -> {
 
       List<OasFragments> result = futuresResult.list();
 
@@ -236,8 +234,7 @@ public class RouterManager {
 
     Promise<Void> promise = Promise.promise();
 
-    @SuppressWarnings("rawtypes")
-    List<Future> updateInstancesFut = apiServerVerticleInstances.stream().map(instance -> {
+    List<Future<Void>> updateInstancesFut = apiServerVerticleInstances.stream().map(instance -> {
 
       Future<Router> ogc =
           OgcRouterBuilder.create(instance, vertx, config).map(OgcRouterBuilder::getRouter);
@@ -246,7 +243,7 @@ public class RouterManager {
       Future<Router> dxMetering = DxMeteringRouterBuilder.create(instance, vertx, config)
           .map(DxMeteringRouterBuilder::getRouter);
 
-      Future<Void> updatedRouter = CompositeFuture.all(ogc, stac, dxMetering).compose(res -> {
+      Future<Void> updatedRouter = Future.all(ogc, stac, dxMetering).compose(res -> {
         instance.resetRouter(List.of(ogc.result(), stac.result(), dxMetering.result()));
         return Future.succeededFuture();
       });
@@ -254,11 +251,11 @@ public class RouterManager {
       return updatedRouter;
     }).collect(Collectors.toList());
 
-    CompositeFuture.all(updateInstancesFut).onSuccess(succ -> {
+    Future.all(updateInstancesFut).onSuccess(succ -> {
       LOGGER.info("Reset sub-routers in all ApiServerVerticle instances successfully");
       promise.complete();
     }).onFailure(err -> {
-      LOGGER.info("Failed to reset sub-routers in ApiServerVerticle instances : {}", err);
+      LOGGER.error("Failed to reset sub-routers in ApiServerVerticle instances : {}", err);
       promise.fail(err);
     });
 
@@ -310,7 +307,7 @@ public class RouterManager {
     }).onSuccess(succ -> {
 
       lock.result().release();
-      LOGGER.debug("Updated spec files successfully; Released lock");
+      LOGGER.info("Updated spec files successfully; (Released lock)");
       promise.complete();
 
     }).onFailure(err -> {
@@ -365,7 +362,7 @@ public class RouterManager {
     Future<Void> writeStacSpec =
         vertx.fileSystem().writeFile(STAC_OAS_REAL_PATH, stacSpec.toBuffer());
 
-    CompositeFuture.all(writeOgcSpec, writeStacSpec).onSuccess(succ -> {
+    Future.all(writeOgcSpec, writeStacSpec).onSuccess(succ -> {
       LOGGER.info("Spec files written successfully to {} and {}", OGC_OAS_REAL_PATH,
           STAC_OAS_REAL_PATH);
 
