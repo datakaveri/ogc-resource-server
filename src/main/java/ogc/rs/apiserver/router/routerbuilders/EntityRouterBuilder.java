@@ -10,6 +10,7 @@ import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import ogc.rs.apiserver.ApiServerVerticle;
+import ogc.rs.apiserver.handlers.FailureHandler;
 import static ogc.rs.apiserver.util.Constants.*;
 import java.util.Set;
 
@@ -30,6 +31,9 @@ public abstract class EntityRouterBuilder {
   
   /* this is used to create handlers or anything that is initialized using a vert.x instance */
   public Vertx vertx;
+  
+  /* create all handlers here and make them public so that they can be accessed */
+  public FailureHandler failureHandler = new FailureHandler();
   
   public RouterBuilder routerBuilder;
   private JsonObject config;
