@@ -7,6 +7,7 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import ogc.rs.apiserver.ApiServerVerticle;
+import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.router.RouterManager;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 import java.util.ServiceLoader;
@@ -73,6 +74,13 @@ public class StacRouterBuilder extends EntityRouterBuilder {
     routerBuilder
     .operation("getStacCollections")
     .handler(apiServerVerticle::stacCollections)
+    .handler(apiServerVerticle::putCommonResponseHeaders)
+    .handler(apiServerVerticle::buildResponse);
+    
+    routerBuilder
+    .operation("getAsset")
+    .handler(AuthHandler.create(vertx))
+    .handler(apiServerVerticle::getAssets)
     .handler(apiServerVerticle::putCommonResponseHeaders)
     .handler(apiServerVerticle::buildResponse);
     
