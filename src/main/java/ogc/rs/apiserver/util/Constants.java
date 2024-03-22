@@ -41,4 +41,13 @@ public class Constants {
     public static final String PROCESS_API = "getProcessDescription";
     public static final String CONTENT_TYPE = "content-type";
     public static final String APPLICATION_JSON = "application/json";
+    public static final String STAC_CATALOG_API = "getStacLandingPage";
+    public static final String STAC_COLLECTIONS_API = "getStacCollections";
+    public static final String STAC_COLLECTION_API = "describeStacCollection";
+    public static final String ASSET_API = "getAsset";
+    public static final String STAC_CONFORMANCE_CLASSES = "getConformanceDeclaration";
+
+
+
+
 }
