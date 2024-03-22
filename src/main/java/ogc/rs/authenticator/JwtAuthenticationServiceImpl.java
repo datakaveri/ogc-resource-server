@@ -441,7 +441,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                                 new OgcException(
                                     401,
                                     "Not Authorised",
-                                    "Not a producer or consumer token. It is of role {} "
+                                    "Not a producer or consumer token. It is of role "
                                         + jwtData.getRole()));
                           }
                         } else {
@@ -451,7 +451,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                               new OgcException(
                                   401,
                                   "Not Authorised",
-                                  "Resource is OPEN. Token is SECURE of role {} "
+                                  "Resource is OPEN. Token is SECURE of role "
                                       + jwtData.getRole()));
                         }
                       })

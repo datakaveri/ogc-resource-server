@@ -364,30 +364,60 @@ public class DatabaseServiceImpl implements DatabaseService{
     Promise<List<JsonObject>> result = Promise.promise();
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());
-    client
-        .withConnection(
-            conn ->
-                conn.preparedQuery(
-                        "Select id, title, description, bbox, temporal,license from collections_details")
-                    .collecting(collector)
-                    .execute()
-                    .map(SqlResult::value))
-        .onSuccess(
-            success -> {
-              if (success.isEmpty()) {
-                LOGGER.error("Collections table is empty!");
-                result.fail("Error!");
-              }
-              else {
-                LOGGER.debug("Collections Result: {}", success.toString());
-                result.complete(success);
-              }
-            })
-        .onFailure(
-            fail -> {
-              LOGGER.error("Failed to getCollections! - {}", fail.getMessage());
-              result.fail("Error!");
-            });
+    client.withConnection(
+        conn ->
+            conn.preparedQuery(
+                    "Select id, title, description, bbox, temporal,license from collections_details")
+                .collecting(collector)
+                .execute()
+                .map(SqlResult::value)
+                .onSuccess(
+                    success -> {
+                      if (success.isEmpty()) {
+                        LOGGER.error("Collections table is empty!");
+                        result.fail(
+                            new OgcException(404, "Not found", "Collection table is Empty!"));
+                      } else {
+                        conn.preparedQuery("SELECT * FROM STAC_COLLECTIONS_ASSETS")
+                            .collecting(collector)
+                            .execute()
+                            .map(SqlResult::value)
+                            .onSuccess(
+                                assets -> {
+                                  if (assets.isEmpty()) {
+                                    LOGGER.error("Assets table is empty!");
+                                    result.fail(
+                                        new OgcException(
+                                            404, "Not found", "Assets table is empty!"));
+                                  } else {
+                                    for (JsonObject asset : assets) {
+                                      for (JsonObject successItem : success) {
+                                        if (successItem
+                                            .getString("id")
+                                            .equals(asset.getString("stac_collections_id"))) {
+                                          if (successItem.containsKey("assets")) {
+                                            successItem.getJsonArray("assets").add(asset);
+                                          } else {
+                                            successItem.put("assets", new JsonArray().add(asset));
+                                          }
+                                        }
+                                      }
+                                    }
+                                    result.complete(success);
+                                  }
+                                })
+                            .onFailure(
+                                fail -> {
+                                  LOGGER.error("Failed to get Assets! - {}", fail.getMessage());
+                                  result.fail("Error!");
+                                });
+                      }
+                    })
+                .onFailure(
+                    fail -> {
+                      LOGGER.error("Failed to getCollections! - {}", fail.getMessage());
+                      result.fail("Error!");
+                    }));
     return result.future();
   }
 

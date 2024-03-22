@@ -160,13 +160,13 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::buildResponse);
 
           routerBuilderStac
-              .operation("getStacLandingPage")
+              .operation(STAC_CATALOG_API)
               .handler(this::stacCatalog)
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
 
           routerBuilderStac
-              .operation("getStacCollections")
+              .operation(STAC_COLLECTIONS_API)
               .handler(this::stacCollections)
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
@@ -213,20 +213,20 @@ public class ApiServerVerticle extends AbstractVerticle {
               .handler(this::buildResponse);
 
           routerBuilderStac
-              .operation("describeStacCollection")
+              .operation(STAC_COLLECTION_API)
               .handler(this::getStacCollection)
               .handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse);
 
               routerBuilderStac
-                      .operation("getAsset")
+                      .operation(ASSET_API)
                       .handler(AuthHandler.create(vertx))
                       .handler(this::getAssets)
                       .handler(this::putCommonResponseHeaders)
                       .handler(this::buildResponse);
 
           routerBuilderStac
-              .operation("getConformanceDeclaration")
+              .operation(STAC_CONFORMANCE_CLASSES)
               .handler(
                   routingContext -> {
                     HttpServerResponse response = routingContext.response();
@@ -862,6 +862,26 @@ public class ApiServerVerticle extends AbstractVerticle {
                                               "interval",
                                               new JsonArray()
                                                   .add(collection.getJsonArray("temporal")))));
+                      if (singleCollection.containsKey("assets")) {
+                        JsonObject assets = new JsonObject();
+
+                        singleCollection
+                            .getJsonArray("assets")
+                            .forEach(
+                                assetJson -> {
+                                  JsonObject asset = new JsonObject();
+                                  asset.mergeIn((JsonObject) assetJson);
+                                  String href =
+                                      hostName + ogcBasePath + "assets/" + asset.getString("id");
+                                  asset.put("href", href);
+                                  asset.put("file:size", asset.getInteger("size"));
+                                  asset.remove("size");
+                                  asset.remove("id");
+                                  asset.remove("stac_collections_id");
+                                  assets.put(((JsonObject) assetJson).getString("id"), asset);
+                                });
+                        singleCollection.put("assets", assets);
+                      }
                       singleCollection.remove("bbox");
                       singleCollection.remove("temporal");
                       collections.add(singleCollection);
