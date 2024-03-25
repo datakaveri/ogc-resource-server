@@ -1,13 +1,9 @@
 package ogc.rs.database.util;
 
-import ogc.rs.database.DatabaseServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.SQLOutput;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import static ogc.rs.common.Constants.DEFAULT_CRS_SRID;
 
 public class FeatureQueryBuilder {
   private String tableName;
@@ -19,7 +15,7 @@ public class FeatureQueryBuilder {
   private String sqlString;
   private int offset;
   private String defaultCrsSrid;
-  private String bboxCrs;
+  private String bboxCrsSrid;
   private String geoColumn;
   private String datetimeKey;
   private static final Logger LOGGER = LogManager.getLogger(FeatureQueryBuilder.class);
@@ -35,38 +31,39 @@ public class FeatureQueryBuilder {
     additionalParams = "";
     sqlString = "";
     datetimeKey = "";
-    defaultCrsSrid = "4326";
-    bboxCrs = "4326";
-    geoColumn = "cast(st_asgeojson(st_transform(geom,4326)) as json)";
+//<<<<<<< HEAD
+//    defaultCrsSrid = "4326";
+//    bboxCrs = "4326";
+//    geoColumn = "cast(st_asgeojson(st_transform(geom,4326)) as json)";
+//=======
+    defaultCrsSrid = String.valueOf(DEFAULT_CRS_SRID);
+    bboxCrsSrid = "";
+    geoColumn = "cast(st_asgeojson(st_transform(geom," + defaultCrsSrid + ")) as json)";
   }
 
   public void setLimit(int limit) {
-    if(limit > 10000 || limit < 1) {
-      return;
-    }
     this.limit = limit;
   }
   public void setOffset(int offset) {
-    if (offset > 2000000)
-      return;
     this.offset = offset-1;
   }
 
-  // bboxCrs is srid equivalent of crs-url
-  public void setBboxCrs(String bboxCrs) {
-    this.bboxCrs = bboxCrs;
+  // bboxCrsSrid is srid equivalent of crs-url
+  public void setBboxCrsSrid(String bboxCrsSrid) {
+    this.bboxCrsSrid = bboxCrsSrid;
   }
 
   public void setBbox(String coordinates, String storageCrs) {
-    if (!bboxCrs.isEmpty() && !bboxCrs.equalsIgnoreCase(defaultCrsSrid)){
+    if (!bboxCrsSrid.isEmpty() && !bboxCrsSrid.equalsIgnoreCase(defaultCrsSrid)){
       //TODO: do bbox transformation to the specified bbox-crs parameter
       // find the storage crs and then transform accordingly
-      coordinates = coordinates.concat("," + bboxCrs);
+      coordinates = coordinates.concat(",").concat(bboxCrsSrid);
     }
     else
-      coordinates = coordinates.concat(",4326");
+      coordinates = coordinates.concat(",").concat(defaultCrsSrid);
+    
     //TODO: validation for lat, lon values (0<=lat<=90, 0<=lon<=180);
-    if (bboxCrs.equalsIgnoreCase(storageCrs))
+    if (bboxCrsSrid.equalsIgnoreCase(storageCrs))
       this.bbox = "st_intersects(geom, st_makeenvelope(" + coordinates + "))";
     else
       this.bbox = "st_intersects(geom, st_transform(st_makeenvelope(" + coordinates + "),"+ storageCrs +"))";;
@@ -75,7 +72,7 @@ public class FeatureQueryBuilder {
 
   }
   public void setCrs (String crs) {
-    // st_geojson(geometry, maxdecimaldigits, options); options = 0 means no extra options
+    // st_asgeojson(geometry, maxdecimaldigits, options); options = 0 means no extra options
     geoColumn = "cast(st_asgeojson(st_transform(geom," + crs + "), 9,0) as json)";
   }
   public void setDatetime(String datetime) {
@@ -83,30 +80,26 @@ public class FeatureQueryBuilder {
       return;
     }
     this.additionalParams = "where";
-    String datetimeFormat = "'yyyy-mm-dd\"T\"HH24:MI:SS\"Z\"'";
-//    datetime query where clause -
-//    to_timestamp(properties ->> 'datetimeKey', 'datetimeFormat') 'operator' 'datetime' (from request);
-    String concatString =
-        " to_timestamp(properties ->> '" .concat(datetimeKey).concat("',").concat(datetimeFormat).concat(") ");
+    //String datetimeFormat = "'yyyy-mm-dd\"T\"HH24:MI:SS\"Z\"'";
     if (!datetime.contains("/")) {
-      this.datetime = concatString.concat("= '").concat(datetime).concat("'");
+      this.datetime = datetimeKey.concat("= '").concat(datetime).concat("'");
       return;
     }
     String[] dateTimeArr = datetime.split("/");
-      if (dateTimeArr[0].equals("..")) { // -- before\
-      this.datetime = concatString.concat("<'").concat(dateTimeArr[1]).concat("'");
+      if (dateTimeArr[0].equals("..")) { // -- before
+      this.datetime = datetimeKey.concat("<'").concat(dateTimeArr[1]).concat("'");
   }
     else if (dateTimeArr[1].equals("..")) { // -- after
-      this.datetime = concatString.concat(">'").concat(dateTimeArr[0]).concat("'");
+      this.datetime = datetimeKey.concat(">'").concat(dateTimeArr[0]).concat("'");
     }
     else {
-      this.datetime = concatString.concat(" between '").concat(dateTimeArr[0]).concat("' and '")
+      this.datetime = datetimeKey.concat(" between '").concat(dateTimeArr[0]).concat("' and '")
           .concat(dateTimeArr[1]).concat("'");
     }
   }
 
   public void setFilter(String key, String value) {
-    this.filter = key + "=" + value;
+    this.filter = "\"" + key + "\"='" + value + "'";
     this.additionalParams = "where";
   }
 
@@ -116,49 +109,50 @@ public class FeatureQueryBuilder {
 
   public String buildSqlString() {
     //TODO: refactor to build the sql query
-    this.sqlString = String.format("select id, itemType as type, %4$s as geometry" +
-            " from \"%1$s\" limit %2$d offset %3$d"
+    this.sqlString = String.format("select id, 'Feature' as type, %4$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
+            " 'id' - 'geom') as properties from \"%1$s\" limit %2$d offset %3$d"
         , this.tableName, this.limit, this.offset, this.geoColumn);
 
     if (!bbox.isEmpty()) {
-      this.sqlString = String.format("select id, itemType as type, %6$s as geometry" +
-              " from \"%1$s\" %3$s %4$s limit %2$d offset %5$d"
+      this.sqlString = String.format("select id, 'Feature' as type, %6$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
+              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s limit %2$d offset %5$d"
           ,this.tableName,this.limit, this.additionalParams, this.bbox, this.offset, this.geoColumn);
     }
 
     if(!datetime.isEmpty() ){
-      this.sqlString = String.format("select id, itemType as type, %6$s as geometry " +
-              " from \"%1$s\" %3$s %4$s limit %2$d offset %5$d"
+      this.sqlString = String.format("select id, 'Feature' as type, %6$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
+              "'id' - 'geom') as properties from \"%1$s\" %3$s %4$s limit %2$d offset %5$d"
           ,this.tableName,this.limit, this.additionalParams, this.datetime, this.offset, this.geoColumn);
     }
 
     if (!filter.isEmpty()) {
-      this.sqlString = String.format("select id, itemType as type, %6$s as geometry" +
-              " from \"%1$s\" %3$s %4$s limit %2$d offset %5$d"
+      this.sqlString = String.format("select id, 'Feature' as type, %6$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
+              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s limit %2$d offset %5$d"
           ,this.tableName,this.limit, this.additionalParams, this.filter, this.offset, this.geoColumn);
     }
 
     if (!bbox.isEmpty() && !filter.isEmpty()) {
-      this.sqlString = String.format("select id, itemType as type, %7$s as geometry" +
-              " from \"%1$s\" %3$s %4$s and %5$s limit %2$d offset %6$d"
+      this.sqlString = String.format("select id, 'Feature' as type, %7$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
+              "'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and %5$s limit %2$d offset %6$d"
           ,this.tableName,this.limit, this.additionalParams, this.bbox, this.filter, this.offset, this.geoColumn);
     }
 
     if (!bbox.isEmpty() && !datetime.isEmpty()) {
-      this.sqlString = String.format("select id, itemType as type, %7$s as geometry" +
-              " from \"%1$s\" %3$s %4$s and %5$s limit %2$d offset %6$d"
+      this.sqlString = String.format("select id, 'Feature' as type, %7$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
+              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and %5$s limit %2$d offset %6$d"
           ,this.tableName,this.limit, this.additionalParams, this.bbox, this.datetime, this.offset, this.geoColumn);
     }
 
     if (!datetime.isEmpty() && !filter.isEmpty()) {
-      this.sqlString = String.format("select id, itemType as type, %7$s as geometry" +
-              " from \"%1$s\" %3$s %4$s and %5$s limit %2$d offset %6$d"
+      this.sqlString = String.format("select id, 'Feature' as type, %7$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
+              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and %5$s limit %2$d offset %6$d"
           ,this.tableName,this.limit, this.additionalParams, this.datetime, this.filter, this.offset, this.geoColumn);
     }
 
     if (!bbox.isEmpty() && !filter.isEmpty() && !datetime.isEmpty()) {
-      this.sqlString = String.format("select id, itemType as type, %8$s as geometry" +
-              " from \"%1$s\" %3$s %4$s and %5$s and %7$s limit %2$d offset %6$d"
+      this.sqlString = String.format("select id, 'Feature' as type, %8$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
+              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and %5$s and %7$s limit %2$d offset" +
+              " %6$d"
           ,this.tableName,this.limit, this.additionalParams, this.bbox, this.filter, this.offset, this.datetime,
           this.geoColumn);
     }
@@ -205,10 +199,5 @@ public class FeatureQueryBuilder {
     }
     LOGGER.debug("<builder>Count query- {}", sqlString);
     return sqlString;
-  }
-
-
-  public int getLimit() {
-    return this.limit;
   }
 }
