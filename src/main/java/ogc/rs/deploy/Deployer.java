@@ -41,6 +41,10 @@ public class Deployer {
     }
 
     public static void deploy(String configPath) {
+        if(System.getProperty("disable.auth") != null){
+            LOGGER.fatal("Token Authentication and Authorization is DISABLED using system property 'disable.auth'");
+        }
+
         EventBusOptions ebOptions = new EventBusOptions();
         VertxOptions options = new VertxOptions().setEventBusOptions(ebOptions);
 
