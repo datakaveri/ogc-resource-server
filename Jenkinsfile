@@ -58,14 +58,16 @@ pipeline {
 
             # make config file for running tests
 
-            tee -a compliance.xml << END
-            > <?xml version="1.0" encoding="UTF-8"?>
+            tee compliance.xml << END
+            <?xml version="1.0" encoding="UTF-8"?>
             <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
             <properties version="1.0">
               <comment>Test run arguments</comment>
               <entry key="iut">http://jenkins-slave1:8443</entry>
             </properties>
             END
+
+            ls compliance.xml
 
             # start compliance tests
 
