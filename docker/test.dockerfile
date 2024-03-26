@@ -23,6 +23,7 @@ ENV JAR="ogc-resource-server-dev-${VERSION}-fat.jar"
 
 # Copying openapi docs 
 COPY docs docs
+RUN sed -i 's|http://127.0.0.1:8080|http://jenkins-slave1:8443|g' docs/openapiv3_0.json
 
 # Copying dev fatjar from builder stage to final image
 COPY --from=builder /usr/share/app/target/${JAR} ./fatjar.jar
