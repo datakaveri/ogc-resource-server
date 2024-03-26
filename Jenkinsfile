@@ -43,7 +43,7 @@ pipeline {
       }
     }
 
-    stage('Start Compliance Tests and Code Coverage Test'){
+    stage('Start OGC Feature Compliance Tests and Code Coverage Test'){
       steps{
         node('built-in') {
           script{
@@ -68,7 +68,44 @@ pipeline {
               catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                   env.NEWEST_TEST_DIR = sh(script: 'ls -t ~/testng | head -n1', returnStdout: true).trim()
                   sh 'cp -r ~/testng/${NEWEST_TEST_DIR} .'
-                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: env.NEWEST_TEST_DIR, reportFiles: 'emailable-report.html,index.html', reportTitles: 'Overview,Detailed Report', reportName: 'OGC Compliance Test Reports'])
+                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: env.NEWEST_TEST_DIR, reportFiles: 'emailable-report.html,index.html', reportTitles: 'Overview,Detailed Report', reportName: 'OGC Feature Compliance Test Reports'])
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stage('Start STAC Compliance Tests and Code Coverage Test'){
+      steps{
+        node('built-in') {
+          script{
+            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          if (!fileExists('stac-validator-venv')) {
+            sh 'python3.10 -m venv stac-validator-venv'
+          }
+            sh '''
+            . stac-validator-venv/bin/activate
+
+            pip install stac-api-validator
+
+            stac-api-validator \
+            --root-url http://jenkins-slave1:8443/stac/ \
+            --conformance core \
+            --conformance features \
+            --conformance collections \
+            --collection a5a6e26f-d252-446d-b7dd-4d50ea945102 > stacOutput
+            '''
+            }
+          }
+        }
+      }
+      post{
+        always{
+          node('built-in') {
+            script{
+              catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '.', reportFiles: 'stacOutput', reportTitles: 'STAC', reportName: 'STAC Compliance Test Reports'])
               }
             }
           }
