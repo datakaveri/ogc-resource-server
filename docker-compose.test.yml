@@ -17,7 +17,7 @@ services:
         source: ogc-volume
         target: /usr/share/app/storage/temp-dir
     depends_on:
-      - "s3mock"
+      - "s3mockModded"
     ports:
       - "8443:8080"
     restart: on-failure
@@ -28,7 +28,7 @@ services:
          options:
              max-file: "5"
              max-size: "100m"
-    command: bash -c "exec java -jar -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -javaagent:/tmp/jacoco/lib/jacocoagent.jar=output=tcpserver,address=0.0.0.0,port=57070,dumponexit=false -Ddisable.auth=true ./fatjar.jar  --host $$(hostname) -c configs/test.json"
+    command: bash -c "exec java -jar -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -javaagent:/tmp/jacoco/lib/jacocoagent.jar=output=tcpserver,address=0.0.0.0,port=57070,dumponexit=false -Ddisable.auth=true -Ds3.mock=true ./fatjar.jar  --host $$(hostname) -c configs/test.json"
 
   perfTest:
     image: ghcr.io/datakaveri/geoserver-dev:latest
@@ -58,14 +58,17 @@ services:
     networks:
       - ogc-net
 
-  s3mock:
-    image: adobe/s3mock:3.1.0
+  s3mockModded:
+    image: s3-mock-modded:latest
     environment:
       - initialBuckets=bucket1
     networks:
-      - ogc-net
+      ogc-net:
+        aliases:
+          - bucket-name.s3.aws-region.amazonaws.com
     ports:
       - 9090:9090
+      - 9293:443
 
 volumes:
   ogc-volume:
