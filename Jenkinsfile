@@ -51,11 +51,15 @@ pipeline {
             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
           //    sh 'HTTP_PROXY=\'127.0.0.1:8090\' newman run /var/lib/jenkins/iudx/ogc/Newman/OGC_Resource_Server_v0.0.2.postman_collection.json -e /home/ubuntu/configs/ogc-postman-env.json --insecure -r htmlextra --reporter-htmlextra-export /var/lib/jenkins/iudx/ogc/Newman/report/report.html --reporter-htmlextra-skipSensitiveData'
           //    runZapAttack()
-          sh '[ ! -d "ets-ogcapi-features10" ] && git clone https://github.com/opengeospatial/ets-ogcapi-features10'
-          sh 'cd ets-ogcapi-features10/'
-          sh '[ ! -d "target" ] && mvn clean package -Dmaven.test.skip -Dmaven.javadoc.skip=true'
-
-          sh 'java -jar target/ets-ogcapi-features10-1.8-SNAPSHOT-aio.jar --generateHtmlReport true /var/lib/jenkins/iudx/ogc/compliance.xml'
+          if (!fileExists('ets-ogcapi-features10')) {
+            sh 'git clone https://github.com/opengeospatial/ets-ogcapi-features10'
+          }
+          dir('ets-ogcapi-features10') {
+            if(!fileExists('target')) {
+                sh 'mvn clean package -Dmaven.test.skip -Dmaven.javadoc.skip=true'
+            }
+            sh 'java -jar target/ets-ogcapi-features10-1.8-SNAPSHOT-aio.jar --generateHtmlReport true /var/lib/jenkins/iudx/ogc/compliance.xml'
+            }
             }
           }
         }
