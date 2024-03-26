@@ -21,8 +21,8 @@ ARG VERSION
 ENV JAR="ogc-resource-server-dev-${VERSION}-fat.jar"
 
 # Copying dev fatjar from builder stage to final image
-COPY target/ogc-resource-server-dev-0.0.1-SNAPSHOT-fat.jar ./fatjar.jar
-COPY target/classes ./built-classes
+COPY --from=builder target/ogc-resource-server-dev-0.0.1-SNAPSHOT-fat.jar ./fatjar.jar
+COPY --from=builder target/classes ./built-classes
 
 EXPOSE 8080 8443
 # Creating a non-root user
