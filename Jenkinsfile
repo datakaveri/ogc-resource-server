@@ -71,7 +71,7 @@ pipeline {
 
             # start compliance tests
 
-            java -jar target/ets-ogcapi-features10-1.8-SNAPSHOT-aio.jar --generateHtmlReport true compliance.xml
+            java -jar target/ets-ogcapi-features10-1.8-SNAPSHOT-aio.jar --generateHtmlReport true compliance.xml > output
             '''
             }
           }
@@ -82,10 +82,11 @@ pipeline {
           node('built-in') {
             script{
               catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                sh 'cat output'
                   environment {
                       NEWEST_TEST_DIR = sh(script: "ls -t ~/testng | head -n1 | xargs realpath", returnStdout: true).trim()
                   }
-                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: env.NEWEST_TEST_DIR, reportFiles: 'index.html', reportTitles: '', reportName: 'Integration Test Report'])
+                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: env.NEWEST_TEST_DIR, reportFiles: 'index.html', reportTitles: '', reportName: 'OGC Compliance Test Report'])
             //    archiveZap failHighAlerts: 1, failMediumAlerts: 1, failLowAlerts: 46
               }
             }
