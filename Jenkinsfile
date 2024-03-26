@@ -94,7 +94,7 @@ pipeline {
             --conformance core \
             --conformance features \
             --conformance collections \
-            --collection a5a6e26f-d252-446d-b7dd-4d50ea945102 > stacOutput
+            --collection a5a6e26f-d252-446d-b7dd-4d50ea945102 > stacOutput.html
             '''
             }
           }
@@ -103,9 +103,13 @@ pipeline {
       post{
         always{
           node('built-in') {
+            sh """
+                sed -i '1s/^/<!DOCTYPE html><html>/g' stacOutput.html
+                echo '</html>' >> stacOutput.html
+            """
             script{
               catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '.', reportFiles: 'stacOutput', reportTitles: 'STAC', reportName: 'STAC Compliance Test Reports'])
+                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '.', reportFiles: 'stacOutput.html', reportTitles: 'STAC', reportName: 'STAC Compliance Test Reports'])
               }
             }
           }
