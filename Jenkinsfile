@@ -67,8 +67,6 @@ pipeline {
             </properties>
             END
 
-            ls compliance.xml
-
             # start compliance tests
 
             java -jar target/ets-ogcapi-features10-1.8-SNAPSHOT-aio.jar --generateHtmlReport true compliance.xml > output
@@ -82,6 +80,7 @@ pipeline {
           node('built-in') {
             script{
               catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                sh 'cat compliance.xml'
                 sh 'cat output'
                   environment {
                       NEWEST_TEST_DIR = sh(script: "ls -t ~/testng | head -n1 | xargs realpath", returnStdout: true).trim()

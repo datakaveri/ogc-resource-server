@@ -16,7 +16,7 @@
   },
   "servers": [
     {
-      "url": "https://ogc.iudx.io",
+      "url": "http://127.0.0.1:8080",
       "description": "OGC-Resource-Server"
     }
   ],
@@ -75,25 +75,25 @@
                       "description": "Information about cities in a state.",
                       "links": [
                         {
-                          "href": "https://ogc.iudx.io",
+                          "href": "http://127.0.0.1:8080",
                           "rel": "self",
                           "type": "application/json",
                           "title": "this document"
                         },
                         {
-                          "href": "https://ogc.iudx.io/api",
+                          "href": "http://127.0.0.1:8080/api",
                           "rel": "service-desc",
                           "type": "application/vnd.oai.openapi+json;version=3.0",
                           "title": "the API definition"
                         },
                         {
-                          "href": "https://ogc.iudx.io/conformance",
+                          "href": "http://127.0.0.1:8080/conformance",
                           "rel": "conformance",
                           "type": "application/json",
                           "title": "OGC API conformance classes implemented by this server"
                         },
                         {
-                          "href": "https://ogc.iudx.io/collections",
+                          "href": "http://127.0.0.1:8080/collections",
                           "rel": "data",
                           "type": "application/json",
                           "title": "Information about the feature collections"
@@ -134,7 +134,7 @@
         },
         "servers": [
           {
-            "url": "https://ogc.iudx.io",
+            "url": "http://127.0.0.1:8080",
             "description": "OGC-Resource-Server"
           }
         ]
@@ -158,7 +158,7 @@
         },
         "servers": [
           {
-            "url": "https://ogc.iudx.io",
+            "url": "http://127.0.0.1:8080",
             "description": "OGC-Resource-Server"
           }
         ]
@@ -182,7 +182,7 @@
         },
         "servers": [
           {
-            "url": "https://ogc.iudx.io",
+            "url": "http://127.0.0.1:8080",
             "description": "OGC-Resource-Server"
           }
         ]
@@ -214,7 +214,7 @@
         },
         "servers": [
           {
-            "url": "https://ogc.iudx.io",
+            "url": "http://127.0.0.1:8080",
             "description": "OGC-Resource-Server"
           }
         ]
@@ -267,7 +267,7 @@
         },
         "servers": [
           {
-            "url": "https://ogc.iudx.io",
+            "url": "http://127.0.0.1:8080",
             "description": "OGC-Resource-Server"
           }
         ]
@@ -302,7 +302,7 @@
         },
         "servers": [
           {
-            "url": "https://ogc.iudx.io",
+            "url": "http://127.0.0.1:8080",
             "description": "OGC-Resource-Server"
           }
         ]
@@ -329,7 +329,7 @@
         },
         "servers": [
           {
-            "url": "https://ogc.iudx.io",
+            "url": "http://127.0.0.1:8080",
             "description": "OGC-Resource-Server"
           }
         ]
@@ -371,7 +371,7 @@
         },
         "servers": [
           {
-            "url": "https://ogc.iudx.io",
+            "url": "http://127.0.0.1:8080",
             "description": "OGC-Resource-Server"
           }
         ]
@@ -406,7 +406,7 @@
         },
         "servers": [
           {
-            "url": "https://ogc.iudx.io",
+            "url": "http://127.0.0.1:8080",
             "description": "OGC-Resource-Server"
           }
         ]
@@ -447,7 +447,7 @@
         },
         "servers": [
           {
-            "url": "https://ogc.iudx.io",
+            "url": "http://127.0.0.1:8080",
             "description": "OGC-Resource-Server"
           }
         ]
@@ -500,7 +500,7 @@
         },
         "servers": [
           {
-            "url": "https://ogc.iudx.io",
+            "url": "http://127.0.0.1:8080",
             "description": "OGC-Resource-Server"
           }
         ]
@@ -546,7 +546,7 @@
                     ],
                     "links": [
                       {
-                        "href": "https://ogc.iudx.io/processes/cc0eb191-7f66-4663-8afa-cfd644de5839",
+                        "href": "http://127.0.0.1:8080/processes/cc0eb191-7f66-4663-8afa-cfd644de5839",
                         "rel": "self",
                         "type": "application/json",
                         "title": "Process description as JSON"
@@ -571,7 +571,7 @@
                     ],
                     "links": [
                       {
-                        "href": "https://ogc.iudx.io/processes/550e8400-e29b-41d4-a716-446655440002",
+                        "href": "http://127.0.0.1:8080/processes/550e8400-e29b-41d4-a716-446655440002",
                         "rel": "self",
                         "type": "application/json",
                         "title": "Process description as JSON"
@@ -581,7 +581,7 @@
                 ],
                 "links": [
                   {
-                    "href": "https://ogc.iudx.io/processes",
+                    "href": "http://127.0.0.1:8080/processes",
                     "rel": "self",
                     "type": "application/json"
                   }
@@ -682,7 +682,7 @@
                         "type": "application/json",
                         "rel": "self",
                         "title": "Process description as JSON",
-                        "href": "https://ogc.iudx.io/processes/550e8400-e29b-41d4-a716-446655440002"
+                        "href": "http://127.0.0.1:8080/processes/550e8400-e29b-41d4-a716-446655440002"
                       }
                     ]
                   }
@@ -932,25 +932,25 @@
                   "description": "This landing page provides all the links as per the OGC compliance in JSON format",
                   "links": [
                     {
-                      "href": "https://ogc.iudx.io/",
+                      "href": "http://127.0.0.1:8080/",
                       "rel": "self",
                       "type": "application/json",
                       "title": "this document"
                     },
                     {
-                      "href": "https://ogc.iudx.io/api",
+                      "href": "http://127.0.0.1:8080/api",
                       "rel": "service-desc",
                       "type": "application/vnd.oai.openapi+json;version=3.0",
                       "title": "the API definition"
                     },
                     {
-                      "href": "https://ogc.iudx.io/conformance",
+                      "href": "http://127.0.0.1:8080/conformance",
                       "rel": "conformance",
                       "type": "application/json",
                       "title": "OGC API conformance classes implemented by this server"
                     },
                     {
-                      "href": "https://ogc.iudx.io/collections",
+                      "href": "http://127.0.0.1:8080/collections",
                       "rel": "data",
                       "type": "application/json",
                       "title": "Information about the feature collections"
@@ -997,7 +997,7 @@
                 "value": {
                   "links": [
                     {
-                      "href": "https://ogc.iudx.io/collections",
+                      "href": "http://127.0.0.1:8080/collections",
                       "rel": "self",
                       "type": "application/json",
                       "title": "this document"
@@ -1010,7 +1010,7 @@
                       "description": "Geographic information of districts in India",
                       "links": [
                         {
-                          "href": "https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items",
+                          "href": "http://127.0.0.1:8080/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items",
                           "rel": "items",
                           "type": "application/geo+json",
                           "title": "Districts in India"
@@ -1040,13 +1040,13 @@
                   "description": "Geographic information of districts in India",
                   "links": [
                     {
-                      "href": "https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items",
+                      "href": "http://127.0.0.1:8080/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items",
                       "rel": "items",
                       "type": "application/geo+json",
                       "title": "Districts in India"
                     },
                     {
-                      "href": "https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d",
+                      "href": "http://127.0.0.1:8080/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d",
                       "rel": "self",
                       "type": "application/geo+json",
                       "title": "Districts in India"
@@ -1071,13 +1071,13 @@
                   "type": "FeatureCollection",
                   "links": [
                     {
-                      "href": "https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items",
+                      "href": "http://127.0.0.1:8080/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items",
                       "rel": "self",
                       "type": "application/geo+json",
                       "title": "this document"
                     },
                     {
-                      "href": "https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items?offset=10&limit=2",
+                      "href": "http://127.0.0.1:8080/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items?offset=10&limit=2",
                       "rel": "next",
                       "type": "application/geo+json",
                       "title": "next page"
@@ -1138,13 +1138,13 @@
                   "type": "Feature",
                   "links": [
                     {
-                      "href": "https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items/4f449c78-3233-4c07-824c-08f7d45cee0e",
+                      "href": "http://127.0.0.1:8080/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items/4f449c78-3233-4c07-824c-08f7d45cee0e",
                       "rel": "self",
                       "type": "application/geo+json",
                       "title": "this document"
                     },
                     {
-                      "href": "https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d",
+                      "href": "http://127.0.0.1:8080/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d",
                       "rel": "collection",
                       "type": "application/geo+json",
                       "title": "the collection document"
@@ -1348,25 +1348,25 @@
           "description": "This landing page provides all the links as per the OGC compliance in JSON format",
           "links": [
             {
-              "href": "https://ogc.iudx.io/",
+              "href": "http://127.0.0.1:8080/",
               "rel": "self",
               "type": "application/json",
               "title": "this document"
             },
             {
-              "href": "https://ogc.iudx.io/api",
+              "href": "http://127.0.0.1:8080/api",
               "rel": "service-desc",
               "type": "application/vnd.oai.openapi+json;version=3.0",
               "title": "the API definition"
             },
             {
-              "href": "https://ogc.iudx.io/conformance",
+              "href": "http://127.0.0.1:8080/conformance",
               "rel": "conformance",
               "type": "application/json",
               "title": "OGC API conformance classes implemented by this server"
             },
             {
-              "href": "https://ogc.iudx.io/collections",
+              "href": "http://127.0.0.1:8080/collections",
               "rel": "data",
               "type": "application/json",
               "title": "Information about the feature collections"
@@ -1421,7 +1421,7 @@
         "properties": {
           "href": {
             "type": "string",
-            "example": "https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d"
+            "example": "http://127.0.0.1:8080/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d"
           },
           "rel": {
             "type": "string",
@@ -1492,7 +1492,7 @@
           "description": "Information about districts in India",
           "links": [
             {
-              "href": "https://ogc.iudx.io/collections/fd6ef7c5-b18c-48e6-94e3-81037702863d",
+              "href": "http://127.0.0.1:8080/collections/fd6ef7c5-b18c-48e6-94e3-81037702863d",
               "rel": "self",
               "type": "application/geo+json",
               "title": "Districts in India"
@@ -2494,7 +2494,7 @@
     "properties": {
       "href": {
         "type": "string",
-        "example": "https://ogc.iudx.io/processes/fd6ef7c5-b18c-48e6-94e3-81037706763d"
+        "example": "http://127.0.0.1:8080/processes/fd6ef7c5-b18c-48e6-94e3-81037706763d"
       },
       "rel": {
         "type": "string",
@@ -2515,7 +2515,7 @@
     "properties": {
       "href": {
         "type": "string",
-        "example": "https://ogc.iudx.io/processes?f=json"
+        "example": "http://127.0.0.1:8080/processes?f=json"
       },
       "rel": {
         "type": "string",
