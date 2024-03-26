@@ -30,7 +30,7 @@ pipeline {
         script{
           sh 'scp src/test/resources/OGC_compliance/compliance.xml jenkins@jenkins-master:/var/lib/jenkins/iudx/ogc/'
           sh 'docker compose -f docker-compose.test.yml up -d test'
-          sh 'sleep 20'
+          sh 'sleep 120'
         }
       }
       post{
