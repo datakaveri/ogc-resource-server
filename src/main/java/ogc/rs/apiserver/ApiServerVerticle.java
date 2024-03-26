@@ -269,7 +269,14 @@ public class ApiServerVerticle extends AbstractVerticle {
           }).onSuccess(success -> LOGGER.info("Started HTTP server at port:" + success.actualPort()))
           .onFailure(Throwable::printStackTrace);
 
-      httpClient = vertx.createHttpClient(new HttpClientOptions().setSsl(true));
+      HttpClientOptions httpCliOptions = new HttpClientOptions().setSsl(true);
+
+      if(System.getProperty("s3.mock") != null){
+          LOGGER.fatal("S3 is being mocked!! Are you testing something?");
+          httpCliOptions.setTrustAll(true).setVerifyHost(false);
+      }
+
+      httpClient = vertx.createHttpClient(httpCliOptions);
     }
 
   private void getFeature(RoutingContext routingContext) {
