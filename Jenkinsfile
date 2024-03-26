@@ -71,8 +71,9 @@ pipeline {
             script{
               catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                   environment {
-                      NEWEST_TEST_DIR = sh(script: "ls -t ~/testng | head -n1 | xargs realpath", returnStdout: true).trim()
+                      NEWEST_TEST_DIR = sh(script: 'ls -t ~/testng | head -n1 | xargs realpath', returnStdout: true).trim()
                   }
+                  echo env.NEWEST_TEST_DIR
                 publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: env.NEWEST_TEST_DIR, reportFiles: 'index.html', reportTitles: '', reportName: 'OGC Compliance Test Report'])
             //    archiveZap failHighAlerts: 1, failMediumAlerts: 1, failLowAlerts: 46
               }
