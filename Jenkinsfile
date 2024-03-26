@@ -70,9 +70,9 @@ pipeline {
           node('built-in') {
             script{
               catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                  def NEWEST_TEST_DIR = sh(script: 'ls -t ~/testng | head -n1 | xargs realpath', returnStdout: true).trim()
+                  def NEWEST_TEST_DIR = sh(script: 'ls -t ~/testng | head -n1', returnStdout: true).trim()
                   echo NEWEST_TEST_DIR
-                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: NEWEST_TEST_DIR, reportFiles: 'index.html', reportTitles: '', reportName: 'OGC Compliance Test Report'])
+                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '~/testng/' + NEWEST_TEST_DIR, reportFiles: 'index.html', reportTitles: '', reportName: 'OGC Compliance Test Report'])
             //    archiveZap failHighAlerts: 1, failMediumAlerts: 1, failLowAlerts: 46
               }
             }
