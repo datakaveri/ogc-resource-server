@@ -52,9 +52,9 @@ pipeline {
           //    runZapAttack()
           sh '''
             # clone the OGC Compliance test repo
-            git clone https://github.com/opengeospatial/ets-ogcapi-features10
+            [ ! -d 'ets-ogcapi-features10' ] && git clone https://github.com/opengeospatial/ets-ogcapi-features10
             cd ets-ogcapi-features10/
-            mvn clean package -Dmaven.test.skip -Dmaven.javadoc.skip=true
+            [ ! -d 'target' ] && mvn clean package -Dmaven.test.skip -Dmaven.javadoc.skip=true
 
             # make config file for running tests
 
