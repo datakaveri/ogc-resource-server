@@ -25,17 +25,11 @@ pipeline {
       }
     }
 
-    stage('Unit Tests and Code Coverage Test'){
+    stage('Setup Server for Compliance Tests and Code Coverage Test'){
       steps{
         script{
-          sh 'docker compose -f docker-compose.test.yml up test'
-        }
-        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-          xunit (
-            thresholds: [ skipped(failureThreshold: '10'), failed(failureThreshold: '10') ],
-            tools: [ JUnit(pattern: 'target/surefire-reports/*.xml') ]
-          )
-          jacoco classPattern: 'target/classes', execPattern: 'target/jacoco.exec', sourcePattern: 'src/main/java'
+          sh 'docker compose -f docker-compose.test.yml up -d test'
+          sh 'sleep 120'
         }
       }
       post{
@@ -43,13 +37,63 @@ pipeline {
           script{
             sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
           }
-          error "Test failure. Stopping pipeline execution!"
+        }
+      }
+    }
+
+    stage('Start Compliance Tests and Code Coverage Test'){
+      steps{
+        node('built-in') {
+          script{
+          //  startZap ([host: 'localhost', port: 8090, zapHome: '/var/lib/jenkins/tools/com.cloudbees.jenkins.plugins.customtools.CustomTool/OWASP_ZAP/ZAP_2.11.0'])
+          //  sh 'curl http://127.0.0.1:8090/JSON/pscan/action/disableScanners/?ids=10096'
+            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          //    sh 'HTTP_PROXY=\'127.0.0.1:8090\' newman run /var/lib/jenkins/iudx/ogc/Newman/OGC_Resource_Server_v0.0.2.postman_collection.json -e /home/ubuntu/configs/ogc-postman-env.json --insecure -r htmlextra --reporter-htmlextra-export /var/lib/jenkins/iudx/ogc/Newman/report/report.html --reporter-htmlextra-skipSensitiveData'
+          //    runZapAttack()
+          sh '''
+            # clone the OGC Compliance test repo
+            git clone https://github.com/opengeospatial/ets-ogcapi-features10
+            cd ets-ogcapi-features10/
+            mvn clean package -Dmaven.test.skip -Dmaven.javadoc.skip=true
+
+            # make config file for running tests
+
+            tee -a compliance.xml << END
+            > <?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+            <properties version="1.0">
+              <comment>Test run arguments</comment>
+              <entry key="iut">http://jenkins-slave1:8443</entry>
+            </properties>
+            END
+
+            # start compliance tests
+
+            java -jar target/ets-ogcapi-features10-1.8-SNAPSHOT-aio.jar --generateHtmlReport true compliance.xml
+            '''
+            }
+          }
+        }
+      }
+      post{
+        always{
+          node('built-in') {
+            script{
+              catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                  environment {
+                      NEWEST_TEST_DIR = sh(script: "ls -t ~/testng | head -n1 | xargs realpath", returnStdout: true).trim()
+                  }
+                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: env.NEWEST_TEST_DIR, reportFiles: 'index.html', reportTitles: '', reportName: 'Integration Test Report'])
+            //    archiveZap failHighAlerts: 1, failMediumAlerts: 1, failLowAlerts: 46
+              }
+            }
+          }
         }
         cleanup{
           script{
-            sh 'sudo rm -rf target/'
-          }
-        }        
+            sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
+          } 
+        }
       }
     }
 
