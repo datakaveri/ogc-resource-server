@@ -72,7 +72,7 @@ pipeline {
               catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                   env.NEWEST_TEST_DIR = sh(script: 'ls -t ~/testng | head -n1', returnStdout: true).trim()
                   sh 'cp -r ~/testng/${NEWEST_TEST_DIR} .'
-                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: env.NEWEST_TEST_DIR, reportFiles: 'index.html', reportTitles: '', reportName: 'OGC Compliance Test Report'])
+                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: env.NEWEST_TEST_DIR, reportFiles: 'emailable-report.html,index.html', reportTitles: 'Overview,Detailed Report', reportName: 'OGC Compliance Test Reports'])
             //    archiveZap failHighAlerts: 1, failMediumAlerts: 1, failLowAlerts: 46
               }
             }
