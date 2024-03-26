@@ -31,7 +31,7 @@ pipeline {
         script{
           sh 'scp src/test/resources/OGC_compliance/compliance.xml jenkins@jenkins-master:/var/lib/jenkins/iudx/ogc/'
           sh 'docker compose -f docker-compose.test.yml up -d test'
-          sh 'sleep 120'
+          sh 'sleep 20'
         }
       }
       post{
@@ -47,11 +47,7 @@ pipeline {
       steps{
         node('built-in') {
           script{
-          //  startZap ([host: 'localhost', port: 8090, zapHome: '/var/lib/jenkins/tools/com.cloudbees.jenkins.plugins.customtools.CustomTool/OWASP_ZAP/ZAP_2.11.0'])
-          //  sh 'curl http://127.0.0.1:8090/JSON/pscan/action/disableScanners/?ids=10096'
             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-          //    sh 'HTTP_PROXY=\'127.0.0.1:8090\' newman run /var/lib/jenkins/iudx/ogc/Newman/OGC_Resource_Server_v0.0.2.postman_collection.json -e /home/ubuntu/configs/ogc-postman-env.json --insecure -r htmlextra --reporter-htmlextra-export /var/lib/jenkins/iudx/ogc/Newman/report/report.html --reporter-htmlextra-skipSensitiveData'
-          //    runZapAttack()
           if (!fileExists('ets-ogcapi-features10')) {
             sh 'git clone https://github.com/opengeospatial/ets-ogcapi-features10'
           }
@@ -59,7 +55,6 @@ pipeline {
             if(!fileExists('target')) {
                 sh 'mvn clean package -Dmaven.test.skip -Dmaven.javadoc.skip=true'
             }
-            sh 'cat /var/lib/jenkins/iudx/ogc/compliance.xml'
             sh 'java -jar target/ets-ogcapi-features10-1.8-SNAPSHOT-aio.jar --generateHtmlReport true /var/lib/jenkins/iudx/ogc/compliance.xml'
             }
             }
@@ -74,9 +69,25 @@ pipeline {
                   env.NEWEST_TEST_DIR = sh(script: 'ls -t ~/testng | head -n1', returnStdout: true).trim()
                   sh 'cp -r ~/testng/${NEWEST_TEST_DIR} .'
                 publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: env.NEWEST_TEST_DIR, reportFiles: 'emailable-report.html,index.html', reportTitles: 'Overview,Detailed Report', reportName: 'OGC Compliance Test Reports'])
-            //    archiveZap failHighAlerts: 1, failMediumAlerts: 1, failLowAlerts: 46
               }
             }
+          }
+        }
+      }
+    }
+
+    stage('Extract class files and JaCoCo data from container and make JaCoCo report'){
+      steps{
+        script{
+          sh 'docker-compose -f docker-compose.test.yml exec -T test cp -r ./built-classes /tmp/test'
+          sh 'docker-compose -f docker-compose.test.yml exec -T test java -jar /tmp/jacoco/lib/jacococli.jar dump --address 127.0.0.1 --port 57070 --destfile /tmp/test/jacoco.exec'
+        }
+        jacoco classPattern: 'built-classes', execPattern: 'jacoco.exec' 
+      }
+      post{
+        failure{
+          script{
+            sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
           }
         }
         cleanup{
