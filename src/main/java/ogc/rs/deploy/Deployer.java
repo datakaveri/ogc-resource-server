@@ -41,6 +41,14 @@ public class Deployer {
     }
 
     public static void deploy(String configPath) {
+        if(System.getProperty("disable.auth") != null){
+            LOGGER.fatal("Token Authentication and Authorization is DISABLED using system property 'disable.auth'");
+        }
+
+        if(System.getProperty("s3.mock") != null){
+            LOGGER.fatal("SSL checks when connecting to S3 are DISABLED using system property 's3.mock'");
+        }
+
         EventBusOptions ebOptions = new EventBusOptions();
         VertxOptions options = new VertxOptions().setEventBusOptions(ebOptions);
 
