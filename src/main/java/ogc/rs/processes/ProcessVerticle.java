@@ -1,5 +1,7 @@
 package ogc.rs.processes;
 
+import static ogc.rs.common.Constants.PROCESSING_SERVICE_ADDRESS;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -66,8 +68,8 @@ public class ProcessVerticle extends AbstractVerticle {
     processService = new ProcessesRunnerImpl(pool,createWebClient(vertx),config());
 
     binder = new ServiceBinder(vertx);
-    consumer = binder.setAddress("ogc.rs.processes.service").register(ProcessesRunnerService.class, processService);
-    LOGGER.info("Processes verticle started.");
+    consumer = binder.setAddress(PROCESSING_SERVICE_ADDRESS).register(ProcessesRunnerService.class, processService);
+    LOGGER.debug("Processes verticle started.");
   }
 
   @Override

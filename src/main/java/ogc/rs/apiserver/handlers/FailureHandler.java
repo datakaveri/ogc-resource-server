@@ -33,7 +33,6 @@ public class FailureHandler implements Handler<RoutingContext> {
       routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON)
         .setStatusCode((((OgcException) failure).getStatusCode())).end(((OgcException) failure).getJson().toString());
       return;
-//                context.next();
     }
     else if(failure instanceof NullPointerException) {
       LOGGER.error("NPE Internal error "+failure.fillInStackTrace());

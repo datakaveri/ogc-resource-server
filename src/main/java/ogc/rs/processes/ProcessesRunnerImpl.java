@@ -1,5 +1,7 @@
 package ogc.rs.processes;
 
+import static ogc.rs.processes.util.Constants.PROCESS_EXIST_CHECK_QUERY;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -29,12 +31,10 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
     this.webClient = webClient;
     this.utilClass = new UtilClass(pgPool);
     this.config = config;
-    //create objects of all the processes
   }
 
   @Override
   public ProcessesRunnerService run(JsonObject input, Handler<AsyncResult<JsonObject>> handler) {
-    LOGGER.info("in process runner "+input);
     Promise<JsonObject> jsonObjectPromise = Promise.promise();
 
     Future<JsonObject> checkForProcess = processExistCheck(input);
@@ -54,15 +54,15 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
 
         ProcessService finalProcessService = processService;
         Future<JsonObject> startAJobInDB = utilClass.startAJobInDB(input);
+
         startAJobInDB.onSuccess(jobStarted -> {
-          LOGGER.info("job started successfully");
           handler.handle(Future.succeededFuture(
-            new JsonObject().put("jobId", jobStarted.getValue("job_id"))
+            new JsonObject().put("jobId", jobStarted.getValue("jobId"))
               .put("processId", input.getString("processId")).put("type", "PROCESS")
               .put("status", Status.ACCEPTED).put("location",
                 config.getString("hostName").concat("/jobs/")
-                  .concat(jobStarted.getString("job_id")))));
-        }).onFailure(jobFailed -> handler.handle(Future.failedFuture("failed to start the job")));
+                  .concat(jobStarted.getString("jobId")))));
+        }).onFailure(jobFailed -> handler.handle(Future.failedFuture(jobFailed.getMessage())));
 
         Vertx.vertx().executeBlocking(blockCode -> {
           Future<JsonObject> jobObjectFuture = startAJobInDB.compose(updatedInputJson -> {
@@ -74,58 +74,65 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
           });
 
           jobObjectFuture.onSuccess(blockCode::complete).onFailure(failureHandler -> {
-            LOGGER.error("FAILED IN BLOCKING CODE " + failureHandler.getMessage());
-            blockCode.fail("failed");
+            LOGGER.error(failureHandler.getMessage());
+            blockCode.fail(failureHandler.getMessage());
           });
         }, blockResult -> {
           if (blockResult.failed()) {
             jsonObjectPromise.fail(blockResult.cause());
-          }else
+          } else {
             jsonObjectPromise.complete((JsonObject) blockResult.result());
+          }
         });
-        // Step1 : get the process id from i/p and use switch case to create obj of that process.
-        // step2 : execute the process using execute() from that class
       } else {
         LOGGER.error("Failed to validate the input");
         handler.handle(Future.failedFuture("Invalid Input"));
       }
     }).onFailure(processNotExist -> {
-      LOGGER.error("Process does not exist.");
-      handler.handle(Future.failedFuture("Process not found."));
+      LOGGER.error(processNotExist.getMessage());
+      handler.handle(Future.failedFuture(processNotExist.getMessage()));
     });
     return this;
   }
 
+  /**
+   * This method is used to check if the process exists or not.
+   *
+   * @param input the input json
+   * @return a future with the result
+   */
   private Future<JsonObject> processExistCheck(JsonObject input) {
     Promise<JsonObject> promise = Promise.promise();
 
-    pgPool.withConnection(
-        sqlConnection -> sqlConnection.preparedQuery("SELECT * FROM PROCESSES_TABLE WHERE ID=$1")
-          .execute(Tuple.of(UUID.fromString(input.getString("processId")))))
+    pgPool.withConnection(sqlConnection -> sqlConnection.preparedQuery(PROCESS_EXIST_CHECK_QUERY)
+        .execute(Tuple.of(UUID.fromString(input.getString("processId")))))
       .onSuccess(successResult -> {
         if (successResult.size() > 0) {
           Row row = successResult.iterator().next();
           JsonObject rowJson = row.toJson();
-          LOGGER.info(
-            "ROW " + rowJson.getJsonObject("input").getJsonObject("inputs").getMap().keySet());
           promise.complete(rowJson);
         } else {
-          LOGGER.warn("Process not found.");
-          promise.fail("Process not found.");
+          promise.fail("Process does not exist.");
         }
       }).onFailure(failureHandler -> {
-        LOGGER.error("FailResult " + failureHandler.toString());
-        promise.fail("Failed to accept the process" + failureHandler);
+        promise.fail(failureHandler.getMessage());
       });
 
     return promise.future();
   }
 
-  private boolean validateInput(JsonObject input, JsonObject processInputs) {
+  /**
+   * This method is used to validate the input.
+   *
+   * @param requestBody   contains the inputs of the request
+   * @param processInputs the process input json
+   * @return true if the input is valid, false otherwise
+   */
+  private boolean validateInput(JsonObject requestBody, JsonObject processInputs) {
     Set<String> processInputKeys = processInputs.getJsonObject("input", new JsonObject())
       .getJsonObject("inputs", new JsonObject()).getMap().keySet();
-    return processInputKeys.stream()
-      .allMatch(inputKey -> input.containsKey(inputKey) && !input.getString(inputKey).isEmpty());
+    return processInputKeys.stream().allMatch(
+      inputKey -> requestBody.containsKey(inputKey) && !requestBody.getString(inputKey).isEmpty());
   }
 
 

@@ -26,7 +26,6 @@ public class Constants {
     public static final String COLLECTION_API = "describeCollection";
     public static final String FEATURES_API = "getFeatures";
     public static final String FEATURE_API = "getFeature";
-
     public static final String EXECUTE_API = "executeProcess";
     public static final String COLLECTIONS = "collections";
     public static final String TILEMATRIXSETS_API = "getTileMatrixSetsList";
@@ -34,8 +33,6 @@ public class Constants {
     public static final String TILESETSLIST_API = ".collection.map.getTileSetsList";
     public static final String TILESET_API = ".collection.map.getTileSet";
     public static final String TILE_API = ".collection.map.getTile";
-
-    public static final String ITEMS = "items";
 
     public static final String STAC = "stac";
     public static final String STAC_OPENAPI_SPEC = "/stac/api";
@@ -48,6 +45,7 @@ public class Constants {
     public static final String STAC_COLLECTION_API = "describeStacCollection";
     public static final String ASSET_API = "getAsset";
     public static final String STAC_CONFORMANCE_CLASSES = "getConformanceDeclaration";
+    public static final String PROCESS_EXECUTION_REGEX = "/processes/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/execution";
 
   // Header params
   public static final String METERING_OPENAPI_SPEC = "/metering/api";
@@ -55,5 +53,4 @@ public class Constants {
   public static final String PROVIDER_AUDIT_API = "provider/audit";
   public static final String SUMMARY_AUDIT_API = "summary";
   public static final String OVERVIEW_AUDIT_API = "overview";
-    public static final String EXECUTION_REGEX= "/processes/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/execution";
 }

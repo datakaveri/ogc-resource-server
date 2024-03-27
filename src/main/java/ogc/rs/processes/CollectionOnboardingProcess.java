@@ -1,5 +1,22 @@
 package ogc.rs.processes;
 
+import static ogc.rs.processes.util.Constants.COLLECTIONS_DETAILS_INSERT_QUERY;
+import static ogc.rs.processes.util.Constants.COLLECTIONS_DETAILS_SELECT_QUERY;
+import static ogc.rs.processes.util.Constants.COLLECTIONS_DETAILS_TABLE_EXIST_QUERY;
+import static ogc.rs.processes.util.Constants.COLLECTION_ROLE;
+import static ogc.rs.processes.util.Constants.COLLECTION_SUPPORTED_CRS_INSERT_QUERY;
+import static ogc.rs.processes.util.Constants.COLLECTION_TYPE;
+import static ogc.rs.processes.util.Constants.CRS_TO_SRID_SELECT_QUERY;
+import static ogc.rs.processes.util.Constants.DEFAULT_SERVER_CRS;
+import static ogc.rs.processes.util.Constants.FEATURE;
+import static ogc.rs.processes.util.Constants.FILE_SIZE;
+import static ogc.rs.processes.util.Constants.GRANT_QUERY;
+import static ogc.rs.processes.util.Constants.RG_DETAILS_INSERT_QUERY;
+import static ogc.rs.processes.util.Constants.RI_DETAILS_INSERT_QUERY;
+import static ogc.rs.processes.util.Constants.ROLES_INSERT_QUERY;
+import static ogc.rs.processes.util.Constants.SECURE_ACCESS_KEY;
+import static ogc.rs.processes.util.Constants.STAC_COLLECTION_ASSETS_INSERT_QUERY;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
@@ -76,28 +93,32 @@ public class CollectionOnboardingProcess implements ProcessService {
   public Future<JsonObject> execute(JsonObject requestInput) {
     Promise<JsonObject> objectPromise = Promise.promise();
 
-    requestInput.put("progress", calculateProgress(1, 5));
+    requestInput.put("progress", calculateProgress(1, 6));
+
+    String tableID = requestInput.getString("resourceId");
+    requestInput.put("collectionsDetailsTableId", tableID);
 
     utilClass.updateJobTableStatus(requestInput, Status.RUNNING)
       .compose(updateTableResult -> makeCatApiRequest(requestInput)).compose(
-        catResponse -> utilClass.updateJobTableProgress(
-          requestInput.put("progress", calculateProgress(2, 5))))
+        catResponseHandler -> utilClass.updateJobTableProgress(
+          requestInput.put("progress", calculateProgress(2, 6))))
       .compose(updateTableResult1 -> checkIfCollectionPresent(requestInput)).compose(
         checkCollectionTableHandler -> utilClass.updateJobTableProgress(
-          requestInput.put("progress", calculateProgress(3, 5))))
-      .compose(p -> checkForCrs(requestInput))
-      .compose(
+          requestInput.put("progress", calculateProgress(3, 6))))
+      .compose(updateTableResult2 -> checkForCrs(requestInput)).compose(
         checkCollectionTableHandler -> utilClass.updateJobTableProgress(
-          requestInput.put("progress", calculateProgress(4, 5))))
-      .compose(progressUpdateHandler -> onboardingCollections(requestInput))
-      .compose(onboardingCollectionsHandler -> checkDbAndTable(requestInput))
-      .compose(onboardingSuccess -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL))
-      .onSuccess(responseFromCat -> {
-        LOGGER.info("ONBOARDING DONE");
+          requestInput.put("progress", calculateProgress(4, 6))))
+      .compose(progressUpdateHandler -> onboardingCollection(requestInput)).compose(
+        onboardingCollectionHandler -> utilClass.updateJobTableProgress(
+          requestInput.put("progress", calculateProgress(5, 6))))
+      .compose(progressUpdateHandler -> checkDbAndTable(requestInput))
+      .compose(checkDbHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL))
+      .onSuccess(onboardingSuccessHandler -> {
+        LOGGER.debug("ONBOARDING DONE");
         objectPromise.complete();
-      }).onFailure(failure -> {
+      }).onFailure(onboardingFailureHandler -> {
         LOGGER.error("ONBOARDING FAILURE");
-        handleFailure(requestInput, failure.getMessage(), objectPromise);
+        handleFailure(requestInput, onboardingFailureHandler.getMessage(), objectPromise);
       });
     return objectPromise.future();
   }
@@ -110,20 +131,30 @@ public class CollectionOnboardingProcess implements ProcessService {
    */
   private Future<JsonObject> makeCatApiRequest(JsonObject requestInput) {
     Promise<JsonObject> promise = Promise.promise();
-    // to check if the resource id is present in cat
     webClient.get(catServerPort, catServerHost, catRequestUri)
       .addQueryParam("id", requestInput.getString("resourceId")).send()
       .onSuccess(responseFromCat -> {
         if (responseFromCat.statusCode() == 200) {
-          // check if the provider is the same as the token decoded user
-          requestInput.put("provider",
+          requestInput.put("owner",
             responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
-              .getString("owner"));
+              .getString("ownerUserId"));
+          if (!(requestInput.getValue("owner").equals(requestInput.getValue("userId")))) {
+            LOGGER.error("Resource does not belong to the user.");
+            promise.fail("Resource does not belong to the user.");
+            return;
+          }
+          requestInput.put("resourceGroup",
+            responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
+              .getString("resourceGroup"));
+          requestInput.put("accessPolicy",
+            responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
+              .getString("accessPolicy"));
           promise.complete(requestInput);
         } else {
           promise.fail("Item not present in catalog");
         }
-      }).onFailure(failureResponseFromCat -> promise.fail("failed to get response from catalog"));
+      }).onFailure(failureResponseFromCat -> promise.fail(
+        "Failed to get response from catalog " + failureResponseFromCat.getMessage()));
     return promise.future();
   }
 
@@ -135,20 +166,20 @@ public class CollectionOnboardingProcess implements ProcessService {
    */
   private Future<Void> checkIfCollectionPresent(JsonObject jsonObject) {
     Promise<Void> promise = Promise.promise();
-    pgPool.withConnection(sqlConnection -> sqlConnection.preparedQuery(
-        "select id,title from collections_details where id=$1::uuid;")
-      .execute(Tuple.of((jsonObject.getString("resourceId")))).onSuccess(successHandler -> {
-        LOGGER.info("got success in collection table " + successHandler.size());
-        //  TODO: change the if condition to > 0 for testing
-        if (successHandler.size() == 0) {
-          promise.complete();
-        } else {
-          promise.fail("Collection already present");
-        }
-      }).onFailure(failureHandler -> {
-        LOGGER.error("failure handler " + failureHandler.toString());
-        promise.fail("failed " + failureHandler.getCause());
-      }));
+    pgPool.withConnection(
+      sqlConnection -> sqlConnection.preparedQuery(COLLECTIONS_DETAILS_SELECT_QUERY)
+        .execute(Tuple.of((jsonObject.getString("collectionsDetailsTableId"))))
+        .onSuccess(successHandler -> {
+          if (successHandler.size() == 0) {
+            promise.complete();
+          } else {
+            LOGGER.error("Collection already present.");
+            promise.fail("Collection already present.");
+          }
+        }).onFailure(failureHandler -> {
+          LOGGER.error("failed to check collection in db {}", failureHandler.getMessage());
+          promise.fail("failed to check collection in db " + failureHandler.getMessage());
+        }));
     return promise.future();
   }
 
@@ -173,49 +204,58 @@ public class CollectionOnboardingProcess implements ProcessService {
 
     try {
       int exitValue = defaultExecutor.execute(cmdLine);
-      LOGGER.info("exit value: " + exitValue);
+      LOGGER.debug("exit value in ogrinfo: " + exitValue);
       String output = stdout.toString();
 
       JsonObject cmdOutput =
         new JsonObject(Buffer.buffer(output.replace("Had to open data source read-only.", "")));
       JsonObject featureProperties = extractFeatureProperties(cmdOutput);
+      // put a fail if featureProperties is not present
 
       String organization = featureProperties.getString("organization");
+      if (!organization.equals("EPSG")) {
+        LOGGER.error("CRS not present as EPSG");
+        onboardingPromise.fail("CRS not present as EPSG");
+        return onboardingPromise.future();
+      }
       int organizationCoordId = featureProperties.getInteger("organization_coordsys_id");
-      LOGGER.info("organization " + organization + " id " + organizationCoordId);
+      LOGGER.debug("organization " + organization + " crs " + organizationCoordId);
 
-      fetchCrsFromDatabase(organizationCoordId, input, onboardingPromise);
+      validSridFromDatabase(organizationCoordId, input, onboardingPromise);
     } catch (IOException e1) {
-      LOGGER.error("error while onboarding the collection " + e1.getMessage());
-      onboardingPromise.fail("failed to do so " + e1.getMessage());
+      LOGGER.error("Failed while getting ogrInfo because {}", e1.getMessage());
+      onboardingPromise.fail("Failed while getting ogrInfo because {} " + e1.getMessage());
     }
     return onboardingPromise.future();
   }
 
   private JsonObject extractFeatureProperties(JsonObject cmdOutput) {
-    LOGGER.info("COMND output " + cmdOutput);
-    JsonObject layers = cmdOutput.getJsonArray("layers",new JsonArray().add(new JsonObject())).getJsonObject(0);
-    JsonArray features = layers.getJsonArray("features",new JsonArray().add(new JsonObject().put("properties",new JsonObject())));
-//    LOGGER.info("OGR INFO "+features);
+    JsonObject layers =
+      cmdOutput.getJsonArray("layers", new JsonArray().add(new JsonObject())).getJsonObject(0);
+    JsonArray features = layers.getJsonArray("features",
+      new JsonArray().add(new JsonObject().put("properties", new JsonObject())));
     return features.getJsonObject(0).getJsonObject("properties");
   }
-  private void fetchCrsFromDatabase(int organizationCoordId, JsonObject input,
-                                    Promise<JsonObject> onboardingPromise) {
-    pgPool.withConnection(
-      sqlConnection -> sqlConnection.preparedQuery("SELECT crs FROM CRS_TO_SRID WHERE SRID = $1;")
-        .execute(Tuple.of(organizationCoordId)).onSuccess(rows -> {
-          if (!rows.iterator().hasNext()) {
-            LOGGER.error("Failed to fetch CRS: No rows found.");
-            onboardingPromise.fail("Failed to fetch CRS: No rows found.");
-            return;
-          }
-          String crs = rows.iterator().next().getString("crs");
-          input.put("crs", crs);
-          onboardingPromise.complete(input);
-        }).onFailure(failureHandler -> {
-          LOGGER.error("Failed to fetch CRS from table: " + failureHandler.getMessage());
-          onboardingPromise.fail("Failed to fetch CRS from table: " + failureHandler.getMessage());
-        }));
+
+  private void validSridFromDatabase(int organizationCoordId, JsonObject input,
+                                     Promise<JsonObject> onboardingPromise) {
+    pgPool.withConnection(sqlConnection -> sqlConnection.preparedQuery(CRS_TO_SRID_SELECT_QUERY)
+      .execute(Tuple.of(organizationCoordId)).onSuccess(rows -> {
+        if (!rows.iterator().hasNext()) {
+          LOGGER.error("Failed to fetch CRS: No rows found.");
+          onboardingPromise.fail("Failed to fetch CRS: No rows found.");
+          return;
+        }
+        Row row = rows.iterator().next();
+        String crs = row.getString("crs");
+        int srid = row.getInteger("srid");
+        input.put("crs", crs);
+        input.put("srid", srid);
+        onboardingPromise.complete(input);
+      }).onFailure(failureHandler -> {
+        LOGGER.error("Failed to fetch CRS from table: " + failureHandler.getMessage());
+        onboardingPromise.fail("Failed to fetch CRS from table: " + failureHandler.getMessage());
+      }));
   }
 
   private CommandLine getOrgInfoCommandLine(JsonObject input) {
@@ -238,23 +278,17 @@ public class CollectionOnboardingProcess implements ProcessService {
     ogrinfo.addArgument(secretKey);
     ogrinfo.addArgument("-json");
     ogrinfo.addArgument("-features");
-//    ogrinfo.addArgument(String.format("/vsis3/%s%s",awsBucketUrl,filename));
-
-    ogrinfo.addArgument(String.format("/home/gopal/Downloads/geopackages/%s",filename));
+    ogrinfo.addArgument(String.format("/vsis3/%s%s", awsBucketUrl, filename));
     ogrinfo.addArgument("-sql");
     ogrinfo.addArgument(
       "select organization,organization_coordsys_id from gpkg_contents join gpkg_spatial_ref_sys using(srs_id)",
       false);
-
-    LOGGER.info("cmd " + ogrinfo);
-
     return ogrinfo;
   }
 
-  private Future<JsonObject> onboardingCollections(JsonObject input) {
-    String newItem = UUID.randomUUID().toString();
-    input.put("jobTableId", newItem);
+  private Future<JsonObject> ogr2ogrCmd(JsonObject input) {
 
+    LOGGER.debug("Trying to onboard the collection");
     CommandLine cmdLine = getCommandLineOgr2Ogr(input);
     DefaultExecutor defaultExecutor = DefaultExecutor.builder().get();
     defaultExecutor.setExitValue(0);
@@ -265,35 +299,68 @@ public class CollectionOnboardingProcess implements ProcessService {
 
     try {
       int exitValue = defaultExecutor.execute(cmdLine);
-      LOGGER.info("exit value: " + exitValue);
+      input.put("exitValue", exitValue);
       onboardingPromise.complete(input);
     } catch (IOException e1) {
-      LOGGER.error("error while onboarding the collection " + e1.getMessage());
-      onboardingPromise.fail("failed to do so " + e1.getMessage());
+      LOGGER.error("Failed to onboard the collection because {}", e1.getMessage());
+      onboardingPromise.fail("Failed to onboard the collection because " + e1.getMessage());
     }
     return onboardingPromise.future();
   }
 
-  private CommandLine getCommandLineOgr2Ogr(JsonObject input) {
-    LOGGER.info("inside command line");
+  private Future<Void> onboardingCollection(JsonObject input) {
+    Promise<Void> promise = Promise.promise();
 
-    String filename = input.getString("fileName");
+    LOGGER.debug("Pre-onboarding started");
+
+    int srid = input.getInteger("srid");
+    String fileName = input.getString("fileName");
     String title = input.getString("title");
     String description = input.getString("description");
-    String newItem = input.getString("jobTableId");
-    LOGGER.info("UUID OF TABLE " + input);
-    String crs = input.getString("crs");
-    String preludeSqlStmt = String.format(
-      "BEGIN;INSERT INTO collections_details (id, title, description, crs,type) VALUES ('%s', '%s', '%s', '%s','%s'); INSERT INTO collection_supported_crs VALUES ('%s', '%s');",
-      newItem, title, description, crs, "FEATURE",newItem,"gettheidfrmtble");
-    String closingSqlStmt = "COMMIT";
+    String collectionsDetailsTableName = input.getString("collectionsDetailsTableId");
+    String userId = input.getString("userId");
+    String role = input.getString("role").toUpperCase();
+    String resourceGroupId = input.getString("resourceGroup");
+    String resourceId = input.getString("resourceId");
+    String accessPolicy = input.getString("accessPolicy");
+    String grantQuery = GRANT_QUERY.replace("collections_details_id", collectionsDetailsTableName)
+      .replace("databaseUser", databaseUser);
+
+    pgPool.withTransaction(sqlClient -> sqlClient.preparedQuery(COLLECTIONS_DETAILS_INSERT_QUERY)
+      .execute(
+        Tuple.of(collectionsDetailsTableName, title, description, DEFAULT_SERVER_CRS, FEATURE))
+      .compose(
+        collectionsDetailsResult -> sqlClient.preparedQuery(COLLECTION_SUPPORTED_CRS_INSERT_QUERY)
+          .execute(Tuple.of(collectionsDetailsTableName, srid))).compose(
+        collectionResult -> sqlClient.preparedQuery(ROLES_INSERT_QUERY)
+          .execute(Tuple.of(userId, role))).compose(
+        rolesResult -> sqlClient.preparedQuery(RG_DETAILS_INSERT_QUERY)
+          .execute(Tuple.of(resourceGroupId, userId, SECURE_ACCESS_KEY))).compose(
+        rgDetailsResult -> sqlClient.preparedQuery(RI_DETAILS_INSERT_QUERY)
+          .execute(Tuple.of(resourceId, resourceGroupId, accessPolicy))).compose(
+        riDetailsResult -> sqlClient.preparedQuery(STAC_COLLECTION_ASSETS_INSERT_QUERY).execute(
+          Tuple.of(collectionsDetailsTableName, title, fileName, COLLECTION_TYPE, FILE_SIZE,
+            COLLECTION_ROLE))).compose(stacCollectionResult -> ogr2ogrCmd(input))
+      .compose(onBoardingSuccess -> sqlClient.query(grantQuery).execute())
+      .onSuccess(grantQueryResult -> {
+        LOGGER.debug("Collection onboarded successfully ");
+        promise.complete();
+      }).onFailure(failure -> {
+        LOGGER.error(failure.getMessage());
+        promise.fail(failure.getMessage());
+      }));
+    return promise.future();
+  }
+
+  private CommandLine getCommandLineOgr2Ogr(JsonObject input) {
+
+    String filename = input.getString("fileName");
+    String collectionsDetailsTableName = input.getString("collectionsDetailsTableId");
 
     CommandLine cmdLine = new CommandLine("ogr2ogr");
 
     cmdLine.addArgument("-nln");
-    cmdLine.addArgument(newItem);
-    cmdLine.addArgument("-nlt");
-    cmdLine.addArgument("PROMOTE_TO_MULTI");
+    cmdLine.addArgument(collectionsDetailsTableName);
     cmdLine.addArgument("-lco");
     cmdLine.addArgument("PRECISION=NO");
     cmdLine.addArgument("-lco");
@@ -304,15 +371,13 @@ public class CollectionOnboardingProcess implements ProcessService {
     cmdLine.addArgument("ENCODING=UTF-8");
     cmdLine.addArgument("-lco");
     cmdLine.addArgument("FID=id");
+    cmdLine.addArgument("-t_srs");
+    cmdLine.addArgument("EPSG:4326");
     cmdLine.addArgument("-f");
     cmdLine.addArgument("PostgreSQL");
     cmdLine.addArgument(
       String.format("PG:host=%s dbname=%s user=%s port=%d password=%s schemas=public", databaseHost,
         databaseName, databaseUser, databasePort, databasePassword), false);
-    cmdLine.addArgument("-doo");
-    cmdLine.addArgument("PRELUDE_STATEMENTS=" + preludeSqlStmt, false);
-    cmdLine.addArgument("-doo");
-    cmdLine.addArgument("CLOSING_STATEMENTS=" + closingSqlStmt, false);
     cmdLine.addArgument("-progress");
     cmdLine.addArgument("--debug");
     cmdLine.addArgument("ON");
@@ -327,8 +392,8 @@ public class CollectionOnboardingProcess implements ProcessService {
     cmdLine.addArgument("--config");
     cmdLine.addArgument("AWS_SECRET_ACCESS_KEY");
     cmdLine.addArgument(secretKey);
+
     cmdLine.addArgument(String.format("/vsis3/%s%s", awsBucketUrl, filename));
-    LOGGER.info("CMD OGR2OGR " + cmdLine);
 
     return cmdLine;
   }
@@ -340,40 +405,38 @@ public class CollectionOnboardingProcess implements ProcessService {
    * @return a future that completes when the check is complete.
    */
   private Future<RowSet<Row>> checkDbAndTable(JsonObject requestJson) {
-    String newItem = requestJson.getString("jobTableId");
-    LOGGER.info("REQEUST " + requestJson);
+
+    LOGGER.debug("Checking collection in database.");
+    String collectionsDetailsTableName = requestJson.getString("collectionsDetailsTableId");
+
     return pgPool.getConnection().compose(
-      conn -> conn.preparedQuery("SELECT * FROM collections_details where id=$1::UUID;")
-        .execute(Tuple.of(newItem)).compose(res -> {
+      conn -> conn.preparedQuery(COLLECTIONS_DETAILS_SELECT_QUERY)
+        .execute(Tuple.of(collectionsDetailsTableName)).compose(res -> {
           if (res.size() > 0) {
-            LOGGER.info("Collection found in collections_detail");
-            return conn.preparedQuery(
-                "SELECT EXISTS (SELECT 1 FROM pg_tables WHERE tablename = $1) AS table_existence;")
-              .execute(Tuple.of(newItem)).map(existsResult -> {
+            LOGGER.debug("Collection found in collections_detail");
+            return conn.preparedQuery(COLLECTIONS_DETAILS_TABLE_EXIST_QUERY)
+              .execute(Tuple.of(collectionsDetailsTableName)).map(existsResult -> {
                 if (existsResult.iterator().next().getBoolean("table_existence")) {
-                  LOGGER.info("Table Exist with name " + newItem);
+                  LOGGER.debug("Table Exist with name " + collectionsDetailsTableName);
                   return existsResult;
                 } else {
                   LOGGER.error("Table does not exist.");
-                  throw new RuntimeException("Table does not exist");
+                  throw new RuntimeException("Table does not exist ");
                 }
               }).onComplete(ar -> conn.close());
           } else {
             conn.close();
-            LOGGER.error("collection not present in collections_table");
-            return Future.failedFuture("collection not present in collections_table");
+            LOGGER.error("Collection not present in collections_details");
+            return Future.failedFuture("Collection not present in collections_details");
           }
         }));
   }
 
   private void handleFailure(JsonObject input, String errorMessage,
                              Promise<JsonObject> itemDetails) {
-    LOGGER.error("Inside failure handler because {}", errorMessage);
     utilClass.updateJobTableStatus(input, Status.FAILED).onSuccess(l -> {
-      LOGGER.info("success");
       itemDetails.fail("Failed to onboard collection because " + errorMessage);
     }).onFailure(jobTableUpdateFailure -> {
-      LOGGER.error("failure");
       itemDetails.fail("Failed to update fail status because " + jobTableUpdateFailure.getCause());
     });
 

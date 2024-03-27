@@ -450,11 +450,18 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
 
     return promise.future();
   }
+  /**
+   * This method is used to check the authentication and authorization of the user for the execution API.
+   *
+   * @param authenticationInfo The authentication information provided by the user, including the JWT token.
+   * @param requestJson The request JSON object for metering purpose.
+   * @return A JSON object containing the authorization details, including the "isAuthorised" field, which indicates whether the user is authorized or not.
+   */
   @Override
-  public Future<JsonObject> executionApiCheck(JsonObject authenticationInfo, JsonObject requestJson) {
+  public Future<JsonObject> executionApiCheck(JsonObject authenticationInfo,
+                                              JsonObject requestJson) {
     Promise<JsonObject> result = Promise.promise();
     String token;
-    LOGGER.info("in jwt "+authenticationInfo);
 
     try {
       token = authenticationInfo.getString("token");
@@ -466,43 +473,32 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
     Future<JWTData> jwtDecodeFut = decodeJwt(token);
     ResultContainer resultIntermediate = new ResultContainer();
     assert jwtDecodeFut != null;
-    jwtDecodeFut
-      .compose(
-        decode -> {
-          resultIntermediate.jwtData = decode;
-          LOGGER.debug(
-            "Intermediate JWTData: {}", resultIntermediate.jwtData.toJson());
-          return isValidAudience(resultIntermediate.jwtData);
-        }).compose(audience -> {
-        LOGGER.debug("Valid Audience: {}\n" , audience);
-        // check for revoked client here before returning true
-        return Future.succeededFuture(true);
-      })
-      .compose(
-        revokedClient -> {
-          LOGGER.debug("Valid Audience: {}", revokedClient);
-          // check for valid iid, should be iid[1]==aud
-          return isValidId(resultIntermediate.jwtData,resultIntermediate.jwtData.getAud());
-        })
-      .compose(
-        validIid -> {
-          // check for valid access
-          LOGGER.debug("Valid iid {}", validIid);
-          return validateExecutionAccess(resultIntermediate.jwtData);
-        })
-      .onSuccess(
-        validExecutionAccess -> {
-          validExecutionAccess.put("isAuthorised", true);
-          result.complete(validExecutionAccess);
-          LOGGER.debug("Congratulations! It worked. {}", (validExecutionAccess).toString());
-        })
-      .onFailure(
-        failed -> {
-          LOGGER.error(
-            "Something went wrong while authentication or authorisation: {}",
-            failed.getMessage());
-          result.fail(failed);
-        });
+
+    jwtDecodeFut.compose(decode -> {
+      resultIntermediate.jwtData = decode;
+      LOGGER.debug("Intermediate JWTData: {}", resultIntermediate.jwtData.toJson());
+      return isValidAudience(resultIntermediate.jwtData);
+    }).compose(audience -> {
+      LOGGER.debug("Valid Audience: {}", audience);
+      // check for revoked client here before returning true
+      return Future.succeededFuture(true);
+    }).compose(revokedClient -> {
+      LOGGER.debug("Valid Audience: {}", revokedClient);
+      // check for valid iid, should be iid[1]==aud
+      return isValidId(resultIntermediate.jwtData, resultIntermediate.jwtData.getAud());
+    }).compose(validIid -> {
+      // check for valid access
+      LOGGER.debug("Valid iid {}", validIid);
+      return validateExecutionAccess(resultIntermediate.jwtData);
+    }).onSuccess(validExecutionAccess -> {
+      validExecutionAccess.put("isAuthorised", true);
+      result.complete(validExecutionAccess);
+      LOGGER.debug("Authorization done successfully {}", (validExecutionAccess).toString());
+    }).onFailure(failed -> {
+      LOGGER.error("Something went wrong while authentication or authorisation: {}",
+        failed.getMessage());
+      result.fail(failed);
+    });
 
     return result.future();
   }
