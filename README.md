@@ -5,7 +5,11 @@
 [![Security Tests](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.iudx.io%2Fjob%2Fogc%2520resource-server%2520%28master%29%2520pipeline%2F&label=security%20tests)](https://jenkins.iudx.io/job/ogc%20resource-server%20(master)%20pipeline/lastBuild/zap/)
 
 # OGC Resource Server
-OGC (and STAC) compliant IUDX based resource server serving Geospatial data
+OGC (and STAC) compliant IUDX based resource server serving Geospatial data.
+
+<p align="center">
+<img src="./readme/images/OGCArch.png">
+</p>
 
 ### Prerequisites
 - Make a config file based on the template in [example-config/config-example.json](./example-config/config-example.json)
