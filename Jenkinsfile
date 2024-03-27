@@ -21,21 +21,17 @@ pipeline {
         script {
           devImage = docker.build( devRegistry, "-f ./docker/dev.dockerfile .")
           testImage = docker.build( testRegistry, "-f ./docker/test.dockerfile .")
+          moddedS3Mock = docker.build( "s3-mock-modded", "-f ./docker/s3_mock_modded_to_443.dockerfile .")
         }
       }
     }
 
-    stage('Unit Tests and Code Coverage Test'){
+    stage('Setup Server for Compliance Tests and Code Coverage Test'){
       steps{
         script{
-          sh 'docker compose -f docker-compose.test.yml up test'
-        }
-        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-          xunit (
-            thresholds: [ skipped(failureThreshold: '10'), failed(failureThreshold: '10') ],
-            tools: [ JUnit(pattern: 'target/surefire-reports/*.xml') ]
-          )
-          jacoco classPattern: 'target/classes', execPattern: 'target/jacoco.exec', sourcePattern: 'src/main/java'
+          sh 'scp src/test/resources/OGC_compliance/compliance.xml jenkins@jenkins-master:/var/lib/jenkins/iudx/ogc/'
+          sh 'docker compose -f docker-compose.test.yml up -d test'
+          sh 'sleep 20'
         }
       }
       post{
@@ -43,13 +39,102 @@ pipeline {
           script{
             sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
           }
-          error "Test failure. Stopping pipeline execution!"
+        }
+      }
+    }
+
+    stage('Start OGC Feature Compliance Tests'){
+      steps{
+        node('built-in') {
+          script{
+            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          if (!fileExists('ets-ogcapi-features10')) {
+            sh 'git clone https://github.com/opengeospatial/ets-ogcapi-features10'
+          }
+          dir('ets-ogcapi-features10') {
+            if(!fileExists('target')) {
+                sh 'mvn clean package -Dmaven.test.skip -Dmaven.javadoc.skip=true'
+            }
+            sh 'java -jar target/ets-ogcapi-features10-1.8-SNAPSHOT-aio.jar --generateHtmlReport true /var/lib/jenkins/iudx/ogc/compliance.xml'
+            }
+            }
+          }
+        }
+      }
+      post{
+        always{
+          node('built-in') {
+            script{
+              catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                  env.NEWEST_TEST_DIR = sh(script: 'ls -t ~/testng | head -n1', returnStdout: true).trim()
+                  sh 'cp -r ~/testng/${NEWEST_TEST_DIR} .'
+                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: env.NEWEST_TEST_DIR, reportFiles: 'emailable-report.html,index.html', reportTitles: 'Overview,Detailed Report', reportName: 'OGC Feature Compliance Test Reports'])
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stage('Start STAC Compliance Tests'){
+      steps{
+        node('built-in') {
+          script{
+            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          if (!fileExists('stac-validator-venv')) {
+            sh 'python3.10 -m venv stac-validator-venv'
+          }
+            sh '''
+            . stac-validator-venv/bin/activate
+
+            pip install stac-api-validator
+
+            stac-api-validator \
+            --root-url http://jenkins-slave1:8443/stac/ \
+            --conformance core \
+            --conformance collections \
+            --collection a5a6e26f-d252-446d-b7dd-4d50ea945102 > stacOutput.html
+            '''
+            }
+          }
+        }
+      }
+      post{
+        always{
+          node('built-in') {
+            sh """
+                sed -i '1s/^/<!DOCTYPE html><html>/g' stacOutput.html
+                echo '</html>' >> stacOutput.html
+            """
+            script{
+              catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '.', reportFiles: 'stacOutput.html', reportTitles: 'STAC', reportName: 'STAC Compliance Test Reports'])
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stage('Extract class files and JaCoCo data from container and make JaCoCo report'){
+      steps{
+        script{
+          sh 'docker-compose -f docker-compose.test.yml exec -T test cp -r ./built-classes /tmp/test'
+          sh 'docker-compose -f docker-compose.test.yml exec -T test java -jar /tmp/jacoco/lib/jacococli.jar dump --address 127.0.0.1 --port 57070 --destfile /tmp/test/jacoco.exec'
+        }
+        jacoco classPattern: 'built-classes', execPattern: 'jacoco.exec'
+      }
+      post{
+        failure{
+          script{
+            sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
+          }
         }
         cleanup{
           script{
-            sh 'sudo rm -rf target/'
+            sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
           }
-        }        
+        }
       }
     }
 
