@@ -1,5 +1,9 @@
 package ogc.rs.processes.util;
 
+import static ogc.rs.processes.util.Constants.NEW_JOB_INSERT_QUERY;
+import static ogc.rs.processes.util.Constants.UPDATE_JOB_STATUS_PROGRESS;
+import static ogc.rs.processes.util.Constants.UPDATE_JOB_TABLE_STATUS_QUERY;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
@@ -10,98 +14,86 @@ import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * This class provides utility methods for the other classes.
+ */
 public class UtilClass {
   Logger LOGGER = LogManager.getLogger(UtilClass.class);
 
   PgPool pgPool;
-  public UtilClass(PgPool pgPool){
-    this.pgPool=pgPool;
+
+  public UtilClass(PgPool pgPool) {
+    this.pgPool = pgPool;
   }
 
-  public Future<JsonObject> startAJobInDB(JsonObject input){
-    Promise<JsonObject> promise= Promise.promise();
-
-    input.put("user_id","dd3551b3-77a3-4da2-bb3c-92ca7d54a5ab");
+  /**
+   * This method is used to start a new job.
+   *
+   * @param input the input json object
+   * @return the input json object with the job id added
+   */
+  public Future<JsonObject> startAJobInDB(JsonObject input) {
+    Promise<JsonObject> promise = Promise.promise();
     String process_id = input.getString("processId");
-    String user_id = input.getString("user_id");
+    String userId = input.getString("userId");
     JsonObject output_json = input.getJsonObject("outputs");
 
-    pgPool.withConnection(sqlConnection -> sqlConnection.
-      preparedQuery("INSERT INTO JOBS_TABLE (process_id,user_id,created_at," +
-        "updated_at,input,output,progress,status,type,message) VALUES($1,$2,NOW(),NOW()," +
-        "$3,$4,'0.0',$5,'PROCESS',$6) RETURNING ID,status;").
-      execute(Tuple.of(UUID.fromString(process_id),UUID.fromString(user_id),input,output_json,
-        Status.ACCEPTED,Status.ACCEPTED.message))).onSuccess(successResult->{
-      for(Row row: successResult){
-        input.put("job_id",row.getUUID("id").toString());
+    pgPool.withConnection(sqlConnection -> sqlConnection.preparedQuery(NEW_JOB_INSERT_QUERY)
+      .execute(Tuple.of(UUID.fromString(process_id), UUID.fromString(userId), input, output_json,
+        Status.ACCEPTED, Status.ACCEPTED.message))).onSuccess(successResult -> {
+      for (Row row : successResult) {
+        input.put("jobId", row.getUUID("id").toString());
       }
+      LOGGER.debug("New Job created.");
       promise.complete(input);
-    }).onFailure(failureHandler->{
-      LOGGER.error("FailResult "+failureHandler.toString());
-      promise.fail("failed to accept the process"+failureHandler.toString());
+    }).onFailure(failureHandler -> {
+      LOGGER.error("Failed to create a job: {}", failureHandler.getMessage());
+      promise.fail("Failed to create a job " + failureHandler.getMessage());
     });
 
     return promise.future();
   }
 
+  /**
+   * Updates the status of a job in the database.
+   *
+   * @param input  the input JSON object
+   * @param status the status to update to
+   * @return a future that completes when the update is complete
+   */
   public Future<Void> updateJobTableStatus(JsonObject input, Status status) {
-    LOGGER.info("Inside update table for "+status.message);
-    input.put("message","updated msg");
     Promise<Void> promise = Promise.promise();
-    UUID jobId = UUID.fromString(input.getString("job_id"));
-    pgPool.withConnection(sqlConnection ->
-      sqlConnection.preparedQuery(
-          "UPDATE JOBS_TABLE\n" +
-            "SET\n" +
-            "    UPDATED_AT = NOW(),\n" +
-            "    STARTED_AT = CASE\n" +
-            "                    WHEN $1 = 'RUNNING' THEN NOW()\n" +
-            "                    ELSE STARTED_AT\n" +
-            "                 END,\n" +
-            "    FINISHED_AT = CASE\n" +
-            "                     WHEN $1 IN ('FAILED', 'SUCCESSFUL') THEN NOW()\n" +
-            "                     ELSE NULL\n" +
-            "                 END,\n" +
-            "    PROGRESS = CASE\n" +
-            "                   WHEN $1 = 'SUCCESSFUL' THEN 100.0\n" +
-            "                   WHEN $1 = 'RUNNING' THEN 25.0\n" +
-            "                   ELSE PROGRESS\n" +
-            "               END,\n" +
-            "    STATUS = $1::JOB_STATUS_TYPE,\n" +
-            "    MESSAGE = $2\n" +
-            "WHERE\n" +
-            "    ID = $3;\n"
-        )
-        .execute(Tuple.of(status,status.message,jobId))
-    ).onSuccess(successResult -> {
-      LOGGER.info("Insertion into db complete " + status.message);
+    UUID jobId = UUID.fromString(input.getString("jobId"));
+    pgPool.withConnection(
+      sqlConnection -> sqlConnection.preparedQuery(UPDATE_JOB_TABLE_STATUS_QUERY)
+        .execute(Tuple.of(status, status.message, jobId))).onSuccess(successResult -> {
+      LOGGER.debug("Job status updated to {}", status.message);
       promise.complete();
     }).onFailure(failureHandler -> {
-      LOGGER.error("FailResult " + failureHandler.toString());
-      promise.fail("failed to accept the process" + failureHandler);
+      LOGGER.error("Failed to update job status: {}", failureHandler.getMessage());
+      promise.fail("Failed to update job status: " + failureHandler.getMessage());
     });
     return promise.future();
   }
 
+  /**
+   * Updates the progress of a job in the database.
+   *
+   * @param input the input JSON object
+   * @return a future that completes when the update is complete
+   */
   public Future<Void> updateJobTableProgress(JsonObject input) {
-    LOGGER.info("Inside update table for progress update "+input.getFloat("progress"));
 
     Promise<Void> promise = Promise.promise();
     float progress = input.getFloat("progress");
-    UUID jobId = UUID.fromString(input.getString("job_id"));
-    pgPool.withConnection(sqlConnection ->
-      sqlConnection.preparedQuery(
-          "UPDATE JOBS_TABLE " +
-            "SET PROGRESS = $1 " +
-            "WHERE ID = $2;"
-        )
-        .execute(Tuple.of(progress,jobId))
-    ).onSuccess(successResult -> {
-      LOGGER.info("Progress update into db complete.");
+    UUID jobId = UUID.fromString(input.getString("jobId"));
+    pgPool.withConnection(sqlConnection -> sqlConnection.preparedQuery(UPDATE_JOB_STATUS_PROGRESS)
+      .execute(Tuple.of(progress, jobId))).onSuccess(successResult -> {
+      LOGGER.debug("Job progress updated to {}", progress);
       promise.complete();
     }).onFailure(failureHandler -> {
-      LOGGER.error("FailResult " + failureHandler.getLocalizedMessage());
-      promise.fail("failed to update the progress");
+      LOGGER.error("Failed to update job progress: {}", failureHandler.getMessage());
+      promise.fail("Failed to update job progress: " + failureHandler.getMessage());
     });
     return promise.future();
   }

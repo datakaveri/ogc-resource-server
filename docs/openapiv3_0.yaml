@@ -519,12 +519,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/statusInfo'
-        "400":
+        "404":
           description: The requested URI was not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/exception400'
+                $ref: '#/components/schemas/exception404'
             text/html:
               schema:
                 type: string
