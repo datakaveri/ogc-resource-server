@@ -138,13 +138,13 @@ pipeline {
       }
     }
 
-    stage('Start ogc-Resource-Server for Integration Testing'){
+    stage('Start ogc-Resource-Server for Integration Testing and Jmeter Test'){
       steps{
         script{
           sh 'scp Jmeter/OGCResourceServer.jmx jenkins@jenkins-master:/var/lib/jenkins/iudx/ogc/Jmeter/'
           sh 'scp src/test/resources/OGC_Resource_Server_v0.0.2.postman_collection.json jenkins@jenkins-master:/var/lib/jenkins/iudx/ogc/Newman/'
-          sh 'docker compose -f docker-compose.test.yml up -d perfTest'
-          sh 'sleep 120'
+          sh 'docker compose -f docker-compose.test.yml up -d test'
+          sh 'sleep 20'
         }
       }
       post{
