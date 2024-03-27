@@ -7,7 +7,6 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.*;
-import io.vertx.core.Promise;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -27,7 +26,6 @@ import ogc.rs.apiserver.util.DataFromS3;
 import ogc.rs.apiserver.handlers.FailureHandler;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.database.DatabaseService;
-import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.ProcessesRunnerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,6 +39,7 @@ import java.util.*;
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
 import static ogc.rs.common.Constants.DEFAULT_SERVER_CRS;
+import static ogc.rs.common.Constants.PROCESSING_SERVICE_ADDRESS;
 
 /**
  * The OGC Resource Server API Verticle.
@@ -270,7 +269,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                 throw new RuntimeException(e.getMessage());
               }
 
-          processService = ProcessesRunnerService.createProxy(vertx,"ogc.rs.processes.service");
+          processService = ProcessesRunnerService.createProxy(vertx,PROCESSING_SERVICE_ADDRESS);
           dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
           // TODO: ssl configuration
           HttpServerOptions serverOptions = new HttpServerOptions();
@@ -294,33 +293,32 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   private void executeJob(RoutingContext routingContext) {
 
-    RequestParameters paramsFromOasValidation = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+    RequestParameters paramsFromOasValidation =
+      routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
     JsonObject requestBody = paramsFromOasValidation.body().getJsonObject().getJsonObject("inputs");
-//    requestBody.put("outputs", routingContext.getBodyAsJson().getJsonObject("outputs"));
-    LOGGER.info("requstBodt "+requestBody);
-    LOGGER.info("requstBodt "+paramsFromOasValidation.pathParametersNames());
-
-    requestBody.put("processId", paramsFromOasValidation.pathParameter("processId").getString());
+    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
+    requestBody.put("processId", paramsFromOasValidation.pathParameter("processId").getString())
+      .put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
 
     processService.run(requestBody, handler -> {
 
       if (handler.succeeded()) {
-        LOGGER.info("handler result here " + handler.result());
-        LOGGER.info("handler success");
+        LOGGER.debug("Process started successfully.");
         routingContext.response().headers().add("Location", handler.result().getString("location"));
         handler.result().remove("location");
         routingContext.put("response", handler.result().toString());
         routingContext.put("statusCode", 201);
         routingContext.next();
       } else {
-        if (handler.cause().getMessage().equals("Process not found.")) {
-          LOGGER.error("handler fail "+handler.cause().getMessage());
-          routingContext.put("response", new JsonObject().put("code","Bad request").put("description",handler.cause().getMessage()).toString());
-          routingContext.put("statusCode", 400);
+        if (handler.cause().getMessage().equals("Process does not exist.")) {
+          routingContext.put("response",
+            new JsonObject().put("code", "Not Found").put("description", "Resource not found")
+              .toString());
+          routingContext.put("statusCode", 404);
           routingContext.next();
         } else {
-          LOGGER.error("handler fail "+handler.cause().getMessage());
-          routingContext.put("response", new JsonObject().put("code","Internal Server Error").put("description",handler.cause().getMessage()).toString());
+          routingContext.put("response", new JsonObject().put("code", "Internal Server Error")
+            .put("description", handler.cause().getMessage()).toString());
           routingContext.put("statusCode", 500);
           routingContext.next();
         }

@@ -11,7 +11,7 @@ import ogc.rs.authenticator.AuthenticationService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static ogc.rs.apiserver.util.Constants.EXECUTION_REGEX;
+import static ogc.rs.apiserver.util.Constants.PROCESS_EXECUTION_REGEX;
 import static ogc.rs.apiserver.util.Constants.HEADER_TOKEN;
 import static ogc.rs.common.Constants.AUTH_SERVICE_ADDRESS;
 import static ogc.rs.common.Constants.UUID_REGEX;
@@ -39,7 +39,7 @@ public class AuthHandler implements Handler<RoutingContext> {
       String token;
       String id;
       String path = context.normalizedPath();
-      boolean isProcessExecution = path.matches(EXECUTION_REGEX);
+      boolean isProcessExecution = path.matches(PROCESS_EXECUTION_REGEX);
       token = request.headers().get(HEADER_TOKEN);
       id = context.pathParam("collectionId");
       if (context.request().path().substring(1, 7).equals("assets")) {
@@ -55,16 +55,13 @@ public class AuthHandler implements Handler<RoutingContext> {
       }
       JsonObject requestJson = new JsonObject();
       JsonObject authInfo = new JsonObject().put(HEADER_TOKEN, token).put("id", id);
-      LOGGER.debug("<AuthHandler> {}", authInfo.toString());
 
       if (isProcessExecution) {
-        LOGGER.info("HERE " + isProcessExecution);
         Future<JsonObject> resultFromAuth = authenticator.executionApiCheck(authInfo, requestJson);
         resultFromAuth
           .onSuccess(
             result -> {
-              LOGGER.info("Successfully authenticated");
-              context.data().put("authInfo", authInfo);
+              context.data().put("authInfo", result);
               context.data().put("isAuthorised", result.getBoolean("isAuthorised"));
               context.next();
             })

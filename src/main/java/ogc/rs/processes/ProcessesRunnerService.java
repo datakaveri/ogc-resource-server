@@ -18,8 +18,14 @@ public interface ProcessesRunnerService {
   static ProcessesRunnerService createProxy(Vertx vertx, String address) {
     return new ProcessesRunnerServiceVertxEBProxy(vertx, address);
   }
+  /**
+   * Runs the process with the given input data.
+   *
+   * @param input the input data for the process
+   * @param handler the handler to be called with the result of the process
+   */
   @Fluent
   ProcessesRunnerService run(JsonObject input, Handler<AsyncResult<JsonObject>>
-    promise);
+    handler);
 
 }
