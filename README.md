@@ -5,11 +5,17 @@
 [![Security Tests](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.iudx.io%2Fjob%2Fogc_resource-server_master_pipeline%2F&label=security%20tests)](https://jenkins.iudx.io/job/ogc_resource-server_master_pipeline/lastBuild/zap/)
 
 # OGC Resource Server
-OGC (and STAC) compliant IUDX based resource server serving Geospatial data.
 
 <p align="center">
 <img src="./readme/images/OGCArch.png">
 </p>
+
+### Features
+- Supports OGC Features and STAC APIs
+- Allows authorized data access based on access policies
+- Enables metered data access
+- Updated with latest software and client libraries
+- Enhanced Software Testing
 
 ### Prerequisites
 - Make a config file based on the template in [example-config/config-example.json](./example-config/config-example.json)
