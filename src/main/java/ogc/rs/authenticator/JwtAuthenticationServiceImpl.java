@@ -450,13 +450,6 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
 
     return promise.future();
   }
-  /**
-   * This method is used to check the authentication and authorization of the user for the execution API.
-   *
-   * @param authenticationInfo The authentication information provided by the user, including the JWT token.
-   * @param requestJson The request JSON object for metering purpose.
-   * @return A JSON object containing the authorization details, including the "isAuthorised" field, which indicates whether the user is authorized or not.
-   */
   @Override
   public Future<JsonObject> executionApiCheck(JsonObject authenticationInfo,
                                               JsonObject requestJson) {

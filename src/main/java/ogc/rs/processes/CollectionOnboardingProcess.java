@@ -137,7 +137,7 @@ public class CollectionOnboardingProcess implements ProcessService {
           requestInput.put("owner",
             responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
               .getString("ownerUserId"));
-          if (!(requestInput.getValue("owner").equals(requestInput.getValue("userId")))) {
+          if (!(requestInput.getValue("owner").toString().equals(requestInput.getValue("userId").toString()))) {
             LOGGER.error("Resource does not belong to the user.");
             promise.fail("Resource does not belong to the user.");
             return;
@@ -209,8 +209,6 @@ public class CollectionOnboardingProcess implements ProcessService {
       JsonObject cmdOutput =
         new JsonObject(Buffer.buffer(output.replace("Had to open data source read-only.", "")));
       JsonObject featureProperties = extractFeatureProperties(cmdOutput);
-      // put a fail if featureProperties is not present
-
       String organization = featureProperties.getString("organization");
       if (!organization.equals("EPSG")) {
         LOGGER.error("CRS not present as EPSG");
@@ -256,9 +254,13 @@ public class CollectionOnboardingProcess implements ProcessService {
         onboardingPromise.fail("Failed to fetch CRS from table: " + failureHandler.getMessage());
       }));
   }
-
+  /**
+   This method, getOrgInfoCommandLine, is utilized for generating a command line to execute the ogrinfo command.
+   The ogrinfo command serves the purpose of extracting feature properties from the command line output,
+   which in turn facilitates the retrieval of properties.
+   **/
   private CommandLine getOrgInfoCommandLine(JsonObject input) {
-    LOGGER.info("inside command line");
+    LOGGER.debug("inside command line");
 
     String filename = input.getString("fileName");
     CommandLine ogrinfo = new CommandLine("ogrinfo");
@@ -307,6 +309,12 @@ public class CollectionOnboardingProcess implements ProcessService {
     return onboardingPromise.future();
   }
 
+  /**
+   * Asynchronously performs the onboarding process for a collection based on the provided input parameters.
+   *
+   * @param input The JsonObject containing parameters required for the collection onboarding process.
+   * @return A Future<Void> representing the completion of the onboarding process.
+   */
   private Future<Void> onboardingCollection(JsonObject input) {
     Promise<Void> promise = Promise.promise();
 
@@ -351,6 +359,12 @@ public class CollectionOnboardingProcess implements ProcessService {
     return promise.future();
   }
 
+  /**
+   * Constructs a command line for executing the ogr2ogr command which reads a collection file from source and insert collection data into db.
+   *
+   * @param input The JsonObject containing parameters for the ogr2ogr command.
+   * @return The constructed CommandLine object ready for execution.
+   */
   private CommandLine getCommandLineOgr2Ogr(JsonObject input) {
 
     String filename = input.getString("fileName");

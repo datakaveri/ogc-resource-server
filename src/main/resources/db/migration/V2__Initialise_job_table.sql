@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS jobs_table
 	finished_at timestamp without time zone DEFAULT NULL,
 	input jsonb,
 	output jsonb,
-	progress decimal(5,2),
+	progress decimal(4,2),
 	status job_status_type NOT NULL,
 	type job_type NOT NULL,
 	message varchar,

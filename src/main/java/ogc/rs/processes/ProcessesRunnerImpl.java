@@ -56,6 +56,8 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
         Future<JsonObject> startAJobInDB = utilClass.startAJobInDB(input);
 
         startAJobInDB.onSuccess(jobStarted -> {
+          LOGGER.info("Job started in DB with jobId {} ", jobStarted.getValue("jobId"),
+            " for process with processId {}", input.getString("processId"));
           handler.handle(Future.succeededFuture(
             new JsonObject().put("jobId", jobStarted.getValue("jobId"))
               .put("processId", input.getString("processId")).put("type", "PROCESS")

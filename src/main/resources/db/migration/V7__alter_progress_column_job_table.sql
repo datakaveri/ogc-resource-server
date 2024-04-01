@@ -1,0 +1,1 @@
+ALTER TABLE jobs_table ALTER COLUMN progress TYPE DECIMAL(5,2);
