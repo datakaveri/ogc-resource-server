@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "bff865d3-dec7-4aab-a013-c84d3ddf1ce5",
+		"_postman_id": "c94a63bc-aa30-4a91-b02c-f43e6bf13619",
 		"name": "OGC Resource Server v0.0.2",
 		"description": "Components/APIs used in the OGC Compliant Resource Server.\n\nOGC Features API standard can be found at\n\n[\"OGC API - Features - Part 1: Core corrigendum standard\"](https://docs.opengeospatial.org/is/17-069r4/17-069r4.html).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "27217689"
+		"_exporter_id": "20457128"
 	},
 	"item": [
 		{
@@ -3315,1541 +3315,6 @@
 			]
 		},
 		{
-			"name": "Consumer Audit",
-			"item": [
-				{
-					"name": "200 (success) Get Data Read Query",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 200 (OK)\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"successful operations\");",
-									"    pm.expect(body).to.have.property(\"type\", \"urn:dx:gsx:success\");",
-									"",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{secureResourceToken}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/consumer/audit?timerel=during&time=2022-11-20T14:20:00Z&endTime=2022-11-21T14:20:00Z&id={{uuidOfResource}}&api=/{{basePath}}/collections",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"consumer",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2022-11-20T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-11-21T14:20:00Z"
-								},
-								{
-									"key": "id",
-									"value": "{{uuidOfResource}}"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/collections"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "200 (success) Get Data Count Query",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 200 (OK)\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"successful operations\");",
-									"    const resultsjsonData = body.results[0];",
-									"    pm.expect(resultsjsonData).to.have.property(\"total\", 26172);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{delegateToken}}",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/consumer/audit?timerel=during&time=2022-11-20T00:00:00Z&endTime=2022-11-21T16:00:00Z&id={{uuidOfResource}}&api=/{{basePath}}/collections",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"consumer",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2022-11-20T00:00:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-11-21T16:00:00Z"
-								},
-								{
-									"key": "id",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "id",
-									"value": "{{uuidOfResource}}"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/collections"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "204 (success) Get Data Count Query",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"response is 204 (no Content)\", function () {",
-									"    pm.response.to.have.status(204);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{secureResourceToken}}",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/consumer/audit?timerel=during&time=2020-07-01T14:20:00Z&endTime=2020-07-10T15:23:00Z&options=count&id={{uuidOfResource}}&api=/{{basePath}}/collections",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"consumer",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2020-07-01T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2020-07-10T15:23:00Z"
-								},
-								{
-									"key": "options",
-									"value": "count"
-								},
-								{
-									"key": "id",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "id",
-									"value": "{{uuidOfResource}}"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/collections"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "400 (failure) Invalid date-interval",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 400 (Bad request)\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{consumerToken}}",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/consumer/audit?timerel=during&time=2022-07-01T14:20:00Z&endTime=2022-08-15T15:23:00Z&options=count&id={{uuidOfResource}}&api=/{{basePath}}/collections",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"consumer",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2022-07-01T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-08-15T15:23:00Z"
-								},
-								{
-									"key": "options",
-									"value": "count"
-								},
-								{
-									"key": "id",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "id",
-									"value": "{{uuidOfResource}}"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/collections"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "400 (failure) Get Data Read Query Count > 10000",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 400 (Bad request)\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{secureResourceToken}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/consumer/audit?id={{uuidOfResource}}&timerel=during&time=2022-05-01T14:20:00Z&endTime=2022-05-15T15:23:00Z&api=/{{basePath}}/collections",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"consumer",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "{{uuidOfResource}}"
-								},
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2022-05-01T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-05-15T15:23:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/collections"
-								},
-								{
-									"key": "id",
-									"value": "",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "400 (failure) Missing time-relation",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 400 (Bad request)\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{secureResourceToken}}",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/consumer/audit?id={{uuidOfResource}}&time=2022-07-01T14:20:00Z&endTime=2022-08-15T15:23:00Z&api=/{{basePath}}/collections&options=count",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"consumer",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "{{uuidOfResource}}"
-								},
-								{
-									"key": "time",
-									"value": "2022-07-01T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-08-15T15:23:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/collections"
-								},
-								{
-									"key": "options",
-									"value": "count"
-								},
-								{
-									"key": "id",
-									"value": "",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "400 (failure) invalid-parameter empty-response read query",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 400 (Bad request)\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{secureResourceToken}}",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/consumer/audit?id={{uuidOfResource}}&time=2022-07-01T14:20:00Z&endTime=2022-08-15T15:23:00Z&api=/{{basePath}}/collections&options=count",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"consumer",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "{{uuidOfResource}}"
-								},
-								{
-									"key": "time",
-									"value": "2022-07-01T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-08-15T15:23:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/collections"
-								},
-								{
-									"key": "options",
-									"value": "count"
-								},
-								{
-									"key": "id",
-									"value": "",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "401 (not authorized) Get Data Read Query",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 401 (Not Authorized)\", function () {",
-									"    pm.response.to.have.status(401);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"Not Authorized\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "abcd",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/consumer/audit?id={{uuidOfResource}}&timerel=during&time=2022-05-01T14:20:00Z&endTime=2022-05-10T15:23:00Z&api=/{{basePath}}/collections",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"consumer",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "{{uuidOfResource}}"
-								},
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2022-05-01T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-05-10T15:23:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/collections"
-								},
-								{
-									"key": "id",
-									"value": "",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "401 (not authorized) Get Data Count Query",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 401 (Not Authorized)\", function () {",
-									"    pm.response.to.have.status(401);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"Not Authorized\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "abcd",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/consumer/audit?id={{uuidOfResource}}&timerel=during&time=2022-05-01T14:20:00Z&endTime=2022-05-10T15:23:00Z&api=/{{basePath}}/collections",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"consumer",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "{{uuidOfResource}}"
-								},
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2022-05-01T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-05-10T15:23:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/collections"
-								},
-								{
-									"key": "id",
-									"value": "",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Provider Audit",
-			"item": [
-				{
-					"name": "200 (success) Get Data Read Query",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 200 (OK)\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"successful operations\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{delegateToken}}",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/provider/audit?id={{uuidOfResource}}&timerel=during&time=2022-11-20T14:20:00Z&endTime=2022-11-21T14:20:00Z&api=/{{basePath}}/collections&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"provider",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "{{uuidOfResource}}"
-								},
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2022-11-20T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-11-21T14:20:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/collections"
-								},
-								{
-									"key": "providerID",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "200 (success) Get Data Count Query",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 200 (OK)\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"successful operations\");",
-									"    const resultsjsonData = body.results[0];",
-									"    pm.expect(resultsjsonData).to.have.property(\"total\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{delegateToken}}",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/provider/audit?id={{uuidOfResource}}&timerel=during&time=2022-11-20T14:20:00Z&endTime=2022-11-21T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"provider",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "{{uuidOfResource}}"
-								},
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2022-11-20T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-11-21T14:20:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/entityOperations/query"
-								},
-								{
-									"key": "providerID",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
-								},
-								{
-									"key": "consumer",
-									"value": "15c7506f-c800-48d6-adeb-0542b03947c6",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "204 (success) Get Data Count Query",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"response is 204 (no Content)\", function () {",
-									"    pm.response.to.have.status(204);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{delegateToken}}",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2020-11-20T14:20:00Z&endTime=2020-12-02T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"provider",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
-								},
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2020-11-20T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2020-12-02T14:20:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/entityOperations/query"
-								},
-								{
-									"key": "providerID",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
-								},
-								{
-									"key": "consumer",
-									"value": "15c7506f-c800-48d6-adeb-0542b03947c6",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "400 (failure) Get Data Read Query count > 10000",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 400 (Bad request)\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{delegateToken}}",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2022-04-01T14:20:00Z&endTime=2022-04-15T14:20:00Z&api=/{{basePath}}/entities&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"provider",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
-								},
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2022-04-01T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-04-15T14:20:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/entities"
-								},
-								{
-									"key": "providerID",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "400 (failure) Invalid date time",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{delegateToken}}",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2021-11-20T14:20:00Z&endTime=2022-11-24T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"provider",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
-								},
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2021-11-20T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-11-24T14:20:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/entityOperations/query"
-								},
-								{
-									"key": "providerID",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
-								},
-								{
-									"key": "consumer",
-									"value": "15c7506f-c800-48d6-adeb-0542b03947c6",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "400 (failure) Missing time relation",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 400 (Bad request)\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{delegateToken}}",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2021-11-20T14:20:00Z&endTime=2022-11-24T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"provider",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
-								},
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2021-11-20T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-11-24T14:20:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/entityOperations/query"
-								},
-								{
-									"key": "providerID",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
-								},
-								{
-									"key": "consumer",
-									"value": "15c7506f-c800-48d6-adeb-0542b03947c6",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "400 (failure) invalid-parameter empty-reponse read query",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 400 (Bad request)\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{delegateToken}}",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2020-07-01T14:20:00Z&endTime=2020-07-15T14:20:00Z&api=/{{basePath}}/entities&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"provider",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
-								},
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2020-07-01T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2020-07-15T14:20:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/entities"
-								},
-								{
-									"key": "providerID",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "401 (not authorized) Get Data Read Query",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 401 (Not Authorized)\", function () {",
-									"    pm.response.to.have.status(401);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"Not Authorized\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "abcd",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2022-06-01T14:20:00Z&endTime=2022-06-15T14:20:00Z&api=/{{basePath}}/entities&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"provider",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
-								},
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2022-06-01T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-06-15T14:20:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/entities"
-								},
-								{
-									"key": "providerID",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "401 (not authorized) Get Data Count Query",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 401 (Not Authorized)\", function () {",
-									"    pm.response.to.have.status(401);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"Not Authorized\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "abcd",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2022-05-01T14:20:00Z&endTime=2022-05-15T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"provider",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
-								},
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2022-05-01T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2022-05-15T14:20:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/entityOperations/query"
-								},
-								{
-									"key": "providerID",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
-								},
-								{
-									"key": "consumer",
-									"value": "15c7506f-c800-48d6-adeb-0542b03947c6",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "404 (failure) resource not found",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test the response code",
-									"pm.test(\"response is 404 (Not Found)\", function () {",
-									"    pm.response.to.have.status(404);",
-									"});",
-									"",
-									"// Test the response header",
-									"pm.test(\"Check response header\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
-									"});",
-									"",
-									"// Test the response",
-									"pm.test(\"Check response body\", function () {    ",
-									"    const body = pm.response.json();",
-									"    pm.expect(body).to.have.property(\"title\", \"Not Found\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "{{delegateToken}}",
-								"type": "text"
-							},
-							{
-								"key": "options",
-								"value": "count",
-								"type": "text",
-								"disabled": true
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/{{basePath}}/provider/audit?id=iisc.ac.in/90a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta&timerel=during&time=2020-07-01T14:20:00Z&endTime=2020-07-15T14:20:00Z&api=/{{basePath}}/entities&providerID=iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"{{basePath}}",
-								"provider",
-								"audit"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "iisc.ac.in/90a36273d77dac4cf38114fca1bbe64392547f86/rs.iudx.io/surat-itms-realtime-information/surat-itms-live-eta"
-								},
-								{
-									"key": "timerel",
-									"value": "during"
-								},
-								{
-									"key": "time",
-									"value": "2020-07-01T14:20:00Z"
-								},
-								{
-									"key": "endTime",
-									"value": "2020-07-15T14:20:00Z"
-								},
-								{
-									"key": "api",
-									"value": "/{{basePath}}/entities"
-								},
-								{
-									"key": "providerID",
-									"value": "iisc.ac.in/89a36273d77dac4cf38114fca1bbe64392547f86"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
 			"name": "Map Tiles",
 			"item": [
 				{
@@ -5058,6 +3523,1594 @@
 							"path": [
 								"assets",
 								"446a2a68-8648-4a70-9163-07ac0d891613"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Summary",
+			"item": [
+				{
+					"name": "200 - (Success)Overview Delegate/Provider without Params",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"result\");",
+									"    const resultsjsonData = body.result[0];",
+									"    pm.expect(resultsjsonData).to.have.property(\"month\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"year\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"counts\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{providerToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"overview"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "401 - (Not Authorized)Overview",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 401 (Not Authorized)\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Not Authorized\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "abc",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"overview"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 - (Success)Overview Consumer with Params",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"result\");",
+									"    const resultsjsonData = body.result[0];",
+									"    pm.expect(resultsjsonData).to.have.property(\"month\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"year\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"counts\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{C1secureResourceToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview?starttime=2023-08-01T00:00:00Z&endtime=2023-10-31T00:00:00Z",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"overview"
+							],
+							"query": [
+								{
+									"key": "starttime",
+									"value": "2023-08-01T00:00:00Z"
+								},
+								{
+									"key": "endtime",
+									"value": "2023-10-31T00:00:00Z"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 - (Success)Overview Admin with Params",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"result\");",
+									"    const resultsjsonData = body.result[0];",
+									"    pm.expect(resultsjsonData).to.have.property(\"month\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"year\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"counts\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{adminToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview?starttime=2023-08-01T00:00:00Z&endtime=2023-09-30T23:59:00Z",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"overview"
+							],
+							"query": [
+								{
+									"key": "starttime",
+									"value": "2023-08-01T00:00:00Z"
+								},
+								{
+									"key": "endtime",
+									"value": "2023-09-30T23:59:00Z"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 - (Bad Request)Overview",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 401 (Not Authorized)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{providerToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview?starttime=2022-11-20T00:00:00Z",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"overview"
+							],
+							"query": [
+								{
+									"key": "starttime",
+									"value": "2022-11-20T00:00:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-12-29T00:00:00Z",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 - (Success)Overview Delegate/Provider with Params",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"result\");",
+									"    const resultsjsonData = body.result[0];",
+									"    pm.expect(resultsjsonData).to.have.property(\"month\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"year\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"counts\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{providerToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview?starttime=2023-08-20T00:00:00Z&endtime=2023-09-29T00:00:00Z",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"overview"
+							],
+							"query": [
+								{
+									"key": "starttime",
+									"value": "2023-08-20T00:00:00Z"
+								},
+								{
+									"key": "endtime",
+									"value": "2023-09-29T00:00:00Z"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 - (Success)Overview Consumer without Params",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"result\");",
+									"    const resultsjsonData = body.result[0];",
+									"    pm.expect(resultsjsonData).to.have.property(\"month\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"year\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"counts\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{C1secureResourceToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"overview"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 - (Success)Overview Admin wihout Params",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"result\");",
+									"    const resultsjsonData = body.result[0];",
+									"    pm.expect(resultsjsonData).to.have.property(\"month\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"year\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"counts\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{adminToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"overview"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200- (Success) Summary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"results\");",
+									"    const resultsjsonData = body.results[0];",
+									"    pm.expect(resultsjsonData).to.have.property(\"resourceid\");",
+									"     pm.expect(resultsjsonData).to.have.property(\"resource_label\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{adminToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/summary?starttime=2023-08-20T00:00:00Z&endtime=2023-09-27T00:00:00Z",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"summary"
+							],
+							"query": [
+								{
+									"key": "starttime",
+									"value": "2023-08-20T00:00:00Z"
+								},
+								{
+									"key": "endtime",
+									"value": "2023-09-27T00:00:00Z"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "401- (Not Authorized Token) Summary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 401 (Not Authorized)\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Not Authorized\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "abc",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/summary",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"summary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 - (Bad Request)Summary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 401 (Not Authorized)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{C1secureResourceToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/summary?starttime=2022-11-20T00:00:00Z",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"summary"
+							],
+							"query": [
+								{
+									"key": "starttime",
+									"value": "2022-11-20T00:00:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-12-29T00:00:00Z",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "204- (No Content) Summary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is 204 (no Content)\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{C1secureResourceToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/summary?starttime=2022-01-20T00:00:00Z&endtime=2022-10-27T00:00:00Z",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"summary"
+							],
+							"query": [
+								{
+									"key": "starttime",
+									"value": "2022-01-20T00:00:00Z"
+								},
+								{
+									"key": "endtime",
+									"value": "2022-10-27T00:00:00Z"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Consumer-Audit-API",
+			"item": [
+				{
+					"name": "200 (success) Get total API calls made",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    const resultsjsonData = body.results[0];",
+									"    pm.expect(body).to.have.property(\"results\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"total\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{secureResourceToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/consumer/audit?timerel=between&time=2023-06-20T00:00:00Z&endTime=2023-09-21T16:00:00Z",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "timerel",
+									"value": "between"
+								},
+								{
+									"key": "time",
+									"value": "2023-06-20T00:00:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2023-09-21T16:00:00Z"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "401 (not authorized) Get total API calls made",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 401 (Not Authorized)\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Not Authorized\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "abcd",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/consumer/audit?timerel=between&time=2022-06-20T00:00:00Z&endTime=2022-06-21T16:00:00Z",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "timerel",
+									"value": "between"
+								},
+								{
+									"key": "time",
+									"value": "2022-06-20T00:00:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2022-06-21T16:00:00Z"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 (success) Get Data Read Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    const resultsjsonData = body.result[0];",
+									"    pm.expect(body).to.have.property(\"result\");",
+									"    pm.expect(body).to.have.property(\"type\", \"urn:dx:rs:success\");",
+									"    pm.expect(body).to.have.property(\"title\", \"Success\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"id\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"userid\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{secureResourceToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/consumer/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2023-06-12T14:20:00Z&endTime=2023-09-05T14:20:00Z&offset=0&limit=2000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "9f8b75fb-58be-432b-85ba-dde1d55a7d58"
+								},
+								{
+									"key": "timerel",
+									"value": "between"
+								},
+								{
+									"key": "time",
+									"value": "2023-06-12T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2023-09-05T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/temporal/entities",
+									"disabled": true
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								},
+								{
+									"key": "limit",
+									"value": "2000"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 (success) Get Data Count Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    const resultsjsonData = body.results[0];",
+									"    pm.expect(body).to.have.property(\"results\");",
+									"    pm.expect(body).to.have.property(\"type\", \"urn:dx:rs:success\");",
+									"    pm.expect(body).to.have.property(\"title\", \"Success\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"total\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{secureResourceToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=between&time=2023-06-20T14:20:00Z&endTime=2023-07-05T14:20:00Z",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "b58da193-23d9-43eb-b98a-a103d4b6103c"
+								},
+								{
+									"key": "timerel",
+									"value": "between"
+								},
+								{
+									"key": "time",
+									"value": "2023-06-20T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2023-07-05T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/temporal/entities",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "204 (NO data) Get Data Read Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 204 (No Content)\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{secureResourceToken}}",
+								"type": "text"
+							},
+							{
+								"key": "option",
+								"value": "count",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=between&time=2021-10-20T14:20:00Z&endTime=2021-10-24T14:20:00Z",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "b58da193-23d9-43eb-b98a-a103d4b6103c"
+								},
+								{
+									"key": "timerel",
+									"value": "between"
+								},
+								{
+									"key": "time",
+									"value": "2021-10-20T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2021-10-24T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/temporal/entities",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 (failure) Get Data Read Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 400 (Bad Request)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"type\", \"urn:dx:rs:badRequest\");",
+									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{secureResourceToken}}",
+								"type": "text"
+							},
+							{
+								"key": "option",
+								"value": "count",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=between&time=2021-12-20T14:20:00Z",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"consumer",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "b58da193-23d9-43eb-b98a-a103d4b6103c"
+								},
+								{
+									"key": "timerel",
+									"value": "between"
+								},
+								{
+									"key": "time",
+									"value": "2021-12-20T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2021-11-24T14:20:00Z",
+									"disabled": true
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/temporal/entities",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Provider-Audit-API",
+			"item": [
+				{
+					"name": "200 (success) Get Data Read Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    const resultsjsonData = body.result[0];",
+									"    pm.expect(body).to.have.property(\"result\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"id\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{providerToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2023-06-05T14:20:00Z&endTime=2023-09-05T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97&consumer=15c7506f-c800-48d6-adeb-0542b03947c6&offset=0&limit=2000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "9f8b75fb-58be-432b-85ba-dde1d55a7d58"
+								},
+								{
+									"key": "timerel",
+									"value": "between"
+								},
+								{
+									"key": "time",
+									"value": "2023-06-05T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2023-09-05T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entityOperations/query",
+									"disabled": true
+								},
+								{
+									"key": "providerID",
+									"value": "0ff3d306-9402-4430-8e18-6f95e4c03c97"
+								},
+								{
+									"key": "consumer",
+									"value": "15c7506f-c800-48d6-adeb-0542b03947c6"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								},
+								{
+									"key": "limit",
+									"value": "2000"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "401 (not authrorized) Get Data Read Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 401 (Not Authorized)\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"title\", \"Not Authorized\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "abc",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/provider/audit?id=83c2e5c2-3574-4e11-9530-2b1fbdfce832&timerel=between&time=2021-11-20T14:20:00Z&endTime=2021-12-02T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=b2c27f3f-2524-4a84-816e-91f9ab23f837",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "83c2e5c2-3574-4e11-9530-2b1fbdfce832"
+								},
+								{
+									"key": "timerel",
+									"value": "between"
+								},
+								{
+									"key": "time",
+									"value": "2021-11-20T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2021-12-02T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entityOperations/query"
+								},
+								{
+									"key": "providerID",
+									"value": "b2c27f3f-2524-4a84-816e-91f9ab23f837"
+								},
+								{
+									"key": "consumer",
+									"value": "15c7506f-c800-48d6-adeb-0542b03947c6",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 (success) Get Data Count Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 200 (OK)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    const resultsjsonData = body.results[0];",
+									"    pm.expect(body).to.have.property(\"results\");",
+									"    pm.expect(resultsjsonData).to.have.property(\"total\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{providerToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2023-06-05T14:20:00Z&endTime=2023-09-05T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "9f8b75fb-58be-432b-85ba-dde1d55a7d58"
+								},
+								{
+									"key": "timerel",
+									"value": "between"
+								},
+								{
+									"key": "time",
+									"value": "2023-06-05T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2023-09-05T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entityOperations/query",
+									"disabled": true
+								},
+								{
+									"key": "providerID",
+									"value": "0ff3d306-9402-4430-8e18-6f95e4c03c97"
+								},
+								{
+									"key": "consumer",
+									"value": "15c7506f-c800-48d6-adeb-0542b03947c6",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "204 (NO data) Get Data Read Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 204 (No Content)\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{providerToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2020-11-20T14:20:00Z&endTime=2020-11-24T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "9f8b75fb-58be-432b-85ba-dde1d55a7d58"
+								},
+								{
+									"key": "timerel",
+									"value": "between"
+								},
+								{
+									"key": "time",
+									"value": "2020-11-20T14:20:00Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2020-11-24T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entityOperations/query",
+									"disabled": true
+								},
+								{
+									"key": "providerID",
+									"value": "0ff3d306-9402-4430-8e18-6f95e4c03c97"
+								},
+								{
+									"key": "consumer",
+									"value": "15c7506f-c800-48d6-adeb-0542b03947c6",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "400 (failure) Get Data Read Query",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test the response code",
+									"pm.test(\"response is 400 (Bad Request)\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"// Test the response header",
+									"pm.test(\"Check response header\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\",\"application/json\");",
+									"});",
+									"",
+									"// Test the response",
+									"pm.test(\"Check response body\", function () {    ",
+									"    const body = pm.response.json();",
+									"    pm.expect(body).to.have.property(\"type\", \"urn:dx:rs:badRequest\");",
+									"    pm.expect(body).to.have.property(\"title\", \"Bad Request\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "{{providerToken}}",
+								"type": "text"
+							},
+							{
+								"key": "options",
+								"value": "count",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/ngsi-ld/v1/provider/audit?id=83c2e5c2-3574-4e11-9530-2b1fbdfce832&timerel=betweeen&endTime=2021-11-02T14:20:00Z&providerID=b2c27f3f-2524-4a84-816e-91f9ab23f837",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ngsi-ld",
+								"v1",
+								"provider",
+								"audit"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "83c2e5c2-3574-4e11-9530-2b1fbdfce832"
+								},
+								{
+									"key": "timerel",
+									"value": "betweeen"
+								},
+								{
+									"key": "time",
+									"value": "2021-11-20T14:20:00Z",
+									"disabled": true
+								},
+								{
+									"key": "endTime",
+									"value": "2021-11-02T14:20:00Z"
+								},
+								{
+									"key": "api",
+									"value": "/{{basePath}}/entityOperations/query",
+									"disabled": true
+								},
+								{
+									"key": "providerID",
+									"value": "b2c27f3f-2524-4a84-816e-91f9ab23f837"
+								},
+								{
+									"key": "consumer",
+									"value": "15c7506f-c800-48d6-adeb-0542b03947c6",
+									"disabled": true
+								}
 							]
 						}
 					},

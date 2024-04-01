@@ -75,9 +75,24 @@
       "s3SecretKey": ""
     },
     {
-      "id": "iudx.ogc.rs.metering.MeteringVerticle",
-      "isWorkerVerticle":false,
-      "verticleInstances": 1
+      "id": "ogc.rs.metering.MeteringVerticle",
+      "verticleInstances": 1,
+      "catServerHost": "",
+      "catServerPort": 123,
+      "dataBrokerIP": "",
+      "dataBrokerPort": 123,
+      "dataBrokerUserName": "",
+      "dataBrokerPassword": "",
+      "dataBrokerManagementPort": 123,
+      "connectionTimeout": 6000,
+      "requestedHeartbeat": 60,
+      "handshakeTimeout": 6000,
+      "requestedChannelMax": 5,
+      "networkRecoveryInterval": 500,
+      "automaticRecoveryEnabled": true,
+      "prodVhost":"",
+      "internalVhost": "",
+      "externalVhost":""
     }
   ]
 }
