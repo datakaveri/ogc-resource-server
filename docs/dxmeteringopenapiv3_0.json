@@ -21,7 +21,7 @@
     }
   ],
   "paths": {
-    "/summary": {
+    "/ngsi-ld/v1/summary": {
       "get": {
         "tags": [
           "Metering"
@@ -59,7 +59,7 @@
         ]
       }
     },
-    "/overview": {
+    "/ngsi-ld/v1/overview": {
       "get": {
         "tags": [
           "Metering"
@@ -94,7 +94,7 @@
         ]
       }
     },
-    "/provider/audit": {
+    "/ngsi-ld/v1/provider/audit": {
       "get": {
         "tags": [
           "Metering"
@@ -136,7 +136,7 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/components/responses/getDataCountQuery"
+            "$ref": "#/components/responses/meteringApiResponse"
           },
           "204": {
             "description": "Empty Response"
@@ -156,7 +156,7 @@
         ]
       }
     },
-    "/consumer/audit": {
+    "/ngsi-ld/v1/consumer/audit": {
       "get": {
         "tags": [
           "Metering"

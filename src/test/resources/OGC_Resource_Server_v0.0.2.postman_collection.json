@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "995f593a-79b6-46a1-9be3-46d77727f5fe",
+		"_postman_id": "c94a63bc-aa30-4a91-b02c-f43e6bf13619",
 		"name": "OGC Resource Server v0.0.2",
 		"description": "Components/APIs used in the OGC Compliant Resource Server.\n\nOGC Features API standard can be found at\n\n[\"OGC API - Features - Part 1: Core corrigendum standard\"](https://docs.opengeospatial.org/is/17-069r4/17-069r4.html).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -3572,11 +3572,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/overview",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"overview"
 							]
 						}
@@ -3619,11 +3621,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/overview",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"overview"
 							]
 						}
@@ -3669,11 +3673,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/overview?starttime=2023-08-01T00:00:00Z&endtime=2023-10-31T00:00:00Z",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview?starttime=2023-08-01T00:00:00Z&endtime=2023-10-31T00:00:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"overview"
 							],
 							"query": [
@@ -3729,11 +3735,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/overview?starttime=2023-08-01T00:00:00Z&endtime=2023-09-30T23:59:00Z",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview?starttime=2023-08-01T00:00:00Z&endtime=2023-09-30T23:59:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"overview"
 							],
 							"query": [
@@ -3787,11 +3795,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/overview?starttime=2022-11-20T00:00:00Z",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview?starttime=2022-11-20T00:00:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"overview"
 							],
 							"query": [
@@ -3848,11 +3858,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/overview?starttime=2023-08-20T00:00:00Z&endtime=2023-09-29T00:00:00Z",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview?starttime=2023-08-20T00:00:00Z&endtime=2023-09-29T00:00:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"overview"
 							],
 							"query": [
@@ -3907,11 +3919,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/overview",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"overview"
 							]
 						}
@@ -3956,11 +3970,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/overview",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/overview",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"overview"
 							]
 						}
@@ -4004,11 +4020,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/summary?starttime=2023-08-20T00:00:00Z&endtime=2023-09-27T00:00:00Z",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/summary?starttime=2023-08-20T00:00:00Z&endtime=2023-09-27T00:00:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"summary"
 							],
 							"query": [
@@ -4061,11 +4079,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/summary",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/summary",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"summary"
 							]
 						}
@@ -4109,11 +4129,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/summary?starttime=2022-11-20T00:00:00Z",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/summary?starttime=2022-11-20T00:00:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"summary"
 							],
 							"query": [
@@ -4156,11 +4178,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/summary?starttime=2022-01-20T00:00:00Z&endtime=2022-10-27T00:00:00Z",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/summary?starttime=2022-01-20T00:00:00Z&endtime=2022-10-27T00:00:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"summary"
 							],
 							"query": [
@@ -4225,11 +4249,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/consumer/audit?timerel=between&time=2023-06-20T00:00:00Z&endTime=2023-09-21T16:00:00Z",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/consumer/audit?timerel=between&time=2023-06-20T00:00:00Z&endTime=2023-09-21T16:00:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"consumer",
 								"audit"
 							],
@@ -4293,11 +4319,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/consumer/audit?timerel=between&time=2022-06-20T00:00:00Z&endTime=2022-06-21T16:00:00Z",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/consumer/audit?timerel=between&time=2022-06-20T00:00:00Z&endTime=2022-06-21T16:00:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"consumer",
 								"audit"
 							],
@@ -4366,11 +4394,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/consumer/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2023-06-12T14:20:00Z&endTime=2023-09-05T14:20:00Z&offset=0&limit=2000",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/consumer/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2023-06-12T14:20:00Z&endTime=2023-09-05T14:20:00Z&offset=0&limit=2000",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"consumer",
 								"audit"
 							],
@@ -4454,11 +4484,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=between&time=2023-06-20T14:20:00Z&endTime=2023-07-05T14:20:00Z",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=between&time=2023-06-20T14:20:00Z&endTime=2023-07-05T14:20:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"consumer",
 								"audit"
 							],
@@ -4521,11 +4553,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=between&time=2021-10-20T14:20:00Z&endTime=2021-10-24T14:20:00Z",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=between&time=2021-10-20T14:20:00Z&endTime=2021-10-24T14:20:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"consumer",
 								"audit"
 							],
@@ -4599,11 +4633,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=between&time=2021-12-20T14:20:00Z",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/consumer/audit?id=b58da193-23d9-43eb-b98a-a103d4b6103c&timerel=between&time=2021-12-20T14:20:00Z",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"consumer",
 								"audit"
 							],
@@ -4684,11 +4720,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2023-06-05T14:20:00Z&endTime=2023-09-05T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97&consumer=15c7506f-c800-48d6-adeb-0542b03947c6&offset=0&limit=2000",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2023-06-05T14:20:00Z&endTime=2023-09-05T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97&consumer=15c7506f-c800-48d6-adeb-0542b03947c6&offset=0&limit=2000",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"provider",
 								"audit"
 							],
@@ -4778,11 +4816,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/provider/audit?id=83c2e5c2-3574-4e11-9530-2b1fbdfce832&timerel=between&time=2021-11-20T14:20:00Z&endTime=2021-12-02T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=b2c27f3f-2524-4a84-816e-91f9ab23f837",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/provider/audit?id=83c2e5c2-3574-4e11-9530-2b1fbdfce832&timerel=between&time=2021-11-20T14:20:00Z&endTime=2021-12-02T14:20:00Z&api=/{{basePath}}/entityOperations/query&providerID=b2c27f3f-2524-4a84-816e-91f9ab23f837",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"provider",
 								"audit"
 							],
@@ -4864,11 +4904,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2023-06-05T14:20:00Z&endTime=2023-09-05T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2023-06-05T14:20:00Z&endTime=2023-09-05T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"provider",
 								"audit"
 							],
@@ -4939,11 +4981,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2020-11-20T14:20:00Z&endTime=2020-11-24T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/provider/audit?id=9f8b75fb-58be-432b-85ba-dde1d55a7d58&timerel=between&time=2020-11-20T14:20:00Z&endTime=2020-11-24T14:20:00Z&providerID=0ff3d306-9402-4430-8e18-6f95e4c03c97",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"provider",
 								"audit"
 							],
@@ -5025,11 +5069,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/provider/audit?id=83c2e5c2-3574-4e11-9530-2b1fbdfce832&timerel=between&endTime=2021-11-02T14:20:00Z&providerID=b2c27f3f-2524-4a84-816e-91f9ab23f837",
+							"raw": "{{baseUrl}}/ngsi-ld/v1/provider/audit?id=83c2e5c2-3574-4e11-9530-2b1fbdfce832&timerel=betweeen&endTime=2021-11-02T14:20:00Z&providerID=b2c27f3f-2524-4a84-816e-91f9ab23f837",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"ngsi-ld",
+								"v1",
 								"provider",
 								"audit"
 							],
