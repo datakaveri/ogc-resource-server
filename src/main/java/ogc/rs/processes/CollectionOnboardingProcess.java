@@ -29,7 +29,6 @@ import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.UUID;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.commons.exec.CommandLine;

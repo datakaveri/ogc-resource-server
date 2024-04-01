@@ -227,7 +227,7 @@ paths:
           $ref: '#/components/responses/ServerError'
       servers:
         - url: 'http://localhost:3000'
-          description: OGC-Resource-Serverssss
+          description: OGC-Resource-Server
 tags:
   - name: Capabilities
     description: essential characteristics of this API
