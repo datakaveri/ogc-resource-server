@@ -93,6 +93,14 @@
       "prodVhost":"",
       "internalVhost": "",
       "externalVhost":""
+    },
+    {
+      "id": "ogc.rs.processes.ProcessVerticle",
+      "s3BucketUrl": "",
+      "awsAccessKey": "",
+      "awsSecretKey": "",
+      "awsEndPoint": "",
+      "verticleInstances": 1
     }
   ]
 }
