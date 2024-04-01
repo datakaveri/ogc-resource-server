@@ -182,16 +182,16 @@ public class DatabaseServiceImpl implements DatabaseService{
                         conn.preparedQuery(featureQuery.buildSqlString())
                             .collecting(collector).execute().map(SqlResult::value)
                             .onSuccess(success -> {
-                              if (success.isEmpty())
-                                result.fail(new OgcException(404, "Not found", "Features not found"));
-                              else {
-                                JsonArray featureJsonArr = new JsonArray(success);
-                                int numReturn = featureJsonArr.size();
-                                result.complete(resultJson
-                                    .put("type","FeatureCollection")
-                                    .put("features", featureJsonArr)
-                                    .put("numberReturned", numReturn ));
-                              }
+                              if (!success.isEmpty())
+                                resultJson
+                                    .put("features", new JsonArray(success))
+                                    .put("numberReturned", success.size());
+                              else
+                                resultJson
+                                    .put("features", new JsonArray())
+                                    .put("numberReturned", 0);
+                              resultJson.put("type", "FeatureCollection");
+                              result.complete(resultJson);
                             })
                             .onFailure(failed -> {
                               LOGGER.error("Failed at getFeatures- {}",failed.getMessage());
