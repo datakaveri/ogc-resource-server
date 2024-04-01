@@ -385,10 +385,8 @@ public class DatabaseServiceImpl implements DatabaseService{
                             .onSuccess(
                                 assets -> {
                                   if (assets.isEmpty()) {
-                                    LOGGER.error("Assets table is empty!");
-                                    result.fail(
-                                        new OgcException(
-                                            404, "Not found", "Assets table is empty!"));
+                                    LOGGER.warn("Assets table is empty!");
+                                    result.complete(success);
                                   } else {
                                     for (JsonObject asset : assets) {
                                       for (JsonObject successItem : success) {
