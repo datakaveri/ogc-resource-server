@@ -47,10 +47,13 @@ public class Constants {
     public static final String STAC_CONFORMANCE_CLASSES = "getConformanceDeclaration";
     public static final String PROCESS_EXECUTION_REGEX = "/processes/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/execution";
 
+<<<<<<< HEAD
   // Header params
   public static final String METERING_OPENAPI_SPEC = "/metering/api";
   public static final String CONSUMER_AUDIT_API = "consumer/audit";
   public static final String PROVIDER_AUDIT_API = "provider/audit";
   public static final String SUMMARY_AUDIT_API = "summary";
   public static final String OVERVIEW_AUDIT_API = "overview";
+=======
+>>>>>>> 78ccf8f9a77bf1f8fc0b046b916d0b0d78bf05e0
 }

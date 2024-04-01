@@ -41,7 +41,6 @@ import ogc.rs.metering.MeteringService;
 import ogc.rs.processes.ProcessesRunnerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import static ogc.rs.common.Constants.*;
 
 /**
  * The OGC Resource Server API Verticle.
@@ -214,14 +213,13 @@ public class ApiServerVerticle extends AbstractVerticle {
                   .handler(this::executeJob).handler(this::putCommonResponseHeaders)
                   .handler(this::buildResponse).failureHandler(failureHandler);
 
-                routerBuilder.operation(PROCESSES_API)
-            .handler(this::getProcesses).handler(this::putCommonResponseHeaders)
-            .handler(this::buildResponse)
-            .failureHandler(failureHandler);
+                routerBuilder.operation(PROCESSES_API).handler(this::getProcesses)
+                  .handler(this::putCommonResponseHeaders).handler(this::buildResponse)
+                  .failureHandler(failureHandler);
 
-            routerBuilder.operation(PROCESS_API)
-              .handler(this::getProcess).handler(this::putCommonResponseHeaders)
-              .handler(this::buildResponse).failureHandler(failureHandler);
+                routerBuilder.operation(PROCESS_API).handler(this::getProcess)
+                  .handler(this::putCommonResponseHeaders).handler(this::buildResponse)
+                  .failureHandler(failureHandler);
 
                 routerBuilder
                     .operation(TILEMATRIXSET_API)
