@@ -129,7 +129,7 @@ pipeline {
           sh 'docker-compose -f docker-compose.test.yml exec -T test mvn test -Dtest=Metering*'
           sh 'docker-compose -f docker-compose.test.yml exec -T test cp target/jacoco.exec /tmp/test/plugin-jacoco.exec'
           sh 'docker-compose -f docker-compose.test.yml exec -T test cp -r target/surefire-reports /tmp/test/surefire-reports'
-          sh 'docker-compose -f docker-compose.test.yml exec -T test chmod a+r /tmp/test/surefire-reports'
+          sh 'docker-compose -f docker-compose.test.yml exec -T test chmod -R a+r /tmp/test/surefire-reports'
         }
       }
       post{
