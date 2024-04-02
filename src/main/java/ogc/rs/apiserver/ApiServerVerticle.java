@@ -305,6 +305,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                     .handler(
                         routingContext -> {
                           HttpServerResponse response = routingContext.response();
+                          response.putHeader(
+                              "Content-Type", "application/vnd.oai.openapi+json;version=3.0");
                           response.sendFile("docs/stacopenapiv3_0.json");
                         });
                 router
