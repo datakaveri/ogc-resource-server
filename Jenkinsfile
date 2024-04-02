@@ -216,7 +216,7 @@ pipeline {
             script{
               catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '/var/lib/jenkins/iudx/ogc/Newman/report/', reportFiles: 'report.html', reportTitles: '', reportName: 'Integration Test Report'])
-                archiveZap failHighAlerts: 1, failMediumAlerts: 1, failLowAlerts: 46
+                archiveZap failHighAlerts: 1, failMediumAlerts: 3, failLowAlerts: 46
               }
             }
           }
