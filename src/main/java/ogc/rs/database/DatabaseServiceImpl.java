@@ -116,8 +116,8 @@ public class DatabaseServiceImpl implements DatabaseService{
           row -> row.getInteger("count"));
       Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
       String datetimeValue;
-      Future<String> sridOfStorageCrs = null;
       FeatureQueryBuilder featureQuery = new FeatureQueryBuilder(collectionId);
+      Future<String> sridOfStorageCrs = getSridOfStorageCrs(collectionId);
       if (queryParams.containsKey("limit"))
           featureQuery.setLimit(Integer.parseInt(queryParams.get("limit")));
       if (queryParams.containsKey("bbox-crs"))
@@ -125,7 +125,6 @@ public class DatabaseServiceImpl implements DatabaseService{
       if (queryParams.containsKey("bbox")) {
         // find storageCrs from collections_details
         String coordinates = queryParams.get("bbox");
-        sridOfStorageCrs = getSridOfStorageCrs(collectionId);
         sridOfStorageCrs
             .onSuccess(srid -> featureQuery.setBbox(coordinates, srid))
             .onFailure(fail -> result.fail(fail.getMessage()));
@@ -143,7 +142,6 @@ public class DatabaseServiceImpl implements DatabaseService{
       String[] key = keys.toArray(new String[keys.size()]);
       if (!keys.isEmpty())
           featureQuery.setFilter(key[0], queryParams.get(key[0]));
-      assert sridOfStorageCrs != null;
       sridOfStorageCrs.compose(srid ->
           client.withConnection(conn ->
           conn.preparedQuery("select datetime_key, count(id) from collections_details " +
