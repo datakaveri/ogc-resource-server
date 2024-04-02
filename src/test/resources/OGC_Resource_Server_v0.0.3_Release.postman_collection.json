@@ -5197,7 +5197,7 @@
 									"});",
 									"",
 									"pm.test(\"Content-Type is application/json\", function () {",
-									"    pm.response.to.have.header(\"Content-Type\", \"application/json\");",
+									"    pm.response.to.have.header(\"Content-Type\", \"application/vnd.oai.openapi+json;version=3.0\");",
 									"});"
 								],
 								"type": "text/javascript",
