@@ -102,13 +102,19 @@ pipeline {
       post{
         always{
           node('built-in') {
-            sh """
+            script{
+              sh """
                 sed -i '1s/^/<!DOCTYPE html><html>/g' stacOutput.html
                 echo '</html>' >> stacOutput.html
-            """
-            script{
+              """
+              if (!fileExists('stac-compliance-reports')) {
+                sh 'mkdir stac-compliance-reports'
+              } else {
+                sh 'rm -rf stac-compliance-reports/'
+              }
+              sh 'mv stacOutput.html stac-compliance-reports/'
               catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '.', reportFiles: 'stacOutput.html', reportTitles: 'STAC', reportName: 'STAC Compliance Test Reports'])
+                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'stac-compliance-reports', reportFiles: 'stacOutput.html', reportTitles: 'STAC', reportName: 'STAC Compliance Test Reports'])
               }
             }
           }
@@ -164,7 +170,7 @@ pipeline {
       steps{
         script{
           sh 'scp Jmeter/OGCResourceServer.jmx jenkins@jenkins-master:/var/lib/jenkins/iudx/ogc/Jmeter/'
-          sh 'scp src/test/resources/OGC_Resource_Server_v0.0.2.postman_collection.json jenkins@jenkins-master:/var/lib/jenkins/iudx/ogc/Newman/'
+          sh 'scp src/test/resources/OGC_Resource_Server_v0.0.3_Release.postman_collection.json jenkins@jenkins-master:/var/lib/jenkins/iudx/ogc/Newman/'
           sh 'docker compose -f docker-compose.test.yml up -d test'
           sh 'sleep 20'
         }
@@ -204,7 +210,7 @@ pipeline {
             startZap ([host: 'localhost', port: 8090, zapHome: '/var/lib/jenkins/tools/com.cloudbees.jenkins.plugins.customtools.CustomTool/OWASP_ZAP/ZAP_2.11.0'])
             sh 'curl http://127.0.0.1:8090/JSON/pscan/action/disableScanners/?ids=10096'
             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-              sh 'HTTP_PROXY=\'127.0.0.1:8090\' newman run /var/lib/jenkins/iudx/ogc/Newman/OGC_Resource_Server_v0.0.2.postman_collection.json -e /home/ubuntu/configs/ogc-postman-env.json --insecure -r htmlextra --reporter-htmlextra-export /var/lib/jenkins/iudx/ogc/Newman/report/report.html --reporter-htmlextra-skipSensitiveData'
+              sh 'HTTP_PROXY=\'127.0.0.1:8090\' newman run /var/lib/jenkins/iudx/ogc/Newman/OGC_Resource_Server_v0.0.3_Release.postman_collection.json -e /home/ubuntu/configs/ogc-postman-env.json --insecure -r htmlextra --reporter-htmlextra-export /var/lib/jenkins/iudx/ogc/Newman/report/report.html --reporter-htmlextra-skipSensitiveData'
               runZapAttack()
             }
           }
