@@ -116,13 +116,35 @@ pipeline {
       }
     }
 
-    stage('Extract class files and JaCoCo data from container and make JaCoCo report'){
+    stage('Run metering Junit tests and move JaCoCo data to /tmp/test'){
+      steps{
+        script{
+          sh 'sudo rm -rf surefire-reports'
+          sh 'docker-compose -f docker-compose.test.yml exec -T test mvn test -Dtest=Metering*'
+          sh 'docker-compose -f docker-compose.test.yml exec -T test cp target/jacoco.exec /tmp/test/plugin-jacoco.exec'
+          sh 'docker-compose -f docker-compose.test.yml exec -T test cp -r target/surefire-reports /tmp/test/surefire-reports'
+        }
+      }
+      post{
+        failure{
+          script{
+            sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
+          }
+        }
+      }
+    }
+
+    stage('Extract class files and dump JaCoCo data from container and make JaCoCo report'){
       steps{
         script{
           sh 'docker-compose -f docker-compose.test.yml exec -T test cp -r ./built-classes /tmp/test'
-          sh 'docker-compose -f docker-compose.test.yml exec -T test java -jar /tmp/jacoco/lib/jacococli.jar dump --address 127.0.0.1 --port 57070 --destfile /tmp/test/jacoco.exec'
+          sh 'docker-compose -f docker-compose.test.yml exec -T test java -jar /tmp/jacoco/lib/jacococli.jar dump --address 127.0.0.1 --port 57070 --destfile /tmp/test/jar-jacoco.exec'
         }
-        jacoco classPattern: 'built-classes', execPattern: 'jacoco.exec'
+        jacoco classPattern: 'built-classes', execPattern: '*-jacoco.exec'
+        xunit (
+          thresholds: [ skipped(failureThreshold: '0'), failed(failureThreshold: '0') ],
+          tools: [ JUnit(pattern: 'surefire-reports/*.xml') ]
+        )
       }
       post{
         failure{
