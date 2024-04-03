@@ -49,7 +49,7 @@ services:
          options:
              max-file: "5"
              max-size: "100m"
-    command: bash -c "exec java -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -jar ./fatjar.jar  --host $$(hostname) -c configs/config.json"
+    command: bash -c "exec java -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -jar -Ds3.mock=true ./fatjar.jar  --host $$(hostname) -c configs/config.json"
 
   s3mockModded:
     image: s3-mock-modded:latest
