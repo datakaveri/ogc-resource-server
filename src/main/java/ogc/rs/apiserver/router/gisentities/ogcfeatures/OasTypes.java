@@ -5,7 +5,7 @@ package ogc.rs.apiserver.router.gisentities.ogcfeatures;
  *
  */
 public enum OasTypes {
-  ARRAY, NUMBER, BOOLEAN, STRING, OBJECT;
+  ARRAY, NUMBER, INTEGER, BOOLEAN, STRING, OBJECT;
 
   /**
    * Get the closest matching OpenAPI type given a postgres type.
@@ -20,8 +20,11 @@ public enum OasTypes {
       return BOOLEAN;
     }
 
-    else if (postgresType.matches(
-        "smallint|integer|bigint|decimal|numeric|real|double precision|smallserial|serial|bigserial")) {
+    else if (postgresType.matches("smallint|integer|bigint|smallserial|serial|bigserial")) {
+      return INTEGER;
+    }
+
+    else if (postgresType.matches("decimal|numeric|real|double precision")) {
       return NUMBER;
     }
 
