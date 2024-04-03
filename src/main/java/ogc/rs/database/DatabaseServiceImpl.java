@@ -117,6 +117,7 @@ public class DatabaseServiceImpl implements DatabaseService{
       Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
       String datetimeValue;
       FeatureQueryBuilder featureQuery = new FeatureQueryBuilder(collectionId);
+      Future<String> sridOfStorageCrs = getSridOfStorageCrs(collectionId);
       if (queryParams.containsKey("limit"))
           featureQuery.setLimit(Integer.parseInt(queryParams.get("limit")));
       if (queryParams.containsKey("bbox-crs"))
@@ -124,7 +125,6 @@ public class DatabaseServiceImpl implements DatabaseService{
       if (queryParams.containsKey("bbox")) {
         // find storageCrs from collections_details
         String coordinates = queryParams.get("bbox");
-        Future<String> sridOfStorageCrs = getSridOfStorageCrs(collectionId);
         sridOfStorageCrs
             .onSuccess(srid -> featureQuery.setBbox(coordinates, srid))
             .onFailure(fail -> result.fail(fail.getMessage()));
@@ -142,68 +142,65 @@ public class DatabaseServiceImpl implements DatabaseService{
       String[] key = keys.toArray(new String[keys.size()]);
       if (!keys.isEmpty())
           featureQuery.setFilter(key[0], queryParams.get(key[0]));
-      client.withConnection(conn ->
-        conn.preparedQuery("select datetime_key, count(id) from collections_details " +
-                    "where id = $1::uuid group by id, datetime_key")
-                .collecting(collector)
-                .execute(Tuple.of(UUID.fromString(collectionId)))
-                .onSuccess(conn1 -> {
-                  if(conn1.rowCount() == 0) {
-                    result.fail(new OgcException(404, "Not found", "Collection not found"));
-                    return;
-                  }
-//                  if (conn1.value().get(0).getInteger("count") == 0) {
-//                    result.fail(new OgcException(404, "Not found", "Collection not found"));
-//                    return;
-//                  }
-                  LOGGER.debug("Count collection- {}", conn1.value().get(0).getInteger("count"));
-                  if (conn1.value().get(0).getString("datetime_key") != null && datetimeValue != null ){
-                    LOGGER.debug("datetimeKey: {}, datetimeValue: {}"
-                        ,conn1.value().get(0).getString("datetime_key"), datetimeValue);
-                    featureQuery.setDatetimeKey(conn1.value().get(0).getString("datetime_key"));
-                    featureQuery.setDatetime(datetimeValue);
-                  }
-                  LOGGER.debug("datetime_key: {}",conn1.value().get(0).getString("datetime_key"));
-                  LOGGER.debug("<DBService> Sql query- {} ",  featureQuery.buildSqlString());
-                  LOGGER.debug("Count Query- {}", featureQuery.buildSqlString("count"));
-                  JsonObject resultJson = new JsonObject();
-                  conn.preparedQuery(featureQuery.buildSqlString("count"))
-                      .collecting(collectorT).execute()
-                      .onSuccess(count -> {
-                        LOGGER.debug("Feature Count- {}",count.value().get("count"));
-                        int totalCount = count.value().get("count");
-                        resultJson.put("numberMatched", totalCount);
-                      })
-                      .onFailure(countFail -> {
-                        LOGGER.error("Failed to get the count of number of features!");
-                        result.fail("Error!");
-                      })
-                      .compose(sql -> {
-                        conn.preparedQuery(featureQuery.buildSqlString())
-                            .collecting(collector).execute().map(SqlResult::value)
-                            .onSuccess(success -> {
-                              if (success.isEmpty())
-                                result.fail(new OgcException(404, "Not found", "Features not found"));
-                              else {
-                                JsonArray featureJsonArr = new JsonArray(success);
-                                int numReturn = featureJsonArr.size();
-                                result.complete(resultJson
-                                    .put("type","FeatureCollection")
-                                    .put("features", featureJsonArr)
-                                    .put("numberReturned", numReturn ));
-                              }
-                            })
-                            .onFailure(failed -> {
-                              LOGGER.error("Failed at getFeatures- {}",failed.getMessage());
-                              result.fail("Error!");
-                            });
-                        return result.future();
-                      });
-                })
-                .onFailure(fail -> {
-                  LOGGER.error("Failed at find_collection- {}",fail.getMessage());
-                  result.fail("Error!");
-                }));
+      sridOfStorageCrs.compose(srid ->
+          client.withConnection(conn ->
+          conn.preparedQuery("select datetime_key, count(id) from collections_details " +
+                  "where id = $1::uuid group by id, datetime_key")
+              .collecting(collector)
+              .execute(Tuple.of(UUID.fromString(collectionId)))
+              .onSuccess(conn1 -> {
+                if(conn1.rowCount() == 0) {
+                  result.fail(new OgcException(404, "Not found", "Collection not found"));
+                  return;
+                }
+                LOGGER.debug("Count collection- {}", conn1.value().get(0).getInteger("count"));
+                if (conn1.value().get(0).getString("datetime_key") != null && datetimeValue != null ){
+                  LOGGER.debug("datetimeKey: {}, datetimeValue: {}"
+                      ,conn1.value().get(0).getString("datetime_key"), datetimeValue);
+                  featureQuery.setDatetimeKey(conn1.value().get(0).getString("datetime_key"));
+                  featureQuery.setDatetime(datetimeValue);
+                }
+                LOGGER.debug("datetime_key: {}",conn1.value().get(0).getString("datetime_key"));
+                LOGGER.debug("<DBService> Sql query- {} ",  featureQuery.buildSqlString());
+                LOGGER.debug("Count Query- {}", featureQuery.buildSqlString("count"));
+                JsonObject resultJson = new JsonObject();
+                conn.preparedQuery(featureQuery.buildSqlString("count"))
+                    .collecting(collectorT).execute()
+                    .onSuccess(count -> {
+                      LOGGER.debug("Feature Count- {}",count.value().get("count"));
+                      int totalCount = count.value().get("count");
+                      resultJson.put("numberMatched", totalCount);
+                    })
+                    .onFailure(countFail -> {
+                      LOGGER.error("Failed to get the count of number of features!");
+                      result.fail("Error!");
+                    })
+                    .compose(sql -> {
+                      conn.preparedQuery(featureQuery.buildSqlString())
+                          .collecting(collector).execute().map(SqlResult::value)
+                          .onSuccess(success -> {
+                            if (!success.isEmpty())
+                              resultJson
+                                  .put("features", new JsonArray(success))
+                                  .put("numberReturned", success.size());
+                            else
+                              resultJson
+                                  .put("features", new JsonArray())
+                                  .put("numberReturned", 0);
+                            resultJson.put("type", "FeatureCollection");
+                            result.complete(resultJson);
+                          })
+                          .onFailure(failed -> {
+                            LOGGER.error("Failed at getFeatures- {}",failed.getMessage());
+                            result.fail("Error!");
+                          });
+                      return result.future();
+                    });
+              })
+              .onFailure(fail -> {
+                LOGGER.error("Failed at find_collection- {}",fail.getMessage());
+                result.fail("Error!");
+              })));
         return result.future();
     }
 
