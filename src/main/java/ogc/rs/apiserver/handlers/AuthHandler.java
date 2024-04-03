@@ -46,7 +46,7 @@ public class AuthHandler implements Handler<RoutingContext> {
       if (!id.matches(UUID_REGEX)) {
         context.put("isAuthorised", false);
         context.put(
-            "response", new OgcException(404, "Not Found", "Asset Not Found").getJson().toString());
+            "response", new OgcException(404, "Not found", "Collection not found").getJson().toString());
         context.put("statusCode", 404);
         context.next();
         return;

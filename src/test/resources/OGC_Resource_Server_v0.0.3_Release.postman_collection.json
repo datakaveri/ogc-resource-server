@@ -4582,7 +4582,7 @@
 											},
 											{
 												"key": "token",
-												"value": "{{C1secureResource2Token}}",
+												"value": "{{C1secureResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -5279,7 +5279,7 @@
 					"response": []
 				},
 				{
-					"name": "fetches the  STAC asset with id `assetId`",
+					"name": "fetches the STAC asset for open resource with id `assetId`",
 					"event": [
 						{
 							"listen": "test",
@@ -5307,7 +5307,7 @@
 							},
 							{
 								"key": "token",
-								"value": "{{assetSecureResourceToken}}",
+								"value": "{{C1openResourceToken}}",
 								"type": "text"
 							}
 						],
@@ -5319,6 +5319,52 @@
 							"path": [
 								"assets",
 								"4d69a28c-6717-4b80-83c8-308cfa40c931"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "fetches the STAC asset for secure resource with id `assetId`",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is application/json\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\", \"application/json\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "token",
+								"value": "{{C1secureResourceToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/assets/462624da-2790-4ae7-8773-c1a6d726a035",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"assets",
+								"462624da-2790-4ae7-8773-c1a6d726a035"
 							]
 						}
 					},
