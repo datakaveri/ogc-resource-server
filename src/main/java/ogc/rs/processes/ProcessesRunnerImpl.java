@@ -1,7 +1,8 @@
 package ogc.rs.processes;
 
 import static ogc.rs.processes.util.Constants.PROCESS_EXIST_CHECK_QUERY;
-import static ogc.rs.processes.util.Constants.ogcException500;
+import static ogc.rs.processes.util.Constants.processException404;
+import static ogc.rs.processes.util.Constants.processException500;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -15,7 +16,6 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import java.util.Set;
 import java.util.UUID;
-import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.logging.log4j.LogManager;
@@ -90,7 +90,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
         });
       } else {
         LOGGER.error("Failed to validate the input");
-        handler.handle(Future.failedFuture(ogcException500));
+        handler.handle(Future.failedFuture(processException500));
       }
     }).onFailure(processNotExist -> {
       handler.handle(Future.failedFuture(processNotExist));
@@ -116,12 +116,11 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
           promise.complete(rowJson);
         } else {
           LOGGER.error("Process does not exist");
-          OgcException ogcException = new OgcException(404,"Not Found","Resource Not Found");
-          promise.fail(ogcException);
+          promise.fail(processException404);
         }
       }).onFailure(failureHandler -> {
         LOGGER.error("Failed to check process in database {}",failureHandler.getMessage());
-        promise.fail(ogcException500);
+        promise.fail(processException500);
       });
 
     return promise.future();

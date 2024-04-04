@@ -1,6 +1,6 @@
 package ogc.rs.processes.util;
 
-import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.apiserver.util.ProcessException;
 
 public class Constants {
   public static final String FEATURE = "FEATURE";
@@ -44,7 +44,8 @@ public class Constants {
     "SELECT crs,srid FROM CRS_TO_SRID WHERE SRID = $1;";
 
   public static final String DEFAULT_SERVER_CRS = "http://www.opengis.net/def/crs/OGC/1.3/CRS84";
-  public static final  OgcException
-    ogcException500 = new OgcException(500,"Internal Server Error","Internal Server Error");
+  public static final ProcessException processException404 = new ProcessException(404,"Not Found","Resource Not Found");
+  public static final ProcessException
+    processException500 = new ProcessException(500,"Internal Server Error","Internal Server Error");
 
 }

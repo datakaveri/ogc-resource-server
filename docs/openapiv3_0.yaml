@@ -474,16 +474,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/exception404'
-            text/html:
-              schema:
-                type: string
   '/processes/{processId}/execution':
     post:
       tags:
         - Execute
       summary: execute a process.
       description: "Create a new job by initiating the execution of a specified process identified by the 'processId'."
-      operationId: executeProcess
+      operationId: execute
       parameters:
         - name: processId
           in: path
@@ -491,6 +488,11 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: token
+          in: header
+          required: true
+          schema:
+            type: string
       requestBody:
         description: Mandatory JSON payload for the execute request.
         content:
@@ -514,7 +516,6 @@ paths:
               description: URL to check the status of the execution/job.
               schema:
                 type: string
-                format: uri
           content:
             application/json:
               schema:
@@ -524,19 +525,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/exception404'
-            text/html:
-              schema:
-                type: string
+                $ref: '#/components/schemas/exception'
         "500":
           description: A server error occurred.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/exception500'
-            text/html:
-              schema:
-                type: string
+                $ref: '#/components/schemas/exception'
+              example:
+                type: Internal Server Error
+                title: Internal Server Error
+                detail: Internal Server Error
 tags:
   - name: Capabilities
     description: Essential characteristics of OGC APIs
@@ -996,6 +995,21 @@ components:
     EmptyTile:
       description: No data available for this tile.
   schemas:
+    exception:
+      title: Exception Schema
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          example: Not Found
+        title:
+          type: string
+          example: Not Found
+        detail:
+          type: string
+          example: Resource Not Found
     exception404:
       type: object
       properties:

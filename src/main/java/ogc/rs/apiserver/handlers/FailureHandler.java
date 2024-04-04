@@ -9,6 +9,7 @@ import io.vertx.ext.web.validation.ParameterProcessorException;
 import io.vertx.ext.web.validation.RequestPredicateException;
 import io.vertx.json.schema.ValidationException;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.apiserver.util.ProcessException;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,9 +30,15 @@ public class FailureHandler implements Handler<RoutingContext> {
         .setStatusCode(HttpStatus.SC_BAD_REQUEST).end(ogcException.getJson().toString());
     }
     else if (failure instanceof OgcException) {
-    LOGGER.debug("failure in handler ");
+    LOGGER.debug("failure in handler ogc exception");
       routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON)
         .setStatusCode((((OgcException) failure).getStatusCode())).end(((OgcException) failure).getJson().toString());
+      return;
+    }
+    else if (failure instanceof ProcessException) {
+      LOGGER.debug("failure in handler process exception");
+      routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON)
+        .setStatusCode((((ProcessException) failure).getStatusCode())).end(((ProcessException) failure).getJson().toString());
       return;
     }
     else if(failure instanceof NullPointerException) {

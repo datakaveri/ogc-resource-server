@@ -35,6 +35,7 @@ import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.util.DataFromS3;
 import ogc.rs.apiserver.handlers.FailureHandler;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.apiserver.util.ProcessException;
 import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.database.DatabaseService;
 import ogc.rs.metering.MeteringService;
@@ -369,9 +370,9 @@ public class ApiServerVerticle extends AbstractVerticle {
         routingContext.put("statusCode", 201);
         routingContext.next();
       } else {
-        OgcException ogcException = (OgcException) handler.cause();
-        routingContext.put("response", ogcException.getJson().toString());
-        routingContext.put("statusCode", ogcException.getStatusCode());
+        ProcessException processException = (ProcessException) handler.cause();
+        routingContext.put("response", processException.getJson().toString());
+        routingContext.put("statusCode", processException.getStatusCode());
         routingContext.next();
       }
     });

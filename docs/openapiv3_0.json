@@ -716,7 +716,7 @@
         ],
         "summary": "execute a process.",
         "description": "Create a new job by initiating the execution of a specified process identified by the 'processId'.",
-        "operationId": "executeProcess",
+        "operationId": "execute",
         "parameters": [
           {
             "name": "processId",
@@ -725,6 +725,14 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -756,8 +764,7 @@
               "Location": {
                 "description": "URL to check the status of the execution/job.",
                 "schema": {
-                  "type": "string",
-                  "format": "uri"
+                  "type": "string"
                 }
               }
             },
@@ -774,12 +781,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/exception404"
-                }
-              },
-              "text/html": {
-                "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/exception"
                 }
               }
             }
@@ -789,12 +791,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/exception500"
-                }
-              },
-              "text/html": {
-                "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/exception"
+                },
+                "example": {
+                  "type": "Internal Server Error",
+                  "title": "Internal Server Error",
+                  "detail": "Internal Server Error"
                 }
               }
             }
@@ -1369,6 +1371,27 @@
       }
     },
     "schemas": {
+      "exception": {
+        "title": "Exception Schema",
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "Not Found"
+          },
+          "title": {
+            "type": "string",
+            "example": "Not Found"
+          },
+          "detail": {
+            "type": "string",
+            "example": "Resource Not Found"
+          }
+        }
+      },
       "exception404": {
         "type": "object",
         "properties": {
