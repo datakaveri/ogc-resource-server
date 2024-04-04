@@ -36,7 +36,7 @@ public class FeatureQueryBuilder {
     sqlString = "";
     datetimeKey = "";
     defaultCrsSrid = "4326";
-    bboxCrs = "";
+    bboxCrs = "4326";
     geoColumn = "cast(st_asgeojson(st_transform(geom,4326)) as json)";
   }
 
@@ -65,7 +65,6 @@ public class FeatureQueryBuilder {
     }
     else
       coordinates = coordinates.concat(",4326");
-
     //TODO: validation for lat, lon values (0<=lat<=90, 0<=lon<=180);
     if (bboxCrs.equalsIgnoreCase(storageCrs))
       this.bbox = "st_intersects(geom, st_makeenvelope(" + coordinates + "))";

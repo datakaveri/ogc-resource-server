@@ -50,7 +50,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
         this.databaseUserName = config.getString("databaseUser");
         this.databasePassword = config.getString("databasePassword");
         this.poolSize = config.getInteger("poolSize");
-        this.domain = config.getString("domain");
+        this.domain = config.getString("audience"); // domain has to be same as audience
         this.connectOptions =
             new PgConnectOptions()
                 .setPort(databasePort)

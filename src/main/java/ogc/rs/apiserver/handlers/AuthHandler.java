@@ -46,6 +46,16 @@ public class AuthHandler implements Handler<RoutingContext> {
         id = context.pathParam("assetId");
       }
 
+      /* TODO : Remove once spec validation is being done */
+      if (!id.matches(UUID_REGEX)) {
+        context.put("isAuthorised", false);
+        context.put(
+            "response", new OgcException(404, "Not found", "Collection not found").getJson().toString());
+        context.put("statusCode", 404);
+        context.next();
+        return;
+      }
+      
       // requestJson will be used by the metering service
       if (token == null) {
         LOGGER.error("Null values for either token or id!");

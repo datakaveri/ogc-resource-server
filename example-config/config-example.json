@@ -9,8 +9,7 @@
     "dxCatalogueBasePath": "/iudx/cat/v1",
     "dxAuthBasePath": "/auth/v1",
     "hostName": "https://server.url.com",
-    "catalogId": "stac",
-    "domain": "server.url.com"
+    "catalogId": "stac"
   },
   "modules": [
     {
