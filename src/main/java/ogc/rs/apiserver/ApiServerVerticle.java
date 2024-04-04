@@ -367,18 +367,10 @@ public class ApiServerVerticle extends AbstractVerticle {
         routingContext.put("statusCode", 201);
         routingContext.next();
       } else {
-        if (handler.cause().getMessage().equals("Process does not exist.")) {
-          routingContext.put("response",
-            new JsonObject().put("code", "Not Found").put("description", "Resource not found")
-              .toString());
-          routingContext.put("statusCode", 404);
-          routingContext.next();
-        } else {
-          routingContext.put("response", new JsonObject().put("code", "Internal Server Error")
-            .put("description", handler.cause().getMessage()).toString());
-          routingContext.put("statusCode", 500);
-          routingContext.next();
-        }
+        OgcException ogcException = (OgcException) handler.cause();
+        routingContext.put("response", ogcException.getJson().toString());
+        routingContext.put("statusCode", ogcException.getStatusCode());
+        routingContext.next();
       }
     });
 

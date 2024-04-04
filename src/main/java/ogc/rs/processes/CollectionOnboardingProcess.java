@@ -206,6 +206,8 @@ public class CollectionOnboardingProcess implements ProcessService {
       LOGGER.debug("exit value in ogrinfo: " + exitValue);
       String output = stdout.toString();
 
+      // Extracting JSON object from string 'output', removing the initial message "Had to open data source read-only."
+      // to retrieve the necessary data for code flow.
       JsonObject cmdOutput =
         new JsonObject(Buffer.buffer(output.replace("Had to open data source read-only.", "")));
       JsonObject featureProperties = extractFeatureProperties(cmdOutput);
@@ -217,7 +219,6 @@ public class CollectionOnboardingProcess implements ProcessService {
       }
       int organizationCoordId = featureProperties.getInteger("organization_coordsys_id");
       LOGGER.debug("organization " + organization + " crs " + organizationCoordId);
-
       validSridFromDatabase(organizationCoordId, input, onboardingPromise);
     } catch (IOException e1) {
       LOGGER.error("Failed while getting ogrInfo because {}", e1.getMessage());

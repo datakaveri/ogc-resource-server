@@ -21,6 +21,5 @@ CREATE TABLE IF NOT EXISTS jobs_table
 	CONSTRAINT process_id_fk FOREIGN KEY(process_id) REFERENCES processes_table(id)
 );
 
-
 ALTER TABLE jobs_table OWNER TO ${flyway:user};
 
