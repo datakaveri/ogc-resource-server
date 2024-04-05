@@ -13,7 +13,7 @@
   },
   "modules": [
     {
-      "id": "iudx.ogc.rs.database.DatabaseVerticle",
+      "id": "ogc.rs.database.DatabaseVerticle",
       "isWorkerVerticle":false,
       "verticleInstances": 8,
       "databaseIP": "",
@@ -22,7 +22,7 @@
       "dbPassword": ""
     },
     {
-      "id": "iudx.ogc.rs.authenticator.AuthenticationVerticle",
+      "id": "ogc.rs.authenticator.AuthenticationVerticle",
       "isWorkerVerticle":false,
       "verticleInstances": 1,
       "audience": "rs.iudx.io",
@@ -32,7 +32,7 @@
       "jwtIgnoreExpiry": false
     },
     {
-      "id": "iudx.ogc.rs.databroker.DataBrokerVerticle",
+      "id": "ogc.rs.databroker.DataBrokerVerticle",
       "isWorkerVerticle":false,
       "verticleInstances": 1,
       "dataBrokerIP": "",
@@ -59,7 +59,7 @@
       "postgrespoolSize": 25
     },
     {
-      "id": "iudx.ogc.rs.apiserver.ApiServerVerticle",
+      "id": "ogc.rs.apiserver.ApiServerVerticle",
       "isWorkerVerticle":false,
       "ssl": true,
       "keystore": "",
