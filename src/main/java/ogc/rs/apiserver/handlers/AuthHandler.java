@@ -11,6 +11,7 @@ import ogc.rs.authenticator.AuthenticationService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static ogc.rs.apiserver.util.Constants.JOB_STATUS_REGEX;
 import static ogc.rs.apiserver.util.Constants.PROCESS_EXECUTION_REGEX;
 import static ogc.rs.apiserver.util.Constants.HEADER_TOKEN;
 import static ogc.rs.common.Constants.AUTH_SERVICE_ADDRESS;
@@ -39,7 +40,7 @@ public class AuthHandler implements Handler<RoutingContext> {
       String token;
       String id;
       String path = context.normalizedPath();
-      boolean isProcessExecution = path.matches(PROCESS_EXECUTION_REGEX);
+      boolean isProcessExecution = path.matches(PROCESS_EXECUTION_REGEX) || path.matches(JOB_STATUS_REGEX);
       token = request.headers().get(HEADER_TOKEN);
       id = context.pathParam("collectionId");
       if (context.request().path().substring(1, 7).equals("assets")) {

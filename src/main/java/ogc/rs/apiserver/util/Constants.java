@@ -46,6 +46,8 @@ public class Constants {
     public static final String ASSET_API = "getAsset";
     public static final String STAC_CONFORMANCE_CLASSES = "getConformanceDeclaration";
     public static final String PROCESS_EXECUTION_REGEX = "/processes/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/execution";
+    public static final String STATUS_API = "getStatus";
+    public static final String JOB_STATUS_REGEX = "/jobs/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}";
 
   // Header params
   public static final String METERING_OPENAPI_SPEC = "/metering/api";

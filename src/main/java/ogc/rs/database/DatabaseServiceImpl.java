@@ -12,6 +12,7 @@ import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.apiserver.util.ProcessException;
 import ogc.rs.database.util.FeatureQueryBuilder;
 import static ogc.rs.common.Constants.*;
 import org.apache.logging.log4j.LogManager;
@@ -638,7 +639,7 @@ public class DatabaseServiceImpl implements DatabaseService{
     client.withConnection(
       conn -> conn.preparedQuery(sqlQuery).execute(Tuple.of(parameter)).onSuccess(rowSet -> {
         if (rowSet.size() == 0) {
-          promise.fail(new OgcException(404, "Not found", "Process not found"));
+          promise.fail(processException404);
         } else {
           JsonObject result = handleRowSet(rowSet);
           if (parameter instanceof Integer) {
@@ -686,7 +687,7 @@ public class DatabaseServiceImpl implements DatabaseService{
 
   private void handleFailure(Throwable fail, Promise<JsonObject> promise) {
     LOGGER.error("Failed to get processes- {}", fail.getMessage());
-    promise.fail("Error!");
+    promise.fail(processException500);
   }
 
 

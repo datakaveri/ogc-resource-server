@@ -590,11 +590,15 @@
             }
           }
         },
-        "400": {
-          "$ref": "#/components/responses/InvalidParameter"
-        },
-        "500": {
-          "$ref": "#/components/responses/ServerError"
+        "404": {
+          "description": "The requested URI was not found.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/exception"
+              }
+            }
+          }
         }
       }
     }
@@ -696,12 +700,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/exception404"
-              }
-            },
-            "text/html": {
-              "schema": {
-                "type": "string"
+                "$ref": "#/components/schemas/exception"
               }
             }
           }
@@ -718,6 +717,15 @@
         "description": "Create a new job by initiating the execution of a specified process identified by the 'processId'.",
         "operationId": "execute",
         "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "A <b> valid Auth token </b> to process the request. <br/> This field is <b> mandatory</b> .",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "processId",
             "in": "path",
@@ -772,6 +780,91 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/statusInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested URI was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                },
+                "example": {
+                  "type": "Internal Server Error",
+                  "title": "Internal Server Error",
+                  "detail": "Internal Server Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{jobId}": {
+      "get": {
+        "tags": [
+          "Status"
+        ],
+        "summary": "retrieve the status of a job",
+        "description": "Shows the status of a job.",
+        "operationId": "getStatus",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "A <b> valid Auth token </b> to process the request. <br/> This field is <b> mandatory</b> .",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "local identifier of a job",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The status of a job.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/statusInfo"
+                },
+                "example": {
+                  "jobID": "cc0eb191-7f66-4663-8afa-cfd644de5839",
+                  "processId": "dd0eb191-7f66-4663-8afa-cfd644de5890",
+                  "type": "PROCESS",
+                  "created": "2024-03-28T09:28:24.843Z",
+                  "started": "2024-03-28T09:28:24.843Z",
+                  "finished": "2024-03-28T09:28:24.843Z",
+                  "updated": "2024-03-28T09:28:24.843Z",
+                  "progress": 66.67,
+                  "status": "RUNNING",
+                  "message": "Process Running",
+                  "links": {
+                    "href": "https://ogc.iudx.io/jobs/fd6ef7c5-b18c-48e6-94e3-81037702863d",
+                    "rel": "self",
+                    "title": "Districts in India"
+                  }
                 }
               }
             }

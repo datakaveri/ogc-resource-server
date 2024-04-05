@@ -1,8 +1,8 @@
 package ogc.rs.processes;
 
 import static ogc.rs.processes.util.Constants.PROCESS_EXIST_CHECK_QUERY;
-import static ogc.rs.processes.util.Constants.processException404;
-import static ogc.rs.processes.util.Constants.processException500;
+import static ogc.rs.common.Constants.processException404;
+import static ogc.rs.common.Constants.processException500;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
