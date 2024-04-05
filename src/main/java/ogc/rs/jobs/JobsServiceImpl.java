@@ -35,7 +35,7 @@ public class JobsServiceImpl implements JobsService {
     pgPool.withConnection(
       sqlClient -> sqlClient.preparedQuery("Select * from jobs_table where id=$1")
         .execute(Tuple.of(jobId)).map(s -> s.iterator().next()).onSuccess(row -> {
-          if (!row.getValue("user_id").toString().equals(userId)) {
+          if (row.getValue("user_id").toString().equals(userId)) {
             JsonObject result = row.toJson();
             result.remove("output");
             JsonObject links = new JsonObject();

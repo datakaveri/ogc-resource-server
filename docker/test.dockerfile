@@ -1,6 +1,8 @@
 # Run from project root directory
 
 ARG VERSION="0.0.1-SNAPSHOT"
+# Getting GDAL latest image
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.8.4 as gdal-latest
 
 FROM maven:3-eclipse-temurin-11
 
@@ -31,6 +33,11 @@ RUN wget https://repo1.maven.org/maven2/org/jacoco/jacoco/0.8.11/jacoco-0.8.11.z
 RUN apt update && apt install -y unzip && rm -rf /var/lib/apt/lists/*
 RUN unzip /tmp/jacoco.zip -d /tmp/jacoco
 RUN apt remove -y unzip && rm /tmp/jacoco.zip
+
+# Copying binaries from gdal into the eclipse-image
+COPY --from=gdal-latest /usr /usr
+# ldconfig creates the necessary links and cache to the most recent shared libraries found in the directories specified on the command line
+RUN ldconfig
 
 EXPOSE 8080 8443
 
