@@ -116,7 +116,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     S3_ACCESS_KEY = config().getString("s3AccessKey");
     S3_SECRET_KEY = config().getString("s3SecretKey");
 
-    Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/openapiv3_0.yaml");
+    Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/openapiv3_0.json");
     Future<RouterBuilder> routerBuilderStacFut =
         RouterBuilder.create(vertx, "docs/stacopenapiv3_0.yaml");
     Future<RouterBuilder> routerBuilderMeteringFut =
