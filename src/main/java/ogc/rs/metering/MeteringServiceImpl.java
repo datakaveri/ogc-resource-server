@@ -5,14 +5,16 @@ import static ogc.rs.metering.util.MeteringConstant.*;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Row;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.catalogue.CatalogueService;
-import ogc.rs.database.DatabaseService;
 import ogc.rs.metering.util.DateValidation;
 import ogc.rs.metering.util.ParamsValidation;
 import ogc.rs.metering.util.QueryBuilder;
@@ -25,7 +27,6 @@ public class MeteringServiceImpl implements MeteringService {
   private final DateValidation dateValidation = new DateValidation();
   private final ParamsValidation paramValidation = new ParamsValidation();
   DataBrokerService dataBrokerService;
-  DatabaseService databaseService;
   CatalogueService catalogueService;
   JsonObject validationCheck = new JsonObject();
   String queryCount;
@@ -36,14 +37,15 @@ public class MeteringServiceImpl implements MeteringService {
   JsonArray jsonArray;
   JsonArray resultJsonArray;
   int loopi;
+  PgPool meteringpgClient;
 
   public MeteringServiceImpl(
       Vertx vertx,
-      DatabaseService databaseService,
+      PgPool meteringpgClient,
       JsonObject config,
       DataBrokerService dataBrokerService) {
     this.dataBrokerService = dataBrokerService;
-    this.databaseService = databaseService;
+    this.meteringpgClient = meteringpgClient;
     catalogueService = new CatalogueService(vertx, config);
   }
 
@@ -391,8 +393,7 @@ public class MeteringServiceImpl implements MeteringService {
 
   private Future<JsonObject> executeQueryDatabaseOperation(String query) {
     Promise<JsonObject> promise = Promise.promise();
-    databaseService
-        .executeQuery(query)
+    executeQuery(query)
         .onSuccess(
             handler -> {
               promise.complete(handler);
@@ -402,6 +403,28 @@ public class MeteringServiceImpl implements MeteringService {
               promise.fail(failure.getMessage());
             });
 
+    return promise.future();
+  }
+
+  public Future<JsonObject> executeQuery(final String query) {
+    Promise<JsonObject> promise = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> rowCollector =
+        Collectors.mapping(row -> row.toJson(), Collectors.toList());
+    meteringpgClient
+        .withConnection(
+            connection ->
+                connection.query(query).collecting(rowCollector).execute().map(row -> row.value()))
+        .onSuccess(
+            successHandler -> {
+              JsonArray result = new JsonArray(successHandler);
+              JsonObject responseJson = new JsonObject().put("result", result);
+              promise.complete(responseJson);
+            })
+        .onFailure(
+            failureHandler -> {
+              LOGGER.debug(failureHandler);
+              promise.fail(failureHandler.getMessage());
+            });
     return promise.future();
   }
 }

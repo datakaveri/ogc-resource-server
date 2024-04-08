@@ -28,11 +28,9 @@ public class DatabaseServiceImpl implements DatabaseService{
     private static final Logger LOGGER = LogManager.getLogger(DatabaseServiceImpl.class);
 
     private final PgPool client;
-    PgPool meteringpgClient;
     private final JsonObject config;
-    public DatabaseServiceImpl(final PgPool pgClient,JsonObject config,PgPool meteringpgClient) {
+    public DatabaseServiceImpl(final PgPool pgClient,JsonObject config) {
         this.client = pgClient;this.config=config;
-        this.meteringpgClient=meteringpgClient;
     }
     public Set<String> predefinedKeys = Set.of("limit", "bbox", "datetime", "offset", "bbox-crs", "crs");
 
@@ -690,29 +688,5 @@ public class DatabaseServiceImpl implements DatabaseService{
   private void handleFailure(Throwable fail, Promise<JsonObject> promise) {
     LOGGER.error("Failed to get processes- {}", fail.getMessage());
     promise.fail(processException500);
-  }
-
-
-  @Override
-  public Future<JsonObject> executeQuery(final String query) {
-    Promise<JsonObject> promise = Promise.promise();
-    Collector<Row, ?, List<JsonObject>> rowCollector =
-        Collectors.mapping(row -> row.toJson(), Collectors.toList());
-      meteringpgClient
-        .withConnection(
-            connection ->
-                connection.query(query).collecting(rowCollector).execute().map(row -> row.value()))
-        .onSuccess(
-            successHandler -> {
-              JsonArray result = new JsonArray(successHandler);
-              JsonObject responseJson = new JsonObject().put("result", result);
-              promise.complete(responseJson);
-            })
-        .onFailure(
-            failureHandler -> {
-              LOGGER.debug(failureHandler);
-              promise.fail(failureHandler.getMessage());
-            });
-    return promise.future();
   }
 }

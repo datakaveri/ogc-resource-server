@@ -16,14 +16,14 @@ public class DatabaseVerticle extends AbstractVerticle {
     private static final Logger LOGGER = LogManager.getLogger(DatabaseService.class);
     private MessageConsumer<JsonObject> consumer;
     private ServiceBinder binder;
-    private PgConnectOptions connectOptions,meteringConnectOptions;
+    private PgConnectOptions connectOptions;
     private PoolOptions poolOptions;
-    private PgPool pool, meteringPool;
-    private String databaseIp,meteringDatabaseHost;
-    private int databasePort,meteringDatabasePort;
-    private String databaseName,meteringDatabaseName;
-    private String databaseUserName,meteringDatabaseUserName;
-    private String databasePassword,meteringDatabasePassword;
+    private PgPool pool;
+    private String databaseIp;
+    private int databasePort;
+    private String databaseName;
+    private String databaseUserName;
+    private String databasePassword;
     private int poolSize;
 
     private DatabaseService dbService;
@@ -50,29 +50,9 @@ public class DatabaseVerticle extends AbstractVerticle {
 
         this.poolOptions = new PoolOptions().setMaxSize(poolSize);
         this.pool = PgPool.pool(vertx, connectOptions, poolOptions);
-
-
-        meteringDatabaseHost = config().getString("meteringDatabaseHost");
-        meteringDatabasePort = config().getInteger("meteringDatabasePort");
-        meteringDatabaseName= config().getString("meteringDatabaseName");
-        meteringDatabaseUserName = config().getString("meteringDatabaseUser");
-        meteringDatabasePassword = config().getString("meteringDatabasePassword");
-
-
-        this.meteringConnectOptions =
-                new PgConnectOptions()
-                        .setPort(meteringDatabasePort)
-                        .setHost(meteringDatabaseHost)
-                        .setDatabase(meteringDatabaseName)
-                        .setUser(meteringDatabaseUserName)
-                        .setPassword(meteringDatabasePassword)
-                        .setReconnectAttempts(2)
-                        .setReconnectInterval(1000L);
-
         this.poolOptions = new PoolOptions().setMaxSize(poolSize);
-        this.meteringPool = PgPool.pool(vertx, meteringConnectOptions, poolOptions);
 
-        dbService = new DatabaseServiceImpl(this.pool,this.config(),this.meteringPool);
+        dbService = new DatabaseServiceImpl(this.pool,this.config());
 
         binder = new ServiceBinder(vertx);
         consumer = binder.setAddress(DATABASE_SERVICE_ADDRESS).register(DatabaseService.class, dbService);

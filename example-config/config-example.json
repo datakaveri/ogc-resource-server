@@ -91,7 +91,13 @@
       "automaticRecoveryEnabled": true,
       "prodVhost":"",
       "internalVhost": "",
-      "externalVhost":""
+      "externalVhost":"",
+      "meteringDatabaseHost": "",
+      "meteringDatabasePort": 123,
+      "meteringDatabaseUser": "",
+      "meteringDatabasePassword": "",
+      "meteringDatabaseName": "",
+      "poolSize": 5
     },
     {
       "id": "ogc.rs.processes.ProcessVerticle",
