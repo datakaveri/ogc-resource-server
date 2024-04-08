@@ -50,7 +50,6 @@ public class DatabaseVerticle extends AbstractVerticle {
 
         this.poolOptions = new PoolOptions().setMaxSize(poolSize);
         this.pool = PgPool.pool(vertx, connectOptions, poolOptions);
-        this.poolOptions = new PoolOptions().setMaxSize(poolSize);
 
         dbService = new DatabaseServiceImpl(this.pool,this.config());
 
