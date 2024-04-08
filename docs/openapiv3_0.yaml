@@ -170,10 +170,12 @@ paths:
                   - href: "https://ogc.iudx.io/processes"
                     rel: "self"
                     type: "application/json"
-        '400':
-          $ref: '#/components/responses/InvalidParameter'
-        "500":
-          $ref: '#/components/responses/ServerError'
+        "404":
+          description: The requested URI was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
   /collections:
     get:
       tags:
@@ -473,11 +475,131 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/exception404'
-            text/html:
+                $ref: '#/components/schemas/exception'
+  '/processes/{processId}/execution':
+    post:
+      tags:
+        - Execute
+      summary: execute a process.
+      description: "Create a new job by initiating the execution of a specified process identified by the 'processId'."
+      operationId: execute
+      parameters:
+        - name: token
+          in: header
+          description: A <b> valid Auth token </b> to process the request. <br/> This field is <b> mandatory</b> .
+          required: true
+          schema:
+            type: string
+        - name: processId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Mandatory JSON payload for the execute request.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/execute'
+            example:
+              input:
+                filename: 'FileName.gpkg'
+                description: 'Description of the file'
+                title: "Title of the file"
+                resourceId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                version: "1.0.0"
+              response: 'raw'
+        required: true
+      responses:
+        "201":
+          description: Started asynchronous execution. Created job.
+          headers:
+            Location:
+              description: URL to check the status of the execution/job.
               schema:
                 type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusInfo'
+        "404":
+          description: The requested URI was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+              example:
+                type: Internal Server Error
+                title: Internal Server Error
+                detail: Internal Server Error
+  '/jobs/{jobId}':
+    get:
+      tags:
+        - Status
+      summary: retrieve the status of a job
+      description: "Shows the status of a job."
+      operationId: getStatus
+      parameters:
+        - name: token
+          in: header
+          description: A <b> valid Auth token </b> to process the request. <br/> This field is <b> mandatory</b> .
+          required: true
+          schema:
+            type: string
 
+        - name: jobId
+          in: path
+          description: local identifier of a job
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: The status of a job.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/statusInfo'
+              example:
+                jobID: cc0eb191-7f66-4663-8afa-cfd644de5839
+                processId: dd0eb191-7f66-4663-8afa-cfd644de5890
+                type: PROCESS
+                created: 2024-03-28T09:28:24.843Z
+                started: 2024-03-28T09:28:24.843Z
+                finished: 2024-03-28T09:28:24.843Z
+                updated: 2024-03-28T09:28:24.843Z
+                progress: 66.67
+                status: RUNNING
+                message: Process Running
+                links:
+                  href: 'https://ogc.iudx.io/jobs/fd6ef7c5-b18c-48e6-94e3-81037702863d'
+                  rel: self
+                  title: Districts in India
+
+        "404":
+          description: The requested URI was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+              example:
+                type: Internal Server Error
+                title: Internal Server Error
+                detail: Internal Server Error
 tags:
   - name: Capabilities
     description: Essential characteristics of OGC APIs
@@ -937,6 +1059,21 @@ components:
     EmptyTile:
       description: No data available for this tile.
   schemas:
+    exception:
+      title: Exception Schema
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          example: Not Found
+        title:
+          type: string
+          example: Not Found
+        detail:
+          type: string
+          example: Resource Not Found
     exception404:
       type: object
       properties:
@@ -1110,6 +1247,36 @@ components:
       required:
         - type
         - features
+    execute:
+      type: object
+      properties:
+        inputs:
+          type: object
+          additionalProperties:
+            oneOf:
+              - $ref: '#/components/schemas/inlineOrRefData'
+              - type: array
+                items:
+                  $ref: '#/components/schemas/inlineOrRefData'
+        response:
+          type: string
+          default: raw
+          enum:
+            - raw
+            - document
+    inlineOrRefData:
+      oneOf:
+        - $ref: '#/components/schemas/inputValueNoObject'
+
+    inputValueNoObject:
+      oneOf:
+        - type: string
+        - type: number
+        - type: integer
+        - type: boolean
+        - type: array
+          items:
+            type: string
     featureGeoJSON:
       type: object
       properties:
@@ -1936,3 +2103,29 @@ components:
         ref:
           type: string
           format: uri-reference
+    statusInfo:
+      required:
+        - jobID
+        - status
+        - type
+      type: object
+      properties:
+        jobID:
+          type: string
+          format: uuid
+        processId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+            - PROCESS
+    statusCode:
+      type: string
+      nullable: false
+      enum:
+        - ACCEPTED
+        - RUNNING
+        - SUCCESSFUL
+        - FAILED
+        - DISMISSED

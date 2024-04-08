@@ -92,6 +92,18 @@
       "prodVhost":"",
       "internalVhost": "",
       "externalVhost":""
+    },
+    {
+      "id": "ogc.rs.processes.ProcessVerticle",
+      "s3BucketUrl": "",
+      "awsAccessKey": "",
+      "awsSecretKey": "",
+      "awsEndPoint": "",
+      "verticleInstances": 1
+    },
+    {
+      "id": "ogc.rs.jobs.JobsVerticle",
+      "verticleInstances": 1
     }
   ]
 }

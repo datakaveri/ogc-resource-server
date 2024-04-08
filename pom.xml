@@ -189,9 +189,14 @@
             <version>0.3.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-rabbitmq-client</artifactId>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-rabbitmq-client</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-exec</artifactId>
+          <version>1.4.0</version>
         </dependency>
     </dependencies>
 

@@ -10,6 +10,10 @@ import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.*;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -30,13 +34,16 @@ import java.util.*;
 import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.util.DataFromS3;
 import ogc.rs.apiserver.handlers.FailureHandler;
-
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.apiserver.util.ProcessException;
 import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.database.DatabaseService;
+import ogc.rs.jobs.JobsService;
 import ogc.rs.metering.MeteringService;
+import ogc.rs.processes.ProcessesRunnerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import static ogc.rs.common.Constants.*;
 
 /**
  * The OGC Resource Server API Verticle.
@@ -70,6 +77,9 @@ public class ApiServerVerticle extends AbstractVerticle {
   private DatabaseService dbService;
   private Buffer ogcLandingPageBuf;
   private HttpClient httpClient;
+  private ProcessesRunnerService processService;
+  private JobsService jobsService;
+
 
   /**
    * This method is used to start the Verticle. It deploys a verticle in a cluster/single instance,
@@ -91,8 +101,6 @@ public class ApiServerVerticle extends AbstractVerticle {
             HEADER_REFERER,
             HEADER_ACCEPT,
             HEADER_ALLOW_ORIGIN);
-
-
       Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS);
       FailureHandler failureHandler = new FailureHandler();
 
@@ -205,14 +213,16 @@ public class ApiServerVerticle extends AbstractVerticle {
                     .handler(this::putCommonResponseHeaders)
                     .handler(this::buildResponse);
 
-          routerBuilder.operation(PROCESSES_API)
-            // .handler(AuthHandler.create(vertx))
+                routerBuilder.operation(EXECUTE_API).handler(AuthHandler.create(vertx))
+                  .handler(this::executeJob).handler(this::putCommonResponseHeaders)
+                  .handler(this::buildResponse).failureHandler(failureHandler);
+
+                routerBuilder.operation(PROCESSES_API)
             .handler(this::getProcesses).handler(this::putCommonResponseHeaders)
             .handler(this::buildResponse)
             .failureHandler(failureHandler);
 
             routerBuilder.operation(PROCESS_API)
-              // .handler(AuthHandler.create(vertx))
               .handler(this::getProcess).handler(this::putCommonResponseHeaders)
               .handler(this::buildResponse).failureHandler(failureHandler);
 
@@ -239,6 +249,10 @@ public class ApiServerVerticle extends AbstractVerticle {
                     .handler(this::getTile)
                     .handler(this::putCommonResponseHeaders)
                     .handler(this::buildResponse);
+
+                routerBuilder.operation(STATUS_API).handler(AuthHandler.create(vertx))
+                  .handler(this::getStatus).handler(this::putCommonResponseHeaders)
+                  .handler(this::buildResponse).failureHandler(failureHandler);
 
                 routerBuilderMetering
                     .operation(SUMMARY_AUDIT_API)
@@ -321,13 +335,13 @@ public class ApiServerVerticle extends AbstractVerticle {
                 throw new RuntimeException(e.getMessage());
               }
 
-              dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
-              // TODO: ssl configuration
-              HttpServerOptions serverOptions = new HttpServerOptions();
-              serverOptions.setCompressionSupported(true).setCompressionLevel(5);
-              int port =
-                  config().getInteger("httpPort") == null ? 8080 : config().getInteger("httpPort");
-
+          processService = ProcessesRunnerService.createProxy(vertx,PROCESSING_SERVICE_ADDRESS);
+          dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
+          jobsService = JobsService.createProxy(vertx,JOBS_SERVICE_ADDRESS);
+          // TODO: ssl configuration
+          HttpServerOptions serverOptions = new HttpServerOptions();
+          serverOptions.setCompressionSupported(true).setCompressionLevel(5);
+          int port = config().getInteger("httpPort") == null ? 8080 : config().getInteger("httpPort");
               HttpServer server = vertx.createHttpServer(serverOptions);
               return server.requestHandler(router).listen(port);
             })
@@ -344,6 +358,58 @@ public class ApiServerVerticle extends AbstractVerticle {
       httpClient = vertx.createHttpClient(httpCliOptions);
     }
 
+  private void executeJob(RoutingContext routingContext) {
+
+    RequestParameters paramsFromOasValidation =
+      routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+    JsonObject requestBody = paramsFromOasValidation.body().getJsonObject().getJsonObject("inputs");
+    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
+    requestBody.put("processId", paramsFromOasValidation.pathParameter("processId").getString())
+      .put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
+
+    processService.run(requestBody, handler -> {
+
+      if (handler.succeeded()) {
+        LOGGER.debug("Process started successfully.");
+        routingContext.response().headers().add("Location", handler.result().getString("location"));
+        handler.result().remove("location");
+        routingContext.put("response", handler.result().toString());
+        routingContext.put("statusCode", 201);
+        routingContext.next();
+      } else {
+        ProcessException processException = (ProcessException) handler.cause();
+        routingContext.put("response", processException.getJson().toString());
+        routingContext.put("statusCode", processException.getStatusCode());
+        routingContext.next();
+      }
+    });
+  }
+
+  private void getStatus(RoutingContext routingContext) {
+
+    RequestParameters paramsFromOasValidation =
+      routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
+    JsonObject requestBody = new JsonObject();
+    requestBody.put("jobId", paramsFromOasValidation.pathParameter("jobId").getString())
+      .put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
+
+    jobsService.getStatus(requestBody).onSuccess(handler -> {
+      {
+        LOGGER.debug("Job status found.");
+        routingContext.put("response", handler.toString());
+        routingContext.put("statusCode", 200);
+        routingContext.next();
+      }
+    }).onFailure(failureHandler -> {
+      LOGGER.debug("JOB status not found. " + failureHandler);
+      ProcessException processException = (ProcessException) failureHandler;
+      routingContext.put("response", processException.getJson().toString());
+      routingContext.put("statusCode", processException.getStatusCode());
+      routingContext.next();
+    });
+
+  }
 
   private void getFeature(RoutingContext routingContext) {
 
@@ -555,17 +621,11 @@ public class ApiServerVerticle extends AbstractVerticle {
       routingContext.put("response", successResult.toString());
       routingContext.put("statusCode", 200);
       routingContext.next();
-    }).onFailure(failed -> {
-      if (failed instanceof OgcException) {
-        routingContext.put("response", ((OgcException) failed).getJson().toString());
-        routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
-      } else {
-        OgcException ogcException =
-          new OgcException(500, "Internal Server Error", "Internal Server Error");
-        routingContext.put("response", ogcException.getJson().toString());
-        routingContext.put("statusCode", ogcException.getStatusCode());
-      }
-      routingContext.next();
+    }).onFailure(failureHandler -> {
+        ProcessException processException = (ProcessException) failureHandler;
+        routingContext.put("response", processException.getJson().toString());
+        routingContext.put("statusCode", processException.getStatusCode());
+        routingContext.next();
     });
   }
 
@@ -575,16 +635,11 @@ public class ApiServerVerticle extends AbstractVerticle {
       routingContext.put("response", successResult.toString());
       routingContext.put("statusCode", 200);
       routingContext.next();
-    }).onFailure(failed -> {
-      if (failed instanceof OgcException) {
-        routingContext.put("response", ((OgcException) failed).getJson().toString());
-        routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
-      } else {
-        OgcException ogcException =
-          new OgcException(500, "Internal Server Error", "Internal Server Error");
-        routingContext.put("response", ogcException.getJson().toString());
-        routingContext.put("statusCode", ogcException.getStatusCode());
-      }
+    }).onFailure(failureHandler -> {
+      LOGGER.error("Failed to get process "+failureHandler);
+      ProcessException processException = (ProcessException) failureHandler;
+      routingContext.put("response", processException.getJson().toString());
+      routingContext.put("statusCode", processException.getStatusCode());
       routingContext.next();
     });
   }

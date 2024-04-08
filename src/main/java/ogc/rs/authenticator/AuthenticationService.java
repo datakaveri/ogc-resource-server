@@ -52,13 +52,22 @@ public interface AuthenticationService {
 Future<JsonObject> tokenIntrospect(JsonObject request, JsonObject authenticationInfo);
 
   /**
-   * The assetApiCheck method implements the authentication and authrization module using IUDX APIS
+   * The assetApiCheck method implements the authentication and authorization module using IUDX APIS
    * for the asset API endpoint.
    *
    * @param requestJson which is jsonObject containing ids: [String]
    * @param authInfo which is a JsonObject containing token: String and apiEndpoint: String
    * @param handler which is a request handler
-   * @return AuthenticationService which is a service
+   * @return A JSON object containing the authorization details, including the "isAuthorised" field, which indicates whether the user is authorized or not.
    */
   Future<JsonObject> assetApiCheck(JsonObject requestJson, JsonObject authInfo);
+
+  /**
+   * This method is used to check the authentication and authorization of the user for the execution and job status endpoint.
+   *
+   * @param authenticationInfo The authentication information provided by the user, including the JWT token.
+   * @param requestJson The request JSON object for metering purpose.
+   * @return A JSON object containing the authorization details, including the "isAuthorised" field, which indicates whether the user is authorized or not.
+   */
+  Future<JsonObject> executionApiCheck(JsonObject authenticationInfo, JsonObject requestJson);
 }

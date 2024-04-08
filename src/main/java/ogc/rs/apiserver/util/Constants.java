@@ -26,6 +26,7 @@ public class Constants {
     public static final String COLLECTION_API = "describeCollection";
     public static final String FEATURES_API = "getFeatures";
     public static final String FEATURE_API = "getFeature";
+    public static final String EXECUTE_API = "execute";
     public static final String COLLECTIONS = "collections";
     public static final String TILEMATRIXSETS_API = "getTileMatrixSetsList";
     public static final String TILEMATRIXSET_API = "getTileMatrixSet";
@@ -33,21 +34,20 @@ public class Constants {
     public static final String TILESET_API = ".collection.map.getTileSet";
     public static final String TILE_API = ".collection.map.getTile";
 
-    public static final String ITEMS = "items";
-
     public static final String STAC = "stac";
     public static final String STAC_OPENAPI_SPEC = "/stac/api";
     public static final String PROCESSES_API = "getProcesses";
     public static final String PROCESS_API = "getProcessDescription";
     public static final String CONTENT_TYPE = "content-type";
     public static final String APPLICATION_JSON = "application/json";
-
     public static final String STAC_CATALOG_API = "getStacLandingPage";
     public static final String STAC_COLLECTIONS_API = "getStacCollections";
     public static final String STAC_COLLECTION_API = "describeStacCollection";
     public static final String ASSET_API = "getAsset";
     public static final String STAC_CONFORMANCE_CLASSES = "getConformanceDeclaration";
-
+    public static final String PROCESS_EXECUTION_REGEX = "/processes/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/execution";
+    public static final String STATUS_API = "getStatus";
+    public static final String JOB_STATUS_REGEX = "/jobs/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}";
 
   // Header params
   public static final String METERING_OPENAPI_SPEC = "/metering/api";
