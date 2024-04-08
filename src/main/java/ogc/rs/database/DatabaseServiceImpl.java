@@ -28,9 +28,11 @@ public class DatabaseServiceImpl implements DatabaseService{
     private static final Logger LOGGER = LogManager.getLogger(DatabaseServiceImpl.class);
 
     private final PgPool client;
+    PgPool meteringpgClient;
     private final JsonObject config;
-    public DatabaseServiceImpl(final PgPool pgClient,JsonObject config) {
+    public DatabaseServiceImpl(final PgPool pgClient,JsonObject config,PgPool meteringpgClient) {
         this.client = pgClient;this.config=config;
+        this.meteringpgClient=meteringpgClient;
     }
     public Set<String> predefinedKeys = Set.of("limit", "bbox", "datetime", "offset", "bbox-crs", "crs");
 
@@ -696,7 +698,7 @@ public class DatabaseServiceImpl implements DatabaseService{
     Promise<JsonObject> promise = Promise.promise();
     Collector<Row, ?, List<JsonObject>> rowCollector =
         Collectors.mapping(row -> row.toJson(), Collectors.toList());
-    client
+      meteringpgClient
         .withConnection(
             connection ->
                 connection.query(query).collecting(rowCollector).execute().map(row -> row.value()))
