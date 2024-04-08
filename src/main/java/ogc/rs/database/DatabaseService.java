@@ -26,12 +26,10 @@ public interface DatabaseService {
 
     Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams, Map<String, Integer> crs);
 
-    Future<JsonObject> getFeature(String collectionId, String featureId, Map<String, String> queryParams, Map<String,
+    Future<JsonObject> getFeature(String collectionId, Integer featureId, Map<String, String> queryParams, Map<String,
         Integer> crs);
 
-    Future<Void> matchFilterWithProperties(String collectionId, Map<String, String> queryParams);
-
-    Future<Map<String, Integer>> isCrsValid(String collectionId, Map<String, String> crs);
+    Future<Map<String, Integer>> isCrsValid(String collectionId, Map<String, String> queryParams);
 
     Future<List<JsonObject>>  getStacCollections();
 

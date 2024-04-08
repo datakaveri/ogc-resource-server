@@ -1,19 +1,9 @@
 package ogc.rs.apiserver;
 
-import static ogc.rs.apiserver.util.Constants.*;
-import static ogc.rs.common.Constants.*;
-import static ogc.rs.common.Constants.ROLE;
-import static ogc.rs.metering.util.MeteringConstant.*;
-import static ogc.rs.metering.util.MeteringConstant.USER_ID;
-
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.*;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -24,16 +14,9 @@ import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import io.vertx.ext.web.validation.RequestParameters;
 import io.vertx.ext.web.validation.ValidationHandler;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
 import ogc.rs.apiserver.handlers.AuthHandler;
-import ogc.rs.apiserver.util.DataFromS3;
 import ogc.rs.apiserver.handlers.FailureHandler;
+import ogc.rs.apiserver.util.DataFromS3;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.ProcessException;
 import ogc.rs.catalogue.CatalogueService;
@@ -43,7 +26,22 @@ import ogc.rs.metering.MeteringService;
 import ogc.rs.processes.ProcessesRunnerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.*;
+import static ogc.rs.metering.util.MeteringConstant.*;
+import static ogc.rs.metering.util.MeteringConstant.ROLE;
+import static ogc.rs.metering.util.MeteringConstant.USER_ID;
+
 
 /**
  * The OGC Resource Server API Verticle.
@@ -104,16 +102,13 @@ public class ApiServerVerticle extends AbstractVerticle {
       Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS);
       FailureHandler failureHandler = new FailureHandler();
 
-    /* Get base paths from config */
+      /* Get base paths from config */
     ogcBasePath = config().getString("ogcBasePath");
     hostName = config().getString("hostName");
-
     catalogueService = new CatalogueService(vertx, config());
     meteringService = MeteringService.createProxy(vertx, METERING_SERVICE_ADDRESS);
-
     /* Initialize OGC landing page buffer - since configured hostname needs to be in it */
-    String landingPageTemplate =
-        vertx.fileSystem().readFileBlocking("docs/landingPage.json").toString();
+    String landingPageTemplate = vertx.fileSystem().readFileBlocking("docs/landingPage.json").toString();
     ogcLandingPageBuf = Buffer.buffer(landingPageTemplate.replace("$HOSTNAME", hostName));
 
     S3_BUCKET = config().getString("s3BucketName");
@@ -121,7 +116,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     S3_ACCESS_KEY = config().getString("s3AccessKey");
     S3_SECRET_KEY = config().getString("s3SecretKey");
 
-    Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/openapiv3_0.yaml");
+    Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, "docs/openapiv3_0.json");
     Future<RouterBuilder> routerBuilderStacFut =
         RouterBuilder.create(vertx, "docs/stacopenapiv3_0.yaml");
     Future<RouterBuilder> routerBuilderMeteringFut =
@@ -136,8 +131,8 @@ public class ApiServerVerticle extends AbstractVerticle {
               LOGGER.debug("Info: Mounting routes from OpenApi3 spec");
 
               RouterBuilderOptions factoryOptions =
-                  new RouterBuilderOptions().setMountResponseContentTypeHandler(true);
-
+                  new RouterBuilderOptions().setMountResponseContentTypeHandler(true).setMountNotImplementedHandler(true);
+              routerBuilder.setOptions(factoryOptions);
               routerBuilder.rootHandler(
                   CorsHandler.create("*")
                       .allowedHeaders(allowedHeaders)
@@ -168,116 +163,140 @@ public class ApiServerVerticle extends AbstractVerticle {
                           HttpServerResponse response = routingContext.response();
                           response.sendFile("docs/conformance.json");
                         });
-
                 routerBuilder
-                    .operation(COLLECTIONS_API)
-                    .handler(this::getCollections)
-                    .handler(this::putCommonResponseHeaders)
-                    .handler(this::buildResponse);
+                  .operation(COLLECTIONS_API)
+                  .handler(this::getCollections)
+                  .handler(this::putCommonResponseHeaders)
+                  .handler(this::buildResponse)
+                  .failureHandler(failureHandler);
 
-                routerBuilder
-                    .operation(COLLECTION_API)
-                    .handler(this::getCollection)
-                    .handler(this::putCommonResponseHeaders)
-                    .handler(this::buildResponse);
+              routerBuilder
+                  .operation(COLLECTION_API)
+                  .handler(this::getCollection)
+                  .handler(this::putCommonResponseHeaders)
+                  .handler(this::buildResponse)
+                  .failureHandler(failureHandler);
 
-                routerBuilder
-                    .operation(FEATURES_API)
-                    .handler(AuthHandler.create(vertx))
-                    .handler(this::getFeatures)
-                    .handler(this::putCommonResponseHeaders)
-                    .handler(this::buildResponse);
-
-                routerBuilder
-                    .operation(FEATURE_API)
-                    .handler(AuthHandler.create(vertx))
-                    .handler(this::getFeature)
-                    .handler(this::putCommonResponseHeaders)
-                    .handler(this::buildResponse);
-
-          routerBuilderStac
-              .operation(STAC_CATALOG_API)
-              .handler(this::stacCatalog)
-              .handler(this::putCommonResponseHeaders)
-              .handler(this::buildResponse);
-
-          routerBuilderStac
-              .operation(STAC_COLLECTIONS_API)
-              .handler(this::stacCollections)
-              .handler(this::putCommonResponseHeaders)
-              .handler(this::buildResponse);
-
-                routerBuilder
-                    .operation(TILEMATRIXSETS_API)
-                    .handler(this::getTileMatrixSetList)
-                    .handler(this::putCommonResponseHeaders)
-                    .handler(this::buildResponse);
-
-                routerBuilder.operation(EXECUTE_API).handler(AuthHandler.create(vertx))
-                  .handler(this::executeJob).handler(this::putCommonResponseHeaders)
-                  .handler(this::buildResponse).failureHandler(failureHandler);
-
-                routerBuilder.operation(PROCESSES_API)
-            .handler(this::getProcesses).handler(this::putCommonResponseHeaders)
-            .handler(this::buildResponse)
-            .failureHandler(failureHandler);
-
-            routerBuilder.operation(PROCESS_API)
-              .handler(this::getProcess).handler(this::putCommonResponseHeaders)
-              .handler(this::buildResponse).failureHandler(failureHandler);
-
-                routerBuilder
-                    .operation(TILEMATRIXSET_API)
-                    .handler(this::getTileMatrixSet)
-                    .handler(this::putCommonResponseHeaders)
-                    .handler(this::buildResponse);
-
-                routerBuilder
-                    .operation(TILESETSLIST_API)
-                    .handler(this::getTileSetList)
-                    .handler(this::putCommonResponseHeaders)
-                    .handler(this::buildResponse);
-
-                routerBuilder
-                    .operation(TILESET_API)
-                    .handler(this::getTileSet)
-                    .handler(this::putCommonResponseHeaders)
-                    .handler(this::buildResponse);
-
-                routerBuilder
-                    .operation(TILE_API)
-                    .handler(this::getTile)
-                    .handler(this::putCommonResponseHeaders)
-                    .handler(this::buildResponse);
-
-                routerBuilder.operation(STATUS_API).handler(AuthHandler.create(vertx))
-                  .handler(this::getStatus).handler(this::putCommonResponseHeaders)
-                  .handler(this::buildResponse).failureHandler(failureHandler);
-
-                routerBuilderMetering
-                    .operation(SUMMARY_AUDIT_API)
-                    .handler(this::getSummary)
-                    .handler(this::putCommonResponseHeaders)
-                    .handler(this::buildResponse);
+              routerBuilder
+                  .operation(FEATURES_API)
+                  .handler(AuthHandler.create(vertx))
+                  .handler(this::validateQueryParams)
+                  .handler(this::getFeatures)
+                  .handler(this::putCommonResponseHeaders)
+                  .handler(this::buildResponse)
+                  .failureHandler(failureHandler);
 
 
-                routerBuilderMetering
-                    .operation(OVERVIEW_AUDIT_API)
-                    .handler(this::getMonthlyOverview)
-                    .handler(this::putCommonResponseHeaders)
-                    .handler(this::buildResponse);
+              routerBuilder
+                  .operation(FEATURE_API)
+                  .handler(AuthHandler.create(vertx))
+                  .handler(this::validateQueryParams)
+                  .handler(this::getFeature)
+                  .handler(this::putCommonResponseHeaders)
+                  .handler(this::buildResponse)
+                  .failureHandler(failureHandler);
 
-                  routerBuilderMetering
-                          .operation(CONSUMER_AUDIT_API)
-                          .handler(this::getConsumerAuditDetail)
-                          .handler(this::putCommonResponseHeaders)
-                          .handler(this::buildResponse);
+              routerBuilderStac
+                  .operation(STAC_CATALOG_API)
+                  .handler(this::stacCatalog)
+                  .handler(this::putCommonResponseHeaders)
+                  .handler(this::buildResponse);
 
-                  routerBuilderMetering
-                          .operation(PROVIDER_AUDIT_API)
-                          .handler(this::getProviderAuditDetail)
-                          .handler(this::putCommonResponseHeaders)
-                          .handler(this::buildResponse);
+              routerBuilderStac
+                  .operation(STAC_COLLECTIONS_API)
+                  .handler(this::stacCollections)
+                  .handler(this::putCommonResponseHeaders)
+                  .handler(this::buildResponse);
+
+              routerBuilder
+                  .operation(EXECUTE_API)
+                  .handler(AuthHandler.create(vertx))
+                  .handler(this::executeJob)
+                  .handler(this::putCommonResponseHeaders)
+                  .handler(this::buildResponse)
+                  .failureHandler(failureHandler);
+
+              routerBuilder
+                  .operation(PROCESSES_API)
+                  .handler(this::getProcesses)
+                  .handler(this::putCommonResponseHeaders)
+                  .handler(this::buildResponse)
+                  .failureHandler(failureHandler);
+
+              routerBuilder
+                  .operation(PROCESS_API)
+                  .handler(this::getProcess)
+                  .handler(this::putCommonResponseHeaders)
+                  .handler(this::buildResponse)
+                  .failureHandler(failureHandler);
+
+            routerBuilder
+                .operation(TILEMATRIXSETS_API)
+                .handler(this::getTileMatrixSetList)
+                .handler(this::putCommonResponseHeaders)
+                .handler(this::buildResponse)
+                .failureHandler(failureHandler);
+
+            routerBuilder
+                  .operation(TILEMATRIXSET_API)
+                  .handler(this::getTileMatrixSet)
+                  .handler(this::putCommonResponseHeaders)
+                  .handler(this::buildResponse)
+                  .failureHandler(failureHandler);
+
+            routerBuilder
+                .operation(TILESETSLIST_API)
+                .handler(this::getTileSetList)
+                .handler(this::putCommonResponseHeaders)
+                .handler(this::buildResponse)
+                .failureHandler(failureHandler);
+
+            routerBuilder
+                .operation(TILESET_API)
+                .handler(this::getTileSet)
+                .handler(this::putCommonResponseHeaders)
+                .handler(this::buildResponse)
+                .failureHandler(failureHandler);
+
+            routerBuilder
+                .operation(TILE_API)
+                .handler(this::getTile)
+                .handler(this::putCommonResponseHeaders)
+                .handler(this::buildResponse);
+
+
+            routerBuilder
+                .operation(STATUS_API)
+                .handler(AuthHandler.create(vertx))
+                .handler(this::getStatus)
+                .handler(this::putCommonResponseHeaders)
+                .handler(this::buildResponse)
+                  .failureHandler(failureHandler);
+
+            routerBuilderMetering
+                .operation(SUMMARY_AUDIT_API)
+                .handler(this::getSummary)
+                .handler(this::putCommonResponseHeaders)
+                .handler(this::buildResponse);
+
+
+            routerBuilderMetering
+                .operation(OVERVIEW_AUDIT_API)
+                .handler(this::getMonthlyOverview)
+                .handler(this::putCommonResponseHeaders)
+                .handler(this::buildResponse);
+
+              routerBuilderMetering
+                      .operation(CONSUMER_AUDIT_API)
+                      .handler(this::getConsumerAuditDetail)
+                      .handler(this::putCommonResponseHeaders)
+                      .handler(this::buildResponse);
+
+              routerBuilderMetering
+                      .operation(PROVIDER_AUDIT_API)
+                      .handler(this::getProviderAuditDetail)
+                      .handler(this::putCommonResponseHeaders)
+                      .handler(this::buildResponse);
 
               routerBuilderStac
                       .operation(ASSET_API)
@@ -285,19 +304,19 @@ public class ApiServerVerticle extends AbstractVerticle {
                       .handler(this::getAssets)
                       .handler(this::putCommonResponseHeaders)
                       .handler(this::buildResponse);
-                  routerBuilderStac
-                          .operation(STAC_COLLECTION_API)
-                          .handler(this::getStacCollection)
-                          .handler(this::putCommonResponseHeaders)
-                          .handler(this::buildResponse);
+              routerBuilderStac
+                      .operation(STAC_COLLECTION_API)
+                      .handler(this::getStacCollection)
+                      .handler(this::putCommonResponseHeaders)
+                      .handler(this::buildResponse);
 
-          routerBuilderStac
-              .operation(STAC_CONFORMANCE_CLASSES)
-              .handler(
-                  routingContext -> {
-                    HttpServerResponse response = routingContext.response();
-                    response.sendFile("docs/stacConformance.json");
-                  });
+              routerBuilderStac
+                  .operation(STAC_CONFORMANCE_CLASSES)
+                  .handler(
+                      routingContext -> {
+                        HttpServerResponse response = routingContext.response();
+                        response.sendFile("docs/stacConformance.json");
+                      });
 
                 Router ogcRouter = routerBuilder.createRouter();
                 Router stacRouter = routerBuilderStac.createRouter();
@@ -312,6 +331,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                     .handler(
                         routingContext -> {
                           HttpServerResponse response = routingContext.response();
+                          response.putHeader(
+                              "Content-Type", "application/vnd.oai.openapi+json;version=3.0");
                           response.sendFile("docs/openapiv3_0.json");
                         });
                 router
@@ -340,7 +361,6 @@ public class ApiServerVerticle extends AbstractVerticle {
           jobsService = JobsService.createProxy(vertx,JOBS_SERVICE_ADDRESS);
           // TODO: ssl configuration
           HttpServerOptions serverOptions = new HttpServerOptions();
-          serverOptions.setCompressionSupported(true).setCompressionLevel(5);
           int port = config().getInteger("httpPort") == null ? 8080 : config().getInteger("httpPort");
               HttpServer server = vertx.createHttpServer(serverOptions);
               return server.requestHandler(router).listen(port);
@@ -413,44 +433,31 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   private void getFeature(RoutingContext routingContext) {
 
-    String collectionId = routingContext.pathParam("collectionId");
-    if (!(Boolean) routingContext.get("isAuthorised")) {
+    if (!(Boolean) routingContext.get("isAuthorised")){
       routingContext.next();
       return;
     }
-    String featureId = routingContext.pathParam("featureId");
-    System.out.println("collectionId- " + collectionId + " featureId- " + featureId);
-    Map<String, String> queryParamsMap = new HashMap<>();
-    MultiMap queryParams = routingContext.queryParams();
-    queryParams.forEach(param -> queryParamsMap.put(param.getKey(), param.getValue()));
+    RequestParameters requestParameters = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+    String collectionId = routingContext.request().path().split("/")[2];
+    Integer featureId = requestParameters.pathParameter("featureId").getInteger();
+    Map<String, Object> queryParams = requestParameters.toJson().getJsonObject("query").getMap();
+    Map<String, String> queryParamsMap = queryParams.entrySet()
+        .stream()
+        .collect(Collectors.toMap(Map.Entry::getKey, e -> (String) e.getValue()));
     LOGGER.debug("<APIServer> QP- {}", queryParamsMap);
     Future<Map<String, Integer>> isCrsValid = dbService.isCrsValid(collectionId, queryParamsMap);
     isCrsValid
         .compose(crs -> dbService.getFeature(collectionId, featureId, queryParamsMap, crs))
-        .onSuccess(
-            success -> {
+        .onSuccess(success -> {
               LOGGER.debug("Success! - {}", success.encodePrettily());
               // TODO: Add base_path from config
-              success.put(
-                  "links",
-                  new JsonArray()
-                      .add(
-                          new JsonObject()
-                              .put(
-                                  "href",
-                                  hostName
-                                      + ogcBasePath
-                                      + COLLECTIONS
-                                      + "/"
-                                      + collectionId
-                                      + "/items/"
+              success.put("links", new JsonArray()
+                  .add(new JsonObject().put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items/"
                                       + featureId)
                               .put("rel", "self")
                               .put("type", "application/geo+json"))
-                      .add(
-                          new JsonObject()
-                              .put(
-                                  "href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId)
+                      .add(new JsonObject()
+                              .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId)
                               .put("rel", "collection")
                               .put("type", "application/json")));
               routingContext.put("response", success.toString());
@@ -475,143 +482,107 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   private void getFeatures(RoutingContext routingContext) {
-    String collectionId = routingContext.pathParam("collectionId");
-    if (!(Boolean) routingContext.get("isAuthorised")) {
+
+    if (!(Boolean) routingContext.get("isAuthorised")){
       routingContext.next();
       return;
     }
-    Map<String, String> queryParamsMap = new HashMap<>();
-    MultiMap queryParams = routingContext.queryParams();
-    queryParams.forEach(param -> queryParamsMap.put(param.getKey(), param.getValue()));
+
+    RequestParameters requestParameters = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+    String collectionId = routingContext.request().path().split("/")[2];
+    Map<String, Object> queryParams = requestParameters.toJson().getJsonObject("query").getMap();
+    Map<String, String> queryParamsMap = queryParams.entrySet()
+        .stream()
+        .filter(i -> i.getValue() != null)
+        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
     LOGGER.debug("<APIServer> QP- {}", queryParamsMap);
+
     Future<Map<String, Integer>> isCrsValid = dbService.isCrsValid(collectionId, queryParamsMap);
     isCrsValid
-        .compose(crsss -> dbService.matchFilterWithProperties(collectionId, queryParamsMap))
-        //    Future<Void> matchFiltersWithProperties =
-        // dbService.matchFilterWithProperties(collectionId, queryParamsMap);
-        //    matchFiltersWithProperties
-        .compose(
-            datetimeCheck -> {
-              try {
-                String datetime;
-                ZonedDateTime zone, zone2;
-                DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
-                if (queryParamsMap.containsKey("datetime")) {
-                  datetime = queryParamsMap.get("datetime");
-                  if (!datetime.contains("/")) {
-                    zone = ZonedDateTime.parse(datetime, formatter);
-                  } else if (datetime.contains("/")) {
-                    String[] dateTimeArr = datetime.split("/");
-                    if (dateTimeArr[0].equals("..")) { // -- before
-                      zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
-                    } else if (dateTimeArr[1].equals("..")) { // -- after
-                      zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
-                    } else {
-                      zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
-                      zone2 = ZonedDateTime.parse(dateTimeArr[1], formatter);
-                      if (zone2.isBefore(zone)) {
-                        OgcException ogcException =
-                            new OgcException(
-                                400,
-                                "Bad Request",
-                                "After time cannot be lesser " + "than Before time");
-                        return Future.failedFuture(ogcException);
-                      }
-                    }
+        .compose(datetimeCheck -> {
+          try {
+            String datetime;
+            ZonedDateTime zone, zone2;
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+            if (queryParamsMap.containsKey("datetime")) {
+              datetime = queryParamsMap.get("datetime");
+              if (!datetime.contains("/")) {
+                zone = ZonedDateTime.parse(datetime, formatter);
+              } else if (datetime.contains("/")) {
+                String[] dateTimeArr = datetime.split("/");
+                if (dateTimeArr[0].equals("..")) { // -- before
+                  zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
+                }
+                else if (dateTimeArr[1].equals("..")) { // -- after
+                  zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
+                }
+                else {
+                  zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
+                  zone2 = ZonedDateTime.parse(dateTimeArr[1], formatter);
+                  if (zone2.isBefore(zone)){
+                    OgcException ogcException = new OgcException(400, "Bad Request", "After time cannot be lesser " +
+                        "than Before time");
+                    return Future.failedFuture(ogcException);
                   }
                 }
-              } catch (NullPointerException ne) {
+              }
+            }
+          } catch (NullPointerException ne) {
                 OgcException ogcException =
                     new OgcException(500, "Internal Server Error", "Internal Server Error");
                 return Future.failedFuture(ogcException);
-              } catch (DateTimeParseException dtpe) {
-                OgcException ogcException =
-                    new OgcException(400, "Bad Request", "Time parameter not in ISO format");
-                return Future.failedFuture(ogcException);
-              }
-              return Future.succeededFuture();
-            })
+            } catch (DateTimeParseException dtpe) {
+              OgcException ogcException =
+                  new OgcException(400, "Bad Request", "Time parameter not in ISO format");
+              return Future.failedFuture(ogcException);
+            }
+            return Future.succeededFuture();
+          })
         .compose(dbCall -> dbService.getFeatures(collectionId, queryParamsMap, isCrsValid.result()))
-        .onSuccess(
-            success -> {
-              LOGGER.debug("Success! - {}", success.encodePrettily());
-              // TODO: Add base_path from config
-              int next, offset = 1, limit = 10;
-              if (queryParamsMap.containsKey("offset")) {
-                offset = Integer.parseInt(queryParamsMap.get("offset"));
-              }
-              if (queryParamsMap.containsKey("limit")) {
-                limit = Math.min(10000, Integer.parseInt(queryParamsMap.get("limit")));
-              }
-              next = offset + limit;
-              success
-                  .put(
-                      "links",
-                      new JsonArray()
-                          .add(
-                              new JsonObject()
-                                  .put(
-                                      "href",
-                                      hostName
-                                          + ogcBasePath
-                                          + COLLECTIONS
-                                          + "/"
-                                          + collectionId
-                                          + "/items")
-                                  .put("rel", "self")
-                                  .put("type", "application/geo+json"))
-                          .add(
-                              new JsonObject()
-                                  .put(
-                                      "href",
-                                      hostName
-                                          + ogcBasePath
-                                          + COLLECTIONS
-                                          + "/"
-                                          + collectionId
-                                          + "/items")
-                                  .put("rel", "alternate")
-                                  .put("type", "application/geo+json")))
-                  .put("timeStamp", Instant.now().toString());
-              if (next < success.getInteger("numberMatched")) {
-                success
-                    .getJsonArray("links")
-                    .add(
-                        new JsonObject()
-                            .put(
-                                "href",
-                                hostName
-                                    + ogcBasePath
-                                    + COLLECTIONS
-                                    + "/"
-                                    + collectionId
-                                    + "/items?offset="
-                                    + next
-                                    + "&limit"
-                                    + "="
-                                    + limit)
-                            .put("rel", "next")
-                            .put("type", "application/geo+json"));
-              }
-              routingContext.put("response", success.toString());
-              routingContext.put("statusCode", 200);
-              routingContext.put(
-                  "crs", "<" + queryParamsMap.getOrDefault("crs", DEFAULT_SERVER_CRS) + ">");
-              routingContext.next();
-            })
-        .onFailure(
-            failed -> {
-              if (failed instanceof OgcException) {
-                routingContext.put("response", ((OgcException) failed).getJson().toString());
-                routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
-              } else {
-                OgcException ogcException =
-                    new OgcException(500, "Internal Server Error", "Internal Server Error");
-                routingContext.put("response", ogcException.getJson().toString());
-                routingContext.put("statusCode", ogcException.getStatusCode());
-              }
-              routingContext.next();
-            });
+        .onSuccess(success -> {
+          LOGGER.debug("Success! - {}", success.encodePrettily());
+          // TODO: Add base_path from config
+          int next, offset, limit;
+          offset = Integer.parseInt(queryParamsMap.get("offset"));
+          limit = Integer.parseInt(queryParamsMap.get("limit"));
+
+          next = offset + limit;
+          success.put("links", new JsonArray()
+                  .add(new JsonObject()
+                      .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items")
+                      .put("rel", "self")
+                      .put("type", "application/geo+json"))
+                  .add(new JsonObject()
+                      .put("href", hostName + ogcBasePath  + COLLECTIONS + "/" + collectionId + "/items")
+                      .put("rel", "alternate")
+                      .put("type", "application/geo+json")))
+              .put("timeStamp", Instant.now().toString());
+          if (next < success.getInteger("numberMatched")) {
+            success.getJsonArray("links")
+                .add(new JsonObject()
+                    .put("href",
+                        hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items?offset=" + next + "&limit" +
+                            "=" + limit)
+                    .put("rel", "next")
+                    .put("type", "application/geo+json" ));
+          }
+          routingContext.put("response",success.toString());
+          routingContext.put("statusCode", 200);
+          routingContext.put("crs", "<" + queryParamsMap.getOrDefault("crs", DEFAULT_SERVER_CRS) + ">");
+          routingContext.next();
+        })
+        .onFailure(failed -> {
+          if (failed instanceof OgcException){
+            routingContext.put("response",((OgcException) failed).getJson().toString());
+            routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+          }
+          else{
+            OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
+            routingContext.put("response", ogcException.getJson().toString());
+            routingContext.put("statusCode", ogcException.getStatusCode());
+          }
+          routingContext.next();
+        });
   }
   private void getProcesses(RoutingContext routingContext) {
     RequestParameters paramsFromOasValidation = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
@@ -645,53 +616,58 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   private void buildResponse(RoutingContext routingContext) {
-    routingContext
-        .response()
+    routingContext.response()
         .setStatusCode(routingContext.get("statusCode"))
         .end((String) routingContext.get("response"));
   }
 
+  private void validateQueryParams(RoutingContext routingContext) {
+      Set<String> queryParamsInRequest = routingContext.queryParams().names();
+      RequestParameters paramsOasValidation = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+      Set<String> allParamsDefinedInOas = paramsOasValidation.toJson().getJsonObject("query").fieldNames();
+      Set<String> badQueryParams = queryParamsInRequest.stream()
+          .filter(p -> !allParamsDefinedInOas.contains(p))
+          .collect(Collectors.toSet());
+      if(!badQueryParams.isEmpty()) {
+        routingContext.fail(new OgcException(400, "Bad Request", "Invalid parameters in request " + badQueryParams));
+      } else
+        routingContext.next();
+  }
   private void getCollection(RoutingContext routingContext) {
-    String collectionId = routingContext.pathParam("collectionId");
-    LOGGER.debug("collectionId- {}", collectionId);
-    dbService
-        .getCollection(collectionId)
-        .onSuccess(
-            success -> {
-              LOGGER.debug("Success! - {}", success.toString());
-              JsonObject jsonResult = new JsonObject();
-              if (success.get(0).getString("type").equalsIgnoreCase("feature"))
-                jsonResult = buildCollectionFeatureResult(success);
-              else if (success.get(0).getString("type").equalsIgnoreCase("tile"))
-                jsonResult = buildCollectionTileResult(success);
-              routingContext.put("response", jsonResult.toString());
-              routingContext.put("statusCode", 200);
-              routingContext.next();
-            })
-        .onFailure(
-            failed -> {
-              if (failed instanceof OgcException) {
-                routingContext.put("response", ((OgcException) failed).getJson().toString());
-                routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
-              } else {
-                OgcException ogcException =
-                    new OgcException(500, "Internal Server Error", "Internal Server Error");
-                routingContext.put("response", ogcException.getJson().toString());
-                routingContext.put("statusCode", ogcException.getStatusCode());
-              }
-              routingContext.next();
-            });
+      String collectionId = routingContext.request().path().split("/")[2];
+      LOGGER.debug("collectionId- {}", collectionId);
+      dbService.getCollection(collectionId)
+          .onSuccess(success -> {
+            LOGGER.debug("Success! - {}", success.toString());
+            JsonObject jsonResult = new JsonObject();
+            if (success.get(0).getString("type").equalsIgnoreCase("feature"))
+              jsonResult = buildCollectionFeatureResult(success);
+            else if (success.get(0).getString("type").equalsIgnoreCase("tile"))
+              jsonResult = buildCollectionTileResult(success);
+            routingContext.put("response", jsonResult.toString());
+            routingContext.put("statusCode", 200);
+            routingContext.next();
+          })
+          .onFailure(failed -> {
+            if (failed instanceof OgcException){
+              routingContext.put("response",((OgcException) failed).getJson().toString());
+              routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+            }
+            else{
+              OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
+              routingContext.put("response", ogcException.getJson().toString());
+              routingContext.put("statusCode", ogcException.getStatusCode());
+            }
+            routingContext.next();
+          });
   }
 
   private void getCollections(RoutingContext routingContext) {
 
-    dbService
-        .getCollections()
-        .onSuccess(
-            success -> {
+    dbService.getCollections()
+        .onSuccess(success -> {
               JsonArray collections = new JsonArray();
-              success.forEach(
-                  collection -> {
+              success.forEach(collection -> {
                     try {
                       JsonObject json = new JsonObject();
                       List<JsonObject> tempArray = new ArrayList<>();
@@ -712,31 +688,23 @@ public class ApiServerVerticle extends AbstractVerticle {
                       routingContext.next();
                     }
                   });
-              JsonObject featureCollections =
-                  new JsonObject()
-                      .put(
-                          "links",
-                          new JsonArray()
-                              .add(
-                                  new JsonObject()
+              JsonObject featureCollections = new JsonObject().put("links", new JsonArray()
+                      .add(new JsonObject()
                                       .put("href", hostName + ogcBasePath + COLLECTIONS)
                                       .put("rel", "self")
                                       .put("type", "application/json")
                                       .put("title", "This document")))
-                      .put("collections", collections);
+                  .put("collections", collections);
               routingContext.put("response", featureCollections.toString());
               routingContext.put("statusCode", 200);
               routingContext.next();
             })
-        .onFailure(
-            failed -> {
+        .onFailure(failed -> {
               if (failed instanceof OgcException) {
                 routingContext.put("response", ((OgcException) failed).getJson().toString());
                 routingContext.put("statusCode", 404);
               } else {
-                routingContext.put(
-                    "response",
-                    new OgcException(500, "Internal Server Error", "Internal Server Error")
+                routingContext.put("response", new OgcException(500, "Internal Server Error", "Internal Server Error")
                         .getJson()
                         .toString());
                 routingContext.put("statusCode", 500);
@@ -790,9 +758,7 @@ public class ApiServerVerticle extends AbstractVerticle {
         .getTileMatrixSetRelationOverload(collectionId, tileMatrixSetId)
         .onSuccess(
             success -> {
-              JsonObject tileSetResponse =
-                  buildTileSetResponse(
-                      collectionId,
+              JsonObject tileSetResponse = buildTileSetResponse(collectionId,
                       success.get(0).getString("tilematrixset"),
                       success.get(0).getString("uri"),
                       success.get(0).getString("crs"),
@@ -821,44 +787,27 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   private void getTileSetList(RoutingContext routingContext) {
     String collectionId = routingContext.pathParam("collectionId");
-    dbService
-        .getTileMatrixSetRelation(collectionId)
-        .onSuccess(
-            success -> {
-              JsonObject tileSetListResponse =
-                  new JsonObject()
-                      .put(
-                          "links",
-                          new JsonObject()
-                              .put(
-                                  "href",
-                                  hostName
-                                      + ogcBasePath
-                                      + COLLECTIONS
-                                      + "/"
-                                      + collectionId
-                                      + "/map/tiles")
+    dbService.getTileMatrixSetRelation(collectionId)
+        .onSuccess(success -> {
+              JsonObject tileSetListResponse = new JsonObject()
+                      .put("links", new JsonObject().put("href", hostName + ogcBasePath + COLLECTIONS + "/"
+                              + collectionId + "/map/tiles")
                               .put("rel", "self")
                               .put("type", "application/geo+json")
                               .put("title", collectionId + " tileset data"));
               JsonArray tileSets = new JsonArray();
-              success.forEach(
-                  tileMatrixSet -> {
-                    tileSets.add(
-                        buildTileSetResponse(
-                            collectionId,
-                            tileMatrixSet.getString("tilematrixset"),
-                            tileMatrixSet.getString("uri"),
-                            tileMatrixSet.getString("crs"),
-                            tileMatrixSet.getString("datatype")));
-                  });
+              success.forEach(tileMatrixSet -> tileSets.add(
+                  buildTileSetResponse(collectionId,
+                      tileMatrixSet.getString("tilematrixset"),
+                      tileMatrixSet.getString("uri"),
+                      tileMatrixSet.getString("crs"),
+                      tileMatrixSet.getString("datatype"))));
               tileSetListResponse.put("tilesets", tileSets);
               routingContext.put("response", tileSetListResponse.toString());
               routingContext.put("statusCode", 200);
               routingContext.next();
             })
-        .onFailure(
-            failed -> {
+        .onFailure(failed -> {
               if (failed instanceof OgcException) {
                 routingContext.put("response", ((OgcException) failed).getJson().toString());
                 routingContext.put("statusCode", 404);
@@ -876,10 +825,8 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   private void getTileMatrixSet(RoutingContext routingContext) {
     String tileMatrixSetId = routingContext.pathParam("tileMatrixSetId");
-    dbService
-        .getTileMatrixSetMetaData(tileMatrixSetId)
-        .onSuccess(
-            success -> {
+    dbService.getTileMatrixSetMetaData(tileMatrixSetId)
+        .onSuccess(success -> {
               // drop collection_id, tilematrixset_id,
               // will return everything, we have to parse and store the individual matrices in the
               // format of tileMatrices
@@ -891,11 +838,9 @@ public class ApiServerVerticle extends AbstractVerticle {
                   .put("uri", tempDbRes.getString("uri"))
                   .put("crs", tempDbRes.getString("crs"));
               JsonArray tileMatrices = new JsonArray();
-              success.forEach(
-                  tileMatrix -> {
+              success.forEach(tileMatrix -> {
                     // TODO: Streamline this build
-                    JsonObject tempTileMatrix =
-                        buildTileMatrices(
+                    JsonObject tempTileMatrix = buildTileMatrices(
                             tileMatrix.getString("tilematrix_id"),
                             tileMatrix.getString("tilematrixmeta_title"),
                             tileMatrix.getString("scaledenominator"),
@@ -911,70 +856,56 @@ public class ApiServerVerticle extends AbstractVerticle {
               routingContext.put("statusCode", 200);
               routingContext.next();
             })
-        .onFailure(
-            failed -> {
+        .onFailure(failed -> {
               if (failed instanceof OgcException) {
                 routingContext.put("response", ((OgcException) failed).getJson().toString());
                 routingContext.put("statusCode", 404);
               } else {
-                routingContext.put(
-                    "response",
-                    new OgcException(500, "Internal Server Error", "Internal Server Error")
-                        .getJson()
-                        .toString());
-                routingContext.put("statusCode", 500);
+                  routingContext.put(
+                      "response",
+                      new OgcException(500, "Internal Server Error", "Internal Server Error")
+                          .getJson()
+                          .toString());
+                  routingContext.put("statusCode", 500);
               }
               routingContext.next();
             });
   }
 
   private void getTileMatrixSetList(RoutingContext routingContext) {
-    dbService
-        .getTileMatrixSets()
-        .onSuccess(
-            success -> {
+    dbService.getTileMatrixSets()
+        .onSuccess(success -> {
               JsonArray tileMatrixSets = new JsonArray();
-              success.forEach(
-                  tileMatrixSet -> {
-                    tileMatrixSet.put(
-                        "links",
-                        new JsonObject()
-                            .put("rel", "self")
-                            .put(
-                                "href",
-                                hostName
-                                    + ogcBasePath
-                                    + "tileMatrixSets/"
-                                    + tileMatrixSet.getString("id"))
-                            .put("type", "application/json")
-                            .put("title", tileMatrixSet.getString("title")));
+              success.forEach(tileMatrixSet -> {
+                    tileMatrixSet.put("links", new JsonObject()
+                        .put("rel", "self")
+                        .put("href", hostName + ogcBasePath + "tileMatrixSets/" + tileMatrixSet.getString("id"))
+                        .put("type", "application/json")
+                        .put("title", tileMatrixSet.getString("title")));
                     tileMatrixSets.add(tileMatrixSet);
                   });
-              routingContext.put(
-                  "response", new JsonObject().put("tileMatrixSets", tileMatrixSets).toString());
+              routingContext.put("response", new JsonObject().put("tileMatrixSets", tileMatrixSets).toString());
               routingContext.put("statusCode", 200);
               routingContext.next();
             })
-        .onFailure(
-            failed -> {
+        .onFailure(failed -> {
               if (failed instanceof OgcException) {
                 routingContext.put("response", ((OgcException) failed).getJson().toString());
                 routingContext.put("statusCode", 404);
               } else {
-                routingContext.put(
-                    "response",
-                    new OgcException(500, "Internal Server Error", "Internal Server Error")
-                        .getJson()
-                        .toString());
-                routingContext.put("statusCode", 500);
+                  routingContext.put(
+                      "response",
+                      new OgcException(500, "Internal Server Error", "Internal Server Error")
+                          .getJson()
+                          .toString());
+                  routingContext.put("statusCode", 500);
               }
               routingContext.next();
             });
   }
 
   private void putCommonResponseHeaders(RoutingContext routingContext) {
-    routingContext
-        .response()
+    routingContext.response()
         .putHeader(HEADER_CONTENT_TYPE, MIME_APPLICATION_JSON)
         .putHeader("Cache-Control", "no-cache, no-store,  must-revalidate,max-age=0")
         .putHeader("Pragma", "no-cache")
@@ -990,17 +921,11 @@ public class ApiServerVerticle extends AbstractVerticle {
     JsonObject collection = success.get(0);
     JsonObject extent = new JsonObject();
     collection.put("properties", new JsonObject());
-    if (collection.getString("datetime_key") != null
-        && !collection.getString("datetime_key").isEmpty())
-      collection
-          .getJsonObject("properties")
-          .put("datetimeParameter", collection.getString("datetime_key"));
+    if (collection.getString("datetime_key") != null && !collection.getString("datetime_key").isEmpty())
+      collection.getJsonObject("properties").put("datetimeParameter", collection.getString("datetime_key"));
     if (collection.getJsonArray("bbox") != null)
-      extent.put(
-          "spatial",
-          new JsonObject().put("bbox", new JsonArray().add(collection.getJsonArray("bbox"))));
+      extent.put("spatial", new JsonObject().put("bbox", new JsonArray().add(collection.getJsonArray("bbox"))));
     if (collection.getJsonArray("temporal") != null)
-
       extent.put("temporal", new JsonObject().put("interval",
           new JsonArray().add(collection.getJsonArray("temporal"))));
     if (!extent.isEmpty())
@@ -1037,36 +962,18 @@ public class ApiServerVerticle extends AbstractVerticle {
   private JsonObject buildCollectionTileResult(List<JsonObject> collections) {
     JsonObject collection = collections.get(0);
     collection.put("itemType", collection.getString("type"));
-    collection.put(
-        "links",
-        new JsonArray()
-            .add(
-                new JsonObject()
-                    .put(
-                        "href",
-                        hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id"))
+    collection.put("links", new JsonArray()
+        .add(new JsonObject().put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id"))
                     .put("rel", "self")
                     .put("type", "application/json")
                     .put("title", "This document"))
-            .add(
-                new JsonObject()
-                    .put(
-                        "href",
-                        hostName
-                            + ogcBasePath
-                            + COLLECTIONS
-                            + "/"
-                            + collection.getString("id")
-                            + "/map/tiles")
+            .add(new JsonObject().put("href", hostName + ogcBasePath + COLLECTIONS + "/"
+                    + collection.getString("id") + "/map/tiles")
                     .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/tilesets-map")
                     .put("type", "application/json")
-                    .put(
-                        "title",
-                        "List of available map tilesets for the collection of "
-                            + collection.getString("id"))));
-    collection.put(
-        "extent",
-        new JsonObject()
+                    .put("title", "List of available map tilesets for the collection of "
+                        + collection.getString("id"))));
+    collection.put("extent", new JsonObject()
             .put("spatial", collection.getJsonArray("bbox"))
             .put("temporal", collection.getJsonArray("temporal")));
     collection.remove("bbox");
@@ -1495,28 +1402,14 @@ public class ApiServerVerticle extends AbstractVerticle {
     // =
     // https://ogc.iud.io/collections/{collectionId}/tiles/{tileMatrixSet}//{tileMatrix}/{tileRow}/{tileCol}
     String templatedTileUrl =
-        hostName
-            + ogcBasePath
-            + COLLECTIONS
-            + "/"
-            + collectionId
-            + "/map/tiles/"
-            + tileMatrixSet
+        hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/map/tiles/" + tileMatrixSet
             + "/{tileMatrix}/{tileRow}/{tileCol}.png";
-    JsonArray linkObject =
-        new JsonArray()
-            .add(
-                new JsonObject()
-                    .put(
-                        "href",
-                        hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/map/tiles")
+    JsonArray linkObject = new JsonArray().add(new JsonObject()
+                    .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/map/tiles")
                     .put("rel", "self")
                     .put("type", "application/json")
                     .put("title", collectionId.concat(" tileset tiled using" + tileMatrixSet)))
-            .add(
-                new JsonObject()
-                    .put(
-                        "href",
+            .add(new JsonObject().put("href",
                         "https://raw.githubusercontent.com/opengeospatial/2D-Tile-Matrix-Set/master/registry/json"
                             + "/WebMercatorQuad.json")
                     .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/tiling-scheme")
@@ -1545,15 +1438,16 @@ public class ApiServerVerticle extends AbstractVerticle {
       String tileHeight,
       String matrixWidth,
       String matrixHeight) {
-    return new JsonObject()
-        .put("title", title)
-        .put("id", id)
-        .put("scaleDenominator", scaleDenominator)
-        .put("cellSize", cellSize)
-        .put("tileWidth", tileWidth)
-        .put("tileHeight", tileHeight)
-        .put("matrixWidth", matrixWidth)
-        .put("matrixHeight", matrixHeight);
+
+        return new JsonObject()
+            .put("title", title)
+            .put("id", id)
+            .put("scaleDenominator", scaleDenominator)
+            .put("cellSize", cellSize)
+            .put("tileWidth", tileWidth)
+            .put("tileHeight", tileHeight)
+            .put("matrixWidth", matrixWidth)
+            .put("matrixHeight", matrixHeight);
   }
 
   // TODO: Used this for auditing purposes

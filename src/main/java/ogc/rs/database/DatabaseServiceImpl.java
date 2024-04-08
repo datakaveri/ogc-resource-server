@@ -14,15 +14,16 @@ import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.ProcessException;
 import ogc.rs.database.util.FeatureQueryBuilder;
-import static ogc.rs.common.Constants.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
-import java.util.UUID;
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
+import static ogc.rs.common.Constants.*;
+
+
 
 public class DatabaseServiceImpl implements DatabaseService{
     private static final Logger LOGGER = LogManager.getLogger(DatabaseServiceImpl.class);
@@ -32,19 +33,11 @@ public class DatabaseServiceImpl implements DatabaseService{
     public DatabaseServiceImpl(final PgPool pgClient,JsonObject config) {
         this.client = pgClient;this.config=config;
     }
-    public Set<String> predefinedKeys = Set.of("limit", "bbox", "datetime", "offset", "bbox-crs", "crs");
 
     @Override
     public Future<List<JsonObject>> getCollection(String collectionId) {
         LOGGER.info("getCollection");
         Promise<List<JsonObject>> result = Promise.promise();
-
-        /* TODO : Remove once spec validation is being done */
-        if (!collectionId.matches(UUID_REGEX)) {
-          result.fail(new OgcException(404, "Not found", "Collection not found"));
-          return result.future();
-        }
-
         Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
            conn.preparedQuery("select collections_details.id, title, description, datetime_key," +
@@ -57,13 +50,8 @@ public class DatabaseServiceImpl implements DatabaseService{
                .collecting(collector)
                .execute(Tuple.of(UUID.fromString( collectionId))).map(SqlResult::value))
             .onSuccess(success -> {
-                LOGGER.debug("DB result - {}", success);
-                if (success.isEmpty())
-                result.fail(new OgcException(404, "Not found", "Collection not found"));
-                else {
-                    LOGGER.debug("Built OGC Collection Response - {}", success);
-                    result.complete(success);
-                }
+                LOGGER.debug("Built OGC Collection Response - {}", success);
+                result.complete(success);
             })
             .onFailure(fail -> {
                 LOGGER.error("Failed at getCollection- {}",fail.getMessage());
@@ -87,13 +75,8 @@ public class DatabaseServiceImpl implements DatabaseService{
                     .execute()
                     .map(SqlResult::value))
             .onSuccess(success -> {
-                if (success.isEmpty()) {
-                    LOGGER.error("Collections table is empty!");
-                    result.fail("Error!");
-                } else {
-                  LOGGER.debug("Collections Result: {}", success.toString());
-                  result.complete(success);
-                }
+                LOGGER.debug("Collections Result: {}", success.toString());
+                result.complete(success);
             })
             .onFailure(fail -> {
                 LOGGER.error("Failed to getCollections! - {}", fail.getMessage());
@@ -106,102 +89,88 @@ public class DatabaseServiceImpl implements DatabaseService{
                                           Map<String, Integer> crs) {
       LOGGER.info("getFeatures");
       Promise<JsonObject> result = Promise.promise();
-
-      /* TODO : Remove once spec validation is being done */
-      if (!collectionId.matches(UUID_REGEX)) {
-        result.fail(new OgcException(404, "Not found", "Collection not found"));
-        return result.future();
-      }
-
       Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0),
           row -> row.getInteger("count"));
       Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
       String datetimeValue;
       FeatureQueryBuilder featureQuery = new FeatureQueryBuilder(collectionId);
+
       Future<String> sridOfStorageCrs = getSridOfStorageCrs(collectionId);
-      if (queryParams.containsKey("limit"))
-          featureQuery.setLimit(Integer.parseInt(queryParams.get("limit")));
-      if (queryParams.containsKey("bbox-crs"))
-        featureQuery.setBboxCrs(String.valueOf(crs.get(queryParams.get("bbox-crs"))));
-      if (queryParams.containsKey("bbox")) {
+      featureQuery.setLimit(Integer.parseInt(queryParams.get("limit")));
+      featureQuery.setBboxCrsSrid(String.valueOf(crs.get(queryParams.get("bbox-crs"))));
+      if (queryParams.get("bbox") != null) {
         // find storageCrs from collections_details
         String coordinates = queryParams.get("bbox");
         sridOfStorageCrs
             .onSuccess(srid -> featureQuery.setBbox(coordinates, srid))
             .onFailure(fail -> result.fail(fail.getMessage()));
-        if(sridOfStorageCrs.failed())
+        if (sridOfStorageCrs.failed())
           return result.future();
       }
       //TODO: convert individual DB calls to a transaction
       datetimeValue = queryParams.getOrDefault("datetime", null);
-      if (queryParams.containsKey("offset"))
-        featureQuery.setOffset(Integer.parseInt(queryParams.get("offset")));
-      if (queryParams.containsKey("crs"))
-        featureQuery.setCrs(String.valueOf(crs.get(queryParams.get("crs"))));
+      featureQuery.setOffset(Integer.parseInt(queryParams.get("offset")));
+      featureQuery.setCrs(String.valueOf(crs.get(queryParams.get("crs"))));
       Set<String> keys =  queryParams.keySet();
-      keys.removeAll(predefinedKeys);
+      keys.removeAll(WELL_KNOWN_QUERY_PARAMETERS);
       String[] key = keys.toArray(new String[keys.size()]);
       if (!keys.isEmpty())
           featureQuery.setFilter(key[0], queryParams.get(key[0]));
+
       sridOfStorageCrs.compose(srid ->
-          client.withConnection(conn ->
-          conn.preparedQuery("select datetime_key, count(id) from collections_details " +
-                  "where id = $1::uuid group by id, datetime_key")
-              .collecting(collector)
-              .execute(Tuple.of(UUID.fromString(collectionId)))
-              .onSuccess(conn1 -> {
-                if(conn1.rowCount() == 0) {
-                  result.fail(new OgcException(404, "Not found", "Collection not found"));
-                  return;
-                }
-                LOGGER.debug("Count collection- {}", conn1.value().get(0).getInteger("count"));
-                if (conn1.value().get(0).getString("datetime_key") != null && datetimeValue != null ){
-                  LOGGER.debug("datetimeKey: {}, datetimeValue: {}"
-                      ,conn1.value().get(0).getString("datetime_key"), datetimeValue);
-                  featureQuery.setDatetimeKey(conn1.value().get(0).getString("datetime_key"));
-                  featureQuery.setDatetime(datetimeValue);
-                }
-                LOGGER.debug("datetime_key: {}",conn1.value().get(0).getString("datetime_key"));
-                LOGGER.debug("<DBService> Sql query- {} ",  featureQuery.buildSqlString());
-                LOGGER.debug("Count Query- {}", featureQuery.buildSqlString("count"));
-                JsonObject resultJson = new JsonObject();
-                conn.preparedQuery(featureQuery.buildSqlString("count"))
-                    .collecting(collectorT).execute()
-                    .onSuccess(count -> {
-                      LOGGER.debug("Feature Count- {}",count.value().get("count"));
-                      int totalCount = count.value().get("count");
-                      resultJson.put("numberMatched", totalCount);
-                    })
-                    .onFailure(countFail -> {
-                      LOGGER.error("Failed to get the count of number of features!");
-                      result.fail("Error!");
-                    })
-                    .compose(sql -> {
-                      conn.preparedQuery(featureQuery.buildSqlString())
-                          .collecting(collector).execute().map(SqlResult::value)
-                          .onSuccess(success -> {
-                            if (!success.isEmpty())
-                              resultJson
-                                  .put("features", new JsonArray(success))
-                                  .put("numberReturned", success.size());
-                            else
-                              resultJson
-                                  .put("features", new JsonArray())
-                                  .put("numberReturned", 0);
-                            resultJson.put("type", "FeatureCollection");
-                            result.complete(resultJson);
-                          })
-                          .onFailure(failed -> {
-                            LOGGER.error("Failed at getFeatures- {}",failed.getMessage());
-                            result.fail("Error!");
-                          });
-                      return result.future();
-                    });
-              })
-              .onFailure(fail -> {
-                LOGGER.error("Failed at find_collection- {}",fail.getMessage());
-                result.fail("Error!");
-              })));
+      client.withConnection(conn ->
+          //TODO: Remove datetime_key information when queryables api is implemented
+        conn.preparedQuery("select datetime_key from collections_details where id = $1::uuid")
+                .collecting(collector)
+                .execute(Tuple.of(UUID.fromString(collectionId)))
+                .onSuccess(conn1 -> {
+                  if (conn1.value().get(0).getString("datetime_key") != null && datetimeValue != null ){
+                    LOGGER.debug("datetimeKey: {}, datetimeValue: {}"
+                        ,conn1.value().get(0).getString("datetime_key"), datetimeValue);
+                    featureQuery.setDatetimeKey(conn1.value().get(0).getString("datetime_key"));
+                    featureQuery.setDatetime(datetimeValue);
+                  }
+                  LOGGER.debug("datetime_key: {}",conn1.value().get(0).getString("datetime_key"));
+                  LOGGER.debug("<DBService> Sql query- {} ",  featureQuery.buildSqlString());
+                  LOGGER.debug("Count Query- {}", featureQuery.buildSqlString("count"));
+                  JsonObject resultJson = new JsonObject();
+                  conn.preparedQuery(featureQuery.buildSqlString("count"))
+                      .collecting(collectorT).execute()
+                      .onSuccess(count -> {
+                        LOGGER.debug("Feature Count- {}",count.value().get("count"));
+                        int totalCount = count.value().get("count");
+                        resultJson.put("numberMatched", totalCount);
+                      })
+                      .onFailure(countFail -> {
+                        LOGGER.error("Failed to get the count of number of features!");
+                        result.fail("Error!");
+                      })
+                      .compose(sql -> {
+                        conn.preparedQuery(featureQuery.buildSqlString())
+                            .collecting(collector).execute().map(SqlResult::value)
+                            .onSuccess(success -> {
+                              if (!success.isEmpty())
+                                resultJson
+                                    .put("features", new JsonArray(success))
+                                    .put("numberReturned", success.size());
+                              else
+                                resultJson
+                                    .put("features", new JsonArray())
+                                    .put("numberReturned", 0);
+                              resultJson.put("type", "FeatureCollection");
+                              result.complete(resultJson);
+                            })
+                            .onFailure(failed -> {
+                              LOGGER.error("Failed at getFeatures- {}",failed.getMessage());
+                              result.fail("Error!");
+                            });
+                        return result.future();
+                      });
+                })
+                .onFailure(fail -> {
+                  LOGGER.error("Failed at find_collection- {}",fail.getMessage());
+                  result.fail("Error!");
+                })));
         return result.future();
     }
 
@@ -227,61 +196,18 @@ public class DatabaseServiceImpl implements DatabaseService{
     return result.future();
   }
 
-  public Future<Void> matchFilterWithProperties(String collectionId, Map<String, String> queryParams) {
-      Promise<Void> result = Promise.promise();
-      if (queryParams.isEmpty()) {
-         result.complete();
-         return result.future();
-      }
-      Set<String> keys =  queryParams.keySet();
-      keys.removeAll(predefinedKeys);
-      if (keys.isEmpty()) {
-        result.complete();
-        return result.future();
-      }
-      client.withConnection(conn ->
-          conn.preparedQuery("select jsonb_object_keys(properties) as filter_keys from \"" + collectionId + "\" group" +
-                  " by " +
-                  "filter_keys")
-              .execute()
-              .onSuccess(success -> {
-                Set<String> propertiesKeys = new HashSet<>();
-                for(Row row: success){
-                  propertiesKeys.add(row.getString("filter_keys"));
-                }
-                LOGGER.debug("properties keys: {}", propertiesKeys);
-                if (propertiesKeys.containsAll(keys))
-                  result.complete();
-                else
-                  result.fail(new OgcException(400, "Bad Request", "Query parameter is invalid"));
-              })
-              .onFailure(failed -> {
-                LOGGER.debug("DB query Failed!! {}", failed.getMessage());
-                result.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
-              }));
-      return result.future();
-  }
-
   @Override
-  public Future<Map<String, Integer>> isCrsValid(String collectionId, Map<String, String> queryParams) {
+  public Future<Map<String, Integer>> isCrsValid(String collectionId, Map<String, String > queryParams) {
     Promise<Map<String, Integer>> result = Promise.promise();
-
-    /* TODO : Remove once spec validation is being done */
-    if (!collectionId.matches(UUID_REGEX)) {
-      result.fail(new OgcException(404, "Not found", "Collection not found"));
-      return result.future();
-    }
-    if (queryParams.isEmpty()) {
-       result.complete(Map.of(DEFAULT_SERVER_CRS,4326));
-       return result.future();
-    }
-    if (!queryParams.containsKey("crs") && !queryParams.containsKey("bbox-crs")) {
-      result.complete(Map.of(DEFAULT_SERVER_CRS, 4326));
-      return result.future();
-    }
     //check for both crs and bbox-crs
-    String requestCrs = queryParams.getOrDefault("crs", DEFAULT_SERVER_CRS);
+    String requestCrs = queryParams.get("crs");
     String bboxCrs = queryParams.getOrDefault("bbox-crs", DEFAULT_SERVER_CRS);
+
+    if (requestCrs.equalsIgnoreCase(DEFAULT_SERVER_CRS) && bboxCrs.equalsIgnoreCase(DEFAULT_SERVER_CRS)) {
+      result.complete(Map.of(DEFAULT_SERVER_CRS, DEFAULT_CRS_SRID));
+      return result.future();
+    }
+
     Collector<Row, ?, Map<String, Integer>> crsCollector = Collectors.toMap(row -> row.getString("crs"),
         row -> row.getInteger("srid"));
     client.withConnection(conn ->
@@ -297,7 +223,8 @@ public class DatabaseServiceImpl implements DatabaseService{
             if (!success.value().containsKey(bboxCrs)) {
               result.fail(new OgcException(400, "Bad Request", "Collection does not support this bbox-crs"));
             }
-              result.complete(success.value());
+            success.value().put(DEFAULT_SERVER_CRS, DEFAULT_CRS_SRID);
+            result.complete(success.value());
           })
           .onFailure(failed -> {
             LOGGER.error("Error: {}", failed.getMessage());
@@ -308,51 +235,33 @@ public class DatabaseServiceImpl implements DatabaseService{
   }
 
   @Override
-  public Future<JsonObject> getFeature(String collectionId, String featureId, Map<String, String> queryParams,
+  public Future<JsonObject> getFeature(String collectionId, Integer featureId, Map<String, String> queryParams,
                                        Map<String, Integer> crs) {
     LOGGER.info("getFeature");
     Promise<JsonObject> result = Promise.promise();
 
-    /* TODO : Remove once spec validation is being done */
-    if (!collectionId.matches(UUID_REGEX)) {
-      result.fail(new OgcException(404, "Not found", "Collection not found"));
-      return result.future();
-    }
-
     Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
     Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0)
       , row -> row.getInteger("count"));
-    String srid = String.valueOf(crs.get(queryParams.getOrDefault("crs", DEFAULT_SERVER_CRS)));
+    String srid = String.valueOf(crs.get(queryParams.get("crs")));
     String geoColumn = "cast(st_asgeojson(st_transform(geom," + srid + "),9,0) as json)";
+    String sqlQuery = "Select id, 'Feature' as type," + geoColumn + " as geometry, " +
+        " (row_to_json(\"" + collectionId + "\")::jsonb - 'id' - 'geom') as properties" +
+        " from \"" + collectionId + "\" where id=$1::int" ;
     client.withConnection(conn ->
-        conn.preparedQuery("select count(*) from collections_details where id = $1::uuid")
-            .collecting(collectorT)
-            .execute(Tuple.of(UUID.fromString(collectionId)))
-            .onSuccess(conn1 -> {
-                if (conn1.value().get("count") == 0) {
-                    result.fail(new OgcException(404, "Not found", "Collection not found"));
-                    return;
-                }
-                String sqlQuery = "Select id, itemType as type," + geoColumn + " as geometry, " +
-                    "properties from \"" + collectionId + "\" where id=$2::UUID" ;
-                conn.preparedQuery(sqlQuery)
-                    .collecting(collector).execute(Tuple.of(geoColumn, UUID.fromString(featureId)))
-                    .map(SqlResult::value)
-                    .onSuccess(success -> {
-                        if (success.isEmpty())
-                            result.fail(new OgcException(404, "Not found", "Feature not found"));
-                        else
-                            result.complete(success.get(0));
-                    })
-                    .onFailure(failed -> {
-                        LOGGER.error("Failed at getFeature- {}",failed.getMessage());
-                        result.fail("Error!");
-                    });
-            })
-            .onFailure(fail -> {
-                LOGGER.error("Failed at to_regclass- {}",fail.getMessage());
-                result.fail("Error!");
-            }));
+        conn.preparedQuery(sqlQuery)
+          .collecting(collector).execute(Tuple.of(featureId))
+          .map(SqlResult::value)
+          .onSuccess(success -> {
+            if (success.isEmpty())
+              result.fail(new OgcException(404, "Not found", "Feature not found"));
+            else
+              result.complete(success.get(0));
+          })
+          .onFailure(failed -> {
+            LOGGER.error("Failed at getFeature- {}",failed.getMessage());
+            result.fail("Error!");
+          }));
       return result.future();
   }
 
@@ -447,12 +356,6 @@ public class DatabaseServiceImpl implements DatabaseService{
   public Future<JsonObject> getStacCollection(String collectionId) {
     LOGGER.info("getFeature");
     Promise<JsonObject> result = Promise.promise();
-
-    /* TODO : Remove once spec validation is being done */
-    if (!collectionId.matches(UUID_REGEX)) {
-      result.fail(new OgcException(404, "Not found", "Collection not found"));
-      return result.future();
-    }
 
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());

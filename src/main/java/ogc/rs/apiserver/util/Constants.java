@@ -48,11 +48,10 @@ public class Constants {
     public static final String PROCESS_EXECUTION_REGEX = "/processes/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/execution";
     public static final String STATUS_API = "getStatus";
     public static final String JOB_STATUS_REGEX = "/jobs/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}";
+    public static final String METERING_OPENAPI_SPEC = "/metering/api";
+    public static final String CONSUMER_AUDIT_API = "consumer/audit";
+    public static final String PROVIDER_AUDIT_API = "provider/audit";
+    public static final String SUMMARY_AUDIT_API = "summary";
+    public static final String OVERVIEW_AUDIT_API = "overview";
 
-  // Header params
-  public static final String METERING_OPENAPI_SPEC = "/metering/api";
-  public static final String CONSUMER_AUDIT_API = "consumer/audit";
-  public static final String PROVIDER_AUDIT_API = "provider/audit";
-  public static final String SUMMARY_AUDIT_API = "summary";
-  public static final String OVERVIEW_AUDIT_API = "overview";
 }
