@@ -153,6 +153,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/assetId"
+          },
+          {
+            "$ref": "#/components/parameters/token"
           }
         ],
         "responses": {
@@ -237,6 +240,15 @@
         "required": true,
         "schema": {
           "type": "string"
+        }
+      },
+      "token": {
+        "name": "token",
+        "in": "header",
+        "description": "A <b> valid Auth token </b> to process the request.",
+        "required": true,
+        "schema": {
+            "type": "string"
         }
       },
       "assetId": {

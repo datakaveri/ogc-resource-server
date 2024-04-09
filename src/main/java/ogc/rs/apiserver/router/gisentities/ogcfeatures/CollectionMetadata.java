@@ -109,6 +109,8 @@ public class CollectionMetadata {
         .put("required", false).put("style", "form").put("explode", false)
         .put("schema", new JsonObject().put("type", "string").put("format", "uri")
             .put("default", DEFAULT_SERVER_CRS).put("enum", new JsonArray(supportedCrs)));
+    
+    JsonObject tokenHeaderParam = new JsonObject().put("$ref", "#/components/parameters/token");
 
     /* GET /collections/<collection-ID> */
     JsonObject collectionSpecificApi = new JsonObject();
@@ -150,6 +152,8 @@ public class CollectionMetadata {
 
     parameters.add(limitParam);
     parameters.add(new JsonObject().put("$ref", "#/components/parameters/offset"));
+    
+    parameters.add(tokenHeaderParam);
 
     parameters.addAll(generateOasParamsFromAttributes(attributes));
 
@@ -175,7 +179,7 @@ public class CollectionMetadata {
             .put("schema", new JsonObject().put("type", OasTypes.NUMBER.toString().toLowerCase()));
 
     featureSpecificApi.put("parameters",
-        new JsonArray().add(featureIdQueryParam).add(crsQueryParam));
+        new JsonArray().add(featureIdQueryParam).add(crsQueryParam).add(tokenHeaderParam));
 
     featureSpecificApi.put("responses",
         new JsonObject().put("200", new JsonObject().put("$ref", "#/components/responses/Feature"))
