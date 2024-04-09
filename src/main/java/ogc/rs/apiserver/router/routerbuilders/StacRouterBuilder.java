@@ -11,6 +11,7 @@ import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.router.RouterManager;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 import java.util.ServiceLoader;
+import static ogc.rs.apiserver.util.Constants.*;
 
 /**
  * Class to build router for STAC APIs.
@@ -58,13 +59,14 @@ public class StacRouterBuilder extends EntityRouterBuilder {
   void addImplSpecificRoutes() {
     
     routerBuilder
-    .operation("getStacLandingPage")
+    .operation(STAC_CATALOG_API)
     .handler(apiServerVerticle::stacCatalog)
     .handler(apiServerVerticle::putCommonResponseHeaders)
-    .handler(apiServerVerticle::buildResponse);
+    .handler(apiServerVerticle::buildResponse)
+    .failureHandler(failureHandler);
 
     routerBuilder
-    .operation("getConformanceDeclaration")
+    .operation(STAC_CONFORMANCE_CLASSES)
     .handler(
         routingContext -> {
           HttpServerResponse response = routingContext.response();
@@ -72,17 +74,19 @@ public class StacRouterBuilder extends EntityRouterBuilder {
         });
 
     routerBuilder
-    .operation("getStacCollections")
+    .operation(STAC_COLLECTIONS_API)
     .handler(apiServerVerticle::stacCollections)
     .handler(apiServerVerticle::putCommonResponseHeaders)
-    .handler(apiServerVerticle::buildResponse);
+    .handler(apiServerVerticle::buildResponse)
+    .failureHandler(failureHandler);
     
     routerBuilder
-    .operation("getAsset")
+    .operation(ASSET_API)
     .handler(AuthHandler.create(vertx))
     .handler(apiServerVerticle::getAssets)
     .handler(apiServerVerticle::putCommonResponseHeaders)
-    .handler(apiServerVerticle::buildResponse);
+    .handler(apiServerVerticle::buildResponse)
+    .failureHandler(failureHandler);
     
     /**
      *  For all implementers of GisEntityInterface, add the STAC routes to the RouterBuilder.

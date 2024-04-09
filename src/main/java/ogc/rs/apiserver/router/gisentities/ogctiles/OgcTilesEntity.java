@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import ogc.rs.apiserver.ApiServerVerticle;
+import ogc.rs.apiserver.handlers.FailureHandler;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 import ogc.rs.apiserver.router.routerbuilders.OgcRouterBuilder;
 import ogc.rs.apiserver.router.routerbuilders.StacRouterBuilder;
@@ -25,36 +26,42 @@ public class OgcTilesEntity implements GisEntityInterface{
     
     RouterBuilder builder = ogcRouterBuilder.routerBuilder;
     ApiServerVerticle apiServerVerticle = ogcRouterBuilder.apiServerVerticle;
+    FailureHandler failureHandler = ogcRouterBuilder.failureHandler;
     
           builder
               .operation(TILEMATRIXSETS_API)
               .handler(apiServerVerticle::getTileMatrixSetList)
               .handler(apiServerVerticle::putCommonResponseHeaders)
-              .handler(apiServerVerticle::buildResponse);
+              .handler(apiServerVerticle::buildResponse)
+              .failureHandler(failureHandler);
 
           builder
                 .operation(TILEMATRIXSET_API)
                 .handler(apiServerVerticle::getTileMatrixSet)
                 .handler(apiServerVerticle::putCommonResponseHeaders)
-                .handler(apiServerVerticle::buildResponse);
+                .handler(apiServerVerticle::buildResponse)
+                .failureHandler(failureHandler);
 
           builder
               .operation(TILESETSLIST_API)
               .handler(apiServerVerticle::getTileSetList)
               .handler(apiServerVerticle::putCommonResponseHeaders)
-              .handler(apiServerVerticle::buildResponse);
+              .handler(apiServerVerticle::buildResponse)
+              .failureHandler(failureHandler);
 
           builder
               .operation(TILESET_API)
               .handler(apiServerVerticle::getTileSet)
               .handler(apiServerVerticle::putCommonResponseHeaders)
-              .handler(apiServerVerticle::buildResponse);
+              .handler(apiServerVerticle::buildResponse)
+              .failureHandler(failureHandler);
 
           builder
               .operation(TILE_API)
               .handler(apiServerVerticle::getTile)
               .handler(apiServerVerticle::putCommonResponseHeaders)
-              .handler(apiServerVerticle::buildResponse);
+              .handler(apiServerVerticle::buildResponse)
+              .failureHandler(failureHandler);
   }
 
   @Override

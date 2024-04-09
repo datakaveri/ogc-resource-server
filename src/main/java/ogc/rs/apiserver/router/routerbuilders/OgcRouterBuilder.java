@@ -55,7 +55,8 @@ public class OgcRouterBuilder extends EntityRouterBuilder {
 
   @Override
   void addImplSpecificRoutes() {
-    routerBuilder.operation(LANDING_PAGE).handler(apiServerVerticle::sendOgcLandingPage);
+    routerBuilder.operation(LANDING_PAGE).handler(apiServerVerticle::sendOgcLandingPage)
+        .failureHandler(failureHandler);
 
     routerBuilder.operation(CONFORMANCE_CLASSES).handler(routingContext -> {
       HttpServerResponse response = routingContext.response();

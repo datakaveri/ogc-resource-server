@@ -18,6 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ogc.rs.apiserver.ApiServerVerticle;
 import ogc.rs.apiserver.handlers.AuthHandler;
+import ogc.rs.apiserver.handlers.FailureHandler;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 import ogc.rs.apiserver.router.routerbuilders.OgcRouterBuilder;
 import ogc.rs.apiserver.router.routerbuilders.StacRouterBuilder;
@@ -41,6 +42,7 @@ public class OgcFeaturesEntity implements GisEntityInterface {
 
     RouterBuilder builder = ogcRouterBuilder.routerBuilder;
     ApiServerVerticle apiServerVerticle = ogcRouterBuilder.apiServerVerticle;
+    FailureHandler failureHandler = ogcRouterBuilder.failureHandler;
     Vertx vertx = ogcRouterBuilder.vertx;
 
     builder.operation("getCollections").handler(apiServerVerticle::getCollections)
@@ -55,21 +57,24 @@ public class OgcFeaturesEntity implements GisEntityInterface {
       if (opId.matches(CollectionMetadata.OGC_GET_SPECIFIC_COLLECTION_OP_ID_REGEX)) {
         builder.operation(opId).handler(apiServerVerticle::getCollection)
             .handler(apiServerVerticle::putCommonResponseHeaders)
-            .handler(apiServerVerticle::buildResponse);
+            .handler(apiServerVerticle::buildResponse)
+            .failureHandler(failureHandler);
 
       } else if (opId.matches(CollectionMetadata.OGC_GET_COLLECTION_ITEMS_OP_ID_REGEX)) {
         builder.operation(opId).handler(AuthHandler.create(vertx))
             .handler(apiServerVerticle::validateQueryParams)
             .handler(apiServerVerticle::getFeatures)
             .handler(apiServerVerticle::putCommonResponseHeaders)
-            .handler(apiServerVerticle::buildResponse);
+            .handler(apiServerVerticle::buildResponse)
+            .failureHandler(failureHandler);
 
       } else if (opId.matches(CollectionMetadata.OGC_GET_SPECIFIC_FEATURE_OP_ID_REGEX)) {
         builder.operation(opId).handler(AuthHandler.create(vertx))
             .handler(apiServerVerticle::validateQueryParams)
             .handler(apiServerVerticle::getFeature)
             .handler(apiServerVerticle::putCommonResponseHeaders)
-            .handler(apiServerVerticle::buildResponse);
+            .handler(apiServerVerticle::buildResponse)
+            .failureHandler(failureHandler);
       }
     });
   }
@@ -79,7 +84,8 @@ public class OgcFeaturesEntity implements GisEntityInterface {
 
     RouterBuilder builder = stacRouterBuilder.routerBuilder;
     ApiServerVerticle apiServerVerticle = stacRouterBuilder.apiServerVerticle;
-
+    FailureHandler failureHandler = stacRouterBuilder.failureHandler;
+    
     List<String> collectionSpecificOpIds = builder.operations().stream()
         .filter(op -> op.getOperationId().matches(CollectionMetadata.STAC_OP_ID_PREFIX_REGEX))
         .map(op -> op.getOperationId()).collect(Collectors.toList());
@@ -88,7 +94,8 @@ public class OgcFeaturesEntity implements GisEntityInterface {
       if (opId.matches(CollectionMetadata.STAC_GET_SPECIFIC_ITEMLESS_COLLECTION_OP_ID_REGEX)) {
         builder.operation(opId).handler(apiServerVerticle::getStacCollection)
             .handler(apiServerVerticle::putCommonResponseHeaders)
-            .handler(apiServerVerticle::buildResponse);
+            .handler(apiServerVerticle::buildResponse)
+            .failureHandler(failureHandler);
       }
     });
   }
