@@ -80,15 +80,6 @@ public abstract class EntityRouterBuilder {
       response.send(oasJson.toBuffer());
     });
     
-    /* Handle not implemented/ not found paths */
-    router.route().last().handler(routingContext -> {
-      HttpServerResponse response = routingContext.response();
-      response.putHeader("Content-type", "application/vnd.oai.openapi+json;version=3.0");
-      response.setStatusCode(404);
-      response.send(new JsonObject().put("code", "Not Found")
-          .put("description", "API / Collection not found").toBuffer());
-    });
-
     return router;
   }
 

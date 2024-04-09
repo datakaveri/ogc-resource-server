@@ -14,6 +14,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.RequestParameters;
@@ -169,13 +170,24 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   /**
    * Reset {@link ApiServerVerticle#router} by clearing it and then adding all routers in
-   * <code>routerList</code> as sub-routers at the root path.
+   * <code>routerList</code> as sub-routers at the root path. Also adds a handler for
+   * {@link Route#last()}, i.e. the last route to handle collection/API not found 404 errors.
    * 
    * @param routerList list of routers to be added as sub-routers
    */
   public void resetRouter(List<Router> routerList) {
     router.clear();
+
     routerList.forEach(subrouter -> router.route("/*").subRouter(subrouter));
+
+    /* Add route to handle not implemented / not found paths */
+    router.route().last().handler(routingContext -> {
+      HttpServerResponse response = routingContext.response();
+      response.putHeader("Content-type", "application/vnd.oai.openapi+json;version=3.0");
+      response.setStatusCode(404);
+      response.send(new JsonObject().put("code", "Not Found")
+          .put("description", "API / Collection not found").toBuffer());
+    });
   }
 
   public void sendOgcLandingPage(RoutingContext routingContext) {
