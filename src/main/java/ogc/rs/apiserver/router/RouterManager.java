@@ -116,8 +116,15 @@ public class RouterManager {
    */
   private void genOasAndInitRouterFirstTime() {
     FileSystem fs = vertx.fileSystem();
-    JsonObject ogcOasTemplate = fs.readFileBlocking(OGC_OAS_TEMPLATE_PATH).toJsonObject();
-    JsonObject stacOasTemplate = fs.readFileBlocking(STAC_OAS_TEMPLATE_PATH).toJsonObject();
+    String ogcOasTemplateStr = fs.readFileBlocking(OGC_OAS_TEMPLATE_PATH).toString();
+    String stacOasTemplateStr = fs.readFileBlocking(STAC_OAS_TEMPLATE_PATH).toString();
+    
+    /* Replace ${HOSTNAME} values in spec with actual hostname */
+    ogcOasTemplateStr = ogcOasTemplateStr.replace("${HOSTNAME}", config.getString("hostName"));
+    stacOasTemplateStr = stacOasTemplateStr.replace("${HOSTNAME}", config.getString("hostName"));
+    
+    JsonObject ogcOasTemplate = new JsonObject(ogcOasTemplateStr);
+    JsonObject stacOasTemplate = new JsonObject(stacOasTemplateStr);
 
     DatabaseService dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
 

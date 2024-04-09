@@ -20,9 +20,6 @@ ENV JAR="ogc-resource-server-dev-${VERSION}-fat.jar"
 
 # Copying openapi docs
 COPY docs docs
-# replace all instances of the server URL in OGC OpenAPI spec to the jenkins URL, since the OGC compliance
-# tests actually parses the server URL in the OpenAPI spec
-RUN sed -i 's|https://ogc.iudx.io|http://jenkins-slave1:8443|g' docs/openapiv3_0.json
 
 # Move jar to workdir and copy classes for JaCoCo
 RUN mv target/${JAR} ./fatjar.jar
