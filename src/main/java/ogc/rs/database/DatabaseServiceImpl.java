@@ -592,28 +592,4 @@ public class DatabaseServiceImpl implements DatabaseService{
     LOGGER.error("Failed to get processes- {}", fail.getMessage());
     promise.fail(processException500);
   }
-
-
-  @Override
-  public Future<JsonObject> executeQuery(final String query) {
-    Promise<JsonObject> promise = Promise.promise();
-    Collector<Row, ?, List<JsonObject>> rowCollector =
-        Collectors.mapping(row -> row.toJson(), Collectors.toList());
-    client
-        .withConnection(
-            connection ->
-                connection.query(query).collecting(rowCollector).execute().map(row -> row.value()))
-        .onSuccess(
-            successHandler -> {
-              JsonArray result = new JsonArray(successHandler);
-              JsonObject responseJson = new JsonObject().put("result", result);
-              promise.complete(responseJson);
-            })
-        .onFailure(
-            failureHandler -> {
-              LOGGER.debug(failureHandler);
-              promise.fail(failureHandler.getMessage());
-            });
-    return promise.future();
-  }
 }

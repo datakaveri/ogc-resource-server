@@ -47,6 +47,5 @@ public interface DatabaseService {
 
     Future<JsonObject> getProcesses(int limit);
     Future<JsonObject> getProcess(String processId);
-    Future<JsonObject> executeQuery(String query);
 
 }
