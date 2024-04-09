@@ -104,44 +104,6 @@
         }
       }
     },
-    "/stac/collections/{collectionId}/items": {
-      "get": {
-        "tags": [
-          "Features"
-        ],
-        "summary": "fetch features",
-        "description": "Fetch features of the feature collection with id `collectionId`.\n\nEvery feature in a dataset belongs to a collection. A dataset may\nconsist of multiple feature collections. A feature collection is often a\ncollection of features of a similar type, based on a common schema.",
-        "operationId": "getStacFeatures",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/collectionId"
-          },
-          {
-            "$ref": "#/components/parameters/limit"
-          },
-          {
-            "$ref": "#/components/parameters/bbox"
-          },
-          {
-            "$ref": "#/components/parameters/datetime"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/StacFeatures"
-          },
-          "400": {
-            "$ref": "#/components/responses/InvalidParameter"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        }
-      }
-    },
     "/assets/{assetId}": {
       "get": {
         "tags": [
