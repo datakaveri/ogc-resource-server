@@ -138,9 +138,7 @@ public class CollectionMetadata {
     parameters.add(bboxCrsQueryParam).add(crsQueryParam)
         .add(new JsonObject().put("$ref", "#/components/parameters/bbox"));
 
-    if (datetimeKey != null) {
-      parameters.add(new JsonObject().put("$ref", "#/components/parameters/datetime"));
-    }
+    parameters.add(new JsonObject().put("$ref", "#/components/parameters/datetime"));
 
     int limitParamMaxValue = geomMaxLimitConf.get(geomType);
     int limitParamDefaultValue = limitParamMaxValue;
