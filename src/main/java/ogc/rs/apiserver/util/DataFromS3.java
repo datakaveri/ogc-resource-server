@@ -87,7 +87,7 @@ public class DataFromS3 {
 
   public String getFullyQualifiedTileUrlString (String collection, String tileMatrixSetId, String tileMatrixId,
                                                 String tileRow, String tileCol) {
-    this.s3Url = this.s3Url + tileMatrixSetId + "/" + collection + "/" + tileMatrixId + "/" + tileRow + "/" + tileCol +
+    this.s3Url = this.s3Url + collection + "/" + tileMatrixSetId + "/" + tileMatrixId + "/" + tileRow + "/" + tileCol +
         ".png";
     return s3Url;
   }
