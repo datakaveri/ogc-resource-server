@@ -1,6 +1,7 @@
 package ogc.rs.deploy;
 
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.cli.CLI;
@@ -8,6 +9,8 @@ import io.vertx.core.cli.CommandLine;
 import io.vertx.core.cli.Option;
 import io.vertx.core.eventbus.EventBusOptions;
 import io.vertx.core.json.JsonObject;
+import ogc.rs.apiserver.ApiServerVerticle;
+import ogc.rs.apiserver.router.RouterManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.nio.file.Files;
@@ -26,11 +29,26 @@ public class Deployer {
         moduleConfigurations.put("host", configs.getString("host"));
         String moduleName = moduleConfigurations.getString("id");
         int numInstances = moduleConfigurations.getInteger("verticleInstances");
-        vertx.deployVerticle(moduleName,
-                new DeploymentOptions()
-                        .setInstances(numInstances)
-                        .setConfig(moduleConfigurations),
-                ar -> {
+        
+        Promise<String> deployed = Promise.promise();
+        
+        if (moduleName.contains("ApiServerVerticle")) {
+          RouterManager routerMgr = new RouterManager(vertx, moduleConfigurations);
+          
+          vertx.deployVerticle(() -> {
+            ApiServerVerticle api = new ApiServerVerticle();
+            routerMgr.registerApiServer(api);
+            return api;
+          }, new DeploymentOptions().setInstances(numInstances).setConfig(moduleConfigurations),
+              deployed);
+        } else {
+
+          vertx.deployVerticle(moduleName,
+              new DeploymentOptions().setInstances(numInstances).setConfig(moduleConfigurations),
+              deployed);
+        }
+        
+        deployed.future().onComplete(ar -> {
                     if (ar.succeeded()) {
                         LOGGER.info("Deployed " + moduleName);
                         recursiveDeploy(vertx, configs, i + 1);

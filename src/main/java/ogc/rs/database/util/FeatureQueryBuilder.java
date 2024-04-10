@@ -110,48 +110,48 @@ public class FeatureQueryBuilder {
   public String buildSqlString() {
     //TODO: refactor to build the sql query
     this.sqlString = String.format("select id, 'Feature' as type, %4$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
-            " 'id' - 'geom') as properties from \"%1$s\" where id > %3$d limit %2$d"
+            " 'id' - 'geom') as properties from \"%1$s\" where id > %3$d ORDER BY id limit %2$d"
         , this.tableName, this.limit, this.offset, this.geoColumn);
 
     if (!bbox.isEmpty()) {
       this.sqlString = String.format("select id, 'Feature' as type, %6$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
-              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and id > %5$d limit %2$d"
+              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and id > %5$d ORDER BY id limit %2$d"
           ,this.tableName,this.limit, this.additionalParams, this.bbox, this.offset, this.geoColumn);
     }
 
     if(!datetime.isEmpty() ){
       this.sqlString = String.format("select id, 'Feature' as type, %6$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
-              "'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and id > %5$d limit %2$d"
+              "'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and id > %5$d ORDER BY id limit %2$d"
           ,this.tableName,this.limit, this.additionalParams, this.datetime, this.offset, this.geoColumn);
     }
 
     if (!filter.isEmpty()) {
       this.sqlString = String.format("select id, 'Feature' as type, %6$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
-              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and id > %5$d limit %2$d"
+              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and id > %5$d ORDER BY id limit %2$d"
           ,this.tableName,this.limit, this.additionalParams, this.filter, this.offset, this.geoColumn);
     }
 
     if (!bbox.isEmpty() && !filter.isEmpty()) {
       this.sqlString = String.format("select id, 'Feature' as type, %7$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
-              "'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and %5$s and id > %6$d limit %2$d"
+              "'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and %5$s and id > %6$d ORDER BY id limit %2$d"
           ,this.tableName,this.limit, this.additionalParams, this.bbox, this.filter, this.offset, this.geoColumn);
     }
 
     if (!bbox.isEmpty() && !datetime.isEmpty()) {
       this.sqlString = String.format("select id, 'Feature' as type, %7$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
-              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and %5$s and %6$d limit %2$d"
+              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and %5$s and %6$d ORDER BY id limit %2$d"
           ,this.tableName,this.limit, this.additionalParams, this.bbox, this.datetime, this.offset, this.geoColumn);
     }
 
     if (!datetime.isEmpty() && !filter.isEmpty()) {
       this.sqlString = String.format("select id, 'Feature' as type, %7$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
-              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and %5$s and offset %6$d limit %2$d"
+              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and %5$s and id > %6$d ORDER BY id limit %2$d"
           ,this.tableName,this.limit, this.additionalParams, this.datetime, this.filter, this.offset, this.geoColumn);
     }
 
     if (!bbox.isEmpty() && !filter.isEmpty() && !datetime.isEmpty()) {
       this.sqlString = String.format("select id, 'Feature' as type, %8$s as geometry, (row_to_json(\"%1$s\")::jsonb - " +
-              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and %5$s and %7$s and id > %6$d  limit %2$d"
+              " 'id' - 'geom') as properties from \"%1$s\" %3$s %4$s and %5$s and %7$s and id > %6$d ORDER BY id limit %2$d"
           ,this.tableName,this.limit, this.additionalParams, this.bbox, this.filter, this.offset, this.datetime,
           this.geoColumn);
     }

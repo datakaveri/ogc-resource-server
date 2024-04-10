@@ -11,15 +11,20 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.ProcessException;
 import ogc.rs.database.util.FeatureQueryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.*;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import static ogc.rs.common.Constants.*;
 
@@ -99,8 +104,8 @@ public class DatabaseServiceImpl implements DatabaseService{
       featureQuery.setLimit(Integer.parseInt(queryParams.get("limit")));
       featureQuery.setBboxCrsSrid(String.valueOf(crs.get(queryParams.get("bbox-crs"))));
       if (queryParams.get("bbox") != null) {
-        // find storageCrs from collections_details
-        String coordinates = queryParams.get("bbox");
+        // find storageCrs from collections_details; remove square brackets since bbox is a string repr. of array
+        String coordinates = queryParams.get("bbox").replace("[", "").replace("]", "");
         sridOfStorageCrs
             .onSuccess(srid -> featureQuery.setBbox(coordinates, srid))
             .onFailure(fail -> result.fail(fail.getMessage()));
@@ -591,5 +596,83 @@ public class DatabaseServiceImpl implements DatabaseService{
   private void handleFailure(Throwable fail, Promise<JsonObject> promise) {
     LOGGER.error("Failed to get processes- {}", fail.getMessage());
     promise.fail(processException500);
+  }
+
+  @Override
+  public Future<List<JsonObject>> getOgcFeatureCollectionMetadataForOasSpec(
+      List<String> existingCollectionUuidIds) {
+    
+    Promise<List<JsonObject>> result = Promise.promise();
+    
+    UUID[] existingCollectionIdsArr =
+        existingCollectionUuidIds.stream().map(i -> UUID.fromString(i)).toArray(UUID[]::new);
+
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+
+    Collector<Row, ?, Map<String, JsonObject>> collectionIdToJsonCollector =
+        Collectors.toMap(row -> row.getString("collection_id"), obj -> obj.toJson());
+
+    final String GET_COLLECTION_INFO =
+        "WITH crs_info AS (SELECT collection_id, array_agg(crs) as supported_crs"
+            + " FROM collection_supported_crs"
+            + " JOIN crs_to_srid ON collection_supported_crs.crs_id = crs_to_srid.id"
+            + " WHERE collection_id != ALL($1::UUID[]) GROUP BY collection_id)"
+            + ", geom_info AS (SELECT type AS geometry_type, f_table_name::text AS collection_id"
+            + " FROM geometry_columns WHERE f_table_name != ALL($2::text[]))"
+            + " SELECT id, title, description, datetime_key, crs, bbox, temporal, supported_crs, geometry_type"
+            + " FROM collections_details JOIN crs_info ON crs_info.collection_id = collections_details.id"
+            + " JOIN geom_info ON geom_info.collection_id::text = collections_details.id::text"
+            + " WHERE id != ALL($1::UUID[]) AND type = 'FEATURE'";
+
+    final String GET_COLLECTION_ATTRIBUTE_INFO =
+        "SELECT table_name AS collection_id, json_object_agg(column_name, data_type) AS attributes"
+            + " FROM information_schema.columns WHERE table_name = ANY($1::text[])"
+            + " AND column_name != ALL('{\"id\",\"geom\",\"itemtype\"}') GROUP BY table_name";
+
+    Future<List<JsonObject>> newCollectionsJson =
+        client.withConnection(conn -> conn.preparedQuery(GET_COLLECTION_INFO).collecting(collector)
+            .execute(Tuple.of(existingCollectionIdsArr)
+                .addArrayOfString(existingCollectionUuidIds.toArray(String[]::new)))
+            .map(res -> res.value()));
+
+    Future<Map<String, JsonObject>> collectionToAttribFut = newCollectionsJson.compose(list -> {
+      if (list.isEmpty()) {
+        return Future.succeededFuture(Map.of());
+      }
+      
+      List<String> newCollectionIds =
+          list.stream().map(obj -> obj.getString("id")).collect(Collectors.toList());
+
+      return client.withConnection(conn -> conn.preparedQuery(GET_COLLECTION_ATTRIBUTE_INFO)
+          .collecting(collectionIdToJsonCollector).execute(Tuple.of(newCollectionIds.toArray()))
+          .map(res -> res.value()));
+    });
+
+    Future<List<JsonObject>> collectionInfoMerged = collectionToAttribFut.compose(res -> {
+      if (newCollectionsJson.result().isEmpty()) {
+        return Future.succeededFuture(List.of());
+      }
+
+      Map<String, JsonObject> collectionToAttribMap = collectionToAttribFut.result();
+
+      List<JsonObject> newListWithAllInfo = newCollectionsJson.result().stream().map(obj -> {
+        String collectionId = obj.getString("id");
+
+        obj.put("attributes", collectionToAttribMap.get(collectionId).getJsonObject("attributes"));
+
+        return obj;
+      }).collect(Collectors.toList());
+
+      return Future.succeededFuture(newListWithAllInfo);
+    });
+
+    collectionInfoMerged.onSuccess(succ -> result.complete(succ)).onFailure(fail -> {
+      LOGGER.error("Something went wrong when querying DB for new OGC feature collections {}",
+          fail.getMessage());
+      result.fail(fail);
+    });
+
+    return result.future();
   }
 }

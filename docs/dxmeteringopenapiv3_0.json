@@ -17,7 +17,11 @@
   "servers": [
     {
       "url": "https://ogc.iudx.io",
-      "description": "OGC-Resource-Server"
+      "description": "Development Server"
+    },
+    {
+      "url": "https://geoserver.dx.ugix.org.in",
+      "description": "Production Server"
     }
   ],
   "paths": {
@@ -50,13 +54,7 @@
           "401": {
             "$ref": "#/components/responses/summaryBadRequestErrorResponse401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://ogc.iudx.io",
-            "description": "OGC-Resource-Server"
-          }
-        ]
+        }
       }
     },
     "/ngsi-ld/v1/overview": {
@@ -85,13 +83,7 @@
           "401": {
             "$ref": "#/components/responses/summaryBadRequestErrorResponse401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://ogc.iudx.io",
-            "description": "OGC-Resource-Server"
-          }
-        ]
+        }
       }
     },
     "/ngsi-ld/v1/provider/audit": {
@@ -147,13 +139,7 @@
           "401": {
             "$ref": "#/components/responses/summaryBadRequestErrorResponse401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://ogc.iudx.io",
-            "description": "OGC-Resource-Server"
-          }
-        ]
+        }
       }
     },
     "/ngsi-ld/v1/consumer/audit": {
@@ -203,13 +189,7 @@
           "401": {
             "$ref": "#/components/responses/summaryBadRequestErrorResponse401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://ogc.iudx.io",
-            "description": "OGC-Resource-Server"
-          }
-        ]
+        }
       }
     }
   },

@@ -198,6 +198,16 @@
           <artifactId>commons-exec</artifactId>
           <version>1.4.0</version>
         </dependency>
+        <dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-json-schema</artifactId>
+		</dependency>
+        <dependency>
+			<groupId>com.google.auto.service</groupId>
+			<artifactId>auto-service</artifactId>
+			<version>1.1.1</version>
+			<optional>true</optional>
+		</dependency>
     </dependencies>
 
     <build>
@@ -393,6 +403,7 @@
                     <target>${openjdk.version}</target>
                     <annotationProcessors>
                         <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
+                        <annotationProcessor>com.google.auto.service.processor.AutoServiceProcessor</annotationProcessor>
                     </annotationProcessors>
                 </configuration>
             </plugin>
