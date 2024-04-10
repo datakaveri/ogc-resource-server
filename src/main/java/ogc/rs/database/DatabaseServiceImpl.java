@@ -104,8 +104,8 @@ public class DatabaseServiceImpl implements DatabaseService{
       featureQuery.setLimit(Integer.parseInt(queryParams.get("limit")));
       featureQuery.setBboxCrsSrid(String.valueOf(crs.get(queryParams.get("bbox-crs"))));
       if (queryParams.get("bbox") != null) {
-        // find storageCrs from collections_details
-        String coordinates = queryParams.get("bbox");
+        // find storageCrs from collections_details; remove square brackets since bbox is a string repr. of array
+        String coordinates = queryParams.get("bbox").replace("[", "").replace("]", "");
         sridOfStorageCrs
             .onSuccess(srid -> featureQuery.setBbox(coordinates, srid))
             .onFailure(fail -> result.fail(fail.getMessage()));
