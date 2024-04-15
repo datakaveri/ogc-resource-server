@@ -174,7 +174,7 @@ public class CollectionMetadata {
 
     JsonObject featureIdQueryParam =
         new JsonObject().put("in", "path").put("name", "featureId").put("required", true)
-            .put("schema", new JsonObject().put("type", OasTypes.NUMBER.toString().toLowerCase()));
+            .put("schema", new JsonObject().put("type", OasTypes.INTEGER.toString().toLowerCase()));
 
     featureSpecificApi.put("parameters",
         new JsonArray().add(featureIdQueryParam).add(crsQueryParam).add(tokenHeaderParam));
