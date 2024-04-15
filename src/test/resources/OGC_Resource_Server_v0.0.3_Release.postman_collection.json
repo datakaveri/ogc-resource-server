@@ -554,6 +554,7 @@
 													"",
 													"pm.test(\"Content-Type is application/json\", function () {",
 													"    pm.response.to.have.header(\"Content-Type\", \"application/json\");",
+													"});",
 													"});"
 												],
 												"type": "text/javascript",
@@ -2337,7 +2338,6 @@
 												{
 													"key": "collectionId",
 													"value": "1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a",
-													"type": "string",
 													"description": "(Required) local identifier of a collection"
 												},
 												{
@@ -2826,7 +2826,7 @@
 									"response": []
 								},
 								{
-									"name": "fetch features with additional filter (postcode=CB21 5NQ)",
+									"name": "fetch features with additional filter (postcode=BB18 5WE)",
 									"event": [
 										{
 											"listen": "test",
@@ -2845,7 +2845,7 @@
 													"    pm.expect(features).to.have.property(\"id\");",
 													"    pm.expect(features).to.have.property(\"properties\");",
 													"    const properties = features.properties;",
-													"    pm.expect(properties).to.have.property(\"postcode\",\"CB21 5NQ\")",
+													"    pm.expect(properties).to.have.property(\"postcode\",\"BB18 5WE\")",
 													"    pm.expect(features).to.have.property(\"type\");",
 													"    pm.expect(features).to.have.property(\"geometry\");",
 													"});",
@@ -2873,7 +2873,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/collections/:collectionId/items?postcode=CB21 5NQ",
+											"raw": "{{baseUrl}}/collections/:collectionId/items?postcode=BB18 5WE",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -2903,7 +2903,7 @@
 												},
 												{
 													"key": "postcode",
-													"value": "CB21 5NQ"
+													"value": "BB18 5WE"
 												}
 											],
 											"variable": [
@@ -3228,8 +3228,8 @@
 													"pm.test(\"Assert Body (features)\", function () {",
 													"    pm.response.to.have.json;",
 													"    var jsonBody = pm.response.json();",
-													"    pm.expect(jsonBody).to.have.property(\"code\",\"Not found\");",
-													"    pm.expect(jsonBody).to.have.property(\"description\",\"Collection not found\");",
+													"    pm.expect(jsonBody).to.have.property(\"code\",\"Not Found\");",
+													"    pm.expect(jsonBody).to.have.property(\"description\");",
 													"    });",
 													"",
 													"pm.test(\"Content-Type is application/json\", function () {",
@@ -4639,8 +4639,8 @@
 													"pm.test(\"Assert Body (features)\", function () {",
 													"    pm.response.to.have.json;",
 													"    var jsonBody = pm.response.json();",
-													"    pm.expect(jsonBody).to.have.property(\"code\",\"Not found\");",
-													"    pm.expect(jsonBody).to.have.property(\"description\",\"Collection not found\");",
+													"    pm.expect(jsonBody).to.have.property(\"code\",\"Not Found\");",
+													"    pm.expect(jsonBody).to.have.property(\"description\");",
 													"",
 													"    });",
 													"",
@@ -4890,8 +4890,8 @@
 											"pm.test(\"Assert Body (features)\", function () {",
 											"    pm.response.to.have.json;",
 											"    var jsonBody = pm.response.json();",
-											"    pm.expect(jsonBody).to.have.property(\"code\",\"Not found\");",
-											"    pm.expect(jsonBody).to.have.property(\"description\",\"Collection not found\");",
+											"    pm.expect(jsonBody).to.have.property(\"code\",\"Not Found\");",
+											"    pm.expect(jsonBody).to.have.property(\"description\");",
 											"    });",
 											"",
 											"pm.test(\"Content-Type is application/json\", function () {",
@@ -5606,7 +5606,7 @@
 							"});",
 							"",
 							"pm.test(\"Content-Type is application/json\", function () {",
-							"    pm.response.to.have.header(\"Content-Type\", \"application/json\");",
+							"    pm.response.to.have.header(\"Content-Type\", \"application/vnd.oai.openapi+json;version=3.0\");",
 							"});"
 						],
 						"type": "text/javascript"
