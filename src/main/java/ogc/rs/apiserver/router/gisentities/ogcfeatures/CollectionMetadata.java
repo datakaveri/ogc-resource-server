@@ -17,7 +17,7 @@ import io.vertx.core.json.JsonObject;
  */
 public class CollectionMetadata {
 
-  private static final int OGC_LIMIT_PARAM_MIN_DEFAULT = 5;
+  private static final int OGC_LIMIT_PARAM_MIN_DEFAULT = 1;
   public static final int OGC_LIMIT_PARAM_MAX_DEFAULT = 5;
 
   public static final String OGC_OP_ID_PREFIX_REGEX = "^ogcFeature-.*";

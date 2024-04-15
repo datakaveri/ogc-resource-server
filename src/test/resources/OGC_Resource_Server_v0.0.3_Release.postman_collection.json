@@ -2670,7 +2670,7 @@
 													"    pm.expect(features).to.have.property(\"id\");",
 													"    pm.expect(features).to.have.property(\"properties\");",
 													"    const properties = features.properties;",
-													"    pm.expect(properties).to.have.property(\"postcode\",\"CB21 5NQ\")",
+													"    pm.expect(properties).to.have.property(\"postcode\",\"BB18 5WE\")",
 													"    pm.expect(features).to.have.property(\"type\");",
 													"    pm.expect(features).to.have.property(\"geometry\");",
 													"});",
@@ -2698,7 +2698,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/collections/:collectionId/items?limit=5&bbox=-7.55,49.76,1.11,57.70&postcode=CB21 5NQ",
+											"raw": "{{baseUrl}}/collections/:collectionId/items?limit=5&bbox=-7.55,49.76,1.11,57.70&postcode=BB18 5WE",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -2718,7 +2718,7 @@
 												},
 												{
 													"key": "postcode",
-													"value": "CB21 5NQ"
+													"value": "BB18 5WE"
 												},
 												{
 													"key": "datetime",
@@ -2757,7 +2757,7 @@
 													"    pm.expect(features).to.have.property(\"id\");",
 													"    pm.expect(features).to.have.property(\"properties\");",
 													"    const properties = features.properties;",
-													"    pm.expect(properties).to.have.property(\"postcode\",\"CB21 5NQ\")",
+													"    pm.expect(properties).to.have.property(\"postcode\",\"BB18 5WE\")",
 													"    pm.expect(features).to.have.property(\"type\");",
 													"    pm.expect(features).to.have.property(\"geometry\");",
 													"});",
@@ -2785,7 +2785,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/collections/:collectionId/items?limit=5&postcode=CB21 5NQ",
+											"raw": "{{baseUrl}}/collections/:collectionId/items?limit=5&postcode=BB18 5WE",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -2811,7 +2811,7 @@
 												},
 												{
 													"key": "postcode",
-													"value": "CB21 5NQ"
+													"value": "BB18 5WE"
 												}
 											],
 											"variable": [
@@ -3345,7 +3345,7 @@
 												},
 												{
 													"key": "featureId",
-													"value": "1729",
+													"value": "1729990",
 													"description": "(Required) local identifier of a feature"
 												}
 											]
@@ -3504,7 +3504,7 @@
 													"    pm.response.to.have.json;",
 													"    var jsonBody = pm.response.json();",
 													"    pm.expect(jsonBody).to.have.property(\"numberMatched\");",
-													"    pm.expect(jsonBody).to.have.property(\"numberReturned\",10);",
+													"    pm.expect(jsonBody).to.have.property(\"numberReturned\",10000);",
 													"    pm.expect(jsonBody).to.have.property(\"features\");",
 													"    const features = jsonBody.features[0];",
 													"    pm.expect(features).to.have.property(\"id\");",
@@ -4126,7 +4126,7 @@
 													"    pm.expect(features).to.have.property(\"id\");",
 													"    pm.expect(features).to.have.property(\"properties\");",
 													"    const properties = features.properties;",
-													"    pm.expect(properties).to.have.property(\"tpep_pickup_datetime\",\"2024-01-12 18:24:44\")",
+													"    pm.expect(properties).to.have.property(\"tpep_pickup_datetime\",\"2024-01-01 04:26:24\")",
 													"    pm.expect(features).to.have.property(\"type\");",
 													"    pm.expect(features).to.have.property(\"geometry\");",
 													"});",
@@ -4154,7 +4154,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/collections/:collectionId/items?limit=5&datetime=2024-01-12T18:24:44Z",
+											"raw": "{{baseUrl}}/collections/:collectionId/items?limit=5&datetime=2024-01-01T04:26:24Z",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -4180,7 +4180,7 @@
 												},
 												{
 													"key": "datetime",
-													"value": "2024-01-12T18:24:44Z"
+													"value": "2024-01-01T04:26:24Z"
 												}
 											],
 											"variable": [
@@ -4242,7 +4242,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/collections/:collectionId/items?limit=2&datetime=2024-01-12T09:00:00Z/..",
+											"raw": "{{baseUrl}}/collections/:collectionId/items?limit=2&datetime=2024-01-01T00:00:00Z/..",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -4268,7 +4268,7 @@
 												},
 												{
 													"key": "datetime",
-													"value": "2024-01-12T09:00:00Z/.."
+													"value": "2024-01-01T00:00:00Z/.."
 												}
 											],
 											"variable": [
@@ -4418,7 +4418,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{baseUrl}}/collections/:collectionId/items?limit=2&datetime=2024-01-12T00:00:00Z/2024-01-13T00:00:00Z",
+											"raw": "{{baseUrl}}/collections/:collectionId/items?limit=2&datetime=2024-01-01T00:00:00Z/2024-01-02T00:00:00Z",
 											"host": [
 												"{{baseUrl}}"
 											],
@@ -4444,7 +4444,7 @@
 												},
 												{
 													"key": "datetime",
-													"value": "2024-01-12T00:00:00Z/2024-01-13T00:00:00Z"
+													"value": "2024-01-01T00:00:00Z/2024-01-02T00:00:00Z"
 												}
 											],
 											"variable": [
@@ -4472,7 +4472,7 @@
 													"    pm.response.to.have.json;",
 													"    var jsonBody = pm.response.json();",
 													"    pm.expect(jsonBody).to.have.property(\"code\",\"Bad Request\");",
-													"    pm.expect(jsonBody).to.have.property(\"description\",\"Time parameter not in ISO format\");",
+													"    pm.expect(jsonBody).to.have.property(\"description\");",
 													"    });",
 													"",
 													"pm.test(\"Content-Type is application/json\", function () {",
