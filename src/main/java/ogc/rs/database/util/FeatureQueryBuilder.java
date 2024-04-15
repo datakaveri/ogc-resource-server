@@ -80,20 +80,26 @@ public class FeatureQueryBuilder {
       return;
     }
     this.additionalParams = "where";
-    //String datetimeFormat = "'yyyy-mm-dd\"T\"HH24:MI:SS\"Z\"'";
+    
+    String datetimeFormat = "'yyyy-mm-dd\"T\"HH24:MI:SS\"Z\"'";
+    
+    // to_timestamp('datetimeKey', 'datetimeFormat') 'operator' 'datetime' (from request);
+    String concatString =
+        " to_timestamp(" .concat(datetimeKey).concat(",").concat(datetimeFormat).concat(") ");
+    
     if (!datetime.contains("/")) {
-      this.datetime = datetimeKey.concat("= '").concat(datetime).concat("'");
+      this.datetime = concatString.concat("= '").concat(datetime).concat("'");
       return;
     }
     String[] dateTimeArr = datetime.split("/");
       if (dateTimeArr[0].equals("..")) { // -- before
-      this.datetime = datetimeKey.concat("<'").concat(dateTimeArr[1]).concat("'");
+      this.datetime = concatString.concat("<'").concat(dateTimeArr[1]).concat("'");
   }
     else if (dateTimeArr[1].equals("..")) { // -- after
-      this.datetime = datetimeKey.concat(">'").concat(dateTimeArr[0]).concat("'");
+      this.datetime = concatString.concat(">'").concat(dateTimeArr[0]).concat("'");
     }
     else {
-      this.datetime = datetimeKey.concat(" between '").concat(dateTimeArr[0]).concat("' and '")
+      this.datetime = concatString.concat(" between '").concat(dateTimeArr[0]).concat("' and '")
           .concat(dateTimeArr[1]).concat("'");
     }
   }
