@@ -7,7 +7,6 @@ import io.vertx.ext.web.validation.BodyProcessorException;
 import io.vertx.ext.web.validation.ParameterProcessorException;
 import io.vertx.ext.web.validation.RequestPredicateException;
 import io.vertx.json.schema.ValidationException;
-import jdk.security.jarsigner.JarSigner;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.ProcessException;
 import org.apache.http.HttpStatus;
@@ -25,9 +24,9 @@ public class FailureHandler implements Handler<RoutingContext> {
     /* exceptions from OpenAPI specification*/
     if (failure instanceof ValidationException || failure instanceof BodyProcessorException ||
       failure instanceof RequestPredicateException ||
-      failure instanceof ParameterProcessorException || failure instanceof NumberFormatException ) {
+      failure instanceof ParameterProcessorException) {
       String failureMessage =
-        failure.getCause() == null ? "Bad Request" : failure.getCause().getMessage();
+        failure.getCause() == null ? "Bad Request" : failure.getMessage();
       OgcException ogcException = new OgcException(400, "Bad Request", failureMessage);
       routingContext.response().putHeader(HEADER_CONTENT_TYPE, MIME_APPLICATION_JSON)
         .setStatusCode(HttpStatus.SC_BAD_REQUEST).end(ogcException.getJson().toString());
