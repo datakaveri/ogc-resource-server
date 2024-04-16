@@ -22,6 +22,7 @@ public class FailureHandler implements Handler<RoutingContext> {
   @Override
   public void handle(RoutingContext routingContext) {
     Throwable failure = routingContext.failure();
+    failure.printStackTrace();
     /* exceptions from OpenAPI specification*/
     if (failure instanceof ValidationException || failure instanceof BodyProcessorException ||
       failure instanceof RequestPredicateException ||

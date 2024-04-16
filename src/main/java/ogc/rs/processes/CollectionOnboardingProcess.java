@@ -1,22 +1,5 @@
 package ogc.rs.processes;
 
-import static ogc.rs.processes.util.Constants.COLLECTIONS_DETAILS_INSERT_QUERY;
-import static ogc.rs.processes.util.Constants.COLLECTIONS_DETAILS_SELECT_QUERY;
-import static ogc.rs.processes.util.Constants.COLLECTIONS_DETAILS_TABLE_EXIST_QUERY;
-import static ogc.rs.processes.util.Constants.COLLECTION_ROLE;
-import static ogc.rs.processes.util.Constants.COLLECTION_SUPPORTED_CRS_INSERT_QUERY;
-import static ogc.rs.processes.util.Constants.COLLECTION_TYPE;
-import static ogc.rs.processes.util.Constants.CRS_TO_SRID_SELECT_QUERY;
-import static ogc.rs.processes.util.Constants.DEFAULT_SERVER_CRS;
-import static ogc.rs.processes.util.Constants.FEATURE;
-import static ogc.rs.processes.util.Constants.FILE_SIZE;
-import static ogc.rs.processes.util.Constants.GRANT_QUERY;
-import static ogc.rs.processes.util.Constants.RG_DETAILS_INSERT_QUERY;
-import static ogc.rs.processes.util.Constants.RI_DETAILS_INSERT_QUERY;
-import static ogc.rs.processes.util.Constants.ROLES_INSERT_QUERY;
-import static ogc.rs.processes.util.Constants.SECURE_ACCESS_KEY;
-import static ogc.rs.processes.util.Constants.STAC_COLLECTION_ASSETS_INSERT_QUERY;
-
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
@@ -27,8 +10,7 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
-import java.io.IOException;
-import java.time.Duration;
+import ogc.rs.apiserver.router.RouterManager;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.commons.exec.CommandLine;
@@ -38,6 +20,11 @@ import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.time.Duration;
+
+import static ogc.rs.processes.util.Constants.*;
 
 /**
  * This class implements the process of onboarding a collection.
@@ -413,37 +400,54 @@ public class CollectionOnboardingProcess implements ProcessService {
   }
 
   /**
-   * Checks if the collection with the given resource ID is already present in the database and also checks if the table with name resource ID is present.
+   * Checks if the collection with the given resource ID is already present in the database and also
+   * checks if the table with name resource ID is present.
    *
    * @param requestJson the JSON object containing the resource ID
    * @return a future that completes when the check is complete.
    */
   private Future<RowSet<Row>> checkDbAndTable(JsonObject requestJson) {
-
     LOGGER.debug("Checking collection in database.");
     String collectionsDetailsTableName = requestJson.getString("collectionsDetailsTableId");
 
-    return pgPool.getConnection().compose(
-      conn -> conn.preparedQuery(COLLECTIONS_DETAILS_SELECT_QUERY)
-        .execute(Tuple.of(collectionsDetailsTableName)).compose(res -> {
-          if (res.size() > 0) {
-            LOGGER.debug("Collection found in collections_detail");
-            return conn.preparedQuery(COLLECTIONS_DETAILS_TABLE_EXIST_QUERY)
-              .execute(Tuple.of(collectionsDetailsTableName)).map(existsResult -> {
-                if (existsResult.iterator().next().getBoolean("table_existence")) {
-                  LOGGER.debug("Table Exist with name " + collectionsDetailsTableName);
-                  return existsResult;
-                } else {
-                  LOGGER.error("Table does not exist.");
-                  throw new RuntimeException("Table does not exist ");
-                }
-              }).onComplete(ar -> conn.close());
-          } else {
-            conn.close();
-            LOGGER.error("Collection not present in collections_details");
-            return Future.failedFuture("Collection not present in collections_details");
-          }
-        }));
+    return pgPool
+        .getConnection()
+        .compose(
+            conn ->
+                conn.preparedQuery(COLLECTIONS_DETAILS_SELECT_QUERY)
+                    .execute(Tuple.of(collectionsDetailsTableName))
+                    .compose(
+                        res -> {
+                          if (res.size() > 0) {
+                            LOGGER.debug("Collection found in collections_detail");
+                            return conn.preparedQuery(COLLECTIONS_DETAILS_TABLE_EXIST_QUERY)
+                                .execute(Tuple.of(collectionsDetailsTableName))
+                                .compose(
+                                    existsResult -> {
+                                      if (existsResult
+                                          .iterator()
+                                          .next()
+                                          .getBoolean("table_existence")) {
+                                        LOGGER.debug(
+                                            "Table Exist with name " + collectionsDetailsTableName);
+                                        return conn.preparedQuery(
+                                                        RouterManager.TRIGGER_SPEC_UPDATE_AND_ROUTER_REGEN_SQL.apply("demo"))
+                                            .execute();
+                                      } else {
+                                        LOGGER.error("Table does not exist.");
+                                        throw new RuntimeException("Table does not exist ");
+                                      }
+                                    })
+                                .onComplete(ar -> conn.close());
+                          } else {
+                            conn.close();
+                            LOGGER.error("Collection not present in collections_details");
+                            return Future.failedFuture(
+                                "Collection not present in collections_details");
+                          }
+                        }).onFailure(failure->{
+                          Future.failedFuture("");
+                        }));
   }
 
   private void handleFailure(JsonObject input, String errorMessage,
