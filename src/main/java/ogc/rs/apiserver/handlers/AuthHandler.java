@@ -28,6 +28,8 @@ public class AuthHandler implements Handler<RoutingContext> {
     @Override
     public void handle(RoutingContext context) {
       // private static Api api;
+        LOGGER.debug("Inside the Auth Handler "
+        +context.request());
 
       if(System.getProperty("disable.auth") != null)
       {
@@ -67,7 +69,8 @@ public class AuthHandler implements Handler<RoutingContext> {
       JsonObject authInfo = new JsonObject().put(HEADER_TOKEN, token).put("id", id);
 
       if (isProcessExecution) {
-        Future<JsonObject> resultFromAuth = authenticator.executionApiCheck(authInfo, requestJson);
+          LOGGER.debug("Inside the Process Execution");
+          Future<JsonObject> resultFromAuth = authenticator.executionApiCheck(authInfo, requestJson);
         resultFromAuth
           .onSuccess(
             result -> {
@@ -79,7 +82,9 @@ public class AuthHandler implements Handler<RoutingContext> {
               context::fail);
       }
       else if (context.request().path().substring(1, 7).equals("assets")) {
-        /* TODO : Remove once spec validation is being done */
+          LOGGER.debug("Inside the collection");
+
+          /* TODO : Remove once spec validation is being done */
         if (id==null || !id.matches(UUID_REGEX)) {
           context.put("isAuthorised",  false);
           OgcException ogcException =new OgcException(401, "Not Authorised", "User is not Authorised. Please contact IUDX AAA Server.");

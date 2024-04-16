@@ -453,6 +453,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
   @Override
   public Future<JsonObject> executionApiCheck(JsonObject authenticationInfo,
                                               JsonObject requestJson) {
+      LOGGER.debug("Inside the executionApiCheck");
     Promise<JsonObject> result = Promise.promise();
     String token;
 
