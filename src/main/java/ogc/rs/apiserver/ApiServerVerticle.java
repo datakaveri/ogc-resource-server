@@ -265,7 +265,6 @@ public class ApiServerVerticle extends AbstractVerticle {
     isCrsValid
         .compose(crs -> dbService.getFeature(collectionId, featureId, queryParamsMap, crs))
         .onSuccess(success -> {
-              LOGGER.debug("Success! - {}", success.encodePrettily());
               // TODO: Add base_path from config
               success.put("links", new JsonArray()
                   .add(new JsonObject().put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items/"
@@ -356,7 +355,6 @@ public class ApiServerVerticle extends AbstractVerticle {
           })
         .compose(dbCall -> dbService.getFeatures(collectionId, queryParamsMap, isCrsValid.result()))
         .onSuccess(success -> {
-          LOGGER.debug("Success! - {}", success.encodePrettily());
           // TODO: Add base_path from config
           int next, offset, limit;
           offset = Integer.parseInt(queryParamsMap.get("offset"));
