@@ -7,6 +7,8 @@ networks:
 services:  
   test:
     image: ghcr.io/datakaveri/geoserver-test:latest
+    environment:
+      - LOG_LEVEL=INFO
     volumes:
       - ./src/:/usr/share/app/src
       - /home/ubuntu/configs/ogc-config-dev.json:/usr/share/app/configs/config.json
@@ -32,6 +34,8 @@ services:
 
   perfTest:
     image: ghcr.io/datakaveri/geoserver-test:latest
+    environment:
+      - LOG_LEVEL=INFO
     volumes:
       - /home/ubuntu/configs/ogc-config-dev.json:/usr/share/app/configs/config.json
       - type: volume
