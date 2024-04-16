@@ -183,7 +183,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     /* Add route to handle not implemented / not found paths */
     router.route().last().handler(routingContext -> {
       HttpServerResponse response = routingContext.response();
-      response.putHeader("Content-type", "application/vnd.oai.openapi+json;version=3.0");
+      response.putHeader(CONTENT_TYPE, APPLICATION_JSON);
       response.setStatusCode(404);
       response.send(new JsonObject().put("code", "Not Found")
           .put("description", "API / Collection not found").toBuffer());
@@ -265,7 +265,6 @@ public class ApiServerVerticle extends AbstractVerticle {
     isCrsValid
         .compose(crs -> dbService.getFeature(collectionId, featureId, queryParamsMap, crs))
         .onSuccess(success -> {
-              LOGGER.debug("Success! - {}", success.encodePrettily());
               // TODO: Add base_path from config
               success.put("links", new JsonArray()
                   .add(new JsonObject().put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items/"
@@ -356,7 +355,6 @@ public class ApiServerVerticle extends AbstractVerticle {
           })
         .compose(dbCall -> dbService.getFeatures(collectionId, queryParamsMap, isCrsValid.result()))
         .onSuccess(success -> {
-          LOGGER.debug("Success! - {}", success.encodePrettily());
           // TODO: Add base_path from config
           int next, offset, limit;
           offset = Integer.parseInt(queryParamsMap.get("offset"));

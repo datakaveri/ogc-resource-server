@@ -178,7 +178,7 @@
           <stringProp name="HTTPSampler.domain">${__P(host)}</stringProp>
           <stringProp name="HTTPSampler.port">8443</stringProp>
           <stringProp name="HTTPSampler.protocol">http</stringProp>
-          <stringProp name="HTTPSampler.path">/collections/a5a6e26f-d252-446d-b7dd-4d50ea945102/items/0baa14b5-70c0-4f62-8197-5f8ce64523ba</stringProp>
+          <stringProp name="HTTPSampler.path">/collections/a5a6e26f-d252-446d-b7dd-4d50ea945102/items/1729</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -293,7 +293,7 @@
           <stringProp name="HTTPSampler.domain">${__P(host)}</stringProp>
           <stringProp name="HTTPSampler.port">8443</stringProp>
           <stringProp name="HTTPSampler.protocol">http</stringProp>
-          <stringProp name="HTTPSampler.path">/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items?limit=2&amp;datetime=2023-07-25T12:50:30%2B05:30/2023-07-25T12:55:30%2B05:30</stringProp>
+          <stringProp name="HTTPSampler.path">/collections/6dbcd15f-b497-42cd-8468-e3ecdf2daf7d/items?limit=2&amp;datetime=2024-01-25T12:50:30%2B05:30/2024-01-25T12:55:30%2B05:30</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
