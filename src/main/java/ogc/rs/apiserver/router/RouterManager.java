@@ -45,7 +45,7 @@ public class RouterManager {
    * Get an SQL query to force a spec update and router. param can be any string for now.
    */
   public static final Function<String, String> TRIGGER_SPEC_UPDATE_AND_ROUTER_REGEN_SQL =
-      (param) -> "NOTIFY '" + SPEC_AND_ROUTER_UPDATE_PG_CHANNEL + "', '" + param + "'";
+      (param) -> "NOTIFY " + SPEC_AND_ROUTER_UPDATE_PG_CHANNEL + ", '" + param + "'";
 
   private static final String SPEC_UPDATE_LOCK = "SPEC_UPDATE_LOCK";
 

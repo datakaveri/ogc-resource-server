@@ -445,8 +445,6 @@ public class CollectionOnboardingProcess implements ProcessService {
                             return Future.failedFuture(
                                 "Collection not present in collections_details");
                           }
-                        }).onFailure(failure->{
-                          Future.failedFuture("");
                         }));
   }
 
