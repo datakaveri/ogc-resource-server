@@ -372,6 +372,9 @@ public class CollectionOnboardingProcess implements ProcessService {
     cmdLine.addArgument("FID=id");
     cmdLine.addArgument("-t_srs");
     cmdLine.addArgument("EPSG:4326");
+    cmdLine.addArgument("--config");
+    cmdLine.addArgument("PG_USE_COPY");
+    cmdLine.addArgument("NO");
     cmdLine.addArgument("-f");
     cmdLine.addArgument("PostgreSQL");
     cmdLine.addArgument(
