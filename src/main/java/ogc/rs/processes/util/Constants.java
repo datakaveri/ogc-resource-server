@@ -21,7 +21,7 @@ public class Constants {
   public static final String RG_DETAILS_INSERT_QUERY =
     "INSERT INTO rg_details (id,role_id,access) VALUES($1,$2,$3) ON CONFLICT DO NOTHING;";
   public static final String RI_DETAILS_INSERT_QUERY =
-    "INSERT INTO ri_details (id,rg_id,access) VALUES($1,$2,$3);";
+    "INSERT INTO ri_details (id,role_id,access) VALUES($1,$2,$3);";
   public static final String UPDATE_JOB_TABLE_STATUS_QUERY =
     "UPDATE JOBS_TABLE SET UPDATED_AT = NOW(), STARTED_AT = CASE WHEN $1 = 'RUNNING' THEN NOW() ELSE STARTED_AT END, FINISHED_AT = CASE WHEN $1 IN ('FAILED', 'SUCCESSFUL') THEN NOW() ELSE NULL END, PROGRESS = CASE WHEN $1 = 'SUCCESSFUL' THEN 100.0 WHEN $1 = 'RUNNING' THEN 16.67  ELSE PROGRESS END, STATUS = $1::JOB_STATUS_TYPE, MESSAGE = $2 WHERE ID = $3;";
 

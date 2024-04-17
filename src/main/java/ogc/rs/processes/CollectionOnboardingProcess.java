@@ -329,10 +329,8 @@ public class CollectionOnboardingProcess implements ProcessService {
           .execute(Tuple.of(collectionsDetailsTableName, srid))).compose(
         collectionResult -> sqlClient.preparedQuery(ROLES_INSERT_QUERY)
           .execute(Tuple.of(userId, role))).compose(
-        rolesResult -> sqlClient.preparedQuery(RG_DETAILS_INSERT_QUERY)
-          .execute(Tuple.of(resourceGroupId, userId, SECURE_ACCESS_KEY))).compose(
         rgDetailsResult -> sqlClient.preparedQuery(RI_DETAILS_INSERT_QUERY)
-          .execute(Tuple.of(resourceId, resourceGroupId, accessPolicy))).compose(
+          .execute(Tuple.of(resourceId, userId, accessPolicy))).compose(
         riDetailsResult -> sqlClient.preparedQuery(STAC_COLLECTION_ASSETS_INSERT_QUERY).execute(
           Tuple.of(collectionsDetailsTableName, title, fileName, COLLECTION_TYPE, FILE_SIZE,
             COLLECTION_ROLE))).compose(stacCollectionResult -> ogr2ogrCmd(input))
