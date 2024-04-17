@@ -112,15 +112,28 @@
     },
     {
       "id": "ogc.rs.processes.ProcessVerticle",
+      "verticleInstances": 1,
       "s3BucketUrl": "",
       "awsAccessKey": "",
       "awsSecretKey": "",
       "awsEndPoint": "",
-      "verticleInstances": 1
+      "catServerHost": "",
+      "catServerPort": 123,
+      "catRequestItemsUri": "/iudx/cat/v1/item",
+      "databasePort": 152,
+      "databaseUser": "",
+      "databasePassword": "",
+      "databaseName": "",
+      "poolSize": 10
     },
     {
       "id": "ogc.rs.jobs.JobsVerticle",
-      "verticleInstances": 1
+      "verticleInstances": 1,
+      "databasePort": 153,
+      "databaseUser": "",
+      "databasePassword": "",
+      "databaseName": "",
+      "poolSize": 10
     }
   ]
 }
