@@ -10,6 +10,8 @@ import ogc.rs.apiserver.ApiServerVerticle;
 import ogc.rs.apiserver.router.RouterManager;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 import static ogc.rs.apiserver.util.Constants.*;
+
+import java.io.File;
 import java.util.ServiceLoader;
 
 /**
@@ -18,7 +20,7 @@ import java.util.ServiceLoader;
  */
 public class OgcRouterBuilder extends EntityRouterBuilder {
 
-  private static final String OAS_PATH = RouterManager.OGC_OAS_REAL_PATH;
+  private static final String OAS_URI_PATH = new File(RouterManager.OGC_OAS_REAL_PATH).toURI().toString();
   private static final String OAS_API_PATH = "/api";
 
   private OgcRouterBuilder(ApiServerVerticle apiServerVerticle, Vertx vertx, JsonObject config,
@@ -38,7 +40,7 @@ public class OgcRouterBuilder extends EntityRouterBuilder {
       JsonObject config) {
     Promise<OgcRouterBuilder> promise = Promise.promise();
 
-    Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, OAS_PATH);
+    Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, OAS_URI_PATH);
 
     routerBuilderFut
         .onSuccess(routerBuilder -> promise
