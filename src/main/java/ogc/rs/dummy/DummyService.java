@@ -1,4 +1,4 @@
-package ogc.rs.dummy.authenticator;
+package ogc.rs.dummy;
 
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;
