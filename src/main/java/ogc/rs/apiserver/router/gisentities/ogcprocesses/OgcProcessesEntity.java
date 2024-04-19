@@ -7,13 +7,14 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import ogc.rs.apiserver.ApiServerVerticle;
 import ogc.rs.apiserver.handlers.AuthHandler;
+import ogc.rs.apiserver.handlers.DummyHandler;
 import ogc.rs.apiserver.handlers.FailureHandler;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 import ogc.rs.apiserver.router.routerbuilders.OgcRouterBuilder;
 import ogc.rs.apiserver.router.routerbuilders.StacRouterBuilder;
 import ogc.rs.apiserver.router.util.OasFragments;
 import ogc.rs.database.DatabaseService;
-import ogc.rs.dummy.DummyService;
+import ogc.rs.dummy.authenticator.DummyService;
 
 import static ogc.rs.apiserver.util.Constants.*;
 
