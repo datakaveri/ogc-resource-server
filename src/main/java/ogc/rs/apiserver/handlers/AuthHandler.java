@@ -145,7 +145,6 @@ public class AuthHandler implements Handler<RoutingContext> {
               if (failed instanceof OgcException){
                 context.fail(failed);
               } else {
-                failed.printStackTrace();  
                 context.fail(internalServerError());
                 LOGGER.debug("statusCode? {}", context.get("statusCode").toString());
               }
