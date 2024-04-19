@@ -628,7 +628,7 @@ public class DatabaseServiceImpl implements DatabaseService{
     final String GET_COLLECTION_ATTRIBUTE_INFO =
         "SELECT table_name AS collection_id, json_object_agg(column_name, data_type) AS attributes"
             + " FROM information_schema.columns WHERE table_name = ANY($1::text[])"
-            + " AND column_name != ALL('{\"id\",\"geom\",\"itemtype\"}') GROUP BY table_name";
+            + " AND column_name != ALL('{\"id\",\"geom\"}') GROUP BY table_name";
 
     Future<List<JsonObject>> newCollectionsJson =
         client.withConnection(conn -> conn.preparedQuery(GET_COLLECTION_INFO).collecting(collector)
@@ -655,11 +655,19 @@ public class DatabaseServiceImpl implements DatabaseService{
       }
 
       Map<String, JsonObject> collectionToAttribMap = collectionToAttribFut.result();
-
+      
+      // if a newly found collection ID is absent in collectionToAttribMap, means that it does not have
+      // any attributes. So using getOrDefault to handle those collection IDs by returning a JSON object
+      // with empty 'attributes' JSON object.
+      
+      JsonObject defaultValIfCollectionHasNoAttribs = new JsonObject().put("attributes", new JsonObject());
+      
       List<JsonObject> newListWithAllInfo = newCollectionsJson.result().stream().map(obj -> {
         String collectionId = obj.getString("id");
 
-        obj.put("attributes", collectionToAttribMap.get(collectionId).getJsonObject("attributes"));
+        obj.put("attributes",
+            collectionToAttribMap.getOrDefault(collectionId, defaultValIfCollectionHasNoAttribs)
+                .getJsonObject("attributes"));
 
         return obj;
       }).collect(Collectors.toList());
