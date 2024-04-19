@@ -7,15 +7,12 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import ogc.rs.apiserver.ApiServerVerticle;
 import ogc.rs.apiserver.handlers.AuthHandler;
-import ogc.rs.apiserver.handlers.DummyHandler;
 import ogc.rs.apiserver.handlers.FailureHandler;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 import ogc.rs.apiserver.router.routerbuilders.OgcRouterBuilder;
 import ogc.rs.apiserver.router.routerbuilders.StacRouterBuilder;
 import ogc.rs.apiserver.router.util.OasFragments;
 import ogc.rs.database.DatabaseService;
-import ogc.rs.dummy.authenticator.DummyService;
-
 import static ogc.rs.apiserver.util.Constants.*;
 
 /**
@@ -52,13 +49,6 @@ public class OgcProcessesEntity implements GisEntityInterface{
 
     builder
         .operation(STATUS_API)
-            .handler(cnt->{
-              DummyService d =DummyService.createProxy(vertx,"ogc.rs.dummy.service");
-              d.dummyTokenIntrospect(new JsonObject(),new JsonObject()).onSuccess(success->cnt.next()).onFailure(fail->{
-                fail.printStackTrace();
-                cnt.fail(fail);
-              });
-            })
         .handler(AuthHandler.create(vertx))
         .handler(apiServerVerticle::getStatus)
         .handler(apiServerVerticle::putCommonResponseHeaders)
