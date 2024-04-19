@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 public class Deployer {
     private static final Logger LOGGER = LogManager.getLogger(Deployer.class);
@@ -68,7 +69,7 @@ public class Deployer {
         }
 
         EventBusOptions ebOptions = new EventBusOptions();
-        VertxOptions options = new VertxOptions().setEventBusOptions(ebOptions);
+        VertxOptions options = new VertxOptions().setEventBusOptions(ebOptions).setMaxWorkerExecuteTimeUnit(TimeUnit.HOURS).setMaxWorkerExecuteTime(1);
 
         String config;
         try {

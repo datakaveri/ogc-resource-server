@@ -26,18 +26,20 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
   private final WebClient webClient;
   private final UtilClass utilClass;
   private final JsonObject config;
+  private final Vertx vertx;
   Logger LOGGER = LogManager.getLogger(ProcessesRunnerImpl.class);
 
-  ProcessesRunnerImpl(PgPool pgPool, WebClient webClient, JsonObject config) {
+  ProcessesRunnerImpl(PgPool pgPool, WebClient webClient, JsonObject config,Vertx vertx) {
     this.pgPool = pgPool;
     this.webClient = webClient;
     this.utilClass = new UtilClass(pgPool);
     this.config = config;
+    this.vertx=vertx;
   }
 
   @Override
   public ProcessesRunnerService run(JsonObject input, Handler<AsyncResult<JsonObject>> handler) {
-    Promise<JsonObject> jsonObjectPromise = Promise.promise();
+    Promise<JsonObject> executeMethodPromise = Promise.promise();
 
     Future<JsonObject> checkForProcess = processExistCheck(input);
 
@@ -50,7 +52,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
 
         switch (processName) {
           case "CollectionOnboarding":
-            processService = new CollectionOnboardingProcess(pgPool, webClient, config);
+            processService = new CollectionOnboardingProcess(pgPool, webClient, config,vertx);
             break;
         }
 
@@ -68,25 +70,11 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
                   .concat(jobStarted.getString("jobId")))));
         }).onFailure(jobFailed -> handler.handle(Future.failedFuture(jobFailed.getMessage())));
 
-        Vertx.vertx().executeBlocking(blockCode -> {
-          Future<JsonObject> jobObjectFuture = startAJobInDB.compose(updatedInputJson -> {
-            try {
-              return finalProcessService.execute(updatedInputJson);
-            } catch (InterruptedException e) {
-              throw new RuntimeException(e);
-            }
-          });
-
-          jobObjectFuture.onSuccess(blockCode::complete).onFailure(failureHandler -> {
+        startAJobInDB.compose(updatedInputJson -> finalProcessService.execute(updatedInputJson))
+          .onSuccess(executeMethodPromise::complete)
+          .onFailure(failureHandler -> {
             LOGGER.error(failureHandler.getMessage());
-            blockCode.fail(failureHandler.getMessage());
-          });
-        }, blockResult -> {
-          if (blockResult.failed()) {
-            jsonObjectPromise.fail(blockResult.cause());
-          } else {
-            jsonObjectPromise.complete((JsonObject) blockResult.result());
-          }
+            executeMethodPromise.fail(failureHandler.getMessage());;
         });
       } else {
         LOGGER.error("Failed to validate the input");

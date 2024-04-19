@@ -2,6 +2,7 @@ package ogc.rs.processes;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -47,11 +48,13 @@ public class CollectionOnboardingProcess implements ProcessService {
   private String databasePassword;
   private String databaseUser;
   private int databasePort;
-
-  public CollectionOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config) {
+  private boolean VERTX_EXECUTE_BLOCKING_IN_ORDER = false;
+  private Vertx vertx;
+  public CollectionOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config,Vertx vertx) {
     this.pgPool = pgPool;
     this.webClient = webClient;
     this.utilClass = new UtilClass(pgPool);
+    this.vertx=vertx;
     initializeConfig(config);
   }
 
@@ -129,9 +132,6 @@ public class CollectionOnboardingProcess implements ProcessService {
             promise.fail("Resource does not belong to the user.");
             return;
           }
-          requestInput.put("resourceGroup",
-            responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
-              .getString("resourceGroup"));
           requestInput.put("accessPolicy",
             responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
               .getString("accessPolicy"));
@@ -176,42 +176,61 @@ public class CollectionOnboardingProcess implements ProcessService {
    * @return the feature properties
    */
   private Future<JsonObject> checkForCrs(JsonObject input) {
-    CommandLine cmdLine = getOrgInfoCommandLine(input);
-    DefaultExecutor defaultExecutor = DefaultExecutor.builder().get();
-    defaultExecutor.setExitValue(0);
-    ExecuteWatchdog watchdog =
-      ExecuteWatchdog.builder().setTimeout(Duration.ofSeconds(10000)).get();
-    defaultExecutor.setWatchdog(watchdog);
-    Promise<JsonObject> onboardingPromise = Promise.promise();
-    ByteArrayOutputStream stdout = new ByteArrayOutputStream();
-    ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-    PumpStreamHandler psh = new PumpStreamHandler(stdout, stderr);
-    defaultExecutor.setStreamHandler(psh);
 
-    try {
-      int exitValue = defaultExecutor.execute(cmdLine);
-      LOGGER.debug("exit value in ogrinfo: " + exitValue);
-      String output = stdout.toString();
+    Promise<JsonObject> promise = Promise.promise();
 
-      // Extracting JSON object from string 'output', removing the initial message "Had to open data source read-only."
-      // to retrieve the necessary data for code flow.
-      JsonObject cmdOutput =
-        new JsonObject(Buffer.buffer(output.replace("Had to open data source read-only.", "")));
-      JsonObject featureProperties = extractFeatureProperties(cmdOutput);
-      String organization = featureProperties.getString("organization");
-      if (!organization.equals("EPSG")) {
-        LOGGER.error("CRS not present as EPSG");
-        onboardingPromise.fail("CRS not present as EPSG");
-        return onboardingPromise.future();
-      }
-      int organizationCoordId = featureProperties.getInteger("organization_coordsys_id");
-      LOGGER.debug("organization " + organization + " crs " + organizationCoordId);
-      validSridFromDatabase(organizationCoordId, input, onboardingPromise);
-    } catch (IOException e1) {
-      LOGGER.error("Failed while getting ogrInfo because {}", e1.getMessage());
-      onboardingPromise.fail("Failed while getting ogrInfo because {} " + e1.getMessage());
-    }
-    return onboardingPromise.future();
+    vertx
+        .<JsonObject>executeBlocking(
+            crsPromise -> {
+              LOGGER.debug("Trying ogrInfo");
+              CommandLine cmdLine = getOrgInfoCommandLine(input);
+              DefaultExecutor defaultExecutor = DefaultExecutor.builder().get();
+              defaultExecutor.setExitValue(0);
+              ExecuteWatchdog watchdog =
+                  ExecuteWatchdog.builder().setTimeout(Duration.ofSeconds(10000)).get();
+              defaultExecutor.setWatchdog(watchdog);
+              Promise<JsonObject> onboardingPromise = Promise.promise();
+              ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+              ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+              PumpStreamHandler psh = new PumpStreamHandler(stdout, stderr);
+              defaultExecutor.setStreamHandler(psh);
+
+              try {
+                int exitValue = defaultExecutor.execute(cmdLine);
+                LOGGER.debug("exit value in ogrInfo: " + exitValue);
+                String output = stdout.toString();
+
+                // Extracting JSON object from string 'output', removing the initial message "Had to
+                // open data source read-only."
+                // to retrieve the necessary data for code flow.
+                JsonObject cmdOutput =
+                    new JsonObject(
+                        Buffer.buffer(output.replace("Had to open data source read-only.", "")));
+                crsPromise.complete(cmdOutput);
+              } catch (IOException e1) {
+                LOGGER.error("Failed while getting ogrInfo because {}", e1.getMessage());
+                onboardingPromise.fail(
+                    "Failed while getting ogrInfo because {} " + e1.getMessage());
+              }
+            },VERTX_EXECUTE_BLOCKING_IN_ORDER)
+        .onSuccess(
+            cmdOutput -> {
+              JsonObject featureProperties = extractFeatureProperties(cmdOutput);
+              String organization = featureProperties.getString("organization");
+              if (!organization.equals("EPSG")) {
+                LOGGER.error("CRS not present as EPSG");
+                promise.fail("CRS not present as EPSG");
+              }
+              int organizationCoOrdId = featureProperties.getInteger("organization_coordsys_id");
+              LOGGER.debug("organization " + organization + " crs " + organizationCoOrdId);
+              validSridFromDatabase(organizationCoOrdId, input, promise);
+            })
+        .onFailure(
+            failureHandler -> {
+              LOGGER.error("Failed in ogrInfo because {}", failureHandler.getMessage());
+              promise.fail(failureHandler.getMessage());
+            });
+    return promise.future();
   }
 
   private JsonObject extractFeatureProperties(JsonObject cmdOutput) {
@@ -252,7 +271,6 @@ public class CollectionOnboardingProcess implements ProcessService {
 
     String filename = input.getString("fileName");
     CommandLine ogrinfo = new CommandLine("ogrinfo");
-
     ogrinfo.addArgument("--config");
     ogrinfo.addArgument("CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE");
     ogrinfo.addArgument("NO");
@@ -277,24 +295,26 @@ public class CollectionOnboardingProcess implements ProcessService {
 
   private Future<JsonObject> ogr2ogrCmd(JsonObject input) {
 
-    LOGGER.debug("Trying to onboard the collection");
-    CommandLine cmdLine = getCommandLineOgr2Ogr(input);
-    DefaultExecutor defaultExecutor = DefaultExecutor.builder().get();
-    defaultExecutor.setExitValue(0);
-    ExecuteWatchdog watchdog = ExecuteWatchdog.builder().setTimeout(Duration.ofHours(1)).get();
-    defaultExecutor.setWatchdog(watchdog);
+    Promise<JsonObject> promise = Promise.promise();
+    vertx.<JsonObject>executeBlocking(onboardingPromise -> {
 
-    Promise<JsonObject> onboardingPromise = Promise.promise();
+      LOGGER.debug("Trying to onboard the collection");
+      CommandLine cmdLine = getCommandLineOgr2Ogr(input);
+      DefaultExecutor defaultExecutor = DefaultExecutor.builder().get();
+      defaultExecutor.setExitValue(0);
+      ExecuteWatchdog watchdog = ExecuteWatchdog.builder().setTimeout(Duration.ofHours(1)).get();
+      defaultExecutor.setWatchdog(watchdog);
 
-    try {
-      int exitValue = defaultExecutor.execute(cmdLine);
-      input.put("exitValue", exitValue);
-      onboardingPromise.complete(input);
-    } catch (IOException e1) {
-      LOGGER.error("Failed to onboard the collection because {}", e1.getMessage());
-      onboardingPromise.fail("Failed to onboard the collection because " + e1.getMessage());
-    }
-    return onboardingPromise.future();
+      try {
+        int exitValue = defaultExecutor.execute(cmdLine);
+        input.put("exitValue", exitValue);
+        LOGGER.debug("OGR2OGR cmd executed successfully.");
+        onboardingPromise.complete(input);
+      } catch (IOException e1) {
+        LOGGER.error("Failed to onboard the collection because {}", e1.getMessage());
+        onboardingPromise.fail("Failed to onboard the collection because " + e1.getMessage());
+      }},VERTX_EXECUTE_BLOCKING_IN_ORDER).onSuccess(promise::complete).onFailure(promise::fail);
+    return promise.future();
   }
 
   /**
@@ -315,7 +335,6 @@ public class CollectionOnboardingProcess implements ProcessService {
     String collectionsDetailsTableName = input.getString("collectionsDetailsTableId");
     String userId = input.getString("userId");
     String role = input.getString("role").toUpperCase();
-    String resourceGroupId = input.getString("resourceGroup");
     String resourceId = input.getString("resourceId");
     String accessPolicy = input.getString("accessPolicy");
     String grantQuery = GRANT_QUERY.replace("collections_details_id", collectionsDetailsTableName)
