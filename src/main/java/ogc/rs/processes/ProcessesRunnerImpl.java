@@ -73,7 +73,6 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
         startAJobInDB.compose(updatedInputJson -> finalProcessService.execute(updatedInputJson))
           .onSuccess(executeMethodPromise::complete)
           .onFailure(failureHandler -> {
-            LOGGER.error(failureHandler.getMessage());
             executeMethodPromise.fail(failureHandler.getMessage());;
         });
       } else {
