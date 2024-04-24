@@ -1,25 +1,23 @@
 package ogc.rs.processes;
 
-import static ogc.rs.processes.util.Constants.PROCESS_EXIST_CHECK_QUERY;
-import static ogc.rs.common.Constants.processException404;
-import static ogc.rs.common.Constants.processException500;
-
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
-import java.util.Set;
-import java.util.UUID;
+import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Set;
+import java.util.UUID;
+
+import static ogc.rs.common.Constants.processException404;
+import static ogc.rs.common.Constants.processException500;
+import static ogc.rs.processes.util.Constants.PROCESS_EXIST_CHECK_QUERY;
 
 public class ProcessesRunnerImpl implements ProcessesRunnerService {
   private final PgPool pgPool;

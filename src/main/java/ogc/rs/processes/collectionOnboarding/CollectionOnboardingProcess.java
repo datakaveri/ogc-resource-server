@@ -1,4 +1,4 @@
-package ogc.rs.processes;
+package ogc.rs.processes.collectionOnboarding;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -9,9 +9,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.router.RouterManager;
+import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.commons.exec.CommandLine;
@@ -26,7 +26,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Objects;
 
-import static ogc.rs.processes.util.Constants.*;
+import static ogc.rs.processes.collectionOnboarding.Constants.*;
+
 
 /**
  * This class implements the process of onboarding a collection.
