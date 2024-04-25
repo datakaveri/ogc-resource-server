@@ -1,4 +1,4 @@
-package ogc.rs.apiserver.util.awss3;
+package ogc.rs.common.awss3;
 
 
 import java.net.URL;

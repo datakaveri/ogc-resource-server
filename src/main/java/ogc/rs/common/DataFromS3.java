@@ -1,15 +1,13 @@
-package ogc.rs.apiserver.util;
+package ogc.rs.common;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
-import ogc.rs.apiserver.ApiServerVerticle;
-import ogc.rs.apiserver.util.awss3.AWS4SignerBase;
-import ogc.rs.apiserver.util.awss3.AWS4SignerForAuthorizationHeader;
+import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.common.awss3.AWS4SignerBase;
+import ogc.rs.common.awss3.AWS4SignerForAuthorizationHeader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,16 +38,16 @@ public class DataFromS3 {
     DataFromS3.client = client;
     this.headers = new HashMap<>();
   }
-  public Future<HttpClientResponse> getTileFromS3() {
+  public Future<HttpClientResponse> getDataFromS3(HttpMethod httpMethod) {
     Promise <HttpClientResponse> response  = Promise.promise();
-    client.request(HttpMethod.GET, url.getDefaultPort(), url.getHost(), url.getPath())
+    client.request(httpMethod, url.getDefaultPort(), url.getHost(), url.getPath())
         .compose(req -> {
           headers.forEach(req::putHeader);
           return req.send();
         })
         .compose(res -> {
           if (res.statusCode() == 404) {
-            response.fail(new OgcException(404, "Not Found", "Tile not found."));
+            response.fail(new OgcException(404, "Not Found", "File not found."));
             return response.future();
           } else if (res.statusCode() == 200) {
             response.complete(res);
@@ -64,12 +62,10 @@ public class DataFromS3 {
     return response.future();
   }
 
-  public void setSignatureHeader () {
+  public void setSignatureHeader (HttpMethod httpMethod) {
     headers.put("x-amz-content-sha256", AWS4SignerBase.EMPTY_BODY_SHA256);
-
     AWS4SignerForAuthorizationHeader signer =
-        new AWS4SignerForAuthorizationHeader(url, "GET", "s3", S3_REGION);
-
+        new AWS4SignerForAuthorizationHeader(url, httpMethod.name(), "s3", S3_REGION);
     String signedAuthorizationHeader = signer.computeSignature(headers, null, // no query parameters
         AWS4SignerBase.EMPTY_BODY_SHA256, S3_ACCESS_KEY, S3_SECRET_KEY);
 
@@ -95,6 +91,10 @@ public class DataFromS3 {
   public String getFullyQualifiedStacUrlString (String stacUrl) {
 
     this.s3Url = this.s3Url + stacUrl;
+    return s3Url;
+  }
+  public String getFullyQualifiedProcessUrlString (String processUrl) {
+    this.s3Url = this.s3Url + processUrl;
     return s3Url;
   }
 }

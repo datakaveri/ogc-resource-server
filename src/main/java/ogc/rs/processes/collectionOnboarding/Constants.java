@@ -38,7 +38,8 @@ public class Constants {
   public static final String COLLECTION_RESPONSE =
       "Collection not found. Proceeding to check for CRS.";
   public static final String CRS_RESPONSE =
-      "CRS is correct. Initiating the collection onboarding process.";
+      "CRS is correct. Trying to get the file size.";
+  public static final String S3_RESPONSE= "Got the file size. Initiating the onboarding process.";
   public static final String ONBOARDING_RESPONSE =
       "Onboarding completed. Verifying collection in the database..";
   public static final String DB_CHECK_RESPONSE =

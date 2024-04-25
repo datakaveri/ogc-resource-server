@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
@@ -11,6 +12,7 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.router.RouterManager;
+import ogc.rs.common.DataFromS3;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
@@ -23,6 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.time.Duration;
 import java.util.Objects;
 
@@ -51,12 +54,14 @@ public class CollectionOnboardingProcess implements ProcessService {
   private String databaseUser;
   private int databasePort;
   private final boolean VERTX_EXECUTE_BLOCKING_IN_ORDER = false;
+  private DataFromS3 dataFromS3;
   private Vertx vertx;
-  public CollectionOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config,Vertx vertx) {
+  public CollectionOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config,DataFromS3 dataFromS3,Vertx vertx) {
     this.pgPool = pgPool;
     this.webClient = webClient;
     this.utilClass = new UtilClass(pgPool);
     this.vertx=vertx;
+    this.dataFromS3=dataFromS3;
     initializeConfig(config);
   }
 
@@ -66,7 +71,7 @@ public class CollectionOnboardingProcess implements ProcessService {
    * @param config the JSON object containing the configuration parameters
    */
   private void initializeConfig(JsonObject config) {
-    this.awsEndPoint = config.getString("awsEndPoint");
+    this.awsEndPoint = "s3.".concat(config.getString("awsRegion")).concat(".amazonaws.com");
     this.accessKey = config.getString("awsAccessKey");
     this.secretKey = config.getString("awsSecretKey");
     this.awsBucketUrl = config.getString("s3BucketUrl");
@@ -84,24 +89,27 @@ public class CollectionOnboardingProcess implements ProcessService {
   public Future<JsonObject> execute(JsonObject requestInput) {
     Promise<JsonObject> objectPromise = Promise.promise();
 
-    requestInput.put("progress", calculateProgress(1, 6));
+    requestInput.put("progress", calculateProgress(1, 7));
 
     String tableID = requestInput.getString("resourceId");
     requestInput.put("collectionsDetailsTableId", tableID);
 
     utilClass.updateJobTableStatus(requestInput, Status.RUNNING,CHECK_CAT_FOR_RESOURCE_REQUEST)
-      .compose(updateTableResult -> makeCatApiRequest(requestInput)).compose(
+      .compose(progressUpdateHandler -> makeCatApiRequest(requestInput)).compose(
         catResponseHandler -> utilClass.updateJobTableProgress(
-          requestInput.put("progress", calculateProgress(2, 6)).put(MESSAGE,CAT_REQUEST_RESPONSE)))
-      .compose(updateTableResult1 -> checkIfCollectionPresent(requestInput)).compose(
+          requestInput.put("progress", calculateProgress(2, 7)).put(MESSAGE,CAT_REQUEST_RESPONSE)))
+      .compose(progressUpdateHandler -> checkIfCollectionPresent(requestInput)).compose(
         checkCollectionTableHandler -> utilClass.updateJobTableProgress(
-          requestInput.put("progress", calculateProgress(3, 6)).put(MESSAGE,COLLECTION_RESPONSE)))
-      .compose(updateTableResult2 -> checkForCrs(requestInput)).compose(
+          requestInput.put("progress", calculateProgress(3, 7)).put(MESSAGE,COLLECTION_RESPONSE)))
+            .compose(progressUpdateHandler -> checkForCrs(requestInput)).compose(
         checkCollectionTableHandler -> utilClass.updateJobTableProgress(
-          requestInput.put("progress", calculateProgress(4, 6)).put(MESSAGE,CRS_RESPONSE)))
-      .compose(progressUpdateHandler -> onboardingCollection(requestInput)).compose(
+          requestInput.put("progress", calculateProgress(4, 7)).put(MESSAGE,CRS_RESPONSE)))
+            .compose(progressHandler->getMetaDataFromS3(requestInput)).compose(
+                    checkCollectionTableHandler -> utilClass.updateJobTableProgress(
+                            requestInput.put("progress", calculateProgress(5, 7)).put(MESSAGE,S3_RESPONSE)))
+            .compose(progressUpdateHandler -> onboardingCollection(requestInput)).compose(
         onboardingCollectionHandler -> utilClass.updateJobTableProgress(
-          requestInput.put("progress", calculateProgress(5, 6)).put(MESSAGE,ONBOARDING_RESPONSE)))
+          requestInput.put("progress", calculateProgress(6, 7)).put(MESSAGE,ONBOARDING_RESPONSE)))
       .compose(progressUpdateHandler -> checkDbAndTable(requestInput))
       .compose(checkDbHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,DB_CHECK_RESPONSE))
       .onSuccess(onboardingSuccessHandler -> {
@@ -272,7 +280,7 @@ public class CollectionOnboardingProcess implements ProcessService {
   private CommandLine getOrgInfoCommandLine(JsonObject input) {
     LOGGER.debug("inside command line");
 
-    String filename = input.getString("fileName");
+    String filename = "/"+input.getString("fileName");
     CommandLine ogrinfo = new CommandLine("ogrinfo");
     ogrinfo.addArgument("--config");
     ogrinfo.addArgument("CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE");
@@ -328,10 +336,10 @@ public class CollectionOnboardingProcess implements ProcessService {
    */
   private Future<Void> onboardingCollection(JsonObject input) {
     Promise<Void> promise = Promise.promise();
-
     LOGGER.debug("Starting Pre-onboarding of collection");
 
     int srid = input.getInteger("srid");
+    BigInteger fileSize = (BigInteger) input.getValue("fileSize");
     String fileName = input.getString("fileName");
     String title = input.getString("title");
     String description = input.getString("description");
@@ -342,7 +350,6 @@ public class CollectionOnboardingProcess implements ProcessService {
     String accessPolicy = input.getString("accessPolicy");
     String grantQuery = GRANT_QUERY.replace("collections_details_id", collectionsDetailsTableName)
       .replace("databaseUser", databaseUser);
-
     pgPool.withTransaction(sqlClient -> sqlClient.preparedQuery(COLLECTIONS_DETAILS_INSERT_QUERY)
       .execute(
         Tuple.of(collectionsDetailsTableName, title, description, DEFAULT_SERVER_CRS, FEATURE))
@@ -354,7 +361,7 @@ public class CollectionOnboardingProcess implements ProcessService {
         rgDetailsResult -> sqlClient.preparedQuery(RI_DETAILS_INSERT_QUERY)
           .execute(Tuple.of(resourceId, userId, accessPolicy))).compose(
         riDetailsResult -> sqlClient.preparedQuery(STAC_COLLECTION_ASSETS_INSERT_QUERY).execute(
-          Tuple.of(collectionsDetailsTableName, title, fileName, COLLECTION_TYPE, FILE_SIZE,
+          Tuple.of(collectionsDetailsTableName, title, fileName, COLLECTION_TYPE, fileSize,
             COLLECTION_ROLE))).compose(stacCollectionResult -> ogr2ogrCmd(input))
       .compose(onBoardingSuccess -> sqlClient.query(grantQuery).execute())
       .onSuccess(grantQueryResult -> {
@@ -376,7 +383,7 @@ public class CollectionOnboardingProcess implements ProcessService {
    */
   private CommandLine getCommandLineOgr2Ogr(JsonObject input) {
 
-    String filename = input.getString("fileName");
+    String filename = "/"+input.getString("fileName");
     String collectionsDetailsTableName = input.getString("collectionsDetailsTableId");
 
     CommandLine cmdLine = new CommandLine("ogr2ogr");
@@ -484,7 +491,33 @@ public class CollectionOnboardingProcess implements ProcessService {
                         }));
      return promise.future();
   }
-
+  /**
+   * This method is used to get meta data of the collection stored in S3 bucket.
+   *
+   * @param requestInput the JSON object containing the file name.
+   * @return a future that completes after getting metadata from S3.
+   */
+  private Future<JsonObject> getMetaDataFromS3(JsonObject requestInput) {
+    Promise<JsonObject> promise = Promise.promise();
+    String fileName = requestInput.getString("fileName");
+    String urlString =
+            dataFromS3.getFullyQualifiedProcessUrlString(fileName);
+    dataFromS3.setUrlFromString(urlString);
+    dataFromS3.setSignatureHeader(HttpMethod.HEAD);
+    dataFromS3
+        .getDataFromS3(HttpMethod.HEAD)
+        .onSuccess(
+            responseFromS3 -> {
+              requestInput.put("fileSize",new BigInteger(responseFromS3.getHeader("Content-Length")));
+              promise.complete(requestInput);
+            })
+        .onFailure(
+            failed -> {
+              LOGGER.error("Failed to get response from S3 " + failed.getLocalizedMessage());
+              promise.fail(failed.getMessage());
+            });
+    return promise.future();
+  }
   private void handleFailure(JsonObject input, String errorMessage,
                              Promise<JsonObject> itemDetails) {
     utilClass.updateJobTableStatus(input, Status.FAILED,errorMessage).onSuccess(l -> {

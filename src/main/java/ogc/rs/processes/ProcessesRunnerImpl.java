@@ -6,6 +6,7 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
+import ogc.rs.common.DataFromS3;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
@@ -25,13 +26,15 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
   private final UtilClass utilClass;
   private final JsonObject config;
   private final Vertx vertx;
+  private final DataFromS3 dataFromS3;
   Logger LOGGER = LogManager.getLogger(ProcessesRunnerImpl.class);
 
-  ProcessesRunnerImpl(PgPool pgPool, WebClient webClient, JsonObject config,Vertx vertx) {
+  ProcessesRunnerImpl(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx) {
     this.pgPool = pgPool;
     this.webClient = webClient;
     this.utilClass = new UtilClass(pgPool);
     this.config = config;
+    this.dataFromS3=dataFromS3;
     this.vertx=vertx;
   }
 
@@ -50,7 +53,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
 
         switch (processName) {
           case "CollectionOnboarding":
-            processService = new CollectionOnboardingProcess(pgPool, webClient, config,vertx);
+            processService = new CollectionOnboardingProcess(pgPool, webClient, config,dataFromS3,vertx);
             break;
         }
 

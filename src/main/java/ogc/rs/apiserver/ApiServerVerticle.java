@@ -2,16 +2,10 @@ package ogc.rs.apiserver;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.MultiMap;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.http.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
@@ -26,16 +20,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import ogc.rs.apiserver.handlers.AuthHandler;
-import ogc.rs.apiserver.handlers.FailureHandler;
-import ogc.rs.apiserver.util.DataFromS3;
+import ogc.rs.common.DataFromS3;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.ProcessException;
 import ogc.rs.catalogue.CatalogueService;
@@ -547,9 +537,9 @@ public class ApiServerVerticle extends AbstractVerticle {
         dataFromS3.getFullyQualifiedTileUrlString(
             collectionId, tileMatrixSetId, tileMatrixId, tileRow, tileCol);
     dataFromS3.setUrlFromString(urlString);
-    dataFromS3.setSignatureHeader();
+    dataFromS3.setSignatureHeader(HttpMethod.GET);
     dataFromS3
-        .getTileFromS3()
+        .getDataFromS3(HttpMethod.GET)
         .onSuccess(success -> success.pipeTo(response))
         .onFailure(
             failed -> {
@@ -1158,9 +1148,9 @@ public class ApiServerVerticle extends AbstractVerticle {
               String urlString =
                   dataFromS3.getFullyQualifiedStacUrlString(handler.getString("href"));
               dataFromS3.setUrlFromString(urlString);
-              dataFromS3.setSignatureHeader();
+              dataFromS3.setSignatureHeader(HttpMethod.GET);
               dataFromS3
-                  .getTileFromS3()
+                  .getDataFromS3(HttpMethod.GET)
                   .onSuccess(success -> success.pipeTo(response))
                   .onFailure(
                       failed -> {
