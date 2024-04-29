@@ -4,7 +4,9 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -96,21 +98,30 @@ public class AuthenticationVerticle extends AbstractVerticle {
     public void stop() {
         binder.unregister(consumer);
     }
-    private Future<String> getJwtPublicKey(Vertx vertx, JsonObject config) {
-        Promise<String> promise = Promise.promise();
-        webClient = createWebClient(vertx, config);
-        String authCert = config.getString("dxAuthBasePath") + AUTH_CERTIFICATE_PATH;
-        webClient
-            .get(443, config.getString("authServerHost"), authCert)
-            .send(
-                handler -> {
-                    if (handler.succeeded()) {
-                        JsonObject json = handler.result().bodyAsJsonObject();
-                        promise.complete(json.getString("cert"));
-                    } else {
-                        promise.fail("fail to get JWT public key");
-                    }
-                });
-        return promise.future();
+
+  private Future<String> getJwtPublicKey(Vertx vertx, JsonObject config) {
+    Promise<String> promise = Promise.promise();
+    if (System.getProperty("fake-token") != null) {
+      LOGGER.fatal("processing fake token property");
+      String authCert = "src/test/resources/public.pem";
+      FileSystem fileSystem = vertx.fileSystem();
+      Buffer buffer = fileSystem.readFileBlocking(authCert);
+      promise.complete(buffer.toString());
+    } else {
+      webClient = createWebClient(vertx, config);
+      String authCert = config.getString("dxAuthBasePath") + AUTH_CERTIFICATE_PATH;
+      webClient
+          .get(443, config.getString("authServerHost"), authCert)
+          .send(
+              handler -> {
+                if (handler.succeeded()) {
+                  JsonObject json = handler.result().bodyAsJsonObject();
+                  promise.complete(json.getString("cert"));
+                } else {
+                  promise.fail("fail to get JWT public key");
+                }
+              });
     }
+    return promise.future();
+  }
 }
