@@ -56,4 +56,7 @@ ADD CONSTRAINT collection_supported_crs_pkey PRIMARY KEY (id);
 
 -- Add foreign key constraint
 ALTER TABLE collection_supported_crs
-ADD CONSTRAINT collection_supported_crs_id_fkey FOREIGN KEY (crs_id) REFERENCES crs_to_srid(id);
+ADD CONSTRAINT collection_supported_crs_crs_id_fkey FOREIGN KEY (crs_id) REFERENCES crs_to_srid(id);
+
+CREATE INDEX idx_collection_supported_crs_crs_id
+ON collection_supported_crs (crs_id);
