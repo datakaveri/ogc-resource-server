@@ -501,7 +501,7 @@ public class CollectionOnboardingProcess implements ProcessService {
     Promise<JsonObject> promise = Promise.promise();
     String fileName = requestInput.getString("fileName");
     String urlString =
-            dataFromS3.getFullyQualifiedProcessUrlString(fileName);
+            dataFromS3.getFullyQualifiedUrlString(fileName);
     dataFromS3.setUrlFromString(urlString);
     dataFromS3.setSignatureHeader(HttpMethod.HEAD);
     dataFromS3

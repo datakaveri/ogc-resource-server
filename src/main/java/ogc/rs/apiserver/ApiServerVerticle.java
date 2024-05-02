@@ -539,9 +539,9 @@ public class ApiServerVerticle extends AbstractVerticle {
     response.putHeader("Content-Type", "image/png");
     DataFromS3 dataFromS3 =
         new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
+    String tilesUrlString = collectionId + "/" + tileMatrixSetId + "/" + tileMatrixId + "/" + tileRow + "/" + tileCol +".png";
     String urlString =
-        dataFromS3.getFullyQualifiedTileUrlString(
-            collectionId, tileMatrixSetId, tileMatrixId, tileRow, tileCol);
+        dataFromS3.getFullyQualifiedUrlString(tilesUrlString);
     dataFromS3.setUrlFromString(urlString);
     dataFromS3.setSignatureHeader(HttpMethod.GET);
     dataFromS3
@@ -1152,7 +1152,7 @@ public class ApiServerVerticle extends AbstractVerticle {
               DataFromS3 dataFromS3 =
                   new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
               String urlString =
-                  dataFromS3.getFullyQualifiedStacUrlString(handler.getString("href"));
+                  dataFromS3.getFullyQualifiedUrlString(handler.getString("href"));
               dataFromS3.setUrlFromString(urlString);
               dataFromS3.setSignatureHeader(HttpMethod.GET);
               dataFromS3

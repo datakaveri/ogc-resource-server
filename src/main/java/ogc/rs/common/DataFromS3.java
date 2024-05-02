@@ -80,21 +80,8 @@ public class DataFromS3 {
       throw new OgcException(500, "Internal Server Error", "Internal Server Error");
     }
   }
-
-  public String getFullyQualifiedTileUrlString (String collection, String tileMatrixSetId, String tileMatrixId,
-                                                String tileRow, String tileCol) {
-    this.s3Url = this.s3Url + collection + "/" + tileMatrixSetId + "/" + tileMatrixId + "/" + tileRow + "/" + tileCol +
-        ".png";
-    return s3Url;
-  }
-
-  public String getFullyQualifiedStacUrlString (String stacUrl) {
-
-    this.s3Url = this.s3Url + stacUrl;
-    return s3Url;
-  }
-  public String getFullyQualifiedProcessUrlString (String processUrl) {
-    this.s3Url = this.s3Url + processUrl;
+  public String getFullyQualifiedUrlString (String urlString) {
+    this.s3Url = this.s3Url + urlString;
     return s3Url;
   }
 }
