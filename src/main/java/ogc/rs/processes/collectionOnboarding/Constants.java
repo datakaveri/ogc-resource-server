@@ -4,7 +4,6 @@ public class Constants {
 
   public static final String FEATURE = "FEATURE";
   public static final String COLLECTION_ROLE = "{data}";
-  public static final int FILE_SIZE = 0;
   public static final String COLLECTION_TYPE = "application/geopackage+sqlite3";
   public static final String GRANT_QUERY =
       "GRANT SELECT, INSERT ON  \"collections_details_id\" TO databaseUser";
@@ -28,6 +27,8 @@ public class Constants {
       "SELECT EXISTS (SELECT 1 FROM pg_tables WHERE tablename = $1) AS table_existence;";
   public static final String CRS_TO_SRID_SELECT_QUERY =
       "SELECT crs,srid FROM CRS_TO_SRID WHERE SRID = $1;";
+  public static final String UPDATE_COLLECTIONS_DETAILS =
+          "UPDATE collections_details SET bbox = $1::DOUBLE PRECISION[] WHERE id = $2::UUID;";
 
   public static final String DEFAULT_SERVER_CRS = "http://www.opengis.net/def/crs/OGC/1.3/CRS84";
   public static final String MESSAGE = "message";
@@ -42,6 +43,8 @@ public class Constants {
   public static final String S3_RESPONSE= "Got the file size. Initiating the onboarding process.";
   public static final String ONBOARDING_RESPONSE =
       "Onboarding completed. Verifying collection in the database..";
+  public static final String VERIFYING_RESPONSE =
+          "Collection present in database. Updating bbox for the collection.";
   public static final String DB_CHECK_RESPONSE =
-      "The collection is in the database. Onboarding has been completed successfully.";
+      "Updated bbox for the collection. Onboarding has been completed successfully.";
 }

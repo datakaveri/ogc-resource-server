@@ -30,6 +30,9 @@ import java.time.Duration;
 import java.util.Objects;
 
 import static ogc.rs.processes.collectionOnboarding.Constants.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -97,20 +100,24 @@ public class CollectionOnboardingProcess implements ProcessService {
     utilClass.updateJobTableStatus(requestInput, Status.RUNNING,CHECK_CAT_FOR_RESOURCE_REQUEST)
       .compose(progressUpdateHandler -> makeCatApiRequest(requestInput)).compose(
         catResponseHandler -> utilClass.updateJobTableProgress(
-          requestInput.put("progress", calculateProgress(2, 7)).put(MESSAGE,CAT_REQUEST_RESPONSE)))
+          requestInput.put("progress", calculateProgress(2, 8)).put(MESSAGE,CAT_REQUEST_RESPONSE)))
       .compose(progressUpdateHandler -> checkIfCollectionPresent(requestInput)).compose(
         checkCollectionTableHandler -> utilClass.updateJobTableProgress(
-          requestInput.put("progress", calculateProgress(3, 7)).put(MESSAGE,COLLECTION_RESPONSE)))
+          requestInput.put("progress", calculateProgress(3, 8)).put(MESSAGE,COLLECTION_RESPONSE)))
             .compose(progressUpdateHandler -> checkForCrs(requestInput)).compose(
         checkCollectionTableHandler -> utilClass.updateJobTableProgress(
-          requestInput.put("progress", calculateProgress(4, 7)).put(MESSAGE,CRS_RESPONSE)))
+          requestInput.put("progress", calculateProgress(4, 8)).put(MESSAGE,CRS_RESPONSE)))
             .compose(progressHandler->getMetaDataFromS3(requestInput)).compose(
                     checkCollectionTableHandler -> utilClass.updateJobTableProgress(
-                            requestInput.put("progress", calculateProgress(5, 7)).put(MESSAGE,S3_RESPONSE)))
+                            requestInput.put("progress", calculateProgress(5, 8)).put(MESSAGE,S3_RESPONSE)))
             .compose(progressUpdateHandler -> onboardingCollection(requestInput)).compose(
         onboardingCollectionHandler -> utilClass.updateJobTableProgress(
-          requestInput.put("progress", calculateProgress(6, 7)).put(MESSAGE,ONBOARDING_RESPONSE)))
+          requestInput.put("progress", calculateProgress(6, 8)).put(MESSAGE,ONBOARDING_RESPONSE)))
       .compose(progressUpdateHandler -> checkDbAndTable(requestInput))
+            .compose(
+                    onboardingCollectionHandler -> utilClass.updateJobTableProgress(
+                            requestInput.put("progress", calculateProgress(7, 8)).put(MESSAGE,VERIFYING_RESPONSE)))
+            .compose(progressUpdateHandler->ogr2ogrCmdExtent(requestInput))
       .compose(checkDbHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,DB_CHECK_RESPONSE))
       .onSuccess(onboardingSuccessHandler -> {
         LOGGER.debug("COLLECTION ONBOARDING DONE");
@@ -211,7 +218,6 @@ public class CollectionOnboardingProcess implements ProcessService {
                 int exitValue = defaultExecutor.execute(cmdLine);
                 LOGGER.debug("exit value in ogrInfo: " + exitValue);
                 String output = stdout.toString();
-
                 // Extracting JSON object from string 'output', removing the initial message "Had to
                 // open data source read-only."
                 // to retrieve the necessary data for code flow.
@@ -528,6 +534,88 @@ public class CollectionOnboardingProcess implements ProcessService {
 
   }
 
+  private CommandLine getOrgInfoBBox(JsonObject input) {
+    String collectionsDetailsTableId = input.getString("collectionsDetailsTableId");
+    CommandLine ogrInfo = new CommandLine("ogrinfo");
+    ogrInfo.addArgument("-al");
+    ogrInfo.addArgument("-so");
+    ogrInfo.addArgument("-json");
+    ogrInfo.addArgument(
+            String.format("PG:host=%s dbname=%s user=%s port=%d password=%s schemas=public", databaseHost,
+                    databaseName, databaseUser, databasePort, databasePassword), false);
+    ogrInfo.addArgument(collectionsDetailsTableId);
+    ogrInfo.addArgument("-nocount");
+    ogrInfo.addArgument("-nomd");
+    ogrInfo.addArgument("-geom=NO");
+    return ogrInfo;
+  }
+  private Future<JsonObject> ogr2ogrCmdExtent(JsonObject input) {
+    LOGGER.debug("Trying to update the Collection table.");
+    Promise<JsonObject> promise = Promise.promise();
+
+    vertx
+        .<JsonArray>executeBlocking(
+            extentPromise -> {
+              LOGGER.debug("Trying ogrInfo for ogr");
+              CommandLine cmdLine = getOrgInfoBBox(input);
+              DefaultExecutor defaultExecutor = DefaultExecutor.builder().get();
+              defaultExecutor.setExitValue(0);
+              ExecuteWatchdog watchdog =
+                  ExecuteWatchdog.builder().setTimeout(Duration.ofSeconds(10000)).get();
+              defaultExecutor.setWatchdog(watchdog);
+              ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+              ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+              PumpStreamHandler psh = new PumpStreamHandler(stdout, stderr);
+              defaultExecutor.setStreamHandler(psh);
+
+              try {
+                int exitValue = defaultExecutor.execute(cmdLine);
+                LOGGER.debug("exit value in ogrInfo: " + exitValue);
+                String output = stdout.toString();
+                JsonArray extentArray =
+                    new JsonObject(Buffer.buffer(output))
+                        .getJsonArray("layers")
+                        .getJsonObject(0)
+                        .getJsonArray("geometryFields")
+                        .getJsonObject(0)
+                        .getJsonArray("extent");
+                extentPromise.complete(extentArray);
+              } catch (IOException e1) {
+                LOGGER.error("Failed while getting ogrInfo because {}", e1.getMessage());
+                extentPromise.fail(
+                    "Failed while getting ogrInfo because {} " + e1.getMessage());
+              }
+            },
+            VERTX_EXECUTE_BLOCKING_IN_ORDER)
+        .onSuccess(
+            extent -> {
+              input.put("extent", extent);
+              updateCollectionsTableBbox(input,promise);
+            })
+        .onFailure(
+            failureHandler -> {
+              LOGGER.error("Failed in ogrInfo because {}", failureHandler.getMessage());
+              promise.fail(failureHandler.getMessage());
+            });
+    return promise.future();
+  }
+  public void updateCollectionsTableBbox(JsonObject input,Promise promise) {
+    JsonArray extent = input.getJsonArray("extent");
+    List<Float> bboxArray = new ArrayList<Float>(extent.getList());
+    LOGGER.info("Trying to update the bbox ");
+
+    String collectionsDetailsId = input.getString("collectionsDetailsTableId");
+
+    pgPool.withConnection(
+      sqlConnection -> sqlConnection.preparedQuery(UPDATE_COLLECTIONS_DETAILS)
+      .execute(Tuple.of(bboxArray.toArray(),collectionsDetailsId))).onSuccess(successResult -> {
+      LOGGER.debug("Bbox updated.");
+      promise.complete();
+    }).onFailure(failureHandler -> {
+      LOGGER.error("Failed to update bbox: {}", failureHandler.getMessage());
+      promise.fail("Failed to update bbox: " + failureHandler.getMessage());
+    });
+  }
   private float calculateProgress(int currentStep, int totalSteps) {
     return ((float) currentStep / totalSteps) * 100;
   }
