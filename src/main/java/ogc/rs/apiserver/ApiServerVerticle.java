@@ -2,12 +2,12 @@ package ogc.rs.apiserver;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.MultiMap;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
@@ -26,16 +26,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import ogc.rs.apiserver.handlers.AuthHandler;
-import ogc.rs.apiserver.handlers.FailureHandler;
-import ogc.rs.apiserver.util.DataFromS3;
+import ogc.rs.common.DataFromS3;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.ProcessException;
 import ogc.rs.catalogue.CatalogueService;
@@ -543,13 +539,13 @@ public class ApiServerVerticle extends AbstractVerticle {
     response.putHeader("Content-Type", "image/png");
     DataFromS3 dataFromS3 =
         new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
+    String tilesUrlString = collectionId + "/" + tileMatrixSetId + "/" + tileMatrixId + "/" + tileRow + "/" + tileCol +".png";
     String urlString =
-        dataFromS3.getFullyQualifiedTileUrlString(
-            collectionId, tileMatrixSetId, tileMatrixId, tileRow, tileCol);
+        dataFromS3.getFullyQualifiedUrlString(tilesUrlString);
     dataFromS3.setUrlFromString(urlString);
-    dataFromS3.setSignatureHeader();
+    dataFromS3.setSignatureHeader(HttpMethod.GET);
     dataFromS3
-        .getTileFromS3()
+        .getDataFromS3(HttpMethod.GET)
         .onSuccess(success -> success.pipeTo(response))
         .onFailure(
             failed -> {
@@ -1156,11 +1152,11 @@ public class ApiServerVerticle extends AbstractVerticle {
               DataFromS3 dataFromS3 =
                   new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
               String urlString =
-                  dataFromS3.getFullyQualifiedStacUrlString(handler.getString("href"));
+                  dataFromS3.getFullyQualifiedUrlString(handler.getString("href"));
               dataFromS3.setUrlFromString(urlString);
-              dataFromS3.setSignatureHeader();
+              dataFromS3.setSignatureHeader(HttpMethod.GET);
               dataFromS3
-                  .getTileFromS3()
+                  .getDataFromS3(HttpMethod.GET)
                   .onSuccess(success -> success.pipeTo(response))
                   .onFailure(
                       failed -> {

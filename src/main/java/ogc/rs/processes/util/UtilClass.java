@@ -1,9 +1,5 @@
 package ogc.rs.processes.util;
 
-import static ogc.rs.processes.util.Constants.NEW_JOB_INSERT_QUERY;
-import static ogc.rs.processes.util.Constants.UPDATE_JOB_STATUS_PROGRESS;
-import static ogc.rs.processes.util.Constants.UPDATE_JOB_TABLE_STATUS_QUERY;
-
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
@@ -13,6 +9,7 @@ import io.vertx.sqlclient.Tuple;
 import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import static ogc.rs.processes.util.Constants.*;
 
 /**
  * This class provides utility methods for the other classes.
@@ -40,7 +37,7 @@ public class UtilClass {
 
     pgPool.withConnection(sqlConnection -> sqlConnection.preparedQuery(NEW_JOB_INSERT_QUERY)
       .execute(Tuple.of(UUID.fromString(process_id), UUID.fromString(userId), input, output_json,
-        Status.ACCEPTED, Status.ACCEPTED.message))).onSuccess(successResult -> {
+        Status.ACCEPTED, PROCESS_ACCEPTED_RESPONSE))).onSuccess(successResult -> {
       for (Row row : successResult) {
         input.put("jobId", row.getUUID("id").toString());
       }
@@ -61,13 +58,13 @@ public class UtilClass {
    * @param status the status to update to
    * @return a future that completes when the update is complete
    */
-  public Future<Void> updateJobTableStatus(JsonObject input, Status status) {
+  public Future<Void> updateJobTableStatus(JsonObject input, Status status,String message) {
     Promise<Void> promise = Promise.promise();
     UUID jobId = UUID.fromString(input.getString("jobId"));
     pgPool.withConnection(
       sqlConnection -> sqlConnection.preparedQuery(UPDATE_JOB_TABLE_STATUS_QUERY)
-        .execute(Tuple.of(status, status.message, jobId))).onSuccess(successResult -> {
-      LOGGER.debug("Job status updated to {}", status.message);
+        .execute(Tuple.of(status, message, jobId))).onSuccess(successResult -> {
+      LOGGER.debug("Job status updated to {}", status);
       promise.complete();
     }).onFailure(failureHandler -> {
       LOGGER.error("Failed to update job status: {}", failureHandler.getMessage());
@@ -87,9 +84,10 @@ public class UtilClass {
     Promise<Void> promise = Promise.promise();
     float progress = input.getFloat("progress");
     UUID jobId = UUID.fromString(input.getString("jobId"));
+    String message = input.getString("message");
     pgPool.withConnection(sqlConnection -> sqlConnection.preparedQuery(UPDATE_JOB_STATUS_PROGRESS)
-      .execute(Tuple.of(progress, jobId))).onSuccess(successResult -> {
-      LOGGER.debug("Job progress updated to {}", progress);
+      .execute(Tuple.of(progress,message, jobId))).onSuccess(successResult -> {
+      LOGGER.debug("Job progress: {}", message);
       promise.complete();
     }).onFailure(failureHandler -> {
       LOGGER.error("Failed to update job progress: {}", failureHandler.getMessage());

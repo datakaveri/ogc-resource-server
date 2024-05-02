@@ -1,9 +1,5 @@
 package ogc.rs.processes;
 
-import static ogc.rs.processes.util.Constants.PROCESS_EXIST_CHECK_QUERY;
-import static ogc.rs.common.Constants.processException404;
-import static ogc.rs.common.Constants.processException500;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -14,12 +10,19 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
-import java.util.Set;
-import java.util.UUID;
+import ogc.rs.common.DataFromS3;
+import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Set;
+import java.util.UUID;
+
+import static ogc.rs.common.Constants.processException404;
+import static ogc.rs.common.Constants.processException500;
+import static ogc.rs.processes.util.Constants.PROCESS_EXIST_CHECK_QUERY;
 
 public class ProcessesRunnerImpl implements ProcessesRunnerService {
   private final PgPool pgPool;
@@ -27,13 +30,15 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
   private final UtilClass utilClass;
   private final JsonObject config;
   private final Vertx vertx;
+  private final DataFromS3 dataFromS3;
   Logger LOGGER = LogManager.getLogger(ProcessesRunnerImpl.class);
 
-  ProcessesRunnerImpl(PgPool pgPool, WebClient webClient, JsonObject config,Vertx vertx) {
+  ProcessesRunnerImpl(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx) {
     this.pgPool = pgPool;
     this.webClient = webClient;
     this.utilClass = new UtilClass(pgPool);
     this.config = config;
+    this.dataFromS3=dataFromS3;
     this.vertx=vertx;
   }
 
@@ -52,7 +57,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
 
         switch (processName) {
           case "CollectionOnboarding":
-            processService = new CollectionOnboardingProcess(pgPool, webClient, config,vertx);
+            processService = new CollectionOnboardingProcess(pgPool, webClient, config,dataFromS3,vertx);
             break;
         }
 
@@ -73,7 +78,6 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
         startAJobInDB.compose(updatedInputJson -> finalProcessService.execute(updatedInputJson))
           .onSuccess(executeMethodPromise::complete)
           .onFailure(failureHandler -> {
-            LOGGER.error(failureHandler.getMessage());
             executeMethodPromise.fail(failureHandler.getMessage());;
         });
       } else {
