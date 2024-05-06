@@ -310,6 +310,13 @@ public class CollectionOnboardingProcess implements ProcessService {
     return ogrinfo;
   }
 
+  /**
+   * Executes a command using 'ogr2ogr' to onboard the collection.
+   *
+   * @param input A JsonObject containing the necessary information for executing the 'ogr2ogr' command.
+   * @return A Future<JsonObject> representing the outcome of the command. It completes with the updated
+   *         JsonObject on success or fails with an error message if the command execution fails.
+   */
   private Future<JsonObject> ogr2ogrCmd(JsonObject input) {
 
     Promise<JsonObject> promise = Promise.promise();
@@ -432,7 +439,6 @@ public class CollectionOnboardingProcess implements ProcessService {
     cmdLine.addArgument(secretKey);
 
     cmdLine.addArgument(String.format("/vsis3/%s%s", awsBucketUrl, filename));
-
     return cmdLine;
   }
 
@@ -534,6 +540,13 @@ public class CollectionOnboardingProcess implements ProcessService {
 
   }
 
+  /**
+   * Creates a CommandLine instruction for 'ogrinfo' to fetch metadata from a PostgreSQL table in JSON format.
+   *
+   * @param input A JsonObject containing:
+   *              - "collectionsDetailsTableId": The name of the PostgreSQL table to query.
+   * @return A CommandLine object representing the command to execute.
+   */
   private CommandLine getOrgInfoBBox(JsonObject input) {
     String collectionsDetailsTableId = input.getString("collectionsDetailsTableId");
     CommandLine ogrInfo = new CommandLine("ogrinfo");
@@ -549,9 +562,20 @@ public class CollectionOnboardingProcess implements ProcessService {
     ogrInfo.addArgument("-geom=NO");
     return ogrInfo;
   }
-  private Future<JsonObject> ogr2ogrCmdExtent(JsonObject input) {
+  /**
+   * Retrieves the bounding box (bbox) information from a PostgreSQL table using the 'ogrinfo' tool
+   * and updates the 'collections_details' table with this data.
+   *
+   * This method executes a command line instruction to obtain bbox information from PostgreSQL
+   * and updates the 'collections_details' table's 'bbox' column.
+   *
+   * @param input A JsonObject with the necessary parameters, including:
+   *              - "collectionsDetailsTableId": The name of the PostgreSQL table to query.
+   * @return A Future<Void> completes with the updated input object on success, or fails with an error message on failure.
+   */
+  private Future<Void> ogr2ogrCmdExtent(JsonObject input) {
     LOGGER.debug("Trying to update the Collection table.");
-    Promise<JsonObject> promise = Promise.promise();
+    Promise<Void> promise = Promise.promise();
 
     vertx
         .<JsonArray>executeBlocking(
@@ -599,6 +623,17 @@ public class CollectionOnboardingProcess implements ProcessService {
             });
     return promise.future();
   }
+  /**
+   * Updates the 'bbox' column in the 'collections_details' table.
+   *
+   * This method updates the specified collection with a new bounding box (bbox) in PostgreSQL.
+   * The new bbox is provided as a JsonArray of floating-point numbers along with a collection ID.
+   *
+   * @param input   A JsonObject with:
+   *                - "extent": A JsonArray of Float values for the new bbox.
+   *                - "collectionsDetailsTableId": The ID of the collection to update.
+   * @param promise A Promise<Void> indicating success or failure of the update operation.
+   */
   public void updateCollectionsTableBbox(JsonObject input,Promise promise) {
     JsonArray extent = input.getJsonArray("extent");
     List<Float> bboxArray = new ArrayList<Float>(extent.getList());
