@@ -45,12 +45,13 @@ public class DatabaseServiceImpl implements DatabaseService{
         Promise<List<JsonObject>> result = Promise.promise();
         Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
-           conn.preparedQuery("select collections_details.id, title, description, datetime_key," +
-                   " array_agg(crs_to_srid.crs) as crs, collections_details.crs as \"storageCrs\"," +
-                   " bbox, temporal, type" +
+           conn.preparedQuery("select collections_details.id, title, array_agg(distinct crs_to_srid.crs) as crs" +
+                   ", collections_details.crs as \"storageCrs\", description, datetime_key, bbox, temporal," +
+                   " array_agg(distinct collection_type.type) as type" +
                    " from collections_details join collection_supported_crs" +
                    " on collections_details.id = collection_supported_crs.collection_id join crs_to_srid" +
-                   " on crs_to_srid.id = collection_supported_crs.crs_id group by collections_details.id" +
+                   " on crs_to_srid.id = collection_supported_crs.crs_id join collection_type" +
+                   " on collections_details.id=collection_type.collection_id group by collections_details.id" +
                    " having collections_details.id = $1::uuid")
                .collecting(collector)
                .execute(Tuple.of(UUID.fromString( collectionId))).map(SqlResult::value))
@@ -70,12 +71,13 @@ public class DatabaseServiceImpl implements DatabaseService{
         Promise<List<JsonObject>> result = Promise.promise();
         Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
-                conn.preparedQuery("select collections_details.id, title, array_agg(crs_to_srid.crs) as crs, " +
-                        "collections_details.crs as \"storageCrs\", description, datetime_key, bbox, temporal, type" +
+                conn.preparedQuery("select collections_details.id, title, array_agg(distinct crs_to_srid.crs) as crs" +
+                        ", collections_details.crs as \"storageCrs\", description, datetime_key, bbox, temporal" +
+                        ", array_agg(distinct collection_type.type) as type" +
                         " from collections_details join collection_supported_crs" +
-                        " on collections_details.id = collection_supported_crs.collection_id" +
-                        " join crs_to_srid on crs_to_srid.id = collection_supported_crs.crs_id" +
-                        " group by collections_details.id")
+                        " on collections_details.id = collection_supported_crs.collection_id join crs_to_srid" +
+                        " on crs_to_srid.id = collection_supported_crs.crs_id join collection_type" +
+                        " on collections_details.id = collection_type.collection_id group by collections_details.id")
                     .collecting(collector)
                     .execute()
                     .map(SqlResult::value))

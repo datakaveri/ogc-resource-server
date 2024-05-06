@@ -480,14 +480,18 @@ public class ApiServerVerticle extends AbstractVerticle {
     dbService.getCollections()
         .onSuccess(success -> {
               JsonArray collections = new JsonArray();
+              /*
+               TODO: When updating OGC Tiles API to include multiple itemTypes, use Java stream().filter() to filter
+                out different itemTypes to their respective builder functions
+                **/
               success.forEach(collection -> {
                     try {
                       JsonObject json = new JsonObject();
                       List<JsonObject> tempArray = new ArrayList<>();
                       tempArray.add(collection);
-                      if (collection.getString("type").equalsIgnoreCase("feature"))
+                      if (collection.getJsonArray("type").contains("FEATURE"))
                         json = buildCollectionFeatureResult(tempArray);
-                      else if (collection.getString("type").equalsIgnoreCase("tile"))
+                      else if (collection.getJsonArray("type").contains("MAP"))
                         json = buildCollectionTileResult(tempArray);
                       collections.add(json);
                     } catch (Exception e) {
@@ -760,8 +764,19 @@ public class ApiServerVerticle extends AbstractVerticle {
                 .put("rel", "item")
                 .put("title", "Link template for " + collection.getString("id") + " features")
                 .put("templated","true")))
-                .put("itemType", collection.getString("type"))
-                .put("crs", collection.getJsonArray("crs"));
+        .put("itemType", "FEATURE")
+        .put("crs", collection.getJsonArray("crs"));
+    if (collection.getJsonArray("type").contains("VECTOR"))
+      collection.getJsonArray("links")
+          .add(new JsonObject()
+              .put("href",
+                  hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id") + "/map/tiles" +
+                      "/WebMercatorQuad/{tileMatrixId}/{tileRow}/{tileCol}?f=mvt")
+              .put("rel", "item")
+              .put("title", "Mapbox vector tiles; the link is a URI template where {tileMatrix}/{tileRow}/{tileCol}" +
+                  " is the tile in the tiling scheme 'WebMercatorQuad'")
+              .put("templated","true")
+              .put("type", "application/vnd.mapbox-vector-tile"));
 
     collection.remove("title");
     collection.remove("description");
@@ -774,7 +789,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   private JsonObject buildCollectionTileResult(List<JsonObject> collections) {
     JsonObject collection = collections.get(0);
-    collection.put("itemType", collection.getString("type"));
+    collection.put("itemType", "MAP");
     collection.put("links", new JsonArray()
         .add(new JsonObject().put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id"))
                     .put("rel", "self")
