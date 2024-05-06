@@ -537,13 +537,26 @@ public class ApiServerVerticle extends AbstractVerticle {
     String tileRow = routingContext.pathParam("tileRow");
     String tileCol = routingContext.pathParam("tileCol");
     HttpServerResponse response = routingContext.response();
+    String tilesUrlString = collectionId + "/" + tileMatrixSetId + "/" + tileMatrixId + "/" + tileRow + "/" + tileCol;
     // need to set chunked for streaming response because Content-Length cannot be determined
     // beforehand.
     response.setChunked(true);
-    response.putHeader("Content-Type", "image/png");
     DataFromS3 dataFromS3 =
         new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
-    String tilesUrlString = collectionId + "/" + tileMatrixSetId + "/" + tileMatrixId + "/" + tileRow + "/" + tileCol +".png";
+
+    // determine tile format if it is a map (PNG image) or vector (MVT tile) using request header.
+    if (routingContext.request().getHeader("Content-Type").equalsIgnoreCase("image/png")) {
+      tilesUrlString = tilesUrlString.concat(".png");
+      response.putHeader("Content-Type", "image/png");
+    }
+    else if (routingContext.request().getHeader("Content-Type")
+        .equalsIgnoreCase("application/vnd.mapbox-vector-tile")) {
+      tilesUrlString = tilesUrlString.concat(".pbf");
+      response.putHeader("Content-Type", "application/vnd.mapbox-vector-tile");
+    }
+
+    //TODO: determine tile format using 'f' query parameter
+
     String urlString =
         dataFromS3.getFullyQualifiedUrlString(tilesUrlString);
     dataFromS3.setUrlFromString(urlString);
