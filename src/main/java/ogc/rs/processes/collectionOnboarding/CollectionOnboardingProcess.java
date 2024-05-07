@@ -365,11 +365,14 @@ public class CollectionOnboardingProcess implements ProcessService {
       .replace("databaseUser", databaseUser);
     pgPool.withTransaction(sqlClient -> sqlClient.preparedQuery(COLLECTIONS_DETAILS_INSERT_QUERY)
       .execute(
-        Tuple.of(collectionsDetailsTableName, title, description, DEFAULT_SERVER_CRS, FEATURE))
+        Tuple.of(collectionsDetailsTableName, title, description, DEFAULT_SERVER_CRS))
+      .compose(
+        collectionResult -> sqlClient.preparedQuery(COLLECTION_TYPE_INSERT_QUERY)
+      .execute(Tuple.of(collectionsDetailsTableName,FEATURE)))
       .compose(
         collectionsDetailsResult -> sqlClient.preparedQuery(COLLECTION_SUPPORTED_CRS_INSERT_QUERY)
           .execute(Tuple.of(collectionsDetailsTableName, srid))).compose(
-        collectionResult -> sqlClient.preparedQuery(ROLES_INSERT_QUERY)
+        collectionTypeResult -> sqlClient.preparedQuery(ROLES_INSERT_QUERY)
           .execute(Tuple.of(userId, role))).compose(
         rgDetailsResult -> sqlClient.preparedQuery(RI_DETAILS_INSERT_QUERY)
           .execute(Tuple.of(resourceId, userId, accessPolicy))).compose(
