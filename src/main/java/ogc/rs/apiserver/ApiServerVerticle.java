@@ -25,10 +25,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import ogc.rs.common.DataFromS3;
@@ -545,12 +542,22 @@ public class ApiServerVerticle extends AbstractVerticle {
         new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
 
     // determine tile format if it is a map (PNG image) or vector (MVT tile) using request header.
-    if (routingContext.request().getHeader("Content-Type").equalsIgnoreCase("image/png")) {
+    String encodingType = getEncodingFromRequest(routingContext.request().getHeader("Accept"));
+    if (encodingType.isEmpty()) {
+      routingContext.put(
+          "response",
+          new OgcException(406, "Not Acceptable", "Content negotiation failed. Unsupported Media-Type.")
+              .getJson()
+              .toString());
+      routingContext.put("statusCode", 406);
+      routingContext.next();
+      return;
+    }
+    if (encodingType.equalsIgnoreCase("image/png") || encodingType.equalsIgnoreCase("*/*")) {
       tilesUrlString = tilesUrlString.concat(".png");
       response.putHeader("Content-Type", "image/png");
     }
-    else if (routingContext.request().getHeader("Content-Type")
-        .equalsIgnoreCase("application/vnd.mapbox-vector-tile")) {
+    else if (encodingType.equalsIgnoreCase("application/vnd.mapbox-vector-tile")) {
       tilesUrlString = tilesUrlString.concat(".pbf");
       response.putHeader("Content-Type", "application/vnd.mapbox-vector-tile");
     }
@@ -579,6 +586,31 @@ public class ApiServerVerticle extends AbstractVerticle {
               }
               routingContext.next();
             });
+  }
+
+  public String getEncodingFromRequest(String acceptRequestHeaders) {
+    Set<String> acceptedHeaders = new HashSet<>(Set.of("*/*", "image/png", "application/vnd.mapbox-vector-tile"));
+    Set<String> acceptRequestHeadersSet = new HashSet<>();
+    String[] tempHeaders = acceptRequestHeaders.split("[,;]");
+    // to handle duplicates, ie encoding type with same weightage
+    Collections.addAll(acceptRequestHeadersSet, tempHeaders);
+    String[] acceptRequestHeadersWithWeight = acceptRequestHeaders.split(",");
+    acceptedHeaders.retainAll(acceptRequestHeadersSet);
+    if (acceptedHeaders.isEmpty()) {
+      return "";
+    }
+    double qLarge = 0.0; String chosenHeader = "image/png";
+    for (String header : acceptRequestHeadersWithWeight) {
+      String[] headerArray = header.split(";");
+      if (headerArray.length == 2) {
+        if (qLarge < Double.parseDouble(headerArray[1].split("=")[1])
+            && acceptedHeaders.contains(headerArray[0])) {
+          qLarge = Double.parseDouble(headerArray[1].split("=")[1]);
+          chosenHeader = headerArray[0];
+        }
+      }
+    }
+    return chosenHeader;
   }
 
   public void getTileSet(RoutingContext routingContext) {
