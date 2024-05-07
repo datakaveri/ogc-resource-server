@@ -450,9 +450,9 @@ public class ApiServerVerticle extends AbstractVerticle {
           .onSuccess(success -> {
             LOGGER.debug("Success! - {}", success.toString());
             JsonObject jsonResult = new JsonObject();
-            if (success.get(0).getString("type").equalsIgnoreCase("feature"))
+            if (success.get(0).getJsonArray("type").contains("FEATURE"))
               jsonResult = buildCollectionFeatureResult(success);
-            else if (success.get(0).getString("type").equalsIgnoreCase("tile"))
+            else if (success.get(0).getJsonArray("type").contains("MAP"))
               jsonResult = buildCollectionTileResult(success);
             routingContext.put("response", jsonResult.toString());
             routingContext.put("statusCode", 200);
