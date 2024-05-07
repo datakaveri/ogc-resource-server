@@ -622,10 +622,12 @@ public class DatabaseServiceImpl implements DatabaseService{
             + " WHERE collection_id != ALL($1::UUID[]) GROUP BY collection_id)"
             + ", geom_info AS (SELECT type AS geometry_type, f_table_name::text AS collection_id"
             + " FROM geometry_columns WHERE f_table_name != ALL($2::text[]))"
-            + " SELECT id, title, description, datetime_key, crs, bbox, temporal, supported_crs, geometry_type"
-            + " FROM collections_details JOIN crs_info ON crs_info.collection_id = collections_details.id"
+            + " SELECT collections_details.id, title, description, datetime_key, crs, bbox, temporal, supported_crs"
+            + ", geometry_type FROM collections_details"
+            + " JOIN crs_info ON crs_info.collection_id = collections_details.id"
             + " JOIN geom_info ON geom_info.collection_id::text = collections_details.id::text"
-            + " WHERE id != ALL($1::UUID[]) AND type = 'FEATURE'";
+            + " JOIN collection_type ON collection_type.collection_id = collections_details.id"
+            + " WHERE collections_details.id != ALL($1::UUID[]) AND collection_type.type = 'FEATURE'";
 
     final String GET_COLLECTION_ATTRIBUTE_INFO =
         "SELECT table_name AS collection_id, json_object_agg(column_name, data_type) AS attributes"
