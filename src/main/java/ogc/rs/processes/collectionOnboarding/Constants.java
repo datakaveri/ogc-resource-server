@@ -11,7 +11,7 @@ public class Constants {
       "INSERT INTO stac_collections_assets (stac_collections_id,title,href,type,size,role) VALUES ($1::UUID, $2, $3, $4, $5,$6) returning id;";
 
   public static final String COLLECTIONS_DETAILS_INSERT_QUERY =
-      "INSERT INTO collections_details (id, title, description, crs, type) VALUES ($1::UUID, $2, $3, $4, $5)";
+      "INSERT INTO collections_details (id, title, description, crs) VALUES ($1::UUID, $2, $3, $4)";
   public static final String COLLECTION_SUPPORTED_CRS_INSERT_QUERY =
       "with data as (select $1::uuid,"
           + " id as crs_id from crs_to_srid where srid = 4326 or srid = $2) insert into collection_supported_crs (collection_id, crs_id) select * from data";
@@ -21,6 +21,7 @@ public class Constants {
       "INSERT INTO rg_details (id,role_id,access) VALUES($1,$2,$3) ON CONFLICT DO NOTHING;";
   public static final String RI_DETAILS_INSERT_QUERY =
       "INSERT INTO ri_details (id,role_id,access) VALUES($1,$2,$3);";
+  public static final String COLLECTION_TYPE_INSERT_QUERY = "INSERT INTO collection_type (collection_id,type) VALUES($1::UUID,$2);";
   public static final String COLLECTIONS_DETAILS_SELECT_QUERY =
       "SELECT * FROM collections_details where id=$1::UUID;";
   public static final String COLLECTIONS_DETAILS_TABLE_EXIST_QUERY =
