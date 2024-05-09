@@ -112,7 +112,18 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                     return validateAccess(resultIntermediate.jwtData, resultIntermediate.isOpen,
                 authenticationInfo);
                 }
-                return Future.succeededFuture(new JsonObject());
+
+                // in case provider requested
+                JsonObject obj = new JsonObject();
+                obj.put("iid",  resultIntermediate.jwtData.getIid().split(":")[1]);
+                obj.put("userId", resultIntermediate.jwtData.getSub());
+                obj.put("role", resultIntermediate.jwtData.getRole());
+                obj.put("expiry", LocalDateTime.ofInstant(
+                        Instant.ofEpochSecond(Long.parseLong(resultIntermediate.jwtData.getExp().toString())),
+                        ZoneId.systemDefault())
+                    .toString());
+
+                return Future.succeededFuture(obj);
             })
             .onSuccess(success -> {
                 success.put("isAuthorised", true);
@@ -355,6 +366,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                         if (resourceResult && openResource) {
                           LOGGER.debug("Resource is Open, Access Granted.");
                           JsonObject results = new JsonObject();
+                          results.put("id", idFromJwt);
                           results.put("iid", idFromJwt);
                           results.put("userId", jwtData.getSub());
                           results.put("role", jwtData.getRole());
@@ -378,6 +390,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                           LOGGER.debug("Collection Id in token Validated ");
                           if (jwtData.getRole().equalsIgnoreCase("provider")) {
                             JsonObject results = new JsonObject();
+                            results.put("id", idFromJwt);
                             results.put("iid", idFromJwt);
                             results.put("userId", jwtData.getSub());
                             results.put("role", jwtData.getRole());
@@ -400,6 +413,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                             if (access.contains("api")) {
 
                               JsonObject results = new JsonObject();
+                              results.put("id", idFromJwt);
                               results.put("iid", idFromJwt);
                               results.put("userId", jwtData.getSub());
                               results.put("role", jwtData.getRole());
@@ -511,6 +525,70 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
       LOGGER.debug(
         "Not a provider token. It is of role {} ",
         jwtData.getRole());
+      promise.fail(ogcException(401,"Not Authorized","User is not authorised. Please contact IUDX AAA "));
+    }
+    return promise.future();
+  }
+  
+  @Override
+  public Future<JsonObject> meteringApiCheck(JsonObject authenticationInfo,
+                                              JsonObject requestJson) {
+    Promise<JsonObject> result = Promise.promise();
+    String token;
+
+    try {
+      token = authenticationInfo.getString("token");
+    } catch (NullPointerException e) {
+      LOGGER.error("NullPointer Exception while getting JSONObj values");
+      result.fail("NullPointer error!");
+      return result.future();
+    }
+    Future<JWTData> jwtDecodeFut = decodeJwt(token);
+    ResultContainer resultIntermediate = new ResultContainer();
+    assert jwtDecodeFut != null;
+
+    jwtDecodeFut.compose(decode -> {
+      resultIntermediate.jwtData = decode;
+      LOGGER.debug("Intermediate JWTData: {}", resultIntermediate.jwtData.toJson());
+      return isValidAudience(resultIntermediate.jwtData);
+    }).compose(audience -> {
+      LOGGER.debug("Valid Audience: {}", audience);
+      // check for revoked client here before returning true
+      return Future.succeededFuture(true);
+    }).compose(revokedClient -> {
+      LOGGER.debug("Valid Audience: {}", revokedClient);
+      // check for valid access
+      return validateMeteringAccess(resultIntermediate.jwtData);
+    }).onSuccess(validMeteringAccess -> {
+      validMeteringAccess.put("isAuthorised", true);
+      result.complete(validMeteringAccess);
+      LOGGER.debug("Authorization done successfully {}", (validMeteringAccess).toString());
+    }).onFailure(failed -> {
+      LOGGER.error("Something went wrong while authentication or authorisation: {}",
+        failed.getMessage());
+      result.fail(failed);
+    });
+
+    return result.future();
+  }
+  
+  private Future<JsonObject> validateMeteringAccess(JWTData jwtData) {
+    Promise<JsonObject> promise = Promise.promise();
+    String idFromJwt = jwtData.getIid().split(":")[1];
+    boolean isRsToken = jwtData.getIid().split(":")[0] == "rs";
+
+    LOGGER.debug("Validating access for metering");
+    // although metering works w/ delegate, not handling it now
+    if (List.of("consumer", "provider", "admin").contains(jwtData.getRole()) && !isRsToken) {
+      JsonObject results = new JsonObject();
+      results.put("iid", idFromJwt);
+      results.put("userId", jwtData.getSub());
+      results.put("role", jwtData.getRole());
+      promise.complete(results);
+    } else {
+      LOGGER.debug(
+        "Not a valid token. Role is {} and token has iid {}",
+        jwtData.getRole(), idFromJwt);
       promise.fail(ogcException(401,"Not Authorized","User is not authorised. Please contact IUDX AAA "));
     }
     return promise.future();

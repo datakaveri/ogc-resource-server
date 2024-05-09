@@ -5,10 +5,10 @@ import static ogc.rs.apiserver.util.Constants.*;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import ogc.rs.apiserver.ApiServerVerticle;
+import ogc.rs.apiserver.handlers.AuthHandler;
 
 /**
  * Class to build router for DX Metering APIs. <br>
@@ -58,22 +58,26 @@ public class DxMeteringRouterBuilder extends EntityRouterBuilder {
   void addImplSpecificRoutes() {
 
     routerBuilder.operation(SUMMARY_AUDIT_API)
+        .handler(AuthHandler.create(vertx))
         .handler(apiServerVerticle::getSummary)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse);
 
 
     routerBuilder.operation(OVERVIEW_AUDIT_API)
+        .handler(AuthHandler.create(vertx))
         .handler(apiServerVerticle::getMonthlyOverview)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse);
 
     routerBuilder.operation(CONSUMER_AUDIT_API)
+        .handler(AuthHandler.create(vertx))
         .handler(apiServerVerticle::getConsumerAuditDetail)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse);
 
     routerBuilder.operation(PROVIDER_AUDIT_API)
+        .handler(AuthHandler.create(vertx))
         .handler(apiServerVerticle::getProviderAuditDetail)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse);

@@ -1323,17 +1323,56 @@ public class ApiServerVerticle extends AbstractVerticle {
             .put("matrixHeight", matrixHeight);
   }
 
-  // TODO: Used this for auditing purposes
-  public Future<Void> updateAuditTable(RoutingContext context) {
+  /**
+   * Add this to a route's handler chain to audit the API call once the API response has been
+   * completely sent. The API is audited <b> only if the response was successful i.e. 2xx status
+   * code</b>.
+   * 
+   * @param context the routing context
+   */
+  public void auditAfterApiEnded(RoutingContext context) {
+    context.addBodyEndHandler(v -> updateAuditTable(context));
+    context.next();
+  }
+  
+  private Future<Void> updateAuditTable(RoutingContext context) {
+    final List<String> APIS_TO_SKIP_CAT_CALL = List.of("processes");
+    final List<Integer> STATUS_CODES_TO_AUDIT = List.of(200, 201);
+    
+    if(!STATUS_CODES_TO_AUDIT.contains(context.response().getStatusCode())) {
+      return Future.succeededFuture();
+    }
+    
     JsonObject authInfo = (JsonObject) context.data().get("authInfo");
-    String id = authInfo.getString(ID);
+    
+    String resourceId = authInfo.getString(ID);
+    
+    // auditing never done for root path ('/') so [1] will always be there 
+    String apiEndpointFirstPart = context.request().path().split("/")[1];
+    
+    // if assets API, then the ID in the path is NOT the resource ID - take resource ID from token iid
+    if("assets".equals(apiEndpointFirstPart)) {
+      resourceId = authInfo.getString("iid");
+    }
+    
     Promise<Void> promise = Promise.promise();
     JsonObject request = new JsonObject();
-    // TODO: Fill json data what ever is required
-    request.put(REQUEST_JSON, "jsonObject");
+    
+    JsonObject reqBody = context.body().asJsonObject();
+    if (reqBody != null) {
+      request.put(REQUEST_JSON, reqBody);
+    }
+    
+    Future<JsonObject> catalogueCall;
+    
+    if(APIS_TO_SKIP_CAT_CALL.contains(apiEndpointFirstPart)) {
+      catalogueCall = Future.succeededFuture(new JsonObject());
+    }
+    else {
+      catalogueCall = catalogueService.getCatItem(resourceId);
+    }
 
-    catalogueService
-        .getCatItem(id)
+    catalogueCall
         .onComplete(
             relHandler -> {
               if (relHandler.succeeded()) {
@@ -1351,7 +1390,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                 if (role.equalsIgnoreCase("delegate") && drl != null) {
                   request.put(DELEGATOR_ID, authInfo.getString(DID));
                 } else {
-                  request.put(DELEGATOR_ID, authInfo.getString(USER_ID));
+                  request.put(DELEGATOR_ID, authInfo.getString("userId"));
                 }
                 String providerId = cacheResult.getString("provider");
                 long time = zst.toInstant().toEpochMilli();
@@ -1362,17 +1401,17 @@ public class ApiServerVerticle extends AbstractVerticle {
                 // Comment here , if we need type (item_type) then we can use this
                 request.put(EPOCH_TIME, time);
                 request.put(ISO_TIME, isoTime);
-                request.put(USER_ID, authInfo.getValue(USER_ID));
+                request.put(USER_ID, authInfo.getValue("userId"));
                 request.put(ID, authInfo.getValue(ID));
-                request.put(API, authInfo.getValue(API_ENDPOINT));
-                request.put(RESPONSE_SIZE, context.data().get(RESPONSE_SIZE));
+                request.put(API, context.request().path());
+                request.put(RESPONSE_SIZE, context.response().bytesWritten());
                 request.put(PROVIDER_ID, providerId);
                 meteringService
                     .insertMeteringValuesInRmq(request)
                     .onComplete(
                         handler -> {
                           if (handler.succeeded()) {
-                            LOGGER.info("message published in RMQ.");
+                            LOGGER.debug("message published in RMQ.");
                             promise.complete();
                           } else {
                             LOGGER.error("failed to publish message in RMQ.");
@@ -1423,6 +1462,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     Promise<JsonObject> promise = Promise.promise();
     HttpServerRequest request = routingContext.request();
     LOGGER.trace("Info: getMonthlyOverview Started." + routingContext.data().get("authInfo"));
+    System.out.println(request.params().toString());
     JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
     authInfo.put(STARTT, request.getParam(STARTT));
     authInfo.put(ENDT, request.getParam(ENDT));
