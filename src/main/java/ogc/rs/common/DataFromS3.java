@@ -57,15 +57,8 @@ public class DataFromS3 {
             response.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
             return response.future();
           }
-            })
-        .onFailure(
-            handler -> {
-              LOGGER.error(
-                  "Internal Server Error, Something went wrong here." + handler.getMessage());
-              handler.printStackTrace();
-              response.fail(
-                  new OgcException(500, "Internal Server Error", "Internal Server Error"));
-            });
+        });
+
     return response.future();
   }
 
