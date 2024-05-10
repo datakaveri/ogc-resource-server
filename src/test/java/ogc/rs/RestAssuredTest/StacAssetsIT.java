@@ -14,20 +14,25 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
+import static ogc.rs.RestAssuredTest.Constant.ASSET_PATH;
+import static ogc.rs.RestAssuredTest.Constant.PORT;
 import static ogc.rs.authenticator.Constants.*;
 import static org.hamcrest.Matchers.equalTo;
 
 @ExtendWith(RestAssuredConfigExtension.class)
 public class StacAssetsIT {
+
+  /**
+   * Sets up a mock S3 environment by uploading a sample file to a local server.
+   * This method is executed once before all test methods in the test class.
+   * The uploaded file is used for simulating interactions with an S3-like service.
+   * Asset_Path is the href link in database to access an asset
+   * Make sure the test server is running at http://localhost:9090 before executing tests.
+   */
   @BeforeAll
   public static void setup() throws IOException {
     File file = new File("src/test/resources/assets/AssetSample.txt");
-    given()
-        .multiPart("file", file)
-        .when()
-        .put("http://localhost:9090/bucket1/fake-asset")
-        .then()
-        .statusCode(200);
+    given().port(PORT).multiPart("file", file).when().put(ASSET_PATH).then().statusCode(200);
   }
 
   // Define constant UUIDs for test
