@@ -92,7 +92,7 @@ public class CollectionOnboardingProcess implements ProcessService {
   public Future<JsonObject> execute(JsonObject requestInput) {
     Promise<JsonObject> objectPromise = Promise.promise();
 
-    requestInput.put("progress", calculateProgress(1, 7));
+    requestInput.put("progress", calculateProgress(1, 8));
 
     String tableID = requestInput.getString("resourceId");
     requestInput.put("collectionsDetailsTableId", tableID);
@@ -605,7 +605,7 @@ public class CollectionOnboardingProcess implements ProcessService {
                         .getJsonObject(0)
                         .getJsonArray("geometryFields")
                         .getJsonObject(0)
-                        .getJsonArray("extent");
+                        .getJsonArray("extent",new JsonArray());
                 extentPromise.complete(extentArray);
               } catch (IOException e1) {
                 LOGGER.error("Failed while getting ogrInfo because {}", e1.getMessage());
