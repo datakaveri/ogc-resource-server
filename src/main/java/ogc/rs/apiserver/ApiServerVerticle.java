@@ -1336,7 +1336,6 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
   
   private Future<Void> updateAuditTable(RoutingContext context) {
-    final List<String> APIS_TO_SKIP_CAT_CALL = List.of("processes");
     final List<Integer> STATUS_CODES_TO_AUDIT = List.of(200, 201);
     
     if(!STATUS_CODES_TO_AUDIT.contains(context.response().getStatusCode())) {
@@ -1359,20 +1358,10 @@ public class ApiServerVerticle extends AbstractVerticle {
     JsonObject request = new JsonObject();
     
     JsonObject reqBody = context.body().asJsonObject();
-    if (reqBody != null) {
-      request.put(REQUEST_JSON, reqBody);
-    }
+    request.put(REQUEST_JSON, reqBody != null ? reqBody : new JsonObject());
     
-    Future<JsonObject> catalogueCall;
-    
-    if(APIS_TO_SKIP_CAT_CALL.contains(apiEndpointFirstPart)) {
-      catalogueCall = Future.succeededFuture(new JsonObject());
-    }
-    else {
-      catalogueCall = catalogueService.getCatItem(resourceId);
-    }
-
-    catalogueCall
+    catalogueService
+        .getCatItem(resourceId)
         .onComplete(
             relHandler -> {
               if (relHandler.succeeded()) {
@@ -1462,7 +1451,6 @@ public class ApiServerVerticle extends AbstractVerticle {
     Promise<JsonObject> promise = Promise.promise();
     HttpServerRequest request = routingContext.request();
     LOGGER.trace("Info: getMonthlyOverview Started." + routingContext.data().get("authInfo"));
-    System.out.println(request.params().toString());
     JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
     authInfo.put(STARTT, request.getParam(STARTT));
     authInfo.put(ENDT, request.getParam(ENDT));
