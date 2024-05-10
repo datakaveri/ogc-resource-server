@@ -49,15 +49,6 @@ public class AuthHandler implements Handler<RoutingContext> {
         id = context.pathParam("assetId");
       }
 
-      /* TODO : Remove once spec validation is being done */
-      if (!isProcessExecution && !id.matches(UUID_REGEX)) {
-        context.put("isAuthorised", false);
-        context.put(
-            "response", new OgcException(404, "Not found", "Collection not found").getJson().toString());
-        context.put("statusCode", 404);
-        context.next();
-        return;
-      }
       // requestJson will be used by the metering service
       if (token == null) {
         LOGGER.error("Null values for either token or id!");
@@ -65,12 +56,24 @@ public class AuthHandler implements Handler<RoutingContext> {
         context.fail(unAuthorizedException());
         return;
       }
-      JsonObject requestJson = new JsonObject();
+      JsonObject requestJson = new JsonObject().put("path", path);
       JsonObject authInfo = new JsonObject().put(HEADER_TOKEN, token).put("id", id);
 
       if (isProcessExecution) {
           LOGGER.debug("Inside the Process Execution");
           Future<JsonObject> resultFromAuth = authenticator.executionApiCheck(authInfo, requestJson);
+        resultFromAuth
+          .onSuccess(
+            result -> {
+              context.data().put("authInfo", result);
+              context.data().put("isAuthorised", result.getBoolean("isAuthorised"));
+              context.next();
+            })
+          .onFailure(
+              context::fail);
+      }
+      else if (path.startsWith("/ngsi-ld/v1/")) {
+          Future<JsonObject> resultFromAuth = authenticator.meteringApiCheck(authInfo, requestJson);
         resultFromAuth
           .onSuccess(
             result -> {
@@ -95,7 +98,7 @@ public class AuthHandler implements Handler<RoutingContext> {
         resultFromAuth
                 .onSuccess(
                         result -> {
-                            context.data().put("authInfo", authInfo);
+                            context.data().put("authInfo", result);
                             context.data().put("isAuthorised", result.getBoolean("isAuthorised"));
                             context.next();
                         })

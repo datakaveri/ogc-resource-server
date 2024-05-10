@@ -85,6 +85,7 @@ public class StacRouterBuilder extends EntityRouterBuilder {
     routerBuilder
     .operation(ASSET_API)
     .handler(AuthHandler.create(vertx))
+    .handler(apiServerVerticle::auditAfterApiEnded)
     .handler(apiServerVerticle::getAssets)
     .handler(apiServerVerticle::putCommonResponseHeaders)
     .handler(apiServerVerticle::buildResponse)

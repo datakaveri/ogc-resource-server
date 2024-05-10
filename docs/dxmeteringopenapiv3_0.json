@@ -39,6 +39,9 @@
           },
           {
             "$ref": "#/components/parameters/summary_endtime"
+          },
+          {
+            "$ref": "#/components/parameters/token"
           }
         ],
         "responses": {
@@ -71,6 +74,9 @@
           },
           {
             "$ref": "#/components/parameters/summary_endtime"
+          },
+          {
+            "$ref": "#/components/parameters/token"
           }
         ],
         "responses": {
@@ -124,6 +130,9 @@
           },
           {
             "$ref": "#/components/parameters/provider_audit_limit"
+          },
+          {
+            "$ref": "#/components/parameters/token"
           }
         ],
         "responses": {
@@ -174,6 +183,9 @@
           },
           {
             "$ref": "#/components/parameters/provider_audit_limit"
+          },
+          {
+            "$ref": "#/components/parameters/token"
           }
         ],
         "responses": {
@@ -319,6 +331,15 @@
           "type": "integer",
           "minimum": 1,
           "default": 2000
+        }
+      },
+      "token": {
+        "name": "token",
+        "in": "header",
+        "description": "A <b> valid Auth token </b> to process the request.",
+        "required": true,
+        "schema": {
+            "type": "string"
         }
       }
     },

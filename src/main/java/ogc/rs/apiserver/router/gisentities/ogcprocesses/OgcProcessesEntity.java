@@ -33,6 +33,7 @@ public class OgcProcessesEntity implements GisEntityInterface{
     builder
         .operation(EXECUTE_API)
         .handler(AuthHandler.create(vertx))
+        .handler(apiServerVerticle::auditAfterApiEnded)
         .handler(apiServerVerticle::executeJob)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)

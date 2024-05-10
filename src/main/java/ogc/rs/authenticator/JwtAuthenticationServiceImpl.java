@@ -112,7 +112,18 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                     return validateAccess(resultIntermediate.jwtData, resultIntermediate.isOpen,
                 authenticationInfo);
                 }
-                return Future.succeededFuture(new JsonObject());
+
+                // in case provider requested
+                JsonObject obj = new JsonObject();
+                obj.put("iid",  resultIntermediate.jwtData.getIid().split(":")[1]);
+                obj.put("userId", resultIntermediate.jwtData.getSub());
+                obj.put("role", resultIntermediate.jwtData.getRole());
+                obj.put("expiry", LocalDateTime.ofInstant(
+                        Instant.ofEpochSecond(Long.parseLong(resultIntermediate.jwtData.getExp().toString())),
+                        ZoneId.systemDefault())
+                    .toString());
+
+                return Future.succeededFuture(obj);
             })
             .onSuccess(success -> {
                 success.put("isAuthorised", true);
@@ -355,6 +366,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                         if (resourceResult && openResource) {
                           LOGGER.debug("Resource is Open, Access Granted.");
                           JsonObject results = new JsonObject();
+                          results.put("id", idFromJwt);
                           results.put("iid", idFromJwt);
                           results.put("userId", jwtData.getSub());
                           results.put("role", jwtData.getRole());
@@ -378,6 +390,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                           LOGGER.debug("Collection Id in token Validated ");
                           if (jwtData.getRole().equalsIgnoreCase("provider")) {
                             JsonObject results = new JsonObject();
+                            results.put("id", idFromJwt);
                             results.put("iid", idFromJwt);
                             results.put("userId", jwtData.getSub());
                             results.put("role", jwtData.getRole());
@@ -400,6 +413,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                             if (access.contains("api")) {
 
                               JsonObject results = new JsonObject();
+                              results.put("id", idFromJwt);
                               results.put("iid", idFromJwt);
                               results.put("userId", jwtData.getSub());
                               results.put("role", jwtData.getRole());
@@ -515,6 +529,119 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
     }
     return promise.future();
   }
+  
+  @Override
+  public Future<JsonObject> meteringApiCheck(JsonObject authenticationInfo,
+                                              JsonObject requestJson) {
+    Promise<JsonObject> result = Promise.promise();
+    String token;
+
+    try {
+      token = authenticationInfo.getString("token");
+    } catch (NullPointerException e) {
+      LOGGER.error("NullPointer Exception while getting JSONObj values");
+      result.fail("NullPointer error!");
+      return result.future();
+    }
+    Future<JWTData> jwtDecodeFut = decodeJwt(token);
+    ResultContainer resultIntermediate = new ResultContainer();
+    assert jwtDecodeFut != null;
+
+    jwtDecodeFut.compose(decode -> {
+      resultIntermediate.jwtData = decode;
+      LOGGER.debug("Intermediate JWTData: {}", resultIntermediate.jwtData.toJson());
+      return isValidAudience(resultIntermediate.jwtData);
+    }).compose(audience -> {
+      LOGGER.debug("Valid Audience: {}", audience);
+      // check for revoked client here before returning true
+      return Future.succeededFuture(true);
+    }).compose(revokedClient -> {
+      LOGGER.debug("Valid Audience: {}", revokedClient);
+      // check for valid access
+      return validateMeteringAccess(resultIntermediate.jwtData, requestJson.getString("path"));
+    }).onSuccess(validMeteringAccess -> {
+      validMeteringAccess.put("isAuthorised", true);
+      result.complete(validMeteringAccess);
+      LOGGER.debug("Authorization done successfully {}", (validMeteringAccess).toString());
+    }).onFailure(failed -> {
+      LOGGER.error("Something went wrong while authentication or authorisation: {}",
+        failed.getMessage());
+      result.fail(failed);
+    });
+
+    return result.future();
+  }
+  
+/**
+ * Validate access to metering APIs. 
+ * 
+ * @param jwtData JWT data
+ * @param apiPath the API path
+ * @return JsonObject future containing token info
+ *
+    +--------------------+--------------+--------------+------------+-------------------+------------+
+    | API name           | Delegate     | Consumer     | Admin      | Provider/Delegate | Consumer   |
+    |                    | Secure Token | Secure Token | Open Token | Open Token        | Open Token |
+    +--------------------+--------------+--------------+------------+-------------------+------------+
+    | Provider Audit API | yes          | no           | yes        | yes               | no         |
+    +--------------------+--------------+--------------+------------+-------------------+------------+
+    | Consumer Audit API | yes          | yes          | yes        | yes               | yes        |
+    +--------------------+--------------+--------------+------------+-------------------+------------+
+    | Overview API       | yes          | yes          | yes        | no                | yes        |
+    +--------------------+--------------+--------------+------------+-------------------+------------+
+    | Summary API        | yes          | yes          | yes        | no                | yes        |
+    +--------------------+--------------+--------------+------------+-------------------+------------+
+ */
+  
+  private Future<JsonObject> validateMeteringAccess(JWTData jwtData, String apiPath) {
+    Promise<JsonObject> promise = Promise.promise();
+    String idFromJwt = jwtData.getIid().split(":")[1];
+    boolean isOpenToken = jwtData.getIid().split(":")[0] == "rs";
+
+    LOGGER.debug("Validating access for metering");
+
+
+    if (!List.of("consumer", "provider", "admin", "delegate").contains(jwtData.getRole())) {
+      promise.fail(ogcException(401, "Not Authorized", "User does not have appropriate role."));
+      return promise.future();
+    }
+
+    JsonObject results = new JsonObject();
+    results.put("iid", idFromJwt);
+    results.put("userId", jwtData.getSub());
+    results.put("role", jwtData.getRole());
+
+    switch (apiPath) {
+      case "/ngsi-ld/v1/consumer/audit":
+        promise.complete(results);
+        break;
+        
+      case "/ngsi-ld/v1/provider/audit":
+        if ("consumer".equals(jwtData.getRole())) {
+          promise.fail(ogcException(401, "Not Authorized",
+              "User with consumer role cannot access API"));
+        } else {
+          promise.complete(results);
+        }
+        break;
+
+      case "/ngsi-ld/v1/overview": // uses similar authZ to summary
+      case "/ngsi-ld/v1/summary":
+        if (isOpenToken && List.of("provider", "delegate").contains(jwtData.getRole())) {
+          promise.fail(ogcException(401, "Not Authorized",
+              "User with provider/delegate role cannot access API with RS token"));
+        } else {
+          promise.complete(results);
+        }
+        break;
+        
+      default:
+        LOGGER.error("No AuthZ defined for metering API {}", apiPath);
+        promise.fail(ogcException(401, "Not Authorized", "User is not authorised."));
+    }
+    return promise.future();
+  }
+  
   private OgcException ogcException(int i, String notFound, String collectionNotFound) {
     return new OgcException(i, notFound, collectionNotFound);
   }
