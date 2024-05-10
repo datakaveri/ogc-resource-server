@@ -56,7 +56,7 @@ public class AuthHandler implements Handler<RoutingContext> {
         context.fail(unAuthorizedException());
         return;
       }
-      JsonObject requestJson = new JsonObject();
+      JsonObject requestJson = new JsonObject().put("path", path);
       JsonObject authInfo = new JsonObject().put(HEADER_TOKEN, token).put("id", id);
 
       if (isProcessExecution) {

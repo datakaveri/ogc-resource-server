@@ -558,7 +558,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
     }).compose(revokedClient -> {
       LOGGER.debug("Valid Audience: {}", revokedClient);
       // check for valid access
-      return validateMeteringAccess(resultIntermediate.jwtData);
+      return validateMeteringAccess(resultIntermediate.jwtData, requestJson.getString("path"));
     }).onSuccess(validMeteringAccess -> {
       validMeteringAccess.put("isAuthorised", true);
       result.complete(validMeteringAccess);
@@ -572,27 +572,76 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
     return result.future();
   }
   
-  private Future<JsonObject> validateMeteringAccess(JWTData jwtData) {
+/**
+ * Validate access to metering APIs. 
+ * 
+ * @param jwtData JWT data
+ * @param apiPath the API path
+ * @return JsonObject future containing token info
+ *
+    +--------------------+--------------+--------------+------------+-------------------+------------+
+    | API name           | Delegate     | Consumer     | Admin      | Provider/Delegate | Consumer   |
+    |                    | Secure Token | Secure Token | Open Token | Open Token        | Open Token |
+    +--------------------+--------------+--------------+------------+-------------------+------------+
+    | Provider Audit API | yes          | no           | yes        | yes               | no         |
+    +--------------------+--------------+--------------+------------+-------------------+------------+
+    | Consumer Audit API | yes          | yes          | yes        | yes               | yes        |
+    +--------------------+--------------+--------------+------------+-------------------+------------+
+    | Overview API       | yes          | yes          | yes        | no                | yes        |
+    +--------------------+--------------+--------------+------------+-------------------+------------+
+    | Summary API        | yes          | yes          | yes        | no                | yes        |
+    +--------------------+--------------+--------------+------------+-------------------+------------+
+ */
+  
+  private Future<JsonObject> validateMeteringAccess(JWTData jwtData, String apiPath) {
     Promise<JsonObject> promise = Promise.promise();
     String idFromJwt = jwtData.getIid().split(":")[1];
-    boolean isRsToken = jwtData.getIid().split(":")[0] == "rs";
+    boolean isOpenToken = jwtData.getIid().split(":")[0] == "rs";
 
     LOGGER.debug("Validating access for metering");
-    // although metering works w/ delegate, not handling it now
-    if (List.of("consumer", "provider", "admin").contains(jwtData.getRole()) && !isRsToken) {
-      JsonObject results = new JsonObject();
-      results.put("iid", idFromJwt);
-      results.put("userId", jwtData.getSub());
-      results.put("role", jwtData.getRole());
-      promise.complete(results);
-    } else {
-      LOGGER.debug(
-        "Not a valid token. Role is {} and token has iid {}",
-        jwtData.getRole(), idFromJwt);
-      promise.fail(ogcException(401,"Not Authorized","User is not authorised. Please contact IUDX AAA "));
+
+
+    if (!List.of("consumer", "provider", "admin", "delegate").contains(jwtData.getRole())) {
+      promise.fail(ogcException(401, "Not Authorized", "User does not have appropriate role."));
+      return promise.future();
+    }
+
+    JsonObject results = new JsonObject();
+    results.put("iid", idFromJwt);
+    results.put("userId", jwtData.getSub());
+    results.put("role", jwtData.getRole());
+
+    switch (apiPath) {
+      case "/ngsi-ld/v1/consumer/audit":
+        promise.complete(results);
+        break;
+        
+      case "/ngsi-ld/v1/provider/audit":
+        if ("consumer".equals(jwtData.getRole())) {
+          promise.fail(ogcException(401, "Not Authorized",
+              "User with consumer role cannot access API"));
+        } else {
+          promise.complete(results);
+        }
+        break;
+
+      case "/ngsi-ld/v1/overview": // uses similar authZ to summary
+      case "/ngsi-ld/v1/summary":
+        if (isOpenToken && List.of("provider", "delegate").contains(jwtData.getRole())) {
+          promise.fail(ogcException(401, "Not Authorized",
+              "User with provider/delegate role cannot access API with RS token"));
+        } else {
+          promise.complete(results);
+        }
+        break;
+        
+      default:
+        LOGGER.error("No AuthZ defined for metering API {}", apiPath);
+        promise.fail(ogcException(401, "Not Authorized", "User is not authorised."));
     }
     return promise.future();
   }
+  
   private OgcException ogcException(int i, String notFound, String collectionNotFound) {
     return new OgcException(i, notFound, collectionNotFound);
   }
