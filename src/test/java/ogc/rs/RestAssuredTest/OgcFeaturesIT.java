@@ -14,7 +14,7 @@ import static ogc.rs.authenticator.Constants.USER_NOT_AUTHORIZED;
 import static org.hamcrest.Matchers.equalTo;
 
 @ExtendWith(RestAssuredConfigExtension.class)
-public class OgcItemsIT {
+public class OgcFeaturesIT {
 
   private static final UUID OPEN_RESOURCE = UUID.fromString("a5a6e26f-d252-446d-b7dd-4d50ea945102");
   private static final UUID SECURE_RESOURCE =
