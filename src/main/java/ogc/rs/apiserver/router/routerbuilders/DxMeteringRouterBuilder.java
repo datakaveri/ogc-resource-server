@@ -61,26 +61,30 @@ public class DxMeteringRouterBuilder extends EntityRouterBuilder {
         .handler(AuthHandler.create(vertx))
         .handler(apiServerVerticle::getSummary)
         .handler(apiServerVerticle::putCommonResponseHeaders)
-        .handler(apiServerVerticle::buildResponse);
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
 
 
     routerBuilder.operation(OVERVIEW_AUDIT_API)
         .handler(AuthHandler.create(vertx))
         .handler(apiServerVerticle::getMonthlyOverview)
         .handler(apiServerVerticle::putCommonResponseHeaders)
-        .handler(apiServerVerticle::buildResponse);
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
 
     routerBuilder.operation(CONSUMER_AUDIT_API)
         .handler(AuthHandler.create(vertx))
         .handler(apiServerVerticle::getConsumerAuditDetail)
         .handler(apiServerVerticle::putCommonResponseHeaders)
-        .handler(apiServerVerticle::buildResponse);
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
 
     routerBuilder.operation(PROVIDER_AUDIT_API)
         .handler(AuthHandler.create(vertx))
         .handler(apiServerVerticle::getProviderAuditDetail)
         .handler(apiServerVerticle::putCommonResponseHeaders)
-        .handler(apiServerVerticle::buildResponse);
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
 
     return;
   }
