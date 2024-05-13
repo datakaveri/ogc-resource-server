@@ -608,7 +608,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
 
     JsonObject results = new JsonObject();
     results.put("iid", idFromJwt);
-    results.put("userId", jwtData.getSub());
+    results.put("userid", jwtData.getSub());
     results.put("role", jwtData.getRole());
 
     switch (apiPath) {

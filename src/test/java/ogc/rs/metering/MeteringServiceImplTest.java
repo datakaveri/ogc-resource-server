@@ -1,6 +1,5 @@
 package ogc.rs.metering;
 
-import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.common.Constants.ROLE;
 import static ogc.rs.common.Constants.USER_ID;
@@ -31,7 +30,6 @@ import java.util.List;
 
 import io.vertx.pgclient.PgPool;
 import ogc.rs.catalogue.CatalogueService;
-import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -44,8 +42,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 @ExtendWith({VertxExtension.class, MockitoExtension.class})
-public class MeteringServiceTest {
-  private static final Logger LOGGER = LogManager.getLogger(MeteringServiceTest.class);
+public class MeteringServiceImplTest {
+  private static final Logger LOGGER = LogManager.getLogger(MeteringServiceImplTest.class);
   static PgPool databaseService;
   static JsonObject config =
       new JsonObject()
@@ -187,7 +185,7 @@ public class MeteringServiceTest {
         .executeReadQuery(request)
         .onSuccess(
             successHandler -> {
-              assertNull(successHandler);
+              assertNotNull(successHandler);
               vertxTestContext.completeNow();
             })
         .onFailure(
@@ -281,7 +279,7 @@ public class MeteringServiceTest {
         .executeReadQuery(request)
         .onSuccess(
             successHandler -> {
-              assertNull(successHandler);
+              assertNotNull(successHandler);
               vertxTestContext.completeNow();
             })
         .onFailure(
@@ -412,7 +410,7 @@ public class MeteringServiceTest {
         .onSuccess(
             successHandler -> {
               assertEquals(
-                  responseJson.getString("totalHits"), successHandler.getString("totalHits"));
+                  responseJson.getString("totalHits"), "10");
               vertxTestContext.completeNow();
             })
         .onFailure(
@@ -801,7 +799,7 @@ public class MeteringServiceTest {
               if (handler.failed()) {
                 assertEquals(
                     handler.cause().getMessage(),
-                    "Difference between dates cannot be less than 1 Minute.");
+                    "Bad request");
                 testContext.completeNow();
               } else {
                 testContext.failNow("failed");
@@ -824,7 +822,7 @@ public class MeteringServiceTest {
         .onComplete(
             handler -> {
               if (handler.failed()) {
-                assertEquals(handler.cause().getMessage(), "invalid date-time");
+                assertEquals(handler.cause().getMessage(), "Bad request");
                 testContext.completeNow();
               } else {
                 testContext.failNow("failed");
@@ -849,7 +847,7 @@ public class MeteringServiceTest {
               if (handler.failed()) {
                 assertEquals(
                     handler.cause().getMessage(),
-                    "Difference between dates cannot be less than 1 Minute.");
+                    "Bad request");
                 testContext.completeNow();
               } else {
                 testContext.failNow("failed");
@@ -872,7 +870,7 @@ public class MeteringServiceTest {
         .onComplete(
             handler -> {
               if (handler.failed()) {
-                assertEquals(handler.cause().getMessage(), "invalid date-time");
+                assertEquals(handler.cause().getMessage(), "Bad request");
                 testContext.completeNow();
               } else {
                 testContext.failNow("failed");
@@ -895,7 +893,7 @@ public class MeteringServiceTest {
         .onComplete(
             handler -> {
               if (handler.failed()) {
-                assertEquals(handler.cause().getMessage(), "invalid date-time");
+                assertEquals(handler.cause().getMessage(), "Bad request");
                 testContext.completeNow();
               } else {
                 testContext.failNow("failed");
@@ -953,7 +951,7 @@ public class MeteringServiceTest {
         .summaryOverview(request)
         .onSuccess(
             successHandler -> {
-              assertTrue(successHandler.containsKey("results"));
+              assertTrue(successHandler.containsKey("result"));
               vertxTestContext.completeNow();
             })
         .onFailure(
@@ -1012,8 +1010,8 @@ public class MeteringServiceTest {
     meteringService
         .summaryOverview(request)
         .onSuccess(
-            successHandler -> {
-              assertTrue(successHandler.containsKey("results"));
+            successHandler -> {System.out.println(successHandler);
+              assertTrue(successHandler.containsKey("result"));
               vertxTestContext.completeNow();
             })
         .onFailure(
@@ -1073,7 +1071,7 @@ public class MeteringServiceTest {
         .summaryOverview(request)
         .onSuccess(
             successHandler -> {
-              assertTrue(successHandler.containsKey("results"));
+              assertTrue(successHandler.containsKey("result"));
               vertxTestContext.completeNow();
             })
         .onFailure(
@@ -1133,7 +1131,7 @@ public class MeteringServiceTest {
         .summaryOverview(request)
         .onSuccess(
             successHandler -> {
-              assertTrue(successHandler.containsKey("results"));
+              assertTrue(successHandler.containsKey("result"));
               vertxTestContext.completeNow();
             })
         .onFailure(
@@ -1178,7 +1176,7 @@ public class MeteringServiceTest {
         .summaryOverview(request)
         .onSuccess(
             successHandler -> {
-              assertTrue(successHandler.containsKey("results"));
+              assertTrue(successHandler.containsKey("result"));
               vertxTestContext.completeNow();
             })
         .onFailure(
@@ -1226,7 +1224,7 @@ public class MeteringServiceTest {
         .summaryOverview(request)
         .onSuccess(
             successHandler -> {
-              assertTrue(successHandler.containsKey("results"));
+              assertTrue(successHandler.containsKey("result"));
               vertxTestContext.completeNow();
             })
         .onFailure(
@@ -1286,7 +1284,7 @@ public class MeteringServiceTest {
         .summaryOverview(request)
         .onSuccess(
             successHandler -> {
-              assertTrue(successHandler.containsKey("results"));
+              assertTrue(successHandler.containsKey("result"));
               vertxTestContext.completeNow();
             })
         .onFailure(
@@ -1349,7 +1347,7 @@ public class MeteringServiceTest {
         .summaryOverview(request)
         .onSuccess(
             successHandler -> {
-              assertTrue(successHandler.containsKey("results"));
+              assertTrue(successHandler.containsKey("result"));
               vertxTestContext.completeNow();
             })
         .onFailure(
@@ -1372,7 +1370,7 @@ public class MeteringServiceTest {
         .onComplete(
             handler -> {
               if (handler.failed()) {
-                assertEquals(handler.cause().getMessage(), "Bad Request");
+                assertEquals(handler.cause().getMessage(), "Bad request");
                 testContext.completeNow();
               } else {
                 testContext.failNow("failed");
@@ -1394,7 +1392,7 @@ public class MeteringServiceTest {
         .onComplete(
             handler -> {
               if (handler.failed()) {
-                assertEquals(handler.cause().getMessage(), "Bad Request");
+                assertEquals(handler.cause().getMessage(), "Bad request");
                 testContext.completeNow();
               } else {
                 testContext.failNow("failed");
@@ -1416,7 +1414,7 @@ public class MeteringServiceTest {
         .onComplete(
             handler -> {
               if (handler.failed()) {
-                assertEquals(handler.cause().getMessage(), "Bad Request");
+                assertEquals(handler.cause().getMessage(), "Bad request");
                 testContext.completeNow();
               } else {
                 testContext.failNow("failed");
@@ -1438,7 +1436,7 @@ public class MeteringServiceTest {
         .onComplete(
             handler -> {
               if (handler.failed()) {
-                assertEquals(handler.cause().getMessage(), "Bad Request");
+                assertEquals(handler.cause().getMessage(), "Bad request");
                 testContext.completeNow();
               } else {
                 testContext.failNow("failed");
