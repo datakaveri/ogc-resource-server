@@ -10,8 +10,8 @@
       "url": "https://iudx.org.in"
     },
     "license": {
-      "url": "https://opensource.org/license/mit/",
-      "name": "MIT"
+      "url": "https://opensource.org/license/apache-2-0",
+      "name": "Apache 2.0"
     }
   },
   "servers": [
