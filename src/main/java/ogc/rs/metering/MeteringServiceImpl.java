@@ -66,19 +66,20 @@ public class MeteringServiceImpl implements MeteringService {
           .onSuccess(promise::complete)
           .onFailure(
               fail -> {
-                promise.fail(fail.getMessage());
+                promise.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
               });
     } else {
       countQuery(request)
           .onSuccess(
               successCount -> {
-                JsonObject jsonObject = new JsonObject();
-                jsonObject.put(TOTALHITS, successCount);
-                promise.complete(jsonObject);
+                  JsonObject jsonObject =  new JsonObject().put(TOTALHITS, successCount);
+                JsonObject jsonObjectResult = new JsonObject();
+                jsonObjectResult.put("result",new JsonArray().add(jsonObject));
+                promise.complete(jsonObjectResult);
               })
           .onFailure(
               fail -> {
-                promise.fail(fail.getMessage());
+                promise.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
               });
     }
     return promise.future();
@@ -92,7 +93,10 @@ public class MeteringServiceImpl implements MeteringService {
               if (successCount == 0) {
                 OgcException ogcException = new OgcException(204, "No Content", "Zero count");
                 LOGGER.info(ogcException.getJson().toString());
-                promise.complete();
+                  JsonObject jsonObject =  new JsonObject().put(TOTALHITS, successCount);
+                  JsonObject jsonObjectResult = new JsonObject();
+                  jsonObjectResult.put("result",new JsonArray().add(jsonObject));
+                promise.complete(jsonObjectResult);
                 return;
               } else {
                 request.put(TOTALHITS, successCount);
@@ -102,7 +106,7 @@ public class MeteringServiceImpl implements MeteringService {
         .onFailure(
             failure -> {
               LOGGER.error(failure.getMessage());
-              promise.fail(failure.getMessage());
+              promise.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
             });
     return promise.future();
   }
@@ -177,10 +181,10 @@ public class MeteringServiceImpl implements MeteringService {
               LOGGER.error(failureHandler.getMessage());
               try {
                 LOGGER.debug("response from rmq ");
-                promise.fail(failureHandler.toString());
+                promise.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
               } catch (Exception e) {
                 LOGGER.error("Failure message not in format [type,title,detail]");
-                promise.fail(e.getMessage());
+                promise.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
               }
             });
     return promise.future();
@@ -193,7 +197,7 @@ public class MeteringServiceImpl implements MeteringService {
     String endTime = request.getString(ENDT);
 
     if (startTime != null && endTime == null || startTime == null && endTime != null) {
-      promise.fail("Bad Request");
+        promise.fail(new OgcException(400, "Bad Request", "Bad request"));
       return promise.future();
     }
 
@@ -201,7 +205,8 @@ public class MeteringServiceImpl implements MeteringService {
       validationCheck = dateValidation.dateParamCheck(request);
 
       if (validationCheck != null && validationCheck.containsKey(ERROR)) {
-        promise.fail(validationCheck.getString(ERROR));
+          LOGGER.debug("Error:" + validationCheck.getString(ERROR));
+          promise.fail(new OgcException(400, "Bad Request", "Bad request"));
         return promise.future();
       }
     }
@@ -219,7 +224,7 @@ public class MeteringServiceImpl implements MeteringService {
               promise.complete(handlers.result());
             } else {
               LOGGER.debug("Could not read from DB : " + handlers.cause());
-              promise.fail(handlers.cause().getMessage());
+              promise.fail(new OgcException(400, "Bad Request", "Bad request"));
             }
           });
     } else if (role.equalsIgnoreCase("provider") || role.equalsIgnoreCase("delegate")) {
@@ -243,11 +248,14 @@ public class MeteringServiceImpl implements MeteringService {
                         promise.complete(monthlyHandlers.result());
                       } else {
                         LOGGER.debug("Could not read " + monthlyHandlers.cause());
-                        promise.fail(monthlyHandlers.cause().getMessage());
+                        promise.fail(new OgcException(400, "Bad Request", "Bad request"));
                       }
                     });
               })
-          .onFailure(fail -> LOGGER.debug(fail.getMessage()));
+          .onFailure(fail -> {
+              LOGGER.debug(fail.getMessage());
+              promise.fail(new OgcException(400, "Bad Request", "Bad request"));
+                  });
     }
     return promise.future();
   }
@@ -259,15 +267,15 @@ public class MeteringServiceImpl implements MeteringService {
     String endTime = request.getString(ENDT);
 
     if (startTime != null && endTime == null || startTime == null && endTime != null) {
-      promise.fail("Bad Request");
+        promise.fail(new OgcException(400, "Bad Request", "Bad request"));
       return promise.future();
     }
 
     if (startTime != null && endTime != null) {
       validationCheck = dateValidation.dateParamCheck(request);
-
       if (validationCheck != null && validationCheck.containsKey(ERROR)) {
-        promise.fail(validationCheck.getString(ERROR));
+        LOGGER.debug("Error:" + validationCheck.getString(ERROR));
+          promise.fail(new OgcException(400, "Bad Request", "Bad request"));
         return promise.future();
       }
     }
@@ -282,9 +290,8 @@ public class MeteringServiceImpl implements MeteringService {
             if (handlers.succeeded()) {
               jsonArray = handlers.result().getJsonArray("result");
               if (jsonArray.size() <= 0) {
-                OgcException ogcException = new OgcException(204, "No Content", "Zero count");
-                LOGGER.debug(ogcException.getJson().toString());
-                promise.fail(ogcException.getJson().toString());
+                LOGGER.debug("NO Content");
+                promise.fail(new OgcException(204, "No Content", "Zero count"));
                 return;
               }
               collectionDetailsCall(jsonArray)
@@ -292,14 +299,12 @@ public class MeteringServiceImpl implements MeteringService {
                       resultHandler -> {
                         JsonObject resultJson =
                             new JsonObject()
-                                .put("type", "urn:dx:dm:Success")
-                                .put("title", "Success")
-                                .put("results", resultHandler);
+                                .put("result", resultHandler);
                         promise.complete(resultJson);
                       });
             } else {
               LOGGER.debug("Could not read from DB : " + handlers.cause());
-              promise.fail(handlers.cause().getMessage());
+              promise.fail(new OgcException(400, "Bad Request", "bad request"));
             }
           });
     } else if (role.equalsIgnoreCase("provider") || role.equalsIgnoreCase("delegate")) {
@@ -319,10 +324,8 @@ public class MeteringServiceImpl implements MeteringService {
                       if (handlers.succeeded()) {
                         jsonArray = handlers.result().getJsonArray("result");
                         if (jsonArray.size() <= 0) {
-                          OgcException ogcException =
-                              new OgcException(204, "No Content", "Zero count");
-                          LOGGER.debug(ogcException.getJson().toString());
-                          promise.fail(ogcException.getJson().toString());
+                          LOGGER.debug("NO Content");
+                          promise.fail(new OgcException(204, "No Content", "Zero count"));
                           return;
                         }
                         collectionDetailsCall(jsonArray)
@@ -330,20 +333,19 @@ public class MeteringServiceImpl implements MeteringService {
                                 resultHandler -> {
                                   JsonObject resultJson =
                                       new JsonObject()
-                                          .put("type", "urn:dx:dm:Success")
-                                          .put("title", "Success")
-                                          .put("results", resultHandler);
+                                          .put("result", resultHandler);
                                   promise.complete(resultJson);
                                 });
                       } else {
                         LOGGER.debug("Could not read from DB : " + handlers.cause());
-                        promise.fail(handlers.cause().getMessage());
+                        promise.fail(new OgcException(400, "Bad Request", "bad request"));
                       }
                     });
               })
           .onFailure(
               fail -> {
                 LOGGER.debug(fail.getMessage());
+                promise.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
               });
     }
 
@@ -387,6 +389,7 @@ public class MeteringServiceImpl implements MeteringService {
         .onFailure(
             failure -> {
               LOGGER.debug(failure.getMessage());
+              promise.fail(new OgcException(400, "Bad Request", "bad request"));
             });
     return promise.future();
   }
@@ -400,7 +403,7 @@ public class MeteringServiceImpl implements MeteringService {
             })
         .onFailure(
             failure -> {
-              promise.fail(failure.getMessage());
+                promise.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
             });
 
     return promise.future();
@@ -423,7 +426,7 @@ public class MeteringServiceImpl implements MeteringService {
         .onFailure(
             failureHandler -> {
               LOGGER.debug(failureHandler);
-              promise.fail(failureHandler.getMessage());
+              promise.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
             });
     return promise.future();
   }

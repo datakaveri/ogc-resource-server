@@ -12,6 +12,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
@@ -1416,7 +1417,6 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   public void getSummary(RoutingContext routingContext) {
-    Promise<JsonObject> promise = Promise.promise();
     HttpServerRequest request = routingContext.request();
     LOGGER.trace("Info: getSummary Started.");
     JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
@@ -1431,24 +1431,28 @@ public class ApiServerVerticle extends AbstractVerticle {
               if (handler.succeeded()) {
                 LOGGER.debug("Successful");
                 responseJson.put("results", handler.result().getJsonArray("result"));
-                promise.complete(responseJson);
                 routingContext.put("response", responseJson.toString());
                 routingContext.put("statusCode", 200);
                 routingContext.next();
               } else {
-                // TODO: Handle 400 / 401
-                LOGGER.error("Fail: Bad request");
-                promise.fail(handler.cause().getMessage());
-                routingContext.put("response", handler.cause().getMessage());
-                routingContext.put("statusCode", 400);
+                LOGGER.error("Fail: Bad request "+ handler.cause().getMessage());
+                if (handler.cause() instanceof OgcException) {
+                  routingContext.put("response", ((OgcException) handler.cause()).getJson().toString());
+                  routingContext.put("statusCode", 400);
+                } else {
+                  routingContext.put(
+                          "response",
+                          new OgcException(500, "Internal Server Error", "Internal Server Error")
+                                  .getJson()
+                                  .toString());
+                  routingContext.put("statusCode", 500);
+                }
                 routingContext.next();
               }
             });
-    promise.future();
   }
 
   public void getMonthlyOverview(RoutingContext routingContext) {
-    Promise<JsonObject> promise = Promise.promise();
     HttpServerRequest request = routingContext.request();
     LOGGER.trace("Info: getMonthlyOverview Started." + routingContext.data().get("authInfo"));
     JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
@@ -1463,20 +1467,25 @@ public class ApiServerVerticle extends AbstractVerticle {
               if (handler.succeeded()) {
                 LOGGER.debug("Successful");
                 responseJson.put("results", handler.result().getJsonArray("result"));
-                promise.complete(responseJson);
                 routingContext.put("response", responseJson.toString());
                 routingContext.put("statusCode", 200);
                 routingContext.next();
               } else {
-                // TODO: Handle 400 / 401
-                LOGGER.error("Fail: Bad request");
-                promise.fail(handler.cause().getMessage());
-                routingContext.put("response", handler.cause().getMessage());
-                routingContext.put("statusCode", 400);
+                LOGGER.error("Fail: Bad request "+ handler.cause().getMessage());
+                if (handler.cause() instanceof OgcException) {
+                  routingContext.put("response", ((OgcException) handler.cause()).getJson().toString());
+                  routingContext.put("statusCode", 400);
+                } else {
+                  routingContext.put(
+                          "response",
+                          new OgcException(500, "Internal Server Error", "Internal Server Error")
+                                  .getJson()
+                                  .toString());
+                  routingContext.put("statusCode", 500);
+                }
                 routingContext.next();
               }
             });
-    promise.future();
   }
 
   public void getProviderAuditDetail(RoutingContext routingContext) {
@@ -1519,11 +1528,18 @@ public class ApiServerVerticle extends AbstractVerticle {
                 routingContext.put("statusCode", 200);
                 routingContext.next();
               } else {
-                // TODO: Handle 400 / 401
                 LOGGER.error("Table reading failed.");
-                promise.fail(handler.cause().getMessage());
-                routingContext.put("response", handler.cause().getMessage());
-                routingContext.put("statusCode", 400);
+                if (handler.cause() instanceof OgcException) {
+                  routingContext.put("response", ((OgcException) handler.cause()).getJson().toString());
+                  routingContext.put("statusCode", 400);
+                } else {
+                  routingContext.put(
+                          "response",
+                          new OgcException(500, "Internal Server Error", "Internal Server Error")
+                                  .getJson()
+                                  .toString());
+                  routingContext.put("statusCode", 500);
+                }
                 routingContext.next();
               }
             });
@@ -1532,7 +1548,6 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   public void getConsumerAuditDetail(RoutingContext routingContext) {
     LOGGER.trace("Info: getConsumerAuditDetail Started.");
-
     JsonObject entries = new JsonObject();
     JsonObject consumer = (JsonObject) routingContext.data().get("authInfo");
     HttpServerRequest request = routingContext.request();
@@ -1553,7 +1568,6 @@ public class ApiServerVerticle extends AbstractVerticle {
     entries.put("limit", limit);
 
     LOGGER.debug(entries);
-    Promise<JsonObject> promise = Promise.promise();
     JsonObject responseJson =
         new JsonObject().put("type", "urn:dx:rs:success").put("title", "success");
     meteringService
@@ -1562,20 +1576,33 @@ public class ApiServerVerticle extends AbstractVerticle {
             handler -> {
               if (handler.succeeded()) {
                 LOGGER.debug("Table Reading Done.");
+                LOGGER.debug(handler);
+                if(handler.result().getJsonArray("result")==null) {
+                  responseJson.put("results", "0");
+                  routingContext.put("response", responseJson.toString());
+                  routingContext.put("statusCode", 204);
+                  routingContext.next();
+                  return;
+                }
                 responseJson.put("results", handler.result().getJsonArray("result"));
-                promise.complete(responseJson);
                 routingContext.put("response", responseJson.toString());
                 routingContext.put("statusCode", 200);
                 routingContext.next();
               } else {
-                // TODO: Handle 400 / 401
                 LOGGER.error("Table reading failed.");
-                promise.fail(handler.cause());
-                routingContext.put("response", handler.cause().getMessage());
-                routingContext.put("statusCode", 400);
+                if (handler.cause() instanceof OgcException) {
+                  routingContext.put("response", ((OgcException) handler.cause()).getJson().toString());
+                  routingContext.put("statusCode", 400);
+                } else {
+                  routingContext.put(
+                          "response",
+                          new OgcException(500, "Internal Server Error", "Internal Server Error")
+                                  .getJson()
+                                  .toString());
+                  routingContext.put("statusCode", 500);
+                }
                 routingContext.next();
               }
             });
-    promise.future();
   }
 }
