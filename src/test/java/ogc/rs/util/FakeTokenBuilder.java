@@ -28,7 +28,6 @@ public class FakeTokenBuilder {
   private String iid;
   private JsonObject cons = new JsonObject();
   private UUID sub = UUID.randomUUID();
-  private static String aud;
   private String role;
   private static JWSSigner signer;
   private UUID did;
@@ -36,6 +35,7 @@ public class FakeTokenBuilder {
 
   private UUID rg;
   private static final String iss = "fakeauth.ugix.io";
+  public static final String aud = "ogc.server.integration-test.com";
 
   // Static initialization block for setting up the signer and audience
 
@@ -57,21 +57,6 @@ public class FakeTokenBuilder {
       LOGGER.debug("jwkSET" + jwkSet.getKeys().get(0).toECKey().toECPrivateKey());
       ECKey ecPrivateKey = (ECKey) jwkSet.getKeys().get(0);
       signer = new ECDSASigner(ecPrivateKey);
-      String configFilePath = "secrets/configs/dev.json";
-      byte[] jsonData = Files.readAllBytes(Paths.get(configFilePath));
-      JsonObject configJson = new JsonObject(new String(jsonData, "UTF-8"));
-      JsonArray modules = configJson.getJsonArray("modules");
-      for (Object module : modules) {
-        if (module instanceof JsonObject) {
-          JsonObject moduleJson = (JsonObject) module;
-          if ("ogc.rs.authenticator.AuthenticationVerticle".equals(moduleJson.getString("id"))
-              && moduleJson.containsKey("audience")) {
-            aud = moduleJson.getString("audience");
-            LOGGER.debug("Audience Value : {} ", aud);
-            break;
-          }
-        }
-      }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

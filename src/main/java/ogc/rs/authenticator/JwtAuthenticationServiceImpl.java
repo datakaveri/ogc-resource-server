@@ -26,6 +26,8 @@ import java.util.UUID;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import static ogc.rs.authenticator.Constants.*;
+
 public class JwtAuthenticationServiceImpl implements AuthenticationService {
     private static final Logger LOGGER = LogManager.getLogger(JwtAuthenticationServiceImpl.class);
     final JWTAuth jwtAuth;
@@ -353,7 +355,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
         .onSuccess(
             success -> {
               if (success.isEmpty()) {
-                promise.fail(new OgcException(404, "Not Found", "Asset not found"));
+                promise.fail(new OgcException(404, NOT_FOUND, ASSET_NOT_FOUND));
                 return;
               }
               LOGGER.debug("Asset Found {} ", success.get(0));
@@ -384,7 +386,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                           if (!success.get(0).getString("stac_collections_id").equals(idFromJwt)) {
                             LOGGER.error(
                                 "Collection associated with asset is not same as in token");
-                            promise.fail(ogcException(401,"Not Authorized","Invalid collection id"));
+                            promise.fail(ogcException(401, NOT_AUTHORIZED, INVALID_COLLECTION_ID));
                             return;
                           }
                           LOGGER.debug("Collection Id in token Validated ");
@@ -409,7 +411,7 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                                     ? jwtData.getCons().getJsonArray("access")
                                     : null;
                             if (access == null)
-                              promise.fail(ogcException(401,"Not Authorized","User is not authorised. Please contact IUDX AAA "));
+                              promise.fail(ogcException(401,NOT_AUTHORIZED, USER_NOT_AUTHORIZED));
                             if (access.contains("api")) {
 
                               JsonObject results = new JsonObject();
@@ -434,8 +436,8 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                             promise.fail(
                                 new OgcException(
                                     401,
-                                    "Not Authorised",
-                                    "Not a producer or consumer token. It is of role "
+                                    NOT_AUTHORIZED,
+                                    NOT_PROVIDER_OR_CONSUMER_TOKEN
                                         + jwtData.getRole()));
                           }
                         } else {
@@ -444,8 +446,8 @@ public class JwtAuthenticationServiceImpl implements AuthenticationService {
                           promise.fail(
                               new OgcException(
                                   401,
-                                  "Not Authorised",
-                                  "Resource is OPEN. Token is SECURE of role "
+                                  NOT_AUTHORIZED,
+                                  RESOURCE_OPEN_TOKEN_SECURE
                                       + jwtData.getRole()));
                         }
                       })
