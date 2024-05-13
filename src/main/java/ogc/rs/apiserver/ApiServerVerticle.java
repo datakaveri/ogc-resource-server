@@ -179,8 +179,8 @@ public class ApiServerVerticle extends AbstractVerticle {
       HttpServerResponse response = routingContext.response();
       response.putHeader(CONTENT_TYPE, APPLICATION_JSON);
       response.setStatusCode(404);
-      response.send(new JsonObject().put("code", "Not Found")
-          .put("description", "API / Collection not found").toBuffer());
+      response.send(new JsonObject().put(CODE_KEY, NOT_FOUND)
+          .put(DESCRIPTION_KEY, INVALID_ENDPOINT_ERROR).toBuffer());
     });
   }
 
