@@ -1,7 +1,8 @@
 package ogc.rs.common;
 
-import java.util.Set;
 import ogc.rs.apiserver.util.ProcessException;
+
+import java.util.Set;
 
 public class Constants {
 
@@ -34,11 +35,15 @@ public class Constants {
     public static final String DID = "did";
     public static final String EVENT = "event";
     public static final String TYPE_KEY = "type";
+    public static final String DESCRIPTION_KEY="description";
     public static final String REQUEST_JSON = "request_json";
     public static String CAT_SEARCH_PATH = "/search";
-    public static final ProcessException processException404 =
-      new ProcessException(404, "Not Found", "Resource Not Found");
-    public static final ProcessException processException500 =
-      new ProcessException(500, "Internal Server Error", "Internal Server Error");
-
+  public static final String NOT_FOUND = "Not Found";
+  public static final String RESOURCE_NOT_FOUND = "Resource Not Found";
+  public static final ProcessException processException404 =
+      new ProcessException(404, NOT_FOUND, RESOURCE_NOT_FOUND);
+  public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
+  public static final ProcessException processException500 =
+      new ProcessException(500, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR);
+  public static final String INVALID_ENDPOINT_ERROR="API / Collection not found";
 }
