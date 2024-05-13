@@ -127,7 +127,7 @@ pipeline {
         script{
           sh 'sudo rm -rf surefire-reports'
           sh 'docker-compose -f docker-compose.test.yml exec -T test mvn test -Dtest=Metering*'
-          sh 'docker-compose -f docker-compose.test.yml exec -T test cp target/jacoco.exec /tmp/test/plugin-jacoco.exec'
+          sh 'docker-compose -f docker-compose.test.yml exec -T test cp target/jacoco.exec /tmp/test/unit-test-jacoco.exec'
           sh 'docker-compose -f docker-compose.test.yml exec -T test cp -r target/surefire-reports /tmp/test/surefire-reports'
           sh 'docker-compose -f docker-compose.test.yml exec -T test chmod -R a+r /tmp/test/surefire-reports'
         }
@@ -141,17 +141,12 @@ pipeline {
       }
     }
 
-    stage('Extract class files and dump JaCoCo data from container and make JaCoCo report'){
+    stage('Extract class files and dump JaCoCo data from container'){
       steps{
         script{
           sh 'docker-compose -f docker-compose.test.yml exec -T test cp -r ./built-classes /tmp/test'
           sh 'docker-compose -f docker-compose.test.yml exec -T test java -jar /tmp/jacoco/lib/jacococli.jar dump --address 127.0.0.1 --port 57070 --destfile /tmp/test/jar-jacoco.exec'
         }
-        jacoco classPattern: 'built-classes', execPattern: '*-jacoco.exec'
-        xunit (
-          thresholds: [ skipped(failureThreshold: '0'), failed(failureThreshold: '0') ],
-          tools: [ JUnit(pattern: 'surefire-reports/*.xml') ]
-        )
       }
       post{
         failure{
@@ -162,7 +157,7 @@ pipeline {
       }
     }
 
-    stage('Move data for Integration Testing and Jmeter Test'){
+    stage('Move data for Postman Integration Testing and Jmeter Test'){
       steps{
         script{
           sh 'scp Jmeter/OGCResourceServer.jmx jenkins@jenkins-master:/var/lib/jenkins/iudx/ogc/Jmeter/'
@@ -201,8 +196,69 @@ pipeline {
         }
       }
     }
+    
+    stage('Start ogc-Resource-Server for RESTAssured Integration Testing'){
+      steps{
+        script{
+          sh 'docker compose -f docker-compose.test.yml up -d integ-test'
+          sh 'sleep 20'
+        }
+      }
+      post{
+        failure{
+          script{
+            sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
+          }
+        }
+      }
+    }
+    
+    stage('RESTAssured Integration Tests'){
+      steps{
+          script{
+            sh 'mvn test-compile failsafe:integration-test -DskipUnitTests=true -DintTestHost=localhost -DintTestPort=8443'
+            }
+        }
+      post{
+        failure{
+          script{
+            sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
+          }
+        }
+      }
+    }
+    
+    stage('Extract class files, dump JaCoCo data from container and make reports'){
+      steps{
+        script{
+          sh 'docker-compose -f docker-compose.test.yml exec -T integ-test cp -r ./built-classes /tmp/test'
+          sh 'docker-compose -f docker-compose.test.yml exec -T integ-test java -jar /tmp/jacoco/lib/jacococli.jar dump --address 127.0.0.1 --port 57070 --destfile /tmp/test/integ-jacoco.exec'
+        }
+        jacoco classPattern: 'built-classes', execPattern: '*-jacoco.exec'
+        xunit (
+          thresholds: [ skipped(failureThreshold: '0'), failed(failureThreshold: '0') ],
+          tools: [ JUnit(pattern: 'surefire-reports/*.xml') ]
+        )
+        xunit (
+          thresholds: [ skipped(failureThreshold: '10'), failed(failureThreshold: '0') ],
+          tools: [ JUnit(pattern: 'target/failsafe-reports/*.xml') ]
+        )
+      }
+      post{
+        cleanup{
+          script{
+            sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
+          } 
+        }          
+        failure{
+          script{
+            sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
+          }
+        }
+      }
+    }
 
-    stage('Start ogc-Resource-Server for Integration Testing'){
+    stage('Start ogc-Resource-Server for Postman Integration Testing'){
       steps{
         script{
           sh 'docker compose -f docker-compose.test.yml up -d perfTest'
@@ -218,7 +274,7 @@ pipeline {
       }
     }
 
-    stage('Integration Tests and OWASP ZAP pen test'){
+    stage('Postman Integration Tests and OWASP ZAP pen test'){
       steps{
         node('built-in') {
           script{
@@ -287,3 +343,4 @@ pipeline {
     }
   }
 }
+
