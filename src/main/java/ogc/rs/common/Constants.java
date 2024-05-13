@@ -36,6 +36,7 @@ public class Constants {
     public static final String EVENT = "event";
     public static final String TYPE_KEY = "type";
     public static final String DESCRIPTION_KEY="description";
+    public static final String CODE_KEY="code";
     public static final String REQUEST_JSON = "request_json";
     public static String CAT_SEARCH_PATH = "/search";
   public static final String NOT_FOUND = "Not Found";
