@@ -23,7 +23,7 @@ public class RestAssuredConfigExtension implements BeforeAllCallback {
     if (testPort != null) {
       RestAssured.port = Integer.parseInt(testPort);
     } else {
-      RestAssured.port = 5000;
+      RestAssured.port = 8443;
     }
 
     String proxyHost = System.getProperty("intTestProxyHost");
