@@ -216,6 +216,7 @@ pipeline {
     stage('RESTAssured Integration Tests'){
       steps{
           script{
+            sh 'rm -rf target/failsafe-reports'
             sh 'mvn test-compile failsafe:integration-test -DskipUnitTests=true -DintTestHost=localhost -DintTestPort=8443'
             }
         }
