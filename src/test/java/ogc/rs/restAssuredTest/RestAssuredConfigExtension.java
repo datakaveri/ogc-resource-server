@@ -1,4 +1,4 @@
-package ogc.rs.RestAssuredTest;
+package ogc.rs.restAssuredTest;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -23,7 +23,7 @@ public class RestAssuredConfigExtension implements BeforeAllCallback {
     if (testPort != null) {
       RestAssured.port = Integer.parseInt(testPort);
     } else {
-      RestAssured.port = 8443;
+      RestAssured.port = 5000;
     }
 
     String proxyHost = System.getProperty("intTestProxyHost");

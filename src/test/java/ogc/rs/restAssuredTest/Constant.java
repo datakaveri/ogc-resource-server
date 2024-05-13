@@ -1,4 +1,4 @@
-package ogc.rs.RestAssuredTest;
+package ogc.rs.restAssuredTest;
 
 public class Constant {
   public static final String BASE_URL = "http://localhost";

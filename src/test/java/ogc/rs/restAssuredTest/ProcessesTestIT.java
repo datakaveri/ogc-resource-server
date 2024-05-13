@@ -1,4 +1,4 @@
-package ogc.rs.processes;
+package ogc.rs.restAssuredTest;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;

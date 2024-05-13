@@ -1,4 +1,4 @@
-package ogc.rs.RestAssuredTest;
+package ogc.rs.restAssuredTest;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
-import static ogc.rs.RestAssuredTest.Constant.ASSET_PATH;
-import static ogc.rs.RestAssuredTest.Constant.PORT;
+import static ogc.rs.restAssuredTest.Constant.ASSET_PATH;
+import static ogc.rs.restAssuredTest.Constant.PORT;
 import static ogc.rs.authenticator.Constants.*;
 import static org.hamcrest.Matchers.equalTo;
 

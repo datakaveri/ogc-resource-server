@@ -1,4 +1,4 @@
-package ogc.rs.RestAssuredTest;
+package ogc.rs.restAssuredTest;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
