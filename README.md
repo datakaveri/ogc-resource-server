@@ -87,8 +87,13 @@ export LOG_LEVEL=INFO
 A client SDK generated using [OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator) is located at [client-sdk](./client-sdk). To generate a version of the SDK derived from the latest version of the OpenAPI spec at https://geoserver.dx.ugix.org.in, download the [OpenAPI Generator JAR file](https://github.com/OpenAPITools/openapi-generator?tab=readme-ov-file#13---download-jar) and run:
 
 ```
-java -jar openapi-generator-cli.jar generate -i https://geoserver.dx.ugix.org.in/api -g python --additional-properties removeOperationIdPrefix=true,removeOperationIdPrefixDelimiter=-,removeOperationIdPrefixCount=6 -o client-sdk --global-property models,modelTests=false,apis,apiTests=false,supportingFiles=README.md:requirements.txt:setup.py:setup.cfg:openapi_client:api_client.py:api_response.py:exceptions.py:__init__.py:configuration.py:py.types:rest.py
+java -jar openapi-generator-cli.jar generate -i <URL> -g python --additional-properties removeOperationIdPrefix=true,removeOperationIdPrefixDelimiter=-,removeOperationIdPrefixCount=6 -o client-sdk --global-property models,modelTests=false,apis,apiTests=false,supportingFiles=README.md:requirements.txt:setup.py:setup.cfg:openapi_client:api_client.py:api_response.py:exceptions.py:__init__.py:configuration.py:py.types:rest.py
 ```
+
+where `<URL>` can be:
+- `https://geoserver.dx.ugix.org.in/api` for OGC APIs
+- `https://geoserver.dx.ugix.org.in/stac/api` for STAC APIs
+- `https://geoserver.dx.ugix.org.in/metering/api` for metering/auditing APIs
 
 ## License
 [View License](./LICENSE)
