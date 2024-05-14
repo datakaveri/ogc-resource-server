@@ -1,4 +1,4 @@
-package ogc.rs.RestAssuredTest;
+package ogc.rs.restAssuredTest;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
