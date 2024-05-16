@@ -64,6 +64,7 @@ public class CollectionOnboardingProcessIT {
   @Test
   @Description("Failure: Unauthorized user.")
   public void testExecuteUnauthorizedFail() {
+    LOGGER.debug("Testing Failure: Unauthorized user.");
     String invalidToken =
         new FakeTokenBuilder()
             .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
@@ -80,7 +81,10 @@ public class CollectionOnboardingProcessIT {
   @Test
   @Description("Success: Process Accepted")
   public void testExecuteProcess() {
-    Response response = sendRequest(processId, getToken(), requestBody());
+    LOGGER.debug("Testing Success: Process Accepted");
+    String token =getToken();
+    Response response = sendRequest(processId, token, requestBody());
+    LOGGER.debug("getToken() "+token);;
     String statusFromResponse = response.body().path("status");
     assertEquals(201, response.statusCode());
     assertEquals(ACCEPTED.toString(), statusFromResponse);
@@ -89,6 +93,7 @@ public class CollectionOnboardingProcessIT {
   @Test
   @Description("Failure: Process does not Exist")
   public void testExecuteFailProcessNotPresent() {
+    LOGGER.debug("Testing Failure: Process does not Exist");
     String invalidProcessId = "cc0eb191-7f66-4663-8afa-cfd644de5830";
     Response response = sendRequest(invalidProcessId, getToken(), requestBody());
     String typeFromResponse = response.body().path(TYPE_KEY);
@@ -99,6 +104,7 @@ public class CollectionOnboardingProcessIT {
   @Test
   @Description("Failure: Invalid input")
   public void testExecuteFailInvalidInput() {
+    LOGGER.debug("Testing Failure: Invalid input");
     JsonObject invalidRequest =
         new JsonObject().put("inputs", requestBody().getJsonObject("inputs").remove("fileName"));
     Response response = sendRequest(processId, getToken(), invalidRequest);
