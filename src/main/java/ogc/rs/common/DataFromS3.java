@@ -53,7 +53,7 @@ public class DataFromS3 {
             response.complete(res);
             return response.future();
           } else {
-            LOGGER.error("Internal Server Error, Something went wrong here. {} {}",res.statusCode());
+            LOGGER.error("Internal Server Error, Something went wrong here. {},{},{},{}",res.statusCode(),httpMethod,url.toString(),res.body().result().toString());
             response.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
             return response.future();
           }
