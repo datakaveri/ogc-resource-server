@@ -45,7 +45,7 @@ public class DataFromS3 {
           headers.forEach(req::putHeader);
           return req.send();
         })
-        .onSuccess(res -> {
+            .onSuccess(res -> {
           if (res.statusCode() == 404) {
             LOGGER.error("FILE not found {}",url.toString());
             response.fail(new OgcException(404, "Not Found", "File not found."));
