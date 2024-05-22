@@ -57,8 +57,15 @@ public class DataFromS3 {
             response.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
             return response.future();
           }
-        });
-
+        }).onFailure( 
+            handler -> { 
+              LOGGER.error("Something went wrong when interacting with S3 - {}. Method {}, URL {} ",
+                  handler.getMessage(), httpMethod, url.toString());
+              
+              response.fail( 
+                  new OgcException(500, "Internal Server Error", "Internal Server Error")); 
+            });
+    
     return response.future();
   }
 
