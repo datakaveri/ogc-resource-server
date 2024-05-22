@@ -66,7 +66,6 @@ public class DataFromS3 {
     
     return response.future();
   }
-
   public void setSignatureHeader (HttpMethod httpMethod) {
     headers.put("x-amz-content-sha256", AWS4SignerBase.EMPTY_BODY_SHA256);
     AWS4SignerForAuthorizationHeader signer =
