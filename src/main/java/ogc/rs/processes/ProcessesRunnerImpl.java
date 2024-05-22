@@ -5,6 +5,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
@@ -30,18 +32,33 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
   private final UtilClass utilClass;
   private final JsonObject config;
   private final Vertx vertx;
-  private final DataFromS3 dataFromS3;
+  private String S3_BUCKET;
+  private String S3_REGION;
+  private String S3_ACCESS_KEY;
+  private String S3_SECRET_KEY;
+  private HttpClientOptions httpClientOptions;
+  private HttpClient httpClient;
   Logger LOGGER = LogManager.getLogger(ProcessesRunnerImpl.class);
 
-  ProcessesRunnerImpl(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx) {
+  ProcessesRunnerImpl(PgPool pgPool, WebClient webClient, JsonObject config, Vertx vertx) {
     this.pgPool = pgPool;
     this.webClient = webClient;
     this.utilClass = new UtilClass(pgPool);
     this.config = config;
-    this.dataFromS3=dataFromS3;
     this.vertx=vertx;
   }
+  private DataFromS3 getS3Object(JsonObject config){
+    S3_BUCKET = config.getString("s3BucketUrl");
+    S3_REGION = config.getString("awsRegion");
+    S3_ACCESS_KEY = config.getString("awsAccessKey");
+    S3_SECRET_KEY = config.getString("awsSecretKey");
 
+    httpClientOptions = new HttpClientOptions().setSsl(true);
+    httpClient = vertx.createHttpClient(httpClientOptions);
+    DataFromS3 dataFromS3 =
+            new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
+    return dataFromS3;
+  }
   @Override
   public ProcessesRunnerService run(JsonObject input, Handler<AsyncResult<JsonObject>> handler) {
     Promise<JsonObject> executeMethodPromise = Promise.promise();
@@ -57,7 +74,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
 
         switch (processName) {
           case "CollectionOnboarding":
-            processService = new CollectionOnboardingProcess(pgPool, webClient, config,dataFromS3,vertx);
+            processService = new CollectionOnboardingProcess(pgPool, webClient, config,getS3Object(config),vertx);
             break;
         }
 
