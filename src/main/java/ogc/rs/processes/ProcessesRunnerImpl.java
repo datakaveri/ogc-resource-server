@@ -54,6 +54,10 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
     S3_SECRET_KEY = config.getString("awsSecretKey");
 
     httpClientOptions = new HttpClientOptions().setSsl(true);
+    if(System.getProperty("s3.mock") != null){
+      LOGGER.fatal("S3 is being mocked!! Are you testing something?");
+      httpClientOptions.setTrustAll(true).setVerifyHost(false);
+    }
     httpClient = vertx.createHttpClient(httpClientOptions);
     DataFromS3 dataFromS3 =
             new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
