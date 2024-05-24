@@ -47,19 +47,12 @@ public class DataFromS3 {
         })
         .onSuccess(res -> {
           if (res.statusCode() == 404) {
+            LOGGER.error("FILE not found {}",url.toString());
             response.fail(new OgcException(404, "Not Found", "File not found."));
           } else if (res.statusCode() == 200) {
             response.complete(res);
           } else {
-<<<<<<< HEAD
-<<<<<<< HEAD
             LOGGER.error("Internal Server Error, Something went wrong here. {},{},{},{}",res.statusCode(),httpMethod,url.toString(),res.body().result().toString());
-=======
-            LOGGER.error("Internal Server Error, Something went wrong here. {}, {}",res.statusCode(),res.body().result().toJson());
->>>>>>> 875624f (log-fix)
-=======
-            LOGGER.error("Internal Server Error, Something went wrong here. {}",res.statusCode());
->>>>>>> 9968c09 (s3-bug-fix)
             response.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
           }
         }).onFailure( 
