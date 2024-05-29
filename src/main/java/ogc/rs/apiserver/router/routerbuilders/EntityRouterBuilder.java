@@ -12,6 +12,10 @@ import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import ogc.rs.apiserver.ApiServerVerticle;
 import ogc.rs.apiserver.handlers.FailureHandler;
 import static ogc.rs.apiserver.util.Constants.*;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Set;
 
 /**
@@ -28,13 +32,13 @@ public abstract class EntityRouterBuilder {
 
   /* this is used since all the API methods are implemented in the ApiServer verticle */
   public ApiServerVerticle apiServerVerticle;
-  
+
   /* this is used to create handlers or anything that is initialized using a vert.x instance */
   public Vertx vertx;
-  
+
   /* create all handlers here and make them public so that they can be accessed */
   public FailureHandler failureHandler = new FailureHandler();
-  
+
   public RouterBuilder routerBuilder;
   private JsonObject config;
 
@@ -50,7 +54,7 @@ public abstract class EntityRouterBuilder {
    * Any common {@link RouterBuilder} configuration to be added to any router to be built.
    */
   final void setCommonRouterBuilderConfiguration() {
-    
+
     RouterBuilderOptions factoryOptions =
         new RouterBuilderOptions().setMountResponseContentTypeHandler(true);
 
@@ -60,8 +64,8 @@ public abstract class EntityRouterBuilder {
   }
 
   /**
-   * Get a {@link Router} with all routes added to it. 
-   * 
+   * Get a {@link Router} with all routes added to it.
+   *
    * @return a fully built {@link Router}
    */
   public final Router getRouter() {
@@ -74,19 +78,39 @@ public abstract class EntityRouterBuilder {
     JsonObject oasJson = routerBuilder.getOpenAPI().getOpenAPI();
 
     /* Set the OpenAPI spec route */
-    router.get(getOasApiPath()).handler(routingContext -> {
-      HttpServerResponse response = routingContext.response();
-      response.putHeader("Content-type", "application/vnd.oai.openapi+json;version=3.0");
-      response.send(oasJson.toBuffer());
-    });
-    
+    router
+        .get(getOasApiPath())
+        .handler(
+            routingContext -> {
+              HttpServerResponse response = routingContext.response();
+              String queryParam = routingContext.request().getParam("f");
+              if ("html".equals(queryParam)) {
+                String apiDocFilePath = "docs/apidoc.html";
+                try {
+                  String apiDocContent =
+                      new String(
+                          Files.readAllBytes(Paths.get(apiDocFilePath)), StandardCharsets.UTF_8);
+                  String specUrl = getOasApiPath();
+                  apiDocContent = apiDocContent.replace("$1", specUrl);
+                  response.putHeader("Content-type", "text/html");
+                  response.end(apiDocContent);
+
+                } catch (Exception e) {
+                  throw new RuntimeException(e);
+                }
+              } else {
+                response.putHeader("Content-type", "application/vnd.oai.openapi+json;version=3.0");
+                response.send(oasJson.toBuffer());
+              }
+            });
+
     return router;
   }
 
   /**
    * Return the API path where the OpenAPI spec JSON is served. The route is created in the
    * {@link #getRouter()} method.
-   * 
+   *
    * @return the endpoint
    */
   abstract String getOasApiPath();
