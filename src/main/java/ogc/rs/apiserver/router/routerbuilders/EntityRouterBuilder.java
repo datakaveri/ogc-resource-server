@@ -1,6 +1,8 @@
 package ogc.rs.apiserver.router.routerbuilders;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
@@ -12,10 +14,6 @@ import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import ogc.rs.apiserver.ApiServerVerticle;
 import ogc.rs.apiserver.handlers.FailureHandler;
 import static ogc.rs.apiserver.util.Constants.*;
-
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Set;
 
 /**
@@ -29,6 +27,8 @@ public abstract class EntityRouterBuilder {
           HEADER_REFERER, HEADER_ACCEPT, HEADER_ALLOW_ORIGIN);
 
   private static final Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS);
+  public static final String API_DOC_FILE_PATH = "docs/apidoc.html";
+
 
   /* this is used since all the API methods are implemented in the ApiServer verticle */
   public ApiServerVerticle apiServerVerticle;
@@ -85,11 +85,10 @@ public abstract class EntityRouterBuilder {
               HttpServerResponse response = routingContext.response();
               String queryParam = routingContext.request().getParam("f");
               if ("html".equals(queryParam)) {
-                String apiDocFilePath = "docs/apidoc.html";
                 try {
-                  String apiDocContent =
-                      new String(
-                          Files.readAllBytes(Paths.get(apiDocFilePath)), StandardCharsets.UTF_8);
+                  FileSystem fileSystem = vertx.fileSystem();
+                  Buffer buffer = fileSystem.readFileBlocking(API_DOC_FILE_PATH);
+                  String apiDocContent = buffer.toString();
                   String specUrl = getOasApiPath();
                   apiDocContent = apiDocContent.replace("$1", specUrl);
                   response.putHeader("Content-type", "text/html");
