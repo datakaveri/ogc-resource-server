@@ -82,7 +82,10 @@
         "POINT" : 10000,
         "MULTIPOLYGON" : 10000,
         "POLYGON" : 10
-      }
+      },
+      "authServerHost": "",
+      "audience": "",
+      "issuer": ""
     },
     {
       "id": "ogc.rs.metering.MeteringVerticle",
