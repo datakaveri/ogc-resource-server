@@ -37,28 +37,56 @@ public class User {
 
     // Audience validation
     if (user.isRsToken && !iid.contains(tokenDetails.getString("aud"))) {
-      throw new OgcException(401, "Invalid Token", "Invalid Token");
+      throw new OgcException(401, "Invalid Token", "Invalid Audience Value");
     }
     return user;
+  }
+
+  public UUID getUserId() {
+    return userId;
+  }
+
+  public RoleEnum getRole() {
+    return role;
+  }
+
+  public JsonObject getConstraints() {
+    return constraints;
+  }
+
+  public RoleEnum getDelegatorRole() {
+    return delegatorRole;
+  }
+
+  public UUID getDelegatorUserId() {
+    return delegatorUserId;
+  }
+
+  public UUID getResourceId() {
+    return resourceId;
+  }
+
+  public boolean isRsToken() {
+    return isRsToken;
   }
 
   @Override
   public String toString() {
     return "{"
-        + "userId="
-        + userId
-        + ", role="
-        + role
-        + ", constraints="
-        + constraints
-        + ", delegatorRole="
-        + delegatorRole
-        + ", delegatorUserId="
-        + delegatorUserId
-        + ", resourceId="
-        + resourceId
-        + ", isRsToken="
-        + isRsToken
-        + '}';
+            + "userId="
+            + userId
+            + ", role="
+            + role
+            + ", constraints="
+            + constraints
+            + ", delegatorRole="
+            + delegatorRole
+            + ", delegatorUserId="
+            + delegatorUserId
+            + ", resourceId="
+            + resourceId
+            + ", isRsToken="
+            + isRsToken
+            + '}';
   }
 }
