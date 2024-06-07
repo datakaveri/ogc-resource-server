@@ -30,7 +30,6 @@ public class Constants {
       "SELECT crs,srid FROM CRS_TO_SRID WHERE SRID = $1;";
   public static final String UPDATE_COLLECTIONS_DETAILS =
           "UPDATE collections_details SET bbox = $1::DOUBLE PRECISION[] WHERE id = $2::UUID;";
-
   public static final String DEFAULT_SERVER_CRS = "http://www.opengis.net/def/crs/OGC/1.3/CRS84";
   public static final String MESSAGE = "message";
   public static final String CHECK_CAT_FOR_RESOURCE_REQUEST =
@@ -48,4 +47,15 @@ public class Constants {
           "Collection present in database. Updating bbox for the collection.";
   public static final String DB_CHECK_RESPONSE =
       "Updated bbox for the collection. Onboarding has been completed successfully.";
+  public static final String ITEM_NOT_PRESENT_ERROR="Item not present in catalogue";
+  public static final String RESOURCE_OWNERSHIP_ERROR = "Resource does not belong to the user.";
+  public static final String CAT_RESPONSE_FAILURE="Failed to get response from Catalogue ";
+  public static final String COLLECTION_PRESENT_ERROR="Collection already present.";
+  public static final String CRS_ERROR="CRS not present as EPSG";
+  public static final String CRS_FETCH_FAILED="Failed to fetch CRS.";
+  public static final String OGR_INFO_FAILED="Failed in ogrInfo.";
+  public static final String TABLE_NOT_EXIST_ERROR="Table does not exist.";
+  public static final String COLLECTION_NOT_PRESENT_ERROR ="Collection not present in collections_details";
+  public static final String OGR_2_OGR_FAILED = "Failed to onboard the collection in OGR2OGR.";
+  public static final String ONBOARDING_FAILED_DB_ERROR="Failed to onboard the collection in db.";
 }

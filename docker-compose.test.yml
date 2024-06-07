@@ -90,6 +90,7 @@ services:
       ogc-net:
         aliases:
           - bucket1.s3.aws-region.amazonaws.com
+          - s3.aws-region.amazonaws.com
     ports:
       - 9090:9090
       - 9293:443
