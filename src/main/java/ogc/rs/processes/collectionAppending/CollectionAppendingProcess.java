@@ -74,7 +74,7 @@ public class CollectionAppendingProcess implements ProcessService {
         Promise<JsonObject> objectPromise = Promise.promise();
 
         requestInput.put("progress", calculateProgress(1, 5));
-        LOGGER.debug("AWS BUCKET URL is: " + awsBucketUrl);
+        LOGGER.debug("AWS BUCKET URL is: {}" , awsBucketUrl);
 
         String tableID = requestInput.getString("resourceId");
         requestInput.put("collectionsDetailsTableId", tableID);
@@ -96,7 +96,7 @@ public class CollectionAppendingProcess implements ProcessService {
                     deleteTempTable(requestInput);
                     objectPromise.complete();
                 }).onFailure(failureHandler -> {
-                    LOGGER.error("COLLECTION APPENDING FAILED: " + failureHandler.getMessage());
+                    LOGGER.error("COLLECTION APPENDING FAILED: {} " , failureHandler.getMessage());
                     deleteTempTable(requestInput)
                             .onComplete(deleteHandler -> handleFailure(requestInput, failureHandler.getMessage(), objectPromise));
                 });
@@ -119,7 +119,7 @@ public class CollectionAppendingProcess implements ProcessService {
                                 promise.fail("Collection not found.");
                             }
                         }).onFailure(failureHandler -> {
-                            LOGGER.error("Failed to check collection in db: " + failureHandler.getMessage());
+                            LOGGER.error("Failed to check collection in db: {} " , failureHandler.getMessage());
                             promise.fail("Failed to check collection existence in db.");
                         }));
 
@@ -175,13 +175,13 @@ public class CollectionAppendingProcess implements ProcessService {
 
         try {
             int exitValue = executor.execute(cmdLine);
-            LOGGER.debug("ogrinfo executed with exit value: " + exitValue);
+            LOGGER.debug("ogrinfo executed with exit value: {} " , exitValue);
             String output = stdout.toString();
             // Removing the initial message if necessary
             String jsonResponse = output.replace("Had to open data source read-only.", "");
             return new JsonObject(Buffer.buffer(jsonResponse));
         } catch (IOException e) {
-            LOGGER.error("ogrinfo execution failed: " + stderr, e);
+            LOGGER.error("ogrinfo execution failed: {}-{} " , stderr, e);
             throw e;
         }
     }
@@ -251,7 +251,7 @@ public class CollectionAppendingProcess implements ProcessService {
 
         vertx.executeBlocking(future -> {
             CommandLine cmdLine = getOgr2ogrCommandLine(requestInput, fileName);
-            LOGGER.debug("Inside Execution and the command line is: " + cmdLine);
+            LOGGER.debug("Inside Execution and the command line is: {} ",cmdLine);
             DefaultExecutor executor = new DefaultExecutor();
             executor.setExitValue(0);
             ExecuteWatchdog watchdog = new ExecuteWatchdog(Duration.ofSeconds(6800).toMillis());
@@ -265,16 +265,13 @@ public class CollectionAppendingProcess implements ProcessService {
                 LOGGER.debug("Successfully Executed");
                 String outLog = stdout.toString();
                 String errLog = stderr.toString();
-                LOGGER.debug("ogr2ogr output: " + outLog);
-                LOGGER.debug("ogr2ogr error output: " + errLog);
+                LOGGER.debug("ogr2ogr output: {}" , outLog);
+                LOGGER.debug("ogr2ogr error output: {}" , errLog);
                 future.complete();
             } catch (IOException e) {
                 String errLog = stderr.toString();
-                LOGGER.error("ogr2ogr execution failed: " + errLog, e);
+                LOGGER.error("ogr2ogr execution failed: {}-{}" , errLog, e);
                 future.fail(e);
-            } catch (Exception exp) {
-                LOGGER.error("Exception Error: " + exp);
-                future.fail(exp); // Ensure the exception is propagated
             }
         }, VERTX_EXECUTE_BLOCKING_IN_ORDER).onSuccess(handler -> {
             LOGGER.debug("Data appended successfully into temp table.");
@@ -330,7 +327,7 @@ public class CollectionAppendingProcess implements ProcessService {
         cmdLine.addArgument(secretKey);
 
         cmdLine.addArgument(String.format("/vsis3/%s%s", awsBucketUrl, fileName));
-        LOGGER.debug("cmdLine: " + cmdLine);
+        LOGGER.debug("cmdLine: {}" , cmdLine);
         for (String arg : cmdLine.getArguments()) {
             LOGGER.debug(arg);
         }
@@ -343,7 +340,7 @@ public class CollectionAppendingProcess implements ProcessService {
         String jobId = requestInput.getString("jobId");
         String collectionId = requestInput.getString("collectionsDetailsTableId");
         String tempTableName = "temp_table_for_" + jobId;
-        LOGGER.debug("temp table name is : " + tempTableName);
+        LOGGER.debug("temp table name is : {} " , tempTableName);
 
         getDbSchema(collectionId)
                 .onSuccess(columns -> {
@@ -367,7 +364,7 @@ public class CollectionAppendingProcess implements ProcessService {
                                         promise.complete();
                                     })
                                     .onFailure(failureHandler -> {
-                                        LOGGER.error("Failed to merge temp table into main table: " + failureHandler.getMessage());
+                                        LOGGER.error("Failed to merge temp table into main table: {} " , failureHandler.getMessage());
                                         promise.fail(new ProcessException(500, "MERGE_FAILED", "Failed to merge temp table into main table."));
                                     })
                     );
@@ -392,7 +389,7 @@ public class CollectionAppendingProcess implements ProcessService {
                             promise.complete();
                         })
                         .onFailure(failureHandler -> {
-                            LOGGER.error("Failed to delete temporary table: " + failureHandler.getMessage());
+                            LOGGER.error("Failed to delete temporary table: {}" , failureHandler.getMessage());
                             promise.fail("Failed to delete temporary table.");
                         })
         );
