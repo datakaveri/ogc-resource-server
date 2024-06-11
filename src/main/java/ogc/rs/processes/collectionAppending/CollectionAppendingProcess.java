@@ -486,8 +486,8 @@ public class CollectionAppendingProcess implements ProcessService {
                             promise.complete();
                         })
                         .onFailure(failureHandler -> {
-                            LOGGER.error("Failed to delete temporary table: {}" , failureHandler.getMessage());
-                            promise.fail("Failed to delete temporary table.");
+                            LOGGER.fatal("Failed to delete temporary table: {}--> {}" ,tempTableName, failureHandler.getMessage());
+                            promise.fail("Failed to delete temporary table: " +tempTableName);
                         })
         );
 
