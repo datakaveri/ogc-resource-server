@@ -454,7 +454,7 @@ public class CollectionAppendingProcess implements ProcessService {
                                         promise.complete();
                                     })
                                     .onFailure(failureHandler -> {
-                                        LOGGER.error("Failed to merge temp table into main table: {} " , failureHandler.getMessage());
+                                        LOGGER.error("Failed to merge temp table into main table for jobId: {}-->{} " ,jobId, failureHandler.getMessage());
                                         promise.fail(new ProcessException(500, "MERGE_FAILED", "Failed to merge temp table into main table."));
                                     })
                     );
