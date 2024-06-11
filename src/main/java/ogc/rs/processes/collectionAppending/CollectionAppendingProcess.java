@@ -413,9 +413,7 @@ public class CollectionAppendingProcess implements ProcessService {
 
         cmdLine.addArgument(String.format("/vsis3/%s%s", awsBucketUrl, fileName));
         LOGGER.debug("cmdLine: {}" , cmdLine);
-        for (String arg : cmdLine.getArguments()) {
-            LOGGER.debug(arg);
-        }
+
         return cmdLine;
     }
 
