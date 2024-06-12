@@ -6,8 +6,6 @@ public class Constants {
             "SELECT column_name FROM information_schema.columns WHERE table_name = $1;";
     public static final String DELETE_TEMP_TABLE_QUERY = "DROP TABLE IF EXISTS \"%s\"";
     public static final String MERGE_TEMP_TABLE_QUERY = "INSERT INTO \"%s\" (%s) SELECT %s FROM \"%s\"";
-    public static final String UPDATE_COLLECTIONS_DETAILS =
-            "UPDATE collections_details SET bbox = $1::DOUBLE PRECISION[] WHERE id = $2::UUID;";
     public static final String STARTING_APPEND_PROCESS_MESSAGE =
             "Starting collection append process.";
     public static final String COLLECTION_EXISTS_MESSAGE =

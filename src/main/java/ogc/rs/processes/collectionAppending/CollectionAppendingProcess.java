@@ -6,10 +6,13 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.ProcessException;
+import ogc.rs.common.DataFromS3;
 import ogc.rs.processes.ProcessService;
+import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.commons.exec.CommandLine;
@@ -22,8 +25,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -43,6 +44,7 @@ public class CollectionAppendingProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(CollectionAppendingProcess.class);
     private final PgPool pgPool;
     private final UtilClass utilClass;
+    private CollectionOnboardingProcess collectionOnboarding;
     private String awsEndPoint;
     private String accessKey;
     private String secretKey;
@@ -63,13 +65,13 @@ public class CollectionAppendingProcess implements ProcessService {
      * @param vertx   the Vertx instance.
      */
 
-    public CollectionAppendingProcess(PgPool pgPool, JsonObject config, Vertx vertx) {
+    public CollectionAppendingProcess(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx) {
 
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
+        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, dataFromS3, vertx);
         this.vertx = vertx;
         initializeConfig(config);
-
     }
 
     /**
@@ -123,7 +125,7 @@ public class CollectionAppendingProcess implements ProcessService {
                 .compose(progressUpdateHandler -> mergeTempTableToCollection(requestInput))
                 .compose(mergeHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress",calculateProgress(5,6)).put("message",MERGE_TEMP_TABLE_MESSAGE)))
-                .compose(progressUpdateHandler->ogr2ogrCmdExtent(requestInput))
+                .compose(progressUpdateHandler->collectionOnboarding.ogr2ogrCmdExtent(requestInput))
                 .compose(checkDbHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,BBOX_UPDATE_MESSAGE))
                 .onSuccess(successHandler -> {
                     LOGGER.debug("COLLECTION APPENDING DONE");
@@ -469,125 +471,6 @@ public class CollectionAppendingProcess implements ProcessService {
 
         return promise.future();
     }
-
-    /**
-     * Retrieves the bounding box (bbox) information from a PostgreSQL table using the 'ogrinfo' tool
-     * and updates the 'collections_details' table with this data.
-     *
-     * This method executes a command line instruction to obtain bbox information from PostgreSQL
-     * and updates the 'collections_details' table's 'bbox' column.
-     *
-     * @param input A JsonObject with the necessary parameters, including:
-     *              - "collectionsDetailsTableId": The name of the PostgreSQL table to query.
-     * @return A Future<Void> completes with the updated input object on success, or fails with an error message on failure.
-     */
-
-    private Future<Void> ogr2ogrCmdExtent(JsonObject input) {
-        LOGGER.debug("Trying to update the Collection table.");
-        Promise<Void> promise = Promise.promise();
-
-        vertx
-                .<JsonArray>executeBlocking(
-                        extentPromise -> {
-                            LOGGER.debug("Trying ogrInfo for bbox update:");
-                            CommandLine cmdLine = getOrgInfoBBox(input);
-                            DefaultExecutor defaultExecutor = DefaultExecutor.builder().get();
-                            defaultExecutor.setExitValue(0);
-                            ExecuteWatchdog watchdog =
-                                    ExecuteWatchdog.builder().setTimeout(Duration.ofSeconds(10000)).get();
-                            defaultExecutor.setWatchdog(watchdog);
-                            ByteArrayOutputStream stdout = new ByteArrayOutputStream();
-                            ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-                            PumpStreamHandler psh = new PumpStreamHandler(stdout, stderr);
-                            defaultExecutor.setStreamHandler(psh);
-
-                            try {
-                                int exitValue = defaultExecutor.execute(cmdLine);
-                                LOGGER.debug("exit value in ogrInfo: " + exitValue);
-                                String output = stdout.toString();
-                                JsonArray extentArray =
-                                        new JsonObject(Buffer.buffer(output))
-                                                .getJsonArray("layers")
-                                                .getJsonObject(0)
-                                                .getJsonArray("geometryFields")
-                                                .getJsonObject(0)
-                                                .getJsonArray("extent",new JsonArray());
-                                extentPromise.complete(extentArray);
-                            } catch (IOException e1) {
-                                LOGGER.error("Failed while getting ogrInfo because {}", e1.getMessage());
-                                extentPromise.fail(
-                                        "Failed while getting ogrInfo because {} " + e1.getMessage());
-                            }
-                        },
-                        VERTX_EXECUTE_BLOCKING_IN_ORDER)
-                .onSuccess(
-                        extent -> {
-                            input.put("extent", extent);
-                            updateCollectionsTableBbox(input,promise);
-                        })
-                .onFailure(
-                        failureHandler -> {
-                            LOGGER.error("Failed in ogrInfo because {}", failureHandler.getMessage());
-                            promise.fail(failureHandler.getMessage());
-                        });
-        return promise.future();
-    }
-
-    /**
-     * Creates a CommandLine instruction for 'ogrinfo' to fetch metadata from a PostgreSQL table in JSON format.
-     *
-     * @param input A JsonObject containing:
-     *              - "collectionsDetailsTableId": The name of the PostgreSQL table to query.
-     * @return A CommandLine object representing the command to execute.
-     */
-
-
-    private CommandLine getOrgInfoBBox(JsonObject input) {
-        String collectionsDetailsTableId = input.getString("collectionsDetailsTableId");
-        CommandLine ogrInfo = new CommandLine("ogrinfo");
-        ogrInfo.addArgument("-al");
-        ogrInfo.addArgument("-so");
-        ogrInfo.addArgument("-json");
-        ogrInfo.addArgument(
-                String.format("PG:host=%s dbname=%s user=%s port=%d password=%s schemas=public", databaseHost,
-                        databaseName, databaseUser, databasePort, databasePassword), false);
-        ogrInfo.addArgument(collectionsDetailsTableId);
-        ogrInfo.addArgument("-nocount");
-        ogrInfo.addArgument("-nomd");
-        ogrInfo.addArgument("-geom=NO");
-        return ogrInfo;
-    }
-
-    /**
-     * Updates the 'bbox' column in the 'collections_details' table.
-     *
-     * This method updates the specified collection with a new bounding box (bbox) in PostgreSQL.
-     * The new bbox is provided as a JsonArray of floating-point numbers along with a collection ID.
-     *
-     * @param input   A JsonObject with:
-     *                - "extent": A JsonArray of Float values for the new bbox.
-     *                - "collectionsDetailsTableId": The ID of the collection to update.
-     * @param promise A Promise<Void> indicating success or failure of the update operation.
-     */
-    
-    public void updateCollectionsTableBbox(JsonObject input,Promise promise) {
-        JsonArray extent = input.getJsonArray("extent");
-        List<Float> bboxArray = new ArrayList<Float>(extent.getList());
-        LOGGER.info("Trying to update the bbox ");
-
-        String collectionsDetailsId = input.getString("collectionsDetailsTableId");
-
-        pgPool.withConnection(
-                sqlConnection -> sqlConnection.preparedQuery(UPDATE_COLLECTIONS_DETAILS)
-                        .execute(Tuple.of(bboxArray.toArray(),collectionsDetailsId))).onSuccess(successResult -> {
-            LOGGER.debug("Bbox updated.");
-            promise.complete();
-        }).onFailure(failureHandler -> {
-            LOGGER.error("Failed to update bbox: {}", failureHandler.getMessage());
-            promise.fail("Failed to update bbox: " + failureHandler.getMessage());
-        });
-    }
-
 
     /**
      * Deletes the temporary table used during the process.

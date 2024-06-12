@@ -61,7 +61,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
             processService = new CollectionOnboardingProcess(pgPool, webClient, config,dataFromS3,vertx);
             break;
           case "CollectionAppending":
-            processService = new CollectionAppendingProcess(pgPool, config, vertx);
+            processService = new CollectionAppendingProcess(pgPool, webClient, config,dataFromS3,vertx);
             break;
         }
 
