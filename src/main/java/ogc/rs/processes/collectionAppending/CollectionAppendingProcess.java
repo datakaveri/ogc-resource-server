@@ -158,12 +158,12 @@ public class CollectionAppendingProcess implements ProcessService {
                             if (successHandler.size() > 0) {
                                 promise.complete();
                             } else {
-                                LOGGER.error("Collection not found.");
-                                promise.fail("Collection not found.");
+                                LOGGER.error("Collection not found: {}",requestInput.getString("collectionsDetailsTableId"));
+                                promise.fail("Collection not found: "+requestInput.getString("collectionsDetailsTableId"));
                             }
                         }).onFailure(failureHandler -> {
-                            LOGGER.error("Failed to check collection in db: {} " , failureHandler.getMessage());
-                            promise.fail("Failed to check collection existence in db.");
+                            LOGGER.error("Failed to check collection in db: {} {} " ,requestInput.getString("collectionsDetailsTableId"), failureHandler.getMessage());
+                            promise.fail("Failed to check collection existence in db. "+requestInput.getString("collectionsDetailsTableId"));
                         }));
 
         return promise.future();
@@ -438,7 +438,6 @@ public class CollectionAppendingProcess implements ProcessService {
         String jobId = requestInput.getString("jobId");
         String collectionId = requestInput.getString("collectionsDetailsTableId");
         String tempTableName = "temp_table_for_" + jobId;
-        LOGGER.debug("temp table name is : {} " , tempTableName);
 
         getDbSchema(collectionId)
                 .onSuccess(columns -> {
@@ -458,7 +457,7 @@ public class CollectionAppendingProcess implements ProcessService {
                             sqlConnection.query(mergeQuery)
                                     .execute()
                                     .onSuccess(successHandler -> {
-                                        LOGGER.debug("Merged temp table into main table successfully.");
+                                        LOGGER.debug("Merged temp table-{} into main table successfully.",tempTableName);
                                         promise.complete();
                                     })
                                     .onFailure(failureHandler -> {
@@ -490,7 +489,7 @@ public class CollectionAppendingProcess implements ProcessService {
                 sqlConnection.query(deleteQuery)
                         .execute()
                         .onSuccess(successHandler -> {
-                            LOGGER.debug("Temporary table deleted successfully.");
+                            LOGGER.debug("Temporary table deleted successfully : {}",tempTableName);
                             promise.complete();
                         })
                         .onFailure(failureHandler -> {
