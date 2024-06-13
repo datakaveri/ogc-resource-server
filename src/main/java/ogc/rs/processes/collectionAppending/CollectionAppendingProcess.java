@@ -107,7 +107,6 @@ public class CollectionAppendingProcess implements ProcessService {
         Promise<JsonObject> objectPromise = Promise.promise();
 
         requestInput.put("progress", calculateProgress(1, 6));
-        LOGGER.debug("AWS BUCKET URL is: {}" , awsBucketUrl);
 
         String tableID = requestInput.getString("resourceId");
         requestInput.put("collectionsDetailsTableId", tableID);
@@ -128,19 +127,22 @@ public class CollectionAppendingProcess implements ProcessService {
                 .compose(progressUpdateHandler->collectionOnboarding.ogr2ogrCmdExtent(requestInput))
                 .compose(checkDbHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,BBOX_UPDATE_MESSAGE))
                 .onSuccess(successHandler -> {
-                    deleteTempTable(requestInput);
-                    LOGGER.debug("COLLECTION APPENDING DONE");
-                    objectPromise.complete();
-                }).onFailure(failureHandler -> {
-                    LOGGER.error("COLLECTION APPENDING FAILED: {} " , failureHandler.getMessage());
                     deleteTempTable(requestInput)
-                            .onComplete(deleteHandler -> handleFailure(requestInput, failureHandler.getMessage(), objectPromise));
-                });
+                            .onComplete(deleteHandler ->
+                                LOGGER.debug("COLLECTION APPENDING DONE")
+                            );
+                    objectPromise.complete();
+                }).onFailure(failureHandler ->
+                    deleteTempTable(requestInput)
+                            .onComplete(deleteHandler ->{
+                                handleFailure(requestInput, failureHandler.getMessage(), objectPromise);
+                                LOGGER.error("COLLECTION APPENDING FAILED: {} " , failureHandler.getMessage());
+                            })
+                );
 
         return objectPromise.future();
 
     }
-
     /**
      * Checks if the collection is present in the database.
      *
@@ -253,7 +255,7 @@ public class CollectionAppendingProcess implements ProcessService {
 
     private CommandLine getOrgInfoCommandLine(JsonObject input) {
 
-        LOGGER.debug("Inside command line");
+        LOGGER.debug("Inside ogrinfo command line to get GeoJsonSchema");
 
         String filename = "/" + input.getString("fileName");
         CommandLine ogrinfo = new CommandLine("ogrinfo");
@@ -355,7 +357,7 @@ public class CollectionAppendingProcess implements ProcessService {
                 future.complete();
             } catch (IOException e) {
                 String errLog = stderr.toString();
-                LOGGER.error("ogr2ogr execution failed: {}-{}" , errLog, e);
+                LOGGER.error("ogr2ogr execution failed: {} {}" , errLog, e);
                 future.fail(e);
             }
         }, VERTX_EXECUTE_BLOCKING_IN_ORDER).onSuccess(handler -> {
@@ -379,6 +381,8 @@ public class CollectionAppendingProcess implements ProcessService {
 
         String jobId = requestInput.getString("jobId");
         String tempTableName = "temp_table_for_" + jobId;
+
+        LOGGER.debug("Inside ogr2ogr command line to append data into {}",tempTableName);
 
         CommandLine cmdLine = new CommandLine("ogr2ogr");
         cmdLine.addArgument("-nln");
@@ -420,7 +424,6 @@ public class CollectionAppendingProcess implements ProcessService {
         cmdLine.addArgument(secretKey);
 
         cmdLine.addArgument(String.format("/vsis3/%s%s", awsBucketUrl, fileName));
-        LOGGER.debug("cmdLine: {}" , cmdLine);
 
         return cmdLine;
     }
@@ -461,7 +464,7 @@ public class CollectionAppendingProcess implements ProcessService {
                                         promise.complete();
                                     })
                                     .onFailure(failureHandler -> {
-                                        LOGGER.error("Failed to merge temp table into main table for jobId: {}-->{} " ,jobId, failureHandler.getMessage());
+                                        LOGGER.error("Failed to merge temp table into main table for jobId - {} : {} " ,jobId, failureHandler.getMessage());
                                         promise.fail(new ProcessException(500, "MERGE_FAILED", "Failed to merge temp table into main table."));
                                     })
                     );
@@ -489,11 +492,11 @@ public class CollectionAppendingProcess implements ProcessService {
                 sqlConnection.query(deleteQuery)
                         .execute()
                         .onSuccess(successHandler -> {
-                            LOGGER.debug("Temporary table deleted successfully : {}",tempTableName);
+                            LOGGER.debug("Temporary table- {} deleted successfully ",tempTableName);
                             promise.complete();
                         })
                         .onFailure(failureHandler -> {
-                            LOGGER.fatal("Failed to delete temporary table: {}--> {}" ,tempTableName, failureHandler.getMessage());
+                            LOGGER.fatal("Failed to delete temporary table- {} : {}" ,tempTableName, failureHandler.getMessage());
                             promise.fail("Failed to delete temporary table: " +tempTableName);
                         })
         );
