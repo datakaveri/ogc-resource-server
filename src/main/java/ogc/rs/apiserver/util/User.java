@@ -1,7 +1,6 @@
-package ogc.rs.apiserver.handlers;
+package ogc.rs.apiserver.util;
 
 import io.vertx.core.json.JsonObject;
-import ogc.rs.apiserver.util.OgcException;
 
 import java.util.UUID;
 
