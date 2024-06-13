@@ -122,14 +122,14 @@ public class CollectionAppendingProcess implements ProcessService {
                 .compose(progressUpdateHandler -> appendDataToTempTable(requestInput))
                 .compose(appendHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress",calculateProgress(4,6)).put("message",APPEND_PROCESS_MESSAGE)))
-                .compose(progressUpdateHandler -> mergeTempTableToCollection(requestInput))
+                .compose(progressUpdateHandler -> mergeTempTableToCollectionTable(requestInput))
                 .compose(mergeHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress",calculateProgress(5,6)).put("message",MERGE_TEMP_TABLE_MESSAGE)))
                 .compose(progressUpdateHandler->collectionOnboarding.ogr2ogrCmdExtent(requestInput))
                 .compose(checkDbHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,BBOX_UPDATE_MESSAGE))
                 .onSuccess(successHandler -> {
-                    LOGGER.debug("COLLECTION APPENDING DONE");
                     deleteTempTable(requestInput);
+                    LOGGER.debug("COLLECTION APPENDING DONE");
                     objectPromise.complete();
                 }).onFailure(failureHandler -> {
                     LOGGER.error("COLLECTION APPENDING FAILED: {} " , failureHandler.getMessage());
@@ -432,7 +432,7 @@ public class CollectionAppendingProcess implements ProcessService {
      * @return a Future that completes when the merge is done.
      */
 
-    private Future<Void> mergeTempTableToCollection(JsonObject requestInput) {
+    private Future<Void> mergeTempTableToCollectionTable(JsonObject requestInput) {
 
         Promise<Void> promise = Promise.promise();
         String jobId = requestInput.getString("jobId");
