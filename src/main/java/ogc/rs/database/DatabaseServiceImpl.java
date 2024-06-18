@@ -685,8 +685,18 @@ public class DatabaseServiceImpl implements DatabaseService{
     return result.future();
   }
 
-    @Override
-    public Future<Boolean> getAccess(String id) {
+  /**
+   * This method queries the database to determine if a resource identified by the given
+   * ID is accessible as "open" or "secure". The access status is retrieved from the
+   * "ri_details" table where the ID matches the provided UUID.
+   * If the ID is not found in the database, the method fails with a
+   * {@link OgcException} indicating a 404 Not Found error.
+   *
+   * @param id which is a UUID
+   * @return a boolean result. If "secure" return false, if "open" returns true
+   */
+  @Override
+  public Future<Boolean> getAccess(String id) {
         Promise<Boolean> promise = Promise.promise();
         String sqlString = "select access from ri_details where id = $1::uuid";
         Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());

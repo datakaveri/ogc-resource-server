@@ -6,7 +6,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import ogc.rs.apiserver.util.OgcException;
-import ogc.rs.apiserver.util.User;
+import ogc.rs.apiserver.util.AuthInfo;
 import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,19 +18,24 @@ import static ogc.rs.apiserver.util.Constants.HEADER_TOKEN;
 import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
 import static ogc.rs.common.Constants.UUID_REGEX;
 
-public class DxOgcFeaturesAuthHandler implements Handler<RoutingContext> {
+public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
 
   Vertx vertx;
 
   private final DatabaseService databaseService;
 
-  private static final Logger LOGGER = LogManager.getLogger(DxOgcFeaturesAuthHandler.class);
+  private static final Logger LOGGER = LogManager.getLogger(OgcFeaturesAuthZHandler.class);
 
-  public DxOgcFeaturesAuthHandler(Vertx vertx) {
+  public OgcFeaturesAuthZHandler(Vertx vertx) {
     this.vertx = vertx;
     this.databaseService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
   }
 
+  /**
+   * Handles the routing context to authorize access to OGC Features APIs.
+   *
+   * @param routingContext the routing context of the request
+   */
   @Override
   public void handle(RoutingContext routingContext) {
     LOGGER.debug("OGC Features Authorization");
@@ -46,9 +51,9 @@ public class DxOgcFeaturesAuthHandler implements Handler<RoutingContext> {
       routingContext.next();
       return;
     }
-    User user = routingContext.get(USER_KEY);
+    AuthInfo user = routingContext.get(USER_KEY);
     UUID iid = user.getResourceId();
-    if (!user.isRsToken() && !id.equals(iid)) {
+    if (!user.isRsToken() && !id.equals(iid.toString())) {
       LOGGER.error("Resource Ids don't match! id- {}, jwtId- {}", id, iid);
       routingContext.put("isAuthorised", false);
       routingContext.fail(
@@ -63,7 +68,7 @@ public class DxOgcFeaturesAuthHandler implements Handler<RoutingContext> {
               if (isOpen && user.isRsToken()) {
                 authorizeUser(routingContext, authInfo, user);
               } else {
-                if (user.getRole() == User.RoleEnum.consumer) {
+                if (user.getRole() == AuthInfo.RoleEnum.consumer) {
                   handleConsumerAccess(routingContext, authInfo, user);
                 } else {
                   authorizeUser(routingContext, authInfo, user);
@@ -77,7 +82,7 @@ public class DxOgcFeaturesAuthHandler implements Handler<RoutingContext> {
             });
   }
 
-  private void authorizeUser(RoutingContext routingContext, JsonObject authInfo, User user) {
+  private void authorizeUser(RoutingContext routingContext, JsonObject authInfo, AuthInfo user) {
     authInfo
         .put("iid", user.getResourceId())
         .put("userId", user.getUserId())
@@ -88,7 +93,8 @@ public class DxOgcFeaturesAuthHandler implements Handler<RoutingContext> {
     routingContext.next();
   }
 
-  private void handleConsumerAccess(RoutingContext routingContext, JsonObject authInfo, User user) {
+  private void handleConsumerAccess(
+      RoutingContext routingContext, JsonObject authInfo, AuthInfo user) {
     JsonArray access =
         user.getConstraints() != null ? user.getConstraints().getJsonArray("access") : null;
     if (access == null || !access.contains("api")) {

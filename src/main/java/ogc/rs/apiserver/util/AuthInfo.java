@@ -4,7 +4,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.UUID;
 
-public class User {
+public class AuthInfo {
 
   private UUID userId;
   private RoleEnum role;
@@ -21,8 +21,8 @@ public class User {
     delegate
   }
 
-  public static User createUser(JsonObject tokenDetails) throws OgcException {
-    User user = new User();
+  public static AuthInfo createUser(JsonObject tokenDetails) throws OgcException {
+    AuthInfo user = new AuthInfo();
     user.userId = UUID.fromString(tokenDetails.getString("sub"));
     user.role = RoleEnum.valueOf(tokenDetails.getString("role"));
     user.constraints = tokenDetails.getJsonObject("cons");
@@ -72,20 +72,20 @@ public class User {
   @Override
   public String toString() {
     return "{"
-            + "userId="
-            + userId
-            + ", role="
-            + role
-            + ", constraints="
-            + constraints
-            + ", delegatorRole="
-            + delegatorRole
-            + ", delegatorUserId="
-            + delegatorUserId
-            + ", resourceId="
-            + resourceId
-            + ", isRsToken="
-            + isRsToken
-            + '}';
+        + "userId="
+        + userId
+        + ", role="
+        + role
+        + ", constraints="
+        + constraints
+        + ", delegatorRole="
+        + delegatorRole
+        + ", delegatorUserId="
+        + delegatorUserId
+        + ", resourceId="
+        + resourceId
+        + ", isRsToken="
+        + isRsToken
+        + '}';
   }
 }

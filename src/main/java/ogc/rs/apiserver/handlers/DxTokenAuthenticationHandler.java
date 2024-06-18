@@ -11,7 +11,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
 import ogc.rs.apiserver.util.OgcException;
-import ogc.rs.apiserver.util.User;
+import ogc.rs.apiserver.util.AuthInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -115,7 +115,7 @@ public class DxTokenAuthenticationHandler implements Handler<RoutingContext> {
           if (res.succeeded()) {
             LOGGER.debug("Authentication Successful");
             JsonObject tokenDetails = res.result().principal();
-            User user = User.createUser(tokenDetails);
+            AuthInfo user = AuthInfo.createUser(tokenDetails);
             routingContext.put(USER_KEY, user);
             LOGGER.debug("the user key: " + routingContext.get(USER_KEY).toString());
             routingContext.next();

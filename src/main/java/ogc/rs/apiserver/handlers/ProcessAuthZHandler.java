@@ -4,7 +4,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import ogc.rs.apiserver.util.OgcException;
-import ogc.rs.apiserver.util.User;
+import ogc.rs.apiserver.util.AuthInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,13 +12,18 @@ import java.util.UUID;
 
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 
-public class DXProcessAuthHandler implements Handler<RoutingContext> {
-  private static final Logger LOGGER = LogManager.getLogger(DXProcessAuthHandler.class);
+public class ProcessAuthZHandler implements Handler<RoutingContext> {
+  private static final Logger LOGGER = LogManager.getLogger(ProcessAuthZHandler.class);
 
+  /**
+   * Handles the routing context to authorize access to process APIs.
+   *
+   * @param routingContext the routing context of the request
+   */
   @Override
   public void handle(RoutingContext routingContext) {
     LOGGER.debug("Process Authorization");
-    User user = routingContext.get(USER_KEY);
+    AuthInfo user = routingContext.get(USER_KEY);
     UUID iid = user.getResourceId();
     LOGGER.debug("Validating access for execution ");
     if (!user.isRsToken()) {
@@ -27,7 +32,7 @@ public class DXProcessAuthHandler implements Handler<RoutingContext> {
           new OgcException(
               401, "Not Authorized", "User is not authorised. Please contact IUDX AAA "));
       return;
-    } else if ((user.getRole() == User.RoleEnum.provider)) {
+    } else if ((user.getRole() == AuthInfo.RoleEnum.provider)) {
       JsonObject results = new JsonObject();
       results.put("iid", iid);
       results.put("userId", user.getUserId());
