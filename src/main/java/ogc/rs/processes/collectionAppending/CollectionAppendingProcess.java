@@ -44,7 +44,7 @@ public class CollectionAppendingProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(CollectionAppendingProcess.class);
     private final PgPool pgPool;
     private final UtilClass utilClass;
-    private CollectionOnboardingProcess collectionOnboarding;
+    private final CollectionOnboardingProcess collectionOnboarding;
     private String awsEndPoint;
     private String accessKey;
     private String secretKey;
@@ -54,7 +54,7 @@ public class CollectionAppendingProcess implements ProcessService {
     private String databasePassword;
     private String databaseUser;
     private int databasePort;
-    private Vertx vertx;
+    private final Vertx vertx;
     private final boolean VERTX_EXECUTE_BLOCKING_IN_ORDER = false;
 
     /**
@@ -160,12 +160,12 @@ public class CollectionAppendingProcess implements ProcessService {
                             if (successHandler.size() > 0) {
                                 promise.complete();
                             } else {
-                                LOGGER.error("Collection not found: {}",requestInput.getString("collectionsDetailsTableId"));
-                                promise.fail("Collection not found: "+requestInput.getString("collectionsDetailsTableId"));
+                                LOGGER.error(COLLECTION_NOT_FOUND_MESSAGE + requestInput.getString("collectionsDetailsTableId"));
+                                promise.fail(COLLECTION_NOT_FOUND_MESSAGE + requestInput.getString("collectionsDetailsTableId"));
                             }
                         }).onFailure(failureHandler -> {
-                            LOGGER.error("Failed to check collection in db: {} {} " ,requestInput.getString("collectionsDetailsTableId"), failureHandler.getMessage());
-                            promise.fail("Failed to check collection existence in db. "+requestInput.getString("collectionsDetailsTableId"));
+                            LOGGER.error(COLLECTION_EXISTENCE_FAIL_CHECK + requestInput.getString("collectionsDetailsTableId") + failureHandler.getMessage());
+                            promise.fail(COLLECTION_EXISTENCE_FAIL_CHECK + requestInput.getString("collectionsDetailsTableId"));
                         }));
 
         return promise.future();
@@ -185,8 +185,8 @@ public class CollectionAppendingProcess implements ProcessService {
 
         vertx.executeBlocking(future -> {
                     try {
-                        JsonObject geoJsonSchema = getGeoJsonSchemaWithOgrinfo(requestInput);
-                        Set<String> geoJsonAttributes = extractAttributesFromGeoJsonSchema(geoJsonSchema);
+                        JsonObject geoJsonSchema = getDataSetSchemaWithOgrinfo(requestInput);
+                        Set<String> geoJsonAttributes = extractAttributesFromDataSetSchema(geoJsonSchema);
 
                         // Add 'geom' and 'id' attributes to the geoJsonAttributes set
                         geoJsonAttributes.add("geom");
@@ -195,17 +195,17 @@ public class CollectionAppendingProcess implements ProcessService {
                         getDbSchema(requestInput.getString("collectionsDetailsTableId"))
                                 .onSuccess(dbSchema -> {
                                     if (geoJsonAttributes.equals(dbSchema)) {
-                                        LOGGER.debug("Schema validation successful.");
+                                        LOGGER.debug(SCHEMA_VALIDATION_SUCCESS_MESSAGE);
                                         future.complete();
                                     } else {
-                                        String errorMsg = "Schema validation failed. GeoJSON schema: " + geoJsonAttributes + ", DB schema: " + dbSchema;
+                                        String errorMsg = SCHEMA_VALIDATION_FAILURE_MESSAGE +"GeoJSON schema: " + geoJsonAttributes + ", DB schema: " + dbSchema;
                                         LOGGER.error(errorMsg);
                                         future.fail(errorMsg);
                                     }
                                 })
                                 .onFailure(future::fail);
                     } catch (Exception e) {
-                        LOGGER.error("Schema validation failed: ", e);
+                        LOGGER.error(SCHEMA_VALIDATION_FAILURE_MESSAGE + e);
                         future.fail(e);
                     }
                 }, VERTX_EXECUTE_BLOCKING_IN_ORDER).onSuccess(handler -> promise.complete())
@@ -222,12 +222,12 @@ public class CollectionAppendingProcess implements ProcessService {
      * @throws IOException if the ogrinfo command fails.
      */
 
-    private JsonObject getGeoJsonSchemaWithOgrinfo(JsonObject input) throws IOException {
+    private JsonObject getDataSetSchemaWithOgrinfo(JsonObject input) throws IOException {
 
         CommandLine cmdLine = getOrgInfoCommandLine(input);
-        DefaultExecutor executor = new DefaultExecutor();
+        DefaultExecutor executor = DefaultExecutor.builder().get();
         executor.setExitValue(0);
-        ExecuteWatchdog watchdog = new ExecuteWatchdog(Duration.ofSeconds(10000).toMillis());
+        ExecuteWatchdog watchdog = ExecuteWatchdog.builder().setTimeout(Duration.ofHours(1)).get();
         executor.setWatchdog(watchdog);
         ByteArrayOutputStream stdout = new ByteArrayOutputStream();
         ByteArrayOutputStream stderr = new ByteArrayOutputStream();
@@ -241,7 +241,7 @@ public class CollectionAppendingProcess implements ProcessService {
             String jsonResponse = output.replace("Had to open data source read-only.", "");
             return new JsonObject(Buffer.buffer(jsonResponse));
         } catch (IOException e) {
-            LOGGER.error("ogrinfo execution failed: {}-{} " , stderr, e);
+            LOGGER.error(OGR_INFO_FAILED_MESSAGE + stderr + e);
             throw e;
         }
     }
@@ -285,7 +285,7 @@ public class CollectionAppendingProcess implements ProcessService {
      * @return a set of attribute names.
      */
 
-    private Set<String> extractAttributesFromGeoJsonSchema(JsonObject geoJsonSchema) {
+    private Set<String> extractAttributesFromDataSetSchema(JsonObject geoJsonSchema) {
 
         JsonArray layers = geoJsonSchema.getJsonArray("layers", new JsonArray());
         if (layers.isEmpty()) {
@@ -339,9 +339,9 @@ public class CollectionAppendingProcess implements ProcessService {
         vertx.executeBlocking(future -> {
             CommandLine cmdLine = getOgr2ogrCommandLine(requestInput, fileName);
             LOGGER.debug("Inside Execution and the command line is: {} ",cmdLine);
-            DefaultExecutor executor = new DefaultExecutor();
+            DefaultExecutor executor = DefaultExecutor.builder().get();
             executor.setExitValue(0);
-            ExecuteWatchdog watchdog = new ExecuteWatchdog(Duration.ofSeconds(6800).toMillis());
+            ExecuteWatchdog watchdog = ExecuteWatchdog.builder().setTimeout(Duration.ofHours(1)).get();
             executor.setWatchdog(watchdog);
             ByteArrayOutputStream stdout = new ByteArrayOutputStream();
             ByteArrayOutputStream stderr = new ByteArrayOutputStream();
@@ -357,11 +357,11 @@ public class CollectionAppendingProcess implements ProcessService {
                 future.complete();
             } catch (IOException e) {
                 String errLog = stderr.toString();
-                LOGGER.error("ogr2ogr execution failed: {} {}" , errLog, e);
+                LOGGER.error(OGR2_OGR_FAILED_MESSAGE + errLog + e);
                 future.fail(e);
             }
         }, VERTX_EXECUTE_BLOCKING_IN_ORDER).onSuccess(handler -> {
-            LOGGER.debug("Data appended successfully into temp table.");
+            LOGGER.debug(APPEND_PROCESS_MESSAGE);
             promise.complete();
         }).onFailure(promise::fail);
 
@@ -460,12 +460,12 @@ public class CollectionAppendingProcess implements ProcessService {
                             sqlConnection.query(mergeQuery)
                                     .execute()
                                     .onSuccess(successHandler -> {
-                                        LOGGER.debug("Merged temp table-{} into main table successfully.",tempTableName);
+                                        LOGGER.debug(MERGE_TEMP_TABLE_MESSAGE + " " + "for jobId - {}:",jobId);
                                         promise.complete();
                                     })
                                     .onFailure(failureHandler -> {
-                                        LOGGER.error("Failed to merge temp table into main table for jobId - {} : {} " ,jobId, failureHandler.getMessage());
-                                        promise.fail(new ProcessException(500, "MERGE_FAILED", "Failed to merge temp table into main table."));
+                                        LOGGER.error(MERGE_TEMP_TABLE_FAILURE_MESSAGE + "for jobId - {}: {}" ,jobId, failureHandler.getMessage());
+                                        promise.fail(new ProcessException(500, "MERGE_FAILED", MERGE_TEMP_TABLE_FAILURE_MESSAGE));
                                     })
                     );
                 })
@@ -492,12 +492,12 @@ public class CollectionAppendingProcess implements ProcessService {
                 sqlConnection.query(deleteQuery)
                         .execute()
                         .onSuccess(successHandler -> {
-                            LOGGER.debug("Temporary table- {} deleted successfully ",tempTableName);
+                            LOGGER.debug(DELETE_TEMP_TABLE_SUCCESS_MESSAGE + ": "+ tempTableName);
                             promise.complete();
                         })
                         .onFailure(failureHandler -> {
-                            LOGGER.fatal("Failed to delete temporary table- {} : {}" ,tempTableName, failureHandler.getMessage());
-                            promise.fail("Failed to delete temporary table: " +tempTableName);
+                            LOGGER.fatal(DELETE_TEMP_TABLE_FAILURE_MESSAGE + ": " + tempTableName + failureHandler.getMessage());
+                            promise.fail(DELETE_TEMP_TABLE_FAILURE_MESSAGE + ": " +tempTableName);
                         })
         );
 
@@ -515,12 +515,12 @@ public class CollectionAppendingProcess implements ProcessService {
     private void handleFailure(JsonObject requestInput, String errorMessage, Promise<JsonObject> promise) {
         utilClass.updateJobTableStatus(requestInput, Status.FAILED, errorMessage)
                 .onSuccess(successHandler -> {
-                    LOGGER.error("Process failed: " + errorMessage);
+                    LOGGER.error("Process failed: {}" ,errorMessage);
                     promise.fail(errorMessage);
                         })
                 .onFailure(failureHandler -> {
-                    LOGGER.error("Failed to update job table status to FAILED: " + failureHandler.getMessage());
-                    promise.fail("Failed to update job status after failure: " + failureHandler.getMessage());
+                    LOGGER.error(HANDLE_FAILURE_MESSAGE + ": " +failureHandler.getMessage());
+                    promise.fail(HANDLE_FAILURE_MESSAGE + ": " +failureHandler.getMessage());
                 });
     }
 
