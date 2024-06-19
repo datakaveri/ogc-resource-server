@@ -602,6 +602,9 @@ public class ApiServerVerticle extends AbstractVerticle {
     if (acceptedHeaders.isEmpty()) {
       return "";
     }
+    if (acceptedHeaders.size() == 1) {
+      return acceptedHeaders.toArray()[0].toString();
+    }
     double qLarge = 0.0; String chosenHeader = "image/png";
     for (String header : acceptRequestHeadersWithWeight) {
       String[] headerArray = header.split(";");
