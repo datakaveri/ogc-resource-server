@@ -12,8 +12,6 @@ import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +19,6 @@ import java.util.UUID;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import ogc.rs.apiserver.util.OgcException;
-import ogc.rs.apiserver.util.ProcessException;
 import ogc.rs.database.util.FeatureQueryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -687,4 +684,46 @@ public class DatabaseServiceImpl implements DatabaseService{
 
     return result.future();
   }
+
+  /**
+   * This method queries the database to determine if a resource identified by the given
+   * ID is accessible as "open" or "secure". The access status is retrieved from the
+   * "ri_details" table where the ID matches the provided UUID.
+   * If the ID is not found in the database, the method fails with a
+   * {@link OgcException} indicating a 404 Not Found error.
+   *
+   * @param id which is a UUID
+   * @return a boolean result. If "secure" return false, if "open" returns true
+   */
+  @Override
+  public Future<Boolean> getAccess(String id) {
+        Promise<Boolean> promise = Promise.promise();
+        String sqlString = "select access from ri_details where id = $1::uuid";
+        Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+
+        client.withConnection(conn ->
+                        conn.preparedQuery(sqlString)
+                                .collecting(collector)
+                                .execute(Tuple.of(UUID.fromString(id)))
+                                .map(SqlResult::value))
+                .onSuccess(success -> {
+                    if (success.isEmpty()){
+                        promise.fail(new OgcException(404,"Not found", "Collection not found"));
+                    }
+                    else {
+                        String access = success.get(0).getString("access");
+                        if (access.equalsIgnoreCase("secure")) {
+                            promise.complete(false);
+                        }
+                        else if (access.equalsIgnoreCase("open")){
+                            promise.complete(true);
+                        }
+                    }
+                })
+                .onFailure(fail -> {
+                    LOGGER.error("Something went wrong at isOpenResource: {}", fail.getMessage() );
+                    promise.fail(new OgcException(500, "Internal Server Error","Internal Server Error"));
+                });
+        return promise.future();
+    }
 }
