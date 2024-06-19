@@ -1,13 +1,18 @@
 package ogc.rs.processes.collectionAppending;
 
 public class Constants {
-    public static final String COLLECTIONS_DETAILS_SELECT_QUERY = "SELECT * FROM collections_details WHERE id = $1";
+    public static final String COLLECTIONS_DETAILS_SELECT_QUERY =
+            "SELECT * FROM collections_details WHERE id = $1";
     public static final String DB_SCHEMA_CHECK_QUERY =
             "SELECT column_name FROM information_schema.columns WHERE table_name = $1;";
-    public static final String DELETE_TEMP_TABLE_QUERY = "DROP TABLE IF EXISTS \"%s\"";
-    public static final String MERGE_TEMP_TABLE_QUERY = "INSERT INTO \"%s\" (%s) SELECT %s FROM \"%s\"";
+    public static final String MERGE_TEMP_TABLE_QUERY =
+            "INSERT INTO \"%s\" (%s) SELECT %s FROM \"%s\"";
+    public static final String DELETE_TEMP_TABLE_QUERY =
+            "DROP TABLE IF EXISTS \"%s\"";
     public static final String STARTING_APPEND_PROCESS_MESSAGE =
             "Starting collection append process.";
+    public static final String RESOURCE_OWNERSHIP_CHECK_MESSAGE=
+            "Resource belongs to the user.";
     public static final String COLLECTION_EXISTS_MESSAGE =
             "Collection exists in collection_details table.";
     public static final String COLLECTION_NOT_FOUND_MESSAGE = "Collection is not found";
