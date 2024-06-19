@@ -106,7 +106,7 @@ public class CollectionAppendingProcess implements ProcessService {
 
         Promise<JsonObject> objectPromise = Promise.promise();
 
-        requestInput.put("progress", calculateProgress(1, 6));
+        requestInput.put("progress", calculateProgress(1, 7));
 
         String tableID = requestInput.getString("resourceId");
         requestInput.put("collectionsDetailsTableId", tableID);
@@ -114,29 +114,29 @@ public class CollectionAppendingProcess implements ProcessService {
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, STARTING_APPEND_PROCESS_MESSAGE)
                 .compose(progressUpdateHandler -> checkIfCollectionPresent(requestInput))
                 .compose(collectionCheckHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(2, 6)).put("message", COLLECTION_EXISTS_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(2, 7)).put("message", COLLECTION_EXISTS_MESSAGE)))
                 .compose(progressUpdateHandler -> checkSchema(requestInput))
                 .compose(schemaCheckHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(3, 6)).put("message", SCHEMA_VALIDATION_SUCCESS_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(3, 7)).put("message", SCHEMA_VALIDATION_SUCCESS_MESSAGE)))
                 .compose(progressUpdateHandler -> appendDataToTempTable(requestInput))
                 .compose(appendHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress",calculateProgress(4,6)).put("message",APPEND_PROCESS_MESSAGE)))
+                        requestInput.put("progress",calculateProgress(4,7)).put("message",APPEND_PROCESS_MESSAGE)))
                 .compose(progressUpdateHandler -> mergeTempTableToCollectionTable(requestInput))
                 .compose(mergeHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress",calculateProgress(5,6)).put("message",MERGE_TEMP_TABLE_MESSAGE)))
+                        requestInput.put("progress",calculateProgress(5,7)).put("message",MERGE_TEMP_TABLE_MESSAGE)))
                 .compose(progressUpdateHandler->collectionOnboarding.ogr2ogrCmdExtent(requestInput))
-                .compose(checkDbHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,BBOX_UPDATE_MESSAGE))
+                .compose(checkDbHandler -> utilClass.updateJobTableProgress(
+                        requestInput.put("progress",calculateProgress(6,7)).put("message",BBOX_UPDATE_MESSAGE)))
+                .compose(progressUpdateHandler->deleteTempTable(requestInput))
+                .compose(deleteHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,DELETE_TEMP_TABLE_SUCCESS_MESSAGE+APPEND_SUCCESS_MESSAGE))
                 .onSuccess(successHandler -> {
-                    deleteTempTable(requestInput)
-                            .onComplete(deleteHandler ->
-                                LOGGER.debug("COLLECTION APPENDING DONE")
-                            );
+                    LOGGER.debug(APPEND_SUCCESS_MESSAGE);
                     objectPromise.complete();
                 }).onFailure(failureHandler ->
                     deleteTempTable(requestInput)
                             .onComplete(deleteHandler ->{
                                 handleFailure(requestInput, failureHandler.getMessage(), objectPromise);
-                                LOGGER.error("COLLECTION APPENDING FAILED: {} " , failureHandler.getMessage());
+                                LOGGER.error(APPEND_FAILURE_MESSAGE + " :"+ failureHandler.getMessage());
                             })
                 );
 
@@ -255,7 +255,7 @@ public class CollectionAppendingProcess implements ProcessService {
 
     private CommandLine getOrgInfoCommandLine(JsonObject input) {
 
-        LOGGER.debug("Inside ogrinfo command line to get GeoJsonSchema");
+        LOGGER.debug("Inside ogrinfo command line to get Dataset Schema");
 
         String filename = "/" + input.getString("fileName");
         CommandLine ogrinfo = new CommandLine("ogrinfo");
@@ -513,6 +513,7 @@ public class CollectionAppendingProcess implements ProcessService {
      */
 
     private void handleFailure(JsonObject requestInput, String errorMessage, Promise<JsonObject> promise) {
+
         utilClass.updateJobTableStatus(requestInput, Status.FAILED, errorMessage)
                 .onSuccess(successHandler -> {
                     LOGGER.error("Process failed: {}" ,errorMessage);
@@ -522,6 +523,7 @@ public class CollectionAppendingProcess implements ProcessService {
                     LOGGER.error(HANDLE_FAILURE_MESSAGE + ": " +failureHandler.getMessage());
                     promise.fail(HANDLE_FAILURE_MESSAGE + ": " +failureHandler.getMessage());
                 });
+
     }
 
     /**
