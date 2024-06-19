@@ -97,6 +97,7 @@ public class StacAssetsAuthZHandler implements Handler<RoutingContext> {
             user.getConstraints() != null ? user.getConstraints().getJsonArray("access") : null;
 
         if (access == null || !access.contains("api")) {
+          LOGGER.debug("Invalid consumer token. Constrains not present.");
           routingContext.fail(new OgcException(401, NOT_AUTHORIZED, USER_NOT_AUTHORIZED));
         } else {
           routingContext.put("isAuthorised", true);

@@ -29,6 +29,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import ogc.rs.apiserver.util.AuthInfo;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.ProcessException;
@@ -40,6 +41,7 @@ import ogc.rs.processes.ProcessesRunnerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.metering.util.MeteringConstant.*;
@@ -1492,6 +1494,10 @@ public class ApiServerVerticle extends AbstractVerticle {
     LOGGER.trace("Info: getProviderAuditDetail Started.");
     JsonObject entries = new JsonObject();
     JsonObject provider = (JsonObject) routingContext.data().get("authInfo");
+    AuthInfo authInfo = routingContext.get(USER_KEY);
+    if (authInfo.isRsToken()) {
+      provider.put("iid", config().getString("audience"));
+    }
     HttpServerRequest request = routingContext.request();
     RequestParameters paramsFromOasValidation =
         routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);

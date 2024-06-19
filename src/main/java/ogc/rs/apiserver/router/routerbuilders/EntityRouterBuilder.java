@@ -12,7 +12,8 @@ import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import ogc.rs.apiserver.ApiServerVerticle;
-import ogc.rs.apiserver.handlers.FailureHandler;
+import ogc.rs.apiserver.handlers.*;
+
 import static ogc.rs.apiserver.util.Constants.*;
 import java.util.Set;
 
@@ -41,6 +42,11 @@ public abstract class EntityRouterBuilder {
 
   public RouterBuilder routerBuilder;
   private JsonObject config;
+  public DxTokenAuthenticationHandler tokenAuthenticationHandler;
+  public StacAssetsAuthZHandler stacAssetsAuthZHandler;
+  public MeteringAuthZHandler meteringAuthZHandler = new MeteringAuthZHandler();
+  public OgcFeaturesAuthZHandler ogcFeaturesAuthZHandler;
+  public ProcessAuthZHandler processAuthZHandler = new ProcessAuthZHandler();
 
   EntityRouterBuilder(ApiServerVerticle apiServerVerticle, Vertx vertx, RouterBuilder routerBuilder,
       JsonObject config) {
@@ -48,6 +54,9 @@ public abstract class EntityRouterBuilder {
     this.vertx = vertx;
     this.routerBuilder = routerBuilder;
     this.config = config;
+    tokenAuthenticationHandler = new DxTokenAuthenticationHandler(vertx, config);
+    stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx);
+    ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(vertx);
   }
 
   /**

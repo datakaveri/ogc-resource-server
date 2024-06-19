@@ -61,24 +61,28 @@ public class OgcFeaturesEntity implements GisEntityInterface {
             .failureHandler(failureHandler);
 
       } else if (opId.matches(CollectionMetadata.OGC_GET_COLLECTION_ITEMS_OP_ID_REGEX)) {
-        builder.operation(opId).handler(AuthHandler.create(vertx))
-            .handler(apiServerVerticle::auditAfterApiEnded)
-            .handler(apiServerVerticle::validateQueryParams)
-            .handler(apiServerVerticle::getFeatures)
-            .handler(apiServerVerticle::putCommonResponseHeaders)
-            .handler(apiServerVerticle::buildResponse)
-            .failureHandler(failureHandler);
+        builder.operation(opId)
+                .handler(ogcRouterBuilder.tokenAuthenticationHandler)
+                .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
+                .handler(apiServerVerticle::auditAfterApiEnded)
+                .handler(apiServerVerticle::validateQueryParams)
+                .handler(apiServerVerticle::getFeatures)
+                .handler(apiServerVerticle::putCommonResponseHeaders)
+                .handler(apiServerVerticle::buildResponse)
+                .failureHandler(failureHandler);
 
       } else if (opId.matches(CollectionMetadata.OGC_GET_SPECIFIC_FEATURE_OP_ID_REGEX)) {
-        builder.operation(opId).handler(AuthHandler.create(vertx))
-            .handler(apiServerVerticle::auditAfterApiEnded)
-            .handler(apiServerVerticle::validateQueryParams)
-            .handler(apiServerVerticle::getFeature)
-            .handler(apiServerVerticle::putCommonResponseHeaders)
-            .handler(apiServerVerticle::buildResponse)
-            .failureHandler(failureHandler);
-      }
-    });
+            builder.operation(opId)
+                    .handler(ogcRouterBuilder.tokenAuthenticationHandler)
+                    .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
+                    .handler(apiServerVerticle::auditAfterApiEnded)
+                    .handler(apiServerVerticle::validateQueryParams)
+                    .handler(apiServerVerticle::getFeature)
+                    .handler(apiServerVerticle::putCommonResponseHeaders)
+                    .handler(apiServerVerticle::buildResponse)
+                    .failureHandler(failureHandler);
+          }
+        });
   }
 
   @Override
