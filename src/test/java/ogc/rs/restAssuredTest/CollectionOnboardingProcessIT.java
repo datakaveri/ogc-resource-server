@@ -37,8 +37,8 @@ public class CollectionOnboardingProcessIT {
      * Asset_Path is the href link in database to access an asset
      * Make sure the test server is running at http://localhost:9090 before executing tests.
      */
-    @BeforeEach
-    public void setup() throws IOException {
+    @BeforeAll
+    public static void setup() throws IOException {
         // put the file in /fileName path for Ogr
         File validFile = new File("src/test/resources/processFiles/hydro_1000_features.gpkg");
         given().port(PORT).body(validFile).when().put(BUCKET_PATH + "hydro_1000_features.gpkg")
@@ -261,7 +261,7 @@ public class CollectionOnboardingProcessIT {
 
     @Test
     @Order(12)
-    @Description("Failure: Item already present in cat")
+    @Description("Failure: Collection already present")
     public void testExecuteFailItemAlreadyPresent() throws InterruptedException {
         LOGGER.debug("Failure: Item already present in cat");
 
