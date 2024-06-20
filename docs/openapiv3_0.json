@@ -2888,16 +2888,7 @@
         "type": "number"
       },
       {
-        "type": "integer"
-      },
-      {
         "type": "boolean"
-      },
-      {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
       }
     ]
   },
