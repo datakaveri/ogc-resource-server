@@ -83,7 +83,8 @@ public class ApiServerVerticle extends AbstractVerticle {
   private ProcessesRunnerService processService;
   private JobsService jobsService;
 
-
+  String tileMatrixSetUrl = "https://raw.githubusercontent.com/opengeospatial/2D-Tile-Matrix-Set/master/registry" +
+      "/json/$.json";
   JsonArray allCrsSupported = new JsonArray();
     
   /**
@@ -537,7 +538,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     String tileRow = routingContext.pathParam("tileRow");
     String tileCol = routingContext.pathParam("tileCol");
     HttpServerResponse response = routingContext.response();
-    String tilesUrlString = collectionId + "/" + tileMatrixSetId + "/" + tileMatrixId + "/" + tileRow + "/" + tileCol;
+    String tilesUrlString = collectionId + "/" + tileMatrixSetId + "/" + tileMatrixId + "/" + tileCol + "/" + tileRow;
     // need to set chunked for streaming response because Content-Length cannot be determined
     // beforehand.
     response.setChunked(true);
@@ -546,6 +547,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     // determine tile format if it is a map (PNG image) or vector (MVT tile) using request header.
     String encodingType = getEncodingFromRequest(routingContext.request().getHeader("Accept"));
+    LOGGER.debug("Accept Headers- {}", routingContext.request().getHeader("Accept"));
     if (encodingType.isEmpty()) {
       routingContext.put(
           "response",
@@ -601,6 +603,9 @@ public class ApiServerVerticle extends AbstractVerticle {
     acceptedHeaders.retainAll(acceptRequestHeadersSet);
     if (acceptedHeaders.isEmpty()) {
       return "";
+    }
+    if (acceptedHeaders.size() == 1) {
+      return acceptedHeaders.toArray()[0].toString();
     }
     double qLarge = 0.0; String chosenHeader = "image/png";
     for (String header : acceptRequestHeadersWithWeight) {
@@ -690,51 +695,8 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   public void getTileMatrixSet(RoutingContext routingContext) {
     String tileMatrixSetId = routingContext.pathParam("tileMatrixSetId");
-    dbService.getTileMatrixSetMetaData(tileMatrixSetId)
-        .onSuccess(success -> {
-              // drop collection_id, tilematrixset_id,
-              // will return everything, we have to parse and store the individual matrices in the
-              // format of tileMatrices
-              JsonObject tileMatrixSetResponse = new JsonObject();
-              JsonObject tempDbRes = success.get(0);
-              tileMatrixSetResponse
-                  .put("title", tempDbRes.getString("title"))
-                  .put("id", tempDbRes.getString("id"))
-                  .put("uri", tempDbRes.getString("uri"))
-                  .put("crs", tempDbRes.getString("crs"));
-              JsonArray tileMatrices = new JsonArray();
-              success.forEach(tileMatrix -> {
-                    // TODO: Streamline this build
-                    JsonObject tempTileMatrix = buildTileMatrices(
-                            tileMatrix.getString("tilematrix_id"),
-                            tileMatrix.getString("tilematrixmeta_title"),
-                            tileMatrix.getString("scaledenominator"),
-                            tileMatrix.getString("cellsize"),
-                            tileMatrix.getString("tilewidth"),
-                            tileMatrix.getString("tileheight"),
-                            tileMatrix.getString("matrixwidth"),
-                            tileMatrix.getString("matrixheight"));
-                    tileMatrices.add(tempTileMatrix);
-                  });
-              tileMatrixSetResponse.put("tileMatrices", tileMatrices);
-              routingContext.put("response", tileMatrixSetResponse.toString());
-              routingContext.put("statusCode", 200);
-              routingContext.next();
-            })
-        .onFailure(failed -> {
-              if (failed instanceof OgcException) {
-                routingContext.put("response", ((OgcException) failed).getJson().toString());
-                routingContext.put("statusCode", 404);
-              } else {
-                  routingContext.put(
-                      "response",
-                      new OgcException(500, "Internal Server Error", "Internal Server Error")
-                          .getJson()
-                          .toString());
-                  routingContext.put("statusCode", 500);
-              }
-              routingContext.next();
-            });
+    routingContext.redirect(tileMatrixSetUrl.replace("$",tileMatrixSetId));
+//    routingContext.end();
   }
 
   public void getTileMatrixSetList(RoutingContext routingContext) {
@@ -812,14 +774,14 @@ public class ApiServerVerticle extends AbstractVerticle {
                 .put("rel", "item")
                 .put("title", "Link template for " + collection.getString("id") + " features")
                 .put("templated","true")))
-        .put("itemType", "FEATURE")
+        .put("itemType", "feature")
         .put("crs", collection.getJsonArray("crs"));
     if (collection.getJsonArray("type").contains("VECTOR"))
       collection.getJsonArray("links")
           .add(new JsonObject()
               .put("href",
                   hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id") + "/map/tiles" +
-                      "/WebMercatorQuad/{tileMatrixId}/{tileRow}/{tileCol}?f=mvt")
+                      "/WebMercatorQuad/{tileMatrixId}/{tileRow}/{tileCol}")
               .put("rel", "item")
               .put("title", "Mapbox vector tiles; the link is a URI template where {tileMatrix}/{tileRow}/{tileCol}" +
                   " is the tile in the tiling scheme 'WebMercatorQuad'")
@@ -837,7 +799,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   private JsonObject buildCollectionTileResult(List<JsonObject> collections) {
     JsonObject collection = collections.get(0);
-    collection.put("itemType", "MAP");
+    collection.put("itemType", "map");
     collection.put("links", new JsonArray()
         .add(new JsonObject().put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id"))
                     .put("rel", "self")
@@ -1276,10 +1238,13 @@ public class ApiServerVerticle extends AbstractVerticle {
       String dataType) {
     // templated URL example
     // =
-    // https://ogc.iud.io/collections/{collectionId}/tiles/{tileMatrixSet}//{tileMatrix}/{tileRow}/{tileCol}
+    // https://ogc.iud.io/collections/{collectionId}/tiles/{tileMatrixSet}/{tileMatrix}/{tileRow}/{tileCol}
     String templatedTileUrl =
         hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/map/tiles/" + tileMatrixSet
-            + "/{tileMatrix}/{tileRow}/{tileCol}.png";
+            + "/{tileMatrix}/{tileRow}/{tileCol}";
+    String type = "image/png";
+    if (dataType.equalsIgnoreCase("vector"))
+      type = "application/vnd.mapbox-vector-tile";
     JsonArray linkObject = new JsonArray().add(new JsonObject()
                     .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/map/tiles")
                     .put("rel", "self")
@@ -1296,11 +1261,12 @@ public class ApiServerVerticle extends AbstractVerticle {
                     .put("href", templatedTileUrl)
                     .put("templated", true)
                     .put("rel", "item")
-                    .put("type", "image/png")
+                    // a change here based on datatype
+                    .put("type", type)
                     .put("title", "Templated link for retrieving the tiles in PNG"));
     return new JsonObject()
         .put("tileMatrixSetURI", tileMatrixSetUri)
-        .put("dataType", dataType)
+        .put("dataType", dataType.toLowerCase())
         .put("crs", crs)
         .put("links", linkObject);
   }

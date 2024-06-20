@@ -336,7 +336,7 @@ public class DatabaseServiceImpl implements DatabaseService{
     Promise<List<JsonObject>> result = Promise.promise();
     Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
     client.withConnection(conn ->
-            conn.preparedQuery("Select id, title, uri from tilematrixsets_relation")
+            conn.preparedQuery("Select distinct(id), title, uri from tilematrixsets_relation")
                 .collecting(collector)
                 .execute()
                 .map(SqlResult::value))
@@ -440,10 +440,11 @@ public class DatabaseServiceImpl implements DatabaseService{
     Promise<List<JsonObject>> result = Promise.promise();
     Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
     client.withConnection(conn ->
-            conn.preparedQuery("select cd.id as collection_id, cd.title as collection_title, cd.description, tmsr.crs" +
-                    ", tmsr.id as tilematrixset, tmsr.title as tilematrixset_title, uri, datatype" +
-                    " from collections_details as cd join tilematrixsets_relation as tmsr on cd.id = tmsr.collection_id" +
-                    " where cd.id = $1::uuid")
+              conn.preparedQuery("select cd.id as collection_id, cd.title as collection_title, cd.description, tmsr.crs" +
+                      ", tmsr.id as tilematrixset, tmsr.title as tilematrixset_title, uri, ctype.type as datatype" +
+                      " from collections_details as cd join tilematrixsets_relation as tmsr" +
+                      " on cd.id = tmsr.collection_id join collection_type as ctype on ctype.collection_id=cd.id" +
+                      " where cd.id = $1::uuid and (ctype.type = 'VECTOR' or ctype.type = 'MAP')")
                 .collecting(collector)
                 .execute(Tuple.of(collectionId))
                 .map(SqlResult::value))
@@ -470,10 +471,11 @@ public class DatabaseServiceImpl implements DatabaseService{
     Promise<List<JsonObject>> result = Promise.promise();
     Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
     client.withConnection(conn ->
-            conn.preparedQuery("select cd.id as collection_id, cd.title as collection_title, cd.description, tmsr.crs" +
-                    " as crs, tmsr.id as tilematrixset, tmsr.title as tilematrixset_title, uri, datatype" +
-                    " from collections_details as cd join tilematrixsets_relation as tmsr on cd.id = tmsr.collection_id" +
-                    " where cd.id = $1::uuid and tmsr.id = $2::text")
+              conn.preparedQuery("select cd.id as collection_id, cd.title as collection_title, cd.description, tmsr.crs" +
+                      ", tmsr.id as tilematrixset, tmsr.title as tilematrixset_title, uri, ctype.type as datatype" +
+                      " from collections_details as cd join tilematrixsets_relation as tmsr on cd.id = tmsr.collection_id" +
+                      " join collection_type as ctype on ctype.collection_id=cd.id where cd.id = $1::uuid" +
+                      " and (ctype.type = 'VECTOR' or ctype.type = 'MAP') and tmsr.id = $2::text")
                 .collecting(collector)
                 .execute(Tuple.of(collectionId, tileMatrixSetId))
                 .map(SqlResult::value))
