@@ -106,7 +106,7 @@ public class CollectionAppendingProcess implements ProcessService {
 
         Promise<JsonObject> objectPromise = Promise.promise();
 
-        requestInput.put("progress", calculateProgress(1, 8));
+        requestInput.put("progress", calculateProgress(1, 7));
 
         String tableID = requestInput.getString("resourceId");
         requestInput.put("collectionsDetailsTableId", tableID);
@@ -114,26 +114,26 @@ public class CollectionAppendingProcess implements ProcessService {
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, STARTING_APPEND_PROCESS_MESSAGE)
                 .compose(progressUpdateHandler->collectionOnboarding.makeCatApiRequest(requestInput))
                 .compose(resourceOwnershipCheckHandler->utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(2, 8)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(2, 7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkIfCollectionPresent(requestInput))
                 .compose(collectionCheckHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(3, 8)).put("message", COLLECTION_EXISTS_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(3, 7)).put("message", COLLECTION_EXISTS_MESSAGE)))
                 .compose(progressUpdateHandler -> checkSchema(requestInput))
                 .compose(schemaCheckHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(4, 8)).put("message", SCHEMA_VALIDATION_SUCCESS_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(4, 7)).put("message", SCHEMA_VALIDATION_SUCCESS_MESSAGE)))
                 .compose(progressUpdateHandler -> appendDataToTempTable(requestInput))
                 .compose(appendHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress",calculateProgress(5,8)).put("message",APPEND_PROCESS_MESSAGE)))
+                        requestInput.put("progress",calculateProgress(5,7)).put("message",APPEND_PROCESS_MESSAGE)))
                 .compose(progressUpdateHandler -> mergeTempTableToCollectionTable(requestInput))
                 .compose(mergeHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress",calculateProgress(6,8)).put("message",MERGE_TEMP_TABLE_MESSAGE)))
+                        requestInput.put("progress",calculateProgress(6,7)).put("message",MERGE_TEMP_TABLE_MESSAGE)))
                 .compose(progressUpdateHandler->collectionOnboarding.ogr2ogrCmdExtent(requestInput))
-                .compose(checkDbHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress",calculateProgress(7,8)).put("message",BBOX_UPDATE_MESSAGE)))
-                .compose(progressUpdateHandler->deleteTempTable(requestInput))
-                .compose(deleteHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,DELETE_TEMP_TABLE_SUCCESS_MESSAGE+APPEND_SUCCESS_MESSAGE))
+                .compose(checkDbHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,BBOX_UPDATE_MESSAGE+APPEND_SUCCESS_MESSAGE))
                 .onSuccess(successHandler -> {
-                    LOGGER.debug(APPEND_SUCCESS_MESSAGE);
+                    deleteTempTable(requestInput)
+                            .onComplete(deleteHandler ->
+                                    LOGGER.debug(APPEND_SUCCESS_MESSAGE)
+                            );
                     objectPromise.complete();
                 }).onFailure(failureHandler ->
                     deleteTempTable(requestInput)
