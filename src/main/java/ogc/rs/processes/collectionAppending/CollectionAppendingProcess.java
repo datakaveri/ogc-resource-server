@@ -35,10 +35,11 @@ import static ogc.rs.processes.collectionAppending.Constants.*;
 
 
 /**
- * This class handles the process of appending a collection of GeoJSON data
+ * This class handles the process of appending a collection of GeoJSON data (or any format of GIS data)
  * to an existing collection in a PostgreSQL database.
- * It includes steps for validating schemas, appending data to temporary table,
- * merging temporary table into existing collection table and deleting temporary table
+ * It includes steps for checking for resource ownership and existing collection ,
+ * validating schemas and CRS,appending data to temporary table, merging temporary table into existing collection table ,
+ * updating bbox values in collection table and deleting temporary table
  */
 
 public class CollectionAppendingProcess implements ProcessService {
@@ -60,11 +61,13 @@ public class CollectionAppendingProcess implements ProcessService {
     private final boolean VERTX_EXECUTE_BLOCKING_IN_ORDER = false;
 
     /**
-     * Constructor to initialize the CollectionAppendingProcess with required configurations.
+     * Constructs a new instance of CollectionAppendingProcess.
      *
-     * @param pgPool  the PostgreSQL client pool.
-     * @param config  the configuration containing AWS and database details.
-     * @param vertx   the Vertx instance.
+     * @param pgPool             The PostgreSQL connection pool used for database operations.
+     * @param webClient          The WebClient used for making HTTP requests.
+     * @param config             The configuration details as a JsonObject.
+     * @param dataFromS3         The DataFromS3 instance for accessing data from AWS S3.
+     * @param vertx              The Vert.x instance for executing asynchronous and event-driven tasks.
      */
 
     public CollectionAppendingProcess(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx) {
@@ -97,10 +100,14 @@ public class CollectionAppendingProcess implements ProcessService {
     }
 
     /**
-     * Executes the process of appending a collection to the database.
+     * Executes a series of asynchronous operations for processing a request input.
+     * This method handles a sequence of tasks related to data processing and updates job status and progress
+     * accordingly.
      *
-     * @param requestInput the input parameters for the process.
-     * @return a Future that completes with a JsonObject upon successful execution.
+     * @param requestInput The input JSON object containing parameters and data necessary for processing.
+     *                     It should include a "resourceId" to identify the resource being processed.
+     * @return A Future that completes with a JsonObject when all operations are successfully executed,
+     *         or fails if any operation encounters an error.
      */
 
     @Override
@@ -148,11 +155,15 @@ public class CollectionAppendingProcess implements ProcessService {
         return objectPromise.future();
 
     }
+
     /**
-     * Checks if the collection is present in the database.
+     * Checks if a collection identified by "collectionsDetailsTableId" exists in the database.
+     * Resolves the Promise if the collection is found, or fails the Promise if not found or an error occurs.
      *
-     * @param requestInput the input parameters containing collection details.
-     * @return a Future that completes when the check is done.
+     * @param requestInput The JsonObject containing the input parameters, including "collectionsDetailsTableId"
+     *                     to identify the collection to be checked.
+     * @return A Future<Void> that completes successfully if the collection exists,
+     *         or fails if the collection does not exist or an error occurs during the database query.
      */
 
     private Future<Void> checkIfCollectionPresent(JsonObject requestInput) {
@@ -244,11 +255,11 @@ public class CollectionAppendingProcess implements ProcessService {
     }
 
     /**
-     * Gets the GeoJSON schema using the ogrinfo command.
+     * Executes ogrinfo command-line tool with the provided input parameters to fetch dataset information.
      *
-     * @param input the input parameters containing file details.
-     * @return the GeoJSON schema as a JsonObject.
-     * @throws IOException if the ogrinfo command fails.
+     * @param input The JsonObject containing parameters needed for ogrinfo command execution.
+     * @return A JsonObject representing the dataset information fetched by ogrinfo.
+     * @throws IOException If an I/O error occurs during the execution of ogrinfo command.
      */
 
     private JsonObject fetchDataSetInfoWithOgrinfo(JsonObject input) throws IOException {
@@ -276,15 +287,16 @@ public class CollectionAppendingProcess implements ProcessService {
     }
 
     /**
-     * Constructs the ogrinfo CommandLine to get the GeoJSON schema.
+     * Constructs a command line for executing ogrinfo tool to retrieve dataset information.
      *
-     * @param input the input parameters containing file details.
-     * @return a CommandLine object configured to retrieve the schema.
+     * @param input The JsonObject containing input parameters required for constructing the command line.
+     *              It should at least contain "fileName" which specifies the file name to fetch from AWS S3.
+     * @return A CommandLine object configured for ogrinfo tool with necessary arguments and configurations.
      */
 
     private CommandLine getOrgInfoCommandLine(JsonObject input) {
 
-        LOGGER.debug("Inside ogrinfo command line to get Dataset Schema");
+        LOGGER.debug("Inside ogrinfo command line to get Dataset Information");
 
         String filename = "/" + input.getString("fileName");
         CommandLine ogrinfo = new CommandLine("ogrinfo");
@@ -308,10 +320,12 @@ public class CollectionAppendingProcess implements ProcessService {
     }
 
     /**
-     * Extracts attributes from the GeoJSON schema.
+     * Extracts schema (attribute names) from the given JsonObject representing dataset information.
      *
-     * @param geoJsonDataSetInfo the GeoJSON schema.
-     * @return a set of attribute names.
+     * @param geoJsonDataSetInfo The JsonObject containing dataset information, expected to have a "layers" array
+     *                           where attribute fields are extracted from the first layer.
+     * @return A Set of attribute names extracted from the fields of the first layer in the dataset information.
+     *         Returns an empty set if no layers or fields are found.
      */
 
     private Set<String> extractAttributesFromDataSetInfo(JsonObject geoJsonDataSetInfo) {
@@ -371,10 +385,11 @@ public class CollectionAppendingProcess implements ProcessService {
 
 
     /**
-     * Retrieves the schema of an existing collection table.
+     * Retrieves the database schema (column names) for the existing collection table asynchronously.
      *
-     * @param tableName the name of the table.
-     * @return a Future that completes with the set of column names.
+     * @param tableName The name of the database table for which the schema needs to be retrieved.
+     * @return A Future resolving to a Set of column names present in the specified database table.
+     *         The Future may fail if there is an error executing the database query.
      */
 
     private Future<Set<String>> getDbSchema(String tableName) {
@@ -395,10 +410,12 @@ public class CollectionAppendingProcess implements ProcessService {
     }
 
     /**
-     * Appends data to a temporary table.
+     * Appends data from a specified file to a temporary database table using ogr2ogr command line tool.
+     * Executes the command asynchronously and completes the Future based on the execution result.
      *
-     * @param requestInput the input parameters containing file details.
-     * @return a Future that completes when the data is appended.
+     * @param requestInput The JsonObject containing input parameters for the operation, including file name and other necessary details.
+     * @return A Future<Void> that completes when the data has been successfully appended to the temporary table,
+     *         or fails if there is an error during the execution of ogr2ogr command.
      */
 
     private Future<Void> appendDataToTempTable(JsonObject requestInput) {
@@ -441,11 +458,13 @@ public class CollectionAppendingProcess implements ProcessService {
     }
 
     /**
-     * Constructs the ogr2ogr CommandLine to append data to the temporary table.
+     * Constructs the command line for executing ogr2ogr to append data into a temporary PostgreSQL table.
+     * Sets up various parameters such as table name, encoding, geometry name, target SRS, PostgreSQL connection details,
+     * and AWS S3 configuration for input data location.
      *
-     * @param requestInput the input parameters containing file and job details.
-     * @param fileName     the name of the file.
-     * @return a CommandLine object configured to append data.
+     * @param requestInput The JsonObject containing input parameters for the operation, including jobId and other necessary details.
+     * @param fileName The name of the file located in AWS S3 bucket to be appended into the PostgreSQL table.
+     * @return A CommandLine object representing the constructed ogr2ogr command line with all necessary arguments set.
      */
 
     private CommandLine getOgr2ogrCommandLine(JsonObject requestInput, String fileName) {
@@ -500,10 +519,12 @@ public class CollectionAppendingProcess implements ProcessService {
     }
 
     /**
-     * Merges the temporary table into the main collection table.
+     * Merges data from a temporary table into the existing collection table in PostgreSQL.
+     * Retrieves the schema of the collection table, constructs a SQL merge query, and executes it.
      *
-     * @param requestInput the input parameters containing job and collection details.
-     * @return a Future that completes when the merge is done.
+     * @param requestInput The JsonObject containing input parameters for the operation, including jobId, collectionsDetailsTableId,
+     *                     and other necessary details.
+     * @return A Future<Void> indicating the completion (or failure) of the merge operation.
      */
 
     private Future<Void> mergeTempTableToCollectionTable(JsonObject requestInput) {
@@ -546,10 +567,11 @@ public class CollectionAppendingProcess implements ProcessService {
     }
 
     /**
-     * Deletes the temporary table used during the process.
+     * Deletes the temporary table associated with the given job ID from the PostgreSQL database.
      *
-     * @param requestInput the input parameters containing job details.
-     * @return a Future that completes when the table is deleted.
+     * @param requestInput The JsonObject containing input parameters for the operation, including jobId,
+     *                     which is used to construct the temporary table name.
+     * @return A Future<Void> indicating the completion (or failure) of the temporary table deletion operation.
      */
 
     private Future<Void> deleteTempTable(JsonObject requestInput) {
@@ -578,9 +600,9 @@ public class CollectionAppendingProcess implements ProcessService {
     /**
      * Handles failure scenarios by updating the job status and completing the promise with a failure.
      *
-     * @param requestInput  the input parameters for the process
-     * @param errorMessage  the error message to be logged
-     * @param promise       the promise to be completed
+     * @param requestInput The JsonObject containing input parameters for the operation
+     * @param errorMessage The error message describing the cause of the failure.
+     * @param promise      The Promise to be failed with the errorMessage if the failure handling fails.
      */
 
     private void handleFailure(JsonObject requestInput, String errorMessage, Promise<JsonObject> promise) {
@@ -598,11 +620,11 @@ public class CollectionAppendingProcess implements ProcessService {
     }
 
     /**
-     * Calculates the progress percentage.
+     * Calculates the progress percentage based on the current step and total steps.
      *
-     * @param step the current step number
-     * @param totalSteps the total number of steps
-     * @return the progress percentage
+     * @param step       The current step in the process.
+     * @param totalSteps The total number of steps in the process.
+     * @return The progress percentage as a float value.
      */
 
     private float calculateProgress(int step, int totalSteps) {
