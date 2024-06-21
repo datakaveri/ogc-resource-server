@@ -13,7 +13,7 @@ import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import ogc.rs.apiserver.ApiServerVerticle;
 import ogc.rs.apiserver.handlers.*;
-
+import ogc.rs.apiserver.util.OgcException;
 import static ogc.rs.apiserver.util.Constants.*;
 import java.util.Set;
 
@@ -89,26 +89,31 @@ public abstract class EntityRouterBuilder {
     /* Set the OpenAPI spec route */
     router
         .get(getOasApiPath())
+        .failureHandler(failureHandler)
         .handler(
             routingContext -> {
               HttpServerResponse response = routingContext.response();
               String queryParam = routingContext.request().getParam("f");
-              if ("html".equals(queryParam)) {
+              if ("html".equals(queryParam) || queryParam == null) {
                 try {
                   FileSystem fileSystem = vertx.fileSystem();
                   Buffer buffer = fileSystem.readFileBlocking(API_DOC_FILE_PATH);
                   String apiDocContent = buffer.toString();
-                  String specUrl = getOasApiPath();
-                  apiDocContent = apiDocContent.replace("$1", specUrl);
+                  String jsonSpecUrl = getOasApiPath() + "?f=json";
+                  apiDocContent = apiDocContent.replace("$1", jsonSpecUrl);
                   response.putHeader("Content-type", "text/html");
                   response.end(apiDocContent);
 
                 } catch (Exception e) {
                   throw new RuntimeException(e);
                 }
-              } else {
+              } else if("json".equals(queryParam)) {
                 response.putHeader("Content-type", "application/vnd.oai.openapi+json;version=3.0");
                 response.send(oasJson.toBuffer());
+              } else {
+                routingContext
+                    .fail(new OgcException(400, "Invalid query param for OpenAPI spec format",
+                        "Invalid query param for OpenAPI spec format"));
               }
             });
 
