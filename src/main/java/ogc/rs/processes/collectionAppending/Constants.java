@@ -18,6 +18,16 @@ public class Constants {
     public static final String COLLECTION_NOT_FOUND_MESSAGE = "Collection is not found";
     public static final String COLLECTION_EXISTENCE_FAIL_CHECK =
             "Failed to check collection existence in db.";
+    public static final String INVALID_ORGANISATION_MESSAGE=
+            "Organisation for defining the CRS is invalid- Not EPSG ";
+    public static final String VALID_ORGANISATION_MESSAGE=
+            "EPSG Organisation check for defining the CRS is successful";
+    public static final String INVALID_SR_ID_MESSAGE=
+            "SR_ID for the CRS is invalid- Not 4326";
+    public static final String VALID_SR_ID_MESSAGE=
+            "4326 SR_ID check for the CRS is successful";
+    public static final String SCHEMA_CRS_VALIDATION_SUCCESS_MESSAGE =
+            "Schema check and CRS check are completed successfully.";
     public static final String SCHEMA_VALIDATION_SUCCESS_MESSAGE =
             "Schema check is completed successfully.";
     public static final String SCHEMA_VALIDATION_FAILURE_MESSAGE =

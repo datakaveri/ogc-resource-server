@@ -25,6 +25,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -118,9 +120,9 @@ public class CollectionAppendingProcess implements ProcessService {
                 .compose(progressUpdateHandler -> checkIfCollectionPresent(requestInput))
                 .compose(collectionCheckHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(3, 7)).put("message", COLLECTION_EXISTS_MESSAGE)))
-                .compose(progressUpdateHandler -> checkSchema(requestInput))
+                .compose(progressUpdateHandler -> validateSchemaAndCRS(requestInput))
                 .compose(schemaCheckHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(4, 7)).put("message", SCHEMA_VALIDATION_SUCCESS_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(4, 7)).put("message", SCHEMA_CRS_VALIDATION_SUCCESS_MESSAGE)))
                 .compose(progressUpdateHandler -> appendDataToTempTable(requestInput))
                 .compose(appendHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress",calculateProgress(5,7)).put("message",APPEND_PROCESS_MESSAGE)))
@@ -176,24 +178,48 @@ public class CollectionAppendingProcess implements ProcessService {
     }
 
     /**
-     * Checks the schema of the GeoJSON file against the existing collection schema.
+     * Validates the schema and Coordinate Reference System (CRS) information of a GeoJSON dataset.
      *
-     * @param requestInput the input parameters containing file details.
-     * @return a Future that completes when the schema check is done.
+     * This method fetches dataset information using OGRInfo based on the provided input, extracts
+     * attributes and CRS details, and validates them against expected values (EPSG authority and SRID 4326).
+     * Additionally, it retrieves the database schema and compares it with the extracted attributes.
+     * If any validation fails, it logs an error message and fails the Future.
+     *
+     * @param requestInput the JsonObject containing input parameters required for fetching dataset information
+     *                     and validating schema and CRS
+     * @return a Future<Void> that completes successfully if the schema and CRS validations pass,
+     *         or fails if any validation condition is not met
      */
 
-    private Future<Void> checkSchema(JsonObject requestInput) {
-
+    private Future<Void> validateSchemaAndCRS(JsonObject requestInput) {
         Promise<Void> promise = Promise.promise();
 
         vertx.executeBlocking(future -> {
                     try {
-                        JsonObject geoJsonSchema = getDataSetSchemaWithOgrinfo(requestInput);
-                        Set<String> geoJsonAttributes = extractAttributesFromDataSetSchema(geoJsonSchema);
+                        JsonObject geoJsonDataSetInfo = fetchDataSetInfoWithOgrinfo(requestInput);
+                        Set<String> geoJsonAttributes = extractAttributesFromDataSetInfo(geoJsonDataSetInfo);
+                        Map<String, String> authorityAndCode = extractCRSFromDataSetInfo(geoJsonDataSetInfo);
 
                         // Add 'geom' and 'id' attributes to the geoJsonAttributes set
                         geoJsonAttributes.add("geom");
                         geoJsonAttributes.add("id");
+
+                        // Check if organisation is "EPSG" and sr_id is "4326"
+                        if (!"EPSG".equals(authorityAndCode.get("authority"))) {
+                            String errorMsg = INVALID_ORGANISATION_MESSAGE + authorityAndCode.get("authority");
+                            LOGGER.error(errorMsg);
+                            future.fail(errorMsg);
+                            return;
+                        }
+                        LOGGER.debug(VALID_ORGANISATION_MESSAGE);
+
+                        if (!"4326".equals(authorityAndCode.get("code"))) {
+                            String errorMsg = INVALID_SR_ID_MESSAGE + authorityAndCode.get("code");
+                            LOGGER.error(errorMsg);
+                            future.fail(errorMsg);
+                            return;
+                        }
+                        LOGGER.debug(VALID_SR_ID_MESSAGE);
 
                         getDbSchema(requestInput.getString("collectionsDetailsTableId"))
                                 .onSuccess(dbSchema -> {
@@ -201,7 +227,7 @@ public class CollectionAppendingProcess implements ProcessService {
                                         LOGGER.debug(SCHEMA_VALIDATION_SUCCESS_MESSAGE);
                                         future.complete();
                                     } else {
-                                        String errorMsg = SCHEMA_VALIDATION_FAILURE_MESSAGE +"GeoJSON schema: " + geoJsonAttributes + ", DB schema: " + dbSchema;
+                                        String errorMsg = SCHEMA_VALIDATION_FAILURE_MESSAGE + " GeoJSON schema: " + geoJsonAttributes + ", DB schema: " + dbSchema;
                                         LOGGER.error(errorMsg);
                                         future.fail(errorMsg);
                                     }
@@ -225,7 +251,7 @@ public class CollectionAppendingProcess implements ProcessService {
      * @throws IOException if the ogrinfo command fails.
      */
 
-    private JsonObject getDataSetSchemaWithOgrinfo(JsonObject input) throws IOException {
+    private JsonObject fetchDataSetInfoWithOgrinfo(JsonObject input) throws IOException {
 
         CommandLine cmdLine = getOrgInfoCommandLine(input);
         DefaultExecutor executor = DefaultExecutor.builder().get();
@@ -275,7 +301,7 @@ public class CollectionAppendingProcess implements ProcessService {
         ogrinfo.addArgument("AWS_SECRET_ACCESS_KEY");
         ogrinfo.addArgument(secretKey);
         ogrinfo.addArgument("-json");
-        ogrinfo.addArgument("-ro"); // argument to open the file in read-only mode
+        ogrinfo.addArgument("-ro");
         ogrinfo.addArgument(String.format("/vsis3/%s%s", awsBucketUrl, filename));
 
         return ogrinfo;
@@ -284,13 +310,13 @@ public class CollectionAppendingProcess implements ProcessService {
     /**
      * Extracts attributes from the GeoJSON schema.
      *
-     * @param geoJsonSchema the GeoJSON schema.
+     * @param geoJsonDataSetInfo the GeoJSON schema.
      * @return a set of attribute names.
      */
 
-    private Set<String> extractAttributesFromDataSetSchema(JsonObject geoJsonSchema) {
+    private Set<String> extractAttributesFromDataSetInfo(JsonObject geoJsonDataSetInfo) {
 
-        JsonArray layers = geoJsonSchema.getJsonArray("layers", new JsonArray());
+        JsonArray layers = geoJsonDataSetInfo.getJsonArray("layers", new JsonArray());
         if (layers.isEmpty()) {
             return Set.of(); // Return empty set if no layers are found
         }
@@ -301,6 +327,48 @@ public class CollectionAppendingProcess implements ProcessService {
                 .map(field -> ((JsonObject) field).getString("name"))
                 .collect(Collectors.toSet());
     }
+
+    /**
+     * Extracts the organisation and sr_id information from a GeoJSON dataset.
+     *
+     * This method navigates through the GeoJSON dataset to find the "layers" array,
+     * then the first layer's "geometryFields" array, and finally extracts the "authority"
+     * and "code" from the "coordinateSystem" object of the first geometry field.
+     *
+     * @param geoJsonDataSetInfo the GeoJSON schema from which to extract the authority and code
+     * @return a map containing the "authority" and "code" extracted from the GeoJSON schema;
+     *         an empty map is returned if the "layers" or "geometryFields" arrays are empty or
+     *         if the necessary fields are not found
+     */
+
+    private Map<String, String> extractCRSFromDataSetInfo(JsonObject geoJsonDataSetInfo) {
+        Map<String, String> authorityAndCode = new HashMap<>();
+
+        JsonArray layers = geoJsonDataSetInfo.getJsonArray("layers", new JsonArray());
+        if (layers.isEmpty()) {
+            return authorityAndCode; // Return empty map if no layers are found
+        }
+
+        JsonObject firstLayer = layers.getJsonObject(0);
+        JsonArray geometryFields = firstLayer.getJsonArray("geometryFields", new JsonArray());
+        if (geometryFields.isEmpty()) {
+            return authorityAndCode; // Return empty map if no geometry fields are found
+        }
+
+        JsonObject geometryField = geometryFields.getJsonObject(0);
+        JsonObject coordinateSystem = geometryField.getJsonObject("coordinateSystem", new JsonObject());
+        JsonObject projjson = coordinateSystem.getJsonObject("projjson", new JsonObject());
+        JsonObject id = projjson.getJsonObject("id", new JsonObject());
+
+        String authority = id.getString("authority", "");
+        int code = id.getInteger("code", 0);
+
+        authorityAndCode.put("authority", authority);
+        authorityAndCode.put("code", String.valueOf(code));
+
+        return authorityAndCode;
+    }
+
 
     /**
      * Retrieves the schema of an existing collection table.
