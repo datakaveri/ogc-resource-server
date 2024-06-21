@@ -6,7 +6,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import ogc.rs.apiserver.ApiServerVerticle;
-import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.handlers.FailureHandler;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 import ogc.rs.apiserver.router.routerbuilders.OgcRouterBuilder;

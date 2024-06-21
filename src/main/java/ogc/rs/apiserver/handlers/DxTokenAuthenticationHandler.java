@@ -18,7 +18,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Collections;
 
 import static ogc.rs.apiserver.util.Constants.HEADER_TOKEN;
-import static ogc.rs.authenticator.Constants.AUTH_CERTIFICATE_PATH;
+import static ogc.rs.apiserver.util.Constants.AUTH_CERTIFICATE_PATH;
 
 public class DxTokenAuthenticationHandler implements Handler<RoutingContext> {
   private static final Logger LOGGER = LogManager.getLogger(DxTokenAuthenticationHandler.class);

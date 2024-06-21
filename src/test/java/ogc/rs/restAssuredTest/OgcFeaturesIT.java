@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
-import static ogc.rs.authenticator.Constants.USER_NOT_AUTHORIZED;
+import static ogc.rs.apiserver.util.Constants.USER_NOT_AUTHORIZED;
 import static org.hamcrest.Matchers.equalTo;
 
 @ExtendWith(RestAssuredConfigExtension.class)

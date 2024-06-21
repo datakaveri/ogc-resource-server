@@ -16,7 +16,7 @@ import java.util.UUID;
 import static io.restassured.RestAssured.given;
 import static ogc.rs.restAssuredTest.Constant.ASSET_PATH;
 import static ogc.rs.restAssuredTest.Constant.PORT;
-import static ogc.rs.authenticator.Constants.*;
+import static ogc.rs.apiserver.util.Constants.*;
 import static org.hamcrest.Matchers.equalTo;
 
 @ExtendWith(RestAssuredConfigExtension.class)

@@ -17,7 +17,6 @@ import io.vertx.ext.web.openapi.RouterBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ogc.rs.apiserver.ApiServerVerticle;
-import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.handlers.FailureHandler;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 import ogc.rs.apiserver.router.routerbuilders.OgcRouterBuilder;
