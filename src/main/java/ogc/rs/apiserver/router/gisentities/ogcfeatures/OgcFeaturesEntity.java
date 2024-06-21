@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import com.google.auto.service.AutoService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -31,8 +30,11 @@ import ogc.rs.database.DatabaseService;
 @AutoService(GisEntityInterface.class)
 public class OgcFeaturesEntity implements GisEntityInterface {
 
-  private static final String OGC_COLLECTION_PATH_REGEX =
-      "^/collections/[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}";
+  private static final String UUID_REGEX =
+      "[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}";
+  
+  private static final String OGC_FEATURE_COLLECTION_PATH_REGEX =
+      "^/collections/" + UUID_REGEX + "/items";
   
   private static final Logger LOGGER = LogManager.getLogger(OgcFeaturesEntity.class);
 
@@ -42,24 +44,14 @@ public class OgcFeaturesEntity implements GisEntityInterface {
     RouterBuilder builder = ogcRouterBuilder.routerBuilder;
     ApiServerVerticle apiServerVerticle = ogcRouterBuilder.apiServerVerticle;
     FailureHandler failureHandler = ogcRouterBuilder.failureHandler;
-    Vertx vertx = ogcRouterBuilder.vertx;
-
-    builder.operation("getCollections").handler(apiServerVerticle::getCollections)
-        .handler(apiServerVerticle::putCommonResponseHeaders)
-        .handler(apiServerVerticle::buildResponse);
 
     List<String> collectionSpecificOpIds = builder.operations().stream()
-        .filter(op -> op.getOperationId().matches(CollectionMetadata.OGC_OP_ID_PREFIX_REGEX))
+        .filter(op -> op.getOperationId().matches(OgcFeaturesMetadata.OGC_OP_ID_PREFIX_REGEX))
         .map(op -> op.getOperationId()).collect(Collectors.toList());
 
     collectionSpecificOpIds.forEach(opId -> {
-      if (opId.matches(CollectionMetadata.OGC_GET_SPECIFIC_COLLECTION_OP_ID_REGEX)) {
-        builder.operation(opId).handler(apiServerVerticle::getCollection)
-            .handler(apiServerVerticle::putCommonResponseHeaders)
-            .handler(apiServerVerticle::buildResponse)
-            .failureHandler(failureHandler);
 
-      } else if (opId.matches(CollectionMetadata.OGC_GET_COLLECTION_ITEMS_OP_ID_REGEX)) {
+      if (opId.matches(OgcFeaturesMetadata.OGC_GET_COLLECTION_ITEMS_OP_ID_REGEX)) {
         builder.operation(opId)
                 .handler(ogcRouterBuilder.tokenAuthenticationHandler)
                 .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
@@ -70,7 +62,7 @@ public class OgcFeaturesEntity implements GisEntityInterface {
                 .handler(apiServerVerticle::buildResponse)
                 .failureHandler(failureHandler);
 
-      } else if (opId.matches(CollectionMetadata.OGC_GET_SPECIFIC_FEATURE_OP_ID_REGEX)) {
+      } else if (opId.matches(OgcFeaturesMetadata.OGC_GET_SPECIFIC_FEATURE_OP_ID_REGEX)) {
             builder.operation(opId)
                     .handler(ogcRouterBuilder.tokenAuthenticationHandler)
                     .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
@@ -86,23 +78,7 @@ public class OgcFeaturesEntity implements GisEntityInterface {
 
   @Override
   public void giveStacRoutes(StacRouterBuilder stacRouterBuilder) {
-
-    RouterBuilder builder = stacRouterBuilder.routerBuilder;
-    ApiServerVerticle apiServerVerticle = stacRouterBuilder.apiServerVerticle;
-    FailureHandler failureHandler = stacRouterBuilder.failureHandler;
-    
-    List<String> collectionSpecificOpIds = builder.operations().stream()
-        .filter(op -> op.getOperationId().matches(CollectionMetadata.STAC_OP_ID_PREFIX_REGEX))
-        .map(op -> op.getOperationId()).collect(Collectors.toList());
-
-    collectionSpecificOpIds.forEach(opId -> {
-      if (opId.matches(CollectionMetadata.STAC_GET_SPECIFIC_ITEMLESS_COLLECTION_OP_ID_REGEX)) {
-        builder.operation(opId).handler(apiServerVerticle::getStacCollection)
-            .handler(apiServerVerticle::putCommonResponseHeaders)
-            .handler(apiServerVerticle::buildResponse)
-            .failureHandler(failureHandler);
-      }
-    });
+    // no STAC routes applicable for OGC Features
   }
 
   @Override
@@ -111,15 +87,15 @@ public class OgcFeaturesEntity implements GisEntityInterface {
 
     Promise<OasFragments> promise = Promise.promise();
     
-    Set<UUID> existingCollectionIds = getExistingCollectionsFromOgcSpec(existingOgcSpec);
+    Set<UUID> existingCollectionIds = getExistingFeatureCollectionsFromOgcSpec(existingOgcSpec);
 
     Future<List<JsonObject>> collectionMetadata =
         dbService.getOgcFeatureCollectionMetadataForOasSpec(
             existingCollectionIds.stream().map(i -> i.toString()).collect(Collectors.toList()));
 
-    Future<List<CollectionMetadata>> metadataObjList = collectionMetadata.compose(res -> {
-      List<CollectionMetadata> list =
-          res.stream().map(i -> new CollectionMetadata(i)).collect(Collectors.toList());
+    Future<List<OgcFeaturesMetadata>> metadataObjList = collectionMetadata.compose(res -> {
+      List<OgcFeaturesMetadata> list =
+          res.stream().map(i -> new OgcFeaturesMetadata(i)).collect(Collectors.toList());
       
       List<String> foundCollectionIds =
           list.stream().map(obj -> obj.getId().toString()).collect(Collectors.toList());
@@ -135,26 +111,23 @@ public class OgcFeaturesEntity implements GisEntityInterface {
 
     Future<OasFragments> result = metadataObjList.compose(list -> {
       List<JsonObject> ogcFrags = new ArrayList<JsonObject>();
-      List<JsonObject> stacFrags = new ArrayList<JsonObject>();
 
       JsonObject geomMaxLimitConfig = config.getJsonObject("geomSpecificMaxLimits", new JsonObject());
 
       /*
        * if geomSpecificMaxLimits is not in config, then set max for all geometries to
-       * CollectionMetadata.OGC_LIMIT_PARAM_MAX_DEFAULT)
+       * OgcFeaturesMetadata.OGC_LIMIT_PARAM_MAX_DEFAULT)
        */
       Map<PostgisGeomTypes, Integer> geomSpecificMaxLimits = Arrays.stream(PostgisGeomTypes.values())
           .collect(Collectors.toMap(type -> type, type -> geomMaxLimitConfig
-              .getInteger(type.toString(), CollectionMetadata.OGC_LIMIT_PARAM_MAX_DEFAULT)));
+              .getInteger(type.toString(), OgcFeaturesMetadata.OGC_LIMIT_PARAM_MAX_DEFAULT)));
       
       list.forEach(obj -> {
         ogcFrags.add(obj.generateOgcOasBlock(geomSpecificMaxLimits));
-        stacFrags.add(obj.generateStacOasBlock());
       });
 
       OasFragments fragments = new OasFragments();
       fragments.setOgc(ogcFrags);
-      fragments.setStac(stacFrags);
 
       return Future.succeededFuture(fragments);
     });
@@ -165,19 +138,19 @@ public class OgcFeaturesEntity implements GisEntityInterface {
   }
 
   /**
-   * Get existing OGC collections from the OGC spec. These IDs don't need to be fetched from the DB
+   * Get existing OGC feature collections from the OGC spec. These IDs don't need to be fetched from the DB
    * and have spec generated for them. We only check the OGC spec and not the STAC spec since all
    * IDs that are there in the STAC spec will be there in the OGC spec as well.
    * 
    * @param ogcSpec the OGC OpenAPI spec JSON
    * @return
    */
-  private Set<UUID> getExistingCollectionsFromOgcSpec(JsonObject ogcSpec) {
+  private Set<UUID> getExistingFeatureCollectionsFromOgcSpec(JsonObject ogcSpec) {
     Set<UUID> existingIds = new HashSet<UUID>();
 
     ogcSpec.getJsonObject("paths").forEach(k -> {
       String key = k.getKey();
-      if (key.matches(OGC_COLLECTION_PATH_REGEX)) {
+      if (key.matches(OGC_FEATURE_COLLECTION_PATH_REGEX)) {
         String collectionId = key.split("/")[2];
         existingIds.add(UUID.fromString(collectionId));
       }
