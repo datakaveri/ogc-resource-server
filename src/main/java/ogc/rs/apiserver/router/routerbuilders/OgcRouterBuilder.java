@@ -64,6 +64,10 @@ public class OgcRouterBuilder extends EntityRouterBuilder {
       HttpServerResponse response = routingContext.response();
       response.sendFile("docs/conformance.json");
     });
+    
+    routerBuilder.operation(COLLECTIONS_API).handler(apiServerVerticle::getCollections)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse).failureHandler(failureHandler);
 
     /**
      * For all implementers of GisEntityInterface, add the OGC routes to the RouterBuilder.
