@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.UUID;
 
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
-import static ogc.rs.authenticator.Constants.*;
+import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
 
 public class StacAssetsAuthZHandler implements Handler<RoutingContext> {

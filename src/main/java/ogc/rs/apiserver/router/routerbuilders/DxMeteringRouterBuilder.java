@@ -8,7 +8,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import ogc.rs.apiserver.ApiServerVerticle;
-import ogc.rs.apiserver.handlers.AuthHandler;
 
 /**
  * Class to build router for DX Metering APIs. <br>

@@ -43,6 +43,7 @@ import org.apache.logging.log4j.Logger;
 
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.apiserver.util.Constants.*;
+import static ogc.rs.apiserver.util.Constants.NOT_FOUND;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.metering.util.MeteringConstant.*;
 import static ogc.rs.metering.util.MeteringConstant.ROLE;
