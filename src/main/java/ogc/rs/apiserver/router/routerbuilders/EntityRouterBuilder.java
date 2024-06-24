@@ -29,7 +29,8 @@ public abstract class EntityRouterBuilder {
 
   private static final Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS);
   public static final String API_DOC_FILE_PATH = "docs/apidoc.html";
-
+  private static final String OPENAPI_V3_JSON_CONTENT_TYPE = "application/vnd.oai.openapi+json;version=3.0";
+  private static final String HTML_CONTENT_TYPE = "text/html";
 
   /* this is used since all the API methods are implemented in the ApiServer verticle */
   public ApiServerVerticle apiServerVerticle;
@@ -89,31 +90,51 @@ public abstract class EntityRouterBuilder {
     /* Set the OpenAPI spec route */
     router
         .get(getOasApiPath())
+        .produces(HTML_CONTENT_TYPE) // order of produces matters - so here priority is given to HTML if Accept is */*
+        .produces(OPENAPI_V3_JSON_CONTENT_TYPE)
         .failureHandler(failureHandler)
         .handler(
             routingContext -> {
               HttpServerResponse response = routingContext.response();
               String queryParam = routingContext.request().getParam("f");
-              if ("html".equals(queryParam) || queryParam == null) {
+              
+              String contentType;
+              
+              if ("html".equals(queryParam)) {
+                contentType = HTML_CONTENT_TYPE;
+              } else if ("json".equals(queryParam)) {
+                contentType = OPENAPI_V3_JSON_CONTENT_TYPE;
+              } else if (queryParam == null) {
+                // use whatever comes in Accept header (controlled by produces block) or HTML if
+                // Accept header is not passed
+                contentType = routingContext.getAcceptableContentType() != null
+                    ? routingContext.getAcceptableContentType()
+                    : HTML_CONTENT_TYPE;
+              } else {
+                routingContext
+                    .fail(new OgcException(400, "Invalid query param for OpenAPI spec format",
+                        "Invalid query param for OpenAPI spec format"));
+                return;
+              }
+              
+              response.putHeader("Content-type", contentType);
+
+              if (HTML_CONTENT_TYPE.equals(contentType)) {
                 try {
                   FileSystem fileSystem = vertx.fileSystem();
                   Buffer buffer = fileSystem.readFileBlocking(API_DOC_FILE_PATH);
                   String apiDocContent = buffer.toString();
                   String jsonSpecUrl = getOasApiPath() + "?f=json";
                   apiDocContent = apiDocContent.replace("$1", jsonSpecUrl);
-                  response.putHeader("Content-type", "text/html");
-                  response.end(apiDocContent);
 
+                  response.end(apiDocContent);
                 } catch (Exception e) {
                   throw new RuntimeException(e);
                 }
-              } else if("json".equals(queryParam)) {
-                response.putHeader("Content-type", "application/vnd.oai.openapi+json;version=3.0");
+              } else if(OPENAPI_V3_JSON_CONTENT_TYPE.equals(contentType)) {
                 response.send(oasJson.toBuffer());
               } else {
-                routingContext
-                    .fail(new OgcException(400, "Invalid query param for OpenAPI spec format",
-                        "Invalid query param for OpenAPI spec format"));
+                routingContext.fail(new OgcException(500, "Internal Error", "Internal Error"));
               }
             });
 
