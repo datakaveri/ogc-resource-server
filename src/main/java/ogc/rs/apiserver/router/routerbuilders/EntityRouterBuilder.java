@@ -90,7 +90,7 @@ public abstract class EntityRouterBuilder {
     /* Set the OpenAPI spec route */
     router
         .get(getOasApiPath())
-        .produces(HTML_CONTENT_TYPE) // order of produces matters - so here priority is given to HTML 
+        .produces(HTML_CONTENT_TYPE) // order of produces matters - so here priority is given to HTML if Accept is */*
         .produces(OPENAPI_V3_JSON_CONTENT_TYPE)
         .failureHandler(failureHandler)
         .handler(
@@ -105,8 +105,11 @@ public abstract class EntityRouterBuilder {
               } else if ("json".equals(queryParam)) {
                 contentType = OPENAPI_V3_JSON_CONTENT_TYPE;
               } else if (queryParam == null) {
-                // use whatever comes in Accept header (controlled by produces block)
-                contentType = routingContext.getAcceptableContentType();
+                // use whatever comes in Accept header (controlled by produces block) or HTML if
+                // Accept header is not passed
+                contentType = routingContext.getAcceptableContentType() != null
+                    ? routingContext.getAcceptableContentType()
+                    : HTML_CONTENT_TYPE;
               } else {
                 routingContext
                     .fail(new OgcException(400, "Invalid query param for OpenAPI spec format",
@@ -130,6 +133,8 @@ public abstract class EntityRouterBuilder {
                 }
               } else if(OPENAPI_V3_JSON_CONTENT_TYPE.equals(contentType)) {
                 response.send(oasJson.toBuffer());
+              } else {
+                routingContext.fail(new OgcException(500, "Internal Error", "Internal Error"));
               }
             });
 
