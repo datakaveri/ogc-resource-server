@@ -38,24 +38,24 @@ public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
    */
   @Override
   public void handle(RoutingContext routingContext) {
+    
+    if(System.getProperty("disable.auth") != null) {
+      routingContext.next();
+      return;
+    }
+    
     LOGGER.debug("OGC Features Authorization");
     String id = routingContext.normalizedPath().split("/")[2];
     String token = routingContext.request().getHeader("token");
     JsonObject authInfo = new JsonObject().put(HEADER_TOKEN, token).put("id", id);
     if (id == null || !id.matches(UUID_REGEX)) {
-      routingContext.put("isAuthorised", false);
-      routingContext.put(
-          "response",
-          new OgcException(404, "Not Found", "Collection Not Found").getJson().toString());
-      routingContext.put("statusCode", 404);
-      routingContext.next();
+      routingContext.fail(new OgcException(404, "Not Found", "Collection Not Found"));
       return;
     }
     AuthInfo user = routingContext.get(USER_KEY);
     UUID iid = user.getResourceId();
     if (!user.isRsToken() && !id.equals(iid.toString())) {
       LOGGER.error("Resource Ids don't match! id- {}, jwtId- {}", id, iid);
-      routingContext.put("isAuthorised", false);
       routingContext.fail(
           new OgcException(
               401, "Not Authorized", "User is not authorised. Please contact IUDX AAA "));
@@ -88,7 +88,6 @@ public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
         .put("userId", user.getUserId())
         .put("role", user.getRole());
     routingContext.data().put("authInfo", authInfo);
-    routingContext.data().put("isAuthorised", true);
     LOGGER.debug("Authorization info: {}", routingContext.data().values());
     routingContext.next();
   }
@@ -99,7 +98,6 @@ public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
         user.getConstraints() != null ? user.getConstraints().getJsonArray("access") : null;
     if (access == null || !access.contains("api")) {
       LOGGER.debug("invalid constraints value");
-      routingContext.put("isAuthorised", false);
       routingContext.fail(
           new OgcException(
               401, "Not Authorized", "User is not authorised. Please contact IUDX AAA "));

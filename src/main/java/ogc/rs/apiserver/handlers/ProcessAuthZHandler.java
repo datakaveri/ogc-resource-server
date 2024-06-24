@@ -37,9 +37,7 @@ public class ProcessAuthZHandler implements Handler<RoutingContext> {
       results.put("iid", iid);
       results.put("userId", user.getUserId());
       results.put("role", user.getRole());
-      results.put("isAuthorised", true);
       routingContext.data().put("authInfo", results);
-      routingContext.data().put("isAuthorised", results.getBoolean("isAuthorised"));
       routingContext.next();
     } else {
       LOGGER.debug("Not a provider token. It is of role {} ", user.getRole());
