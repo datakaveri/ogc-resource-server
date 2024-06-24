@@ -247,10 +247,6 @@ public class ApiServerVerticle extends AbstractVerticle {
   
   public void getFeature(RoutingContext routingContext) {
 
-    if (!(Boolean) routingContext.get("isAuthorised")){
-      routingContext.next();
-      return;
-    }
     RequestParameters requestParameters = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
     String collectionId = routingContext.request().path().split("/")[2];
     Integer featureId = requestParameters.pathParameter("featureId").getInteger();
@@ -295,11 +291,6 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
   
   public void getFeatures(RoutingContext routingContext) {
-
-    if (!(Boolean) routingContext.get("isAuthorised")){
-      routingContext.next();
-      return;
-    }
 
     RequestParameters requestParameters = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
     String collectionId = routingContext.request().path().split("/")[2];
@@ -1170,10 +1161,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   public void getAssets(RoutingContext routingContext) {
     String assetId = routingContext.pathParam("assetId");
-    if (!(Boolean) routingContext.get("isAuthorised")) {
-      routingContext.next();
-      return;
-    }
+
     HttpServerResponse response = routingContext.response();
     response.setChunked(true);
     dbService

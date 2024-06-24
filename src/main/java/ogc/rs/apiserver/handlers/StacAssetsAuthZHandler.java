@@ -64,7 +64,6 @@ public class StacAssetsAuthZHandler implements Handler<RoutingContext> {
                       isOpenResource -> {
                         if (isOpenResource && user.isRsToken()) {
                           LOGGER.debug("Resource is open, access granted.");
-                          routingContext.put("isAuthorised", true);
                           routingContext.next();
                         } else {
                           handleSecureResource(routingContext, user, isOpenResource);
@@ -90,7 +89,6 @@ public class StacAssetsAuthZHandler implements Handler<RoutingContext> {
       LOGGER.debug("Not an open resource, it's a secure resource.");
 
       if (user.getRole() == AuthInfo.RoleEnum.provider) {
-        routingContext.put("isAuthorised", true);
         routingContext.next();
       } else if (user.getRole() == AuthInfo.RoleEnum.consumer) {
         JsonArray access =
@@ -100,7 +98,6 @@ public class StacAssetsAuthZHandler implements Handler<RoutingContext> {
           LOGGER.debug("Invalid consumer token. Constrains not present.");
           routingContext.fail(new OgcException(401, NOT_AUTHORIZED, USER_NOT_AUTHORIZED));
         } else {
-          routingContext.put("isAuthorised", true);
           routingContext.next();
         }
       } else {

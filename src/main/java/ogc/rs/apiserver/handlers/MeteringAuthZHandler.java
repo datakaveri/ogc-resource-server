@@ -48,9 +48,7 @@ public class MeteringAuthZHandler implements Handler<RoutingContext> {
     String path = routingContext.normalizedPath();
     switch (path) {
       case "/ngsi-ld/v1/consumer/audit":
-        results.put("isAuthorised", true);
         routingContext.data().put("authInfo", results);
-        routingContext.data().put("isAuthorised", results.getBoolean("isAuthorised"));
         routingContext.next();
         break;
 
@@ -59,9 +57,7 @@ public class MeteringAuthZHandler implements Handler<RoutingContext> {
           routingContext.fail(
               new OgcException(401, "Not Authorized", "User with consumer role cannot access API"));
         } else {
-          results.put("isAuthorised", true);
           routingContext.data().put("authInfo", results);
-          routingContext.data().put("isAuthorised", results.getBoolean("isAuthorised"));
           routingContext.next();
         }
         break;
@@ -77,9 +73,7 @@ public class MeteringAuthZHandler implements Handler<RoutingContext> {
                   "Not Authorized",
                   "User with provider/delegate role cannot access API with RS token"));
         } else {
-          results.put("isAuthorised", true);
           routingContext.data().put("authInfo", results);
-          routingContext.data().put("isAuthorised", results.getBoolean("isAuthorised"));
           routingContext.next();
         }
         break;
