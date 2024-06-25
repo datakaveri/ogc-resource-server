@@ -59,6 +59,7 @@ public class CollectionOnboardingProcess implements ProcessService {
   private final boolean VERTX_EXECUTE_BLOCKING_IN_ORDER = false;
   private DataFromS3 dataFromS3;
   private Vertx vertx;
+
   public CollectionOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config,DataFromS3 dataFromS3,Vertx vertx) {
     this.pgPool = pgPool;
     this.webClient = webClient;
@@ -135,7 +136,7 @@ public class CollectionOnboardingProcess implements ProcessService {
    * @param requestInput the JSON object containing the resource ID
    * @return a future that completes with the request input if the resource ID is present in the catalog, or fails with an error message if the resource ID is not present in the catalog
    */
-  private Future<JsonObject> makeCatApiRequest(JsonObject requestInput) {
+  public Future<JsonObject> makeCatApiRequest(JsonObject requestInput) {
     Promise<JsonObject> promise = Promise.promise();
     webClient.get(catServerPort, catServerHost, catRequestUri)
       .addQueryParam("id", requestInput.getString("resourceId")).send()
@@ -576,7 +577,7 @@ public class CollectionOnboardingProcess implements ProcessService {
    *              - "collectionsDetailsTableId": The name of the PostgreSQL table to query.
    * @return A Future<Void> completes with the updated input object on success, or fails with an error message on failure.
    */
-  private Future<Void> ogr2ogrCmdExtent(JsonObject input) {
+  public Future<Void> ogr2ogrCmdExtent(JsonObject input) {
     LOGGER.debug("Trying to update the Collection table.");
     Promise<Void> promise = Promise.promise();
 

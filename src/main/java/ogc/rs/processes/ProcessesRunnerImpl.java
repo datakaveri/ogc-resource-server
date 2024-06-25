@@ -13,6 +13,7 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.common.DataFromS3;
+import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
@@ -79,6 +80,9 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
         switch (processName) {
           case "CollectionOnboarding":
             processService = new CollectionOnboardingProcess(pgPool, webClient, config,getS3Object(config),vertx);
+            break;
+          case "CollectionAppending":
+            processService = new CollectionAppendingProcess(pgPool, webClient, config,dataFromS3,vertx);
             break;
         }
 
