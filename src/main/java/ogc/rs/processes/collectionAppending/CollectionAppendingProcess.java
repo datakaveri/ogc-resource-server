@@ -137,7 +137,7 @@ public class CollectionAppendingProcess implements ProcessService {
                 .compose(mergeHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress",calculateProgress(6,7)).put("message",MERGE_TEMP_TABLE_MESSAGE)))
                 .compose(progressUpdateHandler->collectionOnboarding.ogr2ogrCmdExtent(requestInput))
-                .compose(checkDbHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,BBOX_UPDATE_MESSAGE+APPEND_SUCCESS_MESSAGE))
+                .compose(checkDbHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,BBOX_UPDATE_MESSAGE))
                 .onSuccess(successHandler -> {
                     deleteTempTable(requestInput)
                             .onComplete(deleteHandler ->
@@ -145,11 +145,11 @@ public class CollectionAppendingProcess implements ProcessService {
                             );
                     objectPromise.complete();
                 }).onFailure(failureHandler ->
-                    deleteTempTable(requestInput)
-                            .onComplete(deleteHandler ->{
-                                handleFailure(requestInput, failureHandler.getMessage(), objectPromise);
-                                LOGGER.error(APPEND_FAILURE_MESSAGE + " :"+ failureHandler.getMessage());
-                            })
+                        deleteTempTable(requestInput)
+                                .onComplete(deleteHandler ->{
+                                    handleFailure(requestInput, failureHandler.getMessage(), objectPromise);
+                                    LOGGER.error(APPEND_FAILURE_MESSAGE + failureHandler.getMessage());
+                                })
                 );
 
         return objectPromise.future();
@@ -176,12 +176,12 @@ public class CollectionAppendingProcess implements ProcessService {
                             if (successHandler.size() > 0) {
                                 promise.complete();
                             } else {
-                                LOGGER.error(COLLECTION_NOT_FOUND_MESSAGE + requestInput.getString("collectionsDetailsTableId"));
-                                promise.fail(COLLECTION_NOT_FOUND_MESSAGE + requestInput.getString("collectionsDetailsTableId"));
+                                LOGGER.error(COLLECTION_NOT_FOUND_MESSAGE + ":" + requestInput.getString("collectionsDetailsTableId"));
+                                promise.fail(COLLECTION_NOT_FOUND_MESSAGE);
                             }
                         }).onFailure(failureHandler -> {
-                            LOGGER.error(COLLECTION_EXISTENCE_FAIL_CHECK + requestInput.getString("collectionsDetailsTableId") + failureHandler.getMessage());
-                            promise.fail(COLLECTION_EXISTENCE_FAIL_CHECK + requestInput.getString("collectionsDetailsTableId"));
+                            LOGGER.error(COLLECTION_EXISTENCE_FAIL_CHECK +  ":" + requestInput.getString("collectionsDetailsTableId") + failureHandler.getMessage());
+                            promise.fail(COLLECTION_EXISTENCE_FAIL_CHECK);
                         }));
 
         return promise.future();
@@ -217,17 +217,17 @@ public class CollectionAppendingProcess implements ProcessService {
 
                         // Check if organisation is "EPSG" and sr_id is "4326"
                         if (!"EPSG".equals(authorityAndCode.get("authority"))) {
-                            String errorMsg = INVALID_ORGANISATION_MESSAGE + authorityAndCode.get("authority");
+                            String errorMsg = INVALID_ORGANISATION_MESSAGE + ": " + authorityAndCode.get("authority");
                             LOGGER.error(errorMsg);
-                            future.fail(errorMsg);
+                            future.fail(INVALID_ORGANISATION_MESSAGE);
                             return;
                         }
                         LOGGER.debug(VALID_ORGANISATION_MESSAGE);
 
                         if (!"4326".equals(authorityAndCode.get("code"))) {
-                            String errorMsg = INVALID_SR_ID_MESSAGE + authorityAndCode.get("code");
+                            String errorMsg = INVALID_SR_ID_MESSAGE + ": " + authorityAndCode.get("code");
                             LOGGER.error(errorMsg);
-                            future.fail(errorMsg);
+                            future.fail(INVALID_SR_ID_MESSAGE);
                             return;
                         }
                         LOGGER.debug(VALID_SR_ID_MESSAGE);
@@ -240,12 +240,12 @@ public class CollectionAppendingProcess implements ProcessService {
                                     } else {
                                         String errorMsg = SCHEMA_VALIDATION_FAILURE_MESSAGE + " GeoJSON schema: " + geoJsonAttributes + ", DB schema: " + dbSchema;
                                         LOGGER.error(errorMsg);
-                                        future.fail(errorMsg);
+                                        future.fail(SCHEMA_VALIDATION_FAILURE_MESSAGE);
                                     }
                                 })
                                 .onFailure(future::fail);
                     } catch (Exception e) {
-                        LOGGER.error(SCHEMA_VALIDATION_FAILURE_MESSAGE + e);
+                        LOGGER.error(SCHEMA_VALIDATION_FAILURE_MESSAGE +  ":" + e);
                         future.fail(e);
                     }
                 }, VERTX_EXECUTE_BLOCKING_IN_ORDER).onSuccess(handler -> promise.complete())
@@ -303,6 +303,8 @@ public class CollectionAppendingProcess implements ProcessService {
         ogrinfo.addArgument("--config");
         ogrinfo.addArgument("CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE");
         ogrinfo.addArgument("NO");
+
+        setS3OptionsForTesting(ogrinfo);
         ogrinfo.addArgument("--config");
         ogrinfo.addArgument("AWS_S3_ENDPOINT");
         ogrinfo.addArgument(awsEndPoint);
@@ -311,6 +313,7 @@ public class CollectionAppendingProcess implements ProcessService {
         ogrinfo.addArgument(accessKey);
         ogrinfo.addArgument("--config");
         ogrinfo.addArgument("AWS_SECRET_ACCESS_KEY");
+
         ogrinfo.addArgument(secretKey);
         ogrinfo.addArgument("-json");
         ogrinfo.addArgument("-ro");
@@ -445,7 +448,7 @@ public class CollectionAppendingProcess implements ProcessService {
                 future.complete();
             } catch (IOException e) {
                 String errLog = stderr.toString();
-                LOGGER.error(OGR2_OGR_FAILED_MESSAGE + errLog + e);
+                LOGGER.error(OGR_2_OGR_FAILED_MESSAGE + errLog + e);
                 future.fail(e);
             }
         }, VERTX_EXECUTE_BLOCKING_IN_ORDER).onSuccess(handler -> {
@@ -503,6 +506,7 @@ public class CollectionAppendingProcess implements ProcessService {
         cmdLine.addArgument("--debug");
         cmdLine.addArgument("ON");
 
+        setS3OptionsForTesting(cmdLine);
         cmdLine.addArgument("--config");
         cmdLine.addArgument("AWS_S3_ENDPOINT");
         cmdLine.addArgument(awsEndPoint);
@@ -590,7 +594,7 @@ public class CollectionAppendingProcess implements ProcessService {
                         })
                         .onFailure(failureHandler -> {
                             LOGGER.fatal(DELETE_TEMP_TABLE_FAILURE_MESSAGE + ": " + tempTableName + failureHandler.getMessage());
-                            promise.fail(DELETE_TEMP_TABLE_FAILURE_MESSAGE + ": " +tempTableName);
+                            promise.fail(DELETE_TEMP_TABLE_FAILURE_MESSAGE);
                         })
         );
 
@@ -611,10 +615,10 @@ public class CollectionAppendingProcess implements ProcessService {
                 .onSuccess(successHandler -> {
                     LOGGER.error("Process failed: {}" ,errorMessage);
                     promise.fail(errorMessage);
-                        })
+                })
                 .onFailure(failureHandler -> {
                     LOGGER.error(HANDLE_FAILURE_MESSAGE + ": " +failureHandler.getMessage());
-                    promise.fail(HANDLE_FAILURE_MESSAGE + ": " +failureHandler.getMessage());
+                    promise.fail(HANDLE_FAILURE_MESSAGE);
                 });
 
     }
@@ -630,4 +634,27 @@ public class CollectionAppendingProcess implements ProcessService {
     private float calculateProgress(int step, int totalSteps) {
         return (float) step / totalSteps * 100;
     }
+
+    /**
+     * Configures S3 options for integration testing. This method modifies the given
+     * {@link CommandLine} object to disable SSL checks and set virtual hosting to false
+     * if the "s3.mock" system property is enabled. These settings are useful for testing
+     * environments where SSL certificates and S3 virtual hosting are not needed or can cause issues.
+     *
+     * @param ogrinfo the {@link CommandLine} object to be configured with S3 options.
+     */
+
+    private void setS3OptionsForTesting(CommandLine ogrinfo){
+        if(System.getProperty("s3.mock") != null){
+            LOGGER.fatal("S3 mock is enabled therefore disabling SSL check and setting Virtual hosting to false.");
+            ogrinfo.addArgument("--config");
+            ogrinfo.addArgument("GDAL_HTTP_UNSAFESSL");
+            ogrinfo.addArgument("YES");
+            ogrinfo.addArgument("--config");
+            ogrinfo.addArgument("AWS_VIRTUAL_HOSTING");
+            ogrinfo.addArgument("FALSE");
+        }
+    }
+
+
 }

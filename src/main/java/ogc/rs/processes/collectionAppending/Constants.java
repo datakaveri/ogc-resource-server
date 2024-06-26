@@ -13,6 +13,8 @@ public class Constants {
             "Starting collection append process.";
     public static final String RESOURCE_OWNERSHIP_CHECK_MESSAGE=
             "Resource belongs to the user.";
+    public static final String RESOURCE_OWNERSHIP_ERROR=
+            "Resource does not belong to the user.";
     public static final String COLLECTION_EXISTS_MESSAGE =
             "Collection exists in collection_details table.";
     public static final String COLLECTION_NOT_FOUND_MESSAGE = "Collection is not found";
@@ -34,8 +36,8 @@ public class Constants {
             "Schema check is failed ";
     public static final String OGR_INFO_FAILED_MESSAGE =
             "ogrinfo execution failed ";
-    public static final String OGR2_OGR_FAILED_MESSAGE =
-            "ogr2ogr execution failed ";
+    public static final String OGR_2_OGR_FAILED_MESSAGE =
+            "Failed to append the collection in OGR2OGR.";
     public static final String APPEND_PROCESS_MESSAGE =
             "Data appended successfully into temp table";
     public static final String MERGE_TEMP_TABLE_MESSAGE =
@@ -47,7 +49,7 @@ public class Constants {
     public static final String DELETE_TEMP_TABLE_FAILURE_MESSAGE =
             "Failed to delete temporary table";
     public static final String BBOX_UPDATE_MESSAGE =
-            "Updated bbox for the collection.";
+            "Updated bbox for the collection and appending process is completed.";
     public static final String HANDLE_FAILURE_MESSAGE =
             "Failed to update job table status to FAILED after handler failure";
     public static final String APPEND_SUCCESS_MESSAGE=
