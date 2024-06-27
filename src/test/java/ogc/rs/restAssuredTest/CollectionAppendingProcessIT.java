@@ -66,7 +66,7 @@ public class CollectionAppendingProcessIT {
         inputs.put("title", "Valid Append File");
         inputs.put("description", "Valid file for appending test.");
         inputs.put("resourceId", "ce64aa01-cef0-4d44-aaca-0d5cfdd5f20d");
-        inputs.put("version", "1.1.0");
+        inputs.put("version", "1.0.0");
 
         requestBody.put("inputs", inputs);
 
@@ -108,7 +108,6 @@ public class CollectionAppendingProcessIT {
         LOGGER.debug("Testing Success: Process Accepted");
         String token = getToken();
         Response response = sendExecutionRequest(processId, token, requestBody());
-        LOGGER.debug("Execution Response: " + response.prettyPrint());
         response.then().statusCode(201).body("status", is(ACCEPTED.toString()));
     }
 
@@ -119,7 +118,6 @@ public class CollectionAppendingProcessIT {
         LOGGER.debug("Testing Failure: Process does not Exist");
         String invalidProcessId = "b118b4d4-0bc1-4d0b-b137-fdf5b0558c1b";
         Response response = sendExecutionRequest(invalidProcessId, getToken(), requestBody());
-        LOGGER.debug("Execution Response: " + response.prettyPrint());
         response.then().statusCode(404).body(TYPE_KEY, is(NOT_FOUND));
     }
 
@@ -142,13 +140,12 @@ public class CollectionAppendingProcessIT {
 
         String token = new FakeTokenBuilder().withSub(UUID.fromString("0ff3d301-9402-4430-8e18-6f95e4c03c97"))
                 .withResourceServer().withRoleProvider().withCons(new JsonObject()).build();
-        LOGGER.debug("Token is  " + token);
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody());
         String jobId = sendExecutionRequest.body().path("jobId");
-        LOGGER.debug("Job ID: " + jobId);
         Thread.sleep(3000);
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(RESOURCE_OWNERSHIP_ERROR));
+
     }
 
     @Test
@@ -158,16 +155,15 @@ public class CollectionAppendingProcessIT {
         LOGGER.debug("Failure: checkIfCollectionPresent");
 
         String token = getToken();
-        LOGGER.debug("Token is  " + token);
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("resourceId", "61f2187e-affe-4f28-be0e-fe1cd37dbd4e")
                 .put("title", "Non-existing Collection test").put("description", "Invalid collection id for testing");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        LOGGER.debug("Job ID: " + jobId);
         Thread.sleep(3000);
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(COLLECTION_NOT_FOUND_MESSAGE));
+
     }
 
     @Test
@@ -177,7 +173,6 @@ public class CollectionAppendingProcessIT {
         LOGGER.debug("Failure: Invalid organization");
 
         String token = getToken();
-        LOGGER.debug("Token is  " + token);
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("fileName", "not_EPSG_crs.json")
                 .put("title", "Invalid Organization test").put("description", "File with invalid Organization for testing.");
@@ -186,6 +181,7 @@ public class CollectionAppendingProcessIT {
         String jobId = sendExecutionRequest.body().path("jobId");
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(INVALID_ORGANISATION_MESSAGE));
+
     }
 
     @Test
@@ -195,7 +191,6 @@ public class CollectionAppendingProcessIT {
         LOGGER.debug("Failure: Invalid SRID");
 
         String token = getToken();
-        LOGGER.debug("Token is  " + token);
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("fileName", "not_registered_EPSG.json")
                 .put("title", "Invalid CRS- SRID test").put("description", "File with invalid CRS- SRID for testing.");
@@ -204,6 +199,7 @@ public class CollectionAppendingProcessIT {
         Thread.sleep(3000);
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(INVALID_SR_ID_MESSAGE));
+
     }
 
     @Test
@@ -213,7 +209,6 @@ public class CollectionAppendingProcessIT {
         LOGGER.debug("Failure: checkSchema");
 
         String token = getToken();
-        LOGGER.debug("Token is  " + token);
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("fileName", "invalid_schema_file.json");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
@@ -221,6 +216,7 @@ public class CollectionAppendingProcessIT {
         Thread.sleep(3000);
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(SCHEMA_VALIDATION_FAILURE_MESSAGE));
+
     }
 
     @Test
@@ -230,7 +226,6 @@ public class CollectionAppendingProcessIT {
         LOGGER.debug("Success: Appending data to collection");
 
         String token = getToken();
-        LOGGER.debug("Token is  " + token);
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("fileName", "bucket1/append_1000_point_features.json")
                 .put("title", "Valid Append File").put("description", "Valid file for appending test.");
@@ -239,6 +234,7 @@ public class CollectionAppendingProcessIT {
         Thread.sleep(40000);
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(BBOX_UPDATE_MESSAGE));
+
     }
 
 }
