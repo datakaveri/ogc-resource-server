@@ -30,6 +30,8 @@ public class Constants {
             "4326 SR_ID check for the CRS is successful";
     public static final String SCHEMA_CRS_VALIDATION_SUCCESS_MESSAGE =
             "Schema check and CRS check are completed successfully.";
+    public static final String SCHEMA_CRS_VALIDATION_FAILURE_MESSAGE =
+            "Schema check and CRS check failed.";
     public static final String SCHEMA_VALIDATION_SUCCESS_MESSAGE =
             "Schema check is completed successfully.";
     public static final String SCHEMA_VALIDATION_FAILURE_MESSAGE =
