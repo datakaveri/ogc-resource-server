@@ -56,6 +56,9 @@ public class CollectionAppendingProcessIT {
         given().port(PORT).body(invalidSchemaFile).when().put(BUCKET_PATH + "invalid_schema_file.json")
                 .then().statusCode(200);
 
+        File layersWithDiffGeomFile = new File("src/test/resources/processFiles/2LayersWithDifferentGeom.json");
+        given().port(PORT).body(layersWithDiffGeomFile).when().put(BUCKET_PATH + "2LayersWithDifferentGeom.json");
+
     }
 
     private JsonObject requestBody() {
@@ -221,6 +224,23 @@ public class CollectionAppendingProcessIT {
 
     @Test
     @Order(10)
+    @Description("Failure: Invalid file having 2 layers with different geometry")
+    public void testExecuteFail2DiffGeo() throws InterruptedException {
+        LOGGER.debug("Failure: Invalid file having 2 layers with different geometry");
+
+        String token = getToken();
+        JsonObject requestBody = requestBody();
+        requestBody.getJsonObject("inputs").put("fileName", "2LayersWithDifferentGeom.json")
+                .put("title", "Invalid Geometry test").put("description", "File having 2 layers with different geometry.");
+        Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
+        String jobId = sendExecutionRequest.body().path("jobId");
+        Thread.sleep(6000);
+        Response getJobStatus = sendJobStatusRequest(jobId, token);
+        getJobStatus.then().statusCode(200).body("message", is(OGR_2_OGR_FAILED_MESSAGE));
+    }
+
+    @Test
+    @Order(11)
     @Description("Success: Appending data to collection")
     public void testExecuteAppendingSuccess() throws InterruptedException {
         LOGGER.debug("Success: Appending data to collection");

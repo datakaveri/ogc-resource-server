@@ -1,0 +1,105 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "E9A00133-5E56-401D-A9DC-21568F968BCF",
+        "nhs_regional_ha_code": "12345",
+        "country_code": "GB",
+        "nhs_ha_code": "67890",
+        "positional_quality_indicator": 1,
+        "admin_ward_code": "ABC123",
+        "postcode": "AB1 2CD",
+        "admin_county_code": "XYZ",
+        "admin_district_code": "123",
+        "geom": {
+          "type": "Point",
+          "coordinates": [463559.61, 1212995.55]
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [463559.61, 1212995.55]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "BA637B65-DA01-4F42-9535-BF6DA0825411",
+        "nhs_regional_ha_code": null,
+        "country_code": null,
+        "nhs_ha_code": null,
+        "positional_quality_indicator": null,
+        "admin_ward_code": null,
+        "postcode": null,
+        "admin_county_code": null,
+        "admin_district_code": null,
+        "geom": {
+          "type": "LineString",
+          "coordinates": [
+            [463559.61, 1212995.55],
+            [463604.12, 1212997.27],
+            [463800.06, 1212956.44],
+            [463845.05, 1212930.72],
+            [463925.15, 1212838.32],
+            [463965.2, 1212841.92],
+            [464047.31, 1212805.6],
+            [464118.11, 1212736.5],
+            [464189.25, 1212701.65],
+            [464203.2, 1212646.75],
+            [464180.4, 1212582],
+            [464168.1, 1212458],
+            [464188.6, 1212433.5]
+          ]
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [463559.61, 1212995.55],
+          [463604.12, 1212997.27],
+          [463800.06, 1212956.44],
+          [463845.05, 1212930.72],
+          [463925.15, 1212838.32],
+          [463965.2, 1212841.92],
+          [464047.31, 1212805.6],
+          [464118.11, 1212736.5],
+          [464189.25, 1212701.65],
+          [464203.2, 1212646.75],
+          [464180.4, 1212582],
+          [464168.1, 1212458],
+          [464188.6, 1212433.5]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "68E08192-26AC-410C-BE2D-0D9505FAB1E4",
+        "nhs_regional_ha_code": null,
+        "country_code": null,
+        "nhs_ha_code": null,
+        "positional_quality_indicator": null,
+        "admin_ward_code": null,
+        "postcode": null,
+        "admin_county_code": null,
+        "admin_district_code": null,
+        "geom": {
+          "type": "LineString",
+          "coordinates": [
+            [459935.86, 1210199.29],
+            [459969.75, 1210501.38]
+          ]
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [459935.86, 1210199.29],
+          [459969.75, 1210501.38]
+        ]
+      }
+    }
+  ]
+}
