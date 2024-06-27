@@ -205,7 +205,7 @@ public class CollectionAppendingProcess implements ProcessService {
     private Future<Void> validateSchemaAndCRS(JsonObject requestInput) {
         Promise<Void> promise = Promise.promise();
 
-        vertx.executeBlocking(future -> {
+        vertx.executeBlocking(schemaCRSCheckPromise -> {
                     try {
                         JsonObject geoJsonDataSetInfo = fetchDataSetInfoWithOgrinfo(requestInput);
                         Set<String> geoJsonAttributes = extractAttributesFromDataSetInfo(geoJsonDataSetInfo);
@@ -219,7 +219,7 @@ public class CollectionAppendingProcess implements ProcessService {
                         if (!"EPSG".equals(authorityAndCode.get("authority"))) {
                             String errorMsg = INVALID_ORGANISATION_MESSAGE + ": " + authorityAndCode.get("authority");
                             LOGGER.error(errorMsg);
-                            future.fail(INVALID_ORGANISATION_MESSAGE);
+                            schemaCRSCheckPromise.fail(INVALID_ORGANISATION_MESSAGE);
                             return;
                         }
                         LOGGER.debug(VALID_ORGANISATION_MESSAGE);
@@ -227,7 +227,7 @@ public class CollectionAppendingProcess implements ProcessService {
                         if (!"4326".equals(authorityAndCode.get("code"))) {
                             String errorMsg = INVALID_SR_ID_MESSAGE + ": " + authorityAndCode.get("code");
                             LOGGER.error(errorMsg);
-                            future.fail(INVALID_SR_ID_MESSAGE);
+                            schemaCRSCheckPromise.fail(INVALID_SR_ID_MESSAGE);
                             return;
                         }
                         LOGGER.debug(VALID_SR_ID_MESSAGE);
@@ -236,17 +236,17 @@ public class CollectionAppendingProcess implements ProcessService {
                                 .onSuccess(dbSchema -> {
                                     if (geoJsonAttributes.equals(dbSchema)) {
                                         LOGGER.debug(SCHEMA_VALIDATION_SUCCESS_MESSAGE);
-                                        future.complete();
+                                        schemaCRSCheckPromise.complete();
                                     } else {
                                         String errorMsg = SCHEMA_VALIDATION_FAILURE_MESSAGE + " GeoJSON schema: " + geoJsonAttributes + ", DB schema: " + dbSchema;
                                         LOGGER.error(errorMsg);
-                                        future.fail(SCHEMA_VALIDATION_FAILURE_MESSAGE);
+                                        schemaCRSCheckPromise.fail(SCHEMA_VALIDATION_FAILURE_MESSAGE);
                                     }
                                 })
-                                .onFailure(future::fail);
+                                .onFailure(schemaCRSCheckPromise::fail);
                     } catch (Exception e) {
-                        LOGGER.error(SCHEMA_VALIDATION_FAILURE_MESSAGE +  ":" + e);
-                        future.fail(e);
+                        LOGGER.error(SCHEMA_CRS_VALIDATION_FAILURE_MESSAGE +  ":" + e);
+                        schemaCRSCheckPromise.fail(SCHEMA_CRS_VALIDATION_FAILURE_MESSAGE);
                     }
                 }, VERTX_EXECUTE_BLOCKING_IN_ORDER).onSuccess(handler -> promise.complete())
                 .onFailure(promise::fail);
@@ -427,7 +427,8 @@ public class CollectionAppendingProcess implements ProcessService {
 
         Promise<Void> promise = Promise.promise();
 
-        vertx.executeBlocking(future -> {
+        vertx.executeBlocking(appendingPromise -> {
+
             CommandLine cmdLine = getOgr2ogrCommandLine(requestInput, fileName);
             LOGGER.debug("Inside Execution and the command line is: {} ",cmdLine);
             DefaultExecutor executor = DefaultExecutor.builder().get();
@@ -445,11 +446,11 @@ public class CollectionAppendingProcess implements ProcessService {
                 String errLog = stderr.toString();
                 LOGGER.debug("ogr2ogr output: {}" , outLog);
                 LOGGER.debug("ogr2ogr error output: {}" , errLog);
-                future.complete();
+                appendingPromise.complete();
             } catch (IOException e) {
                 String errLog = stderr.toString();
                 LOGGER.error(OGR_2_OGR_FAILED_MESSAGE + errLog + e);
-                future.fail(e);
+                appendingPromise.fail(OGR_2_OGR_FAILED_MESSAGE);
             }
         }, VERTX_EXECUTE_BLOCKING_IN_ORDER).onSuccess(handler -> {
             LOGGER.debug(APPEND_PROCESS_MESSAGE);
