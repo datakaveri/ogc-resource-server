@@ -17,9 +17,7 @@ import java.util.UUID;
 import static io.restassured.RestAssured.given;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.processes.collectionAppending.Constants.*;
-import static ogc.rs.processes.collectionOnboarding.Constants.*;
 import static ogc.rs.processes.util.Status.ACCEPTED;
-import static ogc.rs.restAssuredTest.Constant.*;
 import static org.hamcrest.Matchers.is;
 
 @ExtendWith(RestAssuredConfigExtension.class)
@@ -29,7 +27,9 @@ public class CollectionAppendingProcessIT {
     String executionEndpoint = "/processes/{processId}/execution";
     String jobStatusEndpoint = "/jobs/{jobId}";
     String processId = "b118b4d4-0bc1-4d0b-b137-fdf5b0558c1d";
-
+    public static final int PORT = 9090;
+    public static final String BUCKET_PATH_FOR_S3="/bucket1/bucket1/";
+    public static final String BUCKET_PATH="/bucket1/";
 
     @BeforeAll
     public static void setup() throws IOException {
