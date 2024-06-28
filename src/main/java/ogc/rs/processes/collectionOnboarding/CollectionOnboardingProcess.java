@@ -32,7 +32,6 @@ import java.util.Objects;
 import static ogc.rs.processes.collectionOnboarding.Constants.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 
 /**
@@ -146,8 +145,8 @@ public class CollectionOnboardingProcess implements ProcessService {
             responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
               .getString("ownerUserId"));
           if (!(requestInput.getValue("owner").toString().equals(requestInput.getValue("userId").toString()))) {
-            LOGGER.error("Resource does not belong to the user.");
-            promise.fail("Resource does not belong to the user.");
+            LOGGER.error(RESOURCE_OWNERSHIP_ERROR);
+            promise.fail(RESOURCE_OWNERSHIP_ERROR);
             return;
           }
           requestInput.put("accessPolicy",
@@ -155,12 +154,12 @@ public class CollectionOnboardingProcess implements ProcessService {
               .getString("accessPolicy"));
           promise.complete(requestInput);
         } else {
-          LOGGER.error("Item not present in catalogue");
-          promise.fail("Item not present in catalogue");
+          LOGGER.error(ITEM_NOT_PRESENT_ERROR);
+          promise.fail(ITEM_NOT_PRESENT_ERROR);
         }
       }).onFailure(failureResponseFromCat -> {
-        LOGGER.error("Failed to get response from catalogue " + failureResponseFromCat.getMessage());
-        promise.fail("Failed to get response from Catalogue.");
+        LOGGER.error(CAT_RESPONSE_FAILURE + failureResponseFromCat.getMessage());
+        promise.fail(CAT_RESPONSE_FAILURE);
       });
     return promise.future();
   }
@@ -180,8 +179,8 @@ public class CollectionOnboardingProcess implements ProcessService {
           if (successHandler.size() == 0) {
             promise.complete();
           } else {
-            LOGGER.error("Collection already present.");
-            promise.fail("Collection already present.");
+            LOGGER.error(COLLECTION_PRESENT_ERROR);
+            promise.fail(COLLECTION_PRESENT_ERROR);
           }
         }).onFailure(failureHandler -> {
           LOGGER.error("Failed to check collection in db {}", failureHandler.getMessage());
@@ -235,8 +234,8 @@ public class CollectionOnboardingProcess implements ProcessService {
               JsonObject featureProperties = extractFeatureProperties(cmdOutput);
               String organization = featureProperties.getString("organization");
               if (!organization.equals("EPSG")) {
-                LOGGER.error("CRS not present as EPSG");
-                promise.fail("CRS not present as EPSG");
+                LOGGER.error(CRS_ERROR);
+                promise.fail(CRS_ERROR);
                 return;
               }
               int organizationCoOrdId = featureProperties.getInteger("organization_coordsys_id");
@@ -246,7 +245,7 @@ public class CollectionOnboardingProcess implements ProcessService {
         .onFailure(
             failureHandler -> {
               LOGGER.error("Failed in ogrInfo because {}", failureHandler.getMessage());
-              promise.fail("Failed in ogrInfo.");
+              promise.fail(OGR_INFO_FAILED);
             });
     return promise.future();
   }
@@ -265,7 +264,7 @@ public class CollectionOnboardingProcess implements ProcessService {
       .execute(Tuple.of(organizationCoordId)).onSuccess(rows -> {
         if (!rows.iterator().hasNext()) {
           LOGGER.error("Failed to fetch CRS: No rows found.");
-          onboardingPromise.fail("Failed to fetch CRS.");
+          onboardingPromise.fail(CRS_FETCH_FAILED);
           return;
         }
         Row row = rows.iterator().next();
@@ -275,10 +274,24 @@ public class CollectionOnboardingProcess implements ProcessService {
         input.put("srid", srid);
         onboardingPromise.complete(input);
       }).onFailure(failureHandler -> {
-        LOGGER.error("Failed to fetch CRS from table: " + failureHandler.getMessage());
+                LOGGER.error("Failed to fetch CRS from table: {}", failureHandler.getMessage());
         onboardingPromise.fail("Failed to fetch CRS from table.");
       }));
   }
+
+  // this method is for Integration Testing.
+  private void setS3OptionsForTesting(CommandLine ogrinfo){
+    if(System.getProperty("s3.mock") != null){
+      LOGGER.fatal("S3 mock is enabled therefore disabling SSL check and setting Virtual hosting to false.");
+      ogrinfo.addArgument("--config");
+      ogrinfo.addArgument("GDAL_HTTP_UNSAFESSL");
+      ogrinfo.addArgument("YES");
+      ogrinfo.addArgument("--config");
+      ogrinfo.addArgument("AWS_VIRTUAL_HOSTING");
+      ogrinfo.addArgument("FALSE");
+    }
+  }
+
   /**
    This method, getOrgInfoCommandLine, is utilized for generating a command line to execute the ogrinfo command.
    The ogrinfo command serves the purpose of extracting feature properties from the command line output,
@@ -289,9 +302,12 @@ public class CollectionOnboardingProcess implements ProcessService {
 
     String filename = "/"+input.getString("fileName");
     CommandLine ogrinfo = new CommandLine("ogrinfo");
+    ogrinfo.addArgument("--debug");
+    ogrinfo.addArgument("ON");
     ogrinfo.addArgument("--config");
     ogrinfo.addArgument("CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE");
     ogrinfo.addArgument("NO");
+    setS3OptionsForTesting(ogrinfo);
     ogrinfo.addArgument("--config");
     ogrinfo.addArgument("AWS_S3_ENDPOINT");
     ogrinfo.addArgument(awsEndPoint);
@@ -336,8 +352,8 @@ public class CollectionOnboardingProcess implements ProcessService {
         LOGGER.debug("OGR2OGR cmd executed successfully.");
         onboardingPromise.complete(input);
       } catch (IOException e1) {
-        LOGGER.error("Failed to onboard the collection because {}", e1.getMessage());
-        onboardingPromise.fail("Failed to onboard the collection in OGR2OGR.");
+        LOGGER.error("Failed to onboard the collection in ogr2ogr because {}", e1.getMessage());
+        onboardingPromise.fail(OGR_2_OGR_FAILED);
       }},VERTX_EXECUTE_BLOCKING_IN_ORDER).onSuccess(promise::complete).onFailure(promise::fail);
     return promise.future();
   }
@@ -385,7 +401,7 @@ public class CollectionOnboardingProcess implements ProcessService {
         LOGGER.debug("Collection onboarded successfully ");
         promise.complete();
       }).onFailure(failure -> {
-        String message = Objects.equals(failure.getMessage(), "Failed to onboard the collection in OGR2OGR") ? failure.getMessage() :  "Failed to onboard the collection in db.";
+        String message = Objects.equals(failure.getMessage(), OGR_2_OGR_FAILED) ? failure.getMessage() :  ONBOARDING_FAILED_DB_ERROR;
         LOGGER.error("Failed to onboard the collection because {} ",failure.getMessage());
         promise.fail(message);
       }));
@@ -431,7 +447,7 @@ public class CollectionOnboardingProcess implements ProcessService {
     cmdLine.addArgument("--debug");
     cmdLine.addArgument("ON");
     cmdLine.addArgument("-append");
-
+    setS3OptionsForTesting(cmdLine);
     cmdLine.addArgument("--config");
     cmdLine.addArgument("AWS_S3_ENDPOINT");
     cmdLine.addArgument(awsEndPoint);
@@ -483,8 +499,8 @@ public class CollectionOnboardingProcess implements ProcessService {
                                                     .apply("demo"))
                                             .execute();
                                       } else {
-                                        LOGGER.error("Table does not exist.");
-                                        throw new RuntimeException("Table does not exist.");
+                                        LOGGER.error(TABLE_NOT_EXIST_ERROR);
+                                        throw new RuntimeException(TABLE_NOT_EXIST_ERROR);
                                       }
                                     })
                                 .onSuccess(
@@ -494,9 +510,9 @@ public class CollectionOnboardingProcess implements ProcessService {
                                     });
                           } else {
                             conn.close();
-                            LOGGER.error("Collection not present in collections_details");
+                            LOGGER.error(COLLECTION_NOT_PRESENT_ERROR);
                             return Future.failedFuture(
-                                "Collection not present in collections_details");
+                                    COLLECTION_NOT_PRESENT_ERROR);
                           }
                         })
                     .onFailure(
@@ -609,9 +625,9 @@ public class CollectionOnboardingProcess implements ProcessService {
                         .getJsonArray("extent",new JsonArray());
                 extentPromise.complete(extentArray);
               } catch (IOException e1) {
-                LOGGER.error("Failed while getting ogrInfo because {}", e1.getMessage());
+                LOGGER.error("Failed while getting ogrInfo because {} and also the collection is there in the database", e1.getMessage());
                 extentPromise.fail(
-                    "Failed while getting ogrInfo because {} " + e1.getMessage());
+                    "Failed while getting ogrInfo because {} and also the collection is there in the database" + e1.getMessage());
               }
             },
             VERTX_EXECUTE_BLOCKING_IN_ORDER)
@@ -622,7 +638,7 @@ public class CollectionOnboardingProcess implements ProcessService {
             })
         .onFailure(
             failureHandler -> {
-              LOGGER.error("Failed in ogrInfo because {}", failureHandler.getMessage());
+              LOGGER.error("Failed in ogrInfo while getting extent because {}", failureHandler.getMessage());
               promise.fail(failureHandler.getMessage());
             });
     return promise.future();
