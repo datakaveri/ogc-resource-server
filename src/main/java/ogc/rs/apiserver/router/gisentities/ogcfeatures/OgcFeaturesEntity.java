@@ -17,7 +17,6 @@ import io.vertx.ext.web.openapi.RouterBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ogc.rs.apiserver.ApiServerVerticle;
-import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.handlers.FailureHandler;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 import ogc.rs.apiserver.router.routerbuilders.OgcRouterBuilder;
@@ -61,24 +60,28 @@ public class OgcFeaturesEntity implements GisEntityInterface {
             .failureHandler(failureHandler);
 
       } else if (opId.matches(CollectionMetadata.OGC_GET_COLLECTION_ITEMS_OP_ID_REGEX)) {
-        builder.operation(opId).handler(AuthHandler.create(vertx))
-            .handler(apiServerVerticle::auditAfterApiEnded)
-            .handler(apiServerVerticle::validateQueryParams)
-            .handler(apiServerVerticle::getFeatures)
-            .handler(apiServerVerticle::putCommonResponseHeaders)
-            .handler(apiServerVerticle::buildResponse)
-            .failureHandler(failureHandler);
+        builder.operation(opId)
+                .handler(ogcRouterBuilder.tokenAuthenticationHandler)
+                .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
+                .handler(apiServerVerticle::auditAfterApiEnded)
+                .handler(apiServerVerticle::validateQueryParams)
+                .handler(apiServerVerticle::getFeatures)
+                .handler(apiServerVerticle::putCommonResponseHeaders)
+                .handler(apiServerVerticle::buildResponse)
+                .failureHandler(failureHandler);
 
       } else if (opId.matches(CollectionMetadata.OGC_GET_SPECIFIC_FEATURE_OP_ID_REGEX)) {
-        builder.operation(opId).handler(AuthHandler.create(vertx))
-            .handler(apiServerVerticle::auditAfterApiEnded)
-            .handler(apiServerVerticle::validateQueryParams)
-            .handler(apiServerVerticle::getFeature)
-            .handler(apiServerVerticle::putCommonResponseHeaders)
-            .handler(apiServerVerticle::buildResponse)
-            .failureHandler(failureHandler);
-      }
-    });
+            builder.operation(opId)
+                    .handler(ogcRouterBuilder.tokenAuthenticationHandler)
+                    .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
+                    .handler(apiServerVerticle::auditAfterApiEnded)
+                    .handler(apiServerVerticle::validateQueryParams)
+                    .handler(apiServerVerticle::getFeature)
+                    .handler(apiServerVerticle::putCommonResponseHeaders)
+                    .handler(apiServerVerticle::buildResponse)
+                    .failureHandler(failureHandler);
+          }
+        });
   }
 
   @Override

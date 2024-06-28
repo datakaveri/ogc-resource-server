@@ -22,16 +22,6 @@
       "dbPassword": ""
     },
     {
-      "id": "ogc.rs.authenticator.AuthenticationVerticle",
-      "isWorkerVerticle":false,
-      "verticleInstances": 1,
-      "audience": "rs.iudx.io",
-      "authServerHost": "",
-      "catServerHost": "",
-      "catServerPort": 443,
-      "jwtIgnoreExpiry": false
-    },
-    {
       "id": "ogc.rs.databroker.DataBrokerVerticle",
       "isWorkerVerticle":false,
       "verticleInstances": 1,
@@ -82,7 +72,10 @@
         "POINT" : 10000,
         "MULTIPOLYGON" : 10000,
         "POLYGON" : 10
-      }
+      },
+      "authServerHost": "",
+      "audience": "",
+      "issuer": ""
     },
     {
       "id": "ogc.rs.metering.MeteringVerticle",

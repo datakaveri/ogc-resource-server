@@ -45,20 +45,25 @@ public class DataFromS3 {
           headers.forEach(req::putHeader);
           return req.send();
         })
-        .compose(res -> {
+        .onSuccess(res -> {
           if (res.statusCode() == 404) {
+            LOGGER.error("FILE not found {}",url.toString());
             response.fail(new OgcException(404, "Not Found", "File not found."));
-            return response.future();
           } else if (res.statusCode() == 200) {
             response.complete(res);
-            return response.future();
           } else {
-            LOGGER.error("Internal Server Error, Something went wrong here.");
+            LOGGER.error("Internal Server Error, Something went wrong here. {},{},{},{}",res.statusCode(),httpMethod,url.toString(),res.body().result().toString());
             response.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
-            return response.future();
           }
-        });
-
+        }).onFailure( 
+            handler -> { 
+              LOGGER.error("Something went wrong when interacting with S3 - {}. Method {}, URL {} ",
+                  handler.getMessage(), httpMethod, url.toString());
+              
+              response.fail( 
+                  new OgcException(500, "Internal Server Error", "Internal Server Error")); 
+            });
+    
     return response.future();
   }
 

@@ -56,12 +56,14 @@ public class OgcTilesEntity implements GisEntityInterface{
               .handler(apiServerVerticle::buildResponse)
               .failureHandler(failureHandler);
 
-          builder
-              .operation(TILE_API)
-              .handler(apiServerVerticle::getTile)
-              .handler(apiServerVerticle::putCommonResponseHeaders)
-              .handler(apiServerVerticle::buildResponse)
-              .failureHandler(failureHandler);
+    builder
+        .operation(TILE_API)
+            .handler(ogcRouterBuilder.tokenAuthenticationHandler)
+            .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
+            .handler(apiServerVerticle::getTile)
+            .handler(apiServerVerticle::putCommonResponseHeaders)
+            .handler(apiServerVerticle::buildResponse)
+            .failureHandler(failureHandler);
   }
 
   @Override

@@ -7,7 +7,6 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import ogc.rs.apiserver.ApiServerVerticle;
-import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.router.RouterManager;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 
@@ -30,8 +29,8 @@ public class StacRouterBuilder extends EntityRouterBuilder {
   }
 
   /**
-   * Create an instance of {@link StacRouterBuilder}. 
-   * 
+   * Create an instance of {@link StacRouterBuilder}.
+   *
    * @param apiServerVerticle the {@link ApiServerVerticle} whose router is to be updated
    * @param vertx an instance of Vert.x
    * @param config the config JSON
@@ -42,7 +41,7 @@ public class StacRouterBuilder extends EntityRouterBuilder {
     Promise<StacRouterBuilder> promise = Promise.promise();
 
     Future<RouterBuilder> routerBuilderFut = RouterBuilder.create(vertx, OAS_URI_PATH);
-    
+
     routerBuilderFut
         .onSuccess(routerBuilder -> promise
             .complete(new StacRouterBuilder(apiServerVerticle, vertx, config, routerBuilder)))
@@ -50,8 +49,8 @@ public class StacRouterBuilder extends EntityRouterBuilder {
 
     return promise.future();
   }
-  
-  
+
+
   @Override
   String getOasApiPath() {
     return OAS_API_PATH;
@@ -59,7 +58,7 @@ public class StacRouterBuilder extends EntityRouterBuilder {
 
   @Override
   void addImplSpecificRoutes() {
-    
+
     routerBuilder
     .operation(STAC_CATALOG_API)
     .handler(apiServerVerticle::stacCatalog)
@@ -81,22 +80,23 @@ public class StacRouterBuilder extends EntityRouterBuilder {
     .handler(apiServerVerticle::putCommonResponseHeaders)
     .handler(apiServerVerticle::buildResponse)
     .failureHandler(failureHandler);
-    
+
     routerBuilder
-    .operation(ASSET_API)
-    .handler(AuthHandler.create(vertx))
-    .handler(apiServerVerticle::auditAfterApiEnded)
-    .handler(apiServerVerticle::getAssets)
-    .handler(apiServerVerticle::putCommonResponseHeaders)
-    .handler(apiServerVerticle::buildResponse)
-    .failureHandler(failureHandler);
-    
+        .operation(ASSET_API)
+        .handler(tokenAuthenticationHandler)
+        .handler(stacAssetsAuthZHandler)
+        .handler(apiServerVerticle::auditAfterApiEnded)
+        .handler(apiServerVerticle::getAssets)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
+
     /**
      *  For all implementers of GisEntityInterface, add the STAC routes to the RouterBuilder.
      */
     ServiceLoader<GisEntityInterface> loader = ServiceLoader.load(GisEntityInterface.class);
     loader.forEach(i -> i.giveStacRoutes(this));
-    
+
     return;
   }
 }

@@ -56,4 +56,6 @@ public interface DatabaseService {
      * @return list of {@link JsonObject}, which is cast to the required type by the caller.
      */
     Future<List<JsonObject>> getOgcFeatureCollectionMetadataForOasSpec(List<String> existingCollectionUuidIds);
+
+    Future<Boolean> getAccess(String id);
 }

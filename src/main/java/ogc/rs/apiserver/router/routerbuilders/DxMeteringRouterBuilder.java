@@ -8,11 +8,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import ogc.rs.apiserver.ApiServerVerticle;
-import ogc.rs.apiserver.handlers.AuthHandler;
 
 /**
  * Class to build router for DX Metering APIs. <br>
- * 
+ *
  * <b>NOTE: <b/> Although this class is an instance of {@link EntityRouterBuilder}, there is no
  * dynamic route generation done by this class. Only static routes are supplied.
  *
@@ -29,7 +28,7 @@ public class DxMeteringRouterBuilder extends EntityRouterBuilder {
 
   /**
    * Create an instance of {@link DxMeteringRouterBuilder}.
-   * 
+   *
    * @param apiServerVerticle the {@link ApiServerVerticle} whose router is to be updated
    * @param vertx an instance of Vert.x
    * @param config the config JSON
@@ -58,7 +57,8 @@ public class DxMeteringRouterBuilder extends EntityRouterBuilder {
   void addImplSpecificRoutes() {
 
     routerBuilder.operation(SUMMARY_AUDIT_API)
-        .handler(AuthHandler.create(vertx))
+        .handler(tokenAuthenticationHandler)
+        .handler(meteringAuthZHandler)
         .handler(apiServerVerticle::getSummary)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)
@@ -66,21 +66,26 @@ public class DxMeteringRouterBuilder extends EntityRouterBuilder {
 
 
     routerBuilder.operation(OVERVIEW_AUDIT_API)
-        .handler(AuthHandler.create(vertx))
+        .handler(tokenAuthenticationHandler)
+        .handler(meteringAuthZHandler)
         .handler(apiServerVerticle::getMonthlyOverview)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)
         .failureHandler(failureHandler);
 
-    routerBuilder.operation(CONSUMER_AUDIT_API)
-        .handler(AuthHandler.create(vertx))
+    routerBuilder
+        .operation(CONSUMER_AUDIT_API)
+        .handler(tokenAuthenticationHandler)
+        .handler(meteringAuthZHandler)
         .handler(apiServerVerticle::getConsumerAuditDetail)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)
         .failureHandler(failureHandler);
 
-    routerBuilder.operation(PROVIDER_AUDIT_API)
-        .handler(AuthHandler.create(vertx))
+    routerBuilder
+        .operation(PROVIDER_AUDIT_API)
+        .handler(tokenAuthenticationHandler)
+        .handler(meteringAuthZHandler)
         .handler(apiServerVerticle::getProviderAuditDetail)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)

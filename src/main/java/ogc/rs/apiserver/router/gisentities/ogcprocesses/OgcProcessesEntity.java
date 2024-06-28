@@ -6,7 +6,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import ogc.rs.apiserver.ApiServerVerticle;
-import ogc.rs.apiserver.handlers.AuthHandler;
 import ogc.rs.apiserver.handlers.FailureHandler;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 import ogc.rs.apiserver.router.routerbuilders.OgcRouterBuilder;
@@ -32,7 +31,8 @@ public class OgcProcessesEntity implements GisEntityInterface{
     
     builder
         .operation(EXECUTE_API)
-        .handler(AuthHandler.create(vertx))
+            .handler(ogcRouterBuilder.tokenAuthenticationHandler)
+            .handler(ogcRouterBuilder.processAuthZHandler)
         .handler(apiServerVerticle::auditAfterApiEnded)
         .handler(apiServerVerticle::executeJob)
         .handler(apiServerVerticle::putCommonResponseHeaders)
@@ -50,7 +50,8 @@ public class OgcProcessesEntity implements GisEntityInterface{
 
     builder
         .operation(STATUS_API)
-        .handler(AuthHandler.create(vertx))
+        .handler(ogcRouterBuilder.tokenAuthenticationHandler)
+        .handler(ogcRouterBuilder.processAuthZHandler)
         .handler(apiServerVerticle::getStatus)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)
