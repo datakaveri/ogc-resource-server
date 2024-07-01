@@ -300,6 +300,9 @@ public class CollectionAppendingProcess implements ProcessService {
 
         String filename = "/" + input.getString("fileName");
         CommandLine ogrinfo = new CommandLine("ogrinfo");
+        ogrinfo.addArgument("--debug");
+        ogrinfo.addArgument("ON");
+
         ogrinfo.addArgument("--config");
         ogrinfo.addArgument("CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE");
         ogrinfo.addArgument("NO");
