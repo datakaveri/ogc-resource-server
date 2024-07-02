@@ -70,4 +70,5 @@ build/
 
 ### secrets ###
 secrets/configs/*
+secrets/*
 
