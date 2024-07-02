@@ -27,6 +27,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <exec.mainClass>ogc.rs.deploy.Deployer</exec.mainClass>
 		<skipUnitTests>false</skipUnitTests>
+		<skipBuildShadedJar>false</skipBuildShadedJar>
     </properties>
 
     <dependencyManagement>
@@ -359,6 +360,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <skip>${skipBuildShadedJar}</skip>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
