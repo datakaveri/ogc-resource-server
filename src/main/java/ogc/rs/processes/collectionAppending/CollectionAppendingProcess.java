@@ -316,8 +316,8 @@ public class CollectionAppendingProcess implements ProcessService {
         ogrinfo.addArgument(accessKey);
         ogrinfo.addArgument("--config");
         ogrinfo.addArgument("AWS_SECRET_ACCESS_KEY");
-
         ogrinfo.addArgument(secretKey);
+
         ogrinfo.addArgument("-json");
         ogrinfo.addArgument("-ro");
         ogrinfo.addArgument(String.format("/vsis3/%s%s", awsBucketUrl, filename));

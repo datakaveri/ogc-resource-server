@@ -248,10 +248,10 @@ public class CollectionOnboardingProcess implements ProcessService {
     return promise.future();
   }
 
-  private Map<String, String> extractAuthorityAndCode(JsonObject geoJsonDataSetInfo) {
+  private Map<String, String> extractAuthorityAndCode(JsonObject ogrinfoCmdOutput) {
     Map<String, String> authorityAndCode = new HashMap<>();
 
-    JsonArray layers = geoJsonDataSetInfo.getJsonArray("layers", new JsonArray());
+    JsonArray layers = ogrinfoCmdOutput.getJsonArray("layers", new JsonArray());
     if (layers.isEmpty()) {
       return authorityAndCode; // Return empty map if no layers are found
     }
