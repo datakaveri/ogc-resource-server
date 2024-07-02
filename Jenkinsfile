@@ -217,7 +217,8 @@ pipeline {
       steps{
           script{
             sh 'rm -rf target/failsafe-reports'
-            sh 'mvn test-compile failsafe:integration-test -DskipUnitTests=true -DintTestHost=localhost -DintTestPort=8443'
+            sh 'mkdir -p secrets && cp /home/ubuntu/configs/ogc-integration-test-db-config.properties secrets/integration-test-db-config.properties'
+            sh 'mvn verify -DskipUnitTests=true -DskipBuildShadedJar=true -DintTestHost=localhost -DintTestPort=8443'
             }
         }
       post{
