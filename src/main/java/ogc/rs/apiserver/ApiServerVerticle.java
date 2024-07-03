@@ -27,6 +27,7 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import ogc.rs.apiserver.util.AuthInfo;
 import ogc.rs.common.DataFromS3;
@@ -343,12 +344,21 @@ public class ApiServerVerticle extends AbstractVerticle {
           })
         .compose(dbCall -> dbService.getFeatures(collectionId, queryParamsMap, isCrsValid.result()))
         .onSuccess(success -> {
-          // TODO: Add base_path from config
-          int next, offset, limit;
-          offset = Integer.parseInt(queryParamsMap.get("offset"));
-          limit = Integer.parseInt(queryParamsMap.get("limit"));
-
-          next = offset + limit;
+          int limit = Integer.parseInt(queryParamsMap.get("limit"));
+          String nextLink = "";
+          JsonArray features = success.getJsonArray("features");
+          if (!features.isEmpty()) {
+            int lastIdOffset = features.getJsonObject(features.size() - 1).getInteger("id") + 1;
+            queryParamsMap.put("offset", String.valueOf(lastIdOffset));
+            AtomicReference<String> requestPath = new AtomicReference<>(routingContext.request().path());
+            if (!queryParamsMap.isEmpty()) {
+              requestPath.set(requestPath + "?");
+              queryParamsMap.forEach((key, value) -> requestPath.set(requestPath + key + "=" + value + "&"));
+            }
+            nextLink = requestPath.toString().substring(0, requestPath.toString().length() - 1);
+            nextLink = nextLink.replace("[", "").replace("]","");
+            LOGGER.debug("**** nextLink- {}", nextLink);
+          }
           success.put("links", new JsonArray()
                   .add(new JsonObject()
                       .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items")
@@ -359,12 +369,13 @@ public class ApiServerVerticle extends AbstractVerticle {
                       .put("rel", "alternate")
                       .put("type", "application/geo+json")))
               .put("timeStamp", Instant.now().toString());
-          if (next < success.getInteger("numberMatched")) {
+          if ( limit < success.getInteger("numberMatched")
+              && (success.getInteger("numberMatched") > success.getInteger("numberReturned"))
+              && success.getInteger("numberReturned") != 0 ) {
             success.getJsonArray("links")
                 .add(new JsonObject()
                     .put("href",
-                        hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items?offset=" + next + "&limit" +
-                            "=" + limit)
+                        hostName + nextLink)
                     .put("rel", "next")
                     .put("type", "application/geo+json" ));
           }
