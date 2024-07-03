@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.UUID;
 
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
-import static ogc.rs.apiserver.util.Constants.HEADER_TOKEN;
+import static ogc.rs.apiserver.util.Constants.HEADER_AUTHORIZATION;
 import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
 import static ogc.rs.common.Constants.UUID_REGEX;
 
@@ -47,7 +47,7 @@ public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
     LOGGER.debug("OGC Features Authorization");
     String id = routingContext.normalizedPath().split("/")[2];
     String token = routingContext.request().getHeader("token");
-    JsonObject authInfo = new JsonObject().put(HEADER_TOKEN, token).put("id", id);
+    JsonObject authInfo = new JsonObject().put(HEADER_AUTHORIZATION, token).put("id", id);
     if (id == null || !id.matches(UUID_REGEX)) {
       routingContext.fail(new OgcException(404, "Not Found", "Collection Not Found"));
       return;

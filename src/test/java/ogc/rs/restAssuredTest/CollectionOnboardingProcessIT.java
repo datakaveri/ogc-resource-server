@@ -89,12 +89,12 @@ public class CollectionOnboardingProcessIT {
     }
 
     private Response sendExecutionRequest(String processId, String token, JsonObject requestBody) {
-        return RestAssured.given().pathParam("processId", processId).header("token", token)
+        return RestAssured.given().pathParam("processId", processId).auth().oauth2(token)
                 .contentType("application/json").body(requestBody.toString()).when().post(executionEndpoint);
     }
 
     private Response sendJobStatusRequest(String jobId, String token) {
-        return RestAssured.given().pathParam("jobId", jobId).header("token", token)
+        return RestAssured.given().pathParam("jobId", jobId).auth().oauth2(token)
                 .get(jobStatusEndpoint);
     }
 

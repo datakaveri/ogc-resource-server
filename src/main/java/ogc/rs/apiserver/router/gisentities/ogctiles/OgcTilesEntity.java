@@ -58,7 +58,6 @@ public class OgcTilesEntity implements GisEntityInterface{
 
     builder
         .operation(TILE_API)
-            .handler(ogcRouterBuilder.tokenAuthenticationHandler)
             .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
             .handler(apiServerVerticle::getTile)
             .handler(apiServerVerticle::putCommonResponseHeaders)

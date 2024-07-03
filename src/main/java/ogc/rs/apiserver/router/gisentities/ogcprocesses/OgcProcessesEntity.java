@@ -27,12 +27,10 @@ public class OgcProcessesEntity implements GisEntityInterface{
     RouterBuilder builder = ogcRouterBuilder.routerBuilder;
     ApiServerVerticle apiServerVerticle = ogcRouterBuilder.apiServerVerticle;
     FailureHandler failureHandler = ogcRouterBuilder.failureHandler;
-    Vertx vertx = ogcRouterBuilder.vertx;
     
     builder
         .operation(EXECUTE_API)
-            .handler(ogcRouterBuilder.tokenAuthenticationHandler)
-            .handler(ogcRouterBuilder.processAuthZHandler)
+        .handler(ogcRouterBuilder.processAuthZHandler)
         .handler(apiServerVerticle::auditAfterApiEnded)
         .handler(apiServerVerticle::executeJob)
         .handler(apiServerVerticle::putCommonResponseHeaders)
@@ -50,7 +48,6 @@ public class OgcProcessesEntity implements GisEntityInterface{
 
     builder
         .operation(STATUS_API)
-        .handler(ogcRouterBuilder.tokenAuthenticationHandler)
         .handler(ogcRouterBuilder.processAuthZHandler)
         .handler(apiServerVerticle::getStatus)
         .handler(apiServerVerticle::putCommonResponseHeaders)

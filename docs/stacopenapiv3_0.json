@@ -112,12 +112,14 @@
         "summary": "gets the assets links that can be used to download assets",
         "description": "Based on the 'assetId', it gives the link to asset that can be downloaded",
         "operationId": "getAsset",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/assetId"
-          },
-          {
-            "$ref": "#/components/parameters/token"
           }
         ],
         "responses": {
@@ -141,6 +143,14 @@
     }
   ],
   "components": {
+    "securitySchemes": {
+      "DX-AAA-Token": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "A <b> valid Auth token </b> to process the request."
+      }
+    },
     "parameters": {
       "bbox": {
         "name": "bbox",
@@ -202,15 +212,6 @@
         "required": true,
         "schema": {
           "type": "string"
-        }
-      },
-      "token": {
-        "name": "token",
-        "in": "header",
-        "description": "A <b> valid Auth token </b> to process the request.",
-        "required": true,
-        "schema": {
-            "type": "string"
         }
       },
       "assetId": {

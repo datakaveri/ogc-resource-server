@@ -299,6 +299,11 @@
         "summary": "Retrieve a map tile from the specified collection",
         "description": "Retrieve a map tile from the specified collection",
         "operationId": ".collection.map.getTile",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/collections"
@@ -548,10 +553,12 @@
         "summary": "execute a process.",
         "description": "Create a new job by initiating the execution of a specified process identified by the 'processId'.",
         "operationId": "execute",
-        "parameters": [
+        "security": [
           {
-            "$ref": "#/components/parameters/token"
-          },
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
           {
             "name": "processId",
             "in": "path",
@@ -638,10 +645,12 @@
         "summary": "retrieve the status of a job",
         "description": "Shows the status of a job.",
         "operationId": "getStatus",
-        "parameters": [
+        "security": [
           {
-            "$ref": "#/components/parameters/token"
-          },
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
           {
             "name": "jobId",
             "in": "path",
@@ -730,6 +739,14 @@
     }
   ],
   "components": {
+    "securitySchemes": {
+      "DX-AAA-Token": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "A <b> valid Auth token </b> to process the request."
+      }
+    },
     "parameters": {
       "bbox": {
         "name": "bbox",
@@ -806,15 +823,6 @@
           "minimum": 1,
           "maximum": 2000000,
           "default": 1
-        }
-      },
-      "token": {
-        "name": "token",
-        "in": "header",
-        "description": "A <b> valid Auth token </b> to process the request.",
-        "required": true,
-        "schema": {
-            "type": "string"
         }
       },
       "collections": {

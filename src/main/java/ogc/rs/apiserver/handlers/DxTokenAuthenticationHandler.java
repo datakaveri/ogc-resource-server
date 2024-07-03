@@ -10,6 +10,7 @@ import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
+import io.vertx.ext.web.handler.AuthenticationHandler;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.AuthInfo;
 import org.apache.logging.log4j.LogManager;
@@ -17,10 +18,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
 
-import static ogc.rs.apiserver.util.Constants.HEADER_TOKEN;
+import static ogc.rs.apiserver.util.Constants.HEADER_AUTHORIZATION;
 import static ogc.rs.apiserver.util.Constants.AUTH_CERTIFICATE_PATH;
 
-public class DxTokenAuthenticationHandler implements Handler<RoutingContext> {
+public class DxTokenAuthenticationHandler implements AuthenticationHandler {
   private static final Logger LOGGER = LogManager.getLogger(DxTokenAuthenticationHandler.class);
   public static final String USER_KEY = "userKey";
 
@@ -110,11 +111,23 @@ public class DxTokenAuthenticationHandler implements Handler<RoutingContext> {
       return;
     }
     
-    String token = routingContext.request().headers().get(HEADER_TOKEN);
-    if (token == null) {
-      routingContext.fail(new OgcException(401, "Token not found", "Token not found"));
+    String authZHeader = routingContext.request().headers().get(HEADER_AUTHORIZATION);
+
+    if (authZHeader == null) {
+      routingContext.fail(new OgcException(401, "Authorization header not found", "Authorization header not found"));
       return;
     }
+
+    String[] parts = authZHeader.split(" ");
+    
+    if (parts.length < 2 || !"Bearer".equals(parts[0])) {
+      routingContext.fail(
+          new OgcException(401, "Invalid Authorization header", "Invalid Authorization header"));
+      return;
+    }
+    
+    String token = parts[1];
+
     jwtAuth.authenticate(
         new JsonObject().put("token", token),
         res -> {

@@ -1,5 +1,15 @@
 package ogc.rs.apiserver.router.routerbuilders;
 
+import static ogc.rs.apiserver.util.Constants.HEADER_ACCEPT;
+import static ogc.rs.apiserver.util.Constants.HEADER_ALLOW_ORIGIN;
+import static ogc.rs.apiserver.util.Constants.HEADER_AUTHORIZATION;
+import static ogc.rs.apiserver.util.Constants.HEADER_CONTENT_LENGTH;
+import static ogc.rs.apiserver.util.Constants.HEADER_CONTENT_TYPE;
+import static ogc.rs.apiserver.util.Constants.HEADER_HOST;
+import static ogc.rs.apiserver.util.Constants.HEADER_ORIGIN;
+import static ogc.rs.apiserver.util.Constants.HEADER_REFERER;
+import static ogc.rs.common.Constants.OAS_BEARER_SECURITY_SCHEME;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
@@ -11,11 +21,15 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
-import ogc.rs.apiserver.ApiServerVerticle;
-import ogc.rs.apiserver.handlers.*;
-import ogc.rs.apiserver.util.OgcException;
-import static ogc.rs.apiserver.util.Constants.*;
 import java.util.Set;
+import ogc.rs.apiserver.ApiServerVerticle;
+import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
+import ogc.rs.apiserver.handlers.FailureHandler;
+import ogc.rs.apiserver.handlers.MeteringAuthZHandler;
+import ogc.rs.apiserver.handlers.OgcFeaturesAuthZHandler;
+import ogc.rs.apiserver.handlers.ProcessAuthZHandler;
+import ogc.rs.apiserver.handlers.StacAssetsAuthZHandler;
+import ogc.rs.apiserver.util.OgcException;
 
 /**
  * Abstract class to aid in configuration and building of routers using {@link RouterBuilder}.
@@ -24,7 +38,7 @@ import java.util.Set;
 public abstract class EntityRouterBuilder {
 
   private static final Set<String> allowedHeaders =
-      Set.of(HEADER_TOKEN, HEADER_CONTENT_LENGTH, HEADER_CONTENT_TYPE, HEADER_HOST, HEADER_ORIGIN,
+      Set.of(HEADER_AUTHORIZATION, HEADER_CONTENT_LENGTH, HEADER_CONTENT_TYPE, HEADER_HOST, HEADER_ORIGIN,
           HEADER_REFERER, HEADER_ACCEPT, HEADER_ALLOW_ORIGIN);
 
   private static final Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS);
@@ -43,7 +57,7 @@ public abstract class EntityRouterBuilder {
 
   public RouterBuilder routerBuilder;
   private JsonObject config;
-  public DxTokenAuthenticationHandler tokenAuthenticationHandler;
+  private DxTokenAuthenticationHandler tokenAuthenticationHandler;
   public StacAssetsAuthZHandler stacAssetsAuthZHandler;
   public MeteringAuthZHandler meteringAuthZHandler = new MeteringAuthZHandler();
   public OgcFeaturesAuthZHandler ogcFeaturesAuthZHandler;
@@ -67,7 +81,20 @@ public abstract class EntityRouterBuilder {
 
     RouterBuilderOptions factoryOptions =
         new RouterBuilderOptions().setMountResponseContentTypeHandler(true);
+    
+    if(System.getProperty("disable.auth") != null) {
+      factoryOptions.setRequireSecurityHandlers(false);
+    }
 
+    routerBuilder.setOptions(factoryOptions);
+    
+    /*
+     * Automatically adds the handler for any API that has the `security` block with
+     * OAS_BEARER_SECURITY_SCHEME. See
+     * https://swagger.io/docs/specification/authentication/bearer-authentication/
+     */
+    routerBuilder.securityHandler(OAS_BEARER_SECURITY_SCHEME, tokenAuthenticationHandler);
+    
     routerBuilder.rootHandler(
         CorsHandler.create().allowedHeaders(allowedHeaders).allowedMethods(allowedMethods));
     routerBuilder.rootHandler(BodyHandler.create());

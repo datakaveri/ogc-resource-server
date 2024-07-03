@@ -3,6 +3,8 @@ package ogc.rs.common;
 import ogc.rs.apiserver.util.ProcessException;
 
 import java.util.Set;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 public class Constants {
 
@@ -17,6 +19,10 @@ public class Constants {
     public static final Set<String> WELL_KNOWN_QUERY_PARAMETERS =
         Set.of("limit", "bbox", "datetime", "offset", "bbox-crs", "crs");
     public static final String UUID_REGEX = "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$";
+    
+    public static final String OAS_BEARER_SECURITY_SCHEME = "DX-AAA-Token";
+    public static final JsonObject OAS_TOKEN_SECURITY = new JsonObject().put("security",
+        new JsonArray().add(new JsonObject().put(OAS_BEARER_SECURITY_SCHEME, new JsonArray())));
 
     public static final String CATALOGUE_SERVICE_ADDRESS = "ogc.rs.catalog.service";
     public static final String EPOCH_TIME = "epochTime";

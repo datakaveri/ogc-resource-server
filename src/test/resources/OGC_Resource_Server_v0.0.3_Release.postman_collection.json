@@ -273,8 +273,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1openResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1openResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -570,8 +570,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1openResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1openResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -877,8 +877,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1secureResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1secureResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -1178,8 +1178,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1secureResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1secureResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -1487,8 +1487,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1secureResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1secureResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -1795,8 +1795,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1secureResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1secureResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -2102,8 +2102,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1openResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1openResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -2312,8 +2312,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1secureResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1secureResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -2527,8 +2527,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1openResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1openResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -2609,8 +2609,8 @@
 												"value": "application/json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1openResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1openResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -2692,8 +2692,8 @@
 												"value": "application/json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1openResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1openResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -2779,8 +2779,8 @@
 												"value": "application/json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1openResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1openResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -2867,8 +2867,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1openResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1openResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -3173,8 +3173,8 @@
 												"value": "application/json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1openResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1openResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -3249,8 +3249,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1openResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1openResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -3321,8 +3321,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1openResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1openResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -3530,8 +3530,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1openResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1openResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -3836,8 +3836,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1openResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1openResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -4148,8 +4148,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1secureResource2Token}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1secureResource2Token}}",
 												"type": "text"
 											}
 										],
@@ -4236,8 +4236,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1secureResource2Token}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1secureResource2Token}}",
 												"type": "text"
 											}
 										],
@@ -4324,8 +4324,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1secureResource2Token}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1secureResource2Token}}",
 												"type": "text"
 											}
 										],
@@ -4412,8 +4412,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1secureResource2Token}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1secureResource2Token}}",
 												"type": "text"
 											}
 										],
@@ -4492,8 +4492,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1secureResource2Token}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1secureResource2Token}}",
 												"type": "text"
 											}
 										],
@@ -4580,8 +4580,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1secureResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1secureResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -4661,8 +4661,8 @@
 												"value": "application/geo+json"
 											},
 											{
-												"key": "token",
-												"value": "{{C1secureResourceToken}}",
+												"key": "Authorization",
+												"value": "Bearer {{C1secureResourceToken}}",
 												"type": "text"
 											}
 										],
@@ -5305,8 +5305,8 @@
 								"value": "application/json"
 							},
 							{
-								"key": "token",
-								"value": "{{C1openResourceToken}}",
+                                "key": "Authorization",
+								"value": "Bearer {{C1openResourceToken}}",
 								"type": "text"
 							}
 						],
@@ -5351,8 +5351,8 @@
 								"value": "application/json"
 							},
 							{
-								"key": "token",
-								"value": "{{C1secureResourceToken}}",
+                                "key": "Authorization",
+								"value": "Bearer {{C1secureResourceToken}}",
 								"type": "text"
 							}
 						],
