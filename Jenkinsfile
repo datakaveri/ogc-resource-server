@@ -213,7 +213,7 @@ pipeline {
       }
     }
     
-    stage('RESTAssured Integration Tests'){
+    stage('RESTAssured Integration Tests and Surefire reports'){
       steps{
           script{
             sh 'rm -rf target/failsafe-reports'
@@ -222,6 +222,20 @@ pipeline {
             }
         }
       post{
+        always{
+            script{
+              catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+              xunit (
+                  thresholds: [ skipped(failureThreshold: '0'), failed(failureThreshold: '0') ],
+                  tools: [ JUnit(pattern: 'surefire-reports/*.xml') ]
+                  )
+              xunit (
+                  thresholds: [ skipped(failureThreshold: '10'), failed(failureThreshold: '0') ],
+                  tools: [ JUnit(pattern: 'target/failsafe-reports/*.xml') ]
+                  )
+              }
+          }
+        }
         failure{
           script{
             sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
@@ -230,21 +244,13 @@ pipeline {
       }
     }
     
-    stage('Extract class files, dump JaCoCo data from container and make reports'){
+    stage('Extract class files, dump JaCoCo data from container and make JaCoCo report'){
       steps{
         script{
           sh 'docker-compose -f docker-compose.test.yml exec -T integ-test cp -r ./built-classes /tmp/test'
           sh 'docker-compose -f docker-compose.test.yml exec -T integ-test java -jar /tmp/jacoco/lib/jacococli.jar dump --address 127.0.0.1 --port 57070 --destfile /tmp/test/integ-jacoco.exec'
         }
         jacoco classPattern: 'built-classes', execPattern: '*-jacoco.exec'
-        xunit (
-          thresholds: [ skipped(failureThreshold: '0'), failed(failureThreshold: '0') ],
-          tools: [ JUnit(pattern: 'surefire-reports/*.xml') ]
-        )
-        xunit (
-          thresholds: [ skipped(failureThreshold: '10'), failed(failureThreshold: '0') ],
-          tools: [ JUnit(pattern: 'target/failsafe-reports/*.xml') ]
-        )
       }
       post{
         cleanup{
