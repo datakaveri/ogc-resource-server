@@ -53,7 +53,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/4d69a28c-6717-4b80-83c8-308cfa40c932";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -75,7 +75,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/462624da-2790-4ae7-8773-c1a6d726a035";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -95,7 +95,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/462624da-2790-4ae7-8773-c1a6d726a035";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -116,7 +116,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/4d69a28c-6717-4b80-83c8-308cfa40c931";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -137,7 +137,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/4d69a28c-6717-4b80-83c8-308cfa40c931";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -157,7 +157,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/4d69a28c-6717-4b80-83c8-308cfa40c932";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -178,7 +178,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/462624da-2790-4ae7-8773-c1a6d726a035";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -198,7 +198,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/462624da-2790-4ae7-8773-c1a6d726a035";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -219,7 +219,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/462624da-2790-4ae7-8773-c1a6d726a035";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -240,7 +240,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/4d69a28c-6717-4b80-83c8-308cfa40c931";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -260,7 +260,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/4d69a28c-6717-4b80-83c8-308cfa40c931";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -281,7 +281,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/4d69a28c-6717-4b80-83c8-308cfa40c932";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -303,7 +303,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/462624da-2790-4ae7-8773-c1a6d726a035";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -323,7 +323,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/462624da-2790-4ae7-8773-c1a6d726a035";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -345,7 +345,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/4d69a28c-6717-4b80-83c8-308cfa40c931";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -366,7 +366,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/4d69a28c-6717-4b80-83c8-308cfa40c931";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -386,7 +386,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/4d69a28c-6717-4b80-83c8-308cfa40c932";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -408,7 +408,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/462624da-2790-4ae7-8773-c1a6d726a035";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -428,7 +428,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/462624da-2790-4ae7-8773-c1a6d726a035";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -451,7 +451,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/462624da-2790-4ae7-8773-c1a6d726a035";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -472,7 +472,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/4d69a28c-6717-4b80-83c8-308cfa40c931";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -493,7 +493,7 @@ public class StacAssetsIT {
     String endpoint = "/assets/4d69a28c-6717-4b80-83c8-308cfa40c931";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()

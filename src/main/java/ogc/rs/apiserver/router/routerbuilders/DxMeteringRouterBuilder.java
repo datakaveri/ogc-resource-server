@@ -57,7 +57,6 @@ public class DxMeteringRouterBuilder extends EntityRouterBuilder {
   void addImplSpecificRoutes() {
 
     routerBuilder.operation(SUMMARY_AUDIT_API)
-        .handler(tokenAuthenticationHandler)
         .handler(meteringAuthZHandler)
         .handler(apiServerVerticle::getSummary)
         .handler(apiServerVerticle::putCommonResponseHeaders)
@@ -66,7 +65,6 @@ public class DxMeteringRouterBuilder extends EntityRouterBuilder {
 
 
     routerBuilder.operation(OVERVIEW_AUDIT_API)
-        .handler(tokenAuthenticationHandler)
         .handler(meteringAuthZHandler)
         .handler(apiServerVerticle::getMonthlyOverview)
         .handler(apiServerVerticle::putCommonResponseHeaders)
@@ -75,7 +73,6 @@ public class DxMeteringRouterBuilder extends EntityRouterBuilder {
 
     routerBuilder
         .operation(CONSUMER_AUDIT_API)
-        .handler(tokenAuthenticationHandler)
         .handler(meteringAuthZHandler)
         .handler(apiServerVerticle::getConsumerAuditDetail)
         .handler(apiServerVerticle::putCommonResponseHeaders)
@@ -84,7 +81,6 @@ public class DxMeteringRouterBuilder extends EntityRouterBuilder {
 
     routerBuilder
         .operation(PROVIDER_AUDIT_API)
-        .handler(tokenAuthenticationHandler)
         .handler(meteringAuthZHandler)
         .handler(apiServerVerticle::getProviderAuditDetail)
         .handler(apiServerVerticle::putCommonResponseHeaders)

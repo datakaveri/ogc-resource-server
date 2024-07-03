@@ -1,6 +1,7 @@
 package ogc.rs.apiserver.router.gisentities.ogcfeatures;
 
 import static ogc.rs.common.Constants.DEFAULT_SERVER_CRS;
+import static ogc.rs.common.Constants.OAS_TOKEN_SECURITY;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -110,8 +111,6 @@ public class CollectionMetadata {
         .put("schema", new JsonObject().put("type", "string").put("format", "uri")
             .put("default", DEFAULT_SERVER_CRS).put("enum", new JsonArray(supportedCrs)));
     
-    JsonObject tokenHeaderParam = new JsonObject().put("$ref", "#/components/parameters/token");
-
     /* GET /collections/<collection-ID> */
     JsonObject collectionSpecificApi = new JsonObject();
 
@@ -132,6 +131,8 @@ public class CollectionMetadata {
     collectionItemsApi.put("tags", new JsonArray().add(title));
     collectionItemsApi.put("summary", OGC_GET_COLLECTION_ITEMS_SUMMARY.get());
     collectionItemsApi.put("operationId", OGC_GET_COLLECTION_ITEMS_OPERATION_ID.get());
+    
+    collectionItemsApi.mergeIn(OAS_TOKEN_SECURITY);
 
     JsonArray parameters = new JsonArray();
 
@@ -151,8 +152,6 @@ public class CollectionMetadata {
     parameters.add(limitParam);
     parameters.add(new JsonObject().put("$ref", "#/components/parameters/offset"));
     
-    parameters.add(tokenHeaderParam);
-
     parameters.addAll(generateOasParamsFromAttributes(attributes));
 
     collectionItemsApi.put("parameters", parameters);
@@ -172,12 +171,14 @@ public class CollectionMetadata {
     featureSpecificApi.put("summary", OGC_GET_SPECIFIC_FEATURE_SUMMARY.get());
     featureSpecificApi.put("operationId", OGC_GET_SPECIFIC_FEATURE_OPERATION_ID.get());
 
+    featureSpecificApi.mergeIn(OAS_TOKEN_SECURITY);
+
     JsonObject featureIdQueryParam =
         new JsonObject().put("in", "path").put("name", "featureId").put("required", true)
             .put("schema", new JsonObject().put("type", OasTypes.INTEGER.toString().toLowerCase()));
 
     featureSpecificApi.put("parameters",
-        new JsonArray().add(featureIdQueryParam).add(crsQueryParam).add(tokenHeaderParam));
+        new JsonArray().add(featureIdQueryParam).add(crsQueryParam));
 
     featureSpecificApi.put("responses",
         new JsonObject().put("200", new JsonObject().put("$ref", "#/components/responses/Feature"))

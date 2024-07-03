@@ -33,7 +33,7 @@ public class OgcFeaturesIT {
     String endpoint = "/collections/1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a/items";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -53,7 +53,7 @@ public class OgcFeaturesIT {
     String endpoint = "/collections/1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a/items";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -74,7 +74,7 @@ public class OgcFeaturesIT {
     String endpoint = "/collections/a5a6e26f-d252-446d-b7dd-4d50ea945102/items";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -94,7 +94,7 @@ public class OgcFeaturesIT {
     String endpoint = "/collections/1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a/items";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -114,7 +114,7 @@ public class OgcFeaturesIT {
     String endpoint = "/collections/1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a/items";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -135,7 +135,7 @@ public class OgcFeaturesIT {
     String endpoint = "/collections/a5a6e26f-d252-446d-b7dd-4d50ea945102/items";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -155,7 +155,7 @@ public class OgcFeaturesIT {
     String endpoint = "/collections/1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a/items";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -176,7 +176,7 @@ public class OgcFeaturesIT {
     String endpoint = "/collections/1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a/items";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -196,7 +196,7 @@ public class OgcFeaturesIT {
     String endpoint = "/collections/1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a/items";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -217,7 +217,7 @@ public class OgcFeaturesIT {
     String endpoint = "/collections/1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a/items";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -238,7 +238,7 @@ public class OgcFeaturesIT {
     String endpoint = "/collections/a5a6e26f-d252-446d-b7dd-4d50ea945102/items";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -258,7 +258,7 @@ public class OgcFeaturesIT {
     String endpoint = "/collections/1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a/items";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -278,7 +278,7 @@ public class OgcFeaturesIT {
     String endpoint = "/collections/1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a/items";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()
@@ -299,7 +299,7 @@ public class OgcFeaturesIT {
     String endpoint = "/collections/a5a6e26f-d252-446d-b7dd-4d50ea945102/items";
     given()
         .header("Accept", "application/json")
-        .header("token", token)
+        .auth().oauth2(token)
         .when()
         .get(endpoint)
         .then()

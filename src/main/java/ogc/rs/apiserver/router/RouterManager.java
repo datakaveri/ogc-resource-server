@@ -126,16 +126,6 @@ public class RouterManager {
     JsonObject ogcOasTemplate = new JsonObject(ogcOasTemplateStr);
     JsonObject stacOasTemplate = new JsonObject(stacOasTemplateStr);
 
-    /* Modify the spec to make token header not required if disable.auth property set */
-    if(System.getProperty("disable.auth") != null) {
-      LOGGER.fatal("Auth disabled, making `token` Header not mandatory");
-      
-      ogcOasTemplate.getJsonObject("components").getJsonObject("parameters").getJsonObject("token")
-          .put("required", false);
-      stacOasTemplate.getJsonObject("components").getJsonObject("parameters").getJsonObject("token")
-          .put("required", false);
-    }
-
     DatabaseService dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
 
     /* Load all implementations of the GisEntityInterface using SPI */
