@@ -497,7 +497,7 @@
                             <goal>execute</goal>
                         </goals>
                         <configuration>
-                            <autocommit>true</autocommit>
+                            <autocommit>false</autocommit>
                             <srcFiles>
                                 <srcFile>src/test/resources/integ-db/setup/createEmptyCollectionForAppending.sql</srcFile>
                             </srcFiles>
@@ -510,7 +510,7 @@
                             <goal>execute</goal>
                         </goals>
                         <configuration>
-                            <autocommit>true</autocommit>
+                            <autocommit>false</autocommit>
                             <srcFiles>
                                 <srcFile>src/test/resources/integ-db/teardown/deleteCollectionOnboarding.sql</srcFile>
                                 <srcFile>src/test/resources/integ-db/teardown/deleteCollectionAppending.sql</srcFile>

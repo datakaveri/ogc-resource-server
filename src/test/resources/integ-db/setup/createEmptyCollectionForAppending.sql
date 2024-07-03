@@ -7,3 +7,7 @@ WITH data AS (select '61f2187e-affe-4f28-be0e-fe1cd37dbd4e'::uuid, id AS crs_id 
 INSERT INTO collection_type (collection_id , type) VALUES ('61f2187e-affe-4f28-be0e-fe1cd37dbd4e', 'FEATURE');
 
 CREATE TABLE "61f2187e-affe-4f28-be0e-fe1cd37dbd4e" (id serial, postcode varchar, positional_quality_indicator integer, country_code varchar, nhs_regional_ha_code varchar, nhs_ha_code varchar, admin_county_code varchar, admin_district_code varchar, admin_ward_code varchar, geom geometry(Point, 4326));
+
+-- grant select access to all users 
+GRANT SELECT, INSERT ON "61f2187e-affe-4f28-be0e-fe1cd37dbd4e" TO PUBLIC;
+GRANT SELECT, USAGE ON SEQUENCE "61f2187e-affe-4f28-be0e-fe1cd37dbd4e_id_seq" TO PUBLIC;
