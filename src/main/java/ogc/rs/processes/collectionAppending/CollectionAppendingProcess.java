@@ -303,6 +303,8 @@ public class CollectionAppendingProcess implements ProcessService {
         ogrinfo.addArgument("--config");
         ogrinfo.addArgument("CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE");
         ogrinfo.addArgument("NO");
+        ogrinfo.addArgument("--debug");
+        ogrinfo.addArgument("ON");
 
         setS3OptionsForTesting(ogrinfo);
         ogrinfo.addArgument("--config");
