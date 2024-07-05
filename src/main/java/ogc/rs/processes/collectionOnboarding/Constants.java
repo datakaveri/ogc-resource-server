@@ -53,6 +53,9 @@ public class Constants {
   public static final String COLLECTION_PRESENT_ERROR="Collection already present.";
   public static final String CRS_ERROR="CRS not present as EPSG";
   public static final String CRS_FETCH_FAILED="Failed to fetch CRS.";
+  public static final String DATE_TIME_KEY_ERROR="The date time key is invalid";
+  public static final String VALID_DATE_TIME_KEY_MESSAGE="The date-time key is present and valid";
+  public static final String NULL_DATE_TIME_KEY_MESSAGE="The date-time key value is not provided in the input JSON and is therefore null";
   public static final String OGR_INFO_FAILED="Failed in ogrInfo.";
   public static final String TABLE_NOT_EXIST_ERROR="Table does not exist.";
   public static final String COLLECTION_NOT_PRESENT_ERROR ="Collection not present in collections_details";

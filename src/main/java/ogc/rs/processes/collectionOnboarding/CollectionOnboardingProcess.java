@@ -242,8 +242,16 @@ public class CollectionOnboardingProcess implements ProcessService {
                       if (input.containsKey("dateTimeKey")) {
                         String dateTimeKey = input.getString("dateTimeKey");
                         boolean dateTimeKeyCheck = checkDateTimeKey(cmdOutput, dateTimeKey);
-                        input.put("dateTimeKeyCheck", dateTimeKeyCheck);
-                        LOGGER.debug("Whether date time key exists:{}", dateTimeKeyCheck);
+                        if(!dateTimeKeyCheck){
+                          LOGGER.error(DATE_TIME_KEY_ERROR);
+                          promise.fail(DATE_TIME_KEY_ERROR);
+                          return;
+                        }
+                        input.put("dateTimeKeyCheck", true);
+                        LOGGER.debug(VALID_DATE_TIME_KEY_MESSAGE);
+                      }
+                      else{
+                        LOGGER.debug(NULL_DATE_TIME_KEY_MESSAGE);
                       }
                       validSridFromDatabase(organizationCoOrdId, input, promise);
                     })
