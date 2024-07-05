@@ -27,11 +27,9 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
-import java.util.Objects;
+import java.util.*;
 
 import static ogc.rs.processes.collectionOnboarding.Constants.*;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -231,14 +229,14 @@ public class CollectionOnboardingProcess implements ProcessService {
             },VERTX_EXECUTE_BLOCKING_IN_ORDER)
         .onSuccess(
             cmdOutput -> {
-              JsonObject featureProperties = extractFeatureProperties(cmdOutput);
-              String organization = featureProperties.getString("organization");
+              Map<String, String> authorityAndCode = extractAuthorityAndCode(cmdOutput);
+              String organization = authorityAndCode.get("authority");
               if (!organization.equals("EPSG")) {
                 LOGGER.error(CRS_ERROR);
                 promise.fail(CRS_ERROR);
                 return;
               }
-              int organizationCoOrdId = featureProperties.getInteger("organization_coordsys_id");
+              int organizationCoOrdId = Integer.parseInt(authorityAndCode.get("code"));
               LOGGER.debug("organization " + organization + " crs " + organizationCoOrdId);
               validSridFromDatabase(organizationCoOrdId, input, promise);
             })
@@ -250,12 +248,32 @@ public class CollectionOnboardingProcess implements ProcessService {
     return promise.future();
   }
 
-  private JsonObject extractFeatureProperties(JsonObject cmdOutput) {
-    JsonObject layers =
-      cmdOutput.getJsonArray("layers", new JsonArray().add(new JsonObject())).getJsonObject(0);
-    JsonArray features = layers.getJsonArray("features",
-      new JsonArray().add(new JsonObject().put("properties", new JsonObject())));
-    return features.getJsonObject(0).getJsonObject("properties");
+  private Map<String, String> extractAuthorityAndCode(JsonObject ogrinfoCmdOutput) {
+    Map<String, String> authorityAndCode = new HashMap<>();
+
+    JsonArray layers = ogrinfoCmdOutput.getJsonArray("layers", new JsonArray());
+    if (layers.isEmpty()) {
+      return authorityAndCode; // Return empty map if no layers are found
+    }
+
+    JsonObject firstLayer = layers.getJsonObject(0);
+    JsonArray geometryFields = firstLayer.getJsonArray("geometryFields", new JsonArray());
+    if (geometryFields.isEmpty()) {
+      return authorityAndCode; // Return empty map if no geometry fields are found
+    }
+
+    JsonObject geometryField = geometryFields.getJsonObject(0);
+    JsonObject coordinateSystem = geometryField.getJsonObject("coordinateSystem", new JsonObject());
+    JsonObject projjson = coordinateSystem.getJsonObject("projjson", new JsonObject());
+    JsonObject id = projjson.getJsonObject("id", new JsonObject());
+
+    String authority = id.getString("authority", "");
+    int code = id.getInteger("code", 0);
+
+    authorityAndCode.put("authority", authority);
+    authorityAndCode.put("code", String.valueOf(code));
+
+    return authorityAndCode;
   }
 
   private void validSridFromDatabase(int organizationCoordId, JsonObject input,
@@ -318,12 +336,9 @@ public class CollectionOnboardingProcess implements ProcessService {
     ogrinfo.addArgument("AWS_SECRET_ACCESS_KEY");
     ogrinfo.addArgument(secretKey);
     ogrinfo.addArgument("-json");
-    ogrinfo.addArgument("-features");
+    ogrinfo.addArgument("-ro");
     ogrinfo.addArgument(String.format("/vsis3/%s%s", awsBucketUrl, filename));
-    ogrinfo.addArgument("-sql");
-    ogrinfo.addArgument(
-      "select organization,organization_coordsys_id from gpkg_contents join gpkg_spatial_ref_sys using(srs_id)",
-      false);
+
     return ogrinfo;
   }
 
