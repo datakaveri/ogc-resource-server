@@ -63,11 +63,11 @@ public class CollectionAppendingProcess implements ProcessService {
     /**
      * Constructs a new instance of CollectionAppendingProcess.
      *
-     * @param pgPool     The PostgreSQL connection pool used for database operations.
-     * @param webClient  The WebClient used for making HTTP requests.
-     * @param config     The configuration details as a JsonObject.
-     * @param dataFromS3 The DataFromS3 instance for accessing data from AWS S3.
-     * @param vertx      The Vert.x instance for executing asynchronous and event-driven tasks.
+     * @param pgPool             The PostgreSQL connection pool used for database operations.
+     * @param webClient          The WebClient used for making HTTP requests.
+     * @param config             The configuration details as a JsonObject.
+     * @param dataFromS3         The DataFromS3 instance for accessing data from AWS S3.
+     * @param vertx              The Vert.x instance for executing asynchronous and event-driven tasks.
      */
 
     public CollectionAppendingProcess(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx) {
@@ -107,7 +107,7 @@ public class CollectionAppendingProcess implements ProcessService {
      * @param requestInput The input JSON object containing parameters and data necessary for processing.
      *                     It should include a "resourceId" to identify the resource being processed.
      * @return A Future that completes with a JsonObject when all operations are successfully executed,
-     * or fails if any operation encounters an error.
+     *         or fails if any operation encounters an error.
      */
 
     @Override
@@ -121,8 +121,8 @@ public class CollectionAppendingProcess implements ProcessService {
         requestInput.put("collectionsDetailsTableId", tableID);
 
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, STARTING_APPEND_PROCESS_MESSAGE)
-                .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
-                .compose(resourceOwnershipCheckHandler -> utilClass.updateJobTableProgress(
+                .compose(progressUpdateHandler->collectionOnboarding.makeCatApiRequest(requestInput))
+                .compose(resourceOwnershipCheckHandler->utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2, 7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkIfCollectionPresent(requestInput))
                 .compose(collectionCheckHandler -> utilClass.updateJobTableProgress(
@@ -132,12 +132,12 @@ public class CollectionAppendingProcess implements ProcessService {
                         requestInput.put("progress", calculateProgress(4, 7)).put("message", SCHEMA_CRS_VALIDATION_SUCCESS_MESSAGE)))
                 .compose(progressUpdateHandler -> appendDataToTempTable(requestInput))
                 .compose(appendHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(5, 7)).put("message", APPEND_PROCESS_MESSAGE)))
+                        requestInput.put("progress",calculateProgress(5,7)).put("message",APPEND_PROCESS_MESSAGE)))
                 .compose(progressUpdateHandler -> mergeTempTableToCollectionTable(requestInput))
                 .compose(mergeHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(6, 7)).put("message", MERGE_TEMP_TABLE_MESSAGE)))
-                .compose(progressUpdateHandler -> collectionOnboarding.ogr2ogrCmdExtent(requestInput))
-                .compose(checkDbHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL, BBOX_UPDATE_MESSAGE))
+                        requestInput.put("progress",calculateProgress(6,7)).put("message",MERGE_TEMP_TABLE_MESSAGE)))
+                .compose(progressUpdateHandler->collectionOnboarding.ogr2ogrCmdExtent(requestInput))
+                .compose(checkDbHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,BBOX_UPDATE_MESSAGE))
                 .onSuccess(successHandler -> {
                     deleteTempTable(requestInput)
                             .onComplete(deleteHandler ->
@@ -146,7 +146,7 @@ public class CollectionAppendingProcess implements ProcessService {
                     objectPromise.complete();
                 }).onFailure(failureHandler ->
                         deleteTempTable(requestInput)
-                                .onComplete(deleteHandler -> {
+                                .onComplete(deleteHandler ->{
                                     handleFailure(requestInput, failureHandler.getMessage(), objectPromise);
                                     LOGGER.error(APPEND_FAILURE_MESSAGE + failureHandler.getMessage());
                                 })
@@ -163,7 +163,7 @@ public class CollectionAppendingProcess implements ProcessService {
      * @param requestInput The JsonObject containing the input parameters, including "collectionsDetailsTableId"
      *                     to identify the collection to be checked.
      * @return A Future<Void> that completes successfully if the collection exists,
-     * or fails if the collection does not exist or an error occurs during the database query.
+     *         or fails if the collection does not exist or an error occurs during the database query.
      */
 
     private Future<Void> checkIfCollectionPresent(JsonObject requestInput) {
@@ -180,7 +180,7 @@ public class CollectionAppendingProcess implements ProcessService {
                                 promise.fail(COLLECTION_NOT_FOUND_MESSAGE);
                             }
                         }).onFailure(failureHandler -> {
-                            LOGGER.error(COLLECTION_EXISTENCE_FAIL_CHECK + ":" + requestInput.getString("collectionsDetailsTableId") + failureHandler.getMessage());
+                            LOGGER.error(COLLECTION_EXISTENCE_FAIL_CHECK +  ":" + requestInput.getString("collectionsDetailsTableId") + failureHandler.getMessage());
                             promise.fail(COLLECTION_EXISTENCE_FAIL_CHECK);
                         }));
 
@@ -190,7 +190,7 @@ public class CollectionAppendingProcess implements ProcessService {
 
     /**
      * Validates the schema and Coordinate Reference System (CRS) information of a GeoJSON dataset.
-     * <p>
+     *
      * This method fetches dataset information using OGRInfo based on the provided input, extracts
      * attributes and CRS details, and validates them against expected values (EPSG authority and SRID 4326).
      * Additionally, it retrieves the database schema and compares it with the extracted attributes.
@@ -199,7 +199,7 @@ public class CollectionAppendingProcess implements ProcessService {
      * @param requestInput the JsonObject containing input parameters required for fetching dataset information
      *                     and validating schema and CRS
      * @return a Future<Void> that completes successfully if the schema and CRS validations pass,
-     * or fails if any validation condition is not met
+     *         or fails if any validation condition is not met
      */
 
     private Future<Void> validateSchemaAndCRS(JsonObject requestInput) {
@@ -245,7 +245,7 @@ public class CollectionAppendingProcess implements ProcessService {
                                 })
                                 .onFailure(schemaCRSCheckPromise::fail);
                     } catch (Exception e) {
-                        LOGGER.error(SCHEMA_CRS_VALIDATION_FAILURE_MESSAGE + ":" + e);
+                        LOGGER.error(SCHEMA_CRS_VALIDATION_FAILURE_MESSAGE +  ":" + e);
                         schemaCRSCheckPromise.fail(SCHEMA_CRS_VALIDATION_FAILURE_MESSAGE);
                     }
                 }, VERTX_EXECUTE_BLOCKING_IN_ORDER).onSuccess(handler -> promise.complete())
@@ -275,7 +275,7 @@ public class CollectionAppendingProcess implements ProcessService {
 
         try {
             int exitValue = executor.execute(cmdLine);
-            LOGGER.debug("ogrinfo executed with exit value: {} ", exitValue);
+            LOGGER.debug("ogrinfo executed with exit value: {} " , exitValue);
             String output = stdout.toString();
             // Removing the initial message if necessary
             String jsonResponse = output.replace("Had to open data source read-only.", "");
@@ -328,7 +328,7 @@ public class CollectionAppendingProcess implements ProcessService {
      * @param geoJsonDataSetInfo The JsonObject containing dataset information, expected to have a "layers" array
      *                           where attribute fields are extracted from the first layer.
      * @return A Set of attribute names extracted from the fields of the first layer in the dataset information.
-     * Returns an empty set if no layers or fields are found.
+     *         Returns an empty set if no layers or fields are found.
      */
 
     private Set<String> extractAttributesFromDataSetInfo(JsonObject geoJsonDataSetInfo) {
@@ -347,15 +347,15 @@ public class CollectionAppendingProcess implements ProcessService {
 
     /**
      * Extracts the organisation and sr_id information from a GeoJSON dataset.
-     * <p>
+     *
      * This method navigates through the GeoJSON dataset to find the "layers" array,
      * then the first layer's "geometryFields" array, and finally extracts the "authority"
      * and "code" from the "coordinateSystem" object of the first geometry field.
      *
      * @param geoJsonDataSetInfo the GeoJSON schema from which to extract the authority and code
      * @return a map containing the "authority" and "code" extracted from the GeoJSON schema;
-     * an empty map is returned if the "layers" or "geometryFields" arrays are empty or
-     * if the necessary fields are not found
+     *         an empty map is returned if the "layers" or "geometryFields" arrays are empty or
+     *         if the necessary fields are not found
      */
 
     private Map<String, String> extractCRSFromDataSetInfo(JsonObject geoJsonDataSetInfo) {
@@ -392,7 +392,7 @@ public class CollectionAppendingProcess implements ProcessService {
      *
      * @param tableName The name of the database table for which the schema needs to be retrieved.
      * @return A Future resolving to a Set of column names present in the specified database table.
-     * The Future may fail if there is an error executing the database query.
+     *         The Future may fail if there is an error executing the database query.
      */
 
     private Future<Set<String>> getDbSchema(String tableName) {
@@ -418,7 +418,7 @@ public class CollectionAppendingProcess implements ProcessService {
      *
      * @param requestInput The JsonObject containing input parameters for the operation, including file name and other necessary details.
      * @return A Future<Void> that completes when the data has been successfully appended to the temporary table,
-     * or fails if there is an error during the execution of ogr2ogr command.
+     *         or fails if there is an error during the execution of ogr2ogr command.
      */
 
     private Future<Void> appendDataToTempTable(JsonObject requestInput) {
@@ -430,7 +430,7 @@ public class CollectionAppendingProcess implements ProcessService {
         vertx.executeBlocking(appendingPromise -> {
 
             CommandLine cmdLine = getOgr2ogrCommandLine(requestInput, fileName);
-            LOGGER.debug("Inside Execution and the command line is: {} ", cmdLine);
+            LOGGER.debug("Inside Execution and the command line is: {} ",cmdLine);
             DefaultExecutor executor = DefaultExecutor.builder().get();
             executor.setExitValue(0);
             ExecuteWatchdog watchdog = ExecuteWatchdog.builder().setTimeout(Duration.ofHours(1)).get();
@@ -444,8 +444,8 @@ public class CollectionAppendingProcess implements ProcessService {
                 LOGGER.debug("Successfully Executed");
                 String outLog = stdout.toString();
                 String errLog = stderr.toString();
-                LOGGER.debug("ogr2ogr output: {}", outLog);
-                LOGGER.debug("ogr2ogr error output: {}", errLog);
+                LOGGER.debug("ogr2ogr output: {}" , outLog);
+                LOGGER.debug("ogr2ogr error output: {}" , errLog);
                 appendingPromise.complete();
             } catch (IOException e) {
                 String errLog = stderr.toString();
@@ -467,7 +467,7 @@ public class CollectionAppendingProcess implements ProcessService {
      * and AWS S3 configuration for input data location.
      *
      * @param requestInput The JsonObject containing input parameters for the operation, including jobId and other necessary details.
-     * @param fileName     The name of the file located in AWS S3 bucket to be appended into the PostgreSQL table.
+     * @param fileName The name of the file located in AWS S3 bucket to be appended into the PostgreSQL table.
      * @return A CommandLine object representing the constructed ogr2ogr command line with all necessary arguments set.
      */
 
@@ -476,7 +476,7 @@ public class CollectionAppendingProcess implements ProcessService {
         String jobId = requestInput.getString("jobId");
         String tempTableName = "temp_table_for_" + jobId;
 
-        LOGGER.debug("Inside ogr2ogr command line to append data into {}", tempTableName);
+        LOGGER.debug("Inside ogr2ogr command line to append data into {}",tempTableName);
 
         CommandLine cmdLine = new CommandLine("ogr2ogr");
         cmdLine.addArgument("-nln");
@@ -557,11 +557,11 @@ public class CollectionAppendingProcess implements ProcessService {
                             sqlConnection.query(mergeQuery)
                                     .execute()
                                     .onSuccess(successHandler -> {
-                                        LOGGER.debug(MERGE_TEMP_TABLE_MESSAGE + " " + "for jobId - {}:", jobId);
+                                        LOGGER.debug(MERGE_TEMP_TABLE_MESSAGE + " " + "for jobId - {}:",jobId);
                                         promise.complete();
                                     })
                                     .onFailure(failureHandler -> {
-                                        LOGGER.error(MERGE_TEMP_TABLE_FAILURE_MESSAGE + "for jobId - {}: {}", jobId, failureHandler.getMessage());
+                                        LOGGER.error(MERGE_TEMP_TABLE_FAILURE_MESSAGE + "for jobId - {}: {}" ,jobId, failureHandler.getMessage());
                                         promise.fail(new ProcessException(500, "MERGE_FAILED", MERGE_TEMP_TABLE_FAILURE_MESSAGE));
                                     })
                     );
@@ -590,7 +590,7 @@ public class CollectionAppendingProcess implements ProcessService {
                 sqlConnection.query(deleteQuery)
                         .execute()
                         .onSuccess(successHandler -> {
-                            LOGGER.debug(DELETE_TEMP_TABLE_SUCCESS_MESSAGE + ": " + tempTableName);
+                            LOGGER.debug(DELETE_TEMP_TABLE_SUCCESS_MESSAGE + ": "+ tempTableName);
                             promise.complete();
                         })
                         .onFailure(failureHandler -> {
@@ -614,11 +614,11 @@ public class CollectionAppendingProcess implements ProcessService {
 
         utilClass.updateJobTableStatus(requestInput, Status.FAILED, errorMessage)
                 .onSuccess(successHandler -> {
-                    LOGGER.error("Process failed: {}", errorMessage);
+                    LOGGER.error("Process failed: {}" ,errorMessage);
                     promise.fail(errorMessage);
                 })
                 .onFailure(failureHandler -> {
-                    LOGGER.error(HANDLE_FAILURE_MESSAGE + ": " + failureHandler.getMessage());
+                    LOGGER.error(HANDLE_FAILURE_MESSAGE + ": " +failureHandler.getMessage());
                     promise.fail(HANDLE_FAILURE_MESSAGE);
                 });
 
@@ -645,8 +645,8 @@ public class CollectionAppendingProcess implements ProcessService {
      * @param ogrinfo the {@link CommandLine} object to be configured with S3 options.
      */
 
-    private void setS3OptionsForTesting(CommandLine ogrinfo) {
-        if (System.getProperty("s3.mock") != null) {
+    private void setS3OptionsForTesting(CommandLine ogrinfo){
+        if(System.getProperty("s3.mock") != null){
             LOGGER.fatal("S3 mock is enabled therefore disabling SSL check and setting Virtual hosting to false.");
             ogrinfo.addArgument("--config");
             ogrinfo.addArgument("GDAL_HTTP_UNSAFESSL");

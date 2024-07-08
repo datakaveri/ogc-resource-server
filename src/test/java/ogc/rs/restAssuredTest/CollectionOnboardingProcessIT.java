@@ -75,7 +75,6 @@ public class CollectionOnboardingProcessIT {
         inputs.put("title", "Invalid File");
         inputs.put("description", "Invalid file for testing.");
         inputs.put("resourceId", "2cfc08b8-a43d-40d4-ba98-c6fdfa76a0c1");
-        inputs.put("dateTimeKey", "Type");
         inputs.put("version", "1.0.0");
 
         requestBody.put("inputs", inputs);
@@ -211,24 +210,6 @@ public class CollectionOnboardingProcessIT {
 
     @Test
     @Order(9)
-    @Description("Failure: Invalid DateTimeKey")
-    public void testExecuteInvalidDateTimeKey() throws InterruptedException {
-        LOGGER.debug("Success: Onboarding a collection");
-
-        String token = getToken();
-        JsonObject requestBody = requestBody();
-        requestBody.getJsonObject("inputs").put("fileName", "bucket1/hydro_1000_features.gpkg")
-                .put("title", "Valid Hydro File").put("description", "Valid hydro file with 1000 features")
-                .put("dateTimeKey", "hydro");
-        Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
-        String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(40000);
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(DB_CHECK_RESPONSE));
-    }
-
-    @Test
-    @Order(10)
     @Description("Failure: Fail to get Meta data from S3 by passing an empty file.")
     public void testExecuteS3MetaDataFail() throws InterruptedException {
         LOGGER.debug("Failure: Fail to get Meta data from S3 by passing an empty file.");
@@ -236,7 +217,7 @@ public class CollectionOnboardingProcessIT {
         String token = getToken();
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("fileName", "no_features.gpkg").put("title", "Invalid File test")
-                .put("description", "Empty File for S3 failure testing.").put("dateTimeKey", "country_code");
+                .put("description", "Empty File for S3 failure testing.");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
         Thread.sleep(3000);
@@ -245,7 +226,7 @@ public class CollectionOnboardingProcessIT {
     }
 
     @Test
-    @Order(11)
+    @Order(10)
     @Description("Failure: Invalid file having 2 layers with different geometry")
     public void testExecuteFail2DiffGeo() throws InterruptedException {
         LOGGER.debug("Failure: Invalid file having 2 layers with different geometry");
@@ -253,8 +234,7 @@ public class CollectionOnboardingProcessIT {
         String token = getToken();
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("fileName", "bucket1/2LayersWithDiffGeom.gpkg")
-                .put("title", "Invalid Geometry test").put("description", "File with 2 layers with different geometry.")
-                .put("dateTimeKey", "flow_direction");
+                .put("title", "Invalid Geometry test").put("description", "File with 2 layers with different geometry.");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
         Thread.sleep(6000);
@@ -263,7 +243,7 @@ public class CollectionOnboardingProcessIT {
     }
 
     @Test
-    @Order(12)
+    @Order(11)
     @Description("Success: Onboarding a collection")
     public void testExecuteOnboardingSuccess() throws InterruptedException {
         LOGGER.debug("Success: Onboarding a collection");
@@ -271,8 +251,7 @@ public class CollectionOnboardingProcessIT {
         String token = getToken();
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("fileName", "bucket1/hydro_1000_features.gpkg")
-                .put("title", "Valid Hydro File").put("description", "Valid hydro file with 1000 features")
-                .put("dateTimeKey", "hydro_node_category");
+                .put("title", "Valid Hydro File").put("description", "Valid hydro file with 1000 features");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
         Thread.sleep(40000);
@@ -281,7 +260,7 @@ public class CollectionOnboardingProcessIT {
     }
 
     @Test
-    @Order(13)
+    @Order(12)
     @Description("Failure: Collection already present")
     public void testExecuteFailItemAlreadyPresent() throws InterruptedException {
         LOGGER.debug("Failure: Item already present in cat");
