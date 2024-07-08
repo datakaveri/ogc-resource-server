@@ -225,9 +225,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     JsonObject requestBody = new JsonObject();
     requestBody.put("jobId", paramsFromOasValidation.pathParameter("jobId").getString())
       .put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
-  String jobId = requestBody.getString("jobId");
-  String userId = requestBody.getString("userId");
-    dbService.getJobStatus(jobId,userId).onSuccess(handler -> {
+    dbService.getJobStatus(requestBody).onSuccess(handler -> {
       {
         LOGGER.debug("Job status found.");
         routingContext.put("response", handler.toString());
