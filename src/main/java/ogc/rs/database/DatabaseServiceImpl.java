@@ -91,10 +91,9 @@ public class DatabaseServiceImpl implements DatabaseService{
     }
 
     @Override
-    public Future<JsonObject> getJobStatus(JsonObject requestBody) {
+    public Future<JsonObject> getJobStatus(String jobId, String userId) {
         LOGGER.info("Trying to get status");
-        String jobId = requestBody.getString("jobId");
-        String userId = requestBody.getString("userId");
+
         Promise<JsonObject> promise = Promise.promise();
         client.withConnection(
                 sqlClient -> sqlClient.preparedQuery("Select * from jobs_table where id=$1")

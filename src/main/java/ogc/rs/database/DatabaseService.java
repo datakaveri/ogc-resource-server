@@ -24,7 +24,7 @@ public interface DatabaseService {
 
     Future<List<JsonObject>>  getCollection(final String collectionId);
 
-    Future<JsonObject> getJobStatus(JsonObject requestBody);
+    public Future<JsonObject> getJobStatus(String jobId, String userId);
 
     Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams, Map<String, Integer> crs);
 
