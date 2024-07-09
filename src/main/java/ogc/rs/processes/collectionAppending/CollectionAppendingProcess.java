@@ -121,12 +121,12 @@ public class CollectionAppendingProcess implements ProcessService {
         requestInput.put("collectionsDetailsTableId", tableID);
 
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, STARTING_APPEND_PROCESS_MESSAGE)
-                .compose(progressUpdateHandler->collectionOnboarding.makeCatApiRequest(requestInput))
-                .compose(resourceOwnershipCheckHandler->utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(2, 7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkIfCollectionPresent(requestInput))
                 .compose(collectionCheckHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(3, 7)).put("message", COLLECTION_EXISTS_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(2, 7)).put("message", COLLECTION_EXISTS_MESSAGE)))
+                .compose(progressUpdateHandler->collectionOnboarding.makeCatApiRequest(requestInput))
+                .compose(resourceOwnershipCheckHandler->utilClass.updateJobTableProgress(
+                        requestInput.put("progress", calculateProgress(3, 7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> validateSchemaAndCRS(requestInput))
                 .compose(schemaCheckHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(4, 7)).put("message", SCHEMA_CRS_VALIDATION_SUCCESS_MESSAGE)))
@@ -303,6 +303,8 @@ public class CollectionAppendingProcess implements ProcessService {
         ogrinfo.addArgument("--config");
         ogrinfo.addArgument("CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE");
         ogrinfo.addArgument("NO");
+        ogrinfo.addArgument("--debug");
+        ogrinfo.addArgument("ON");
 
         setS3OptionsForTesting(ogrinfo);
         ogrinfo.addArgument("--config");
@@ -496,7 +498,7 @@ public class CollectionAppendingProcess implements ProcessService {
         cmdLine.addArgument("EPSG:4326");
         cmdLine.addArgument("--config");
         cmdLine.addArgument("PG_USE_COPY");
-        cmdLine.addArgument("YES");
+        cmdLine.addArgument("NO");
         cmdLine.addArgument("-f");
         cmdLine.addArgument("PostgreSQL");
         cmdLine.addArgument(
