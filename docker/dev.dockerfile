@@ -12,7 +12,7 @@ COPY src src
 RUN mvn clean package -Dmaven.test.skip=true
 
 # Getting GDAL latest image
-FROM ghcr.io/osgeo/gdal:ubuntu-small-3.8.4 as gdal-latest
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.8.5 as gdal-latest
 # Java Runtime as the base for final image
 FROM eclipse-temurin:11-jre-focal
 
