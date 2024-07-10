@@ -68,7 +68,7 @@ public class CollectionAppendingProcessIT {
         inputs.put("fileName", "append_1000_point_features.json");
         inputs.put("title", "Valid Append File");
         inputs.put("description", "Valid file for appending test.");
-        inputs.put("resourceId", "ce64aa01-cef0-4d44-aaca-0d5cfdd5f20d");
+        inputs.put("resourceId", "61f2187e-affe-4f28-be0e-fe1cd37dbd4e");
         inputs.put("version", "1.0.0");
 
         requestBody.put("inputs", inputs);
@@ -159,7 +159,7 @@ public class CollectionAppendingProcessIT {
 
         String token = getToken();
         JsonObject requestBody = requestBody();
-        requestBody.getJsonObject("inputs").put("resourceId", "61f2187e-affe-4f28-be0e-fe1cd37dbd4e")
+        requestBody.getJsonObject("inputs").put("resourceId", UUID.randomUUID().toString())
                 .put("title", "Non-existing Collection test").put("description", "Invalid collection id for testing");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
