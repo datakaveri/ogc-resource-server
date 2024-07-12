@@ -7,10 +7,9 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import java.math.BigInteger;
 import static ogc.rs.processes.tilesOnboarding.Constants.*;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.processes.ProcessService;
@@ -18,7 +17,10 @@ import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 
-import java.math.BigInteger;
+
+/**
+ * This class handles the tiles onboarding process.
+ */
 
 public class TilesOnboardingProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(TilesOnboardingProcess.class);
@@ -33,7 +35,15 @@ public class TilesOnboardingProcess implements ProcessService {
     private String databaseUser;
     private String databasePassword;
 
-
+    /**
+     * Constructs a TilesOnboardingProcess.
+     *
+     * @param pgPool       the PostgreSQL pool
+     * @param webClient    the WebClient
+     * @param config       the configuration
+     * @param dataFromS3   the DataFromS3 instance
+     * @param vertx        the Vertx instance
+     */
 
     public TilesOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx){
         this.pgPool = pgPool;
@@ -44,6 +54,12 @@ public class TilesOnboardingProcess implements ProcessService {
         initializeConfig(config);
     }
 
+    /**
+     * Initializes the configuration.
+     *
+     * @param config the configuration
+     */
+
     private void initializeConfig(JsonObject config){
         this.databaseName = config.getString("databaseName");
         this.databaseHost = config.getString("databaseHost");
@@ -51,6 +67,13 @@ public class TilesOnboardingProcess implements ProcessService {
         this.databaseUser = config.getString("databaseUser");
         this.databasePassword = config.getString("databasePassword");
     }
+
+    /**
+     * Executes the tiles onboarding process.
+     *
+     * @param requestInput the input JSON object
+     * @return a Future containing the result JSON object
+     */
 
     public Future<JsonObject> execute(JsonObject requestInput){
         Promise<JsonObject> promise = Promise.promise();
@@ -77,6 +100,13 @@ public class TilesOnboardingProcess implements ProcessService {
         return promise.future();
     }
 
+    /**
+     * Checks if a file exists in S3.
+     *
+     * @param requestInput the input JSON object
+     * @return a Future containing a boolean indicating file existence
+     */
+
     public Future<Boolean> checkFileExistenceInS3(JsonObject requestInput) {
         Promise<Boolean> promise = Promise.promise();
         String fileName = requestInput.getString("fileName");
@@ -101,6 +131,13 @@ public class TilesOnboardingProcess implements ProcessService {
         return promise.future();
     }
 
+    /**
+     * Checks the collection type.
+     *
+     * @param requestBody the input JSON object
+     * @return a Future indicating completion
+     */
+
     private Future<Void> checkCollectionType(JsonObject requestBody){
         Promise<Void> promise = Promise.promise();
         String collectionType = requestBody.getString("collectionType");
@@ -110,6 +147,14 @@ public class TilesOnboardingProcess implements ProcessService {
         }
         return promise.future();
     }
+
+    /**
+     * Handles failure scenarios.
+     *
+     * @param requestInput the input JSON object
+     * @param errorMessage the error message
+     * @param promise      the promise to fail
+     */
 
     private void handleFailure(JsonObject requestInput, String errorMessage, Promise<JsonObject> promise) {
 
@@ -124,6 +169,15 @@ public class TilesOnboardingProcess implements ProcessService {
                 });
 
     }
+
+    /**
+     * Calculates the progress percentage.
+     *
+     * @param currentStep the current step number
+     * @param totalSteps  the total number of steps
+     * @return the progress percentage
+     */
+
     private float calculateProgress(int currentStep, int totalSteps){
         return ((float) currentStep / totalSteps) * 100;
 
