@@ -86,10 +86,13 @@ public class TilesOnboardingProcess implements ProcessService {
            .compose(progressUpdateHandler-> checkFileExistenceInS3(requestInput))
                 .compose(s3FileExistenceHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2, 6)).put("message", S3_FILE_EXISTENCE_MESSAGE)))
+                .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
+                .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
+                        requestInput.put("progress",calculateProgress(3,6)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkCollectionType(requestInput))
                 .compose(checkCollectionTypeHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(3, 6)).put("message", COLLECTION_TYPE_CHECK_MESSAGE)))
-                .onSuccess(successHandler ->{
+                        requestInput.put("progress", calculateProgress(4, 6)).put("message", COLLECTION_TYPE_CHECK_MESSAGE)))
+                .onSuccess(successHandler -> {
                     LOGGER.debug(TILES_ONBOARDING_SUCCESS_MESSAGE);
                     promise.complete();
                 })
