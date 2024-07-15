@@ -25,6 +25,10 @@ public class Constants {
             "No type found for the collection";
     public static final String COLLECTION_EXISTENCE_CHECK_FAILURE_MESSAGE =
             "Failed to check collection existence";
+    public static final String VALID_TMS_MESSAGE =
+            "The tile matrix set is valid - Web Mercator Quad type (EPSG:3857)";
+    public static final String INVALID_TMS_MESSAGE =
+            "The tile matrix set is invalid, not of the type Web Mercator Quad (EPSG:3857)";
     public static final String HANDLE_FAILURE_MESSAGE =
             "Failed to update job table status to FAILED after handler failure";
     public static final String TILES_ONBOARDING_SUCCESS_MESSAGE =
