@@ -7,6 +7,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.math.BigInteger;
@@ -92,6 +93,9 @@ public class TilesOnboardingProcess implements ProcessService {
                 .compose(progressUpdateHandler -> checkCollectionType(requestInput))
                 .compose(checkCollectionTypeHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(4, 6)).put("message", COLLECTION_TYPE_CHECK_MESSAGE)))
+                .compose(progressUpdateHandler -> checkCollectionExistence(requestInput))
+                .compose(checkCollectionExistenceHandler -> utilClass.updateJobTableProgress(
+                        requestInput.put("progress", calculateProgress(5, 6)).put("message", COLLECTION_EXISTENCE_CHECK_MESSAGE)))
                 .onSuccess(successHandler -> {
                     LOGGER.debug(TILES_ONBOARDING_SUCCESS_MESSAGE);
                     promise.complete();
@@ -148,6 +152,54 @@ public class TilesOnboardingProcess implements ProcessService {
             LOGGER.debug(FEATURE_COLLECTION_MESSAGE);
             promise.fail(FEATURE_COLLECTION_MESSAGE);
         }
+        return promise.future();
+    }
+
+    /**
+     * Checks the existence of the collection and its type.
+     *
+     * @param requestInput the input JSON object
+     * @return a Future containing the updated JSON object with pureTile attribute
+     */
+
+    public Future<JsonObject> checkCollectionExistence(JsonObject requestInput) {
+        Promise<JsonObject> promise = Promise.promise();
+        String collectionId = requestInput.getString("collectionId");
+
+        // Check if the collection exists in the collection_details table
+        pgPool.preparedQuery(CHECK_COLLECTION_EXISTENCE_QUERY)
+                .execute(Tuple.of(collectionId))
+                .compose(rowSet -> {
+                    if (rowSet.iterator().hasNext() && rowSet.iterator().next().getBoolean("exists")) {
+                        // Collection exists, now check its type in the collection_type table
+                        return pgPool.preparedQuery(GET_COLLECTION_TYPE_QUERY)
+                                .execute(Tuple.of(collectionId));
+                    } else {
+                        // Collection does not exist, it is a pure tile collection
+                        requestInput.put("pureTile", true);
+                        promise.complete(requestInput);
+                        return Future.succeededFuture();
+                    }
+                })
+                .onSuccess(typeRowSet -> {
+                    if (typeRowSet != null && typeRowSet.iterator().hasNext()) {
+                        String collectionType = typeRowSet.iterator().next().getString("type");
+                        if ("feature".equalsIgnoreCase(collectionType)) {
+                            requestInput.put("pureTile", false);
+                            promise.complete(requestInput);
+                        } else if ("map".equalsIgnoreCase(collectionType) || "vector".equalsIgnoreCase(collectionType)) {
+                            promise.fail(COLLECTION_EXISTS_MESSAGE);
+                        } else {
+                            promise.fail(UNKNOWN_COLLECTION_TYPE);
+                        }
+                    } else {
+                        promise.fail(COLLECTION_TYPE_NOT_FOUND_MESSAGE);
+                    }
+                })
+                .onFailure(err -> {
+                    promise.fail(COLLECTION_EXISTENCE_CHECK_FAILURE_MESSAGE + " :" + err.getMessage());
+                });
+
         return promise.future();
     }
 
