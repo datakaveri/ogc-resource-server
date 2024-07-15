@@ -23,8 +23,8 @@ import ogc.rs.processes.util.UtilClass;
  * resource ownership verification, collection type validation, and collection
  * existence checks.
  */
-public class TilesOnboardingProcess implements ProcessService {
-    private static final Logger LOGGER = LogManager.getLogger(TilesOnboardingProcess.class);
+public class TilesMetaDataOnboardingProcess implements ProcessService {
+    private static final Logger LOGGER = LogManager.getLogger(TilesMetaDataOnboardingProcess.class);
     private final Vertx vertx;
     private final PgPool pgPool;
     private final UtilClass utilClass;
@@ -45,7 +45,7 @@ public class TilesOnboardingProcess implements ProcessService {
      * @param dataFromS3   DataFromS3 instance for interacting with AWS S3
      * @param vertx        Vert.x instance for asynchronous event-driven programming
      */
-    public TilesOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx){
+    public TilesMetaDataOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx){
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, dataFromS3, vertx);
@@ -79,20 +79,23 @@ public class TilesOnboardingProcess implements ProcessService {
         String tileMatrixSet = requestInput.getString("tileMatrixSet");
         String fileName = collectionId + "/" + tileMatrixSet + "/";
         requestInput.put("fileName",fileName);
-        requestInput.put("progress",calculateProgress(1,6));
+        requestInput.put("progress",calculateProgress(1,7));
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING,START_TILES_ONBOARDING_PROCESS)
                 .compose(progressUpdateHandler-> checkFileExistenceInS3(requestInput))
                 .compose(s3FileExistenceHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(2, 6)).put("message", S3_FILE_EXISTENCE_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(2, 7)).put("message", S3_FILE_EXISTENCE_MESSAGE)))
                 .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
                 .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress",calculateProgress(3,6)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
+                        requestInput.put("progress",calculateProgress(3,7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkCollectionType(requestInput))
                 .compose(checkCollectionTypeHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(4, 6)).put("message", COLLECTION_TYPE_CHECK_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(4, 7)).put("message", COLLECTION_TYPE_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkCollectionExistence(requestInput))
                 .compose(checkCollectionExistenceHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(5, 6)).put("message", COLLECTION_EXISTENCE_CHECK_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(5, 7)).put("message", COLLECTION_EXISTENCE_CHECK_MESSAGE)))
+                .compose(progressUpdateHandler -> checkTileMatrixSet(requestInput))
+                .compose(tileMatrixCheckHandler -> utilClass.updateJobTableProgress(
+                        requestInput.put("progress",calculateProgress(6,7)).put("message", VALID_TMS_MESSAGE)))
                 .onSuccess(successHandler -> {
                     LOGGER.debug(TILES_ONBOARDING_SUCCESS_MESSAGE);
                     promise.complete();
@@ -157,7 +160,7 @@ public class TilesOnboardingProcess implements ProcessService {
      * @param requestInput Input JSON object containing collection details
      * @return Future<JsonObject> a Future containing the updated JSON object with the pureTile attribute
      */
-    public Future<JsonObject> checkCollectionExistence(JsonObject requestInput) {
+    private Future<JsonObject> checkCollectionExistence(JsonObject requestInput) {
         Promise<JsonObject> promise = Promise.promise();
         String collectionId = requestInput.getString("collectionId");
 
@@ -197,7 +200,12 @@ public class TilesOnboardingProcess implements ProcessService {
 
         return promise.future();
     }
-
+private Future<Void> checkTileMatrixSet(JsonObject requestInput){
+        Promise<Void> promise = Promise.promise();
+        String tms_id = requestInput.getString("tileMatrixSet");
+        //Needs to be implemented after setting up the tms_metadata table
+        return promise.future();
+}
     /**
      * Handles failure scenarios by updating the job table status and failing the promise.
      *
