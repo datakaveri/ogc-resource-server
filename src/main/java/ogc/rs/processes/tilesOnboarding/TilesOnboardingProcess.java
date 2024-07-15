@@ -18,11 +18,11 @@ import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 
-
 /**
- * This class handles the tiles onboarding process.
+ * Handles the onboarding process for tiles, including file existence checks,
+ * resource ownership verification, collection type validation, and collection
+ * existence checks.
  */
-
 public class TilesOnboardingProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(TilesOnboardingProcess.class);
     private final Vertx vertx;
@@ -39,13 +39,12 @@ public class TilesOnboardingProcess implements ProcessService {
     /**
      * Constructs a TilesOnboardingProcess.
      *
-     * @param pgPool       the PostgreSQL pool
-     * @param webClient    the WebClient
-     * @param config       the configuration
-     * @param dataFromS3   the DataFromS3 instance
-     * @param vertx        the Vertx instance
+     * @param pgPool       PostgreSQL database connection pool
+     * @param webClient    Vert.x web client for making HTTP requests
+     * @param config       Configuration JSON object containing database and other settings
+     * @param dataFromS3   DataFromS3 instance for interacting with AWS S3
+     * @param vertx        Vert.x instance for asynchronous event-driven programming
      */
-
     public TilesOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx){
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
@@ -56,11 +55,10 @@ public class TilesOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Initializes the configuration.
+     * Initializes the database configuration parameters.
      *
-     * @param config the configuration
+     * @param config Configuration JSON object containing database settings
      */
-
     private void initializeConfig(JsonObject config){
         this.databaseName = config.getString("databaseName");
         this.databaseHost = config.getString("databaseHost");
@@ -70,21 +68,20 @@ public class TilesOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Executes the tiles onboarding process.
+     * Executes the tiles onboarding process asynchronously.
      *
-     * @param requestInput the input JSON object
-     * @return a Future containing the result JSON object
+     * @param requestInput Input JSON object containing collection and tile matrix set details
+     * @return Future<JsonObject> a Future containing the result JSON object after completion
      */
-
     public Future<JsonObject> execute(JsonObject requestInput){
         Promise<JsonObject> promise = Promise.promise();
         String collectionId = requestInput.getString("collectionId");
         String tileMatrixSet = requestInput.getString("tileMatrixSet");
-        String fileName = collectionId + "/" + tileMatrixSet +"/";
+        String fileName = collectionId + "/" + tileMatrixSet + "/";
         requestInput.put("fileName",fileName);
         requestInput.put("progress",calculateProgress(1,6));
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING,START_TILES_ONBOARDING_PROCESS)
-           .compose(progressUpdateHandler-> checkFileExistenceInS3(requestInput))
+                .compose(progressUpdateHandler-> checkFileExistenceInS3(requestInput))
                 .compose(s3FileExistenceHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2, 6)).put("message", S3_FILE_EXISTENCE_MESSAGE)))
                 .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
@@ -108,12 +105,11 @@ public class TilesOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Checks if a file exists in S3.
+     * Checks if a specific file exists in the AWS S3 bucket.
      *
-     * @param requestInput the input JSON object
-     * @return a Future containing a boolean indicating file existence
+     * @param requestInput Input JSON object containing file details
+     * @return Future<Boolean> a Future containing a boolean indicating file existence in S3
      */
-
     public Future<Boolean> checkFileExistenceInS3(JsonObject requestInput) {
         Promise<Boolean> promise = Promise.promise();
         String fileName = requestInput.getString("fileName");
@@ -139,12 +135,11 @@ public class TilesOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Checks the collection type.
+     * Checks the type of the collection to determine suitability for tile metadata onboarding.
      *
-     * @param requestBody the input JSON object
-     * @return a Future indicating completion
+     * @param requestBody Input JSON object containing collection details
+     * @return Future<Void> a Future indicating completion of the collection type check
      */
-
     private Future<Void> checkCollectionType(JsonObject requestBody){
         Promise<Void> promise = Promise.promise();
         String collectionType = requestBody.getString("collectionType");
@@ -156,12 +151,12 @@ public class TilesOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Checks the existence of the collection and its type.
+     * Checks the existence of the collection and determines if it is a pure tile collection
+     * or a combination of feature and tile collection.
      *
-     * @param requestInput the input JSON object
-     * @return a Future containing the updated JSON object with pureTile attribute
+     * @param requestInput Input JSON object containing collection details
+     * @return Future<JsonObject> a Future containing the updated JSON object with the pureTile attribute
      */
-
     public Future<JsonObject> checkCollectionExistence(JsonObject requestInput) {
         Promise<JsonObject> promise = Promise.promise();
         String collectionId = requestInput.getString("collectionId");
@@ -204,13 +199,12 @@ public class TilesOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Handles failure scenarios.
+     * Handles failure scenarios by updating the job table status and failing the promise.
      *
-     * @param requestInput the input JSON object
-     * @param errorMessage the error message
-     * @param promise      the promise to fail
+     * @param requestInput Input JSON object containing request details
+     * @param errorMessage Error message describing the failure reason
+     * @param promise      Promise to fail with the error message
      */
-
     private void handleFailure(JsonObject requestInput, String errorMessage, Promise<JsonObject> promise) {
 
         utilClass.updateJobTableStatus(requestInput, Status.FAILED, errorMessage)
@@ -226,13 +220,12 @@ public class TilesOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Calculates the progress percentage.
+     * Calculates the progress percentage based on the current step and total steps.
      *
-     * @param currentStep the current step number
-     * @param totalSteps  the total number of steps
-     * @return the progress percentage
+     * @param currentStep Current step number in the process
+     * @param totalSteps  Total number of steps in the process
+     * @return Progress percentage as a float value
      */
-
     private float calculateProgress(int currentStep, int totalSteps){
         return ((float) currentStep / totalSteps) * 100;
 
