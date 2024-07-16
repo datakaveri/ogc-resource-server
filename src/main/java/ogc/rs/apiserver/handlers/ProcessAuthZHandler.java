@@ -34,9 +34,9 @@ public class ProcessAuthZHandler implements Handler<RoutingContext> {
       return;
     } else if ((user.getRole() == AuthInfo.RoleEnum.provider)) {
       JsonObject results = new JsonObject();
-      results.put("iid", iid);
-      results.put("userId", user.getUserId());
-      results.put("role", user.getRole());
+      results.put("iid", iid.toString());
+      results.put("userId", user.getUserId().toString());
+      results.put("role", user.getRole().toString());
       routingContext.data().put("authInfo", results);
       routingContext.next();
     } else {

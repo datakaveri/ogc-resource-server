@@ -41,7 +41,7 @@ public class MeteringAuthZHandler implements Handler<RoutingContext> {
     AuthInfo user = routingContext.get(USER_KEY);
     JsonObject results = new JsonObject();
     results.put("userid", user.getUserId().toString());
-    results.put("role", user.getRole());
+    results.put("role", user.getRole().toString());
     if (!user.isRsToken()) {
       results.put("iid", user.getResourceId().toString());
     }

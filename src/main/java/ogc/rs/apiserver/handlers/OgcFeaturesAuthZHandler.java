@@ -84,9 +84,9 @@ public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
 
   private void authorizeUser(RoutingContext routingContext, JsonObject authInfo, AuthInfo user) {
     authInfo
-        .put("iid", user.getResourceId())
-        .put("userId", user.getUserId())
-        .put("role", user.getRole());
+        .put("iid", user.getResourceId().toString())
+        .put("userId", user.getUserId().toString())
+        .put("role", user.getRole().toString());
     routingContext.data().put("authInfo", authInfo);
     LOGGER.debug("Authorization info: {}", routingContext.data().values());
     routingContext.next();
