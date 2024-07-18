@@ -782,13 +782,10 @@ public class ApiServerVerticle extends AbstractVerticle {
       collection.getJsonArray("links")
           .add(new JsonObject()
               .put("href",
-                  hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id") + "/map/tiles" +
-                      "/WebMercatorQuad/{tileMatrixId}/{tileRow}/{tileCol}")
-              .put("rel", "item")
-              .put("title", "Mapbox vector tiles; the link is a URI template where {tileMatrix}/{tileRow}/{tileCol}" +
-                  " is the tile in the tiling scheme 'WebMercatorQuad'")
-              .put("templated","true")
-              .put("type", "application/vnd.mapbox-vector-tile"));
+                  hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id") + "/map/tiles")
+              .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/tilesets-vector")
+              .put("title", "List of available vector features tilesets for the dataset")
+              .put("type", "application/json"));
 
     collection.remove("title");
     collection.remove("description");
@@ -1251,13 +1248,14 @@ public class ApiServerVerticle extends AbstractVerticle {
     if (dataType.equalsIgnoreCase("vector"))
       type = "application/vnd.mapbox-vector-tile";
     JsonArray linkObject = new JsonArray().add(new JsonObject()
-                    .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/map/tiles")
+                    .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/map/tiles/"
+                        + tileMatrixSet)
                     .put("rel", "self")
                     .put("type", "application/json")
-                    .put("title", collectionId.concat(" tileset tiled using" + tileMatrixSet)))
+                    .put("title", collectionId.concat(" tileset tiled using " + tileMatrixSet)))
             .add(new JsonObject().put("href",
-                        "https://raw.githubusercontent.com/opengeospatial/2D-Tile-Matrix-Set/master/registry/json"
-                            + "/WebMercatorQuad.json")
+                        "https://raw.githubusercontent.com/opengeospatial/2D-Tile-Matrix-Set/master/registry/json/"
+                            + tileMatrixSet +".json")
                     .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/tiling-scheme")
                     .put("type", "application/json")
                     .put("title", "Definition of " + tileMatrixSet + " TileMatrixSet"))
@@ -1268,7 +1266,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                     .put("rel", "item")
                     // a change here based on datatype
                     .put("type", type)
-                    .put("title", "Templated link for retrieving the tiles in PNG"));
+                    .put("title", "Templated link for retrieving the tiles"));
     return new JsonObject()
         .put("tileMatrixSetURI", tileMatrixSetUri)
         .put("dataType", dataType.toLowerCase())
