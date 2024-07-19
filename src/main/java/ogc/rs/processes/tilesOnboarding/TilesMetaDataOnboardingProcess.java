@@ -10,8 +10,11 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import java.math.BigInteger;
+
 import static ogc.rs.processes.tilesOnboarding.Constants.*;
+
 import ogc.rs.common.DataFromS3;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
@@ -37,7 +40,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     private String databasePassword;
 
     /**
-     * Constructs a TilesOnboardingProcess.
+     * Constructs a TilesMetaDataOnboardingProcess.
      *
      * @param pgPool       PostgreSQL database connection pool
      * @param webClient    Vert.x web client for making HTTP requests
@@ -80,13 +83,13 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
         String fileName = collectionId + "/" + tileMatrixSet + "/";
         requestInput.put("fileName",fileName);
         requestInput.put("progress",calculateProgress(1,7));
-        utilClass.updateJobTableStatus(requestInput, Status.RUNNING,START_TILES_ONBOARDING_PROCESS)
-                .compose(progressUpdateHandler-> checkFileExistenceInS3(requestInput))
+        utilClass.updateJobTableStatus(requestInput, Status.RUNNING, START_TILES_ONBOARDING_PROCESS)
+                .compose(progressUpdateHandler -> checkFileExistenceInS3(requestInput))
                 .compose(s3FileExistenceHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2, 7)).put("message", S3_FILE_EXISTENCE_MESSAGE)))
                 .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
                 .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress",calculateProgress(3,7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(3, 7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkCollectionType(requestInput))
                 .compose(checkCollectionTypeHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(4, 7)).put("message", COLLECTION_TYPE_CHECK_MESSAGE)))
@@ -95,7 +98,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                         requestInput.put("progress", calculateProgress(5, 7)).put("message", COLLECTION_EXISTENCE_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkTileMatrixSet(requestInput))
                 .compose(tileMatrixCheckHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress",calculateProgress(6,7)).put("message", VALID_TMS_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(6, 7)).put("message", TILE_MATRIX_SET_FOUND_MESSAGE)))
                 .onSuccess(successHandler -> {
                     LOGGER.debug(TILES_ONBOARDING_SUCCESS_MESSAGE);
                     promise.complete();
@@ -123,7 +126,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                 .onSuccess(responseFromS3 -> {
                     BigInteger fileSize = new BigInteger(responseFromS3.getHeader("Content-Length"));
                     if (fileSize.compareTo(BigInteger.ZERO) > 0) {
-                        LOGGER.debug(S3_FILE_EXISTENCE_MESSAGE + " with size: {}",fileSize);
+                        LOGGER.debug(S3_FILE_EXISTENCE_MESSAGE + " with size: {}", fileSize);
                         promise.complete(true);
                     } else {
                         promise.fail(S3_FILE_EXISTENCE_FAIL_MESSAGE);
@@ -146,7 +149,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     private Future<Void> checkCollectionType(JsonObject requestBody){
         Promise<Void> promise = Promise.promise();
         String collectionType = requestBody.getString("collectionType");
-        if("feature".equalsIgnoreCase(collectionType)){
+        if ("feature".equalsIgnoreCase(collectionType)) {
             LOGGER.debug(FEATURE_COLLECTION_MESSAGE);
             promise.fail(FEATURE_COLLECTION_MESSAGE);
         }
@@ -200,12 +203,36 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
 
         return promise.future();
     }
-private Future<Void> checkTileMatrixSet(JsonObject requestInput){
+
+    /**
+     * Checks if the tileMatrixSet exists in the tms_metadata table.
+     *
+     * @param requestInput Input JSON object containing tile matrix set details
+     * @return Future<Void> a Future indicating completion of the tile matrix set check
+     */
+    private Future<Void> checkTileMatrixSet(JsonObject requestInput){
         Promise<Void> promise = Promise.promise();
-        String tms_id = requestInput.getString("tileMatrixSet");
-        //Needs to be implemented after setting up the tms_metadata table
+        String tmsTitle = requestInput.getString("tileMatrixSet");
+
+        pgPool.preparedQuery(CHECK_TILE_MATRIX_SET_EXISTENCE_QUERY)
+                .execute(Tuple.of(tmsTitle))
+                .onSuccess(rowSet -> {
+                    if (rowSet.iterator().hasNext() && rowSet.iterator().next().getBoolean("exists")) {
+                        LOGGER.debug(TILE_MATRIX_SET_FOUND_MESSAGE + ": " + tmsTitle);
+                        promise.complete();
+                    } else {
+                        LOGGER.error(TILE_MATRIX_SET_NOT_FOUND_MESSAGE + ": " + tmsTitle);
+                        promise.fail(TILE_MATRIX_SET_NOT_FOUND_MESSAGE);
+                    }
+                })
+                .onFailure(err -> {
+                    LOGGER.error(TILE_MATRIX_SET_CHECK_FAILURE_MESSAGE + ": " + err.getMessage());
+                    promise.fail(TILE_MATRIX_SET_CHECK_FAILURE_MESSAGE + ": " + err.getMessage());
+                });
+
         return promise.future();
-}
+    }
+
     /**
      * Handles failure scenarios by updating the job table status and failing the promise.
      *
@@ -217,11 +244,11 @@ private Future<Void> checkTileMatrixSet(JsonObject requestInput){
 
         utilClass.updateJobTableStatus(requestInput, Status.FAILED, errorMessage)
                 .onSuccess(successHandler -> {
-                    LOGGER.error("Process failed: {}" ,errorMessage);
+                    LOGGER.error("Process failed: {}", errorMessage);
                     promise.fail(errorMessage);
                 })
                 .onFailure(failureHandler -> {
-                    LOGGER.error(HANDLE_FAILURE_MESSAGE + ": " +failureHandler.getMessage());
+                    LOGGER.error(HANDLE_FAILURE_MESSAGE + ": " + failureHandler.getMessage());
                     promise.fail(HANDLE_FAILURE_MESSAGE);
                 });
 
