@@ -1,4 +1,4 @@
-package ogc.rs.processes.tilesOnboarding;
+package ogc.rs.processes.tilesMetaDataOnboarding;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
 
-import static ogc.rs.processes.tilesOnboarding.Constants.*;
+import static ogc.rs.processes.tilesMetaDataOnboarding.Constants.*;
 
 import ogc.rs.common.DataFromS3;
 import ogc.rs.processes.ProcessService;

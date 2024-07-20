@@ -1,4 +1,4 @@
-package ogc.rs.processes.tilesOnboarding;
+package ogc.rs.processes.tilesMetaDataOnboarding;
 
 public class Constants {
     // Query to check if the collection exists in the collection_details table
