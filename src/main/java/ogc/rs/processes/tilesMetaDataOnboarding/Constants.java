@@ -7,9 +7,9 @@ public class Constants {
     // Query to get the collection type from the collection_type table
     public static String GET_COLLECTION_TYPE_QUERY =
             "SELECT type FROM collection_type WHERE collection_id = $1";
-    // Query to check if the tile matrix set exists in tms_metadata table
+    // Query to check if the tile matrix set exists in tms_metadata table and retrieve all columns
     public static final String CHECK_TILE_MATRIX_SET_EXISTENCE_QUERY =
-            "SELECT EXISTS (SELECT 1 FROM tms_metadata WHERE title = $1) AS exists";
+            "SELECT *, EXISTS (SELECT 1 FROM tms_metadata WHERE title = $1) AS exists FROM tms_metadata WHERE title = $1";
     public static final String START_TILES_ONBOARDING_PROCESS = "Starting Tiles Onboarding Process";
     public static final String S3_FILE_EXISTENCE_MESSAGE = "File exists in s3 bucket";
     public static final String S3_FILE_EXISTENCE_FAIL_MESSAGE = "File does not exist in S3 or is empty.";
