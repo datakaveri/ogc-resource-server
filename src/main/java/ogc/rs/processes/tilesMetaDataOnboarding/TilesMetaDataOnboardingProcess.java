@@ -26,6 +26,7 @@ import ogc.rs.processes.util.UtilClass;
  * resource ownership verification, collection type validation, and collection
  * existence checks.
  */
+
 public class TilesMetaDataOnboardingProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(TilesMetaDataOnboardingProcess.class);
     private final Vertx vertx;
@@ -205,21 +206,31 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Checks if the tileMatrixSet exists in the tms_metadata table.
+     * Checks if the tileMatrixSet exists in the tms_metadata table and adds 'id' and 'crs'
+     * column values into the requestInput JSON object.
      *
      * @param requestInput Input JSON object containing tile matrix set details
-     * @return Future<Void> a Future indicating completion of the tile matrix set check
+     * @return Future<JsonObject> a Future containing the updated JSON object with 'id' and 'crs' values if the tile matrix set exists
      */
-    private Future<Void> checkTileMatrixSet(JsonObject requestInput){
-        Promise<Void> promise = Promise.promise();
+    private Future<JsonObject> checkTileMatrixSet(JsonObject requestInput) {
+        Promise<JsonObject> promise = Promise.promise();
         String tmsTitle = requestInput.getString("tileMatrixSet");
 
         pgPool.preparedQuery(CHECK_TILE_MATRIX_SET_EXISTENCE_QUERY)
                 .execute(Tuple.of(tmsTitle))
                 .onSuccess(rowSet -> {
-                    if (rowSet.iterator().hasNext() && rowSet.iterator().next().getBoolean("exists")) {
-                        LOGGER.debug(TILE_MATRIX_SET_FOUND_MESSAGE + ": " + tmsTitle);
-                        promise.complete();
+                    if (rowSet.iterator().hasNext()) {
+                        var row = rowSet.iterator().next();
+                        if (row.getBoolean("exists")) {
+                            LOGGER.debug(TILE_MATRIX_SET_FOUND_MESSAGE + ": " + tmsTitle);
+                            // Add 'id' and 'crs' column values into requestInput
+                            requestInput.put("tms_id", row.getValue("id"));
+                            requestInput.put("crs", row.getValue("crs"));
+                            promise.complete(requestInput);
+                        } else {
+                            LOGGER.error(TILE_MATRIX_SET_NOT_FOUND_MESSAGE + ": " + tmsTitle);
+                            promise.fail(TILE_MATRIX_SET_NOT_FOUND_MESSAGE);
+                        }
                     } else {
                         LOGGER.error(TILE_MATRIX_SET_NOT_FOUND_MESSAGE + ": " + tmsTitle);
                         promise.fail(TILE_MATRIX_SET_NOT_FOUND_MESSAGE);
