@@ -21,3 +21,6 @@ ALTER TABLE tilematrixsets_relation ADD COLUMN id uuid PRIMARY KEY DEFAULT publi
 -- add foreign key constraint
 ALTER TABLE tilematrixsets_relation ADD CONSTRAINT tms_fkey FOREIGN KEY (tms_id)
  REFERENCES tms_metadata (id) ON DELETE CASCADE;
+
+-- Add GRANTS to tms_metadata table
+GRANT SELECT, INSERT ON tms_metadata to ${ogcUser};
