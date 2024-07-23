@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
@@ -100,6 +101,8 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                 .compose(progressUpdateHandler -> checkTileMatrixSet(requestInput))
                 .compose(tileMatrixCheckHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(6, 7)).put("message", TILE_MATRIX_SET_FOUND_MESSAGE)))
+                .compose(progressUpdateHandler -> onboardTileMetadata(requestInput))
+                .compose(tilesMetaDataOnboardingHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,PROCESS_SUCCESS_MESSAGE))
                 .onSuccess(successHandler -> {
                     LOGGER.debug(TILES_ONBOARDING_SUCCESS_MESSAGE);
                     promise.complete();
@@ -242,6 +245,53 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                 });
 
         return promise.future();
+    }
+
+    /**
+     * Onboards tile metadata into the database. Depending on whether the collection is a pure tile collection,
+     * it inserts data into different tables.
+     *
+     * @param requestInput JSON object containing tile metadata information and other details.
+     * @return Future<Void> indicating the success or failure of the onboarding process.
+     */
+    private Future<Void> onboardTileMetadata(JsonObject requestInput) {
+        return pgPool.withTransaction(sqlClient -> {
+            Promise<Void> promise = Promise.promise();
+
+            boolean pureTile = requestInput.getBoolean("pureTile");
+            String collectionId = requestInput.getString("collectionId");
+            String title = requestInput.getString("title");
+            String description = requestInput.getString("description");
+            String crs = requestInput.getString("crs");
+            JsonArray bbox = requestInput.getJsonArray("bbox");
+            JsonArray temporal = requestInput.getJsonArray("temporal");
+            String accessPolicy = requestInput.getString("accessPolicy");
+            String userId = requestInput.getString("userId");
+            String collectionType = requestInput.getString("collectionType");
+            String tmsId = requestInput.getString("tms_id");
+            JsonArray pointOfOrigin = requestInput.getJsonArray("pointOfOrigin");
+
+            Future<Void> collectionDetailsFuture = Future.succeededFuture();
+            if (pureTile) {
+                collectionDetailsFuture = sqlClient.preparedQuery(INSERT_COLLECTION_DETAILS_QUERY)
+                        .execute(Tuple.of(collectionId, title, description, crs, bbox.encode(), temporal.encode()))
+                        .mapEmpty()
+                        .compose(v -> sqlClient.preparedQuery(INSERT_RI_DETAILS_QUERY)
+                                .execute(Tuple.of(collectionId, accessPolicy, userId))
+                                .mapEmpty());
+            }
+
+            return collectionDetailsFuture
+                    .compose(v -> sqlClient.preparedQuery(INSERT_COLLECTION_TYPE_QUERY)
+                            .execute(Tuple.of(collectionId, collectionType))
+                            .mapEmpty())
+                    .compose(v -> sqlClient.preparedQuery(INSERT_TILE_MATRIX_SET_RELATION_QUERY)
+                            .execute(Tuple.of(collectionId, tmsId, pointOfOrigin.encode()))
+                            .mapEmpty())
+                    .onSuccess(v -> promise.complete())
+                    .onFailure(promise::fail)
+                    .mapEmpty();
+        });
     }
 
     /**
