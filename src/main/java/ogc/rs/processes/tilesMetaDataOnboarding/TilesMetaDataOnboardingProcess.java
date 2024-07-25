@@ -147,18 +147,26 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     /**
      * Checks the type of the collection to determine suitability for tile metadata onboarding.
      *
-     * @param requestBody Input JSON object containing collection details
-     * @return Future<Void> a Future indicating completion of the collection type check
+     * @param requestBody JSON object containing the collection type information.
+     * @return Future<Void> indicating the success or failure of the collection type validation.
      */
-    private Future<Void> checkCollectionType(JsonObject requestBody){
+    private Future<Void> checkCollectionType(JsonObject requestBody) {
         Promise<Void> promise = Promise.promise();
         String collectionType = requestBody.getString("collectionType");
+
         if ("feature".equalsIgnoreCase(collectionType)) {
             LOGGER.debug(FEATURE_COLLECTION_MESSAGE);
             promise.fail(FEATURE_COLLECTION_MESSAGE);
+        } else if (!"VECTOR".equalsIgnoreCase(collectionType) && !"MAP".equalsIgnoreCase(collectionType)) {
+            LOGGER.error(INVALID_COLLECTION_TYPE_MESSAGE + ": " + collectionType);
+            promise.fail(INVALID_COLLECTION_TYPE_MESSAGE);
+        } else {
+            promise.complete();
         }
+
         return promise.future();
     }
+
 
     /**
      * Checks the existence of the collection and determines if it is a pure tile collection

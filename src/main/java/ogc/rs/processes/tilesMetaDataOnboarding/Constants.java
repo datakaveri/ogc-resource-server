@@ -30,6 +30,8 @@ public class Constants {
             "Resource belongs to the user.";
     public static final String FEATURE_COLLECTION_MESSAGE =
             "Tile metadata onboarding is not applicable for feature collections.";
+    public static final String INVALID_COLLECTION_TYPE_MESSAGE =
+            "Invalid Collection Type";
     public static final String COLLECTION_TYPE_CHECK_MESSAGE =
             "Collection type check complete: the collection type is suitable for tile metadata onboarding.";
     public static final String COLLECTION_EXISTENCE_CHECK_MESSAGE =
