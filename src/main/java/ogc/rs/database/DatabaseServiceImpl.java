@@ -731,4 +731,37 @@ public class DatabaseServiceImpl implements DatabaseService{
                 });
         return promise.future();
     }
+
+
+  @Override
+  public Future<JsonObject> getSchema(String id) {
+    Promise<JsonObject> promise = Promise.promise();
+    String sqlString = "select schema from collection_coverage where collection_id = $1::uuid";
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+
+    client
+        .withConnection(
+            conn ->
+                conn.preparedQuery(sqlString)
+                    .collecting(collector)
+                    .execute(Tuple.of(UUID.fromString(id)))
+                    .map(SqlResult::value))
+        .onSuccess(
+            success -> {
+              if (success.isEmpty()) {
+                promise.fail(new OgcException(404, "Not found", "Collection not found"));
+              } else {
+                LOGGER.debug("response from database: " + success.get(0));
+                JsonObject schema = success.get(0);
+                promise.complete(schema);
+              }
+            })
+        .onFailure(
+            fail -> {
+              LOGGER.error("Something went wrong at isOpenResource: {}", fail.getMessage());
+              promise.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
+            });
+    return promise.future();
+  }
 }

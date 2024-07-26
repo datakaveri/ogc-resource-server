@@ -58,4 +58,6 @@ public interface DatabaseService {
     Future<List<JsonObject>> getOgcFeatureCollectionMetadataForOasSpec(List<String> existingCollectionUuidIds);
 
     Future<Boolean> getAccess(String id);
+    Future<JsonObject> getSchema(String id);
+
 }
