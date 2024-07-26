@@ -717,6 +717,51 @@
           }
         }
       }
+    },
+    "/collections/{collectionId}/schema": {
+      "get": {
+        "tags": [
+          "Coverage"
+        ],
+        "summary": "retrieve the schema of the coverage-data",
+        "description": "Shows the schema of the coverage.",
+        "operationId": "getCoverageSchema",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/collectionId-all"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the schema of the coverage.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schema": {
+                      "type": "object",
+                      "description": "The JSON schema of the coverage."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "servers": [
+          {
+            "url": "https://ogc.iudx.io",
+            "description": "OGC-Resource-Server"
+          }
+        ]
+      }
     }
   }
 ,
