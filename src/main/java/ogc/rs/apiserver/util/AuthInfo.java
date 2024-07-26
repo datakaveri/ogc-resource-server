@@ -65,6 +65,16 @@ public class AuthInfo {
     return resourceId;
   }
 
+  /**
+   * Used to set resource ID when the token is a resource server token and the effective resource ID
+   * is determined in authorization handlers.
+   * 
+   * @param resourceId
+   */
+  public void setResourceId(UUID resourceId) {
+    this.resourceId = resourceId; 
+  }
+
   public boolean isRsToken() {
     return isRsToken;
   }
