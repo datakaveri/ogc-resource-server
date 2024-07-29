@@ -58,6 +58,14 @@ public interface DatabaseService {
     Future<List<JsonObject>> getOgcFeatureCollectionMetadataForOasSpec(List<String> existingCollectionUuidIds);
 
     Future<Boolean> getAccess(String id);
+
+    /**
+     * Retrieves the schema of coverage for the collection whose id is provided.
+     *
+     * @param id The ID of the collection for which to retrieve the schema. Must be a valid UUID string.
+     * @return The future will return with a JsonObject containing the schema if successful,
+     * or it will fail with an OgcException if the collection is not found or if there is an internal server error.
+     */
     Future<JsonObject> getSchema(String id);
 
 }
