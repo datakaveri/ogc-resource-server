@@ -14,6 +14,11 @@ import ogc.rs.apiserver.router.routerbuilders.StacRouterBuilder;
 import ogc.rs.apiserver.router.util.OasFragments;
 import ogc.rs.database.DatabaseService;
 
+/**
+ * Class to handle creation of routes for OGC Coverages.
+ *
+ */
+
 @AutoService(GisEntityInterface.class)
 public class OgcCoverageEntity implements GisEntityInterface {
 

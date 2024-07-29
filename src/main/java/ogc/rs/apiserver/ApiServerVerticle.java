@@ -480,6 +480,13 @@ public class ApiServerVerticle extends AbstractVerticle {
           });
   }
 
+  /**
+   * Builds and returns a JSON object representing the coverage result for a collection.
+   *
+   * @param success success A list of JSON objects representing the collection query result.
+   * The first element is expected to be the collection.
+   * @return  A JsonObject representing the coverage result for the collection, including metadata and links.
+   */
   private JsonObject buildCollectionCoverageResult(List<JsonObject> success) {
     JsonObject collection = success.get(0);
     if (collection.getJsonArray("temporal") == null
@@ -536,14 +543,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                     .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/schema")
                     .put("type", "application/json")
                     .put("title", "Schema (as JSON)")));
-    collection.put(
-        "crs",
-        new JsonArray()
-            .add("http://www.opengis.net/def/crs/OGC/1.3/CRS84")
-            .add("http://www.opengis.net/def/crs/EPSG/0/4326")
-            .add("http://www.opengis.net/def/crs/EPSG/0/3857")
-            .add("http://www.opengis.net/def/crs/EPSG/0/3395"));
-
+    collection.put("crs", collection.getJsonArray("crs"));
     collection.remove("datetime_key");
     collection.remove("temporal");
     collection.remove("bbox");
@@ -1655,6 +1655,12 @@ public class ApiServerVerticle extends AbstractVerticle {
             });
   }
 
+  /**
+   * Handles the request to retrieve the schema of coverage for a given collection.
+   *
+   * @param routingContext The routing context of the HTTP request, which contains the request and
+   * response objects and other context data.
+   */
   public void getCoverageSchema(RoutingContext routingContext) {
     String collectionId = routingContext.normalizedPath().split("/")[2];
     LOGGER.debug("Collection Id: {}", collectionId);
