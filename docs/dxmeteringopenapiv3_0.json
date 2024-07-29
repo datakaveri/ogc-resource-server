@@ -33,15 +33,17 @@
         "summary": "summary details",
         "description": "Summary API is used to get summary details and count for a given resource within the given time frame. The consumer could provide `starttime` and `endtime` and get the frequency usage of the resources.",
         "operationId": "summary",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/summary_starttime"
           },
           {
             "$ref": "#/components/parameters/summary_endtime"
-          },
-          {
-            "$ref": "#/components/parameters/token"
           }
         ],
         "responses": {
@@ -68,15 +70,17 @@
         "summary": "overview",
         "description": "Overview API is used to get count based on month. Without parameter it will return last 12 months count data. This responds the number of times the API requests are made from OGC Resource Server within the given time frame when the user specifies `starttime` and `endtime`.",
         "operationId": "overview",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/summary_starttime"
           },
           {
             "$ref": "#/components/parameters/summary_endtime"
-          },
-          {
-            "$ref": "#/components/parameters/token"
           }
         ],
         "responses": {
@@ -100,6 +104,11 @@
         "summary": "provider search",
         "description": "A provider could use `/provider/audit` API to get the detailed summary of the resources with the APIs associated with provider. The count query gives the sum total of calls by the provider to the OGC Resource Server when the user provides `count` in the options.",
         "operationId": "provider/audit",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/provider_audit_options"
@@ -130,9 +139,6 @@
           },
           {
             "$ref": "#/components/parameters/provider_audit_limit"
-          },
-          {
-            "$ref": "#/components/parameters/token"
           }
         ],
         "responses": {
@@ -159,6 +165,11 @@
         "summary": "consumer search",
         "description": "Consumer API can be used by a user to get detailed audit summary of all the APIs from OGC Resource Server when the user provides the required query parameters. This API could also give the total number of requests made to all the APIs from OGC Resource Server when the `option` is query parameter is count.",
         "operationId": "consumer/audit",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/provider_audit_options"
@@ -183,9 +194,6 @@
           },
           {
             "$ref": "#/components/parameters/provider_audit_limit"
-          },
-          {
-            "$ref": "#/components/parameters/token"
           }
         ],
         "responses": {
@@ -212,6 +220,14 @@
     }
   ],
   "components": {
+    "securitySchemes": {
+      "DX-AAA-Token": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "A <b> valid Auth token </b> to process the request."
+      }
+    },
     "parameters": {
       "summary_starttime": {
         "name": "starttime",
@@ -331,15 +347,6 @@
           "type": "integer",
           "minimum": 1,
           "default": 2000
-        }
-      },
-      "token": {
-        "name": "token",
-        "in": "header",
-        "description": "A <b> valid Auth token </b> to process the request.",
-        "required": true,
-        "schema": {
-            "type": "string"
         }
       }
     },
