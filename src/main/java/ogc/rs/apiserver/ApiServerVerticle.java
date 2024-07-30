@@ -527,7 +527,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                             + "/"
                             + collection.getString("id")
                             + "/coverage")
-                    .put("rel", " http://www.opengis.net/def/rel/ogc/1.0/coverage")
+                    .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/coverage")
                     .put("type", "application/json")
                     .put("title", collection.getString("title")))
             .add(
@@ -547,6 +547,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     collection.remove("datetime_key");
     collection.remove("temporal");
     collection.remove("bbox");
+    collection.remove("type");
     return collection;
   }
 
