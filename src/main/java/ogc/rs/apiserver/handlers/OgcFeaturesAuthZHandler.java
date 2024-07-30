@@ -3,7 +3,6 @@ package ogc.rs.apiserver.handlers;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.AuthInfo;
@@ -14,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.UUID;
 
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
-import static ogc.rs.apiserver.util.Constants.HEADER_AUTHORIZATION;
 import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
 import static ogc.rs.common.Constants.UUID_REGEX;
 
@@ -45,33 +43,34 @@ public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
     }
     
     LOGGER.debug("OGC Features Authorization");
-    String id = routingContext.normalizedPath().split("/")[2];
-    String token = routingContext.request().getHeader("token");
-    JsonObject authInfo = new JsonObject().put(HEADER_AUTHORIZATION, token).put("id", id);
-    if (id == null || !id.matches(UUID_REGEX)) {
+    String collectionId = routingContext.normalizedPath().split("/")[2];
+    if (collectionId == null || !collectionId.matches(UUID_REGEX)) {
       routingContext.fail(new OgcException(404, "Not Found", "Collection Not Found"));
       return;
     }
     AuthInfo user = routingContext.get(USER_KEY);
     UUID iid = user.getResourceId();
-    if (!user.isRsToken() && !id.equals(iid.toString())) {
-      LOGGER.error("Resource Ids don't match! id- {}, jwtId- {}", id, iid);
+    if (!user.isRsToken() && !collectionId.equals(iid.toString())) {
+      LOGGER.error("Resource Ids don't match! id- {}, jwtId- {}", collectionId, iid);
       routingContext.fail(
           new OgcException(
               401, "Not Authorized", "User is not authorised. Please contact IUDX AAA "));
       return;
     }
     databaseService
-        .getAccess(id)
+        .getAccess(collectionId)
         .onSuccess(
             isOpen -> {
+              
+              user.setResourceId(UUID.fromString(collectionId));
+              
               if (isOpen && user.isRsToken()) {
-                authorizeUser(routingContext, authInfo, user);
+                authorizeUser(routingContext);
               } else {
                 if (user.getRole() == AuthInfo.RoleEnum.consumer) {
-                  handleConsumerAccess(routingContext, authInfo, user);
+                  handleConsumerAccess(routingContext, user);
                 } else {
-                  authorizeUser(routingContext, authInfo, user);
+                  authorizeUser(routingContext);
                 }
               }
             })
@@ -82,18 +81,13 @@ public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
             });
   }
 
-  private void authorizeUser(RoutingContext routingContext, JsonObject authInfo, AuthInfo user) {
-    authInfo
-        .put("iid", user.getResourceId())
-        .put("userId", user.getUserId())
-        .put("role", user.getRole());
-    routingContext.data().put("authInfo", authInfo);
+  private void authorizeUser(RoutingContext routingContext) {
     LOGGER.debug("Authorization info: {}", routingContext.data().values());
     routingContext.next();
   }
 
   private void handleConsumerAccess(
-      RoutingContext routingContext, JsonObject authInfo, AuthInfo user) {
+      RoutingContext routingContext, AuthInfo user) {
     JsonArray access =
         user.getConstraints() != null ? user.getConstraints().getJsonArray("access") : null;
     if (access == null || !access.contains("api")) {
@@ -103,7 +97,7 @@ public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
               401, "Not Authorized", "User is not authorised. Please contact IUDX AAA "));
 
     } else {
-      authorizeUser(routingContext, authInfo, user);
+      authorizeUser(routingContext);
     }
   }
 }

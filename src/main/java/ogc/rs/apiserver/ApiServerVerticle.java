@@ -29,7 +29,9 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
 import ogc.rs.apiserver.util.AuthInfo;
+import ogc.rs.apiserver.util.AuthInfo.RoleEnum;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.ProcessException;
@@ -1388,19 +1390,11 @@ public class ApiServerVerticle extends AbstractVerticle {
     if(!STATUS_CODES_TO_AUDIT.contains(context.response().getStatusCode())) {
       return Future.succeededFuture();
     }
-
-    JsonObject authInfo = (JsonObject) context.data().get("authInfo");
-
-    String resourceId = authInfo.getString(ID);
-
-    // auditing never done for root path ('/') so [1] will always be there
-    String apiEndpointFirstPart = context.request().path().split("/")[1];
-
-    // if assets API, then the ID in the path is NOT the resource ID - take resource ID from token iid
-    if("assets".equals(apiEndpointFirstPart)) {
-      resourceId = authInfo.getString("iid");
-    }
-
+    
+    AuthInfo authInfo = (AuthInfo) context.data().get(DxTokenAuthenticationHandler.USER_KEY);
+   
+    String resourceId = authInfo.getResourceId().toString();
+    
     Promise<Void> promise = Promise.promise();
     JsonObject request = new JsonObject();
 
@@ -1421,12 +1415,12 @@ public class ApiServerVerticle extends AbstractVerticle {
                         ? cacheResult.getString(RESOURCE_GROUP)
                         : cacheResult.getString(ID);
                 ZonedDateTime zst = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
-                String role = authInfo.getString(ROLE);
-                String drl = authInfo.getString(DRL);
-                if (role.equalsIgnoreCase("delegate") && drl != null) {
-                  request.put(DELEGATOR_ID, authInfo.getString(DID));
+                RoleEnum role = authInfo.getRole();
+                RoleEnum drl = authInfo.getDelegatorRole();
+                if (RoleEnum.delegate.equals(role) && drl != null) {
+                  request.put(DELEGATOR_ID, authInfo.getDelegatorUserId().toString());
                 } else {
-                  request.put(DELEGATOR_ID, authInfo.getString("userId"));
+                  request.put(DELEGATOR_ID, authInfo.getUserId().toString());
                 }
                 String providerId = cacheResult.getString("provider");
                 long time = zst.toInstant().toEpochMilli();
@@ -1437,8 +1431,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                 // Comment here , if we need type (item_type) then we can use this
                 request.put(EPOCH_TIME, time);
                 request.put(ISO_TIME, isoTime);
-                request.put(USER_ID, authInfo.getValue("userId"));
-                request.put(ID, authInfo.getValue(ID));
+                request.put(USER_ID, authInfo.getUserId().toString());
+                request.put(ID, authInfo.getResourceId().toString());
                 request.put(API, context.request().path());
                 request.put(RESPONSE_SIZE, context.response().bytesWritten());
                 request.put(PROVIDER_ID, providerId);

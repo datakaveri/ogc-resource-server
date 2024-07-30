@@ -34,7 +34,7 @@ public class StacAssetsAuthZHandler implements Handler<RoutingContext> {
     LOGGER.debug("STAC Assets Authorization");
 
     AuthInfo user = routingContext.get(USER_KEY);
-    UUID userId = user.getResourceId();
+    UUID resourceId = user.getResourceId();
     String assetId = routingContext.pathParam("assetId");
 
     databaseService
@@ -50,7 +50,7 @@ public class StacAssetsAuthZHandler implements Handler<RoutingContext> {
               LOGGER.debug("Asset found: {}", asset);
 
               if (!user.isRsToken()
-                  && !asset.getString("stac_collections_id").equals(userId.toString())) {
+                  && !asset.getString("stac_collections_id").equals(resourceId.toString())) {
                 LOGGER.error("Collection associated with asset is not the same as in token.");
                 routingContext.fail(new OgcException(401, NOT_AUTHORIZED, INVALID_COLLECTION_ID));
                 return;
@@ -62,6 +62,8 @@ public class StacAssetsAuthZHandler implements Handler<RoutingContext> {
                   .getAccess(asset.getString("stac_collections_id"))
                   .onSuccess(
                       isOpenResource -> {
+                        user.setResourceId(UUID.fromString(asset.getString("stac_collections_id")));
+                        
                         if (isOpenResource && user.isRsToken()) {
                           LOGGER.debug("Resource is open, access granted.");
                           routingContext.next();
