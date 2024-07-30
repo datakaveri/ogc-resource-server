@@ -87,7 +87,7 @@ public class ApiServerVerticle extends AbstractVerticle {
   String tileMatrixSetUrl = "https://raw.githubusercontent.com/opengeospatial/2D-Tile-Matrix-Set/master/registry" +
       "/json/$.json";
   JsonArray allCrsSupported = new JsonArray();
-    
+
   /**
    * This method is used to start the Verticle. It deploys a verticle in a cluster/single instance, reads the
    * configuration, obtains a proxy for the Event bus services exposed through service discovery,
@@ -123,20 +123,20 @@ public class ApiServerVerticle extends AbstractVerticle {
     HttpServerOptions serverOptions = new HttpServerOptions();
     serverOptions.setCompressionSupported(true).setCompressionLevel(5);
     int port = config().getInteger("httpPort") == null ? 8080 : config().getInteger("httpPort");
-    
+
     HttpServer server = vertx.createHttpServer(serverOptions);
-    
+
     router = Router.router(vertx);
 
     /*
      * Start server only once router has at least one route (it will have only one, '/' since both
      * the OGC and STAC sub-routers are bound to that path).
-     * 
+     *
      * Check every second for 20 seconds if router has been created. If it has, start server.
-     */ 
+     */
     AtomicInteger waitForRouterCounter = new AtomicInteger(20);
     vertx.setPeriodic(1000, wait -> {
-        
+
       if (!router.getRoutes().isEmpty()) {
         vertx.cancelTimer(wait);
         server.requestHandler(router).listen(port)
@@ -145,11 +145,11 @@ public class ApiServerVerticle extends AbstractVerticle {
             .onFailure(Throwable::printStackTrace);
       } else {
         LOGGER.info("Waiting for router to be initialized");
-        
+
         waitForRouterCounter.decrementAndGet();
         if (waitForRouterCounter.intValue() == 0) {
           LOGGER.fatal("Router not initialized - Failed to start HTTP server");
-          
+
           vertx.cancelTimer(wait);
           throw new RuntimeException();
         }
@@ -170,7 +170,7 @@ public class ApiServerVerticle extends AbstractVerticle {
    * Reset {@link ApiServerVerticle#router} by clearing it and then adding all routers in
    * <code>routerList</code> as sub-routers at the root path. Also adds a handler for
    * {@link Route#last()}, i.e. the last route to handle collection/API not found 404 errors.
-   * 
+   *
    * @param routerList list of routers to be added as sub-routers
    */
   public void resetRouter(List<Router> routerList) {
@@ -244,7 +244,7 @@ public class ApiServerVerticle extends AbstractVerticle {
       routingContext.next();
     });
   }
-  
+
   public void getFeature(RoutingContext routingContext) {
 
     RequestParameters requestParameters = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
@@ -289,7 +289,7 @@ public class ApiServerVerticle extends AbstractVerticle {
               routingContext.next();
             });
   }
-  
+
   public void getFeatures(RoutingContext routingContext) {
 
     RequestParameters requestParameters = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
@@ -460,6 +460,8 @@ public class ApiServerVerticle extends AbstractVerticle {
               jsonResult = buildCollectionFeatureResult(success);
             else if (success.get(0).getJsonArray("type").contains("MAP"))
               jsonResult = buildCollectionTileResult(success);
+            else if (success.get(0).getJsonArray("type").contains("COVERAGE"))
+              jsonResult = buildCollectionCoverageResult(success);
             routingContext.put("response", jsonResult.toString());
             routingContext.put("statusCode", 200);
             routingContext.next();
@@ -476,6 +478,76 @@ public class ApiServerVerticle extends AbstractVerticle {
             }
             routingContext.next();
           });
+  }
+
+  /**
+   * Builds and returns a JSON object representing the coverage result for a collection.
+   *
+   * @param success success A list of JSON objects representing the collection query result.
+   * The first element is expected to be the collection.
+   * @return  A JsonObject representing the coverage result for the collection, including metadata and links.
+   */
+  private JsonObject buildCollectionCoverageResult(List<JsonObject> success) {
+    JsonObject collection = success.get(0);
+    if (collection.getJsonArray("temporal") == null
+        || collection.getJsonArray("temporal").isEmpty()) {
+      collection.put("temporal", new JsonArray().add(null).add(null));
+    }
+    collection.put("id", collection.getString("id")).put("dataType", "coverage");
+    collection.put("title", collection.getString("title"));
+    collection.put("description", collection.getString("description"));
+    collection.put(
+        "extent",
+        new JsonObject()
+            .put(
+                "spatial",
+                new JsonObject().put("bbox", new JsonArray().add(collection.getJsonArray("bbox"))))
+            .put(
+                "temporal",
+                new JsonObject()
+                    .put("interval", new JsonArray().add(collection.getJsonArray("temporal")))));
+    collection.put(
+        "links",
+        new JsonArray()
+            .add(
+                new JsonObject()
+                    .put(
+                        "href",
+                        hostName + ogcBasePath + COLLECTIONS + "/" + collection.getString("id"))
+                    .put("rel", "self")
+                    .put("type", "application/json")
+                    .put("title", collection.getString("title")))
+            .add(
+                new JsonObject()
+                    .put(
+                        "href",
+                        hostName
+                            + ogcBasePath
+                            + COLLECTIONS
+                            + "/"
+                            + collection.getString("id")
+                            + "/coverage")
+                    .put("rel", " http://www.opengis.net/def/rel/ogc/1.0/coverage")
+                    .put("type", "application/json")
+                    .put("title", collection.getString("title")))
+            .add(
+                new JsonObject()
+                    .put(
+                        "href",
+                        hostName
+                            + ogcBasePath
+                            + COLLECTIONS
+                            + "/"
+                            + collection.getString("id")
+                            + "/schema")
+                    .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/schema")
+                    .put("type", "application/json")
+                    .put("title", "Schema (as JSON)")));
+    collection.put("crs", collection.getJsonArray("crs"));
+    collection.remove("datetime_key");
+    collection.remove("temporal");
+    collection.remove("bbox");
+    return collection;
   }
 
   public void getCollections(RoutingContext routingContext) {
@@ -496,6 +568,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                         json = buildCollectionFeatureResult(tempArray);
                       else if (collection.getJsonArray("type").contains("MAP"))
                         json = buildCollectionTileResult(tempArray);
+                      else if (collection.getJsonArray("type").contains("COVERAGE"))
+                        json = buildCollectionCoverageResult(tempArray);
                       collections.add(json);
                     } catch (Exception e) {
                       LOGGER.error("Something went wrong here: {}", e.getMessage());
@@ -1299,39 +1373,39 @@ public class ApiServerVerticle extends AbstractVerticle {
    * Add this to a route's handler chain to audit the API call once the API response has been
    * completely sent. The API is audited <b> only if the response was successful i.e. 2xx status
    * code</b>.
-   * 
+   *
    * @param context the routing context
    */
   public void auditAfterApiEnded(RoutingContext context) {
     context.addBodyEndHandler(v -> updateAuditTable(context));
     context.next();
   }
-  
+
   private Future<Void> updateAuditTable(RoutingContext context) {
     final List<Integer> STATUS_CODES_TO_AUDIT = List.of(200, 201);
-    
+
     if(!STATUS_CODES_TO_AUDIT.contains(context.response().getStatusCode())) {
       return Future.succeededFuture();
     }
-    
+
     JsonObject authInfo = (JsonObject) context.data().get("authInfo");
-    
+
     String resourceId = authInfo.getString(ID);
-    
-    // auditing never done for root path ('/') so [1] will always be there 
+
+    // auditing never done for root path ('/') so [1] will always be there
     String apiEndpointFirstPart = context.request().path().split("/")[1];
-    
+
     // if assets API, then the ID in the path is NOT the resource ID - take resource ID from token iid
     if("assets".equals(apiEndpointFirstPart)) {
       resourceId = authInfo.getString("iid");
     }
-    
+
     Promise<Void> promise = Promise.promise();
     JsonObject request = new JsonObject();
-    
+
     JsonObject reqBody = context.body().asJsonObject();
     request.put(REQUEST_JSON, reqBody != null ? reqBody : new JsonObject());
-    
+
     catalogueService
         .getCatItem(resourceId)
         .onComplete(
@@ -1578,6 +1652,41 @@ public class ApiServerVerticle extends AbstractVerticle {
                 }
                 routingContext.next();
               }
+            });
+  }
+
+  /**
+   * Handles the request to retrieve the schema of coverage for a given collection.
+   *
+   * @param routingContext The routing context of the HTTP request, which contains the request and
+   * response objects and other context data.
+   */
+  public void getCoverageSchema(RoutingContext routingContext) {
+    String collectionId = routingContext.normalizedPath().split("/")[2];
+    LOGGER.debug("Collection Id: {}", collectionId);
+    dbService
+        .getSchema(collectionId)
+        .onSuccess(
+            success -> {
+              if (success.isEmpty()) {
+                LOGGER.debug("Schema for the given coverage not found");
+                routingContext.response().setStatusCode(404).end(success.encode());
+              }
+              LOGGER.debug("Response: {}", success.encode());
+              routingContext.response().setStatusCode(200).end(success.encode());
+            })
+        .onFailure(
+            failed -> {
+              if (failed instanceof OgcException) {
+                routingContext.put("response", ((OgcException) failed).getJson().toString());
+                routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+              } else {
+                OgcException ogcException =
+                    new OgcException(500, "Internal Server Error", "Internal Server Error");
+                routingContext.put("response", ogcException.getJson().toString());
+                routingContext.put("statusCode", ogcException.getStatusCode());
+              }
+              routingContext.next();
             });
   }
 }
