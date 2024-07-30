@@ -80,9 +80,13 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      */
     public Future<JsonObject> execute(JsonObject requestInput){
         Promise<JsonObject> promise = Promise.promise();
-        String collectionId = requestInput.getString("collectionId");
+        String collectionId = requestInput.getString("resourceId");
         String tileMatrixSet = requestInput.getString("tileMatrixSet");
-        String fileName = collectionId + "/" + tileMatrixSet + "/";
+        String collectionType = requestInput.getString("collectionType");
+        // Determine file extension based on collectionType
+        String fileExtension = "MAP".equalsIgnoreCase(collectionType) ? ".png" : ".pbf";
+        // Construct the file path
+        String fileName = collectionId + "/" + tileMatrixSet + "/0/0/0" + fileExtension;
         requestInput.put("fileName",fileName);
         requestInput.put("progress",calculateProgress(1,7));
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, START_TILES_ONBOARDING_PROCESS)
@@ -115,29 +119,58 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Checks if a specific file exists in the AWS S3 bucket.
+     * Checks the existence of a file in an S3 bucket and verifies its size.
+     * <p>
+     * This method constructs the URL for the file based on the provided filename, sends an HTTP HEAD request to S3,
+     * and checks the response status code and content length. If the file exists and has a non-zero size, it completes
+     * the promise with {@code true}. If the file does not exist or is empty, or if an error occurs during the request,
+     * it fails the promise with an appropriate error message.
+     * </p>
      *
-     * @param requestInput Input JSON object containing file details
-     * @return Future<Boolean> a Future containing a boolean indicating file existence in S3
+     * @param requestInput A {@link JsonObject} containing the file information. Must include a key {@code "fileName"}
+     *                     with the name of the file to check.
+     * @return A {@link Future<Boolean>} that will be completed with {@code true} if the file exists and is not empty,
+     *         or failed with an appropriate error message if the file does not exist, is empty, or an error occurs.
+     *
      */
     public Future<Boolean> checkFileExistenceInS3(JsonObject requestInput) {
         Promise<Boolean> promise = Promise.promise();
         String fileName = requestInput.getString("fileName");
+        LOGGER.debug("Checking existence of file: {}", fileName);
         String urlString = dataFromS3.getFullyQualifiedUrlString(fileName);
+        LOGGER.debug("Constructed URL: {}", urlString);
         dataFromS3.setUrlFromString(urlString);
         dataFromS3.setSignatureHeader(HttpMethod.HEAD);
+
         dataFromS3.getDataFromS3(HttpMethod.HEAD)
                 .onSuccess(responseFromS3 -> {
-                    BigInteger fileSize = new BigInteger(responseFromS3.getHeader("Content-Length"));
-                    if (fileSize.compareTo(BigInteger.ZERO) > 0) {
-                        LOGGER.debug(S3_FILE_EXISTENCE_MESSAGE + " with size: {}", fileSize);
-                        promise.complete(true);
-                    } else {
-                        promise.fail(S3_FILE_EXISTENCE_FAIL_MESSAGE);
+                    int statusCode = responseFromS3.statusCode();
+                    switch (statusCode) {
+                        case 200:
+                            String contentLengthHeader = responseFromS3.getHeader("Content-Length");
+                            BigInteger fileSize = contentLengthHeader != null
+                                    ? new BigInteger(contentLengthHeader)
+                                    : BigInteger.ZERO;
+                            if (fileSize.compareTo(BigInteger.ZERO) > 0) {
+                                LOGGER.debug("File exists and has size: {}", fileSize);
+                                promise.complete(true);
+                            } else {
+                                LOGGER.warn("File exists but is empty");
+                                promise.fail(S3_EMPTY_FILE_MESSAGE);
+                            }
+                            break;
+                        case 404:
+                            LOGGER.warn("File not found in S3");
+                            promise.fail(S3_FILE_EXISTENCE_FAIL_MESSAGE);
+                            break;
+                        default:
+                            LOGGER.error("Unexpected HTTP status code: {}", statusCode);
+                            promise.fail("Failed to check file existence. HTTP Status: " + statusCode);
+                            break;
                     }
                 })
                 .onFailure(failed -> {
-                    LOGGER.error("Failed to get response from S3: " + failed.getLocalizedMessage());
+                    LOGGER.error("Failed to get response from S3: {}", failed.getMessage());
                     promise.fail(failed.getMessage());
                 });
 
@@ -177,7 +210,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      */
     private Future<JsonObject> checkCollectionExistence(JsonObject requestInput) {
         Promise<JsonObject> promise = Promise.promise();
-        String collectionId = requestInput.getString("collectionId");
+        String collectionId = requestInput.getString("resourceId");
 
         // Check if the collection exists in the collection_details table
         pgPool.preparedQuery(CHECK_COLLECTION_EXISTENCE_QUERY)
@@ -267,7 +300,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
             Promise<Void> promise = Promise.promise();
 
             boolean pureTile = requestInput.getBoolean("pureTile");
-            String collectionId = requestInput.getString("collectionId");
+            String collectionId = requestInput.getString("resourceId");
             String title = requestInput.getString("title");
             String description = requestInput.getString("description");
             String crs = requestInput.getString("crs");
