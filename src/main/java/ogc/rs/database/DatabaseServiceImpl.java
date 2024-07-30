@@ -764,4 +764,33 @@ public class DatabaseServiceImpl implements DatabaseService{
             });
     return promise.future();
   }
+
+  @Override
+  public Future<List<JsonObject>> getCollectionMetadataForOasSpec(
+      List<String> existingCollectionUuidIds) {
+    
+    Promise<List<JsonObject>> result = Promise.promise();
+    
+    UUID[] existingCollectionIdsArr =
+        existingCollectionUuidIds.stream().map(i -> UUID.fromString(i)).toArray(UUID[]::new);
+
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+
+    final String GET_COLLECTION_INFO =
+             " SELECT id, title, description FROM collections_details WHERE id != ALL($1::UUID[])";
+
+    Future<List<JsonObject>> newCollectionsJson =
+        client.withConnection(conn -> conn.preparedQuery(GET_COLLECTION_INFO).collecting(collector)
+            .execute(Tuple.of(existingCollectionIdsArr))
+            .map(res -> res.value()));
+
+    newCollectionsJson.onSuccess(succ -> result.complete(succ)).onFailure(fail -> {
+      LOGGER.error("Something went wrong when querying DB for new OGC collections {}",
+          fail.getMessage());
+      result.fail(fail);
+    });
+
+    return result.future();
+  }
 }

@@ -68,4 +68,11 @@ public interface DatabaseService {
      */
     Future<JsonObject> getSchema(String id);
 
+    /**
+     * Get all collections metadata to be used for OpenAPI spec generation.
+     * 
+     * @param existingCollectionUuidIds UUID IDs of collections that are already part of the spec.
+     * @return list of {@link JsonObject}, which is cast to the required type by the caller.
+     */
+    Future<List<JsonObject>> getCollectionMetadataForOasSpec(List<String> existingCollectionUuidIds);
 }
