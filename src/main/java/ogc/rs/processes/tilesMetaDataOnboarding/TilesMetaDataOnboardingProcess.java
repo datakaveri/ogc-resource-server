@@ -73,11 +73,19 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Executes the tiles onboarding process asynchronously.
+     * Executes the tiles meta data onboarding process asynchronously.
+     * <p>
+     * This method performs the onboarding process for tiles by checking file existence in S3, verifying collection type,
+     * checking collection existence, verifying tile matrix set, and onboarding tile metadata. It updates the job table
+     * status and progress throughout the process.
+     * </p>
      *
-     * @param requestInput Input JSON object containing collection and tile matrix set details
-     * @return Future<JsonObject> a Future containing the result JSON object after completion
+     * @param requestInput A {@link JsonObject} containing collection and tile matrix set details. Must include keys
+     *                     {@code "resourceId"}, {@code "tileMatrixSet"}, and {@code "collectionType"}.
+     * @return A {@link Future<JsonObject>} that will be completed with the result JSON object after successful completion
+     *         of the onboarding process, or failed with an appropriate error message if any step fails.
      */
+
     public Future<JsonObject> execute(JsonObject requestInput){
         Promise<JsonObject> promise = Promise.promise();
         String collectionId = requestInput.getString("resourceId");
@@ -179,10 +187,15 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
 
     /**
      * Checks the type of the collection to determine suitability for tile metadata onboarding.
+     * <p>
+     * This method validates the collection type to ensure it is either "VECTOR" or "MAP". If the collection type is
+     * invalid or "feature", it fails the promise with an appropriate error message.
+     * </p>
      *
      * @param requestBody JSON object containing the collection type information.
-     * @return Future<Void> indicating the success or failure of the collection type validation.
+     * @return A {@link Future<Void>} indicating the success or failure of the collection type validation.
      */
+
     private Future<Void> checkCollectionType(JsonObject requestBody) {
         Promise<Void> promise = Promise.promise();
         String collectionType = requestBody.getString("collectionType");
@@ -204,10 +217,16 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     /**
      * Checks the existence of the collection and determines if it is a pure tile collection
      * or a combination of feature and tile collection.
+     * <p>
+     * This method queries the database to check if the collection exists. If the collection exists, it further checks
+     * its type. If the collection does not exist, it marks the collection as a pure tile collection.
+     * </p>
      *
-     * @param requestInput Input JSON object containing collection details
-     * @return Future<JsonObject> a Future containing the updated JSON object with the pureTile attribute
+     * @param requestInput Input JSON object containing collection details.
+     * @return A {@link Future<JsonObject>} containing the updated JSON object with the {@code "pureTile"} attribute
+     *         indicating whether the collection is a pure tile collection.
      */
+
     private Future<JsonObject> checkCollectionExistence(JsonObject requestInput) {
         Promise<JsonObject> promise = Promise.promise();
         String collectionId = requestInput.getString("resourceId");
@@ -250,12 +269,17 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Checks if the tileMatrixSet exists in the tms_metadata table and adds 'id' and 'crs'
-     * column values into the requestInput JSON object.
+     * Checks if the tile matrix set exists in the {@code tms_metadata} table and adds 'id' and 'crs'
+     * column values into the {@code requestInput} JSON object.
+     * <p>
+     * This method queries the database to check if the tile matrix set exists. If it exists, it adds the 'id' and 'crs'
+     * values to the request input.
+     * </p>
      *
-     * @param requestInput Input JSON object containing tile matrix set details
-     * @return Future<JsonObject> a Future containing the updated JSON object with 'id' and 'crs' values if the tile matrix set exists
+     * @param requestInput Input JSON object containing tile matrix set details.
+     * @return A {@link Future<JsonObject>} containing the updated JSON object with 'id' and 'crs' values if the tile matrix set exists.
      */
+
     private Future<JsonObject> checkTileMatrixSet(JsonObject requestInput) {
         Promise<JsonObject> promise = Promise.promise();
         String tmsTitle = requestInput.getString("tileMatrixSet");
@@ -291,10 +315,15 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     /**
      * Onboards tile metadata into the database. Depending on whether the collection is a pure tile collection,
      * it inserts data into different tables.
+     * <p>
+     * This method performs the necessary database operations to onboard tile metadata. It handles both pure tile collections
+     * and collections that combine feature and tile data.
+     * </p>
      *
      * @param requestInput JSON object containing tile metadata information and other details.
-     * @return Future<Void> indicating the success or failure of the onboarding process.
+     * @return A {@link Future<Void>} indicating the success or failure of the onboarding process.
      */
+
     private Future<Void> onboardTileMetadata(JsonObject requestInput) {
         return pgPool.withTransaction(sqlClient -> {
             Promise<Void> promise = Promise.promise();
@@ -337,11 +366,16 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
 
     /**
      * Handles failure scenarios by updating the job table status and failing the promise.
+     * <p>
+     * This method updates the job table status to "FAILED" and logs the error message. It then fails the promise
+     * with the provided error message.
+     * </p>
      *
-     * @param requestInput Input JSON object containing request details
-     * @param errorMessage Error message describing the failure reason
-     * @param promise      Promise to fail with the error message
+     * @param requestInput Input JSON object containing request details.
+     * @param errorMessage Error message describing the failure reason.
+     * @param promise      Promise to fail with the error message.
      */
+
     private void handleFailure(JsonObject requestInput, String errorMessage, Promise<JsonObject> promise) {
 
         utilClass.updateJobTableStatus(requestInput, Status.FAILED, errorMessage)
@@ -358,10 +392,13 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
 
     /**
      * Calculates the progress percentage based on the current step and total steps.
+     * <p>
+     * This method computes the progress as a percentage of the current step relative to the total number of steps.
+     * </p>
      *
-     * @param currentStep Current step number in the process
-     * @param totalSteps  Total number of steps in the process
-     * @return Progress percentage as a float value
+     * @param currentStep Current step number in the process.
+     * @param totalSteps  Total number of steps in the process.
+     * @return Progress percentage as a float value.
      */
     private float calculateProgress(int currentStep, int totalSteps){
         return ((float) currentStep / totalSteps) * 100;
