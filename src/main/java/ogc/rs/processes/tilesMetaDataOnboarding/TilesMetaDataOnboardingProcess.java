@@ -13,6 +13,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static ogc.rs.processes.tilesMetaDataOnboarding.Constants.*;
 
@@ -101,9 +103,9 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                 .compose(progressUpdateHandler -> checkFileExistenceInS3(requestInput))
                 .compose(s3FileExistenceHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2, 7)).put("message", S3_FILE_EXISTENCE_MESSAGE)))
-                .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
-                .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(3, 7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
+             //   .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
+             //   .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
+             //           requestInput.put("progress", calculateProgress(3, 7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkCollectionType(requestInput))
                 .compose(checkCollectionTypeHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(4, 7)).put("message", COLLECTION_TYPE_CHECK_MESSAGE)))
@@ -323,7 +325,6 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      * @param requestInput JSON object containing tile metadata information and other details.
      * @return A {@link Future<Void>} indicating the success or failure of the onboarding process.
      */
-
     private Future<Void> onboardTileMetadata(JsonObject requestInput) {
         return pgPool.withTransaction(sqlClient -> {
             Promise<Void> promise = Promise.promise();
@@ -341,10 +342,24 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
             String tmsId = requestInput.getString("tms_id");
             JsonArray pointOfOrigin = requestInput.getJsonArray("pointOfOrigin");
 
+            // Convert JsonArray to Float[] for bbox and pointOfOrigin
+            Float[] bboxArray = (bbox != null) ? bbox.stream()
+                    .map(obj -> obj instanceof Number ? ((Number) obj).floatValue() : 0f)
+                    .toArray(Float[]::new) : new Float[0];
+
+            Float[] pointOfOriginArray = (pointOfOrigin != null) ? pointOfOrigin.stream()
+                    .map(obj -> obj instanceof Number ? ((Number) obj).floatValue() : 0f)
+                    .toArray(Float[]::new) : new Float[0];
+
+            // Convert JsonArray to String[] for temporal
+            String[] temporalArray = (temporal != null) ? temporal.stream()
+                    .map(Object::toString)
+                    .toArray(String[]::new) : new String[0];
+
             Future<Void> collectionDetailsFuture = Future.succeededFuture();
             if (pureTile) {
                 collectionDetailsFuture = sqlClient.preparedQuery(INSERT_COLLECTION_DETAILS_QUERY)
-                        .execute(Tuple.of(collectionId, title, description, crs, bbox.encode(), temporal.encode()))
+                        .execute(Tuple.of(collectionId, title, description, crs, bboxArray, temporalArray))
                         .mapEmpty()
                         .compose(v -> sqlClient.preparedQuery(INSERT_RI_DETAILS_QUERY)
                                 .execute(Tuple.of(collectionId, accessPolicy, userId))
@@ -356,13 +371,14 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                             .execute(Tuple.of(collectionId, collectionType))
                             .mapEmpty())
                     .compose(v -> sqlClient.preparedQuery(INSERT_TILE_MATRIX_SET_RELATION_QUERY)
-                            .execute(Tuple.of(collectionId, tmsId, pointOfOrigin.encode()))
+                            .execute(Tuple.of(collectionId, tmsId, pointOfOriginArray))
                             .mapEmpty())
                     .onSuccess(v -> promise.complete())
                     .onFailure(promise::fail)
                     .mapEmpty();
         });
     }
+
 
     /**
      * Handles failure scenarios by updating the job table status and failing the promise.
