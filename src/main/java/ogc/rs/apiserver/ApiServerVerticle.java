@@ -214,12 +214,6 @@ public class ApiServerVerticle extends AbstractVerticle {
         routingContext.put("statusCode", 201);
         routingContext.next();
       }
-      else if(handler.cause() instanceof ProcessException){
-        ProcessException processException = (ProcessException) handler.cause();
-        routingContext.put("response", processException.getJson().toString());
-        routingContext.put("statusCode", processException.getStatusCode());
-        routingContext.next();
-      }
       else{
         LOGGER.error("Process failed {}", handler.cause().getMessage());
         routingContext.fail(handler.cause());
