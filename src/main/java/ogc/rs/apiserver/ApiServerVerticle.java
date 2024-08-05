@@ -213,11 +213,16 @@ public class ApiServerVerticle extends AbstractVerticle {
         routingContext.put("response", handler.result().toString());
         routingContext.put("statusCode", 201);
         routingContext.next();
-      } else {
+      }
+      else if(handler.cause() instanceof ProcessException){
         ProcessException processException = (ProcessException) handler.cause();
         routingContext.put("response", processException.getJson().toString());
         routingContext.put("statusCode", processException.getStatusCode());
         routingContext.next();
+      }
+      else{
+        LOGGER.error("Process failed {}", handler.cause().getMessage());
+        routingContext.fail(handler.cause());
       }
     });
   }
@@ -238,13 +243,7 @@ public class ApiServerVerticle extends AbstractVerticle {
         routingContext.put("statusCode", 200);
         routingContext.next();
       }
-    }).onFailure(failureHandler -> {
-      LOGGER.debug("JOB status not found. " + failureHandler);
-      ProcessException processException = (ProcessException) failureHandler;
-      routingContext.put("response", processException.getJson().toString());
-      routingContext.put("statusCode", processException.getStatusCode());
-      routingContext.next();
-    });
+    }).onFailure(routingContext::fail);
   }
 
   public void getFeature(RoutingContext routingContext) {
@@ -408,12 +407,7 @@ public class ApiServerVerticle extends AbstractVerticle {
       routingContext.put("response", successResult.toString());
       routingContext.put("statusCode", 200);
       routingContext.next();
-    }).onFailure(failureHandler -> {
-        ProcessException processException = (ProcessException) failureHandler;
-        routingContext.put("response", processException.getJson().toString());
-        routingContext.put("statusCode", processException.getStatusCode());
-        routingContext.next();
-    });
+    }).onFailure(routingContext::fail);
   }
 
   public void getProcess(RoutingContext routingContext) {
@@ -422,13 +416,7 @@ public class ApiServerVerticle extends AbstractVerticle {
       routingContext.put("response", successResult.toString());
       routingContext.put("statusCode", 200);
       routingContext.next();
-    }).onFailure(failureHandler -> {
-      LOGGER.error("Failed to get process "+failureHandler);
-      ProcessException processException = (ProcessException) failureHandler;
-      routingContext.put("response", processException.getJson().toString());
-      routingContext.put("statusCode", processException.getStatusCode());
-      routingContext.next();
-    });
+    }).onFailure(routingContext::fail);
   }
 
   public void buildResponse(RoutingContext routingContext) {
