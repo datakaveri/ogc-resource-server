@@ -106,6 +106,9 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                 .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
                 .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(3, 7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
+                 .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
+                .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
+                        requestInput.put("progress", calculateProgress(3, 7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkCollectionType(requestInput))
                 .compose(checkCollectionTypeHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(4, 7)).put("message", COLLECTION_TYPE_CHECK_MESSAGE)))
