@@ -106,6 +106,48 @@ public class CollectionAppendingProcessIT {
 
     @Test
     @Order(2)
+    @Description("Failure: Consumer Delegate User")
+    public void testExecuteWithConsumerDelegateUserFail() {
+        LOGGER.debug("Testing Failure: Consumer Delegate User");
+        String invalidToken = new FakeTokenBuilder()
+                .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
+                .withResourceServer().withDelegate(UUID.fromString("9304cb99-7125-47f1-8686-a070bb6c3eaf"), "consumer")
+                .withCons(new JsonObject()).build();
+        Response response = sendExecutionRequest(processId, invalidToken, requestBody());
+        response.then().statusCode(401).body(CODE_KEY, is("Not Authorized"));
+    }
+
+    @Test
+    @Order(3)
+    @Description("Failure: Provider Delegate with different provider id")
+    public void testExecuteWithDifferentDelegateUserIdFail() throws InterruptedException {
+        LOGGER.debug("Testing Failure: Provider Delegate with different DID");
+        String invalidToken = new FakeTokenBuilder()
+                .withSub(UUID.randomUUID())
+                .withResourceServer().withDelegate(UUID.fromString("9304cb99-7125-47f1-8686-a070bb6c3eaf"), "provider")
+                .withCons(new JsonObject()).build();
+        Response sendExecutionRequest = sendExecutionRequest(processId, invalidToken, requestBody());
+        String jobId = sendExecutionRequest.body().path("jobId");
+        Thread.sleep(3000);
+        Response getJobStatus = sendJobStatusRequest(jobId, invalidToken);
+        getJobStatus.then().statusCode(200).body("message", is(RESOURCE_OWNERSHIP_ERROR));
+    }
+
+    @Test
+    @Order(4)
+    @Description("Success: Provider Delegate Flow")
+    public void testExecuteWithProviderDelegateUser() {
+        LOGGER.debug("Testing Success: Provider Delegate User");
+        String token = new FakeTokenBuilder()
+                .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
+                .withResourceServer().withDelegate(UUID.fromString("9304cb99-7125-47f1-8686-a070bb6c3eaf"), "provider")
+                .withCons(new JsonObject()).build();
+        Response response = sendExecutionRequest(processId, token, requestBody());
+        response.then().statusCode(201).body("status", is(ACCEPTED.toString()));
+    }
+
+    @Test
+    @Order(5)
     @Description("Success: Process Accepted")
     public void testExecuteProcess() {
         LOGGER.debug("Testing Success: Process Accepted");
@@ -115,7 +157,7 @@ public class CollectionAppendingProcessIT {
     }
 
     @Test
-    @Order(3)
+    @Order(6)
     @Description("Failure: Process does not Exist")
     public void testExecuteFailProcessNotPresent() {
         LOGGER.debug("Testing Failure: Process does not Exist");
@@ -125,7 +167,7 @@ public class CollectionAppendingProcessIT {
     }
 
     @Test
-    @Order(4)
+    @Order(7)
     @Description("Failure: Invalid input")
     public void testExecuteFailInvalidInput() {
         LOGGER.debug("Testing Failure: Invalid input");
@@ -136,12 +178,12 @@ public class CollectionAppendingProcessIT {
     }
 
     @Test
-    @Order(5)
+    @Order(8)
     @Description("Failure: Ownership Error")
     public void testExecuteFailOwnershipError() throws InterruptedException {
         LOGGER.debug("Failure: Ownership Error");
 
-        String token = new FakeTokenBuilder().withSub(UUID.fromString("0ff3d301-9402-4430-8e18-6f95e4c03c97"))
+        String token = new FakeTokenBuilder().withSub(UUID.randomUUID())
                 .withResourceServer().withRoleProvider().withCons(new JsonObject()).build();
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody());
         String jobId = sendExecutionRequest.body().path("jobId");
@@ -152,7 +194,7 @@ public class CollectionAppendingProcessIT {
     }
 
     @Test
-    @Order(6)
+    @Order(9)
     @Description("Failure: Check if collection is present in collection_details table")
     public void testFailCheckIfCollectionPresent() throws InterruptedException {
         LOGGER.debug("Failure: checkIfCollectionPresent");
@@ -170,7 +212,7 @@ public class CollectionAppendingProcessIT {
     }
 
     @Test
-    @Order(7)
+    @Order(10)
     @Description("Failure: Invalid organization")
     public void testExecuteFailInvalidOrganization() throws InterruptedException {
         LOGGER.debug("Failure: Invalid organization");
@@ -188,7 +230,7 @@ public class CollectionAppendingProcessIT {
     }
 
     @Test
-    @Order(8)
+    @Order(11)
     @Description("Failure: Invalid CRS- SRID")
     public void testExecuteFailInvalidCode() throws InterruptedException {
         LOGGER.debug("Failure: Invalid SRID");
@@ -206,7 +248,7 @@ public class CollectionAppendingProcessIT {
     }
 
     @Test
-    @Order(9)
+    @Order(12)
     @Description("Failure: checkSchema")
     public void testFailCheckSchema() throws InterruptedException {
         LOGGER.debug("Failure: checkSchema");
@@ -223,7 +265,7 @@ public class CollectionAppendingProcessIT {
     }
 
     @Test
-    @Order(10)
+    @Order(13)
     @Description("Failure: Invalid file having 2 layers with different geometry")
     public void testExecuteFail2DiffGeo() throws InterruptedException {
         LOGGER.debug("Failure: Invalid file having 2 layers with different geometry");
@@ -240,7 +282,7 @@ public class CollectionAppendingProcessIT {
     }
 
     @Test
-    @Order(11)
+    @Order(14)
     @Description("Success: Appending data to collection")
     public void testExecuteAppendingSuccess() throws InterruptedException {
         LOGGER.debug("Success: Appending data to collection");
