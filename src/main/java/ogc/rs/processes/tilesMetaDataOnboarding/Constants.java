@@ -29,12 +29,10 @@ public class Constants {
     public static final String S3_EMPTY_FILE_MESSAGE = "File in S3 is empty!";
     public static final String RESOURCE_OWNERSHIP_CHECK_MESSAGE =
             "Resource belongs to the user.";
-    public static final String FEATURE_COLLECTION_MESSAGE =
-            "Tile metadata onboarding is not applicable for feature collections.";
-    public static final String INVALID_COLLECTION_TYPE_MESSAGE =
-            "Invalid Collection Type";
-    public static final String COLLECTION_TYPE_CHECK_MESSAGE =
-            "Collection type check complete: the collection type is suitable for tile metadata onboarding.";
+    public static final String INVALID_ENCODING_FORMAT_MESSAGE =
+            "Invalid Encoding Type";
+    public static final String ENCODING_FORMAT_CHECK_MESSAGE =
+            "Encoding format check complete: The encoding format is suitable for tile metadata onboarding.";
     public static final String COLLECTION_EXISTENCE_CHECK_MESSAGE =
             "Collection existence check completed successfully. Collection is either a pure tile collection or a feature + tile collection.";
     public static final String COLLECTION_EXISTS_MESSAGE =

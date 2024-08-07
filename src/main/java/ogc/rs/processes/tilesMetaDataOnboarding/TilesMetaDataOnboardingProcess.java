@@ -13,9 +13,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 import static ogc.rs.processes.tilesMetaDataOnboarding.Constants.*;
 
 import ogc.rs.common.DataFromS3;
@@ -92,9 +89,11 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
         Promise<JsonObject> promise = Promise.promise();
         String collectionId = requestInput.getString("resourceId");
         String tileMatrixSet = requestInput.getString("tileMatrixSet");
-        String collectionType = requestInput.getString("collectionType");
-        // Determine file extension based on collectionType
-        String fileExtension = "MAP".equalsIgnoreCase(collectionType) ? ".png" : ".pbf";
+        String encoding = requestInput.getString("encoding");
+        String collectionType = "MVT".equalsIgnoreCase(encoding) ? "VECTOR" : "MAP";
+        requestInput.put("collectionType",collectionType);
+        // Determine file extension based on encoding
+        String fileExtension = "MVT".equalsIgnoreCase(encoding) ? ".pbf" : "." + encoding.toLowerCase();
         // Construct the file path
         String fileName = collectionId + "/" + tileMatrixSet + "/0/0/0" + fileExtension;
         requestInput.put("fileName",fileName);
@@ -103,12 +102,12 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                 .compose(progressUpdateHandler -> checkFileExistenceInS3(requestInput))
                 .compose(s3FileExistenceHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2, 7)).put("message", S3_FILE_EXISTENCE_MESSAGE)))
-             //   .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
-             //   .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
-             //           requestInput.put("progress", calculateProgress(3, 7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
-                .compose(progressUpdateHandler -> checkCollectionType(requestInput))
-                .compose(checkCollectionTypeHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(4, 7)).put("message", COLLECTION_TYPE_CHECK_MESSAGE)))
+                .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
+                .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
+                        requestInput.put("progress", calculateProgress(3, 7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
+                .compose(progressUpdateHandler -> checkEncodingFormat(requestInput))
+                .compose(checkEncodingFormatHandler -> utilClass.updateJobTableProgress(
+                        requestInput.put("progress", calculateProgress(4, 7)).put("message", ENCODING_FORMAT_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkCollectionExistence(requestInput))
                 .compose(checkCollectionExistenceHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(5, 7)).put("message", COLLECTION_EXISTENCE_CHECK_MESSAGE)))
@@ -188,33 +187,30 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Checks the type of the collection to determine suitability for tile metadata onboarding.
+     * Validates the encoding format provided in the request body.
      * <p>
-     * This method validates the collection type to ensure it is either "VECTOR" or "MAP". If the collection type is
-     * invalid or "feature", it fails the promise with an appropriate error message.
+     * This method checks if the `encoding` parameter in the `requestBody` JSON object is one of the acceptable formats:
+     * PNG, JPEG, or MVT. If the encoding is invalid or null, it logs an error and fails the promise.
      * </p>
      *
-     * @param requestBody JSON object containing the collection type information.
-     * @return A {@link Future<Void>} indicating the success or failure of the collection type validation.
+     * @param requestBody the JSON object containing the request parameters, including the encoding format.
+     * @return a {@link Future} that will be completed when the validation is finished.
+     *         If the encoding is valid, the future will be completed successfully.
+     *         If the encoding is invalid, the future will be failed with an error message.
      */
-
-    private Future<Void> checkCollectionType(JsonObject requestBody) {
+    private Future<Void> checkEncodingFormat(JsonObject requestBody) {
         Promise<Void> promise = Promise.promise();
-        String collectionType = requestBody.getString("collectionType");
+        String encoding = requestBody.getString("encoding");
 
-        if ("feature".equalsIgnoreCase(collectionType)) {
-            LOGGER.debug(FEATURE_COLLECTION_MESSAGE);
-            promise.fail(FEATURE_COLLECTION_MESSAGE);
-        } else if (!"VECTOR".equalsIgnoreCase(collectionType) && !"MAP".equalsIgnoreCase(collectionType)) {
-            LOGGER.error(INVALID_COLLECTION_TYPE_MESSAGE + ": " + collectionType);
-            promise.fail(INVALID_COLLECTION_TYPE_MESSAGE);
+        if ((!"PNG".equalsIgnoreCase(encoding) && !"JPEG".equalsIgnoreCase(encoding) && !"MVT".equalsIgnoreCase(encoding))) {
+            LOGGER.error(INVALID_ENCODING_FORMAT_MESSAGE + ": " + encoding);
+            promise.fail(INVALID_ENCODING_FORMAT_MESSAGE);
         } else {
             promise.complete();
         }
 
         return promise.future();
     }
-
 
     /**
      * Checks the existence of the collection and determines if it is a pure tile collection
@@ -224,46 +220,49 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      * its type. If the collection does not exist, it marks the collection as a pure tile collection.
      * </p>
      *
-     * @param requestInput Input JSON object containing collection details.
+     * @param requestInput A JSON object containing collection details with a key {@code "resourceId"} for the collection identifier.
      * @return A {@link Future<JsonObject>} containing the updated JSON object with the {@code "pureTile"} attribute
-     *         indicating whether the collection is a pure tile collection.
+     * indicating whether the collection is a pure tile collection (true) or not (false).
      */
-
     private Future<JsonObject> checkCollectionExistence(JsonObject requestInput) {
-        Promise<JsonObject> promise = Promise.promise();
         String collectionId = requestInput.getString("resourceId");
+        Promise<JsonObject> promise = Promise.promise();
 
         // Check if the collection exists in the collection_details table
         pgPool.preparedQuery(CHECK_COLLECTION_EXISTENCE_QUERY)
                 .execute(Tuple.of(collectionId))
-                .compose(rowSet -> {
-                    if (rowSet.iterator().hasNext() && rowSet.iterator().next().getBoolean("exists")) {
+                .onSuccess(rowSet -> {
+                    // Check if the collection exists
+                    if (rowSet.rowCount() > 0 && rowSet.iterator().next().getBoolean("exists")) {
                         // Collection exists, now check its type in the collection_type table
-                        return pgPool.preparedQuery(GET_COLLECTION_TYPE_QUERY)
-                                .execute(Tuple.of(collectionId));
+                        pgPool.preparedQuery(GET_COLLECTION_TYPE_QUERY)
+                                .execute(Tuple.of(collectionId))
+                                .onSuccess(typeRowSet -> {
+                                    if (typeRowSet.rowCount() > 0) {
+                                        String collectionType = typeRowSet.iterator().next().getString("type");
+                                        if ("feature".equalsIgnoreCase(collectionType)) {
+                                            requestInput.put("pureTile", false);
+                                            promise.complete(requestInput);
+                                        } else if ("map".equalsIgnoreCase(collectionType) || "vector".equalsIgnoreCase(collectionType)) {
+                                            promise.fail(COLLECTION_EXISTS_MESSAGE);
+                                        } else {
+                                            promise.fail(UNKNOWN_COLLECTION_TYPE);
+                                        }
+                                    } else {
+                                        promise.fail(COLLECTION_TYPE_NOT_FOUND_MESSAGE);
+                                    }
+                                })
+                                .onFailure(err -> {
+                                    promise.fail(COLLECTION_EXISTENCE_CHECK_FAILURE_MESSAGE + " :" + err.getMessage());
+                                });
                     } else {
-                        // Collection does not exist, it is a pure tile collection
+                        // Collection does not exist
                         requestInput.put("pureTile", true);
                         promise.complete(requestInput);
-                        return Future.succeededFuture();
-                    }
-                })
-                .onSuccess(typeRowSet -> {
-                    if (typeRowSet != null && typeRowSet.iterator().hasNext()) {
-                        String collectionType = typeRowSet.iterator().next().getString("type");
-                        if ("feature".equalsIgnoreCase(collectionType)) {
-                            requestInput.put("pureTile", false);
-                            promise.complete(requestInput);
-                        } else if ("map".equalsIgnoreCase(collectionType) || "vector".equalsIgnoreCase(collectionType)) {
-                            promise.fail(COLLECTION_EXISTS_MESSAGE);
-                        } else {
-                            promise.fail(UNKNOWN_COLLECTION_TYPE);
-                        }
-                    } else {
-                        promise.fail(COLLECTION_TYPE_NOT_FOUND_MESSAGE);
                     }
                 })
                 .onFailure(err -> {
+                    // Handle failure
                     promise.fail(COLLECTION_EXISTENCE_CHECK_FAILURE_MESSAGE + " :" + err.getMessage());
                 });
 
@@ -281,7 +280,6 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      * @param requestInput Input JSON object containing tile matrix set details.
      * @return A {@link Future<JsonObject>} containing the updated JSON object with 'id' and 'crs' values if the tile matrix set exists.
      */
-
     private Future<JsonObject> checkTileMatrixSet(JsonObject requestInput) {
         Promise<JsonObject> promise = Promise.promise();
         String tmsTitle = requestInput.getString("tileMatrixSet");
@@ -379,7 +377,6 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
         });
     }
 
-
     /**
      * Handles failure scenarios by updating the job table status and failing the promise.
      * <p>
@@ -391,7 +388,6 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      * @param errorMessage Error message describing the failure reason.
      * @param promise      Promise to fail with the error message.
      */
-
     private void handleFailure(JsonObject requestInput, String errorMessage, Promise<JsonObject> promise) {
 
         utilClass.updateJobTableStatus(requestInput, Status.FAILED, errorMessage)
