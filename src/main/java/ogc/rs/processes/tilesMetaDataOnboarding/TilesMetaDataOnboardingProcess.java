@@ -88,6 +88,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     public Future<JsonObject> execute(JsonObject requestInput){
         Promise<JsonObject> promise = Promise.promise();
         String collectionId = requestInput.getString("resourceId");
+        String tileCoordinateIndexes = requestInput.getString("tileCoordinateIndexes");
         String tileMatrixSet = requestInput.getString("tileMatrixSet");
         String encoding = requestInput.getString("encoding");
         String collectionType = "MVT".equalsIgnoreCase(encoding) ? "VECTOR" : "MAP";
@@ -95,7 +96,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
         // Determine file extension based on encoding
         String fileExtension = "MVT".equalsIgnoreCase(encoding) ? ".pbf" : "." + encoding.toLowerCase();
         // Construct the file path
-        String fileName = collectionId + "/" + tileMatrixSet + "/0/0/0" + fileExtension;
+        String fileName = collectionId + "/" + tileMatrixSet +  "/" +tileCoordinateIndexes + fileExtension;
         requestInput.put("fileName",fileName);
         requestInput.put("progress",calculateProgress(1,7));
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, START_TILES_ONBOARDING_PROCESS)
