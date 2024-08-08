@@ -191,7 +191,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      * Validates the encoding format provided in the request body.
      * <p>
      * This method checks if the `encoding` parameter in the `requestBody` JSON object is one of the acceptable formats:
-     * PNG, JPEG, or MVT. If the encoding is invalid or null, it logs an error and fails the promise.
+     * PNG or MVT. If the encoding is invalid or null, it logs an error and fails the promise.
      * </p>
      *
      * @param requestBody the JSON object containing the request parameters, including the encoding format.
@@ -203,7 +203,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
         Promise<Void> promise = Promise.promise();
         String encoding = requestBody.getString("encoding");
 
-        if ((!"PNG".equalsIgnoreCase(encoding) && !"JPEG".equalsIgnoreCase(encoding) && !"MVT".equalsIgnoreCase(encoding))) {
+        if ((!"PNG".equalsIgnoreCase(encoding) && !"MVT".equalsIgnoreCase(encoding))) {
             LOGGER.error(INVALID_ENCODING_FORMAT_MESSAGE + ": " + encoding);
             promise.fail(INVALID_ENCODING_FORMAT_MESSAGE);
         } else {
