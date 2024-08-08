@@ -33,5 +33,9 @@ ALTER TABLE tilematrixsets_relation ADD CONSTRAINT tms_fkey FOREIGN KEY (tms_id)
 -- add NULL constraint on tms_id on tilematrixset_relation
 ALTER TABLE tilematrixsets_relation ALTER COLUMN tms_id SET NOT NULL;
 
+-- add indexes for collection_id and tms_id
+CREATE INDEX collection_id_tmsr_idx ON tilematrixsets_relation (collection_id);
+CREATE INDEX tms_id_tmsr_idx ON tilematrixsets_relation (tms_id);
+
 -- Add GRANTS to tms_metadata table
 GRANT SELECT, INSERT ON tms_metadata to ${ogcUser};
