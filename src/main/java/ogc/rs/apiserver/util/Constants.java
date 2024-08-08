@@ -63,6 +63,8 @@ public class Constants {
     public static final String NOT_PROVIDER_OR_CONSUMER_TOKEN = "Not a provider or consumer token. It is of role ";
     public static final String RESOURCE_OPEN_TOKEN_SECURE = "Resource is OPEN. Token is SECURE of role ";
     public static final String COVERAGE_SCHEMA ="getCoverageSchema";
+    public static final String COLLECTION_COVERAGE = "getCollectionCoverage";
+    public static final String COLLECTION_COVERAGE_TYPE = "application/vnd.cov+json";
 
 
 }

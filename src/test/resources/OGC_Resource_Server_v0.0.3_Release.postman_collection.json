@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "497f62d9-dec2-4210-8e63-2abaaf3c21ac",
+		"_postman_id": "c8a8e0a2-9a16-49d0-ba74-84f4e3a448af",
 		"name": "OGC Resource Server v0.0.3 Release",
 		"description": "Components/APIs used in the OGC Compliant Resource Server.\n\nOGC Features API standard can be found at\n\n[\"OGC API - Features - Part 1: Core corrigendum standard\"](https://docs.opengeospatial.org/is/17-069r4/17-069r4.html).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "28022201"
+		"_exporter_id": "27217689"
 	},
 	"item": [
 		{
@@ -5364,6 +5364,46 @@
 							"path": [
 								"assets",
 								"462624da-2790-4ae7-8773-c1a6d726a035"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Coverages",
+			"item": [
+				{
+					"name": "fetch coverage of collection",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{C1secureResourceToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/collections/:collectionId/coverage",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"collections",
+								":collectionId",
+								"coverage"
+							],
+							"variable": [
+								{
+									"key": "collectionId",
+									"value": "1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a",
+									"description": "(Required) local identifier of a collection"
+								}
 							]
 						}
 					},

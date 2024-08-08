@@ -605,9 +605,9 @@ public class DatabaseServiceImpl implements DatabaseService{
   @Override
   public Future<List<JsonObject>> getOgcFeatureCollectionMetadataForOasSpec(
       List<String> existingCollectionUuidIds) {
-    
+
     Promise<List<JsonObject>> result = Promise.promise();
-    
+
     UUID[] existingCollectionIdsArr =
         existingCollectionUuidIds.stream().map(i -> UUID.fromString(i)).toArray(UUID[]::new);
 
@@ -646,7 +646,7 @@ public class DatabaseServiceImpl implements DatabaseService{
       if (list.isEmpty()) {
         return Future.succeededFuture(Map.of());
       }
-      
+
       List<String> newCollectionIds =
           list.stream().map(obj -> obj.getString("id")).collect(Collectors.toList());
 
@@ -661,13 +661,13 @@ public class DatabaseServiceImpl implements DatabaseService{
       }
 
       Map<String, JsonObject> collectionToAttribMap = collectionToAttribFut.result();
-      
+
       // if a newly found collection ID is absent in collectionToAttribMap, means that it does not have
       // any attributes. So using getOrDefault to handle those collection IDs by returning a JSON object
       // with empty 'attributes' JSON object.
-      
+
       JsonObject defaultValIfCollectionHasNoAttribs = new JsonObject().put("attributes", new JsonObject());
-      
+
       List<JsonObject> newListWithAllInfo = newCollectionsJson.result().stream().map(obj -> {
         String collectionId = obj.getString("id");
 
@@ -734,9 +734,10 @@ public class DatabaseServiceImpl implements DatabaseService{
 
 
   @Override
-  public Future<JsonObject> getSchema(String id) {
+  public Future<JsonObject> getCoverageDetails(String id) {
     Promise<JsonObject> promise = Promise.promise();
-    String sqlString = "select schema from collection_coverage where collection_id = $1::uuid";
+    String sqlString =
+        "select schema, href from collection_coverage where collection_id = $1::uuid";
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());
 
@@ -768,9 +769,9 @@ public class DatabaseServiceImpl implements DatabaseService{
   @Override
   public Future<List<JsonObject>> getCollectionMetadataForOasSpec(
       List<String> existingCollectionUuidIds) {
-    
+
     Promise<List<JsonObject>> result = Promise.promise();
-    
+
     UUID[] existingCollectionIdsArr =
         existingCollectionUuidIds.stream().map(i -> UUID.fromString(i)).toArray(UUID[]::new);
 
@@ -778,18 +779,25 @@ public class DatabaseServiceImpl implements DatabaseService{
         Collectors.mapping(Row::toJson, Collectors.toList());
 
     final String GET_COLLECTION_INFO =
-             " SELECT id, title, description FROM collections_details WHERE id != ALL($1::UUID[])";
+        " SELECT id, title, description FROM collections_details WHERE id != ALL($1::UUID[])";
 
     Future<List<JsonObject>> newCollectionsJson =
-        client.withConnection(conn -> conn.preparedQuery(GET_COLLECTION_INFO).collecting(collector)
-            .execute(Tuple.of(existingCollectionIdsArr))
-            .map(res -> res.value()));
+        client.withConnection(
+            conn ->
+                conn.preparedQuery(GET_COLLECTION_INFO)
+                    .collecting(collector)
+                    .execute(Tuple.of(existingCollectionIdsArr))
+                    .map(res -> res.value()));
 
-    newCollectionsJson.onSuccess(succ -> result.complete(succ)).onFailure(fail -> {
-      LOGGER.error("Something went wrong when querying DB for new OGC collections {}",
-          fail.getMessage());
-      result.fail(fail);
-    });
+    newCollectionsJson
+        .onSuccess(succ -> result.complete(succ))
+        .onFailure(
+            fail -> {
+              LOGGER.error(
+                  "Something went wrong when querying DB for new OGC collections {}",
+                  fail.getMessage());
+              result.fail(fail);
+            });
 
     return result.future();
   }
