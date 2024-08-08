@@ -1,5 +1,6 @@
 package ogc.rs.apiserver.router.gisentities.ogccoverages;
 
+import static ogc.rs.apiserver.util.Constants.COLLECTION_COVERAGE;
 import static ogc.rs.apiserver.util.Constants.COVERAGE_SCHEMA;
 
 import com.google.auto.service.AutoService;
@@ -32,6 +33,13 @@ public class OgcCoverageEntity implements GisEntityInterface {
 
             builder.operation(COVERAGE_SCHEMA)
                     .handler(apiServerVerticle::getCoverageSchema)
+                    .handler(apiServerVerticle::putCommonResponseHeaders)
+                    .handler(apiServerVerticle::buildResponse)
+                    .failureHandler(failureHandler);
+
+            builder.operation(COLLECTION_COVERAGE)
+                    .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
+                    .handler(apiServerVerticle::getCollectionCoverage)
                     .handler(apiServerVerticle::putCommonResponseHeaders)
                     .handler(apiServerVerticle::buildResponse)
                     .failureHandler(failureHandler);

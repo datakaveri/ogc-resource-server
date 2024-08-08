@@ -60,13 +60,13 @@ public interface DatabaseService {
     Future<Boolean> getAccess(String id);
 
     /**
-     * Retrieves the schema of coverage for the collection whose id is provided.
+     * Retrieves all the details of coverage for the collection whose id is provided.
      *
      * @param id The ID of the collection for which to retrieve the schema. Must be a valid UUID string.
-     * @return The future will return with a JsonObject containing the schema if successful,
+     * @return The future will return with a JsonObject containing the coverageJson data if successful,
      * or it will fail with an OgcException if the collection is not found or if there is an internal server error.
      */
-    Future<JsonObject> getSchema(String id);
+    Future<JsonObject> getCoverageDetails(String id);
 
     /**
      * Get all collections metadata to be used for OpenAPI spec generation.
