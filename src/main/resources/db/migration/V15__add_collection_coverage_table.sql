@@ -5,7 +5,7 @@ CREATE TABLE collection_coverage (
     href VARCHAR,
     CONSTRAINT fk_collection
         FOREIGN KEY (collection_id)
-        REFERENCES collections_details (id) ON DELETE CASCADE;
+        REFERENCES collections_details (id) ON DELETE CASCADE
 );
 
 GRANT SELECT,UPDATE,INSERT ON collection_coverage TO ${ogcUser} ;
