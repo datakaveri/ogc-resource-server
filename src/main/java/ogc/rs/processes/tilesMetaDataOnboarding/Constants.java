@@ -23,7 +23,7 @@ public class Constants {
     public static final String INSERT_TILE_MATRIX_SET_RELATION_QUERY =
             "INSERT INTO tilematrixsets_relation (collection_id, tms_id, pointoforigin) VALUES ($1, $2, $3)";
 
-    public static final String START_TILES_ONBOARDING_PROCESS = "Starting Tiles Onboarding Process";
+    public static final String START_TILES_METADATA_ONBOARDING_PROCESS = "Starting Tiles Onboarding Process";
     public static final String S3_FILE_EXISTENCE_MESSAGE = "File exists in s3 bucket";
     public static final String S3_FILE_EXISTENCE_FAIL_MESSAGE = "File does not exist in S3";
     public static final String S3_EMPTY_FILE_MESSAGE = "File in S3 is empty!";
@@ -33,8 +33,8 @@ public class Constants {
             "Invalid Encoding Type";
     public static final String ENCODING_FORMAT_CHECK_MESSAGE =
             "Encoding format check complete: The encoding format is suitable for tile metadata onboarding.";
-    public static final String COLLECTION_EXISTENCE_CHECK_MESSAGE =
-            "Collection existence check completed successfully. Collection is either a pure tile collection or a feature + tile collection.";
+    public static final String COLLECTION_EVALUATION_MESSAGE =
+            "Collection evaluation completed successfully. Collection is either a pure tile collection or a feature + tile collection.";
     public static final String COLLECTION_EXISTS_MESSAGE =
             "Collection already exists as a map or vector";
     public static final String UNKNOWN_COLLECTION_TYPE =
