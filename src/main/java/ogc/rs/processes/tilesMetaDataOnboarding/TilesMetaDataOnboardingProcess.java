@@ -29,17 +29,10 @@ import ogc.rs.processes.util.UtilClass;
 
 public class TilesMetaDataOnboardingProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(TilesMetaDataOnboardingProcess.class);
-    private final Vertx vertx;
     private final PgPool pgPool;
     private final UtilClass utilClass;
     private final CollectionOnboardingProcess collectionOnboarding;
     private final DataFromS3 dataFromS3;
-    private String databaseName;
-    private String databaseHost;
-    private String databasePort;
-    private String databaseUser;
-    private String databasePassword;
-
     /**
      * Constructs a TilesMetaDataOnboardingProcess.
      *
@@ -54,23 +47,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
         this.utilClass = new UtilClass(pgPool);
         this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, dataFromS3, vertx);
         this.dataFromS3=dataFromS3;
-        this.vertx = vertx;
-        initializeConfig(config);
     }
-
-    /**
-     * Initializes the database configuration parameters.
-     *
-     * @param config Configuration JSON object containing database settings
-     */
-    private void initializeConfig(JsonObject config){
-        this.databaseName = config.getString("databaseName");
-        this.databaseHost = config.getString("databaseHost");
-        this.databasePort = config.getString("databasePort");
-        this.databaseUser = config.getString("databaseUser");
-        this.databasePassword = config.getString("databasePassword");
-    }
-
     /**
      * Executes the tiles meta data onboarding process asynchronously.
      * <p>
@@ -98,23 +75,23 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
         // Construct the file path
         String fileName = collectionId + "/" + tileMatrixSet +  "/" +tileCoordinateIndexes + fileExtension;
         requestInput.put("fileName",fileName);
-        requestInput.put("progress",calculateProgress(1,7));
-        utilClass.updateJobTableStatus(requestInput, Status.RUNNING, START_TILES_ONBOARDING_PROCESS)
+        requestInput.put("progress",calculateProgress(1));
+        utilClass.updateJobTableStatus(requestInput, Status.RUNNING, START_TILES_METADATA_ONBOARDING_PROCESS)
                 .compose(progressUpdateHandler -> checkFileExistenceInS3(requestInput))
                 .compose(s3FileExistenceHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(2, 7)).put("message", S3_FILE_EXISTENCE_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(2)).put("message", S3_FILE_EXISTENCE_MESSAGE)))
                 .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
                 .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(3, 7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(3)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkEncodingFormat(requestInput))
                 .compose(checkEncodingFormatHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(4, 7)).put("message", ENCODING_FORMAT_CHECK_MESSAGE)))
-                .compose(progressUpdateHandler -> checkCollectionExistence(requestInput))
-                .compose(checkCollectionExistenceHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(5, 7)).put("message", COLLECTION_EXISTENCE_CHECK_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(4)).put("message", ENCODING_FORMAT_CHECK_MESSAGE)))
+                .compose(progressUpdateHandler -> identifyPureTileCollection(requestInput))
+                .compose(identifyPureTileCollectionHandler -> utilClass.updateJobTableProgress(
+                        requestInput.put("progress", calculateProgress(5)).put("message", COLLECTION_EVALUATION_MESSAGE)))
                 .compose(progressUpdateHandler -> checkTileMatrixSet(requestInput))
                 .compose(tileMatrixCheckHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(6, 7)).put("message", TILE_MATRIX_SET_FOUND_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(6)).put("message", TILE_MATRIX_SET_FOUND_MESSAGE)))
                 .compose(progressUpdateHandler -> onboardTileMetadata(requestInput))
                 .compose(tilesMetaDataOnboardingHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,PROCESS_SUCCESS_MESSAGE))
                 .onSuccess(successHandler -> {
@@ -225,7 +202,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      * @return A {@link Future<JsonObject>} containing the updated JSON object with the {@code "pureTile"} attribute
      * indicating whether the collection is a pure tile collection (true) or not (false).
      */
-    private Future<JsonObject> checkCollectionExistence(JsonObject requestInput) {
+    private Future<JsonObject> identifyPureTileCollection(JsonObject requestInput) {
         String collectionId = requestInput.getString("resourceId");
         Promise<JsonObject> promise = Promise.promise();
 
@@ -253,9 +230,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                                         promise.fail(COLLECTION_TYPE_NOT_FOUND_MESSAGE);
                                     }
                                 })
-                                .onFailure(err -> {
-                                    promise.fail(COLLECTION_EXISTENCE_CHECK_FAILURE_MESSAGE + " :" + err.getMessage());
-                                });
+                                .onFailure(err -> promise.fail(COLLECTION_EXISTENCE_CHECK_FAILURE_MESSAGE + " :" + err.getMessage()));
                     } else {
                         // Collection does not exist
                         requestInput.put("pureTile", true);
@@ -410,11 +385,9 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      * </p>
      *
      * @param currentStep Current step number in the process.
-     * @param totalSteps  Total number of steps in the process.
      * @return Progress percentage as a float value.
      */
-    private float calculateProgress(int currentStep, int totalSteps){
-        return ((float) currentStep / totalSteps) * 100;
-
+    private float calculateProgress(int currentStep){
+        return ((float) currentStep / 7) * 100;
     }
 }
