@@ -1372,11 +1372,11 @@ public class ApiServerVerticle extends AbstractVerticle {
     if(!STATUS_CODES_TO_AUDIT.contains(context.response().getStatusCode())) {
       return Future.succeededFuture();
     }
-    
+
     AuthInfo authInfo = (AuthInfo) context.data().get(DxTokenAuthenticationHandler.USER_KEY);
-   
+
     String resourceId = authInfo.getResourceId().toString();
-    
+
     Promise<Void> promise = Promise.promise();
     JsonObject request = new JsonObject();
 
@@ -1636,21 +1636,84 @@ public class ApiServerVerticle extends AbstractVerticle {
    * Handles the request to retrieve the schema of coverage for a given collection.
    *
    * @param routingContext The routing context of the HTTP request, which contains the request and
-   * response objects and other context data.
+   *     response objects and other context data.
    */
   public void getCoverageSchema(RoutingContext routingContext) {
     String collectionId = routingContext.normalizedPath().split("/")[2];
     LOGGER.debug("Collection Id: {}", collectionId);
     dbService
-        .getSchema(collectionId)
+        .getCoverageDetails(collectionId)
         .onSuccess(
             success -> {
               if (success.isEmpty()) {
                 LOGGER.debug("Schema for the given coverage not found");
                 routingContext.response().setStatusCode(404).end(success.encode());
               }
-              LOGGER.debug("Response: {}", success.encode());
-              routingContext.response().setStatusCode(200).end(success.encode());
+              LOGGER.debug("Response: {}", success.getJsonObject("schema").encode());
+              routingContext
+                  .response()
+                  .setStatusCode(200)
+                  .end(success.getJsonObject("schema").encode());
+            })
+        .onFailure(
+            failed -> {
+              if (failed instanceof OgcException) {
+                routingContext.put("response", ((OgcException) failed).getJson().toString());
+                routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+              } else {
+                OgcException ogcException =
+                    new OgcException(500, "Internal Server Error", "Internal Server Error");
+                routingContext.put("response", ogcException.getJson().toString());
+                routingContext.put("statusCode", ogcException.getStatusCode());
+              }
+              routingContext.next();
+            });
+  }
+
+  /**
+   * Handles the request to get covJSON link from the databaseService and use that
+   * link to fetch covJSON from S3.
+   *
+   * @param routingContext The routing context of the HTTP request, which contains the request and
+   * response objects and other context data.
+   */
+
+  public void getCollectionCoverage(RoutingContext routingContext) {
+    LOGGER.debug("Getting the coverages");
+    String collectionId = routingContext.normalizedPath().split("/")[2];
+
+    HttpServerResponse response = routingContext.response();
+    response.setChunked(true);
+    dbService
+        .getCoverageDetails(collectionId)
+        .onSuccess(
+            handler -> {
+              response.putHeader(CONTENT_TYPE, COLLECTION_COVERAGE_TYPE);
+              DataFromS3 dataFromS3 =
+                  new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
+              String urlString = dataFromS3.getFullyQualifiedUrlString(handler.getString("href"));
+              dataFromS3.setUrlFromString(urlString);
+              dataFromS3.setSignatureHeader(HttpMethod.GET);
+              dataFromS3
+                  .getDataFromS3(HttpMethod.GET)
+                  .onSuccess(success -> success.pipeTo(response))
+                  .onFailure(
+                      failed -> {
+                        if (failed instanceof OgcException) {
+                          routingContext.put(
+                              "response", ((OgcException) failed).getJson().toString());
+                          routingContext.put("statusCode", 404);
+                        } else {
+                          routingContext.put(
+                              "response",
+                              new OgcException(
+                                      500, "Internal Server Error", "Internal Server Error")
+                                  .getJson()
+                                  .toString());
+                          routingContext.put("statusCode", 500);
+                        }
+                        routingContext.next();
+                      });
             })
         .onFailure(
             failed -> {
