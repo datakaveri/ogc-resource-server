@@ -44,7 +44,7 @@ public class Constants {
     public static final String COLLECTION_EXISTENCE_CHECK_FAILURE_MESSAGE =
             "Failed to check collection existence";
     public static final String TILE_MATRIX_SET_FOUND_MESSAGE =
-            "Tile matrix set exists in tms_metadata table.";
+            "Tile matrix set exists in tms_metadata table";
     public static final String TILE_MATRIX_SET_NOT_FOUND_MESSAGE =
             "Tile matrix set does not exist in tms_metadata table.";
     public static final String TILE_MATRIX_SET_CHECK_FAILURE_MESSAGE =

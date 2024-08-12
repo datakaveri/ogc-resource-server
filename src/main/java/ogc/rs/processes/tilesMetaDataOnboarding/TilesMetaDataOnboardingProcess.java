@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,6 +34,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     private final UtilClass utilClass;
     private final CollectionOnboardingProcess collectionOnboarding;
     private final DataFromS3 dataFromS3;
+
     /**
      * Constructs a TilesMetaDataOnboardingProcess.
      *
@@ -48,6 +50,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
         this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, dataFromS3, vertx);
         this.dataFromS3=dataFromS3;
     }
+
     /**
      * Executes the tiles meta data onboarding process asynchronously.
      * <p>
@@ -86,7 +89,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                 .compose(progressUpdateHandler -> checkEncodingFormat(requestInput))
                 .compose(checkEncodingFormatHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(4)).put("message", ENCODING_FORMAT_CHECK_MESSAGE)))
-                .compose(progressUpdateHandler -> identifyPureTileCollection(requestInput))
+                .compose(progressUpdateHandler -> evaluateCollectionTileType(requestInput))
                 .compose(identifyPureTileCollectionHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(5)).put("message", COLLECTION_EVALUATION_MESSAGE)))
                 .compose(progressUpdateHandler -> checkTileMatrixSet(requestInput))
@@ -202,7 +205,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      * @return A {@link Future<JsonObject>} containing the updated JSON object with the {@code "pureTile"} attribute
      * indicating whether the collection is a pure tile collection (true) or not (false).
      */
-    private Future<JsonObject> identifyPureTileCollection(JsonObject requestInput) {
+    private Future<JsonObject> evaluateCollectionTileType(JsonObject requestInput) {
         String collectionId = requestInput.getString("resourceId");
         Promise<JsonObject> promise = Promise.promise();
 
@@ -217,11 +220,25 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                                 .execute(Tuple.of(collectionId))
                                 .onSuccess(typeRowSet -> {
                                     if (typeRowSet.rowCount() > 0) {
-                                        String collectionType = typeRowSet.iterator().next().getString("type");
-                                        if ("feature".equalsIgnoreCase(collectionType)) {
+                                        boolean isFeature = false;
+                                        boolean isVector = false;
+                                        boolean isMap = false;
+
+                                        for (Row row : typeRowSet) {
+                                            String collectionType = row.getString("type");
+                                            if ("feature".equalsIgnoreCase(collectionType)) {
+                                                isFeature = true;
+                                            } else if ("vector".equalsIgnoreCase(collectionType)) {
+                                                isVector = true;
+                                            } else if ("map".equalsIgnoreCase(collectionType)) {
+                                                isMap = true;
+                                            }
+                                        }
+
+                                        if (isFeature && !isVector && !isMap) {
                                             requestInput.put("pureTile", false);
                                             promise.complete(requestInput);
-                                        } else if ("map".equalsIgnoreCase(collectionType) || "vector".equalsIgnoreCase(collectionType)) {
+                                        } else if (isVector || isMap) {
                                             promise.fail(COLLECTION_EXISTS_MESSAGE);
                                         } else {
                                             promise.fail(UNKNOWN_COLLECTION_TYPE);
@@ -302,6 +319,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     private Future<Void> onboardTileMetadata(JsonObject requestInput) {
         return pgPool.withTransaction(sqlClient -> {
             Promise<Void> promise = Promise.promise();
+            LOGGER.debug("Starting the onboarding process for tile metadata.");
 
             boolean pureTile = requestInput.getBoolean("pureTile");
             String collectionId = requestInput.getString("resourceId");
@@ -316,14 +334,14 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
             String tmsId = requestInput.getString("tms_id");
             JsonArray pointOfOrigin = requestInput.getJsonArray("pointOfOrigin");
 
-            // Convert JsonArray to Float[] for bbox and pointOfOrigin
-            Float[] bboxArray = (bbox != null) ? bbox.stream()
-                    .map(obj -> obj instanceof Number ? ((Number) obj).floatValue() : 0f)
-                    .toArray(Float[]::new) : new Float[0];
+            // Convert JsonArray to Double[] for bbox and pointOfOrigin
+            Double[] bboxArray = (bbox != null) ? bbox.stream()
+                    .map(obj -> obj instanceof Number ? ((Number) obj).doubleValue() : 0.0)
+                    .toArray(Double[]::new) : new Double[0];
 
-            Float[] pointOfOriginArray = (pointOfOrigin != null) ? pointOfOrigin.stream()
-                    .map(obj -> obj instanceof Number ? ((Number) obj).floatValue() : 0f)
-                    .toArray(Float[]::new) : new Float[0];
+            Double[] pointOfOriginArray = (pointOfOrigin != null) ? pointOfOrigin.stream()
+                    .map(obj -> obj instanceof Number ? ((Number) obj).doubleValue() : 0.0)
+                    .toArray(Double[]::new) : new Double[0];
 
             // Convert JsonArray to String[] for temporal
             String[] temporalArray = (temporal != null) ? temporal.stream()
@@ -332,23 +350,39 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
 
             Future<Void> collectionDetailsFuture = Future.succeededFuture();
             if (pureTile) {
+                LOGGER.debug("Inserting collection details for collectionId: {}", collectionId);
                 collectionDetailsFuture = sqlClient.preparedQuery(INSERT_COLLECTION_DETAILS_QUERY)
                         .execute(Tuple.of(collectionId, title, description, crs, bboxArray, temporalArray))
                         .mapEmpty()
-                        .compose(v -> sqlClient.preparedQuery(INSERT_RI_DETAILS_QUERY)
-                                .execute(Tuple.of(collectionId, accessPolicy, userId))
-                                .mapEmpty());
+                        .compose(v -> {
+                            LOGGER.debug("Inserting RI details for collectionId: {}", collectionId);
+                            return sqlClient.preparedQuery(INSERT_RI_DETAILS_QUERY)
+                                    .execute(Tuple.of(collectionId, accessPolicy, userId))
+                                    .mapEmpty();
+                        });
             }
 
             return collectionDetailsFuture
-                    .compose(v -> sqlClient.preparedQuery(INSERT_COLLECTION_TYPE_QUERY)
-                            .execute(Tuple.of(collectionId, collectionType))
-                            .mapEmpty())
-                    .compose(v -> sqlClient.preparedQuery(INSERT_TILE_MATRIX_SET_RELATION_QUERY)
-                            .execute(Tuple.of(collectionId, tmsId, pointOfOriginArray))
-                            .mapEmpty())
-                    .onSuccess(v -> promise.complete())
-                    .onFailure(promise::fail)
+                    .compose(v -> {
+                        LOGGER.debug("Inserting collection type for collectionId: {}", collectionId);
+                        return sqlClient.preparedQuery(INSERT_COLLECTION_TYPE_QUERY)
+                                .execute(Tuple.of(collectionId, collectionType))
+                                .mapEmpty();
+                    })
+                    .compose(v -> {
+                        LOGGER.debug("Inserting tile matrix set relation for collectionId: {}", collectionId);
+                        return sqlClient.preparedQuery(INSERT_TILE_MATRIX_SET_RELATION_QUERY)
+                                .execute(Tuple.of(collectionId, tmsId, pointOfOriginArray))
+                                .mapEmpty();
+                    })
+                    .onSuccess(v -> {
+                        LOGGER.debug("Tiles Meta Data Onboarding process completed successfully for collectionId: {}", collectionId);
+                        promise.complete();
+                    })
+                    .onFailure(throwable -> {
+                        LOGGER.error("Error occurred during tiles meta data onboarding process for collectionId: {}. Error: {}", collectionId, throwable.getMessage());
+                        promise.fail(throwable);
+                    })
                     .mapEmpty();
         });
     }
@@ -379,7 +413,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Calculates the progress percentage based on the current step and total steps.
+     * Calculates the progress percentage based on the current step in a multi-step process.
      * <p>
      * This method computes the progress as a percentage of the current step relative to the total number of steps.
      * </p>
