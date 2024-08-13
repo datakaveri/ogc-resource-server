@@ -23,7 +23,7 @@ public class Constants {
     public static final String INSERT_TILE_MATRIX_SET_RELATION_QUERY =
             "INSERT INTO tilematrixsets_relation (collection_id, tms_id, pointoforigin) VALUES ($1, $2, $3)";
 
-    public static final String START_TILES_METADATA_ONBOARDING_PROCESS = "Starting Tiles Onboarding Process";
+    public static final String START_TILES_METADATA_ONBOARDING_PROCESS = "Starting Tiles Meta Data Onboarding Process";
     public static final String S3_FILE_EXISTENCE_MESSAGE = "File exists in s3 bucket";
     public static final String S3_FILE_EXISTENCE_FAIL_MESSAGE = "File does not exist in S3";
     public static final String S3_EMPTY_FILE_MESSAGE = "File in S3 is empty!";
@@ -54,7 +54,7 @@ public class Constants {
     public static final String HANDLE_FAILURE_MESSAGE =
             "Failed to update job table status to FAILED after handler failure";
     public static final String TILES_ONBOARDING_SUCCESS_MESSAGE =
-            "Tiles Onboarding process has been completed successfully";
+            "Tiles Meta Data Onboarding process has been completed successfully";
     public static final String TILES_ONBOARDING_FAILURE_MESSAGE =
-            "Tiles Onboarding process failed";
+            "Tiles Meta Data Onboarding process failed";
 }

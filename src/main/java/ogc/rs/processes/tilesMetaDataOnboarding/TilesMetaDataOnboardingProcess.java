@@ -12,12 +12,10 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import java.math.BigInteger;
-import static ogc.rs.processes.tilesMetaDataOnboarding.Constants.*;
-
 import ogc.rs.common.DataFromS3;
 import ogc.rs.processes.ProcessService;
+import static ogc.rs.processes.tilesMetaDataOnboarding.Constants.*;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
@@ -35,10 +33,15 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     private final CollectionOnboardingProcess collectionOnboarding;
     private final DataFromS3 dataFromS3;
 
+    public enum EncodingFormatEnum {
+        PNG,
+        MVT
+    }
+
     /**
      * Constructs a TilesMetaDataOnboardingProcess.
      *
-     * @param pgPool       PostgreSQL database connection pool
+     * @param pgPool       Postgresql database connection pool
      * @param webClient    Vert.x web client for making HTTP requests
      * @param config       Configuration JSON object containing database and other settings
      * @param dataFromS3   DataFromS3 instance for interacting with AWS S3
@@ -52,7 +55,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Executes the tiles meta data onboarding process asynchronously.
+     * Executes the tiles metadata onboarding process asynchronously.
      * <p>
      * This method performs the onboarding process for tiles by checking file existence in S3, verifying collection type,
      * checking collection existence, verifying tile matrix set, and onboarding tile metadata. It updates the job table
@@ -109,6 +112,96 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     }
 
     /**
+     * Validates the encoding format provided in the request body.
+     * <p>
+     * This method checks if the `encoding` parameter in the `requestBody` JSON object is one of the acceptable formats:
+     * PNG or MVT. If the encoding is invalid or null, it logs an error and fails the promise with an appropriate message.
+     * </p>
+     *
+     * @param requestBody the JSON object containing the request parameters, including the encoding format.
+     * @return a {@link Future} that will be completed when the validation is finished.
+     *         If the encoding is valid, the future will be completed successfully.
+     *         If the encoding is invalid, the future will be failed with an error message.
+     */
+    private Future<Void> checkEncodingFormat(JsonObject requestBody) {
+        Promise<Void> promise = Promise.promise();
+        String encoding = requestBody.getString("encoding");
+
+        if (!isValidEncoding(encoding)) {
+            LOGGER.error(INVALID_ENCODING_FORMAT_MESSAGE + ": " + encoding);
+            promise.fail(INVALID_ENCODING_FORMAT_MESSAGE);
+        } else {
+            promise.complete();
+        }
+
+        return promise.future();
+    }
+
+    /**
+     * Checks if the provided encoding format is valid according to the {@link EncodingFormatEnum}.
+     * <p>
+     * This method attempts to convert the provided encoding string to an enum constant of {@link EncodingFormatEnum}.
+     * If the conversion is successful, the encoding is considered valid. If an {@link IllegalArgumentException}
+     * is thrown due to an invalid encoding format, the method returns {@code false}.
+     * </p>
+     *
+     * @param encoding the encoding format string to be validated.
+     * @return {@code true} if the encoding format is valid and corresponds to an enum constant in {@link EncodingFormatEnum};
+     *         {@code false} otherwise.
+     */
+    private static boolean isValidEncoding(String encoding) {
+        try {
+            EncodingFormatEnum.valueOf(encoding.toUpperCase());
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks if the tile matrix set exists in the {@code tms_metadata} table and adds 'id' and 'crs'
+     * column values into the {@code requestInput} JSON object.
+     * <p>
+     * This method queries the database to check if the tile matrix set exists. If it exists, it adds the 'id' and 'crs'
+     * values to the request input.
+     * </p>
+     *
+     * @param requestInput Input JSON object containing tile matrix set details.
+     * @return A {@link Future<JsonObject>} containing the updated JSON object with 'id' and 'crs' values if the tile matrix set exists.
+     */
+    private Future<JsonObject> checkTileMatrixSet(JsonObject requestInput) {
+        Promise<JsonObject> promise = Promise.promise();
+        String tmsTitle = requestInput.getString("tileMatrixSet");
+
+        pgPool.preparedQuery(CHECK_TILE_MATRIX_SET_EXISTENCE_QUERY)
+                .execute(Tuple.of(tmsTitle))
+                .onSuccess(rowSet -> {
+                    if (rowSet.iterator().hasNext()) {
+                        var row = rowSet.iterator().next();
+                        if (row.getBoolean("exists")) {
+                            LOGGER.debug(TILE_MATRIX_SET_FOUND_MESSAGE + ": " + tmsTitle);
+                            // Add 'id' and 'crs' column values into requestInput
+                            requestInput.put("tms_id", row.getValue("id"));
+                            requestInput.put("crs", row.getValue("crs"));
+                            promise.complete(requestInput);
+                        } else {
+                            LOGGER.error(TILE_MATRIX_SET_NOT_FOUND_MESSAGE + ": " + tmsTitle);
+                            promise.fail(TILE_MATRIX_SET_NOT_FOUND_MESSAGE);
+                        }
+                    } else {
+                        LOGGER.error(TILE_MATRIX_SET_NOT_FOUND_MESSAGE + ": " + tmsTitle);
+                        promise.fail(TILE_MATRIX_SET_NOT_FOUND_MESSAGE);
+                    }
+                })
+                .onFailure(err -> {
+                    LOGGER.error(TILE_MATRIX_SET_CHECK_FAILURE_MESSAGE + ": " + err.getMessage());
+                    promise.fail(TILE_MATRIX_SET_CHECK_FAILURE_MESSAGE + ": " + err.getMessage());
+                });
+
+        return promise.future();
+    }
+
+    /**
      * Checks the existence of a file in an S3 bucket and verifies its size.
      * <p>
      * This method constructs the URL for the file based on the provided filename, sends an HTTP HEAD request to S3,
@@ -123,7 +216,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      *         or failed with an appropriate error message if the file does not exist, is empty, or an error occurs.
      *
      */
-    public Future<Boolean> checkFileExistenceInS3(JsonObject requestInput) {
+    private Future<Boolean> checkFileExistenceInS3(JsonObject requestInput) {
         Promise<Boolean> promise = Promise.promise();
         String fileName = requestInput.getString("fileName");
         LOGGER.debug("Checking existence of file: {}", fileName);
@@ -163,32 +256,6 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                     LOGGER.error("Failed to get response from S3: {}", failed.getMessage());
                     promise.fail(failed.getMessage());
                 });
-
-        return promise.future();
-    }
-
-    /**
-     * Validates the encoding format provided in the request body.
-     * <p>
-     * This method checks if the `encoding` parameter in the `requestBody` JSON object is one of the acceptable formats:
-     * PNG or MVT. If the encoding is invalid or null, it logs an error and fails the promise.
-     * </p>
-     *
-     * @param requestBody the JSON object containing the request parameters, including the encoding format.
-     * @return a {@link Future} that will be completed when the validation is finished.
-     *         If the encoding is valid, the future will be completed successfully.
-     *         If the encoding is invalid, the future will be failed with an error message.
-     */
-    private Future<Void> checkEncodingFormat(JsonObject requestBody) {
-        Promise<Void> promise = Promise.promise();
-        String encoding = requestBody.getString("encoding");
-
-        if ((!"PNG".equalsIgnoreCase(encoding) && !"MVT".equalsIgnoreCase(encoding))) {
-            LOGGER.error(INVALID_ENCODING_FORMAT_MESSAGE + ": " + encoding);
-            promise.fail(INVALID_ENCODING_FORMAT_MESSAGE);
-        } else {
-            promise.complete();
-        }
 
         return promise.future();
     }
@@ -257,49 +324,6 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                 .onFailure(err -> {
                     // Handle failure
                     promise.fail(COLLECTION_EXISTENCE_CHECK_FAILURE_MESSAGE + " :" + err.getMessage());
-                });
-
-        return promise.future();
-    }
-
-    /**
-     * Checks if the tile matrix set exists in the {@code tms_metadata} table and adds 'id' and 'crs'
-     * column values into the {@code requestInput} JSON object.
-     * <p>
-     * This method queries the database to check if the tile matrix set exists. If it exists, it adds the 'id' and 'crs'
-     * values to the request input.
-     * </p>
-     *
-     * @param requestInput Input JSON object containing tile matrix set details.
-     * @return A {@link Future<JsonObject>} containing the updated JSON object with 'id' and 'crs' values if the tile matrix set exists.
-     */
-    private Future<JsonObject> checkTileMatrixSet(JsonObject requestInput) {
-        Promise<JsonObject> promise = Promise.promise();
-        String tmsTitle = requestInput.getString("tileMatrixSet");
-
-        pgPool.preparedQuery(CHECK_TILE_MATRIX_SET_EXISTENCE_QUERY)
-                .execute(Tuple.of(tmsTitle))
-                .onSuccess(rowSet -> {
-                    if (rowSet.iterator().hasNext()) {
-                        var row = rowSet.iterator().next();
-                        if (row.getBoolean("exists")) {
-                            LOGGER.debug(TILE_MATRIX_SET_FOUND_MESSAGE + ": " + tmsTitle);
-                            // Add 'id' and 'crs' column values into requestInput
-                            requestInput.put("tms_id", row.getValue("id"));
-                            requestInput.put("crs", row.getValue("crs"));
-                            promise.complete(requestInput);
-                        } else {
-                            LOGGER.error(TILE_MATRIX_SET_NOT_FOUND_MESSAGE + ": " + tmsTitle);
-                            promise.fail(TILE_MATRIX_SET_NOT_FOUND_MESSAGE);
-                        }
-                    } else {
-                        LOGGER.error(TILE_MATRIX_SET_NOT_FOUND_MESSAGE + ": " + tmsTitle);
-                        promise.fail(TILE_MATRIX_SET_NOT_FOUND_MESSAGE);
-                    }
-                })
-                .onFailure(err -> {
-                    LOGGER.error(TILE_MATRIX_SET_CHECK_FAILURE_MESSAGE + ": " + err.getMessage());
-                    promise.fail(TILE_MATRIX_SET_CHECK_FAILURE_MESSAGE + ": " + err.getMessage());
                 });
 
         return promise.future();
@@ -413,7 +437,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     }
 
     /**
-     * Calculates the progress percentage based on the current step in a multi-step process.
+     * Calculates the progress percentage based on the current step in a multiple step process.
      * <p>
      * This method computes the progress as a percentage of the current step relative to the total number of steps.
      * </p>
