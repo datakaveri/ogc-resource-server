@@ -80,21 +80,21 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
         requestInput.put("fileName",fileName);
         requestInput.put("progress",calculateProgress(1));
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, START_TILES_METADATA_ONBOARDING_PROCESS)
-                .compose(progressUpdateHandler -> checkFileExistenceInS3(requestInput))
-                .compose(s3FileExistenceHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(2)).put("message", S3_FILE_EXISTENCE_MESSAGE)))
-                .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
-                .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(3)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkEncodingFormat(requestInput))
                 .compose(checkEncodingFormatHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(4)).put("message", ENCODING_FORMAT_CHECK_MESSAGE)))
-                .compose(progressUpdateHandler -> evaluateCollectionTileType(requestInput))
-                .compose(identifyPureTileCollectionHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(5)).put("message", COLLECTION_EVALUATION_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(2)).put("message", ENCODING_FORMAT_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkTileMatrixSet(requestInput))
                 .compose(tileMatrixCheckHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress", calculateProgress(6)).put("message", TILE_MATRIX_SET_FOUND_MESSAGE)))
+                        requestInput.put("progress", calculateProgress(3)).put("message", TILE_MATRIX_SET_FOUND_MESSAGE)))
+                .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
+                .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
+                        requestInput.put("progress", calculateProgress(4)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
+                .compose(progressUpdateHandler -> checkFileExistenceInS3(requestInput))
+                .compose(s3FileExistenceHandler -> utilClass.updateJobTableProgress(
+                        requestInput.put("progress", calculateProgress(5)).put("message", S3_FILE_EXISTENCE_MESSAGE)))
+                .compose(progressUpdateHandler -> evaluateCollectionTileType(requestInput))
+                .compose(identifyPureTileCollectionHandler -> utilClass.updateJobTableProgress(
+                        requestInput.put("progress", calculateProgress(6)).put("message", COLLECTION_EVALUATION_MESSAGE)))
                 .compose(progressUpdateHandler -> onboardTileMetadata(requestInput))
                 .compose(tilesMetaDataOnboardingHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,PROCESS_SUCCESS_MESSAGE))
                 .onSuccess(successHandler -> {
