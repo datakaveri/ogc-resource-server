@@ -13,9 +13,15 @@ import io.vertx.sqlclient.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import ogc.rs.common.DataFromS3;
 import ogc.rs.processes.ProcessService;
 import static ogc.rs.processes.tilesMetaDataOnboarding.Constants.*;
+import static ogc.rs.processes.tilesMetaDataOnboarding.SqlConstants.*;
+
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
@@ -71,7 +77,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     public Future<JsonObject> execute(JsonObject requestInput){
         Promise<JsonObject> promise = Promise.promise();
         String collectionId = requestInput.getString("resourceId");
-        String tileCoordinateIndexes = requestInput.getString("tileCoordinateIndexes");
+        String testTileCoordinateIndexes = requestInput.getString("testTileCoordinateIndexes");
         String tileMatrixSet = requestInput.getString("tileMatrixSet");
         String encoding = requestInput.getString("encoding");
         String collectionType = "MVT".equalsIgnoreCase(encoding) ? "VECTOR" : "MAP";
@@ -79,7 +85,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
         // Determine file extension based on encoding
         String fileExtension = "MVT".equalsIgnoreCase(encoding) ? ".pbf" : "." + encoding.toLowerCase();
         // Construct the file path
-        String fileName = collectionId + "/" + tileMatrixSet +  "/" +tileCoordinateIndexes + fileExtension;
+        String fileName = collectionId + "/" + tileMatrixSet +  "/" +testTileCoordinateIndexes + fileExtension;
         requestInput.put("fileName",fileName);
         requestInput.put("progress",calculateProgress(1));
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, START_TILES_METADATA_ONBOARDING_PROCESS)
@@ -99,13 +105,13 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                 .compose(identifyPureTileCollectionHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(6)).put("message", COLLECTION_EVALUATION_MESSAGE)))
                 .compose(progressUpdateHandler -> onboardTileMetadata(requestInput))
-                .compose(tilesMetaDataOnboardingHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,PROCESS_SUCCESS_MESSAGE))
+                .compose(tilesMetaDataOnboardingHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL, TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE))
                 .onSuccess(successHandler -> {
-                    LOGGER.debug(TILES_ONBOARDING_SUCCESS_MESSAGE);
+                    LOGGER.debug(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
                     promise.complete();
                 })
                 .onFailure(failureHandler -> {
-                    LOGGER.error(TILES_ONBOARDING_FAILURE_MESSAGE);
+                    LOGGER.error(TILES_METADATA_ONBOARDING_FAILURE_MESSAGE);
                     handleFailure(requestInput, failureHandler.getMessage(), promise);
                 });
         return promise.future();
@@ -176,13 +182,19 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
         pgPool.preparedQuery(CHECK_TILE_MATRIX_SET_EXISTENCE_QUERY)
                 .execute(Tuple.of(tmsTitle))
                 .onSuccess(rowSet -> {
-                    if (rowSet.iterator().hasNext()) {
-                        var row = rowSet.iterator().next();
-                        if (row.getBoolean("exists")) {
+                    // Collect Rows into List<JsonObject>
+                    List<JsonObject> jsonList = new ArrayList<>();
+                    rowSet.forEach(row -> jsonList.add(row.toJson())); // Convert each Row to JsonObject and add to the list
+
+                    // Check if we have any results
+                    if (!jsonList.isEmpty()) {
+                        JsonObject rowJson = jsonList.get(0);
+                        // Check if the tile matrix set exists
+                        if (rowJson.getBoolean("exists")) {
                             LOGGER.debug(TILE_MATRIX_SET_FOUND_MESSAGE + ": " + tmsTitle);
                             // Add 'id' and 'crs' column values into requestInput
-                            requestInput.put("tms_id", row.getValue("id"));
-                            requestInput.put("crs", row.getValue("crs"));
+                            requestInput.put("tms_id", rowJson.getValue("id"));
+                            requestInput.put("crs", rowJson.getValue("crs"));
                             promise.complete(requestInput);
                         } else {
                             LOGGER.error(TILE_MATRIX_SET_NOT_FOUND_MESSAGE + ": " + tmsTitle);
@@ -200,6 +212,8 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
 
         return promise.future();
     }
+
+
 
     /**
      * Checks the existence of a file in an S3 bucket and verifies its size.
@@ -254,7 +268,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                 })
                 .onFailure(failed -> {
                     LOGGER.error("Failed to get response from S3: {}", failed.getMessage());
-                    promise.fail(failed.getMessage());
+                    promise.fail(S3_FILE_EXISTENCE_FAIL_MESSAGE);
                 });
 
         return promise.future();
