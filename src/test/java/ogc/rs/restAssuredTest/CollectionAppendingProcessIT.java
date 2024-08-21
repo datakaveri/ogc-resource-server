@@ -36,28 +36,30 @@ public class CollectionAppendingProcessIT {
         // Set up files for the tests
 
         // put the file in /fileName path for Ogr
-        File validFile = new File("src/test/resources/processFiles/append_1000_point_features.json");
-        given().port(PORT).body(validFile).when().put(BUCKET_PATH + "append_1000_point_features.json")
-                .then().statusCode(200);
-
-        // put the file in bucket1/fileName to read file directly from S3
-        given().port(PORT).body(validFile).when().put(BUCKET_PATH_FOR_S3 + "append_1000_point_features.json")
-                .then().statusCode(200);
+        File validFile =
+            new File("src/test/resources/processFiles/append_1000_point_features.json");
+        given().baseUri("https://localhost").relaxedHTTPSValidation().port(PORT).body(validFile)
+            .when().put(BUCKET_PATH + "append_1000_point_features.json").then().statusCode(200);
 
         File notEPSGFile = new File("src/test/resources/processFiles/not_EPSG_crs.json");
-        given().port(PORT).body(notEPSGFile).when().put(BUCKET_PATH + "not_EPSG_crs.json")
-                .then().statusCode(200);
+        given().baseUri("https://localhost").relaxedHTTPSValidation().port(PORT).body(notEPSGFile)
+            .when().put(BUCKET_PATH + "not_EPSG_crs.json").then().statusCode(200);
 
         File invalidSRIDFile = new File("src/test/resources/processFiles/not_registered_EPSG.json");
-        given().port(PORT).body(invalidSRIDFile).when().put(BUCKET_PATH + "not_registered_EPSG.json")
-                .then().statusCode(200);
+        given().baseUri("https://localhost").relaxedHTTPSValidation().port(PORT)
+            .body(invalidSRIDFile).when().put(BUCKET_PATH + "not_registered_EPSG.json").then()
+            .statusCode(200);
 
-        File invalidSchemaFile = new File("src/test/resources/processFiles/invalid_schema_file.json");
-        given().port(PORT).body(invalidSchemaFile).when().put(BUCKET_PATH + "invalid_schema_file.json")
-                .then().statusCode(200);
+        File invalidSchemaFile =
+            new File("src/test/resources/processFiles/invalid_schema_file.json");
+        given().baseUri("https://localhost").relaxedHTTPSValidation().port(PORT)
+            .body(invalidSchemaFile).when().put(BUCKET_PATH + "invalid_schema_file.json").then()
+            .statusCode(200);
 
-        File layersWithDiffGeomFile = new File("src/test/resources/processFiles/2LayersWithDifferentGeom.json");
-        given().port(PORT).body(layersWithDiffGeomFile).when().put(BUCKET_PATH + "2LayersWithDifferentGeom.json");
+        File layersWithDiffGeomFile =
+            new File("src/test/resources/processFiles/2LayersWithDifferentGeom.json");
+        given().baseUri("https://localhost").relaxedHTTPSValidation().port(PORT)
+            .body(layersWithDiffGeomFile).when().put(BUCKET_PATH + "2LayersWithDifferentGeom.json");
 
     }
 
@@ -289,7 +291,7 @@ public class CollectionAppendingProcessIT {
 
         String token = getToken();
         JsonObject requestBody = requestBody();
-        requestBody.getJsonObject("inputs").put("fileName", "bucket1/append_1000_point_features.json")
+        requestBody.getJsonObject("inputs").put("fileName", "append_1000_point_features.json")
                 .put("title", "Valid Append File").put("description", "Valid file for appending test.");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");

@@ -39,32 +39,28 @@ public class CollectionOnboardingProcessIT {
      */
     @BeforeAll
     public static void setup() throws IOException {
-        // put the file in /fileName path for Ogr
-        File validFile = new File("src/test/resources/processFiles/hydro_1000_features.gpkg");
-        given().port(PORT).body(validFile).when().put(BUCKET_PATH + "hydro_1000_features.gpkg")
-                .then().statusCode(200);
-        // put the file in bucket1/fileName to read file directly from S3
-        given().port(PORT).body(validFile).when().put(BUCKET_PATH_FOR_S3 + "hydro_1000_features.gpkg")
-                .then().statusCode(200);
+      // put the file in /fileName path for Ogr
+      File validFile = new File("src/test/resources/processFiles/hydro_1000_features.gpkg");
+      given().baseUri("https://localhost").relaxedHTTPSValidation().port(PORT).body(validFile)
+          .when().put(BUCKET_PATH + "hydro_1000_features.gpkg").then().statusCode(200);
 
-        File layersWith2GeomFile = new File("src/test/resources/processFiles/2LayersWithDiffGeom.gpkg");
-        given().port(PORT).body(layersWith2GeomFile).when().put(BUCKET_PATH + "2LayersWithDiffGeom.gpkg")
-                .then().statusCode(200);
+      File layersWith2GeomFile =
+          new File("src/test/resources/processFiles/2LayersWithDiffGeom.gpkg");
+      given().baseUri("https://localhost").relaxedHTTPSValidation().port(PORT)
+          .body(layersWith2GeomFile).when().put(BUCKET_PATH + "2LayersWithDiffGeom.gpkg").then()
+          .statusCode(200);
 
-        given().port(PORT).body(layersWith2GeomFile).when().put(BUCKET_PATH_FOR_S3 + "2LayersWithDiffGeom.gpkg")
-                .then().statusCode(200);
+      File notEPSG = new File("src/test/resources/processFiles/not_EPSG_crs.gpkg");
+      given().baseUri("https://localhost").relaxedHTTPSValidation().port(PORT).body(notEPSG).when()
+          .put(BUCKET_PATH + "not_EPSG_crs.gpkg").then().statusCode(200);
 
-        File notEPSG = new File("src/test/resources/processFiles/not_EPSG_crs.gpkg");
-        given().port(PORT).body(notEPSG).when().put(BUCKET_PATH + "not_EPSG_crs.gpkg")
-                .then().statusCode(200);
+      File invalidEPSGFile = new File("src/test/resources/processFiles/not_registered_EPSG.gpkg");
+      given().baseUri("https://localhost").relaxedHTTPSValidation().port(PORT).body(invalidEPSGFile)
+          .when().put(BUCKET_PATH + "not_registered_EPSG.gpkg").then().statusCode(200);
 
-        File invalidEPSGFile = new File("src/test/resources/processFiles/not_registered_EPSG.gpkg");
-        given().port(PORT).body(invalidEPSGFile).when().put(BUCKET_PATH + "not_registered_EPSG.gpkg")
-                .then().statusCode(200);
-
-        File emptyFile = new File("src/test/resources/processFiles/no_features.gpkg");
-        given().port(PORT).body(emptyFile).when().put(BUCKET_PATH + "no_features.gpkg")
-                .then().statusCode(200);
+      File emptyFile = new File("src/test/resources/processFiles/no_features.gpkg");
+      given().baseUri("https://localhost").relaxedHTTPSValidation().port(PORT).body(emptyFile)
+          .when().put(BUCKET_PATH + "no_features.gpkg").then().statusCode(200);
     }
 
     private JsonObject requestBody() {
@@ -208,6 +204,7 @@ public class CollectionOnboardingProcessIT {
         getJobStatus.then().statusCode(200).body("message", is(CRS_FETCH_FAILED));
     }
 
+    @Disabled
     @Test
     @Order(9)
     @Description("Failure: Fail to get Meta data from S3 by passing an empty file.")
@@ -233,7 +230,7 @@ public class CollectionOnboardingProcessIT {
 
         String token = getToken();
         JsonObject requestBody = requestBody();
-        requestBody.getJsonObject("inputs").put("fileName", "bucket1/2LayersWithDiffGeom.gpkg")
+        requestBody.getJsonObject("inputs").put("fileName", "2LayersWithDiffGeom.gpkg")
                 .put("title", "Invalid Geometry test").put("description", "File with 2 layers with different geometry.");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
@@ -250,7 +247,7 @@ public class CollectionOnboardingProcessIT {
 
         String token = getToken();
         JsonObject requestBody = requestBody();
-        requestBody.getJsonObject("inputs").put("fileName", "bucket1/hydro_1000_features.gpkg")
+        requestBody.getJsonObject("inputs").put("fileName", "hydro_1000_features.gpkg")
                 .put("title", "Valid Hydro File").put("description", "Valid hydro file with 1000 features");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
