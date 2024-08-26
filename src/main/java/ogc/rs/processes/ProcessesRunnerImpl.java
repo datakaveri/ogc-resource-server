@@ -85,7 +85,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
           case "CollectionAppending":
             processService = new CollectionAppendingProcess(pgPool, webClient, config,getS3Object(config),vertx);
             break;
-          case "TilesOnboarding":
+          case "TilesMetaDataOnboarding":
             processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config,getS3Object(config), vertx);
         }
 
