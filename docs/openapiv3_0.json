@@ -3,7 +3,7 @@
   "info": {
     "version": "1.0.1",
     "title": "OGC Compliant IUDX Resource Server",
-    "description": "OGC compliant Features and Common API definitions.\nIncludes Schema and Response Objects.",
+    "description": "OGC compliant Features and Common API definitions.\nIncludes Schema and Response Objects.\n\n <a href='/stac/api'>STAC API Documentation</a> \n\n <a href='/metering/api'>DX Metering API Documentation</a>",
     "contact": {
       "name": "India Urban Data eXchange (IUDX)",
       "email": "info@iudx.org.in",
