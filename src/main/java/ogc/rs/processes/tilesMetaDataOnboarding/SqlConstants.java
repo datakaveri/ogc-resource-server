@@ -6,7 +6,7 @@ public class SqlConstants {
             "SELECT EXISTS (SELECT 1 FROM collections_details WHERE id = $1::UUID)";
     // Query to get the collection type from the collection_type table
     public static String GET_COLLECTION_TYPE_QUERY =
-            "SELECT type FROM collection_type WHERE collection_id = $1::UUID";
+            "SELECT collection_id, array_agg(type) from collection_type group by collection_id having collection_id = $1::uuid";
     // Query to check if the tile matrix set exists in tms_metadata table and retrieve all columns
     public static final String CHECK_TILE_MATRIX_SET_EXISTENCE_QUERY =
             "SELECT *, EXISTS (SELECT 1 FROM tms_metadata WHERE title = $1) AS exists FROM tms_metadata WHERE title = $1";

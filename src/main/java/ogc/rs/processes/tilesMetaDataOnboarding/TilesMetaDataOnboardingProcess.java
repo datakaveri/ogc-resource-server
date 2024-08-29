@@ -14,8 +14,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import ogc.rs.common.DataFromS3;
 import ogc.rs.processes.ProcessService;
@@ -57,9 +57,9 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, dataFromS3, vertx);
-        this.dataFromS3=dataFromS3;
-    }
+        this.dataFromS3 = dataFromS3;
 
+    }
     /**
      * Executes the tiles metadata onboarding process asynchronously.
      * <p>
@@ -213,8 +213,6 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
         return promise.future();
     }
 
-
-
     /**
      * Checks the existence of a file in an S3 bucket and verifies its size.
      * <p>
@@ -241,9 +239,6 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
 
         dataFromS3.getDataFromS3(HttpMethod.HEAD)
                 .onSuccess(responseFromS3 -> {
-                    int statusCode = responseFromS3.statusCode();
-                    switch (statusCode) {
-                        case 200:
                             String contentLengthHeader = responseFromS3.getHeader("Content-Length");
                             BigInteger fileSize = contentLengthHeader != null
                                     ? new BigInteger(contentLengthHeader)
@@ -255,16 +250,6 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                                 LOGGER.warn("File exists but is empty");
                                 promise.fail(S3_EMPTY_FILE_MESSAGE);
                             }
-                            break;
-                        case 404:
-                            LOGGER.warn("File not found in S3");
-                            promise.fail(S3_FILE_EXISTENCE_FAIL_MESSAGE);
-                            break;
-                        default:
-                            LOGGER.error("Unexpected HTTP status code: {}", statusCode);
-                            promise.fail("Failed to check file existence. HTTP Status: " + statusCode);
-                            break;
-                    }
                 })
                 .onFailure(failed -> {
                     LOGGER.error("Failed to get response from S3: {}", failed.getMessage());
@@ -296,25 +281,24 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                 .onSuccess(rowSet -> {
                     // Check if the collection exists
                     if (rowSet.rowCount() > 0 && rowSet.iterator().next().getBoolean("exists")) {
-                        // Collection exists, now check its type in the collection_type table
+                        // Collection exists, now get its types from the collection_type table
                         pgPool.preparedQuery(GET_COLLECTION_TYPE_QUERY)
                                 .execute(Tuple.of(collectionId))
                                 .onSuccess(typeRowSet -> {
                                     if (typeRowSet.rowCount() > 0) {
-                                        boolean isFeature = false;
-                                        boolean isVector = false;
-                                        boolean isMap = false;
+                                        Row row = typeRowSet.iterator().next();
+                                        // Get the array of strings
+                                        String[] typesArray = row.getArrayOfStrings("array_agg");
 
-                                        for (Row row : typeRowSet) {
-                                            String collectionType = row.getString("type");
-                                            if ("feature".equalsIgnoreCase(collectionType)) {
-                                                isFeature = true;
-                                            } else if ("vector".equalsIgnoreCase(collectionType)) {
-                                                isVector = true;
-                                            } else if ("map".equalsIgnoreCase(collectionType)) {
-                                                isMap = true;
-                                            }
-                                        }
+                                        // Convert String[] to a List for easier processing
+                                        List<String> typesList = Arrays.asList(typesArray);
+
+                                        boolean isFeature = typesList.stream()
+                                                .anyMatch("FEATURE"::equalsIgnoreCase);
+                                        boolean isVector = typesList.stream()
+                                                .anyMatch("VECTOR"::equalsIgnoreCase);
+                                        boolean isMap = typesList.stream()
+                                                .anyMatch("MAP"::equalsIgnoreCase);
 
                                         if (isFeature && !isVector && !isMap) {
                                             requestInput.put("pureTile", false);
@@ -342,6 +326,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
 
         return promise.future();
     }
+
 
     /**
      * Onboards tile metadata into the database. Depending on whether the collection is a pure tile collection,
@@ -386,10 +371,12 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                     .map(Object::toString)
                     .toArray(String[]::new) : new String[0];
 
-            Future<Void> collectionDetailsFuture = Future.succeededFuture();
+            // Start the chain based on the condition
+            Future<Void> chainFuture;
+
             if (pureTile) {
                 LOGGER.debug("Inserting collection details for collectionId: {}", collectionId);
-                collectionDetailsFuture = sqlClient.preparedQuery(INSERT_COLLECTION_DETAILS_QUERY)
+                chainFuture = sqlClient.preparedQuery(INSERT_COLLECTION_DETAILS_QUERY)
                         .execute(Tuple.of(collectionId, title, description, crs, bboxArray, temporalArray))
                         .mapEmpty()
                         .compose(v -> {
@@ -398,9 +385,11 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                                     .execute(Tuple.of(collectionId, accessPolicy, userId))
                                     .mapEmpty();
                         });
+            } else {
+                chainFuture = Future.succeededFuture(); // No initial operations, just continue
             }
 
-            return collectionDetailsFuture
+            return chainFuture
                     .compose(v -> {
                         LOGGER.debug("Inserting collection type for collectionId: {}", collectionId);
                         return sqlClient.preparedQuery(INSERT_COLLECTION_TYPE_QUERY)

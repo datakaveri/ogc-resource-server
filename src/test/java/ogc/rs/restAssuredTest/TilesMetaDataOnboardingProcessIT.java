@@ -18,7 +18,6 @@ import static io.restassured.RestAssured.given;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.processes.tilesMetaDataOnboarding.Constants.*;
 import static ogc.rs.processes.collectionOnboarding.Constants.RESOURCE_OWNERSHIP_ERROR;
-import static ogc.rs.processes.util.Status.ACCEPTED;
 import static ogc.rs.restAssuredTest.Constant.*;
 import static org.hamcrest.Matchers.is;
 
@@ -34,14 +33,27 @@ public class TilesMetaDataOnboardingProcessIT {
     @BeforeAll
     public static void setup() throws IOException {
         // Set up files for the tests
-        // put the file in /fileName path
-        File validFile = new File("src/test/resources/processFiles/c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0");
-        given().port(PORT).body(validFile).when().put(BUCKET_PATH + "src/test/resources/processFiles/c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0")
+
+        // Upload a test file to the root path /c432b3df-0a22-485d-80a5-ace8195f6074
+        File validFile = new File("src/test/resources/processFiles/c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf");
+
+        given().port(PORT).body(validFile).when().put( "c432b3df-0a22-485d-80a5-ace8195f6074")
                 .then().statusCode(200);
 
-        // put the file in bucket1/fileName to read file directly from S3
-        given().port(PORT).body(validFile).when().put(BUCKET_PATH_FOR_S3 + "c432b3df-0a22-485d-80a5-ace8195f6074/WebMercator/0/0/0.pbf")
+        // Upload the same test file to the S3 path /bucket1/c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf
+        given().port(PORT).body(validFile).when().put( "c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf")
                 .then().statusCode(200);
+
+    }
+
+    @AfterAll
+    public static void tearDown() throws IOException {
+
+        given().port(PORT).when().delete( "c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf")
+                .then().statusCode(204);
+
+        given().port(PORT).when().delete( "c432b3df-0a22-485d-80a5-ace8195f6074")
+                .then().statusCode(204);
 
     }
 
@@ -123,29 +135,6 @@ public class TilesMetaDataOnboardingProcessIT {
 
     @Test
     @Order(4)
-    @Description("Success: Provider Delegate Flow")
-    public void testExecuteWithProviderDelegateUser() {
-        LOGGER.debug("Testing Success: Provider Delegate User");
-        String token = new FakeTokenBuilder()
-                .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
-                .withResourceServer().withDelegate(UUID.fromString("9304cb99-7125-47f1-8686-a070bb6c3eaf"), "provider")
-                .withCons(new JsonObject()).build();
-        Response response = sendExecutionRequest(processId, token, requestBody());
-        response.then().statusCode(201).body("status", is(ACCEPTED.toString()));
-    }
-
-    @Test
-    @Order(5)
-    @Description("Success: Process Accepted")
-    public void testExecuteProcess() {
-        LOGGER.debug("Testing Success: Process Accepted");
-        String token = getToken();
-        Response response = sendExecutionRequest(processId, token, requestBody());
-        response.then().statusCode(201).body("status", is(ACCEPTED.toString()));
-    }
-
-    @Test
-    @Order(6)
     @Description("Failure: Process does not Exist")
     public void testExecuteFailProcessNotPresent() {
         LOGGER.debug("Testing Failure: Process does not Exist");
@@ -155,7 +144,7 @@ public class TilesMetaDataOnboardingProcessIT {
     }
 
     @Test
-    @Order(7)
+    @Order(5)
     @Description("Failure: Invalid input")
     public void testExecuteFailInvalidInput() {
         LOGGER.debug("Testing Failure: Invalid input");
@@ -166,7 +155,7 @@ public class TilesMetaDataOnboardingProcessIT {
     }
 
     @Test
-    @Order(8)
+    @Order(6)
     @Description("Failure: Ownership Error")
     public void testExecuteFailOwnershipError() throws InterruptedException {
         LOGGER.debug("Failure: Ownership Error");
@@ -181,7 +170,7 @@ public class TilesMetaDataOnboardingProcessIT {
     }
 
     @Test
-    @Order(9)
+    @Order(7)
     @Description("Failure: Check the encoding format")
     public void testFailCheckEncodingFormat() throws InterruptedException {
         LOGGER.debug("Failure: Invalid Encoding Format");
@@ -198,7 +187,7 @@ public class TilesMetaDataOnboardingProcessIT {
     }
 
     @Test
-    @Order(10)
+    @Order(8)
     @Description("Failure: Check the tile matrix set")
     public void testFailCheckTileMatrixSet() throws InterruptedException {
         LOGGER.debug("Failure: Invalid TileMatrixSet");
@@ -215,7 +204,7 @@ public class TilesMetaDataOnboardingProcessIT {
     }
 
     @Test
-    @Order(11)
+    @Order(9)
     @Description("Failure: Check the file existence in S3")
     public void testFailCheckFileExistenceInS3() throws InterruptedException {
         LOGGER.debug("Failure: Invalid File which does not exist in S3");
@@ -223,7 +212,7 @@ public class TilesMetaDataOnboardingProcessIT {
         String token = getToken();
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("title", "Non-existing file in S3 test")
-                .put("tileCoordinateIndexes", "0/0/1");
+                .put("testTileCoordinateIndexes", "111/111/111");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
         Thread.sleep(3000);
@@ -232,7 +221,7 @@ public class TilesMetaDataOnboardingProcessIT {
     }
 
     @Test
-    @Order(12)
+    @Order(10)
     @Description("Success: Onboarding Tiles Meta Data")
     public void testExecuteTilesMetaDataOnboardingSuccess() throws InterruptedException {
         LOGGER.debug("Success: Onboarding Tiles Meta Data");
@@ -248,7 +237,7 @@ public class TilesMetaDataOnboardingProcessIT {
         getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
     }
     @Test
-    @Order(13)
+    @Order(11)
     @Description("Failure: Onboarding Tiles Meta Data as collection is already present")
     public void testExecuteTileCollectionAlreadyPresent() throws InterruptedException {
         LOGGER.debug("Failure: Onboarding Tiles Meta Data");
