@@ -28,20 +28,38 @@ public class TilesMetaDataOnboardingProcessIT {
     String executionEndpoint = "/processes/{processId}/execution";
     String jobStatusEndpoint = "/jobs/{jobId}";
     String processId = "a512b49a-f8e6-4da1-99b0-13aa758c9104";
-
+    String RESOURCE_ID_FOR_VECTOR_TEST = "c432b3df-0a22-485d-80a5-ace8195f6074";
+    String RESOURCE_ID_FOR_RASTER_TEST = "a7c85951-9c1d-4b45-ad98-a395bef571d0";
+    String RESOURCE_ID_EXISTING_FEATURE_COLLECTION_TEST = "5d568f26-ccaf-456d-ba04-7feb589c1185";
 
     @BeforeAll
     public static void setup() throws IOException {
         // Set up files for the tests
 
         // Upload a test file to the root path /c432b3df-0a22-485d-80a5-ace8195f6074
-        File validFile = new File("src/test/resources/processFiles/c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf");
+        File vectorFile = new File("src/test/resources/processFiles/c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf");
 
-        given().port(PORT).body(validFile).when().put( "c432b3df-0a22-485d-80a5-ace8195f6074")
+        given().port(PORT).body(vectorFile).when().put( "c432b3df-0a22-485d-80a5-ace8195f6074")
                 .then().statusCode(200);
 
-        // Upload the same test file to the S3 path /bucket1/c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf
-        given().port(PORT).body(validFile).when().put( "c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf")
+        // Upload the same test file to the S3 path /c432b3df-0a22-485d-80a5-ace8195f6074/c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf
+        given().port(PORT).body(vectorFile).when().put( "c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf")
+                .then().statusCode(200);
+
+        File existingFeatureCollectionFile = new File("src/test/resources/processFiles/5d568f26-ccaf-456d-ba04-7feb589c1185/WebMercatorQuad/0/0/0.pbf");
+
+        given().port(PORT).body(existingFeatureCollectionFile).when().put( "5d568f26-ccaf-456d-ba04-7feb589c1185")
+                .then().statusCode(200);
+
+        given().port(PORT).body(existingFeatureCollectionFile).when().put( "5d568f26-ccaf-456d-ba04-7feb589c1185/WebMercatorQuad/0/0/0.pbf")
+                .then().statusCode(200);
+
+        File rasterFile = new File("src/test/resources/processFiles/a7c85951-9c1d-4b45-ad98-a395bef571d0/WebMercatorQuad/0/0/0.png");
+
+        given().port(PORT).body(rasterFile).when().put( "a7c85951-9c1d-4b45-ad98-a395bef571d0")
+                .then().statusCode(200);
+
+        given().port(PORT).body(rasterFile).when().put( "a7c85951-9c1d-4b45-ad98-a395bef571d0/WebMercatorQuad/0/0/0.png")
                 .then().statusCode(200);
 
     }
@@ -55,13 +73,25 @@ public class TilesMetaDataOnboardingProcessIT {
         given().port(PORT).when().delete( "c432b3df-0a22-485d-80a5-ace8195f6074")
                 .then().statusCode(204);
 
+        given().port(PORT).when().delete( "5d568f26-ccaf-456d-ba04-7feb589c1185/WebMercatorQuad/0/0/0.pbf")
+                .then().statusCode(204);
+
+        given().port(PORT).when().delete( "5d568f26-ccaf-456d-ba04-7feb589c1185")
+                .then().statusCode(204);
+
+        given().port(PORT).when().delete( "a7c85951-9c1d-4b45-ad98-a395bef571d0/WebMercatorQuad/0/0/0.png")
+                .then().statusCode(204);
+
+        given().port(PORT).when().delete( "a7c85951-9c1d-4b45-ad98-a395bef571d0")
+                .then().statusCode(204);
+
     }
 
     private JsonObject requestBody() {
         JsonObject requestBody = new JsonObject();
 
         JsonObject inputs = new JsonObject();
-        inputs.put("resourceId", "c432b3df-0a22-485d-80a5-ace8195f6074");
+        inputs.put("resourceId", RESOURCE_ID_FOR_VECTOR_TEST);
         inputs.put("encoding", "MVT");
         inputs.put("tileMatrixSet", "WebMercatorQuad");
         inputs.put("testTileCoordinateIndexes", "0/0/0");
@@ -222,14 +252,14 @@ public class TilesMetaDataOnboardingProcessIT {
 
     @Test
     @Order(10)
-    @Description("Success: Onboarding Tiles Meta Data")
-    public void testExecuteTilesMetaDataOnboardingSuccess() throws InterruptedException {
-        LOGGER.debug("Success: Onboarding Tiles Meta Data");
+    @Description("Success: Onboarding Tiles Meta Data for vector collection")
+    public void testExecuteTilesMetaDataOnboardingSuccessForVectorCollection() throws InterruptedException {
+        LOGGER.debug("Success: Onboarding Tiles Meta Data for vector collection");
 
         String token = getToken();
         JsonObject requestBody = requestBody();
-        requestBody.getJsonObject("inputs").put("title", "Tiles Meta Data Onboarding Process Success")
-                .put("description", "Testing Tiles Meta Data Onboarding Process Success");
+        requestBody.getJsonObject("inputs").put("title", "Vector Tile Meta Data Onboarding Process Success")
+                .put("description", "Testing Vector Tile Meta Data Onboarding Process Success");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
         Thread.sleep(40000);
@@ -238,17 +268,73 @@ public class TilesMetaDataOnboardingProcessIT {
     }
     @Test
     @Order(11)
-    @Description("Failure: Onboarding Tiles Meta Data as collection is already present")
-    public void testExecuteTileCollectionAlreadyPresent() throws InterruptedException {
-        LOGGER.debug("Failure: Onboarding Tiles Meta Data");
+    @Description("Failure: Onboarding Tiles Meta Data as vector collection is already present")
+    public void testExecuteVectorTileCollectionAlreadyPresent() throws InterruptedException {
+        LOGGER.debug("Failure: Onboarding Tiles Meta Data of existing vector collection");
 
         String token = getToken();
         JsonObject requestBody = requestBody();
+        requestBody.getJsonObject("inputs").put("title", "Existing Vector Tile Meta Data Onboarding Process Failure")
+                .put("description", "Testing Existing Vector Tile Meta Data Onboarding Process");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
         Thread.sleep(40000);
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(COLLECTION_EXISTS_MESSAGE));
+    }
+
+    @Test
+    @Order(12)
+    @Description("Success: Onboarding Tiles Meta Data for raster collection")
+    public void testExecuteTilesMetaDataOnboardingSuccessForRasterCollection() throws InterruptedException {
+        LOGGER.debug("Success: Onboarding Tiles Meta Data for raster collection");
+
+        String token = getToken();
+        JsonObject requestBody = requestBody();
+        requestBody.getJsonObject("inputs").put("resourceId", RESOURCE_ID_FOR_RASTER_TEST).put("encoding", "PNG")
+                .put("title", "Raster Tile Meta Data Onboarding Process Success")
+                .put("description", "Testing Raster Tile Meta Data Onboarding Process Success");
+        Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
+        String jobId = sendExecutionRequest.body().path("jobId");
+        Thread.sleep(40000);
+        Response getJobStatus = sendJobStatusRequest(jobId, token);
+        getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
+    }
+
+    @Test
+    @Order(13)
+    @Description("Failure: Onboarding Tiles Meta Data as raster collection is already present")
+    public void testExecuteRasterTileCollectionAlreadyPresent() throws InterruptedException {
+        LOGGER.debug("Failure: Onboarding Tiles Meta Data of existing raster collection");
+
+        String token = getToken();
+        JsonObject requestBody = requestBody();
+        requestBody.getJsonObject("inputs").put("resourceId", RESOURCE_ID_FOR_RASTER_TEST).put("encoding", "PNG")
+                .put("title", "Existing Raster Tile Meta Data Onboarding Process Failure")
+                .put("description", "Testing Existing Raster Tile Meta Data Onboarding Process");
+        Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
+        String jobId = sendExecutionRequest.body().path("jobId");
+        Thread.sleep(40000);
+        Response getJobStatus = sendJobStatusRequest(jobId, token);
+        getJobStatus.then().statusCode(200).body("message", is(COLLECTION_EXISTS_MESSAGE));
+    }
+
+    @Test
+    @Order(14)
+    @Description("Success: Onboarding Tiles Meta Data for existing feature collection")
+    public void testExecuteTilesMetaDataOnboardingSuccessForExistingFeatureCollection() throws InterruptedException {
+        LOGGER.debug("Success: Onboarding Tiles Meta Data for existing feature collection");
+
+        String token = getToken();
+        JsonObject requestBody = requestBody();
+        requestBody.getJsonObject("inputs").put("resourceId", RESOURCE_ID_EXISTING_FEATURE_COLLECTION_TEST)
+                .put("title", "Test Existing Feature Flow for Tiles MetaData Onboarding")
+                .put("description", "Tiles Meta Data Onboarding Existing Feature Flow  Test");
+        Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
+        String jobId = sendExecutionRequest.body().path("jobId");
+        Thread.sleep(40000);
+        Response getJobStatus = sendJobStatusRequest(jobId, token);
+        getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
     }
 
 }
