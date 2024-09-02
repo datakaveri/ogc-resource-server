@@ -8,7 +8,8 @@ CREATE TABLE stac_items_assets (
     href VARCHAR(255) not null,
     type VARCHAR(50) not null,
     size BIGINT not null,
-    role asset_role_enum[] not null
+    role asset_role_enum[] not null,
+    properties jsonb
 );
 
 ALTER TABLE ADD	CONSTRAINT unique_stac_asset UNIQUE (stac_collections_id, title)
