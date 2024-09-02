@@ -12,3 +12,9 @@ DELETE FROM collections_details WHERE id = '5d568f26-ccaf-456d-ba04-7feb589c1185
 DELETE FROM collection_type WHERE collection_id = '5d568f26-ccaf-456d-ba04-7feb589c1185';
 DELETE FROM ri_details WHERE id = '5d568f26-ccaf-456d-ba04-7feb589c1185';
 DELETE FROM tilematrixsets_relation WHERE collection_id = '5d568f26-ccaf-456d-ba04-7feb589c1185';
+
+-- Delete the empty collection for testing existing feature flow for tiles meta data onboarding process.
+DROP TABLE IF EXISTS "5d568f26-ccaf-456d-ba04-7feb589c1185";
+DELETE FROM ri_details WHERE id = '5d568f26-ccaf-456d-ba04-7feb589c1185';
+DELETE FROM stac_collections_assets WHERE stac_collections_id = '5d568f26-ccaf-456d-ba04-7feb589c1185';
+DELETE FROM collections_details WHERE id = '5d568f26-ccaf-456d-ba04-7feb589c1185';
