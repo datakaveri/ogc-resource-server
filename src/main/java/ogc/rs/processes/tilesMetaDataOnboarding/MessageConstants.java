@@ -1,6 +1,6 @@
 package ogc.rs.processes.tilesMetaDataOnboarding;
 
-public class Constants {
+public class MessageConstants {
     public static final String START_TILES_METADATA_ONBOARDING_PROCESS = "Starting Tiles Meta Data Onboarding Process";
     public static final String S3_FILE_EXISTENCE_MESSAGE = "File exists in s3 bucket";
     public static final String S3_FILE_EXISTENCE_FAIL_MESSAGE = "File does not exist in S3";

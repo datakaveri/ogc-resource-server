@@ -19,7 +19,7 @@ import java.util.List;
 
 import ogc.rs.common.DataFromS3;
 import ogc.rs.processes.ProcessService;
-import static ogc.rs.processes.tilesMetaDataOnboarding.Constants.*;
+import static ogc.rs.processes.tilesMetaDataOnboarding.MessageConstants.*;
 import static ogc.rs.processes.tilesMetaDataOnboarding.SqlConstants.*;
 
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;

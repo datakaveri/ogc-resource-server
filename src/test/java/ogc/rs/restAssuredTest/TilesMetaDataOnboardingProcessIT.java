@@ -16,7 +16,7 @@ import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static ogc.rs.common.Constants.*;
-import static ogc.rs.processes.tilesMetaDataOnboarding.Constants.*;
+import static ogc.rs.processes.tilesMetaDataOnboarding.MessageConstants.*;
 import static ogc.rs.processes.collectionOnboarding.Constants.RESOURCE_OWNERSHIP_ERROR;
 import static ogc.rs.restAssuredTest.Constant.*;
 import static org.hamcrest.Matchers.is;
@@ -24,7 +24,7 @@ import static org.hamcrest.Matchers.is;
 @ExtendWith(RestAssuredConfigExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TilesMetaDataOnboardingProcessIT {
-    private static final Logger LOGGER = LogManager.getLogger(CollectionAppendingProcessIT.class);
+    private static final Logger LOGGER = LogManager.getLogger(TilesMetaDataOnboardingProcessIT.class);
     String executionEndpoint = "/processes/{processId}/execution";
     String jobStatusEndpoint = "/jobs/{jobId}";
     String processId = "a512b49a-f8e6-4da1-99b0-13aa758c9104";
