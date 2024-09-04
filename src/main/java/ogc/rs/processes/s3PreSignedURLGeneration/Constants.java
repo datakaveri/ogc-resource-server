@@ -1,4 +1,4 @@
-package ogc.rs.processes.preSignedURLGeneration;
+package ogc.rs.processes.s3PreSignedURLGeneration;
 
 public class Constants {
     public static final String STARTING_PRE_SIGNED_URL_PROCESS_MESSAGE =

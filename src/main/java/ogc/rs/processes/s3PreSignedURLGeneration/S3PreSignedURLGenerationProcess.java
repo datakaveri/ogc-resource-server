@@ -1,4 +1,4 @@
-package ogc.rs.processes.preSignedURLGeneration;
+package ogc.rs.processes.s3PreSignedURLGeneration;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -20,14 +20,14 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 
 import java.time.Duration;
 
-import static ogc.rs.processes.preSignedURLGeneration.Constants.*;
+import static ogc.rs.processes.s3PreSignedURLGeneration.Constants.*;
 
 /**
  * This class handles the process of generating an S3 Pre-Signed URL and updating the status
  * of the process in a Postgresql database.
  */
-public class PreSignedURLGenerationProcess implements ProcessService {
-    private static final Logger LOGGER = LogManager.getLogger(PreSignedURLGenerationProcess.class);
+public class S3PreSignedURLGenerationProcess implements ProcessService {
+    private static final Logger LOGGER = LogManager.getLogger(S3PreSignedURLGenerationProcess.class);
     private final UtilClass utilClass;
     private String accessKey;
     private String secretKey;
@@ -38,7 +38,7 @@ public class PreSignedURLGenerationProcess implements ProcessService {
      * @param pgPool  The Postgresql connection pool.
      * @param config  The configuration containing AWS and database details.
      */
-    public PreSignedURLGenerationProcess(PgPool pgPool, JsonObject config) {
+    public S3PreSignedURLGenerationProcess(PgPool pgPool, JsonObject config) {
         this.utilClass = new UtilClass(pgPool);
         initializeConfig(config);
     }
