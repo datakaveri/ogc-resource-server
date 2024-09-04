@@ -24,7 +24,7 @@ import static ogc.rs.processes.s3PreSignedURLGeneration.Constants.*;
 
 /**
  * This class handles the process of generating an S3 Pre-Signed URL and updating the status
- * of the process in a Postgresql database.
+ * of the process in a PostgreSQL database.
  */
 public class S3PreSignedURLGenerationProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(S3PreSignedURLGenerationProcess.class);
@@ -33,9 +33,9 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
     private String secretKey;
 
     /**
-     * Constructor to initialize the PreSignedURLProcess with Postgresql pool and configuration.
+     * Constructor to initialize the S3PreSignedURLGenerationProcess with PostgreSQL pool and configuration.
      *
-     * @param pgPool  The Postgresql connection pool.
+     * @param pgPool  The PostgreSQL connection pool.
      * @param config  The configuration containing AWS and database details.
      */
     public S3PreSignedURLGenerationProcess(PgPool pgPool, JsonObject config) {
