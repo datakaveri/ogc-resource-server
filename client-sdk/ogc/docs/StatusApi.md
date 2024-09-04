@@ -8,7 +8,7 @@ Method | HTTP request | Description
 
 
 # **get_status**
-> StatusInfo get_status(token, job_id)
+> StatusInfo get_status(job_id)
 
 retrieve the status of a job
 
@@ -16,6 +16,7 @@ Shows the status of a job.
 
 ### Example
 
+* Bearer (JWT) Authentication (DX-AAA-Token):
 
 ```python
 import openapi_client
@@ -29,17 +30,25 @@ configuration = openapi_client.Configuration(
     host = "https://geoserver.dx.ugix.org.in"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): DX-AAA-Token
+configuration = openapi_client.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with openapi_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = openapi_client.StatusApi(api_client)
-    token = 'token_example' # str | A <b> valid Auth token </b> to process the request.
     job_id = 'job_id_example' # str | local identifier of a job
 
     try:
         # retrieve the status of a job
-        api_response = api_instance.get_status(token, job_id)
+        api_response = api_instance.get_status(job_id)
         print("The response of StatusApi->get_status:\n")
         pprint(api_response)
     except Exception as e:
@@ -53,7 +62,6 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **token** | **str**| A &lt;b&gt; valid Auth token &lt;/b&gt; to process the request. | 
  **job_id** | **str**| local identifier of a job | 
 
 ### Return type
@@ -62,7 +70,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[DX-AAA-Token](../README.md#DX-AAA-Token)
 
 ### HTTP request headers
 

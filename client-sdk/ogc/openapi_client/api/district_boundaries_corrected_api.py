@@ -45,7 +45,6 @@ class DistrictBoundariesCorrectedApi:
     @validate_call
     def get_features(
         self,
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         bbox_crs: Optional[StrictStr] = None,
         crs: Optional[StrictStr] = None,
         bbox: Annotated[Optional[Annotated[List[Union[StrictFloat, StrictInt]], Field(min_length=4, max_length=6)]], Field(description="Only features that have a geometry that intersects the bounding box are selected. The bounding box is provided as four or six numbers, depending on whether the coordinate reference system includes a vertical axis (height or depth):  * Lower left corner, coordinate axis 1 * Lower left corner, coordinate axis 2 * Minimum value, coordinate axis 3 (optional) * Upper right corner, coordinate axis 1 * Upper right corner, coordinate axis 2 * Maximum value, coordinate axis 3 (optional)  If the value consists of four numbers, the coordinate reference system is WGS 84 longitude/latitude (http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a different coordinate reference system is specified in the parameter `bbox-crs`.  If the value consists of six numbers, the coordinate reference system is WGS 84 longitude/latitude/ellipsoidal height (http://www.opengis.net/def/crs/OGC/0/CRS84h) unless a different coordinate reference system is specified in the parameter `bbox-crs`.  The query parameter `bbox-crs` is specified in OGC API - Features - Part 2: Coordinate Reference Systems by Reference.  For WGS 84 longitude/latitude the values are in most cases the sequence of minimum longitude, minimum latitude, maximum longitude and maximum latitude. However, in cases where the box spans the antimeridian the first value (west-most box edge) is larger than the third value (east-most box edge).  If the vertical axis is included, the third and the sixth number are the bottom and the top of the 3-dimensional bounding box.  If a feature has multiple spatial geometry properties, it is the decision of the server whether only a single spatial geometry property is used to determine the extent or all relevant geometries.")] = None,
@@ -54,8 +53,8 @@ class DistrictBoundariesCorrectedApi:
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         shape_leng: Optional[Union[StrictFloat, StrictInt]] = None,
         shape_area: Optional[Union[StrictFloat, StrictInt]] = None,
-        state: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
+        state: Optional[StrictStr] = None,
         remarks: Optional[StrictStr] = None,
         district: Optional[StrictStr] = None,
         district_l: Optional[StrictStr] = None,
@@ -75,8 +74,6 @@ class DistrictBoundariesCorrectedApi:
         """Get features from Fetched from Administrative_Boundary_Database_For_Entire_Country_Upto_Taluk_level_with_HQ
 
 
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param bbox_crs:
         :type bbox_crs: str
         :param crs:
@@ -93,10 +90,10 @@ class DistrictBoundariesCorrectedApi:
         :type shape_leng: float
         :param shape_area:
         :type shape_area: float
-        :param state:
-        :type state: str
         :param state_lgd:
         :type state_lgd: int
+        :param state:
+        :type state: str
         :param remarks:
         :type remarks: str
         :param district:
@@ -126,7 +123,6 @@ class DistrictBoundariesCorrectedApi:
         """ # noqa: E501
 
         _param = self._get_features_serialize(
-            token=token,
             bbox_crs=bbox_crs,
             crs=crs,
             bbox=bbox,
@@ -135,8 +131,8 @@ class DistrictBoundariesCorrectedApi:
             offset=offset,
             shape_leng=shape_leng,
             shape_area=shape_area,
-            state=state,
             state_lgd=state_lgd,
+            state=state,
             remarks=remarks,
             district=district,
             district_l=district_l,
@@ -165,7 +161,6 @@ class DistrictBoundariesCorrectedApi:
     @validate_call
     def get_features_with_http_info(
         self,
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         bbox_crs: Optional[StrictStr] = None,
         crs: Optional[StrictStr] = None,
         bbox: Annotated[Optional[Annotated[List[Union[StrictFloat, StrictInt]], Field(min_length=4, max_length=6)]], Field(description="Only features that have a geometry that intersects the bounding box are selected. The bounding box is provided as four or six numbers, depending on whether the coordinate reference system includes a vertical axis (height or depth):  * Lower left corner, coordinate axis 1 * Lower left corner, coordinate axis 2 * Minimum value, coordinate axis 3 (optional) * Upper right corner, coordinate axis 1 * Upper right corner, coordinate axis 2 * Maximum value, coordinate axis 3 (optional)  If the value consists of four numbers, the coordinate reference system is WGS 84 longitude/latitude (http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a different coordinate reference system is specified in the parameter `bbox-crs`.  If the value consists of six numbers, the coordinate reference system is WGS 84 longitude/latitude/ellipsoidal height (http://www.opengis.net/def/crs/OGC/0/CRS84h) unless a different coordinate reference system is specified in the parameter `bbox-crs`.  The query parameter `bbox-crs` is specified in OGC API - Features - Part 2: Coordinate Reference Systems by Reference.  For WGS 84 longitude/latitude the values are in most cases the sequence of minimum longitude, minimum latitude, maximum longitude and maximum latitude. However, in cases where the box spans the antimeridian the first value (west-most box edge) is larger than the third value (east-most box edge).  If the vertical axis is included, the third and the sixth number are the bottom and the top of the 3-dimensional bounding box.  If a feature has multiple spatial geometry properties, it is the decision of the server whether only a single spatial geometry property is used to determine the extent or all relevant geometries.")] = None,
@@ -174,8 +169,8 @@ class DistrictBoundariesCorrectedApi:
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         shape_leng: Optional[Union[StrictFloat, StrictInt]] = None,
         shape_area: Optional[Union[StrictFloat, StrictInt]] = None,
-        state: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
+        state: Optional[StrictStr] = None,
         remarks: Optional[StrictStr] = None,
         district: Optional[StrictStr] = None,
         district_l: Optional[StrictStr] = None,
@@ -195,8 +190,6 @@ class DistrictBoundariesCorrectedApi:
         """Get features from Fetched from Administrative_Boundary_Database_For_Entire_Country_Upto_Taluk_level_with_HQ
 
 
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param bbox_crs:
         :type bbox_crs: str
         :param crs:
@@ -213,10 +206,10 @@ class DistrictBoundariesCorrectedApi:
         :type shape_leng: float
         :param shape_area:
         :type shape_area: float
-        :param state:
-        :type state: str
         :param state_lgd:
         :type state_lgd: int
+        :param state:
+        :type state: str
         :param remarks:
         :type remarks: str
         :param district:
@@ -246,7 +239,6 @@ class DistrictBoundariesCorrectedApi:
         """ # noqa: E501
 
         _param = self._get_features_serialize(
-            token=token,
             bbox_crs=bbox_crs,
             crs=crs,
             bbox=bbox,
@@ -255,8 +247,8 @@ class DistrictBoundariesCorrectedApi:
             offset=offset,
             shape_leng=shape_leng,
             shape_area=shape_area,
-            state=state,
             state_lgd=state_lgd,
+            state=state,
             remarks=remarks,
             district=district,
             district_l=district_l,
@@ -285,7 +277,6 @@ class DistrictBoundariesCorrectedApi:
     @validate_call
     def get_features_without_preload_content(
         self,
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         bbox_crs: Optional[StrictStr] = None,
         crs: Optional[StrictStr] = None,
         bbox: Annotated[Optional[Annotated[List[Union[StrictFloat, StrictInt]], Field(min_length=4, max_length=6)]], Field(description="Only features that have a geometry that intersects the bounding box are selected. The bounding box is provided as four or six numbers, depending on whether the coordinate reference system includes a vertical axis (height or depth):  * Lower left corner, coordinate axis 1 * Lower left corner, coordinate axis 2 * Minimum value, coordinate axis 3 (optional) * Upper right corner, coordinate axis 1 * Upper right corner, coordinate axis 2 * Maximum value, coordinate axis 3 (optional)  If the value consists of four numbers, the coordinate reference system is WGS 84 longitude/latitude (http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a different coordinate reference system is specified in the parameter `bbox-crs`.  If the value consists of six numbers, the coordinate reference system is WGS 84 longitude/latitude/ellipsoidal height (http://www.opengis.net/def/crs/OGC/0/CRS84h) unless a different coordinate reference system is specified in the parameter `bbox-crs`.  The query parameter `bbox-crs` is specified in OGC API - Features - Part 2: Coordinate Reference Systems by Reference.  For WGS 84 longitude/latitude the values are in most cases the sequence of minimum longitude, minimum latitude, maximum longitude and maximum latitude. However, in cases where the box spans the antimeridian the first value (west-most box edge) is larger than the third value (east-most box edge).  If the vertical axis is included, the third and the sixth number are the bottom and the top of the 3-dimensional bounding box.  If a feature has multiple spatial geometry properties, it is the decision of the server whether only a single spatial geometry property is used to determine the extent or all relevant geometries.")] = None,
@@ -294,8 +285,8 @@ class DistrictBoundariesCorrectedApi:
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         shape_leng: Optional[Union[StrictFloat, StrictInt]] = None,
         shape_area: Optional[Union[StrictFloat, StrictInt]] = None,
-        state: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
+        state: Optional[StrictStr] = None,
         remarks: Optional[StrictStr] = None,
         district: Optional[StrictStr] = None,
         district_l: Optional[StrictStr] = None,
@@ -315,8 +306,6 @@ class DistrictBoundariesCorrectedApi:
         """Get features from Fetched from Administrative_Boundary_Database_For_Entire_Country_Upto_Taluk_level_with_HQ
 
 
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param bbox_crs:
         :type bbox_crs: str
         :param crs:
@@ -333,10 +322,10 @@ class DistrictBoundariesCorrectedApi:
         :type shape_leng: float
         :param shape_area:
         :type shape_area: float
-        :param state:
-        :type state: str
         :param state_lgd:
         :type state_lgd: int
+        :param state:
+        :type state: str
         :param remarks:
         :type remarks: str
         :param district:
@@ -366,7 +355,6 @@ class DistrictBoundariesCorrectedApi:
         """ # noqa: E501
 
         _param = self._get_features_serialize(
-            token=token,
             bbox_crs=bbox_crs,
             crs=crs,
             bbox=bbox,
@@ -375,8 +363,8 @@ class DistrictBoundariesCorrectedApi:
             offset=offset,
             shape_leng=shape_leng,
             shape_area=shape_area,
-            state=state,
             state_lgd=state_lgd,
+            state=state,
             remarks=remarks,
             district=district,
             district_l=district_l,
@@ -400,7 +388,6 @@ class DistrictBoundariesCorrectedApi:
 
     def _get_features_serialize(
         self,
-        token,
         bbox_crs,
         crs,
         bbox,
@@ -409,8 +396,8 @@ class DistrictBoundariesCorrectedApi:
         offset,
         shape_leng,
         shape_area,
-        state,
         state_lgd,
+        state,
         remarks,
         district,
         district_l,
@@ -467,13 +454,13 @@ class DistrictBoundariesCorrectedApi:
             
             _query_params.append(('Shape_Area', shape_area))
             
-        if state is not None:
-            
-            _query_params.append(('STATE', state))
-            
         if state_lgd is not None:
             
             _query_params.append(('State_LGD', state_lgd))
+            
+        if state is not None:
+            
+            _query_params.append(('STATE', state))
             
         if remarks is not None:
             
@@ -488,8 +475,6 @@ class DistrictBoundariesCorrectedApi:
             _query_params.append(('DISTRICT_L', district_l))
             
         # process the header parameters
-        if token is not None:
-            _header_params['token'] = token
         # process the form parameters
         # process the body parameter
 
@@ -505,6 +490,7 @@ class DistrictBoundariesCorrectedApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'DX-AAA-Token'
         ]
 
         return self.api_client.param_serialize(
@@ -771,7 +757,6 @@ class DistrictBoundariesCorrectedApi:
     def get_specific_feature(
         self,
         feature_id: StrictInt,
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         crs: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -791,8 +776,6 @@ class DistrictBoundariesCorrectedApi:
 
         :param feature_id: (required)
         :type feature_id: int
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param crs:
         :type crs: str
         :param _request_timeout: timeout setting for this request. If one
@@ -819,7 +802,6 @@ class DistrictBoundariesCorrectedApi:
 
         _param = self._get_specific_feature_serialize(
             feature_id=feature_id,
-            token=token,
             crs=crs,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -847,7 +829,6 @@ class DistrictBoundariesCorrectedApi:
     def get_specific_feature_with_http_info(
         self,
         feature_id: StrictInt,
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         crs: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -867,8 +848,6 @@ class DistrictBoundariesCorrectedApi:
 
         :param feature_id: (required)
         :type feature_id: int
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param crs:
         :type crs: str
         :param _request_timeout: timeout setting for this request. If one
@@ -895,7 +874,6 @@ class DistrictBoundariesCorrectedApi:
 
         _param = self._get_specific_feature_serialize(
             feature_id=feature_id,
-            token=token,
             crs=crs,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -923,7 +901,6 @@ class DistrictBoundariesCorrectedApi:
     def get_specific_feature_without_preload_content(
         self,
         feature_id: StrictInt,
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         crs: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -943,8 +920,6 @@ class DistrictBoundariesCorrectedApi:
 
         :param feature_id: (required)
         :type feature_id: int
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param crs:
         :type crs: str
         :param _request_timeout: timeout setting for this request. If one
@@ -971,7 +946,6 @@ class DistrictBoundariesCorrectedApi:
 
         _param = self._get_specific_feature_serialize(
             feature_id=feature_id,
-            token=token,
             crs=crs,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -994,7 +968,6 @@ class DistrictBoundariesCorrectedApi:
     def _get_specific_feature_serialize(
         self,
         feature_id,
-        token,
         crs,
         _request_auth,
         _content_type,
@@ -1023,8 +996,6 @@ class DistrictBoundariesCorrectedApi:
             _query_params.append(('crs', crs))
             
         # process the header parameters
-        if token is not None:
-            _header_params['token'] = token
         # process the form parameters
         # process the body parameter
 
@@ -1040,6 +1011,7 @@ class DistrictBoundariesCorrectedApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'DX-AAA-Token'
         ]
 
         return self.api_client.param_serialize(

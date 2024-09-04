@@ -45,7 +45,6 @@ class FeaturesApi:
     def get_asset(
         self,
         asset_id: Annotated[StrictStr, Field(description="local identifier of an asset")],
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -65,8 +64,6 @@ class FeaturesApi:
 
         :param asset_id: local identifier of an asset (required)
         :type asset_id: str
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -91,7 +88,6 @@ class FeaturesApi:
 
         _param = self._get_asset_serialize(
             asset_id=asset_id,
-            token=token,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -118,7 +114,6 @@ class FeaturesApi:
     def get_asset_with_http_info(
         self,
         asset_id: Annotated[StrictStr, Field(description="local identifier of an asset")],
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -138,8 +133,6 @@ class FeaturesApi:
 
         :param asset_id: local identifier of an asset (required)
         :type asset_id: str
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -164,7 +157,6 @@ class FeaturesApi:
 
         _param = self._get_asset_serialize(
             asset_id=asset_id,
-            token=token,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -191,7 +183,6 @@ class FeaturesApi:
     def get_asset_without_preload_content(
         self,
         asset_id: Annotated[StrictStr, Field(description="local identifier of an asset")],
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -211,8 +202,6 @@ class FeaturesApi:
 
         :param asset_id: local identifier of an asset (required)
         :type asset_id: str
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -237,7 +226,6 @@ class FeaturesApi:
 
         _param = self._get_asset_serialize(
             asset_id=asset_id,
-            token=token,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -259,7 +247,6 @@ class FeaturesApi:
     def _get_asset_serialize(
         self,
         asset_id,
-        token,
         _request_auth,
         _content_type,
         _headers,
@@ -283,8 +270,6 @@ class FeaturesApi:
             _path_params['assetId'] = asset_id
         # process the query parameters
         # process the header parameters
-        if token is not None:
-            _header_params['token'] = token
         # process the form parameters
         # process the body parameter
 
@@ -299,6 +284,7 @@ class FeaturesApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'DX-AAA-Token'
         ]
 
         return self.api_client.param_serialize(

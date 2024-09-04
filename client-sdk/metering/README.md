@@ -63,6 +63,15 @@ configuration = openapi_client.Configuration(
     host = "https://ogc.iudx.io"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): DX-AAA-Token
+configuration = openapi_client.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 
 # Enter a context with an instance of the API client
@@ -113,7 +122,12 @@ Class | Method | HTTP request | Description
 <a id="documentation-for-authorization"></a>
 ## Documentation For Authorization
 
-Endpoints do not require authorization.
+
+Authentication schemes defined for the API:
+<a id="DX-AAA-Token"></a>
+### DX-AAA-Token
+
+- **Type**: Bearer authentication (JWT)
 
 
 ## Author

@@ -42,7 +42,6 @@ class StatusApi:
     @validate_call
     def get_status(
         self,
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         job_id: Annotated[StrictStr, Field(description="local identifier of a job")],
         _request_timeout: Union[
             None,
@@ -61,8 +60,6 @@ class StatusApi:
 
         Shows the status of a job.
 
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param job_id: local identifier of a job (required)
         :type job_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -88,7 +85,6 @@ class StatusApi:
         """ # noqa: E501
 
         _param = self._get_status_serialize(
-            token=token,
             job_id=job_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -115,7 +111,6 @@ class StatusApi:
     @validate_call
     def get_status_with_http_info(
         self,
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         job_id: Annotated[StrictStr, Field(description="local identifier of a job")],
         _request_timeout: Union[
             None,
@@ -134,8 +129,6 @@ class StatusApi:
 
         Shows the status of a job.
 
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param job_id: local identifier of a job (required)
         :type job_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -161,7 +154,6 @@ class StatusApi:
         """ # noqa: E501
 
         _param = self._get_status_serialize(
-            token=token,
             job_id=job_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -188,7 +180,6 @@ class StatusApi:
     @validate_call
     def get_status_without_preload_content(
         self,
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         job_id: Annotated[StrictStr, Field(description="local identifier of a job")],
         _request_timeout: Union[
             None,
@@ -207,8 +198,6 @@ class StatusApi:
 
         Shows the status of a job.
 
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param job_id: local identifier of a job (required)
         :type job_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -234,7 +223,6 @@ class StatusApi:
         """ # noqa: E501
 
         _param = self._get_status_serialize(
-            token=token,
             job_id=job_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -256,7 +244,6 @@ class StatusApi:
 
     def _get_status_serialize(
         self,
-        token,
         job_id,
         _request_auth,
         _content_type,
@@ -281,8 +268,6 @@ class StatusApi:
             _path_params['jobId'] = job_id
         # process the query parameters
         # process the header parameters
-        if token is not None:
-            _header_params['token'] = token
         # process the form parameters
         # process the body parameter
 
@@ -297,6 +282,7 @@ class StatusApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'DX-AAA-Token'
         ]
 
         return self.api_client.param_serialize(

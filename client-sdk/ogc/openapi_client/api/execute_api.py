@@ -43,7 +43,6 @@ class ExecuteApi:
     @validate_call
     def execute(
         self,
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         process_id: StrictStr,
         execute: Annotated[Execute, Field(description="Mandatory JSON payload for the execute request.")],
         _request_timeout: Union[
@@ -63,8 +62,6 @@ class ExecuteApi:
 
         Create a new job by initiating the execution of a specified process identified by the 'processId'.
 
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param process_id: (required)
         :type process_id: str
         :param execute: Mandatory JSON payload for the execute request. (required)
@@ -92,7 +89,6 @@ class ExecuteApi:
         """ # noqa: E501
 
         _param = self._execute_serialize(
-            token=token,
             process_id=process_id,
             execute=execute,
             _request_auth=_request_auth,
@@ -120,7 +116,6 @@ class ExecuteApi:
     @validate_call
     def execute_with_http_info(
         self,
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         process_id: StrictStr,
         execute: Annotated[Execute, Field(description="Mandatory JSON payload for the execute request.")],
         _request_timeout: Union[
@@ -140,8 +135,6 @@ class ExecuteApi:
 
         Create a new job by initiating the execution of a specified process identified by the 'processId'.
 
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param process_id: (required)
         :type process_id: str
         :param execute: Mandatory JSON payload for the execute request. (required)
@@ -169,7 +162,6 @@ class ExecuteApi:
         """ # noqa: E501
 
         _param = self._execute_serialize(
-            token=token,
             process_id=process_id,
             execute=execute,
             _request_auth=_request_auth,
@@ -197,7 +189,6 @@ class ExecuteApi:
     @validate_call
     def execute_without_preload_content(
         self,
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         process_id: StrictStr,
         execute: Annotated[Execute, Field(description="Mandatory JSON payload for the execute request.")],
         _request_timeout: Union[
@@ -217,8 +208,6 @@ class ExecuteApi:
 
         Create a new job by initiating the execution of a specified process identified by the 'processId'.
 
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param process_id: (required)
         :type process_id: str
         :param execute: Mandatory JSON payload for the execute request. (required)
@@ -246,7 +235,6 @@ class ExecuteApi:
         """ # noqa: E501
 
         _param = self._execute_serialize(
-            token=token,
             process_id=process_id,
             execute=execute,
             _request_auth=_request_auth,
@@ -269,7 +257,6 @@ class ExecuteApi:
 
     def _execute_serialize(
         self,
-        token,
         process_id,
         execute,
         _request_auth,
@@ -295,8 +282,6 @@ class ExecuteApi:
             _path_params['processId'] = process_id
         # process the query parameters
         # process the header parameters
-        if token is not None:
-            _header_params['token'] = token
         # process the form parameters
         # process the body parameter
         if execute is not None:
@@ -326,6 +311,7 @@ class ExecuteApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'DX-AAA-Token'
         ]
 
         return self.api_client.param_serialize(
