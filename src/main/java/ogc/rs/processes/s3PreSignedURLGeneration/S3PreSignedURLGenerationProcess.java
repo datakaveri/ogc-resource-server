@@ -66,8 +66,6 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
 
         // Update initial progress
         requestInput.put("progress", calculateProgress(1));
-        requestInput.put("awsAccessKey", accessKey);
-        requestInput.put("awsSecretKey", secretKey);
 
         // Chain the process steps and handle success or failure
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, STARTING_PRE_SIGNED_URL_PROCESS_MESSAGE)
