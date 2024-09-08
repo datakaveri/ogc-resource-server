@@ -2,10 +2,12 @@ package ogc.rs.processes.s3PreSignedURLGeneration;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 
+import ogc.rs.common.DataFromS3;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
@@ -31,6 +33,7 @@ import static ogc.rs.processes.s3PreSignedURLGeneration.Constants.*;
 public class S3PreSignedURLGenerationProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(S3PreSignedURLGenerationProcess.class);
     private final UtilClass utilClass;
+    private final DataFromS3 dataFromS3;
     private final WebClient webClient;
     private String accessKey;
     private String secretKey;
@@ -45,10 +48,11 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
      * @param webClient  The WebClient instance for making HTTP requests.
      * @param config  The configuration containing AWS and database details.
      */
-    public S3PreSignedURLGenerationProcess(PgPool pgPool, WebClient webClient, JsonObject config) {
+    public S3PreSignedURLGenerationProcess(PgPool pgPool, WebClient webClient, DataFromS3 dataFromS3, JsonObject config) {
         this.utilClass = new UtilClass(pgPool);
         this.webClient = webClient;
         initializeConfig(config);
+        this.dataFromS3 = dataFromS3;
     }
 
     /**
@@ -88,7 +92,14 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                 .compose(progressUpdateHandler -> makeCatApiRequest(requestInput))
                 .compose(catResponseHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2)).put(MESSAGE, CAT_REQUEST_RESPONSE)))
-                .compose(progressUpdateHandler -> generatePreSignedUrl(requestInput))
+                .compose(progressUpdateHandler -> checkIfObjectExistsInS3(requestInput.getString("objectKeyName")))
+                .compose(checkResult -> {
+                    if (checkResult) {
+                        return generatePreSignedUrl(requestInput);
+                    } else {
+                        return Future.failedFuture("Object already exists in S3.");
+                    }
+                })
                 .compose(preSignedURLHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(3))
                                 .put(MESSAGE, S3_PRE_SIGNED_URL_GENERATOR_MESSAGE)
@@ -178,6 +189,40 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
     }
 
     /**
+     * Checks if the object already exists in S3 using a HEAD request.
+     * If the object exists, fail the process. If not, proceed with URL generation.
+     *
+     * @param objectKeyName The key of the object in S3.
+     * @return A {@link Future<Boolean>} that completes with {@code true} if the object does not exist,
+     *         or fails with an appropriate error message if the object exists.
+     */
+    private Future<Boolean> checkIfObjectExistsInS3(String objectKeyName) {
+        Promise<Boolean> promise = Promise.promise();
+        LOGGER.debug("Checking existence of object: {}", objectKeyName);
+
+        // Construct the URL for the object
+        String urlString = dataFromS3.getFullyQualifiedUrlString(objectKeyName);
+        LOGGER.debug("Constructed URL: {}", urlString);
+        dataFromS3.setUrlFromString(urlString);
+        dataFromS3.setSignatureHeader(HttpMethod.HEAD);
+
+        // Send the HEAD request to check if the object exists
+        dataFromS3.getDataFromS3(HttpMethod.HEAD)
+                .onSuccess(responseFromS3 -> {
+                    if (responseFromS3.statusCode() == 200) {
+                        LOGGER.error("Object already exists in S3: {}", objectKeyName);
+                        promise.fail(OBJECT_ALREADY_EXISTS_MESSAGE);
+                    }
+                })
+                .onFailure(failure -> {
+                    LOGGER.debug("Object does not exist in S3: {}", objectKeyName);
+                    promise.complete(true);
+                });
+
+        return promise.future();
+    }
+
+    /**
      * Generates a Pre-Signed URL for the given S3 object using the AWS SDK.
      *
      * @param requestInput The input JSON object containing AWS details such as bucket name, region, and object key.
@@ -241,7 +286,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                     promise.fail(HANDLE_FAILURE_MESSAGE);
                 });
     }
-
+    
     /**
      * Calculates the progress percentage of the process based on the current step.
      *
@@ -249,6 +294,6 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
      * @return The progress percentage.
      */
     private float calculateProgress(int currentStep) {
-        return (float) (currentStep * 100) / 4;
+        return (float) (currentStep * 100) / 5;
     }
 }

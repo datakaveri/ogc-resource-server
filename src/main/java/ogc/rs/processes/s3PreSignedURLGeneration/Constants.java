@@ -7,6 +7,8 @@ public class Constants {
     public static final String RESOURCE_OWNERSHIP_ERROR = "Resource does not belong to the user.";
     public static final String CAT_REQUEST_RESPONSE =
             "CAT API response received successfully. Resource ownership validated, and object key generated.";
+    public static final String OBJECT_ALREADY_EXISTS_MESSAGE =
+            "Object already exists in S3, no need to generate pre-signed URL.";
     public static final String S3_PRE_SIGNED_URL_GENERATOR_MESSAGE =
             "Generating the S3 Pre-Signed URL.";
     public static final String S3_PRE_SIGNED_URL_GENERATOR_FAILURE_MESSAGE =
