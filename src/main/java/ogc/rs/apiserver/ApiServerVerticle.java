@@ -196,30 +196,47 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   public void executeJob(RoutingContext routingContext) {
-
-    RequestParameters paramsFromOasValidation =
-      routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+    RequestParameters paramsFromOasValidation = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
     JsonObject requestBody = paramsFromOasValidation.body().getJsonObject().getJsonObject("inputs");
     JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
     requestBody.put("processId", paramsFromOasValidation.pathParameter("processId").getString())
-      .put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
+            .put("userId", authInfo.getString("userId"))
+            .put("role", authInfo.getString("role"));
 
     processService.run(requestBody, handler -> {
-
       if (handler.succeeded()) {
-        LOGGER.debug("Process started successfully.");
-        routingContext.response().headers().add("Location", handler.result().getString("location"));
-        handler.result().remove("location");
-        routingContext.put("response", handler.result().toString());
-        routingContext.put("statusCode", 201);
-        routingContext.next();
-      }
-      else{
+        JsonObject result = handler.result();
+
+        String statusLogMessage = "Process started successfully.";
+        int statusCode = 201; // Default to async status code
+
+        // Check if it's a sync process
+        if (result.containsKey("sync") && result.getString("sync").equals("true")) {
+          statusLogMessage = "Process completed successfully.";
+          statusCode = 200; // Sync process status code
+          result.remove("sync");
+        }
+
+        LOGGER.debug(statusLogMessage);
+        String location = result.getString("location");
+        if (location != null) {
+          routingContext.response().headers().add("Location", location);
+        } else {
+          LOGGER.error("Location not found in handler result");
+        }
+        result.remove("location");
+        //routingContext.response().putHeader("Content-Type", "application/json");
+        routingContext.put("response", result.toString());
+        routingContext.response().setStatusCode(statusCode).end(result.toString());
+      } else {
         LOGGER.error("Process failed {}", handler.cause().getMessage());
         routingContext.fail(handler.cause());
       }
     });
   }
+
+
+
 
   public void getStatus(RoutingContext routingContext) {
 

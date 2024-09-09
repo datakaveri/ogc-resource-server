@@ -72,42 +72,66 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
     Future<JsonObject> checkForProcess = processExistCheck(input);
 
     checkForProcess.onSuccess(processExist -> {
-
       String processName = processExist.getString("title");
+      boolean isAsync = processExist.getJsonArray("response").contains("async"); // Check for async
+
       boolean validateInput = validateInput(input, processExist);
       if (validateInput) {
         ProcessService processService = null;
 
         switch (processName) {
           case "CollectionOnboarding":
-            processService = new CollectionOnboardingProcess(pgPool, webClient, config,getS3Object(config),vertx);
+            processService = new CollectionOnboardingProcess(pgPool, webClient, config, getS3Object(config), vertx);
             break;
           case "CollectionAppending":
-            processService = new CollectionAppendingProcess(pgPool, webClient, config,getS3Object(config),vertx);
+            processService = new CollectionAppendingProcess(pgPool, webClient, config, getS3Object(config), vertx);
             break;
           case "S3PreSignedURLGeneration":
-            processService = new S3PreSignedURLGenerationProcess(pgPool,webClient, getS3Object(config), config);
+            processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, getS3Object(config), config);
+            break;
         }
 
         ProcessService finalProcessService = processService;
         Future<JsonObject> startAJobInDB = utilClass.startAJobInDB(input);
 
         startAJobInDB.onSuccess(jobStarted -> {
-          LOGGER.info("Job started in DB with jobId {} ", jobStarted.getValue("jobId"),
-            " for process with processId {}", input.getString("processId"));
-          handler.handle(Future.succeededFuture(
-            new JsonObject().put("jobId", jobStarted.getValue("jobId"))
-              .put("processId", input.getString("processId")).put("type", "PROCESS")
-              .put("status", Status.ACCEPTED).put("location",
-                config.getString("hostName").concat("/jobs/")
-                  .concat(jobStarted.getString("jobId")))));
-        }).onFailure(jobFailed -> handler.handle(Future.failedFuture(jobFailed.getMessage())));
-
-        startAJobInDB.compose(updatedInputJson -> finalProcessService.execute(updatedInputJson))
-          .onSuccess(executeMethodPromise::complete)
-          .onFailure(failureHandler -> {
-            executeMethodPromise.fail(failureHandler.getMessage());;
+          if (isAsync) {
+            // Handle async process
+            LOGGER.info("Job started in DB with jobId {} for process with processId {}",
+                    jobStarted.getValue("jobId"), input.getString("processId"));
+            handler.handle(Future.succeededFuture(
+                    new JsonObject()
+                            .put("jobId", jobStarted.getValue("jobId"))
+                            .put("processId", input.getString("processId"))
+                            .put("type", "PROCESS")
+                            .put("status", Status.ACCEPTED)
+                            .put("location",
+                                    config.getString("hostName")
+                                            .concat("/jobs/")
+                                            .concat(jobStarted.getString("jobId")))
+            ));
+            finalProcessService.execute(input); // Start async process
+          } else {
+            // Handle sync process
+            LOGGER.info("Job started in DB with jobId {} for process with processId {}",
+                    jobStarted.getValue("jobId"), input.getString("processId"));
+            finalProcessService.execute(input).onSuccess(result -> {
+              JsonObject response = result.copy(); // Contains "preSignedUrl"
+              response.put("sync", "true");
+              response.put("status", Status.SUCCESSFUL);
+              response.put("location",
+                      config.getString("hostName")
+                              .concat("/jobs/")
+                              .concat(jobStarted.getString("jobId")));
+              handler.handle(Future.succeededFuture(response));
+            }).onFailure(failureHandler -> {
+              executeMethodPromise.fail(failureHandler.getMessage());
+            });
+          }
+        }).onFailure(jobFailed -> {
+          handler.handle(Future.failedFuture(jobFailed.getMessage()));
         });
+
       } else {
         LOGGER.error("Failed to validate the input");
         handler.handle(Future.failedFuture(processException500));
@@ -117,6 +141,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
     });
     return this;
   }
+
 
   /**
    * This method is used to check if the process exists or not.

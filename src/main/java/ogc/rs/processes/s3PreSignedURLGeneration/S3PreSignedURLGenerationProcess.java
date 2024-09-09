@@ -104,10 +104,15 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                         requestInput.put("progress", calculateProgress(3))
                                 .put(MESSAGE, S3_PRE_SIGNED_URL_GENERATOR_MESSAGE)
                                 .put("preSignedUrl", preSignedURLHandler.getString("preSignedUrl"))))
-                .compose(progressUpdateHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL, requestInput.getString("preSignedUrl")))
+                .compose(progressUpdateHandler -> utilClass.updateJobTableStatus(
+                        requestInput, Status.SUCCESSFUL, S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE))
                 .onSuccess(successHandler -> {
+                    // Pass the preSignedUrl as the output of the process
+                    JsonObject result = new JsonObject()
+                            .put("S3PreSignedUrl", requestInput.getString("preSignedUrl"));
+
                     LOGGER.debug(S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE);
-                    objectPromise.complete();
+                    objectPromise.complete(result);  // Complete with result including preSignedUrl
                 })
                 .onFailure(failureHandler -> {
                     LOGGER.error(S3_PRE_SIGNED_URL_PROCESS_FAILURE_MESSAGE);
