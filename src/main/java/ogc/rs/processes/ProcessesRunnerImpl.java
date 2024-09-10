@@ -67,7 +67,6 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
   }
   @Override
   public ProcessesRunnerService run(JsonObject input, Handler<AsyncResult<JsonObject>> handler) {
-    Promise<JsonObject> executeMethodPromise = Promise.promise();
 
     Future<JsonObject> checkForProcess = processExistCheck(input);
 
@@ -125,7 +124,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
                               .concat(jobStarted.getString("jobId")));
               handler.handle(Future.succeededFuture(response));
             }).onFailure(failureHandler -> {
-              executeMethodPromise.fail(failureHandler.getMessage());
+              handler.handle(Future.failedFuture(failureHandler.getMessage()));
             });
           }
         }).onFailure(jobFailed -> {
