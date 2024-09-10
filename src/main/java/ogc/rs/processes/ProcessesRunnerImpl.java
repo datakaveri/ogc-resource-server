@@ -116,7 +116,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
             LOGGER.info("Job started in DB with jobId {} for process with processId {}",
                     jobStarted.getValue("jobId"), input.getString("processId"));
             finalProcessService.execute(input).onSuccess(result -> {
-              JsonObject response = result.copy(); // Contains "preSignedUrl"
+              JsonObject response = result.copy();
               response.put("sync", "true");
               response.put("status", Status.SUCCESSFUL);
               response.put("location",
@@ -141,7 +141,6 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
     });
     return this;
   }
-
 
   /**
    * This method is used to check if the process exists or not.

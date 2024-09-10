@@ -24,7 +24,6 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 import java.time.Duration;
 import java.util.Map;
 
-import static ogc.rs.processes.collectionOnboarding.Constants.CAT_RESPONSE_FAILURE;
 import static ogc.rs.processes.s3PreSignedURLGeneration.Constants.*;
 
 /**
@@ -93,7 +92,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                 .compose(progressUpdateHandler -> checkResourceOwnershipAndBuildS3ObjectKey(requestInput))
                 .compose(catResponseHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2)).put(MESSAGE, CAT_REQUEST_RESPONSE)))
-                .compose(progressUpdateHandler -> checkIfObjectExistsInS3(requestInput.getString("objectKeyName")))
+                .compose(progressUpdateHandler -> checkIfObjectExistsInS3(requestInput))
                 .compose(checkResult -> {
                     if (checkResult) {
                         return generatePreSignedUrl(requestInput);
@@ -108,14 +107,14 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                 .compose(progressUpdateHandler -> utilClass.updateJobTableStatus(
                         requestInput, Status.SUCCESSFUL, S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE))
                 .onSuccess(successHandler -> {
-                    // Pass the preSignedUrl as the output of the process
+                    // Pass the preSignedUrl, s3ObjectKeyName and message as the output of the process
                     JsonObject result = new JsonObject()
                             .put("S3PreSignedUrl", requestInput.getString("preSignedUrl"))
                             .put("s3ObjectKeyName", requestInput.getString("objectKeyName"))
                             .put("message", S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE);
 
                     LOGGER.debug(S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE);
-                    objectPromise.complete(result);  // Complete with result including preSignedUrl, s3ObjectKeyName and message
+                    objectPromise.complete(result);
                 })
                 .onFailure(failureHandler -> {
                     LOGGER.error(S3_PRE_SIGNED_URL_PROCESS_FAILURE_MESSAGE);
@@ -212,12 +211,14 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
      * Checks if the object already exists in S3 using a HEAD request.
      * If the object exists, fail the process. If not, proceed with URL generation.
      *
-     * @param objectKeyName The key of the object in S3.
+     * @param requestInput The input JSON object containing the key of the object in S3.
      * @return A {@link Future<Boolean>} that completes with {@code true} if the object does not exist,
      *         or fails with an appropriate error message if the object exists.
      */
-    private Future<Boolean> checkIfObjectExistsInS3(String objectKeyName) {
+    private Future<Boolean> checkIfObjectExistsInS3(JsonObject requestInput) {
         Promise<Boolean> promise = Promise.promise();
+
+        String objectKeyName = requestInput.getString("objectKeyName");
         LOGGER.debug("Checking existence of object: {}", objectKeyName);
 
         // Construct the URL for the object
@@ -268,7 +269,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
 
                 // Create the S3 Pre-Signed URL request
                 PutObjectPresignRequest preSignRequest = PutObjectPresignRequest.builder()
-                        .signatureDuration(Duration.ofMinutes(10)) // Set URL expiration time
+                        .signatureDuration(Duration.ofMinutes(5)) // Set URL expiration time
                         .putObjectRequest(objectRequest)
                         .build();
 
