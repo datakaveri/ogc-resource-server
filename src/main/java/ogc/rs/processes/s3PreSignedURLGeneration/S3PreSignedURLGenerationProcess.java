@@ -24,6 +24,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 import java.time.Duration;
 import java.util.Map;
 
+import static ogc.rs.processes.collectionOnboarding.Constants.CAT_RESPONSE_FAILURE;
 import static ogc.rs.processes.s3PreSignedURLGeneration.Constants.*;
 
 /**
@@ -89,7 +90,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
 
         // Chain the process steps and handle success or failure
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, STARTING_PRE_SIGNED_URL_PROCESS_MESSAGE)
-                .compose(progressUpdateHandler -> makeCatApiRequest(requestInput))
+                .compose(progressUpdateHandler -> checkResourceOwnershipAndBuildS3ObjectKey(requestInput))
                 .compose(catResponseHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2)).put(MESSAGE, CAT_REQUEST_RESPONSE)))
                 .compose(progressUpdateHandler -> checkIfObjectExistsInS3(requestInput.getString("objectKeyName")))
@@ -97,7 +98,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                     if (checkResult) {
                         return generatePreSignedUrl(requestInput);
                     } else {
-                        return Future.failedFuture("Object already exists in S3.");
+                        return Future.failedFuture(OBJECT_ALREADY_EXISTS_MESSAGE);
                     }
                 })
                 .compose(preSignedURLHandler -> utilClass.updateJobTableProgress(
@@ -109,10 +110,12 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                 .onSuccess(successHandler -> {
                     // Pass the preSignedUrl as the output of the process
                     JsonObject result = new JsonObject()
-                            .put("S3PreSignedUrl", requestInput.getString("preSignedUrl"));
+                            .put("S3PreSignedUrl", requestInput.getString("preSignedUrl"))
+                            .put("s3ObjectKeyName", requestInput.getString("objectKeyName"))
+                            .put("message", S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE);
 
                     LOGGER.debug(S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE);
-                    objectPromise.complete(result);  // Complete with result including preSignedUrl
+                    objectPromise.complete(result);  // Complete with result including preSignedUrl, s3ObjectKeyName and message
                 })
                 .onFailure(failureHandler -> {
                     LOGGER.error(S3_PRE_SIGNED_URL_PROCESS_FAILURE_MESSAGE);
@@ -123,71 +126,83 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
     }
 
     /**
-     * Fetches resource and resource group information from the CAT API based on the provided resourceId.
-     * Validates the resource ownership and constructs the object key name.
+     * Makes a generic API call to the catalogue server with the provided resourceID.
      *
-     * @param requestInput The input JSON object containing the resourceId, userId, and fileType.
-     * @return A Future containing the updated requestInput with resource name, resource group name, and object key name.
+     * @param id The resourceID to include as a query parameter.
+     * @return A Future containing the response body as a JsonObject.
      */
-    public Future<JsonObject> makeCatApiRequest(JsonObject requestInput) {
+    private Future<JsonObject> makeCatApiRequest(String id) {
         Promise<JsonObject> promise = Promise.promise();
 
-        // First API call to get resource info using resourceId
         webClient.get(catServerPort, catServerHost, catRequestUri)
-                .addQueryParam("id", requestInput.getString("resourceId")).send()
-                .onSuccess(responseFromCat -> {
-                    if (responseFromCat.statusCode() == 200) {
-                        JsonObject resourceInfo = responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0);
-
-                        // Check resource ownership
-                        String ownerUserId = resourceInfo.getString("ownerUserId");
-                        if (!ownerUserId.equals(requestInput.getString("userId"))) {
-                            LOGGER.error(RESOURCE_OWNERSHIP_ERROR);
-                            promise.fail(RESOURCE_OWNERSHIP_ERROR);
-                            return;
-                        }
-
-                        // Extract resourceId name (riName) and resourceGroup
-                        requestInput.put("riName", resourceInfo.getString("name"));
-                        String resourceGroupId = resourceInfo.getString("resourceGroup");
-
-                        // Make second API call to get resourceGroup info
-                        webClient.get(catServerPort, catServerHost, catRequestUri)
-                                .addQueryParam("id", resourceGroupId).send()
-                                .onSuccess(groupResponse -> {
-                                    if (groupResponse.statusCode() == 200) {
-                                        JsonObject groupInfo = groupResponse.bodyAsJsonObject().getJsonArray("results").getJsonObject(0);
-                                        requestInput.put("rgName", groupInfo.getString("name"));
-
-                                        // Now construct objectKeyName
-                                        String fileType = requestInput.getString("fileType").toLowerCase(); // Convert to lowercase
-                                        String fileExtension = fileTypeMap.getOrDefault(fileType, "");
-                                        if (fileExtension.isEmpty()) {
-                                            promise.fail("Unsupported file type");
-                                            return;
-                                        }
-
-                                        String objectKeyName = requestInput.getString("rgName") + "/" + requestInput.getString("riName") + fileExtension;
-                                        LOGGER.debug("Object key name is: {}", objectKeyName);
-                                        requestInput.put("objectKeyName", objectKeyName);
-
-                                        // Complete with the updated requestInput
-                                        promise.complete(requestInput);
-                                    } else {
-                                        LOGGER.error("Resource group not found");
-                                        promise.fail("Resource group not found");
-                                    }
-                                }).onFailure(failureResponse -> {
-                                    LOGGER.error("Failed to fetch resource group: " + failureResponse.getMessage());
-                                    promise.fail("Failed to fetch resource group");
-                                });
+                .addQueryParam("id", id).send()
+                .onSuccess(response -> {
+                    if (response.statusCode() == 200) {
+                        JsonObject result = response.bodyAsJsonObject().getJsonArray("results").getJsonObject(0);
+                        promise.complete(result);
                     } else {
-                        LOGGER.error("Resource not found");
-                        promise.fail("Resource not found");
+                        promise.fail(ITEM_NOT_PRESENT_ERROR);
                     }
-                }).onFailure(failureResponse -> {
-                    LOGGER.error("Failed to fetch resource: " + failureResponse.getMessage());
-                    promise.fail("Failed to fetch resource");
+                })
+                .onFailure(failureResponseFromCat -> {
+                    LOGGER.error(CAT_RESPONSE_FAILURE + failureResponseFromCat.getMessage());
+                    promise.fail(CAT_RESPONSE_FAILURE);
+                });
+
+        return promise.future();
+    }
+    /**
+     * Handles the process of making catalogue API requests, checking resource ownership,
+     * and constructing the object key name.
+     *
+     * @param requestInput The input JSON object containing details like resourceId, userId, and fileType.
+     * @return A Future containing the updated requestInput with objectKeyName, or an error message.
+     */
+    public Future<JsonObject> checkResourceOwnershipAndBuildS3ObjectKey(JsonObject requestInput) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        // Call catalogue API to get resource info
+        makeCatApiRequest(requestInput.getString("resourceId"))
+                .compose(resourceInfo -> {
+                    // Check resource ownership using resourceId
+                    String ownerUserId = resourceInfo.getString("ownerUserId");
+                    if (!ownerUserId.equals(requestInput.getString("userId"))) {
+                        // Ownership check failed
+                        LOGGER.error(RESOURCE_OWNERSHIP_ERROR);
+                        return Future.failedFuture(RESOURCE_OWNERSHIP_ERROR);
+                    }
+
+                    // Extract resourceId name (riName) and call CAT API to get resourceGroup ID info
+                    requestInput.put("riName", resourceInfo.getString("name"));
+                    return makeCatApiRequest(resourceInfo.getString("resourceGroup"));
+                })
+                .compose(groupInfo -> {
+                    // Extract resource group name and construct object key name
+                    requestInput.put("rgName", groupInfo.getString("name"));
+
+                    // Determine file extension based on file type
+                    String fileType = requestInput.getString("fileType").toLowerCase();
+                    String fileExtension = fileTypeMap.getOrDefault(fileType, "");
+                    if (fileExtension.isEmpty()) {
+                        // Unsupported file type
+                        return Future.failedFuture("Unsupported file type");
+                    }
+
+                    // Construct the object key name and update requestInput
+                    String objectKeyName = requestInput.getString("rgName") + "/" +
+                            requestInput.getString("riName") + fileExtension;
+                    LOGGER.debug("Object key name is: {}", objectKeyName);
+                    requestInput.put("objectKeyName", objectKeyName);
+
+                    return Future.succeededFuture(requestInput);
+                })
+
+                // Success case: complete the promise with the updated requestInput
+                .onSuccess(promise::complete)
+                .onFailure(failure -> {
+                    // Failure case: log the error and fail the promise
+                    LOGGER.error(failure.getMessage());
+                    promise.fail(failure.getMessage());
                 });
 
         return promise.future();

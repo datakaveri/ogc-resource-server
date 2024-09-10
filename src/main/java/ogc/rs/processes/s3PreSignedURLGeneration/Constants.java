@@ -4,6 +4,8 @@ public class Constants {
     public static final String MESSAGE = "message";
     public static final String STARTING_PRE_SIGNED_URL_PROCESS_MESSAGE =
             "Starting the process to generate a Pre-Signed URL.";
+    public static final String ITEM_NOT_PRESENT_ERROR = "Item is not present in catalogue";
+    public static final String CAT_RESPONSE_FAILURE = "Failed to get response from Catalogue ";
     public static final String RESOURCE_OWNERSHIP_ERROR = "Resource does not belong to the user.";
     public static final String CAT_REQUEST_RESPONSE =
             "CAT API response received successfully. Resource ownership validated, and object key generated.";
