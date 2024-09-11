@@ -55,15 +55,15 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
         tmax: Optional[Union[StrictFloat, StrictInt]] = None,
         tmin: Optional[Union[StrictFloat, StrictInt]] = None,
         gp: Optional[StrictStr] = None,
-        rhavg: Optional[Union[StrictFloat, StrictInt]] = None,
         rhmin: Optional[Union[StrictFloat, StrictInt]] = None,
-        observation_date_time: Optional[StrictStr] = None,
+        rhavg: Optional[Union[StrictFloat, StrictInt]] = None,
         maxwind: Optional[Union[StrictFloat, StrictInt]] = None,
+        observation_date_time: Optional[StrictStr] = None,
         daylength: Optional[Union[StrictFloat, StrictInt]] = None,
         tdew: Optional[Union[StrictFloat, StrictInt]] = None,
         subdistrict: Optional[StrictStr] = None,
-        srad: Optional[Union[StrictFloat, StrictInt]] = None,
         district: Optional[StrictStr] = None,
+        srad: Optional[Union[StrictFloat, StrictInt]] = None,
         rhmax: Optional[Union[StrictFloat, StrictInt]] = None,
         prcp: Optional[Union[StrictFloat, StrictInt]] = None,
         village: Optional[StrictStr] = None,
@@ -103,24 +103,24 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
         :type tmin: float
         :param gp:
         :type gp: str
-        :param rhavg:
-        :type rhavg: float
         :param rhmin:
         :type rhmin: float
-        :param observation_date_time:
-        :type observation_date_time: str
+        :param rhavg:
+        :type rhavg: float
         :param maxwind:
         :type maxwind: float
+        :param observation_date_time:
+        :type observation_date_time: str
         :param daylength:
         :type daylength: float
         :param tdew:
         :type tdew: float
         :param subdistrict:
         :type subdistrict: str
-        :param srad:
-        :type srad: float
         :param district:
         :type district: str
+        :param srad:
+        :type srad: float
         :param rhmax:
         :type rhmax: float
         :param prcp:
@@ -160,15 +160,15 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
             tmax=tmax,
             tmin=tmin,
             gp=gp,
-            rhavg=rhavg,
             rhmin=rhmin,
-            observation_date_time=observation_date_time,
+            rhavg=rhavg,
             maxwind=maxwind,
+            observation_date_time=observation_date_time,
             daylength=daylength,
             tdew=tdew,
             subdistrict=subdistrict,
-            srad=srad,
             district=district,
+            srad=srad,
             rhmax=rhmax,
             prcp=prcp,
             village=village,
@@ -207,15 +207,15 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
         tmax: Optional[Union[StrictFloat, StrictInt]] = None,
         tmin: Optional[Union[StrictFloat, StrictInt]] = None,
         gp: Optional[StrictStr] = None,
-        rhavg: Optional[Union[StrictFloat, StrictInt]] = None,
         rhmin: Optional[Union[StrictFloat, StrictInt]] = None,
-        observation_date_time: Optional[StrictStr] = None,
+        rhavg: Optional[Union[StrictFloat, StrictInt]] = None,
         maxwind: Optional[Union[StrictFloat, StrictInt]] = None,
+        observation_date_time: Optional[StrictStr] = None,
         daylength: Optional[Union[StrictFloat, StrictInt]] = None,
         tdew: Optional[Union[StrictFloat, StrictInt]] = None,
         subdistrict: Optional[StrictStr] = None,
-        srad: Optional[Union[StrictFloat, StrictInt]] = None,
         district: Optional[StrictStr] = None,
+        srad: Optional[Union[StrictFloat, StrictInt]] = None,
         rhmax: Optional[Union[StrictFloat, StrictInt]] = None,
         prcp: Optional[Union[StrictFloat, StrictInt]] = None,
         village: Optional[StrictStr] = None,
@@ -255,24 +255,24 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
         :type tmin: float
         :param gp:
         :type gp: str
-        :param rhavg:
-        :type rhavg: float
         :param rhmin:
         :type rhmin: float
-        :param observation_date_time:
-        :type observation_date_time: str
+        :param rhavg:
+        :type rhavg: float
         :param maxwind:
         :type maxwind: float
+        :param observation_date_time:
+        :type observation_date_time: str
         :param daylength:
         :type daylength: float
         :param tdew:
         :type tdew: float
         :param subdistrict:
         :type subdistrict: str
-        :param srad:
-        :type srad: float
         :param district:
         :type district: str
+        :param srad:
+        :type srad: float
         :param rhmax:
         :type rhmax: float
         :param prcp:
@@ -312,15 +312,15 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
             tmax=tmax,
             tmin=tmin,
             gp=gp,
-            rhavg=rhavg,
             rhmin=rhmin,
-            observation_date_time=observation_date_time,
+            rhavg=rhavg,
             maxwind=maxwind,
+            observation_date_time=observation_date_time,
             daylength=daylength,
             tdew=tdew,
             subdistrict=subdistrict,
-            srad=srad,
             district=district,
+            srad=srad,
             rhmax=rhmax,
             prcp=prcp,
             village=village,
@@ -359,15 +359,15 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
         tmax: Optional[Union[StrictFloat, StrictInt]] = None,
         tmin: Optional[Union[StrictFloat, StrictInt]] = None,
         gp: Optional[StrictStr] = None,
-        rhavg: Optional[Union[StrictFloat, StrictInt]] = None,
         rhmin: Optional[Union[StrictFloat, StrictInt]] = None,
-        observation_date_time: Optional[StrictStr] = None,
+        rhavg: Optional[Union[StrictFloat, StrictInt]] = None,
         maxwind: Optional[Union[StrictFloat, StrictInt]] = None,
+        observation_date_time: Optional[StrictStr] = None,
         daylength: Optional[Union[StrictFloat, StrictInt]] = None,
         tdew: Optional[Union[StrictFloat, StrictInt]] = None,
         subdistrict: Optional[StrictStr] = None,
-        srad: Optional[Union[StrictFloat, StrictInt]] = None,
         district: Optional[StrictStr] = None,
+        srad: Optional[Union[StrictFloat, StrictInt]] = None,
         rhmax: Optional[Union[StrictFloat, StrictInt]] = None,
         prcp: Optional[Union[StrictFloat, StrictInt]] = None,
         village: Optional[StrictStr] = None,
@@ -407,24 +407,24 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
         :type tmin: float
         :param gp:
         :type gp: str
-        :param rhavg:
-        :type rhavg: float
         :param rhmin:
         :type rhmin: float
-        :param observation_date_time:
-        :type observation_date_time: str
+        :param rhavg:
+        :type rhavg: float
         :param maxwind:
         :type maxwind: float
+        :param observation_date_time:
+        :type observation_date_time: str
         :param daylength:
         :type daylength: float
         :param tdew:
         :type tdew: float
         :param subdistrict:
         :type subdistrict: str
-        :param srad:
-        :type srad: float
         :param district:
         :type district: str
+        :param srad:
+        :type srad: float
         :param rhmax:
         :type rhmax: float
         :param prcp:
@@ -464,15 +464,15 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
             tmax=tmax,
             tmin=tmin,
             gp=gp,
-            rhavg=rhavg,
             rhmin=rhmin,
-            observation_date_time=observation_date_time,
+            rhavg=rhavg,
             maxwind=maxwind,
+            observation_date_time=observation_date_time,
             daylength=daylength,
             tdew=tdew,
             subdistrict=subdistrict,
-            srad=srad,
             district=district,
+            srad=srad,
             rhmax=rhmax,
             prcp=prcp,
             village=village,
@@ -506,15 +506,15 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
         tmax,
         tmin,
         gp,
-        rhavg,
         rhmin,
-        observation_date_time,
+        rhavg,
         maxwind,
+        observation_date_time,
         daylength,
         tdew,
         subdistrict,
-        srad,
         district,
+        srad,
         rhmax,
         prcp,
         village,
@@ -579,21 +579,21 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
             
             _query_params.append(('gp', gp))
             
-        if rhavg is not None:
-            
-            _query_params.append(('rhavg', rhavg))
-            
         if rhmin is not None:
             
             _query_params.append(('rhmin', rhmin))
             
-        if observation_date_time is not None:
+        if rhavg is not None:
             
-            _query_params.append(('observationDateTime', observation_date_time))
+            _query_params.append(('rhavg', rhavg))
             
         if maxwind is not None:
             
             _query_params.append(('maxwind', maxwind))
+            
+        if observation_date_time is not None:
+            
+            _query_params.append(('observationDateTime', observation_date_time))
             
         if daylength is not None:
             
@@ -607,13 +607,13 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
             
             _query_params.append(('subdistrict', subdistrict))
             
-        if srad is not None:
-            
-            _query_params.append(('srad', srad))
-            
         if district is not None:
             
             _query_params.append(('district', district))
+            
+        if srad is not None:
+            
+            _query_params.append(('srad', srad))
             
         if rhmax is not None:
             

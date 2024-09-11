@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, bwa_bay_no=bwa_bay_no, bwa_long=bwa_long, dtcode=dtcode, bwa_pond_l=bwa_pond_l, bwa_gate_s=bwa_gate_s, bwa_spil_c=bwa_spil_c, bwa_gate_n=bwa_gate_n, bwa_name=bwa_name, bwa_status=bwa_status, var_class=var_class, bwa_cn_gat=bwa_cn_gat, bwa_head_r=bwa_head_r, bwa_spil_n=bwa_spil_n, bwa_head_1=bwa_head_1, bwa_spil_l=bwa_spil_l, bwa_crt_ve=bwa_crt_ve, bwa_perlia=bwa_perlia, rivcode=rivcode, bacode=bacode, bwa_spil_t=bwa_spil_t, strucode=strucode, bwa_size_h=bwa_size_h, bwa_len=bwa_len, bwa_ph_gat=bwa_ph_gat, bwa_ncity=bwa_ncity, bwa_cmp_yr=bwa_cmp_yr, bwa_ses_zo=bwa_ses_zo, bwa_lat=bwa_lat, bwa_wd_rb=bwa_wd_rb, bwa_disc_c=bwa_disc_c, bwa_disc_d=bwa_disc_d)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, bwa_bay_no=bwa_bay_no, bwa_long=bwa_long, dtcode=dtcode, bwa_pond_l=bwa_pond_l, bwa_gate_s=bwa_gate_s, bwa_spil_c=bwa_spil_c, bwa_gate_n=bwa_gate_n, bwa_name=bwa_name, bwa_status=bwa_status, var_class=var_class, bwa_cn_gat=bwa_cn_gat, bwa_head_r=bwa_head_r, bwa_spil_n=bwa_spil_n, bwa_head_1=bwa_head_1, bwa_crt_ve=bwa_crt_ve, bwa_spil_l=bwa_spil_l, bwa_perlia=bwa_perlia, rivcode=rivcode, bacode=bacode, bwa_spil_t=bwa_spil_t, strucode=strucode, bwa_size_h=bwa_size_h, bwa_len=bwa_len, bwa_ph_gat=bwa_ph_gat, bwa_ncity=bwa_ncity, bwa_cmp_yr=bwa_cmp_yr, bwa_ses_zo=bwa_ses_zo, bwa_lat=bwa_lat, bwa_disc_c=bwa_disc_c, bwa_wd_rb=bwa_wd_rb, bwa_disc_d=bwa_disc_d)
 
 Get features from Points representing barrage, weir and anicut locations in and around Vizianagaram, Andhra Pradesh
 
@@ -65,8 +65,8 @@ with openapi_client.ApiClient(configuration) as api_client:
     bwa_head_r = 56 # int |  (optional)
     bwa_spil_n = 56 # int |  (optional)
     bwa_head_1 = 56 # int |  (optional)
-    bwa_spil_l = 3.4 # float |  (optional)
     bwa_crt_ve = 'bwa_crt_ve_example' # str |  (optional)
+    bwa_spil_l = 3.4 # float |  (optional)
     bwa_perlia = 'bwa_perlia_example' # str |  (optional)
     rivcode = 'rivcode_example' # str |  (optional)
     bacode = 'bacode_example' # str |  (optional)
@@ -79,13 +79,13 @@ with openapi_client.ApiClient(configuration) as api_client:
     bwa_cmp_yr = 'bwa_cmp_yr_example' # str |  (optional)
     bwa_ses_zo = 'bwa_ses_zo_example' # str |  (optional)
     bwa_lat = 3.4 # float |  (optional)
-    bwa_wd_rb = 56 # int |  (optional)
     bwa_disc_c = 'bwa_disc_c_example' # str |  (optional)
+    bwa_wd_rb = 56 # int |  (optional)
     bwa_disc_d = 3.4 # float |  (optional)
 
     try:
         # Get features from Points representing barrage, weir and anicut locations in and around Vizianagaram, Andhra Pradesh
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, bwa_bay_no=bwa_bay_no, bwa_long=bwa_long, dtcode=dtcode, bwa_pond_l=bwa_pond_l, bwa_gate_s=bwa_gate_s, bwa_spil_c=bwa_spil_c, bwa_gate_n=bwa_gate_n, bwa_name=bwa_name, bwa_status=bwa_status, var_class=var_class, bwa_cn_gat=bwa_cn_gat, bwa_head_r=bwa_head_r, bwa_spil_n=bwa_spil_n, bwa_head_1=bwa_head_1, bwa_spil_l=bwa_spil_l, bwa_crt_ve=bwa_crt_ve, bwa_perlia=bwa_perlia, rivcode=rivcode, bacode=bacode, bwa_spil_t=bwa_spil_t, strucode=strucode, bwa_size_h=bwa_size_h, bwa_len=bwa_len, bwa_ph_gat=bwa_ph_gat, bwa_ncity=bwa_ncity, bwa_cmp_yr=bwa_cmp_yr, bwa_ses_zo=bwa_ses_zo, bwa_lat=bwa_lat, bwa_wd_rb=bwa_wd_rb, bwa_disc_c=bwa_disc_c, bwa_disc_d=bwa_disc_d)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, bwa_bay_no=bwa_bay_no, bwa_long=bwa_long, dtcode=dtcode, bwa_pond_l=bwa_pond_l, bwa_gate_s=bwa_gate_s, bwa_spil_c=bwa_spil_c, bwa_gate_n=bwa_gate_n, bwa_name=bwa_name, bwa_status=bwa_status, var_class=var_class, bwa_cn_gat=bwa_cn_gat, bwa_head_r=bwa_head_r, bwa_spil_n=bwa_spil_n, bwa_head_1=bwa_head_1, bwa_crt_ve=bwa_crt_ve, bwa_spil_l=bwa_spil_l, bwa_perlia=bwa_perlia, rivcode=rivcode, bacode=bacode, bwa_spil_t=bwa_spil_t, strucode=strucode, bwa_size_h=bwa_size_h, bwa_len=bwa_len, bwa_ph_gat=bwa_ph_gat, bwa_ncity=bwa_ncity, bwa_cmp_yr=bwa_cmp_yr, bwa_ses_zo=bwa_ses_zo, bwa_lat=bwa_lat, bwa_disc_c=bwa_disc_c, bwa_wd_rb=bwa_wd_rb, bwa_disc_d=bwa_disc_d)
         print("The response of BarragesWeirsAnicutsVizianagaramAPApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -120,8 +120,8 @@ Name | Type | Description  | Notes
  **bwa_head_r** | **int**|  | [optional] 
  **bwa_spil_n** | **int**|  | [optional] 
  **bwa_head_1** | **int**|  | [optional] 
- **bwa_spil_l** | **float**|  | [optional] 
  **bwa_crt_ve** | **str**|  | [optional] 
+ **bwa_spil_l** | **float**|  | [optional] 
  **bwa_perlia** | **str**|  | [optional] 
  **rivcode** | **str**|  | [optional] 
  **bacode** | **str**|  | [optional] 
@@ -134,8 +134,8 @@ Name | Type | Description  | Notes
  **bwa_cmp_yr** | **str**|  | [optional] 
  **bwa_ses_zo** | **str**|  | [optional] 
  **bwa_lat** | **float**|  | [optional] 
- **bwa_wd_rb** | **int**|  | [optional] 
  **bwa_disc_c** | **str**|  | [optional] 
+ **bwa_wd_rb** | **int**|  | [optional] 
  **bwa_disc_d** | **float**|  | [optional] 
 
 ### Return type

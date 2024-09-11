@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, elevation=elevation, stateno=stateno, name_of_st=name_of_st, capital_na=capital_na, scale=scale, rotation=rotation)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, elevation=elevation, name_of_st=name_of_st, stateno=stateno, capital_na=capital_na, scale=scale, rotation=rotation)
 
 Get features from Fetched from Administrative_Boundary_Database_For_Entire_Country_Upto_Taluk_level_with_HQ
 
@@ -51,15 +51,15 @@ with openapi_client.ApiClient(configuration) as api_client:
     limit = 5000 # int |  (optional) (default to 5000)
     offset = 1 # int | OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10. (optional) (default to 1)
     elevation = 3.4 # float |  (optional)
-    stateno = 56 # int |  (optional)
     name_of_st = 'name_of_st_example' # str |  (optional)
+    stateno = 56 # int |  (optional)
     capital_na = 'capital_na_example' # str |  (optional)
     scale = 3.4 # float |  (optional)
     rotation = 56 # int |  (optional)
 
     try:
         # Get features from Fetched from Administrative_Boundary_Database_For_Entire_Country_Upto_Taluk_level_with_HQ
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, elevation=elevation, stateno=stateno, name_of_st=name_of_st, capital_na=capital_na, scale=scale, rotation=rotation)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, elevation=elevation, name_of_st=name_of_st, stateno=stateno, capital_na=capital_na, scale=scale, rotation=rotation)
         print("The response of StateHeadquartersApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -80,8 +80,8 @@ Name | Type | Description  | Notes
  **limit** | **int**|  | [optional] [default to 5000]
  **offset** | **int**| OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum &#x3D; 0. Maximum &#x3D; 1000. Default &#x3D; 10. | [optional] [default to 1]
  **elevation** | **float**|  | [optional] 
- **stateno** | **int**|  | [optional] 
  **name_of_st** | **str**|  | [optional] 
+ **stateno** | **int**|  | [optional] 
  **capital_na** | **str**|  | [optional] 
  **scale** | **float**|  | [optional] 
  **rotation** | **int**|  | [optional] 

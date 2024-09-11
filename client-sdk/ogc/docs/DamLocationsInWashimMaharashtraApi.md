@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, spillway_l=spillway_l, operating_=operating_, river_name=river_name, spillway_1=spillway_1, spillway_3=spillway_3, res_area_s=res_area_s, canal_gate=canal_gate, dam_perlia=dam_perlia, spillway_2=spillway_2, dtcode=dtcode, spillway_4=spillway_4, dam_length=dam_length, spillway_t=spillway_t, max_height=max_height, type=type, seismic_zo=seismic_zo, subbasin=subbasin, spillway_c=spillway_c, spillway_g=spillway_g, state=state, var_class=var_class, completion=completion, total_volu=total_volu, purpose=purpose, design_flo=design_flo, basin=basin, bacode=bacode, sbcode=sbcode, nearest_ci=nearest_ci, grs_stor_c=grs_stor_c, dm_long=dm_long, struct_typ=struct_typ, dam_volume=dam_volume, strucode=strucode, nrld_no=nrld_no, district=district, dm_lat=dm_lat, name=name, eff_stor_c=eff_stor_c, name_nrld_=name_nrld_, powerhouse=powerhouse, status=status)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, spillway_l=spillway_l, operating_=operating_, river_name=river_name, spillway_1=spillway_1, spillway_3=spillway_3, res_area_s=res_area_s, dam_perlia=dam_perlia, spillway_2=spillway_2, canal_gate=canal_gate, dtcode=dtcode, dam_length=dam_length, spillway_4=spillway_4, spillway_t=spillway_t, max_height=max_height, type=type, seismic_zo=seismic_zo, subbasin=subbasin, spillway_c=spillway_c, spillway_g=spillway_g, state=state, var_class=var_class, completion=completion, total_volu=total_volu, purpose=purpose, basin=basin, design_flo=design_flo, bacode=bacode, sbcode=sbcode, nearest_ci=nearest_ci, grs_stor_c=grs_stor_c, dm_long=dm_long, struct_typ=struct_typ, dam_volume=dam_volume, strucode=strucode, nrld_no=nrld_no, district=district, dm_lat=dm_lat, name=name, eff_stor_c=eff_stor_c, name_nrld_=name_nrld_, powerhouse=powerhouse, status=status)
 
 Get features from Point features representing dam locations in Washim district, Maharashtra
 
@@ -57,12 +57,12 @@ with openapi_client.ApiClient(configuration) as api_client:
     spillway_1 = 'spillway_1_example' # str |  (optional)
     spillway_3 = 56 # int |  (optional)
     res_area_s = 3.4 # float |  (optional)
-    canal_gate = 56 # int |  (optional)
     dam_perlia = 'dam_perlia_example' # str |  (optional)
     spillway_2 = 'spillway_2_example' # str |  (optional)
+    canal_gate = 56 # int |  (optional)
     dtcode = 'dtcode_example' # str |  (optional)
-    spillway_4 = 3.4 # float |  (optional)
     dam_length = 'dam_length_example' # str |  (optional)
+    spillway_4 = 3.4 # float |  (optional)
     spillway_t = 'spillway_t_example' # str |  (optional)
     max_height = 'max_height_example' # str |  (optional)
     type = 'type_example' # str |  (optional)
@@ -75,8 +75,8 @@ with openapi_client.ApiClient(configuration) as api_client:
     completion = 'completion_example' # str |  (optional)
     total_volu = 'total_volu_example' # str |  (optional)
     purpose = 'purpose_example' # str |  (optional)
-    design_flo = 'design_flo_example' # str |  (optional)
     basin = 'basin_example' # str |  (optional)
+    design_flo = 'design_flo_example' # str |  (optional)
     bacode = 'bacode_example' # str |  (optional)
     sbcode = 'sbcode_example' # str |  (optional)
     nearest_ci = 'nearest_ci_example' # str |  (optional)
@@ -96,7 +96,7 @@ with openapi_client.ApiClient(configuration) as api_client:
 
     try:
         # Get features from Point features representing dam locations in Washim district, Maharashtra
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, spillway_l=spillway_l, operating_=operating_, river_name=river_name, spillway_1=spillway_1, spillway_3=spillway_3, res_area_s=res_area_s, canal_gate=canal_gate, dam_perlia=dam_perlia, spillway_2=spillway_2, dtcode=dtcode, spillway_4=spillway_4, dam_length=dam_length, spillway_t=spillway_t, max_height=max_height, type=type, seismic_zo=seismic_zo, subbasin=subbasin, spillway_c=spillway_c, spillway_g=spillway_g, state=state, var_class=var_class, completion=completion, total_volu=total_volu, purpose=purpose, design_flo=design_flo, basin=basin, bacode=bacode, sbcode=sbcode, nearest_ci=nearest_ci, grs_stor_c=grs_stor_c, dm_long=dm_long, struct_typ=struct_typ, dam_volume=dam_volume, strucode=strucode, nrld_no=nrld_no, district=district, dm_lat=dm_lat, name=name, eff_stor_c=eff_stor_c, name_nrld_=name_nrld_, powerhouse=powerhouse, status=status)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, spillway_l=spillway_l, operating_=operating_, river_name=river_name, spillway_1=spillway_1, spillway_3=spillway_3, res_area_s=res_area_s, dam_perlia=dam_perlia, spillway_2=spillway_2, canal_gate=canal_gate, dtcode=dtcode, dam_length=dam_length, spillway_4=spillway_4, spillway_t=spillway_t, max_height=max_height, type=type, seismic_zo=seismic_zo, subbasin=subbasin, spillway_c=spillway_c, spillway_g=spillway_g, state=state, var_class=var_class, completion=completion, total_volu=total_volu, purpose=purpose, basin=basin, design_flo=design_flo, bacode=bacode, sbcode=sbcode, nearest_ci=nearest_ci, grs_stor_c=grs_stor_c, dm_long=dm_long, struct_typ=struct_typ, dam_volume=dam_volume, strucode=strucode, nrld_no=nrld_no, district=district, dm_lat=dm_lat, name=name, eff_stor_c=eff_stor_c, name_nrld_=name_nrld_, powerhouse=powerhouse, status=status)
         print("The response of DamLocationsInWashimMaharashtraApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -123,12 +123,12 @@ Name | Type | Description  | Notes
  **spillway_1** | **str**|  | [optional] 
  **spillway_3** | **int**|  | [optional] 
  **res_area_s** | **float**|  | [optional] 
- **canal_gate** | **int**|  | [optional] 
  **dam_perlia** | **str**|  | [optional] 
  **spillway_2** | **str**|  | [optional] 
+ **canal_gate** | **int**|  | [optional] 
  **dtcode** | **str**|  | [optional] 
- **spillway_4** | **float**|  | [optional] 
  **dam_length** | **str**|  | [optional] 
+ **spillway_4** | **float**|  | [optional] 
  **spillway_t** | **str**|  | [optional] 
  **max_height** | **str**|  | [optional] 
  **type** | **str**|  | [optional] 
@@ -141,8 +141,8 @@ Name | Type | Description  | Notes
  **completion** | **str**|  | [optional] 
  **total_volu** | **str**|  | [optional] 
  **purpose** | **str**|  | [optional] 
- **design_flo** | **str**|  | [optional] 
  **basin** | **str**|  | [optional] 
+ **design_flo** | **str**|  | [optional] 
  **bacode** | **str**|  | [optional] 
  **sbcode** | **str**|  | [optional] 
  **nearest_ci** | **str**|  | [optional] 

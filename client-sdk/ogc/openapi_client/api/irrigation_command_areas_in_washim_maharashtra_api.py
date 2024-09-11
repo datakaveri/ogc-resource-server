@@ -54,8 +54,8 @@ class IrrigationCommandAreasInWashimMaharashtraApi:
         prjcode: Optional[StrictStr] = None,
         perimeter: Optional[Union[StrictFloat, StrictInt]] = None,
         cname: Optional[StrictStr] = None,
-        area_ha: Optional[Union[StrictFloat, StrictInt]] = None,
         dist_benf: Optional[StrictStr] = None,
+        area_ha: Optional[Union[StrictFloat, StrictInt]] = None,
         state: Optional[StrictStr] = None,
         type: Optional[StrictStr] = None,
         cmdcode: Optional[StrictStr] = None,
@@ -94,10 +94,10 @@ class IrrigationCommandAreasInWashimMaharashtraApi:
         :type perimeter: float
         :param cname:
         :type cname: str
-        :param area_ha:
-        :type area_ha: float
         :param dist_benf:
         :type dist_benf: str
+        :param area_ha:
+        :type area_ha: float
         :param state:
         :type state: str
         :param type:
@@ -138,8 +138,8 @@ class IrrigationCommandAreasInWashimMaharashtraApi:
             prjcode=prjcode,
             perimeter=perimeter,
             cname=cname,
-            area_ha=area_ha,
             dist_benf=dist_benf,
+            area_ha=area_ha,
             state=state,
             type=type,
             cmdcode=cmdcode,
@@ -178,8 +178,8 @@ class IrrigationCommandAreasInWashimMaharashtraApi:
         prjcode: Optional[StrictStr] = None,
         perimeter: Optional[Union[StrictFloat, StrictInt]] = None,
         cname: Optional[StrictStr] = None,
-        area_ha: Optional[Union[StrictFloat, StrictInt]] = None,
         dist_benf: Optional[StrictStr] = None,
+        area_ha: Optional[Union[StrictFloat, StrictInt]] = None,
         state: Optional[StrictStr] = None,
         type: Optional[StrictStr] = None,
         cmdcode: Optional[StrictStr] = None,
@@ -218,10 +218,10 @@ class IrrigationCommandAreasInWashimMaharashtraApi:
         :type perimeter: float
         :param cname:
         :type cname: str
-        :param area_ha:
-        :type area_ha: float
         :param dist_benf:
         :type dist_benf: str
+        :param area_ha:
+        :type area_ha: float
         :param state:
         :type state: str
         :param type:
@@ -262,8 +262,8 @@ class IrrigationCommandAreasInWashimMaharashtraApi:
             prjcode=prjcode,
             perimeter=perimeter,
             cname=cname,
-            area_ha=area_ha,
             dist_benf=dist_benf,
+            area_ha=area_ha,
             state=state,
             type=type,
             cmdcode=cmdcode,
@@ -302,8 +302,8 @@ class IrrigationCommandAreasInWashimMaharashtraApi:
         prjcode: Optional[StrictStr] = None,
         perimeter: Optional[Union[StrictFloat, StrictInt]] = None,
         cname: Optional[StrictStr] = None,
-        area_ha: Optional[Union[StrictFloat, StrictInt]] = None,
         dist_benf: Optional[StrictStr] = None,
+        area_ha: Optional[Union[StrictFloat, StrictInt]] = None,
         state: Optional[StrictStr] = None,
         type: Optional[StrictStr] = None,
         cmdcode: Optional[StrictStr] = None,
@@ -342,10 +342,10 @@ class IrrigationCommandAreasInWashimMaharashtraApi:
         :type perimeter: float
         :param cname:
         :type cname: str
-        :param area_ha:
-        :type area_ha: float
         :param dist_benf:
         :type dist_benf: str
+        :param area_ha:
+        :type area_ha: float
         :param state:
         :type state: str
         :param type:
@@ -386,8 +386,8 @@ class IrrigationCommandAreasInWashimMaharashtraApi:
             prjcode=prjcode,
             perimeter=perimeter,
             cname=cname,
-            area_ha=area_ha,
             dist_benf=dist_benf,
+            area_ha=area_ha,
             state=state,
             type=type,
             cmdcode=cmdcode,
@@ -421,8 +421,8 @@ class IrrigationCommandAreasInWashimMaharashtraApi:
         prjcode,
         perimeter,
         cname,
-        area_ha,
         dist_benf,
+        area_ha,
         state,
         type,
         cmdcode,
@@ -484,13 +484,13 @@ class IrrigationCommandAreasInWashimMaharashtraApi:
             
             _query_params.append(('cname', cname))
             
-        if area_ha is not None:
-            
-            _query_params.append(('area_ha', area_ha))
-            
         if dist_benf is not None:
             
             _query_params.append(('dist_benf', dist_benf))
+            
+        if area_ha is not None:
+            
+            _query_params.append(('area_ha', area_ha))
             
         if state is not None:
             

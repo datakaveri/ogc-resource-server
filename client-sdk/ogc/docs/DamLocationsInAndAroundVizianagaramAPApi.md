@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, spillway_l=spillway_l, operating_=operating_, river_name=river_name, spillway_1=spillway_1, spillway_3=spillway_3, res_area_s=res_area_s, canal_gate=canal_gate, dam_perlia=dam_perlia, dtcode=dtcode, spillway_4=spillway_4, dam_length=dam_length, spillway_t=spillway_t, max_height=max_height, type=type, seismic_zo=seismic_zo, subbasin=subbasin, spillway_c=spillway_c, spillway_g=spillway_g, state=state, var_class=var_class, completion=completion, total_volu=total_volu, purpose=purpose, design_flo=design_flo, basin=basin, bacode=bacode, sbcode=sbcode, nearest_ci=nearest_ci, grs_stor_c=grs_stor_c, dm_long=dm_long, struct_typ=struct_typ, dam_volume=dam_volume, strucode=strucode, nrld_no=nrld_no, district=district, dm_lat=dm_lat, name=name, eff_stor_c=eff_stor_c, name_nrld_=name_nrld_, powerhouse=powerhouse, commenceme=commenceme, status=status)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, spillway_l=spillway_l, operating_=operating_, river_name=river_name, spillway_1=spillway_1, spillway_3=spillway_3, dam_perlia=dam_perlia, canal_gate=canal_gate, res_area_s=res_area_s, dtcode=dtcode, spillway_t=spillway_t, dam_length=dam_length, spillway_4=spillway_4, max_height=max_height, type=type, seismic_zo=seismic_zo, subbasin=subbasin, spillway_c=spillway_c, spillway_g=spillway_g, state=state, var_class=var_class, completion=completion, total_volu=total_volu, purpose=purpose, design_flo=design_flo, basin=basin, bacode=bacode, sbcode=sbcode, nearest_ci=nearest_ci, dm_long=dm_long, grs_stor_c=grs_stor_c, struct_typ=struct_typ, strucode=strucode, dam_volume=dam_volume, nrld_no=nrld_no, district=district, name=name, dm_lat=dm_lat, eff_stor_c=eff_stor_c, name_nrld_=name_nrld_, powerhouse=powerhouse, status=status, commenceme=commenceme)
 
 Get features from Point features representing dam locations in and around Vizianagaram district, Andhra Pradesh
 
@@ -56,13 +56,13 @@ with openapi_client.ApiClient(configuration) as api_client:
     river_name = 'river_name_example' # str |  (optional)
     spillway_1 = 'spillway_1_example' # str |  (optional)
     spillway_3 = 56 # int |  (optional)
-    res_area_s = 3.4 # float |  (optional)
-    canal_gate = 56 # int |  (optional)
     dam_perlia = 'dam_perlia_example' # str |  (optional)
+    canal_gate = 56 # int |  (optional)
+    res_area_s = 3.4 # float |  (optional)
     dtcode = 'dtcode_example' # str |  (optional)
-    spillway_4 = 3.4 # float |  (optional)
-    dam_length = 'dam_length_example' # str |  (optional)
     spillway_t = 'spillway_t_example' # str |  (optional)
+    dam_length = 'dam_length_example' # str |  (optional)
+    spillway_4 = 3.4 # float |  (optional)
     max_height = 'max_height_example' # str |  (optional)
     type = 'type_example' # str |  (optional)
     seismic_zo = 'seismic_zo_example' # str |  (optional)
@@ -79,24 +79,24 @@ with openapi_client.ApiClient(configuration) as api_client:
     bacode = 'bacode_example' # str |  (optional)
     sbcode = 'sbcode_example' # str |  (optional)
     nearest_ci = 'nearest_ci_example' # str |  (optional)
-    grs_stor_c = 3.4 # float |  (optional)
     dm_long = 3.4 # float |  (optional)
+    grs_stor_c = 3.4 # float |  (optional)
     struct_typ = 'struct_typ_example' # str |  (optional)
-    dam_volume = 3.4 # float |  (optional)
     strucode = 'strucode_example' # str |  (optional)
+    dam_volume = 3.4 # float |  (optional)
     nrld_no = 'nrld_no_example' # str |  (optional)
     district = 'district_example' # str |  (optional)
-    dm_lat = 3.4 # float |  (optional)
     name = 'name_example' # str |  (optional)
+    dm_lat = 3.4 # float |  (optional)
     eff_stor_c = 3.4 # float |  (optional)
     name_nrld_ = 'name_nrld__example' # str |  (optional)
     powerhouse = 56 # int |  (optional)
-    commenceme = 'commenceme_example' # str |  (optional)
     status = 'status_example' # str |  (optional)
+    commenceme = 'commenceme_example' # str |  (optional)
 
     try:
         # Get features from Point features representing dam locations in and around Vizianagaram district, Andhra Pradesh
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, spillway_l=spillway_l, operating_=operating_, river_name=river_name, spillway_1=spillway_1, spillway_3=spillway_3, res_area_s=res_area_s, canal_gate=canal_gate, dam_perlia=dam_perlia, dtcode=dtcode, spillway_4=spillway_4, dam_length=dam_length, spillway_t=spillway_t, max_height=max_height, type=type, seismic_zo=seismic_zo, subbasin=subbasin, spillway_c=spillway_c, spillway_g=spillway_g, state=state, var_class=var_class, completion=completion, total_volu=total_volu, purpose=purpose, design_flo=design_flo, basin=basin, bacode=bacode, sbcode=sbcode, nearest_ci=nearest_ci, grs_stor_c=grs_stor_c, dm_long=dm_long, struct_typ=struct_typ, dam_volume=dam_volume, strucode=strucode, nrld_no=nrld_no, district=district, dm_lat=dm_lat, name=name, eff_stor_c=eff_stor_c, name_nrld_=name_nrld_, powerhouse=powerhouse, commenceme=commenceme, status=status)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, spillway_l=spillway_l, operating_=operating_, river_name=river_name, spillway_1=spillway_1, spillway_3=spillway_3, dam_perlia=dam_perlia, canal_gate=canal_gate, res_area_s=res_area_s, dtcode=dtcode, spillway_t=spillway_t, dam_length=dam_length, spillway_4=spillway_4, max_height=max_height, type=type, seismic_zo=seismic_zo, subbasin=subbasin, spillway_c=spillway_c, spillway_g=spillway_g, state=state, var_class=var_class, completion=completion, total_volu=total_volu, purpose=purpose, design_flo=design_flo, basin=basin, bacode=bacode, sbcode=sbcode, nearest_ci=nearest_ci, dm_long=dm_long, grs_stor_c=grs_stor_c, struct_typ=struct_typ, strucode=strucode, dam_volume=dam_volume, nrld_no=nrld_no, district=district, name=name, dm_lat=dm_lat, eff_stor_c=eff_stor_c, name_nrld_=name_nrld_, powerhouse=powerhouse, status=status, commenceme=commenceme)
         print("The response of DamLocationsInAndAroundVizianagaramAPApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -122,13 +122,13 @@ Name | Type | Description  | Notes
  **river_name** | **str**|  | [optional] 
  **spillway_1** | **str**|  | [optional] 
  **spillway_3** | **int**|  | [optional] 
- **res_area_s** | **float**|  | [optional] 
- **canal_gate** | **int**|  | [optional] 
  **dam_perlia** | **str**|  | [optional] 
+ **canal_gate** | **int**|  | [optional] 
+ **res_area_s** | **float**|  | [optional] 
  **dtcode** | **str**|  | [optional] 
- **spillway_4** | **float**|  | [optional] 
- **dam_length** | **str**|  | [optional] 
  **spillway_t** | **str**|  | [optional] 
+ **dam_length** | **str**|  | [optional] 
+ **spillway_4** | **float**|  | [optional] 
  **max_height** | **str**|  | [optional] 
  **type** | **str**|  | [optional] 
  **seismic_zo** | **str**|  | [optional] 
@@ -145,20 +145,20 @@ Name | Type | Description  | Notes
  **bacode** | **str**|  | [optional] 
  **sbcode** | **str**|  | [optional] 
  **nearest_ci** | **str**|  | [optional] 
- **grs_stor_c** | **float**|  | [optional] 
  **dm_long** | **float**|  | [optional] 
+ **grs_stor_c** | **float**|  | [optional] 
  **struct_typ** | **str**|  | [optional] 
- **dam_volume** | **float**|  | [optional] 
  **strucode** | **str**|  | [optional] 
+ **dam_volume** | **float**|  | [optional] 
  **nrld_no** | **str**|  | [optional] 
  **district** | **str**|  | [optional] 
- **dm_lat** | **float**|  | [optional] 
  **name** | **str**|  | [optional] 
+ **dm_lat** | **float**|  | [optional] 
  **eff_stor_c** | **float**|  | [optional] 
  **name_nrld_** | **str**|  | [optional] 
  **powerhouse** | **int**|  | [optional] 
- **commenceme** | **str**|  | [optional] 
  **status** | **str**|  | [optional] 
+ **commenceme** | **str**|  | [optional] 
 
 ### Return type
 

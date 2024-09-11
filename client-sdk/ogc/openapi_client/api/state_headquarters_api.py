@@ -52,8 +52,8 @@ class StateHeadquartersApi:
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         elevation: Optional[Union[StrictFloat, StrictInt]] = None,
-        stateno: Optional[StrictInt] = None,
         name_of_st: Optional[StrictStr] = None,
+        stateno: Optional[StrictInt] = None,
         capital_na: Optional[StrictStr] = None,
         scale: Optional[Union[StrictFloat, StrictInt]] = None,
         rotation: Optional[StrictInt] = None,
@@ -87,10 +87,10 @@ class StateHeadquartersApi:
         :type offset: int
         :param elevation:
         :type elevation: float
-        :param stateno:
-        :type stateno: int
         :param name_of_st:
         :type name_of_st: str
+        :param stateno:
+        :type stateno: int
         :param capital_na:
         :type capital_na: str
         :param scale:
@@ -127,8 +127,8 @@ class StateHeadquartersApi:
             limit=limit,
             offset=offset,
             elevation=elevation,
-            stateno=stateno,
             name_of_st=name_of_st,
+            stateno=stateno,
             capital_na=capital_na,
             scale=scale,
             rotation=rotation,
@@ -164,8 +164,8 @@ class StateHeadquartersApi:
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         elevation: Optional[Union[StrictFloat, StrictInt]] = None,
-        stateno: Optional[StrictInt] = None,
         name_of_st: Optional[StrictStr] = None,
+        stateno: Optional[StrictInt] = None,
         capital_na: Optional[StrictStr] = None,
         scale: Optional[Union[StrictFloat, StrictInt]] = None,
         rotation: Optional[StrictInt] = None,
@@ -199,10 +199,10 @@ class StateHeadquartersApi:
         :type offset: int
         :param elevation:
         :type elevation: float
-        :param stateno:
-        :type stateno: int
         :param name_of_st:
         :type name_of_st: str
+        :param stateno:
+        :type stateno: int
         :param capital_na:
         :type capital_na: str
         :param scale:
@@ -239,8 +239,8 @@ class StateHeadquartersApi:
             limit=limit,
             offset=offset,
             elevation=elevation,
-            stateno=stateno,
             name_of_st=name_of_st,
+            stateno=stateno,
             capital_na=capital_na,
             scale=scale,
             rotation=rotation,
@@ -276,8 +276,8 @@ class StateHeadquartersApi:
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         elevation: Optional[Union[StrictFloat, StrictInt]] = None,
-        stateno: Optional[StrictInt] = None,
         name_of_st: Optional[StrictStr] = None,
+        stateno: Optional[StrictInt] = None,
         capital_na: Optional[StrictStr] = None,
         scale: Optional[Union[StrictFloat, StrictInt]] = None,
         rotation: Optional[StrictInt] = None,
@@ -311,10 +311,10 @@ class StateHeadquartersApi:
         :type offset: int
         :param elevation:
         :type elevation: float
-        :param stateno:
-        :type stateno: int
         :param name_of_st:
         :type name_of_st: str
+        :param stateno:
+        :type stateno: int
         :param capital_na:
         :type capital_na: str
         :param scale:
@@ -351,8 +351,8 @@ class StateHeadquartersApi:
             limit=limit,
             offset=offset,
             elevation=elevation,
-            stateno=stateno,
             name_of_st=name_of_st,
+            stateno=stateno,
             capital_na=capital_na,
             scale=scale,
             rotation=rotation,
@@ -383,8 +383,8 @@ class StateHeadquartersApi:
         limit,
         offset,
         elevation,
-        stateno,
         name_of_st,
+        stateno,
         capital_na,
         scale,
         rotation,
@@ -437,13 +437,13 @@ class StateHeadquartersApi:
             
             _query_params.append(('Elevation', elevation))
             
-        if stateno is not None:
-            
-            _query_params.append(('STATENO', stateno))
-            
         if name_of_st is not None:
             
             _query_params.append(('NAME_OF_ST', name_of_st))
+            
+        if stateno is not None:
+            
+            _query_params.append(('STATENO', stateno))
             
         if capital_na is not None:
             

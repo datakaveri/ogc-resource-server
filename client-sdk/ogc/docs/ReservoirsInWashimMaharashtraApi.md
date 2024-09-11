@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, wbrscode=wbrscode, dtcode=dtcode, wbclass=wbclass, basin=basin, bacode=bacode, sbcode=sbcode, strucode=strucode, setname=setname, subbasin=subbasin, district=district, state=state, wbname=wbname)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, wbrscode=wbrscode, dtcode=dtcode, basin=basin, wbclass=wbclass, sbcode=sbcode, bacode=bacode, strucode=strucode, setname=setname, subbasin=subbasin, district=district, state=state, wbname=wbname)
 
 Get features from Polygon features of reservoirs in Washim district, Maharashtra
 
@@ -53,10 +53,10 @@ with openapi_client.ApiClient(configuration) as api_client:
     stcode = 'stcode_example' # str |  (optional)
     wbrscode = 'wbrscode_example' # str |  (optional)
     dtcode = 'dtcode_example' # str |  (optional)
-    wbclass = 'wbclass_example' # str |  (optional)
     basin = 'basin_example' # str |  (optional)
-    bacode = 'bacode_example' # str |  (optional)
+    wbclass = 'wbclass_example' # str |  (optional)
     sbcode = 'sbcode_example' # str |  (optional)
+    bacode = 'bacode_example' # str |  (optional)
     strucode = 'strucode_example' # str |  (optional)
     setname = 'setname_example' # str |  (optional)
     subbasin = 'subbasin_example' # str |  (optional)
@@ -66,7 +66,7 @@ with openapi_client.ApiClient(configuration) as api_client:
 
     try:
         # Get features from Polygon features of reservoirs in Washim district, Maharashtra
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, wbrscode=wbrscode, dtcode=dtcode, wbclass=wbclass, basin=basin, bacode=bacode, sbcode=sbcode, strucode=strucode, setname=setname, subbasin=subbasin, district=district, state=state, wbname=wbname)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, wbrscode=wbrscode, dtcode=dtcode, basin=basin, wbclass=wbclass, sbcode=sbcode, bacode=bacode, strucode=strucode, setname=setname, subbasin=subbasin, district=district, state=state, wbname=wbname)
         print("The response of ReservoirsInWashimMaharashtraApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -89,10 +89,10 @@ Name | Type | Description  | Notes
  **stcode** | **str**|  | [optional] 
  **wbrscode** | **str**|  | [optional] 
  **dtcode** | **str**|  | [optional] 
- **wbclass** | **str**|  | [optional] 
  **basin** | **str**|  | [optional] 
- **bacode** | **str**|  | [optional] 
+ **wbclass** | **str**|  | [optional] 
  **sbcode** | **str**|  | [optional] 
+ **bacode** | **str**|  | [optional] 
  **strucode** | **str**|  | [optional] 
  **setname** | **str**|  | [optional] 
  **subbasin** | **str**|  | [optional] 

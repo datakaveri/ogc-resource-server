@@ -56,8 +56,8 @@ class ReservoirsInAndAroundVizianagaramAPApi:
         dtcode: Optional[StrictStr] = None,
         wbclass: Optional[StrictStr] = None,
         basin: Optional[StrictStr] = None,
-        bacode: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
+        bacode: Optional[StrictStr] = None,
         strucode: Optional[StrictStr] = None,
         setname: Optional[StrictStr] = None,
         subbasin: Optional[StrictStr] = None,
@@ -102,10 +102,10 @@ class ReservoirsInAndAroundVizianagaramAPApi:
         :type wbclass: str
         :param basin:
         :type basin: str
-        :param bacode:
-        :type bacode: str
         :param sbcode:
         :type sbcode: str
+        :param bacode:
+        :type bacode: str
         :param strucode:
         :type strucode: str
         :param setname:
@@ -152,8 +152,8 @@ class ReservoirsInAndAroundVizianagaramAPApi:
             dtcode=dtcode,
             wbclass=wbclass,
             basin=basin,
-            bacode=bacode,
             sbcode=sbcode,
+            bacode=bacode,
             strucode=strucode,
             setname=setname,
             subbasin=subbasin,
@@ -196,8 +196,8 @@ class ReservoirsInAndAroundVizianagaramAPApi:
         dtcode: Optional[StrictStr] = None,
         wbclass: Optional[StrictStr] = None,
         basin: Optional[StrictStr] = None,
-        bacode: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
+        bacode: Optional[StrictStr] = None,
         strucode: Optional[StrictStr] = None,
         setname: Optional[StrictStr] = None,
         subbasin: Optional[StrictStr] = None,
@@ -242,10 +242,10 @@ class ReservoirsInAndAroundVizianagaramAPApi:
         :type wbclass: str
         :param basin:
         :type basin: str
-        :param bacode:
-        :type bacode: str
         :param sbcode:
         :type sbcode: str
+        :param bacode:
+        :type bacode: str
         :param strucode:
         :type strucode: str
         :param setname:
@@ -292,8 +292,8 @@ class ReservoirsInAndAroundVizianagaramAPApi:
             dtcode=dtcode,
             wbclass=wbclass,
             basin=basin,
-            bacode=bacode,
             sbcode=sbcode,
+            bacode=bacode,
             strucode=strucode,
             setname=setname,
             subbasin=subbasin,
@@ -336,8 +336,8 @@ class ReservoirsInAndAroundVizianagaramAPApi:
         dtcode: Optional[StrictStr] = None,
         wbclass: Optional[StrictStr] = None,
         basin: Optional[StrictStr] = None,
-        bacode: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
+        bacode: Optional[StrictStr] = None,
         strucode: Optional[StrictStr] = None,
         setname: Optional[StrictStr] = None,
         subbasin: Optional[StrictStr] = None,
@@ -382,10 +382,10 @@ class ReservoirsInAndAroundVizianagaramAPApi:
         :type wbclass: str
         :param basin:
         :type basin: str
-        :param bacode:
-        :type bacode: str
         :param sbcode:
         :type sbcode: str
+        :param bacode:
+        :type bacode: str
         :param strucode:
         :type strucode: str
         :param setname:
@@ -432,8 +432,8 @@ class ReservoirsInAndAroundVizianagaramAPApi:
             dtcode=dtcode,
             wbclass=wbclass,
             basin=basin,
-            bacode=bacode,
             sbcode=sbcode,
+            bacode=bacode,
             strucode=strucode,
             setname=setname,
             subbasin=subbasin,
@@ -471,8 +471,8 @@ class ReservoirsInAndAroundVizianagaramAPApi:
         dtcode,
         wbclass,
         basin,
-        bacode,
         sbcode,
+        bacode,
         strucode,
         setname,
         subbasin,
@@ -544,13 +544,13 @@ class ReservoirsInAndAroundVizianagaramAPApi:
             
             _query_params.append(('basin', basin))
             
-        if bacode is not None:
-            
-            _query_params.append(('bacode', bacode))
-            
         if sbcode is not None:
             
             _query_params.append(('sbcode', sbcode))
+            
+        if bacode is not None:
+            
+            _query_params.append(('bacode', bacode))
             
         if strucode is not None:
             

@@ -58,12 +58,12 @@ class DamLocationsInWashimMaharashtraApi:
         spillway_1: Optional[StrictStr] = None,
         spillway_3: Optional[StrictInt] = None,
         res_area_s: Optional[Union[StrictFloat, StrictInt]] = None,
-        canal_gate: Optional[StrictInt] = None,
         dam_perlia: Optional[StrictStr] = None,
         spillway_2: Optional[StrictStr] = None,
+        canal_gate: Optional[StrictInt] = None,
         dtcode: Optional[StrictStr] = None,
-        spillway_4: Optional[Union[StrictFloat, StrictInt]] = None,
         dam_length: Optional[StrictStr] = None,
+        spillway_4: Optional[Union[StrictFloat, StrictInt]] = None,
         spillway_t: Optional[StrictStr] = None,
         max_height: Optional[StrictStr] = None,
         type: Optional[StrictStr] = None,
@@ -76,8 +76,8 @@ class DamLocationsInWashimMaharashtraApi:
         completion: Optional[StrictStr] = None,
         total_volu: Optional[StrictStr] = None,
         purpose: Optional[StrictStr] = None,
-        design_flo: Optional[StrictStr] = None,
         basin: Optional[StrictStr] = None,
+        design_flo: Optional[StrictStr] = None,
         bacode: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
         nearest_ci: Optional[StrictStr] = None,
@@ -136,18 +136,18 @@ class DamLocationsInWashimMaharashtraApi:
         :type spillway_3: int
         :param res_area_s:
         :type res_area_s: float
-        :param canal_gate:
-        :type canal_gate: int
         :param dam_perlia:
         :type dam_perlia: str
         :param spillway_2:
         :type spillway_2: str
+        :param canal_gate:
+        :type canal_gate: int
         :param dtcode:
         :type dtcode: str
-        :param spillway_4:
-        :type spillway_4: float
         :param dam_length:
         :type dam_length: str
+        :param spillway_4:
+        :type spillway_4: float
         :param spillway_t:
         :type spillway_t: str
         :param max_height:
@@ -172,10 +172,10 @@ class DamLocationsInWashimMaharashtraApi:
         :type total_volu: str
         :param purpose:
         :type purpose: str
-        :param design_flo:
-        :type design_flo: str
         :param basin:
         :type basin: str
+        :param design_flo:
+        :type design_flo: str
         :param bacode:
         :type bacode: str
         :param sbcode:
@@ -244,12 +244,12 @@ class DamLocationsInWashimMaharashtraApi:
             spillway_1=spillway_1,
             spillway_3=spillway_3,
             res_area_s=res_area_s,
-            canal_gate=canal_gate,
             dam_perlia=dam_perlia,
             spillway_2=spillway_2,
+            canal_gate=canal_gate,
             dtcode=dtcode,
-            spillway_4=spillway_4,
             dam_length=dam_length,
+            spillway_4=spillway_4,
             spillway_t=spillway_t,
             max_height=max_height,
             type=type,
@@ -262,8 +262,8 @@ class DamLocationsInWashimMaharashtraApi:
             completion=completion,
             total_volu=total_volu,
             purpose=purpose,
-            design_flo=design_flo,
             basin=basin,
+            design_flo=design_flo,
             bacode=bacode,
             sbcode=sbcode,
             nearest_ci=nearest_ci,
@@ -318,12 +318,12 @@ class DamLocationsInWashimMaharashtraApi:
         spillway_1: Optional[StrictStr] = None,
         spillway_3: Optional[StrictInt] = None,
         res_area_s: Optional[Union[StrictFloat, StrictInt]] = None,
-        canal_gate: Optional[StrictInt] = None,
         dam_perlia: Optional[StrictStr] = None,
         spillway_2: Optional[StrictStr] = None,
+        canal_gate: Optional[StrictInt] = None,
         dtcode: Optional[StrictStr] = None,
-        spillway_4: Optional[Union[StrictFloat, StrictInt]] = None,
         dam_length: Optional[StrictStr] = None,
+        spillway_4: Optional[Union[StrictFloat, StrictInt]] = None,
         spillway_t: Optional[StrictStr] = None,
         max_height: Optional[StrictStr] = None,
         type: Optional[StrictStr] = None,
@@ -336,8 +336,8 @@ class DamLocationsInWashimMaharashtraApi:
         completion: Optional[StrictStr] = None,
         total_volu: Optional[StrictStr] = None,
         purpose: Optional[StrictStr] = None,
-        design_flo: Optional[StrictStr] = None,
         basin: Optional[StrictStr] = None,
+        design_flo: Optional[StrictStr] = None,
         bacode: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
         nearest_ci: Optional[StrictStr] = None,
@@ -396,18 +396,18 @@ class DamLocationsInWashimMaharashtraApi:
         :type spillway_3: int
         :param res_area_s:
         :type res_area_s: float
-        :param canal_gate:
-        :type canal_gate: int
         :param dam_perlia:
         :type dam_perlia: str
         :param spillway_2:
         :type spillway_2: str
+        :param canal_gate:
+        :type canal_gate: int
         :param dtcode:
         :type dtcode: str
-        :param spillway_4:
-        :type spillway_4: float
         :param dam_length:
         :type dam_length: str
+        :param spillway_4:
+        :type spillway_4: float
         :param spillway_t:
         :type spillway_t: str
         :param max_height:
@@ -432,10 +432,10 @@ class DamLocationsInWashimMaharashtraApi:
         :type total_volu: str
         :param purpose:
         :type purpose: str
-        :param design_flo:
-        :type design_flo: str
         :param basin:
         :type basin: str
+        :param design_flo:
+        :type design_flo: str
         :param bacode:
         :type bacode: str
         :param sbcode:
@@ -504,12 +504,12 @@ class DamLocationsInWashimMaharashtraApi:
             spillway_1=spillway_1,
             spillway_3=spillway_3,
             res_area_s=res_area_s,
-            canal_gate=canal_gate,
             dam_perlia=dam_perlia,
             spillway_2=spillway_2,
+            canal_gate=canal_gate,
             dtcode=dtcode,
-            spillway_4=spillway_4,
             dam_length=dam_length,
+            spillway_4=spillway_4,
             spillway_t=spillway_t,
             max_height=max_height,
             type=type,
@@ -522,8 +522,8 @@ class DamLocationsInWashimMaharashtraApi:
             completion=completion,
             total_volu=total_volu,
             purpose=purpose,
-            design_flo=design_flo,
             basin=basin,
+            design_flo=design_flo,
             bacode=bacode,
             sbcode=sbcode,
             nearest_ci=nearest_ci,
@@ -578,12 +578,12 @@ class DamLocationsInWashimMaharashtraApi:
         spillway_1: Optional[StrictStr] = None,
         spillway_3: Optional[StrictInt] = None,
         res_area_s: Optional[Union[StrictFloat, StrictInt]] = None,
-        canal_gate: Optional[StrictInt] = None,
         dam_perlia: Optional[StrictStr] = None,
         spillway_2: Optional[StrictStr] = None,
+        canal_gate: Optional[StrictInt] = None,
         dtcode: Optional[StrictStr] = None,
-        spillway_4: Optional[Union[StrictFloat, StrictInt]] = None,
         dam_length: Optional[StrictStr] = None,
+        spillway_4: Optional[Union[StrictFloat, StrictInt]] = None,
         spillway_t: Optional[StrictStr] = None,
         max_height: Optional[StrictStr] = None,
         type: Optional[StrictStr] = None,
@@ -596,8 +596,8 @@ class DamLocationsInWashimMaharashtraApi:
         completion: Optional[StrictStr] = None,
         total_volu: Optional[StrictStr] = None,
         purpose: Optional[StrictStr] = None,
-        design_flo: Optional[StrictStr] = None,
         basin: Optional[StrictStr] = None,
+        design_flo: Optional[StrictStr] = None,
         bacode: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
         nearest_ci: Optional[StrictStr] = None,
@@ -656,18 +656,18 @@ class DamLocationsInWashimMaharashtraApi:
         :type spillway_3: int
         :param res_area_s:
         :type res_area_s: float
-        :param canal_gate:
-        :type canal_gate: int
         :param dam_perlia:
         :type dam_perlia: str
         :param spillway_2:
         :type spillway_2: str
+        :param canal_gate:
+        :type canal_gate: int
         :param dtcode:
         :type dtcode: str
-        :param spillway_4:
-        :type spillway_4: float
         :param dam_length:
         :type dam_length: str
+        :param spillway_4:
+        :type spillway_4: float
         :param spillway_t:
         :type spillway_t: str
         :param max_height:
@@ -692,10 +692,10 @@ class DamLocationsInWashimMaharashtraApi:
         :type total_volu: str
         :param purpose:
         :type purpose: str
-        :param design_flo:
-        :type design_flo: str
         :param basin:
         :type basin: str
+        :param design_flo:
+        :type design_flo: str
         :param bacode:
         :type bacode: str
         :param sbcode:
@@ -764,12 +764,12 @@ class DamLocationsInWashimMaharashtraApi:
             spillway_1=spillway_1,
             spillway_3=spillway_3,
             res_area_s=res_area_s,
-            canal_gate=canal_gate,
             dam_perlia=dam_perlia,
             spillway_2=spillway_2,
+            canal_gate=canal_gate,
             dtcode=dtcode,
-            spillway_4=spillway_4,
             dam_length=dam_length,
+            spillway_4=spillway_4,
             spillway_t=spillway_t,
             max_height=max_height,
             type=type,
@@ -782,8 +782,8 @@ class DamLocationsInWashimMaharashtraApi:
             completion=completion,
             total_volu=total_volu,
             purpose=purpose,
-            design_flo=design_flo,
             basin=basin,
+            design_flo=design_flo,
             bacode=bacode,
             sbcode=sbcode,
             nearest_ci=nearest_ci,
@@ -833,12 +833,12 @@ class DamLocationsInWashimMaharashtraApi:
         spillway_1,
         spillway_3,
         res_area_s,
-        canal_gate,
         dam_perlia,
         spillway_2,
+        canal_gate,
         dtcode,
-        spillway_4,
         dam_length,
+        spillway_4,
         spillway_t,
         max_height,
         type,
@@ -851,8 +851,8 @@ class DamLocationsInWashimMaharashtraApi:
         completion,
         total_volu,
         purpose,
-        design_flo,
         basin,
+        design_flo,
         bacode,
         sbcode,
         nearest_ci,
@@ -942,10 +942,6 @@ class DamLocationsInWashimMaharashtraApi:
             
             _query_params.append(('res_area_s', res_area_s))
             
-        if canal_gate is not None:
-            
-            _query_params.append(('canal_gate', canal_gate))
-            
         if dam_perlia is not None:
             
             _query_params.append(('dam_perlia', dam_perlia))
@@ -954,17 +950,21 @@ class DamLocationsInWashimMaharashtraApi:
             
             _query_params.append(('spillway_2', spillway_2))
             
+        if canal_gate is not None:
+            
+            _query_params.append(('canal_gate', canal_gate))
+            
         if dtcode is not None:
             
             _query_params.append(('dtcode', dtcode))
             
-        if spillway_4 is not None:
-            
-            _query_params.append(('spillway_4', spillway_4))
-            
         if dam_length is not None:
             
             _query_params.append(('dam_length', dam_length))
+            
+        if spillway_4 is not None:
+            
+            _query_params.append(('spillway_4', spillway_4))
             
         if spillway_t is not None:
             
@@ -1014,13 +1014,13 @@ class DamLocationsInWashimMaharashtraApi:
             
             _query_params.append(('Purpose', purpose))
             
-        if design_flo is not None:
-            
-            _query_params.append(('design_flo', design_flo))
-            
         if basin is not None:
             
             _query_params.append(('basin', basin))
+            
+        if design_flo is not None:
+            
+            _query_params.append(('design_flo', design_flo))
             
         if bacode is not None:
             

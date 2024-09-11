@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, prjcode=prjcode, cancode=cancode, prjname=prjname, canname=canname, state=state, can_type=can_type)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, prjcode=prjcode, cancode=cancode, prjname=prjname, state=state, canname=canname, can_type=can_type)
 
 Get features from Line features representing canals in and around Vizianagaram district, Andhra Pradesh
 
@@ -53,13 +53,13 @@ with openapi_client.ApiClient(configuration) as api_client:
     prjcode = 'prjcode_example' # str |  (optional)
     cancode = 'cancode_example' # str |  (optional)
     prjname = 'prjname_example' # str |  (optional)
-    canname = 'canname_example' # str |  (optional)
     state = 'state_example' # str |  (optional)
+    canname = 'canname_example' # str |  (optional)
     can_type = 'can_type_example' # str |  (optional)
 
     try:
         # Get features from Line features representing canals in and around Vizianagaram district, Andhra Pradesh
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, prjcode=prjcode, cancode=cancode, prjname=prjname, canname=canname, state=state, can_type=can_type)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, prjcode=prjcode, cancode=cancode, prjname=prjname, state=state, canname=canname, can_type=can_type)
         print("The response of CanalsInAndAroundVizianagaramAPApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -82,8 +82,8 @@ Name | Type | Description  | Notes
  **prjcode** | **str**|  | [optional] 
  **cancode** | **str**|  | [optional] 
  **prjname** | **str**|  | [optional] 
- **canname** | **str**|  | [optional] 
  **state** | **str**|  | [optional] 
+ **canname** | **str**|  | [optional] 
  **can_type** | **str**|  | [optional] 
 
 ### Return type

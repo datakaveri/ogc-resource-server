@@ -66,8 +66,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         bwa_head_r: Optional[StrictInt] = None,
         bwa_spil_n: Optional[StrictInt] = None,
         bwa_head_1: Optional[StrictInt] = None,
-        bwa_spil_l: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_crt_ve: Optional[StrictStr] = None,
+        bwa_spil_l: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_perlia: Optional[StrictStr] = None,
         rivcode: Optional[StrictStr] = None,
         bacode: Optional[StrictStr] = None,
@@ -80,8 +80,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         bwa_cmp_yr: Optional[StrictStr] = None,
         bwa_ses_zo: Optional[StrictStr] = None,
         bwa_lat: Optional[Union[StrictFloat, StrictInt]] = None,
-        bwa_wd_rb: Optional[StrictInt] = None,
         bwa_disc_c: Optional[StrictStr] = None,
+        bwa_wd_rb: Optional[StrictInt] = None,
         bwa_disc_d: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
@@ -141,10 +141,10 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type bwa_spil_n: int
         :param bwa_head_1:
         :type bwa_head_1: int
-        :param bwa_spil_l:
-        :type bwa_spil_l: float
         :param bwa_crt_ve:
         :type bwa_crt_ve: str
+        :param bwa_spil_l:
+        :type bwa_spil_l: float
         :param bwa_perlia:
         :type bwa_perlia: str
         :param rivcode:
@@ -169,10 +169,10 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type bwa_ses_zo: str
         :param bwa_lat:
         :type bwa_lat: float
-        :param bwa_wd_rb:
-        :type bwa_wd_rb: int
         :param bwa_disc_c:
         :type bwa_disc_c: str
+        :param bwa_wd_rb:
+        :type bwa_wd_rb: int
         :param bwa_disc_d:
         :type bwa_disc_d: float
         :param _request_timeout: timeout setting for this request. If one
@@ -219,8 +219,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             bwa_head_r=bwa_head_r,
             bwa_spil_n=bwa_spil_n,
             bwa_head_1=bwa_head_1,
-            bwa_spil_l=bwa_spil_l,
             bwa_crt_ve=bwa_crt_ve,
+            bwa_spil_l=bwa_spil_l,
             bwa_perlia=bwa_perlia,
             rivcode=rivcode,
             bacode=bacode,
@@ -233,8 +233,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             bwa_cmp_yr=bwa_cmp_yr,
             bwa_ses_zo=bwa_ses_zo,
             bwa_lat=bwa_lat,
-            bwa_wd_rb=bwa_wd_rb,
             bwa_disc_c=bwa_disc_c,
+            bwa_wd_rb=bwa_wd_rb,
             bwa_disc_d=bwa_disc_d,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -282,8 +282,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         bwa_head_r: Optional[StrictInt] = None,
         bwa_spil_n: Optional[StrictInt] = None,
         bwa_head_1: Optional[StrictInt] = None,
-        bwa_spil_l: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_crt_ve: Optional[StrictStr] = None,
+        bwa_spil_l: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_perlia: Optional[StrictStr] = None,
         rivcode: Optional[StrictStr] = None,
         bacode: Optional[StrictStr] = None,
@@ -296,8 +296,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         bwa_cmp_yr: Optional[StrictStr] = None,
         bwa_ses_zo: Optional[StrictStr] = None,
         bwa_lat: Optional[Union[StrictFloat, StrictInt]] = None,
-        bwa_wd_rb: Optional[StrictInt] = None,
         bwa_disc_c: Optional[StrictStr] = None,
+        bwa_wd_rb: Optional[StrictInt] = None,
         bwa_disc_d: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
@@ -357,10 +357,10 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type bwa_spil_n: int
         :param bwa_head_1:
         :type bwa_head_1: int
-        :param bwa_spil_l:
-        :type bwa_spil_l: float
         :param bwa_crt_ve:
         :type bwa_crt_ve: str
+        :param bwa_spil_l:
+        :type bwa_spil_l: float
         :param bwa_perlia:
         :type bwa_perlia: str
         :param rivcode:
@@ -385,10 +385,10 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type bwa_ses_zo: str
         :param bwa_lat:
         :type bwa_lat: float
-        :param bwa_wd_rb:
-        :type bwa_wd_rb: int
         :param bwa_disc_c:
         :type bwa_disc_c: str
+        :param bwa_wd_rb:
+        :type bwa_wd_rb: int
         :param bwa_disc_d:
         :type bwa_disc_d: float
         :param _request_timeout: timeout setting for this request. If one
@@ -435,8 +435,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             bwa_head_r=bwa_head_r,
             bwa_spil_n=bwa_spil_n,
             bwa_head_1=bwa_head_1,
-            bwa_spil_l=bwa_spil_l,
             bwa_crt_ve=bwa_crt_ve,
+            bwa_spil_l=bwa_spil_l,
             bwa_perlia=bwa_perlia,
             rivcode=rivcode,
             bacode=bacode,
@@ -449,8 +449,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             bwa_cmp_yr=bwa_cmp_yr,
             bwa_ses_zo=bwa_ses_zo,
             bwa_lat=bwa_lat,
-            bwa_wd_rb=bwa_wd_rb,
             bwa_disc_c=bwa_disc_c,
+            bwa_wd_rb=bwa_wd_rb,
             bwa_disc_d=bwa_disc_d,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -498,8 +498,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         bwa_head_r: Optional[StrictInt] = None,
         bwa_spil_n: Optional[StrictInt] = None,
         bwa_head_1: Optional[StrictInt] = None,
-        bwa_spil_l: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_crt_ve: Optional[StrictStr] = None,
+        bwa_spil_l: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_perlia: Optional[StrictStr] = None,
         rivcode: Optional[StrictStr] = None,
         bacode: Optional[StrictStr] = None,
@@ -512,8 +512,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         bwa_cmp_yr: Optional[StrictStr] = None,
         bwa_ses_zo: Optional[StrictStr] = None,
         bwa_lat: Optional[Union[StrictFloat, StrictInt]] = None,
-        bwa_wd_rb: Optional[StrictInt] = None,
         bwa_disc_c: Optional[StrictStr] = None,
+        bwa_wd_rb: Optional[StrictInt] = None,
         bwa_disc_d: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
@@ -573,10 +573,10 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type bwa_spil_n: int
         :param bwa_head_1:
         :type bwa_head_1: int
-        :param bwa_spil_l:
-        :type bwa_spil_l: float
         :param bwa_crt_ve:
         :type bwa_crt_ve: str
+        :param bwa_spil_l:
+        :type bwa_spil_l: float
         :param bwa_perlia:
         :type bwa_perlia: str
         :param rivcode:
@@ -601,10 +601,10 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type bwa_ses_zo: str
         :param bwa_lat:
         :type bwa_lat: float
-        :param bwa_wd_rb:
-        :type bwa_wd_rb: int
         :param bwa_disc_c:
         :type bwa_disc_c: str
+        :param bwa_wd_rb:
+        :type bwa_wd_rb: int
         :param bwa_disc_d:
         :type bwa_disc_d: float
         :param _request_timeout: timeout setting for this request. If one
@@ -651,8 +651,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             bwa_head_r=bwa_head_r,
             bwa_spil_n=bwa_spil_n,
             bwa_head_1=bwa_head_1,
-            bwa_spil_l=bwa_spil_l,
             bwa_crt_ve=bwa_crt_ve,
+            bwa_spil_l=bwa_spil_l,
             bwa_perlia=bwa_perlia,
             rivcode=rivcode,
             bacode=bacode,
@@ -665,8 +665,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             bwa_cmp_yr=bwa_cmp_yr,
             bwa_ses_zo=bwa_ses_zo,
             bwa_lat=bwa_lat,
-            bwa_wd_rb=bwa_wd_rb,
             bwa_disc_c=bwa_disc_c,
+            bwa_wd_rb=bwa_wd_rb,
             bwa_disc_d=bwa_disc_d,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -709,8 +709,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         bwa_head_r,
         bwa_spil_n,
         bwa_head_1,
-        bwa_spil_l,
         bwa_crt_ve,
+        bwa_spil_l,
         bwa_perlia,
         rivcode,
         bacode,
@@ -723,8 +723,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         bwa_cmp_yr,
         bwa_ses_zo,
         bwa_lat,
-        bwa_wd_rb,
         bwa_disc_c,
+        bwa_wd_rb,
         bwa_disc_d,
         _request_auth,
         _content_type,
@@ -831,13 +831,13 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             
             _query_params.append(('bwa_head_1', bwa_head_1))
             
-        if bwa_spil_l is not None:
-            
-            _query_params.append(('bwa_spil_l', bwa_spil_l))
-            
         if bwa_crt_ve is not None:
             
             _query_params.append(('bwa_crt_ve', bwa_crt_ve))
+            
+        if bwa_spil_l is not None:
+            
+            _query_params.append(('bwa_spil_l', bwa_spil_l))
             
         if bwa_perlia is not None:
             
@@ -887,13 +887,13 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             
             _query_params.append(('bwa_lat', bwa_lat))
             
-        if bwa_wd_rb is not None:
-            
-            _query_params.append(('bwa_wd_rb', bwa_wd_rb))
-            
         if bwa_disc_c is not None:
             
             _query_params.append(('bwa_disc_c', bwa_disc_c))
+            
+        if bwa_wd_rb is not None:
+            
+            _query_params.append(('bwa_wd_rb', bwa_wd_rb))
             
         if bwa_disc_d is not None:
             

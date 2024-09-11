@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, prjcode=prjcode, perimeter=perimeter, cname=cname, area_ha=area_ha, dist_benf=dist_benf, state=state, type=type, cmdcode=cmdcode, status=status)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, prjcode=prjcode, perimeter=perimeter, cname=cname, dist_benf=dist_benf, area_ha=area_ha, state=state, type=type, cmdcode=cmdcode, status=status)
 
 Get features from Polygon features of irrigation command areas in Washim district, Maharashtra
 
@@ -53,8 +53,8 @@ with openapi_client.ApiClient(configuration) as api_client:
     prjcode = 'prjcode_example' # str |  (optional)
     perimeter = 3.4 # float |  (optional)
     cname = 'cname_example' # str |  (optional)
-    area_ha = 3.4 # float |  (optional)
     dist_benf = 'dist_benf_example' # str |  (optional)
+    area_ha = 3.4 # float |  (optional)
     state = 'state_example' # str |  (optional)
     type = 'type_example' # str |  (optional)
     cmdcode = 'cmdcode_example' # str |  (optional)
@@ -62,7 +62,7 @@ with openapi_client.ApiClient(configuration) as api_client:
 
     try:
         # Get features from Polygon features of irrigation command areas in Washim district, Maharashtra
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, prjcode=prjcode, perimeter=perimeter, cname=cname, area_ha=area_ha, dist_benf=dist_benf, state=state, type=type, cmdcode=cmdcode, status=status)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, prjcode=prjcode, perimeter=perimeter, cname=cname, dist_benf=dist_benf, area_ha=area_ha, state=state, type=type, cmdcode=cmdcode, status=status)
         print("The response of IrrigationCommandAreasInWashimMaharashtraApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -85,8 +85,8 @@ Name | Type | Description  | Notes
  **prjcode** | **str**|  | [optional] 
  **perimeter** | **float**|  | [optional] 
  **cname** | **str**|  | [optional] 
- **area_ha** | **float**|  | [optional] 
  **dist_benf** | **str**|  | [optional] 
+ **area_ha** | **float**|  | [optional] 
  **state** | **str**|  | [optional] 
  **type** | **str**|  | [optional] 
  **cmdcode** | **str**|  | [optional] 

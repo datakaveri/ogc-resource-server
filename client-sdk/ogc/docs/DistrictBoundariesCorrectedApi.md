@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, shape_leng=shape_leng, shape_area=shape_area, state_lgd=state_lgd, state=state, remarks=remarks, district=district, district_l=district_l)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, shape_leng=shape_leng, shape_area=shape_area, state=state, state_lgd=state_lgd, remarks=remarks, district=district, district_l=district_l)
 
 Get features from Fetched from Administrative_Boundary_Database_For_Entire_Country_Upto_Taluk_level_with_HQ
 
@@ -52,15 +52,15 @@ with openapi_client.ApiClient(configuration) as api_client:
     offset = 1 # int | OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10. (optional) (default to 1)
     shape_leng = 3.4 # float |  (optional)
     shape_area = 3.4 # float |  (optional)
-    state_lgd = 56 # int |  (optional)
     state = 'state_example' # str |  (optional)
+    state_lgd = 56 # int |  (optional)
     remarks = 'remarks_example' # str |  (optional)
     district = 'district_example' # str |  (optional)
     district_l = 'district_l_example' # str |  (optional)
 
     try:
         # Get features from Fetched from Administrative_Boundary_Database_For_Entire_Country_Upto_Taluk_level_with_HQ
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, shape_leng=shape_leng, shape_area=shape_area, state_lgd=state_lgd, state=state, remarks=remarks, district=district, district_l=district_l)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, shape_leng=shape_leng, shape_area=shape_area, state=state, state_lgd=state_lgd, remarks=remarks, district=district, district_l=district_l)
         print("The response of DistrictBoundariesCorrectedApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -82,8 +82,8 @@ Name | Type | Description  | Notes
  **offset** | **int**| OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum &#x3D; 0. Maximum &#x3D; 1000. Default &#x3D; 10. | [optional] [default to 1]
  **shape_leng** | **float**|  | [optional] 
  **shape_area** | **float**|  | [optional] 
- **state_lgd** | **int**|  | [optional] 
  **state** | **str**|  | [optional] 
+ **state_lgd** | **int**|  | [optional] 
  **remarks** | **str**|  | [optional] 
  **district** | **str**|  | [optional] 
  **district_l** | **str**|  | [optional] 

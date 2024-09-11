@@ -53,8 +53,8 @@ class DistrictBoundariesCorrectedApi:
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         shape_leng: Optional[Union[StrictFloat, StrictInt]] = None,
         shape_area: Optional[Union[StrictFloat, StrictInt]] = None,
-        state_lgd: Optional[StrictInt] = None,
         state: Optional[StrictStr] = None,
+        state_lgd: Optional[StrictInt] = None,
         remarks: Optional[StrictStr] = None,
         district: Optional[StrictStr] = None,
         district_l: Optional[StrictStr] = None,
@@ -90,10 +90,10 @@ class DistrictBoundariesCorrectedApi:
         :type shape_leng: float
         :param shape_area:
         :type shape_area: float
-        :param state_lgd:
-        :type state_lgd: int
         :param state:
         :type state: str
+        :param state_lgd:
+        :type state_lgd: int
         :param remarks:
         :type remarks: str
         :param district:
@@ -131,8 +131,8 @@ class DistrictBoundariesCorrectedApi:
             offset=offset,
             shape_leng=shape_leng,
             shape_area=shape_area,
-            state_lgd=state_lgd,
             state=state,
+            state_lgd=state_lgd,
             remarks=remarks,
             district=district,
             district_l=district_l,
@@ -169,8 +169,8 @@ class DistrictBoundariesCorrectedApi:
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         shape_leng: Optional[Union[StrictFloat, StrictInt]] = None,
         shape_area: Optional[Union[StrictFloat, StrictInt]] = None,
-        state_lgd: Optional[StrictInt] = None,
         state: Optional[StrictStr] = None,
+        state_lgd: Optional[StrictInt] = None,
         remarks: Optional[StrictStr] = None,
         district: Optional[StrictStr] = None,
         district_l: Optional[StrictStr] = None,
@@ -206,10 +206,10 @@ class DistrictBoundariesCorrectedApi:
         :type shape_leng: float
         :param shape_area:
         :type shape_area: float
-        :param state_lgd:
-        :type state_lgd: int
         :param state:
         :type state: str
+        :param state_lgd:
+        :type state_lgd: int
         :param remarks:
         :type remarks: str
         :param district:
@@ -247,8 +247,8 @@ class DistrictBoundariesCorrectedApi:
             offset=offset,
             shape_leng=shape_leng,
             shape_area=shape_area,
-            state_lgd=state_lgd,
             state=state,
+            state_lgd=state_lgd,
             remarks=remarks,
             district=district,
             district_l=district_l,
@@ -285,8 +285,8 @@ class DistrictBoundariesCorrectedApi:
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         shape_leng: Optional[Union[StrictFloat, StrictInt]] = None,
         shape_area: Optional[Union[StrictFloat, StrictInt]] = None,
-        state_lgd: Optional[StrictInt] = None,
         state: Optional[StrictStr] = None,
+        state_lgd: Optional[StrictInt] = None,
         remarks: Optional[StrictStr] = None,
         district: Optional[StrictStr] = None,
         district_l: Optional[StrictStr] = None,
@@ -322,10 +322,10 @@ class DistrictBoundariesCorrectedApi:
         :type shape_leng: float
         :param shape_area:
         :type shape_area: float
-        :param state_lgd:
-        :type state_lgd: int
         :param state:
         :type state: str
+        :param state_lgd:
+        :type state_lgd: int
         :param remarks:
         :type remarks: str
         :param district:
@@ -363,8 +363,8 @@ class DistrictBoundariesCorrectedApi:
             offset=offset,
             shape_leng=shape_leng,
             shape_area=shape_area,
-            state_lgd=state_lgd,
             state=state,
+            state_lgd=state_lgd,
             remarks=remarks,
             district=district,
             district_l=district_l,
@@ -396,8 +396,8 @@ class DistrictBoundariesCorrectedApi:
         offset,
         shape_leng,
         shape_area,
-        state_lgd,
         state,
+        state_lgd,
         remarks,
         district,
         district_l,
@@ -454,13 +454,13 @@ class DistrictBoundariesCorrectedApi:
             
             _query_params.append(('Shape_Area', shape_area))
             
-        if state_lgd is not None:
-            
-            _query_params.append(('State_LGD', state_lgd))
-            
         if state is not None:
             
             _query_params.append(('STATE', state))
+            
+        if state_lgd is not None:
+            
+            _query_params.append(('State_LGD', state_lgd))
             
         if remarks is not None:
             

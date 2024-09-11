@@ -60,21 +60,21 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
-        wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
+        wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
-        non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
+        non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         f_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_vt: Optional[StrictStr] = None,
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_conc: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gimas: Optional[Union[StrictFloat, StrictInt]] = None,
         sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_dt: Optional[StrictStr] = None,
         mow_wood: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -90,27 +90,27 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__9: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_3_: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_5_: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         os_non: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_3: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
         no_hh: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -145,8 +145,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         marg_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_32: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
         p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_32: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_3_r: Optional[Union[StrictFloat, StrictInt]] = None,
         f_06: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -158,15 +158,15 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         nhh_hbfw_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_02: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_4: Optional[Union[StrictFloat, StrictInt]] = None,
-        os_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_3: Optional[Union[StrictFloat, StrictInt]] = None,
+        os_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_1: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_0: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -174,8 +174,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         margwork_5: Optional[Union[StrictFloat, StrictInt]] = None,
         f_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_kr: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -187,8 +187,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         tot_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         m_06: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -237,8 +237,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         m_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_op: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        name_dt: Optional[StrictStr] = None,
         marg_ot_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        name_dt: Optional[StrictStr] = None,
         marg_cl_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gtb: Optional[Union[StrictFloat, StrictInt]] = None,
         m_st: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -252,8 +252,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         main_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_se: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mud: Optional[Union[StrictFloat, StrictInt]] = None,
-        aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
+        aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_wb: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -262,20 +262,20 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         total: Optional[StrictStr] = None,
         msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
-        ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_st: Optional[StrictStr] = None,
         pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -326,20 +326,20 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type non_work_p: float
         :param marg_ot_32:
         :type marg_ot_32: float
-        :param wwoc_nd:
-        :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
+        :param wwoc_nd:
+        :type wwoc_nd: float
         :param tot_p:
         :type tot_p: float
         :param non_work_m:
         :type non_work_m: float
         :param mof_aom:
         :type mof_aom: float
-        :param non_work_f:
-        :type non_work_f: float
         :param mof_mft:
         :type mof_mft: float
+        :param non_work_f:
+        :type non_work_f: float
         :param f_ill:
         :type f_ill: float
         :param mdds_vt:
@@ -350,12 +350,12 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type main_cl_p: float
         :param mor_conc:
         :type mor_conc: float
-        :param hh_tscs_uc:
-        :type hh_tscs_uc: float
         :param mow_gimas:
         :type mow_gimas: float
         :param sl_nsrbh:
         :type sl_nsrbh: float
+        :param hh_tscs_uc:
+        :type hh_tscs_uc: float
         :param kf_hk:
         :type kf_hk: float
         :param mdds_dt:
@@ -386,10 +386,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param hh_cond__8:
-        :type hh_cond__8: float
         :param mof_cem:
         :type mof_cem: float
+        :param hh_cond__8:
+        :type hh_cond__8: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -402,20 +402,20 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type marg_cl_3_: float
         :param mc_5_:
         :type mc_5_: float
-        :param hhs_4:
-        :type hhs_4: float
         :param mainwork_m:
         :type mainwork_m: float
+        :param hhs_4:
+        :type hhs_4: float
         :param hhs_5:
         :type hhs_5: float
         :param fpfl_pss:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param mow_mub:
-        :type mow_mub: float
         :param hh_tscs_sp:
         :type hh_tscs_sp: float
+        :param mow_mub:
+        :type mow_mub: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -424,10 +424,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type mor_mmt: float
         :param hhs_1:
         :type hhs_1: float
-        :param hhs_2:
-        :type hhs_2: float
         :param os_non:
         :type os_non: float
+        :param hhs_2:
+        :type hhs_2: float
         :param hhs_3:
         :type hhs_3: float
         :param main_cl_m:
@@ -496,10 +496,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type marg_hh_32: float
         :param marg_cl_p:
         :type marg_cl_p: float
-        :param marg_al_31:
-        :type marg_al_31: float
         :param p_sc:
         :type p_sc: float
+        :param marg_al_31:
+        :type marg_al_31: float
         :param marg_al_32:
         :type marg_al_32: float
         :param ndr_3_r:
@@ -522,10 +522,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type margwork_p: float
         :param margwork_m:
         :type margwork_m: float
-        :param marg_al_01:
-        :type marg_al_01: float
         :param ldws_np:
         :type ldws_np: float
+        :param marg_al_01:
+        :type marg_al_01: float
         :param f_st:
         :type f_st: float
         :param main_al_p:
@@ -536,10 +536,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type marg_al_02: float
         :param margwork_4:
         :type margwork_4: float
-        :param os_ao:
-        :type os_ao: float
         :param margwork_3:
         :type margwork_3: float
+        :param os_ao:
+        :type os_ao: float
         :param margwork_2:
         :type margwork_2: float
         :param margwork_1:
@@ -554,10 +554,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type f_lit: float
         :param msl_kr:
         :type msl_kr: float
-        :param mow_pl_pol:
-        :type mow_pl_pol: float
         :param m_ill:
         :type m_ill: float
+        :param mow_pl_pol:
+        :type mow_pl_pol: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
         :param mow_snpwm:
@@ -580,10 +580,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type tot_work_m: float
         :param m_06:
         :type m_06: float
-        :param marg_ot_m:
-        :type marg_ot_m: float
         :param tot_work_f:
         :type tot_work_f: float
+        :param marg_ot_m:
+        :type marg_ot_m: float
         :param main_al_m:
         :type main_al_m: float
         :param main_al_f:
@@ -680,10 +680,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type ans_op: float
         :param marg_ot_02:
         :type marg_ot_02: float
-        :param name_dt:
-        :type name_dt: str
         :param marg_ot_01:
         :type marg_ot_01: float
+        :param name_dt:
+        :type name_dt: str
         :param marg_cl_0_:
         :type marg_cl_0_: float
         :param mow_gtb:
@@ -710,10 +710,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type msl_se: float
         :param mof_mud:
         :type mof_mud: float
-        :param aos_smm:
-        :type aos_smm: float
         :param hhs_6_8:
         :type hhs_6_8: float
+        :param aos_smm:
+        :type aos_smm: float
         :param mof_wb:
         :type mof_wb: float
         :param mor_gr_th_:
@@ -730,34 +730,34 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type msdw_os: float
         :param tfufc_nc:
         :type tfufc_nc: float
-        :param marg_al_f:
-        :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
+        :param marg_al_f:
+        :type marg_al_f: float
+        :param hh_cond_11:
+        :type hh_cond_11: float
         :param m_lit:
         :type m_lit: float
         :param mc_1:
         :type mc_1: float
-        :param hh_cond_11:
-        :type hh_cond_11: float
+        :param hh_tscs_ns:
+        :type hh_tscs_ns: float
         :param marg_al_m:
         :type marg_al_m: float
         :param mc_2:
         :type mc_2: float
-        :param hh_tscs_ns:
-        :type hh_tscs_ns: float
-        :param mc_3:
-        :type mc_3: float
         :param msdw_tfuts:
         :type msdw_tfuts: float
+        :param mc_3:
+        :type mc_3: float
         :param hh_cond_10:
         :type hh_cond_10: float
         :param mc_4:
         :type mc_4: float
-        :param ldws_wp:
-        :type ldws_wp: float
         :param marg_al_p:
         :type marg_al_p: float
+        :param ldws_wp:
+        :type ldws_wp: float
         :param mof_stone:
         :type mof_stone: float
         :param mdds_st:
@@ -804,21 +804,21 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             ndr_ner2=ndr_ner2,
             non_work_p=non_work_p,
             marg_ot_32=marg_ot_32,
-            wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
+            wwoc_nd=wwoc_nd,
             tot_p=tot_p,
             non_work_m=non_work_m,
             mof_aom=mof_aom,
-            non_work_f=non_work_f,
             mof_mft=mof_mft,
+            non_work_f=non_work_f,
             f_ill=f_ill,
             mdds_vt=mdds_vt,
             tfufc_elc=tfufc_elc,
             main_cl_p=main_cl_p,
             mor_conc=mor_conc,
-            hh_tscs_uc=hh_tscs_uc,
             mow_gimas=mow_gimas,
             sl_nsrbh=sl_nsrbh,
+            hh_tscs_uc=hh_tscs_uc,
             kf_hk=kf_hk,
             mdds_dt=mdds_dt,
             mow_wood=mow_wood,
@@ -834,27 +834,27 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            hh_cond__8=hh_cond__8,
             mof_cem=mof_cem,
+            hh_cond__8=hh_cond__8,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
             hh_cond__9=hh_cond__9,
             marg_cl_3_=marg_cl_3_,
             mc_5_=mc_5_,
-            hhs_4=hhs_4,
             mainwork_m=mainwork_m,
+            hhs_4=hhs_4,
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            mow_mub=mow_mub,
             hh_tscs_sp=hh_tscs_sp,
+            mow_mub=mow_mub,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
             hhs_1=hhs_1,
-            hhs_2=hhs_2,
             os_non=os_non,
+            hhs_2=hhs_2,
             hhs_3=hhs_3,
             main_cl_m=main_cl_m,
             no_hh=no_hh,
@@ -889,8 +889,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             marg_cl_m=marg_cl_m,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
-            marg_al_31=marg_al_31,
             p_sc=p_sc,
+            marg_al_31=marg_al_31,
             marg_al_32=marg_al_32,
             ndr_3_r=ndr_3_r,
             f_06=f_06,
@@ -902,15 +902,15 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             nhh_hbfw_2=nhh_hbfw_2,
             margwork_p=margwork_p,
             margwork_m=margwork_m,
-            marg_al_01=marg_al_01,
             ldws_np=ldws_np,
+            marg_al_01=marg_al_01,
             f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
             marg_al_02=marg_al_02,
             margwork_4=margwork_4,
-            os_ao=os_ao,
             margwork_3=margwork_3,
+            os_ao=os_ao,
             margwork_2=margwork_2,
             margwork_1=margwork_1,
             margwork_0=margwork_0,
@@ -918,8 +918,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             margwork_5=margwork_5,
             f_lit=f_lit,
             msl_kr=msl_kr,
-            mow_pl_pol=mow_pl_pol,
             m_ill=m_ill,
+            mow_pl_pol=mow_pl_pol,
             tfufc_lpg_=tfufc_lpg_,
             mow_snpwm=mow_snpwm,
             tfufc_cc=tfufc_cc,
@@ -931,8 +931,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             tot_work_p=tot_work_p,
             tot_work_m=tot_work_m,
             m_06=m_06,
-            marg_ot_m=marg_ot_m,
             tot_work_f=tot_work_f,
+            marg_ot_m=marg_ot_m,
             main_al_m=main_al_m,
             main_al_f=main_al_f,
             marg_ot_p=marg_ot_p,
@@ -981,8 +981,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             m_sc=m_sc,
             ans_op=ans_op,
             marg_ot_02=marg_ot_02,
-            name_dt=name_dt,
             marg_ot_01=marg_ot_01,
+            name_dt=name_dt,
             marg_cl_0_=marg_cl_0_,
             mow_gtb=mow_gtb,
             m_st=m_st,
@@ -996,8 +996,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             main_ot_f=main_ot_f,
             msl_se=msl_se,
             mof_mud=mof_mud,
-            aos_smm=aos_smm,
             hhs_6_8=hhs_6_8,
+            aos_smm=aos_smm,
             mof_wb=mof_wb,
             mor_gr_th_=mor_gr_th_,
             main_ot_m=main_ot_m,
@@ -1006,20 +1006,20 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             total=total,
             msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
-            marg_al_f=marg_al_f,
             mor_ss=mor_ss,
+            marg_al_f=marg_al_f,
+            hh_cond_11=hh_cond_11,
             m_lit=m_lit,
             mc_1=mc_1,
-            hh_cond_11=hh_cond_11,
+            hh_tscs_ns=hh_tscs_ns,
             marg_al_m=marg_al_m,
             mc_2=mc_2,
-            hh_tscs_ns=hh_tscs_ns,
-            mc_3=mc_3,
             msdw_tfuts=msdw_tfuts,
+            mc_3=mc_3,
             hh_cond_10=hh_cond_10,
             mc_4=mc_4,
-            ldws_wp=ldws_wp,
             marg_al_p=marg_al_p,
+            ldws_wp=ldws_wp,
             mof_stone=mof_stone,
             mdds_st=mdds_st,
             pl_wsvi=pl_wsvi,
@@ -1064,21 +1064,21 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
-        wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
+        wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
-        non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
+        non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         f_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_vt: Optional[StrictStr] = None,
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_conc: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gimas: Optional[Union[StrictFloat, StrictInt]] = None,
         sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_dt: Optional[StrictStr] = None,
         mow_wood: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1094,27 +1094,27 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__9: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_3_: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_5_: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         os_non: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_3: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
         no_hh: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1149,8 +1149,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         marg_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_32: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
         p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_32: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_3_r: Optional[Union[StrictFloat, StrictInt]] = None,
         f_06: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1162,15 +1162,15 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         nhh_hbfw_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_02: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_4: Optional[Union[StrictFloat, StrictInt]] = None,
-        os_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_3: Optional[Union[StrictFloat, StrictInt]] = None,
+        os_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_1: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_0: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1178,8 +1178,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         margwork_5: Optional[Union[StrictFloat, StrictInt]] = None,
         f_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_kr: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1191,8 +1191,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         tot_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         m_06: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1241,8 +1241,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         m_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_op: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        name_dt: Optional[StrictStr] = None,
         marg_ot_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        name_dt: Optional[StrictStr] = None,
         marg_cl_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gtb: Optional[Union[StrictFloat, StrictInt]] = None,
         m_st: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1256,8 +1256,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         main_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_se: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mud: Optional[Union[StrictFloat, StrictInt]] = None,
-        aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
+        aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_wb: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1266,20 +1266,20 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         total: Optional[StrictStr] = None,
         msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
-        ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_st: Optional[StrictStr] = None,
         pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1330,20 +1330,20 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type non_work_p: float
         :param marg_ot_32:
         :type marg_ot_32: float
-        :param wwoc_nd:
-        :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
+        :param wwoc_nd:
+        :type wwoc_nd: float
         :param tot_p:
         :type tot_p: float
         :param non_work_m:
         :type non_work_m: float
         :param mof_aom:
         :type mof_aom: float
-        :param non_work_f:
-        :type non_work_f: float
         :param mof_mft:
         :type mof_mft: float
+        :param non_work_f:
+        :type non_work_f: float
         :param f_ill:
         :type f_ill: float
         :param mdds_vt:
@@ -1354,12 +1354,12 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type main_cl_p: float
         :param mor_conc:
         :type mor_conc: float
-        :param hh_tscs_uc:
-        :type hh_tscs_uc: float
         :param mow_gimas:
         :type mow_gimas: float
         :param sl_nsrbh:
         :type sl_nsrbh: float
+        :param hh_tscs_uc:
+        :type hh_tscs_uc: float
         :param kf_hk:
         :type kf_hk: float
         :param mdds_dt:
@@ -1390,10 +1390,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param hh_cond__8:
-        :type hh_cond__8: float
         :param mof_cem:
         :type mof_cem: float
+        :param hh_cond__8:
+        :type hh_cond__8: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -1406,20 +1406,20 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type marg_cl_3_: float
         :param mc_5_:
         :type mc_5_: float
-        :param hhs_4:
-        :type hhs_4: float
         :param mainwork_m:
         :type mainwork_m: float
+        :param hhs_4:
+        :type hhs_4: float
         :param hhs_5:
         :type hhs_5: float
         :param fpfl_pss:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param mow_mub:
-        :type mow_mub: float
         :param hh_tscs_sp:
         :type hh_tscs_sp: float
+        :param mow_mub:
+        :type mow_mub: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -1428,10 +1428,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type mor_mmt: float
         :param hhs_1:
         :type hhs_1: float
-        :param hhs_2:
-        :type hhs_2: float
         :param os_non:
         :type os_non: float
+        :param hhs_2:
+        :type hhs_2: float
         :param hhs_3:
         :type hhs_3: float
         :param main_cl_m:
@@ -1500,10 +1500,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type marg_hh_32: float
         :param marg_cl_p:
         :type marg_cl_p: float
-        :param marg_al_31:
-        :type marg_al_31: float
         :param p_sc:
         :type p_sc: float
+        :param marg_al_31:
+        :type marg_al_31: float
         :param marg_al_32:
         :type marg_al_32: float
         :param ndr_3_r:
@@ -1526,10 +1526,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type margwork_p: float
         :param margwork_m:
         :type margwork_m: float
-        :param marg_al_01:
-        :type marg_al_01: float
         :param ldws_np:
         :type ldws_np: float
+        :param marg_al_01:
+        :type marg_al_01: float
         :param f_st:
         :type f_st: float
         :param main_al_p:
@@ -1540,10 +1540,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type marg_al_02: float
         :param margwork_4:
         :type margwork_4: float
-        :param os_ao:
-        :type os_ao: float
         :param margwork_3:
         :type margwork_3: float
+        :param os_ao:
+        :type os_ao: float
         :param margwork_2:
         :type margwork_2: float
         :param margwork_1:
@@ -1558,10 +1558,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type f_lit: float
         :param msl_kr:
         :type msl_kr: float
-        :param mow_pl_pol:
-        :type mow_pl_pol: float
         :param m_ill:
         :type m_ill: float
+        :param mow_pl_pol:
+        :type mow_pl_pol: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
         :param mow_snpwm:
@@ -1584,10 +1584,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type tot_work_m: float
         :param m_06:
         :type m_06: float
-        :param marg_ot_m:
-        :type marg_ot_m: float
         :param tot_work_f:
         :type tot_work_f: float
+        :param marg_ot_m:
+        :type marg_ot_m: float
         :param main_al_m:
         :type main_al_m: float
         :param main_al_f:
@@ -1684,10 +1684,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type ans_op: float
         :param marg_ot_02:
         :type marg_ot_02: float
-        :param name_dt:
-        :type name_dt: str
         :param marg_ot_01:
         :type marg_ot_01: float
+        :param name_dt:
+        :type name_dt: str
         :param marg_cl_0_:
         :type marg_cl_0_: float
         :param mow_gtb:
@@ -1714,10 +1714,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type msl_se: float
         :param mof_mud:
         :type mof_mud: float
-        :param aos_smm:
-        :type aos_smm: float
         :param hhs_6_8:
         :type hhs_6_8: float
+        :param aos_smm:
+        :type aos_smm: float
         :param mof_wb:
         :type mof_wb: float
         :param mor_gr_th_:
@@ -1734,34 +1734,34 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type msdw_os: float
         :param tfufc_nc:
         :type tfufc_nc: float
-        :param marg_al_f:
-        :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
+        :param marg_al_f:
+        :type marg_al_f: float
+        :param hh_cond_11:
+        :type hh_cond_11: float
         :param m_lit:
         :type m_lit: float
         :param mc_1:
         :type mc_1: float
-        :param hh_cond_11:
-        :type hh_cond_11: float
+        :param hh_tscs_ns:
+        :type hh_tscs_ns: float
         :param marg_al_m:
         :type marg_al_m: float
         :param mc_2:
         :type mc_2: float
-        :param hh_tscs_ns:
-        :type hh_tscs_ns: float
-        :param mc_3:
-        :type mc_3: float
         :param msdw_tfuts:
         :type msdw_tfuts: float
+        :param mc_3:
+        :type mc_3: float
         :param hh_cond_10:
         :type hh_cond_10: float
         :param mc_4:
         :type mc_4: float
-        :param ldws_wp:
-        :type ldws_wp: float
         :param marg_al_p:
         :type marg_al_p: float
+        :param ldws_wp:
+        :type ldws_wp: float
         :param mof_stone:
         :type mof_stone: float
         :param mdds_st:
@@ -1808,21 +1808,21 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             ndr_ner2=ndr_ner2,
             non_work_p=non_work_p,
             marg_ot_32=marg_ot_32,
-            wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
+            wwoc_nd=wwoc_nd,
             tot_p=tot_p,
             non_work_m=non_work_m,
             mof_aom=mof_aom,
-            non_work_f=non_work_f,
             mof_mft=mof_mft,
+            non_work_f=non_work_f,
             f_ill=f_ill,
             mdds_vt=mdds_vt,
             tfufc_elc=tfufc_elc,
             main_cl_p=main_cl_p,
             mor_conc=mor_conc,
-            hh_tscs_uc=hh_tscs_uc,
             mow_gimas=mow_gimas,
             sl_nsrbh=sl_nsrbh,
+            hh_tscs_uc=hh_tscs_uc,
             kf_hk=kf_hk,
             mdds_dt=mdds_dt,
             mow_wood=mow_wood,
@@ -1838,27 +1838,27 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            hh_cond__8=hh_cond__8,
             mof_cem=mof_cem,
+            hh_cond__8=hh_cond__8,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
             hh_cond__9=hh_cond__9,
             marg_cl_3_=marg_cl_3_,
             mc_5_=mc_5_,
-            hhs_4=hhs_4,
             mainwork_m=mainwork_m,
+            hhs_4=hhs_4,
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            mow_mub=mow_mub,
             hh_tscs_sp=hh_tscs_sp,
+            mow_mub=mow_mub,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
             hhs_1=hhs_1,
-            hhs_2=hhs_2,
             os_non=os_non,
+            hhs_2=hhs_2,
             hhs_3=hhs_3,
             main_cl_m=main_cl_m,
             no_hh=no_hh,
@@ -1893,8 +1893,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             marg_cl_m=marg_cl_m,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
-            marg_al_31=marg_al_31,
             p_sc=p_sc,
+            marg_al_31=marg_al_31,
             marg_al_32=marg_al_32,
             ndr_3_r=ndr_3_r,
             f_06=f_06,
@@ -1906,15 +1906,15 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             nhh_hbfw_2=nhh_hbfw_2,
             margwork_p=margwork_p,
             margwork_m=margwork_m,
-            marg_al_01=marg_al_01,
             ldws_np=ldws_np,
+            marg_al_01=marg_al_01,
             f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
             marg_al_02=marg_al_02,
             margwork_4=margwork_4,
-            os_ao=os_ao,
             margwork_3=margwork_3,
+            os_ao=os_ao,
             margwork_2=margwork_2,
             margwork_1=margwork_1,
             margwork_0=margwork_0,
@@ -1922,8 +1922,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             margwork_5=margwork_5,
             f_lit=f_lit,
             msl_kr=msl_kr,
-            mow_pl_pol=mow_pl_pol,
             m_ill=m_ill,
+            mow_pl_pol=mow_pl_pol,
             tfufc_lpg_=tfufc_lpg_,
             mow_snpwm=mow_snpwm,
             tfufc_cc=tfufc_cc,
@@ -1935,8 +1935,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             tot_work_p=tot_work_p,
             tot_work_m=tot_work_m,
             m_06=m_06,
-            marg_ot_m=marg_ot_m,
             tot_work_f=tot_work_f,
+            marg_ot_m=marg_ot_m,
             main_al_m=main_al_m,
             main_al_f=main_al_f,
             marg_ot_p=marg_ot_p,
@@ -1985,8 +1985,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             m_sc=m_sc,
             ans_op=ans_op,
             marg_ot_02=marg_ot_02,
-            name_dt=name_dt,
             marg_ot_01=marg_ot_01,
+            name_dt=name_dt,
             marg_cl_0_=marg_cl_0_,
             mow_gtb=mow_gtb,
             m_st=m_st,
@@ -2000,8 +2000,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             main_ot_f=main_ot_f,
             msl_se=msl_se,
             mof_mud=mof_mud,
-            aos_smm=aos_smm,
             hhs_6_8=hhs_6_8,
+            aos_smm=aos_smm,
             mof_wb=mof_wb,
             mor_gr_th_=mor_gr_th_,
             main_ot_m=main_ot_m,
@@ -2010,20 +2010,20 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             total=total,
             msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
-            marg_al_f=marg_al_f,
             mor_ss=mor_ss,
+            marg_al_f=marg_al_f,
+            hh_cond_11=hh_cond_11,
             m_lit=m_lit,
             mc_1=mc_1,
-            hh_cond_11=hh_cond_11,
+            hh_tscs_ns=hh_tscs_ns,
             marg_al_m=marg_al_m,
             mc_2=mc_2,
-            hh_tscs_ns=hh_tscs_ns,
-            mc_3=mc_3,
             msdw_tfuts=msdw_tfuts,
+            mc_3=mc_3,
             hh_cond_10=hh_cond_10,
             mc_4=mc_4,
-            ldws_wp=ldws_wp,
             marg_al_p=marg_al_p,
+            ldws_wp=ldws_wp,
             mof_stone=mof_stone,
             mdds_st=mdds_st,
             pl_wsvi=pl_wsvi,
@@ -2068,21 +2068,21 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
-        wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
+        wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
-        non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
+        non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         f_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_vt: Optional[StrictStr] = None,
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_conc: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gimas: Optional[Union[StrictFloat, StrictInt]] = None,
         sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_dt: Optional[StrictStr] = None,
         mow_wood: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2098,27 +2098,27 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__9: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_3_: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_5_: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         os_non: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_3: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
         no_hh: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2153,8 +2153,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         marg_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_32: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
         p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_32: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_3_r: Optional[Union[StrictFloat, StrictInt]] = None,
         f_06: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2166,15 +2166,15 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         nhh_hbfw_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_02: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_4: Optional[Union[StrictFloat, StrictInt]] = None,
-        os_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_3: Optional[Union[StrictFloat, StrictInt]] = None,
+        os_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_1: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_0: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2182,8 +2182,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         margwork_5: Optional[Union[StrictFloat, StrictInt]] = None,
         f_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_kr: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2195,8 +2195,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         tot_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         m_06: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2245,8 +2245,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         m_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_op: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        name_dt: Optional[StrictStr] = None,
         marg_ot_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        name_dt: Optional[StrictStr] = None,
         marg_cl_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gtb: Optional[Union[StrictFloat, StrictInt]] = None,
         m_st: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2260,8 +2260,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         main_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_se: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mud: Optional[Union[StrictFloat, StrictInt]] = None,
-        aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
+        aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_wb: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2270,20 +2270,20 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         total: Optional[StrictStr] = None,
         msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
-        ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_st: Optional[StrictStr] = None,
         pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2334,20 +2334,20 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type non_work_p: float
         :param marg_ot_32:
         :type marg_ot_32: float
-        :param wwoc_nd:
-        :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
+        :param wwoc_nd:
+        :type wwoc_nd: float
         :param tot_p:
         :type tot_p: float
         :param non_work_m:
         :type non_work_m: float
         :param mof_aom:
         :type mof_aom: float
-        :param non_work_f:
-        :type non_work_f: float
         :param mof_mft:
         :type mof_mft: float
+        :param non_work_f:
+        :type non_work_f: float
         :param f_ill:
         :type f_ill: float
         :param mdds_vt:
@@ -2358,12 +2358,12 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type main_cl_p: float
         :param mor_conc:
         :type mor_conc: float
-        :param hh_tscs_uc:
-        :type hh_tscs_uc: float
         :param mow_gimas:
         :type mow_gimas: float
         :param sl_nsrbh:
         :type sl_nsrbh: float
+        :param hh_tscs_uc:
+        :type hh_tscs_uc: float
         :param kf_hk:
         :type kf_hk: float
         :param mdds_dt:
@@ -2394,10 +2394,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param hh_cond__8:
-        :type hh_cond__8: float
         :param mof_cem:
         :type mof_cem: float
+        :param hh_cond__8:
+        :type hh_cond__8: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -2410,20 +2410,20 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type marg_cl_3_: float
         :param mc_5_:
         :type mc_5_: float
-        :param hhs_4:
-        :type hhs_4: float
         :param mainwork_m:
         :type mainwork_m: float
+        :param hhs_4:
+        :type hhs_4: float
         :param hhs_5:
         :type hhs_5: float
         :param fpfl_pss:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param mow_mub:
-        :type mow_mub: float
         :param hh_tscs_sp:
         :type hh_tscs_sp: float
+        :param mow_mub:
+        :type mow_mub: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -2432,10 +2432,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type mor_mmt: float
         :param hhs_1:
         :type hhs_1: float
-        :param hhs_2:
-        :type hhs_2: float
         :param os_non:
         :type os_non: float
+        :param hhs_2:
+        :type hhs_2: float
         :param hhs_3:
         :type hhs_3: float
         :param main_cl_m:
@@ -2504,10 +2504,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type marg_hh_32: float
         :param marg_cl_p:
         :type marg_cl_p: float
-        :param marg_al_31:
-        :type marg_al_31: float
         :param p_sc:
         :type p_sc: float
+        :param marg_al_31:
+        :type marg_al_31: float
         :param marg_al_32:
         :type marg_al_32: float
         :param ndr_3_r:
@@ -2530,10 +2530,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type margwork_p: float
         :param margwork_m:
         :type margwork_m: float
-        :param marg_al_01:
-        :type marg_al_01: float
         :param ldws_np:
         :type ldws_np: float
+        :param marg_al_01:
+        :type marg_al_01: float
         :param f_st:
         :type f_st: float
         :param main_al_p:
@@ -2544,10 +2544,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type marg_al_02: float
         :param margwork_4:
         :type margwork_4: float
-        :param os_ao:
-        :type os_ao: float
         :param margwork_3:
         :type margwork_3: float
+        :param os_ao:
+        :type os_ao: float
         :param margwork_2:
         :type margwork_2: float
         :param margwork_1:
@@ -2562,10 +2562,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type f_lit: float
         :param msl_kr:
         :type msl_kr: float
-        :param mow_pl_pol:
-        :type mow_pl_pol: float
         :param m_ill:
         :type m_ill: float
+        :param mow_pl_pol:
+        :type mow_pl_pol: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
         :param mow_snpwm:
@@ -2588,10 +2588,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type tot_work_m: float
         :param m_06:
         :type m_06: float
-        :param marg_ot_m:
-        :type marg_ot_m: float
         :param tot_work_f:
         :type tot_work_f: float
+        :param marg_ot_m:
+        :type marg_ot_m: float
         :param main_al_m:
         :type main_al_m: float
         :param main_al_f:
@@ -2688,10 +2688,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type ans_op: float
         :param marg_ot_02:
         :type marg_ot_02: float
-        :param name_dt:
-        :type name_dt: str
         :param marg_ot_01:
         :type marg_ot_01: float
+        :param name_dt:
+        :type name_dt: str
         :param marg_cl_0_:
         :type marg_cl_0_: float
         :param mow_gtb:
@@ -2718,10 +2718,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type msl_se: float
         :param mof_mud:
         :type mof_mud: float
-        :param aos_smm:
-        :type aos_smm: float
         :param hhs_6_8:
         :type hhs_6_8: float
+        :param aos_smm:
+        :type aos_smm: float
         :param mof_wb:
         :type mof_wb: float
         :param mor_gr_th_:
@@ -2738,34 +2738,34 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         :type msdw_os: float
         :param tfufc_nc:
         :type tfufc_nc: float
-        :param marg_al_f:
-        :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
+        :param marg_al_f:
+        :type marg_al_f: float
+        :param hh_cond_11:
+        :type hh_cond_11: float
         :param m_lit:
         :type m_lit: float
         :param mc_1:
         :type mc_1: float
-        :param hh_cond_11:
-        :type hh_cond_11: float
+        :param hh_tscs_ns:
+        :type hh_tscs_ns: float
         :param marg_al_m:
         :type marg_al_m: float
         :param mc_2:
         :type mc_2: float
-        :param hh_tscs_ns:
-        :type hh_tscs_ns: float
-        :param mc_3:
-        :type mc_3: float
         :param msdw_tfuts:
         :type msdw_tfuts: float
+        :param mc_3:
+        :type mc_3: float
         :param hh_cond_10:
         :type hh_cond_10: float
         :param mc_4:
         :type mc_4: float
-        :param ldws_wp:
-        :type ldws_wp: float
         :param marg_al_p:
         :type marg_al_p: float
+        :param ldws_wp:
+        :type ldws_wp: float
         :param mof_stone:
         :type mof_stone: float
         :param mdds_st:
@@ -2812,21 +2812,21 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             ndr_ner2=ndr_ner2,
             non_work_p=non_work_p,
             marg_ot_32=marg_ot_32,
-            wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
+            wwoc_nd=wwoc_nd,
             tot_p=tot_p,
             non_work_m=non_work_m,
             mof_aom=mof_aom,
-            non_work_f=non_work_f,
             mof_mft=mof_mft,
+            non_work_f=non_work_f,
             f_ill=f_ill,
             mdds_vt=mdds_vt,
             tfufc_elc=tfufc_elc,
             main_cl_p=main_cl_p,
             mor_conc=mor_conc,
-            hh_tscs_uc=hh_tscs_uc,
             mow_gimas=mow_gimas,
             sl_nsrbh=sl_nsrbh,
+            hh_tscs_uc=hh_tscs_uc,
             kf_hk=kf_hk,
             mdds_dt=mdds_dt,
             mow_wood=mow_wood,
@@ -2842,27 +2842,27 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            hh_cond__8=hh_cond__8,
             mof_cem=mof_cem,
+            hh_cond__8=hh_cond__8,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
             hh_cond__9=hh_cond__9,
             marg_cl_3_=marg_cl_3_,
             mc_5_=mc_5_,
-            hhs_4=hhs_4,
             mainwork_m=mainwork_m,
+            hhs_4=hhs_4,
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            mow_mub=mow_mub,
             hh_tscs_sp=hh_tscs_sp,
+            mow_mub=mow_mub,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
             hhs_1=hhs_1,
-            hhs_2=hhs_2,
             os_non=os_non,
+            hhs_2=hhs_2,
             hhs_3=hhs_3,
             main_cl_m=main_cl_m,
             no_hh=no_hh,
@@ -2897,8 +2897,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             marg_cl_m=marg_cl_m,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
-            marg_al_31=marg_al_31,
             p_sc=p_sc,
+            marg_al_31=marg_al_31,
             marg_al_32=marg_al_32,
             ndr_3_r=ndr_3_r,
             f_06=f_06,
@@ -2910,15 +2910,15 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             nhh_hbfw_2=nhh_hbfw_2,
             margwork_p=margwork_p,
             margwork_m=margwork_m,
-            marg_al_01=marg_al_01,
             ldws_np=ldws_np,
+            marg_al_01=marg_al_01,
             f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
             marg_al_02=marg_al_02,
             margwork_4=margwork_4,
-            os_ao=os_ao,
             margwork_3=margwork_3,
+            os_ao=os_ao,
             margwork_2=margwork_2,
             margwork_1=margwork_1,
             margwork_0=margwork_0,
@@ -2926,8 +2926,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             margwork_5=margwork_5,
             f_lit=f_lit,
             msl_kr=msl_kr,
-            mow_pl_pol=mow_pl_pol,
             m_ill=m_ill,
+            mow_pl_pol=mow_pl_pol,
             tfufc_lpg_=tfufc_lpg_,
             mow_snpwm=mow_snpwm,
             tfufc_cc=tfufc_cc,
@@ -2939,8 +2939,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             tot_work_p=tot_work_p,
             tot_work_m=tot_work_m,
             m_06=m_06,
-            marg_ot_m=marg_ot_m,
             tot_work_f=tot_work_f,
+            marg_ot_m=marg_ot_m,
             main_al_m=main_al_m,
             main_al_f=main_al_f,
             marg_ot_p=marg_ot_p,
@@ -2989,8 +2989,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             m_sc=m_sc,
             ans_op=ans_op,
             marg_ot_02=marg_ot_02,
-            name_dt=name_dt,
             marg_ot_01=marg_ot_01,
+            name_dt=name_dt,
             marg_cl_0_=marg_cl_0_,
             mow_gtb=mow_gtb,
             m_st=m_st,
@@ -3004,8 +3004,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             main_ot_f=main_ot_f,
             msl_se=msl_se,
             mof_mud=mof_mud,
-            aos_smm=aos_smm,
             hhs_6_8=hhs_6_8,
+            aos_smm=aos_smm,
             mof_wb=mof_wb,
             mor_gr_th_=mor_gr_th_,
             main_ot_m=main_ot_m,
@@ -3014,20 +3014,20 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             total=total,
             msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
-            marg_al_f=marg_al_f,
             mor_ss=mor_ss,
+            marg_al_f=marg_al_f,
+            hh_cond_11=hh_cond_11,
             m_lit=m_lit,
             mc_1=mc_1,
-            hh_cond_11=hh_cond_11,
+            hh_tscs_ns=hh_tscs_ns,
             marg_al_m=marg_al_m,
             mc_2=mc_2,
-            hh_tscs_ns=hh_tscs_ns,
-            mc_3=mc_3,
             msdw_tfuts=msdw_tfuts,
+            mc_3=mc_3,
             hh_cond_10=hh_cond_10,
             mc_4=mc_4,
-            ldws_wp=ldws_wp,
             marg_al_p=marg_al_p,
+            ldws_wp=ldws_wp,
             mof_stone=mof_stone,
             mdds_st=mdds_st,
             pl_wsvi=pl_wsvi,
@@ -3067,21 +3067,21 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         ndr_ner2,
         non_work_p,
         marg_ot_32,
-        wwoc_nd,
         marg_ot_31,
+        wwoc_nd,
         tot_p,
         non_work_m,
         mof_aom,
-        non_work_f,
         mof_mft,
+        non_work_f,
         f_ill,
         mdds_vt,
         tfufc_elc,
         main_cl_p,
         mor_conc,
-        hh_tscs_uc,
         mow_gimas,
         sl_nsrbh,
+        hh_tscs_uc,
         kf_hk,
         mdds_dt,
         mow_wood,
@@ -3097,27 +3097,27 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         hh_cond__1,
         hh_cond__2,
         hh_cond__7,
-        hh_cond__8,
         mof_cem,
+        hh_cond__8,
         hh_cond__5,
         hh_cond__6,
         ans_pl,
         hh_cond__9,
         marg_cl_3_,
         mc_5_,
-        hhs_4,
         mainwork_m,
+        hhs_4,
         hhs_5,
         fpfl_pss,
         mainwork_p,
-        mow_mub,
         hh_tscs_sp,
+        mow_mub,
         kf_tot,
         mainwork_f,
         mor_mmt,
         hhs_1,
-        hhs_2,
         os_non,
+        hhs_2,
         hhs_3,
         main_cl_m,
         no_hh,
@@ -3152,8 +3152,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         marg_cl_m,
         marg_hh_32,
         marg_cl_p,
-        marg_al_31,
         p_sc,
+        marg_al_31,
         marg_al_32,
         ndr_3_r,
         f_06,
@@ -3165,15 +3165,15 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         nhh_hbfw_2,
         margwork_p,
         margwork_m,
-        marg_al_01,
         ldws_np,
+        marg_al_01,
         f_st,
         main_al_p,
         wwoc_cd,
         marg_al_02,
         margwork_4,
-        os_ao,
         margwork_3,
+        os_ao,
         margwork_2,
         margwork_1,
         margwork_0,
@@ -3181,8 +3181,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         margwork_5,
         f_lit,
         msl_kr,
-        mow_pl_pol,
         m_ill,
+        mow_pl_pol,
         tfufc_lpg_,
         mow_snpwm,
         tfufc_cc,
@@ -3194,8 +3194,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         tot_work_p,
         tot_work_m,
         m_06,
-        marg_ot_m,
         tot_work_f,
+        marg_ot_m,
         main_al_m,
         main_al_f,
         marg_ot_p,
@@ -3244,8 +3244,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         m_sc,
         ans_op,
         marg_ot_02,
-        name_dt,
         marg_ot_01,
+        name_dt,
         marg_cl_0_,
         mow_gtb,
         m_st,
@@ -3259,8 +3259,8 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         main_ot_f,
         msl_se,
         mof_mud,
-        aos_smm,
         hhs_6_8,
+        aos_smm,
         mof_wb,
         mor_gr_th_,
         main_ot_m,
@@ -3269,20 +3269,20 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         total,
         msdw_os,
         tfufc_nc,
-        marg_al_f,
         mor_ss,
+        marg_al_f,
+        hh_cond_11,
         m_lit,
         mc_1,
-        hh_cond_11,
+        hh_tscs_ns,
         marg_al_m,
         mc_2,
-        hh_tscs_ns,
-        mc_3,
         msdw_tfuts,
+        mc_3,
         hh_cond_10,
         mc_4,
-        ldws_wp,
         marg_al_p,
+        ldws_wp,
         mof_stone,
         mdds_st,
         pl_wsvi,
@@ -3368,13 +3368,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('MARG_OT_32', marg_ot_32))
             
-        if wwoc_nd is not None:
-            
-            _query_params.append(('WWOC_ND', wwoc_nd))
-            
         if marg_ot_31 is not None:
             
             _query_params.append(('MARG_OT_31', marg_ot_31))
+            
+        if wwoc_nd is not None:
+            
+            _query_params.append(('WWOC_ND', wwoc_nd))
             
         if tot_p is not None:
             
@@ -3388,13 +3388,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('MOF_AOM', mof_aom))
             
-        if non_work_f is not None:
-            
-            _query_params.append(('NON_WORK_F', non_work_f))
-            
         if mof_mft is not None:
             
             _query_params.append(('MOF_MFT', mof_mft))
+            
+        if non_work_f is not None:
+            
+            _query_params.append(('NON_WORK_F', non_work_f))
             
         if f_ill is not None:
             
@@ -3416,10 +3416,6 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('MOR_CONC', mor_conc))
             
-        if hh_tscs_uc is not None:
-            
-            _query_params.append(('HH_TSCS_UC', hh_tscs_uc))
-            
         if mow_gimas is not None:
             
             _query_params.append(('MOW_GIMAS', mow_gimas))
@@ -3427,6 +3423,10 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
         if sl_nsrbh is not None:
             
             _query_params.append(('SL_NSRBH', sl_nsrbh))
+            
+        if hh_tscs_uc is not None:
+            
+            _query_params.append(('HH_TSCS_UC', hh_tscs_uc))
             
         if kf_hk is not None:
             
@@ -3488,13 +3488,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('HH_COND__7', hh_cond__7))
             
-        if hh_cond__8 is not None:
-            
-            _query_params.append(('HH_COND__8', hh_cond__8))
-            
         if mof_cem is not None:
             
             _query_params.append(('MOF_CEM', mof_cem))
+            
+        if hh_cond__8 is not None:
+            
+            _query_params.append(('HH_COND__8', hh_cond__8))
             
         if hh_cond__5 is not None:
             
@@ -3520,13 +3520,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('MC_5_', mc_5_))
             
-        if hhs_4 is not None:
-            
-            _query_params.append(('HHS_4', hhs_4))
-            
         if mainwork_m is not None:
             
             _query_params.append(('MAINWORK_M', mainwork_m))
+            
+        if hhs_4 is not None:
+            
+            _query_params.append(('HHS_4', hhs_4))
             
         if hhs_5 is not None:
             
@@ -3540,13 +3540,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('MAINWORK_P', mainwork_p))
             
-        if mow_mub is not None:
-            
-            _query_params.append(('MOW_MUB', mow_mub))
-            
         if hh_tscs_sp is not None:
             
             _query_params.append(('HH_TSCS_SP', hh_tscs_sp))
+            
+        if mow_mub is not None:
+            
+            _query_params.append(('MOW_MUB', mow_mub))
             
         if kf_tot is not None:
             
@@ -3564,13 +3564,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('HHS_1', hhs_1))
             
-        if hhs_2 is not None:
-            
-            _query_params.append(('HHS_2', hhs_2))
-            
         if os_non is not None:
             
             _query_params.append(('OS_NON', os_non))
+            
+        if hhs_2 is not None:
+            
+            _query_params.append(('HHS_2', hhs_2))
             
         if hhs_3 is not None:
             
@@ -3708,13 +3708,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('MARG_CL_P', marg_cl_p))
             
-        if marg_al_31 is not None:
-            
-            _query_params.append(('MARG_AL_31', marg_al_31))
-            
         if p_sc is not None:
             
             _query_params.append(('P_SC', p_sc))
+            
+        if marg_al_31 is not None:
+            
+            _query_params.append(('MARG_AL_31', marg_al_31))
             
         if marg_al_32 is not None:
             
@@ -3760,13 +3760,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('MARGWORK_M', margwork_m))
             
-        if marg_al_01 is not None:
-            
-            _query_params.append(('MARG_AL_01', marg_al_01))
-            
         if ldws_np is not None:
             
             _query_params.append(('LDWS_NP', ldws_np))
+            
+        if marg_al_01 is not None:
+            
+            _query_params.append(('MARG_AL_01', marg_al_01))
             
         if f_st is not None:
             
@@ -3788,13 +3788,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('MARGWORK_4', margwork_4))
             
-        if os_ao is not None:
-            
-            _query_params.append(('OS_AO', os_ao))
-            
         if margwork_3 is not None:
             
             _query_params.append(('MARGWORK_3', margwork_3))
+            
+        if os_ao is not None:
+            
+            _query_params.append(('OS_AO', os_ao))
             
         if margwork_2 is not None:
             
@@ -3824,13 +3824,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('MSL_KR', msl_kr))
             
-        if mow_pl_pol is not None:
-            
-            _query_params.append(('MOW_PL_POL', mow_pl_pol))
-            
         if m_ill is not None:
             
             _query_params.append(('M_ILL', m_ill))
+            
+        if mow_pl_pol is not None:
+            
+            _query_params.append(('MOW_PL_POL', mow_pl_pol))
             
         if tfufc_lpg_ is not None:
             
@@ -3876,13 +3876,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('M_06', m_06))
             
-        if marg_ot_m is not None:
-            
-            _query_params.append(('MARG_OT_M', marg_ot_m))
-            
         if tot_work_f is not None:
             
             _query_params.append(('TOT_WORK_F', tot_work_f))
+            
+        if marg_ot_m is not None:
+            
+            _query_params.append(('MARG_OT_M', marg_ot_m))
             
         if main_al_m is not None:
             
@@ -4076,13 +4076,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('MARG_OT_02', marg_ot_02))
             
-        if name_dt is not None:
-            
-            _query_params.append(('NAME_DT', name_dt))
-            
         if marg_ot_01 is not None:
             
             _query_params.append(('MARG_OT_01', marg_ot_01))
+            
+        if name_dt is not None:
+            
+            _query_params.append(('NAME_DT', name_dt))
             
         if marg_cl_0_ is not None:
             
@@ -4136,13 +4136,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('MOF_MUD', mof_mud))
             
-        if aos_smm is not None:
-            
-            _query_params.append(('AOS_SMM', aos_smm))
-            
         if hhs_6_8 is not None:
             
             _query_params.append(('HHS_6_8', hhs_6_8))
+            
+        if aos_smm is not None:
+            
+            _query_params.append(('AOS_SMM', aos_smm))
             
         if mof_wb is not None:
             
@@ -4176,13 +4176,17 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('TFUFC_NC', tfufc_nc))
             
+        if mor_ss is not None:
+            
+            _query_params.append(('MOR_SS', mor_ss))
+            
         if marg_al_f is not None:
             
             _query_params.append(('MARG_AL_F', marg_al_f))
             
-        if mor_ss is not None:
+        if hh_cond_11 is not None:
             
-            _query_params.append(('MOR_SS', mor_ss))
+            _query_params.append(('HH_COND_11', hh_cond_11))
             
         if m_lit is not None:
             
@@ -4192,9 +4196,9 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('MC_1', mc_1))
             
-        if hh_cond_11 is not None:
+        if hh_tscs_ns is not None:
             
-            _query_params.append(('HH_COND_11', hh_cond_11))
+            _query_params.append(('HH_TSCS_NS', hh_tscs_ns))
             
         if marg_al_m is not None:
             
@@ -4204,17 +4208,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('MC_2', mc_2))
             
-        if hh_tscs_ns is not None:
+        if msdw_tfuts is not None:
             
-            _query_params.append(('HH_TSCS_NS', hh_tscs_ns))
+            _query_params.append(('MSDW_TFUTS', msdw_tfuts))
             
         if mc_3 is not None:
             
             _query_params.append(('MC_3', mc_3))
-            
-        if msdw_tfuts is not None:
-            
-            _query_params.append(('MSDW_TFUTS', msdw_tfuts))
             
         if hh_cond_10 is not None:
             
@@ -4224,13 +4224,13 @@ class PrimaryCensusAbstractOfGurugramHaryanaApi:
             
             _query_params.append(('MC_4', mc_4))
             
-        if ldws_wp is not None:
-            
-            _query_params.append(('LDWS_WP', ldws_wp))
-            
         if marg_al_p is not None:
             
             _query_params.append(('MARG_AL_P', marg_al_p))
+            
+        if ldws_wp is not None:
+            
+            _query_params.append(('LDWS_WP', ldws_wp))
             
         if mof_stone is not None:
             

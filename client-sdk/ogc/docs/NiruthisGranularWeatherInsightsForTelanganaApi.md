@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, avgwind=avgwind, tmax=tmax, tmin=tmin, gp=gp, rhavg=rhavg, rhmin=rhmin, observation_date_time=observation_date_time, maxwind=maxwind, daylength=daylength, tdew=tdew, subdistrict=subdistrict, srad=srad, district=district, rhmax=rhmax, prcp=prcp, village=village)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, avgwind=avgwind, tmax=tmax, tmin=tmin, gp=gp, rhmin=rhmin, rhavg=rhavg, maxwind=maxwind, observation_date_time=observation_date_time, daylength=daylength, tdew=tdew, subdistrict=subdistrict, district=district, srad=srad, rhmax=rhmax, prcp=prcp, village=village)
 
 Get features from Daily (7 days prior current day) information about weather parameters for villages of Telangana
 
@@ -54,22 +54,22 @@ with openapi_client.ApiClient(configuration) as api_client:
     tmax = 3.4 # float |  (optional)
     tmin = 3.4 # float |  (optional)
     gp = 'gp_example' # str |  (optional)
-    rhavg = 3.4 # float |  (optional)
     rhmin = 3.4 # float |  (optional)
-    observation_date_time = 'observation_date_time_example' # str |  (optional)
+    rhavg = 3.4 # float |  (optional)
     maxwind = 3.4 # float |  (optional)
+    observation_date_time = 'observation_date_time_example' # str |  (optional)
     daylength = 3.4 # float |  (optional)
     tdew = 3.4 # float |  (optional)
     subdistrict = 'subdistrict_example' # str |  (optional)
-    srad = 3.4 # float |  (optional)
     district = 'district_example' # str |  (optional)
+    srad = 3.4 # float |  (optional)
     rhmax = 3.4 # float |  (optional)
     prcp = 3.4 # float |  (optional)
     village = 'village_example' # str |  (optional)
 
     try:
         # Get features from Daily (7 days prior current day) information about weather parameters for villages of Telangana
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, avgwind=avgwind, tmax=tmax, tmin=tmin, gp=gp, rhavg=rhavg, rhmin=rhmin, observation_date_time=observation_date_time, maxwind=maxwind, daylength=daylength, tdew=tdew, subdistrict=subdistrict, srad=srad, district=district, rhmax=rhmax, prcp=prcp, village=village)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, avgwind=avgwind, tmax=tmax, tmin=tmin, gp=gp, rhmin=rhmin, rhavg=rhavg, maxwind=maxwind, observation_date_time=observation_date_time, daylength=daylength, tdew=tdew, subdistrict=subdistrict, district=district, srad=srad, rhmax=rhmax, prcp=prcp, village=village)
         print("The response of NiruthisGranularWeatherInsightsForTelanganaApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -93,15 +93,15 @@ Name | Type | Description  | Notes
  **tmax** | **float**|  | [optional] 
  **tmin** | **float**|  | [optional] 
  **gp** | **str**|  | [optional] 
- **rhavg** | **float**|  | [optional] 
  **rhmin** | **float**|  | [optional] 
- **observation_date_time** | **str**|  | [optional] 
+ **rhavg** | **float**|  | [optional] 
  **maxwind** | **float**|  | [optional] 
+ **observation_date_time** | **str**|  | [optional] 
  **daylength** | **float**|  | [optional] 
  **tdew** | **float**|  | [optional] 
  **subdistrict** | **str**|  | [optional] 
- **srad** | **float**|  | [optional] 
  **district** | **str**|  | [optional] 
+ **srad** | **float**|  | [optional] 
  **rhmax** | **float**|  | [optional] 
  **prcp** | **float**|  | [optional] 
  **village** | **str**|  | [optional] 

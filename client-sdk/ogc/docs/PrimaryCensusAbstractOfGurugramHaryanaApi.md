@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, name_sdt=name_sdt, tot_m=tot_m, tot_f=tot_f, fpfl_os=fpfl_os, ndr_ner1=ndr_ner1, mor_bb=mor_bb, ndr_ner2=ndr_ner2, non_work_p=non_work_p, marg_ot_32=marg_ot_32, wwoc_nd=wwoc_nd, marg_ot_31=marg_ot_31, tot_p=tot_p, non_work_m=non_work_m, mof_aom=mof_aom, non_work_f=non_work_f, mof_mft=mof_mft, f_ill=f_ill, mdds_vt=mdds_vt, tfufc_elc=tfufc_elc, main_cl_p=main_cl_p, mor_conc=mor_conc, hh_tscs_uc=hh_tscs_uc, mow_gimas=mow_gimas, sl_nsrbh=sl_nsrbh, kf_hk=kf_hk, mdds_dt=mdds_dt, mow_wood=mow_wood, hh_tscs_tt=hh_tscs_tt, os_ren=os_ren, mow_bb=mow_bb, msl_el=msl_el, tfufc_kr=tfufc_kr, mor_pl_pol=mor_pl_pol, marg_ot_3_=marg_ot_3_, hh_cond__3=hh_cond__3, hh_cond__4=hh_cond__4, hh_cond__1=hh_cond__1, hh_cond__2=hh_cond__2, hh_cond__7=hh_cond__7, hh_cond__8=hh_cond__8, mof_cem=mof_cem, hh_cond__5=hh_cond__5, hh_cond__6=hh_cond__6, ans_pl=ans_pl, hh_cond__9=hh_cond__9, marg_cl_3_=marg_cl_3_, mc_5_=mc_5_, hhs_4=hhs_4, mainwork_m=mainwork_m, hhs_5=hhs_5, fpfl_pss=fpfl_pss, mainwork_p=mainwork_p, mow_mub=mow_mub, hh_tscs_sp=hh_tscs_sp, kf_tot=kf_tot, mainwork_f=mainwork_f, mor_mmt=mor_mmt, hhs_1=hhs_1, hhs_2=hhs_2, os_non=os_non, hhs_3=hhs_3, main_cl_m=main_cl_m, no_hh=no_hh, mdds_sdt=mdds_sdt, main_cl_f=main_cl_f, wwoc_od=wwoc_od, sl_nssba=sl_nssba, p_06=p_06, nhhnhl=nhhnhl, kf_coh=kf_coh, ldws_a=ldws_a, tnhh_abs=tnhh_abs, fpfl_st=fpfl_st, msdw_hp=msdw_hp, marg_al_0_=marg_al_0_, aos_tm_bot=aos_tm_bot, mor_gi_mas=mor_gi_mas, mow_aom=mow_aom, marg_hh_3_=marg_hh_3_, msdw_tpl=msdw_tpl, p_st=p_st, p_lit=p_lit, mor_hmt=mor_hmt, ndr_4_r=ndr_4_r, marg_hh_31=marg_hh_31, aos_tel=aos_tel, os_ow=os_ow, mof_bb=mof_bb, marg_cl_f=marg_cl_f, kf_hk1=kf_hk1, mor_aom=mor_aom, marg_cl_m=marg_cl_m, marg_hh_32=marg_hh_32, marg_cl_p=marg_cl_p, marg_al_31=marg_al_31, p_sc=p_sc, marg_al_32=marg_al_32, ndr_3_r=ndr_3_r, f_06=f_06, ndr_tr=ndr_tr, margwork_f=margwork_f, ndr_ner=ndr_ner, f_sc=f_sc, nhh_hbfw_1=nhh_hbfw_1, nhh_hbfw_2=nhh_hbfw_2, margwork_p=margwork_p, margwork_m=margwork_m, marg_al_01=marg_al_01, ldws_np=ldws_np, f_st=f_st, main_al_p=main_al_p, wwoc_cd=wwoc_cd, marg_al_02=marg_al_02, margwork_4=margwork_4, os_ao=os_ao, margwork_3=margwork_3, margwork_2=margwork_2, margwork_1=margwork_1, margwork_0=margwork_0, nhh_hlf=nhh_hlf, margwork_5=margwork_5, f_lit=f_lit, msl_kr=msl_kr, mow_pl_pol=mow_pl_pol, m_ill=m_ill, tfufc_lpg_=tfufc_lpg_, mow_snpwm=mow_snpwm, tfufc_cc=tfufc_cc, aos_=aos_, name_vt=name_vt, kf_dnhk1=kf_dnhk1, marg_hh_02=marg_hh_02, marg_hh_01=marg_hh_01, tot_work_p=tot_work_p, tot_work_m=tot_work_m, m_06=m_06, marg_ot_m=marg_ot_m, tot_work_f=tot_work_f, main_al_m=main_al_m, main_al_f=main_al_f, marg_ot_p=marg_ot_p, pl_wsop=pl_wsop, marg_ot_f=marg_ot_f, aos_tm_mo=aos_tm_mo, msl_nl=msl_nl, msl_ool=msl_ool, kf_dnhk=kf_dnhk, tfufc_cr=tfufc_cr, main_hh_p=main_hh_p, hhs_9_=hhs_9_, main_hh_m=main_hh_m, aos_tm_lo=aos_tm_lo, main_hh_f=main_hh_f, hh_tscs_p=hh_tscs_p, ndr_or=ndr_or, kf_nc=kf_nc, msdw_ucw=msdw_ucw, aos_noasic=aos_noasic, mow_spwm=mow_spwm, aos_cl_win=aos_cl_win, tfufc_=tfufc_, msdw_sp=msdw_sp, marg_al_3_=marg_al_3_, hh_tscs_s=hh_tscs_s, tfufc_ao=tfufc_ao, msdw_cw=msdw_cw, aos_cjv=aos_cjv, marg_hh_f=marg_hh_f, msdw_tb=msdw_tb, marg_hh_0_=marg_hh_0_, marg_hh_m=marg_hh_m, marg_hh_p=marg_hh_p, p_ill=p_ill, aos_bi=aos_bi, tfufc_bio=tfufc_bio, hh_cond_ch=hh_cond_ch, nsdiod=nsdiod, nhh_hbfwtp=nhh_hbfwtp, tfufc_clc=tfufc_clc, marg_cl_31=marg_cl_31, marg_cl_32=marg_cl_32, aos_cl_wii=aos_cl_wii, msdw_tfts=msdw_tfts, m_sc=m_sc, ans_op=ans_op, marg_ot_02=marg_ot_02, name_dt=name_dt, marg_ot_01=marg_ot_01, marg_cl_0_=marg_cl_0_, mow_gtb=mow_gtb, m_st=m_st, kf_cih=kf_cih, msl_ao=msl_ao, mow_conc=mow_conc, msdw_rc=msdw_rc, marg_cl_02=marg_cl_02, aos_hhw_tc=aos_hhw_tc, marg_cl_01=marg_cl_01, main_ot_f=main_ot_f, msl_se=msl_se, mof_mud=mof_mud, aos_smm=aos_smm, hhs_6_8=hhs_6_8, mof_wb=mof_wb, mor_gr_th_=mor_gr_th_, main_ot_m=main_ot_m, marg_ot_0_=marg_ot_0_, main_ot_p=main_ot_p, total=total, msdw_os=msdw_os, tfufc_nc=tfufc_nc, marg_al_f=marg_al_f, mor_ss=mor_ss, m_lit=m_lit, mc_1=mc_1, hh_cond_11=hh_cond_11, marg_al_m=marg_al_m, mc_2=mc_2, hh_tscs_ns=hh_tscs_ns, mc_3=mc_3, msdw_tfuts=msdw_tfuts, hh_cond_10=hh_cond_10, mc_4=mc_4, ldws_wp=ldws_wp, marg_al_p=marg_al_p, mof_stone=mof_stone, mdds_st=mdds_st, pl_wsvi=pl_wsvi, name_st=name_st)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, name_sdt=name_sdt, tot_m=tot_m, tot_f=tot_f, fpfl_os=fpfl_os, ndr_ner1=ndr_ner1, mor_bb=mor_bb, ndr_ner2=ndr_ner2, non_work_p=non_work_p, marg_ot_32=marg_ot_32, marg_ot_31=marg_ot_31, wwoc_nd=wwoc_nd, tot_p=tot_p, non_work_m=non_work_m, mof_aom=mof_aom, mof_mft=mof_mft, non_work_f=non_work_f, f_ill=f_ill, mdds_vt=mdds_vt, tfufc_elc=tfufc_elc, main_cl_p=main_cl_p, mor_conc=mor_conc, mow_gimas=mow_gimas, sl_nsrbh=sl_nsrbh, hh_tscs_uc=hh_tscs_uc, kf_hk=kf_hk, mdds_dt=mdds_dt, mow_wood=mow_wood, hh_tscs_tt=hh_tscs_tt, os_ren=os_ren, mow_bb=mow_bb, msl_el=msl_el, tfufc_kr=tfufc_kr, mor_pl_pol=mor_pl_pol, marg_ot_3_=marg_ot_3_, hh_cond__3=hh_cond__3, hh_cond__4=hh_cond__4, hh_cond__1=hh_cond__1, hh_cond__2=hh_cond__2, hh_cond__7=hh_cond__7, mof_cem=mof_cem, hh_cond__8=hh_cond__8, hh_cond__5=hh_cond__5, hh_cond__6=hh_cond__6, ans_pl=ans_pl, hh_cond__9=hh_cond__9, marg_cl_3_=marg_cl_3_, mc_5_=mc_5_, mainwork_m=mainwork_m, hhs_4=hhs_4, hhs_5=hhs_5, fpfl_pss=fpfl_pss, mainwork_p=mainwork_p, hh_tscs_sp=hh_tscs_sp, mow_mub=mow_mub, kf_tot=kf_tot, mainwork_f=mainwork_f, mor_mmt=mor_mmt, hhs_1=hhs_1, os_non=os_non, hhs_2=hhs_2, hhs_3=hhs_3, main_cl_m=main_cl_m, no_hh=no_hh, mdds_sdt=mdds_sdt, main_cl_f=main_cl_f, wwoc_od=wwoc_od, sl_nssba=sl_nssba, p_06=p_06, nhhnhl=nhhnhl, kf_coh=kf_coh, ldws_a=ldws_a, tnhh_abs=tnhh_abs, fpfl_st=fpfl_st, msdw_hp=msdw_hp, marg_al_0_=marg_al_0_, aos_tm_bot=aos_tm_bot, mor_gi_mas=mor_gi_mas, mow_aom=mow_aom, marg_hh_3_=marg_hh_3_, msdw_tpl=msdw_tpl, p_st=p_st, p_lit=p_lit, mor_hmt=mor_hmt, ndr_4_r=ndr_4_r, marg_hh_31=marg_hh_31, aos_tel=aos_tel, os_ow=os_ow, mof_bb=mof_bb, marg_cl_f=marg_cl_f, kf_hk1=kf_hk1, mor_aom=mor_aom, marg_cl_m=marg_cl_m, marg_hh_32=marg_hh_32, marg_cl_p=marg_cl_p, p_sc=p_sc, marg_al_31=marg_al_31, marg_al_32=marg_al_32, ndr_3_r=ndr_3_r, f_06=f_06, ndr_tr=ndr_tr, margwork_f=margwork_f, ndr_ner=ndr_ner, f_sc=f_sc, nhh_hbfw_1=nhh_hbfw_1, nhh_hbfw_2=nhh_hbfw_2, margwork_p=margwork_p, margwork_m=margwork_m, ldws_np=ldws_np, marg_al_01=marg_al_01, f_st=f_st, main_al_p=main_al_p, wwoc_cd=wwoc_cd, marg_al_02=marg_al_02, margwork_4=margwork_4, margwork_3=margwork_3, os_ao=os_ao, margwork_2=margwork_2, margwork_1=margwork_1, margwork_0=margwork_0, nhh_hlf=nhh_hlf, margwork_5=margwork_5, f_lit=f_lit, msl_kr=msl_kr, m_ill=m_ill, mow_pl_pol=mow_pl_pol, tfufc_lpg_=tfufc_lpg_, mow_snpwm=mow_snpwm, tfufc_cc=tfufc_cc, aos_=aos_, name_vt=name_vt, kf_dnhk1=kf_dnhk1, marg_hh_02=marg_hh_02, marg_hh_01=marg_hh_01, tot_work_p=tot_work_p, tot_work_m=tot_work_m, m_06=m_06, tot_work_f=tot_work_f, marg_ot_m=marg_ot_m, main_al_m=main_al_m, main_al_f=main_al_f, marg_ot_p=marg_ot_p, pl_wsop=pl_wsop, marg_ot_f=marg_ot_f, aos_tm_mo=aos_tm_mo, msl_nl=msl_nl, msl_ool=msl_ool, kf_dnhk=kf_dnhk, tfufc_cr=tfufc_cr, main_hh_p=main_hh_p, hhs_9_=hhs_9_, main_hh_m=main_hh_m, aos_tm_lo=aos_tm_lo, main_hh_f=main_hh_f, hh_tscs_p=hh_tscs_p, ndr_or=ndr_or, kf_nc=kf_nc, msdw_ucw=msdw_ucw, aos_noasic=aos_noasic, mow_spwm=mow_spwm, aos_cl_win=aos_cl_win, tfufc_=tfufc_, msdw_sp=msdw_sp, marg_al_3_=marg_al_3_, hh_tscs_s=hh_tscs_s, tfufc_ao=tfufc_ao, msdw_cw=msdw_cw, aos_cjv=aos_cjv, marg_hh_f=marg_hh_f, msdw_tb=msdw_tb, marg_hh_0_=marg_hh_0_, marg_hh_m=marg_hh_m, marg_hh_p=marg_hh_p, p_ill=p_ill, aos_bi=aos_bi, tfufc_bio=tfufc_bio, hh_cond_ch=hh_cond_ch, nsdiod=nsdiod, nhh_hbfwtp=nhh_hbfwtp, tfufc_clc=tfufc_clc, marg_cl_31=marg_cl_31, marg_cl_32=marg_cl_32, aos_cl_wii=aos_cl_wii, msdw_tfts=msdw_tfts, m_sc=m_sc, ans_op=ans_op, marg_ot_02=marg_ot_02, marg_ot_01=marg_ot_01, name_dt=name_dt, marg_cl_0_=marg_cl_0_, mow_gtb=mow_gtb, m_st=m_st, kf_cih=kf_cih, msl_ao=msl_ao, mow_conc=mow_conc, msdw_rc=msdw_rc, marg_cl_02=marg_cl_02, aos_hhw_tc=aos_hhw_tc, marg_cl_01=marg_cl_01, main_ot_f=main_ot_f, msl_se=msl_se, mof_mud=mof_mud, hhs_6_8=hhs_6_8, aos_smm=aos_smm, mof_wb=mof_wb, mor_gr_th_=mor_gr_th_, main_ot_m=main_ot_m, marg_ot_0_=marg_ot_0_, main_ot_p=main_ot_p, total=total, msdw_os=msdw_os, tfufc_nc=tfufc_nc, mor_ss=mor_ss, marg_al_f=marg_al_f, hh_cond_11=hh_cond_11, m_lit=m_lit, mc_1=mc_1, hh_tscs_ns=hh_tscs_ns, marg_al_m=marg_al_m, mc_2=mc_2, msdw_tfuts=msdw_tfuts, mc_3=mc_3, hh_cond_10=hh_cond_10, mc_4=mc_4, marg_al_p=marg_al_p, ldws_wp=ldws_wp, mof_stone=mof_stone, mdds_st=mdds_st, pl_wsvi=pl_wsvi, name_st=name_st)
 
 Get features from Primary Census Abstract (2011) for Gurugram district in Haryana at village level
 
@@ -59,21 +59,21 @@ with openapi_client.ApiClient(configuration) as api_client:
     ndr_ner2 = 3.4 # float |  (optional)
     non_work_p = 3.4 # float |  (optional)
     marg_ot_32 = 3.4 # float |  (optional)
-    wwoc_nd = 3.4 # float |  (optional)
     marg_ot_31 = 3.4 # float |  (optional)
+    wwoc_nd = 3.4 # float |  (optional)
     tot_p = 3.4 # float |  (optional)
     non_work_m = 3.4 # float |  (optional)
     mof_aom = 3.4 # float |  (optional)
-    non_work_f = 3.4 # float |  (optional)
     mof_mft = 3.4 # float |  (optional)
+    non_work_f = 3.4 # float |  (optional)
     f_ill = 3.4 # float |  (optional)
     mdds_vt = 'mdds_vt_example' # str |  (optional)
     tfufc_elc = 3.4 # float |  (optional)
     main_cl_p = 3.4 # float |  (optional)
     mor_conc = 3.4 # float |  (optional)
-    hh_tscs_uc = 3.4 # float |  (optional)
     mow_gimas = 3.4 # float |  (optional)
     sl_nsrbh = 3.4 # float |  (optional)
+    hh_tscs_uc = 3.4 # float |  (optional)
     kf_hk = 3.4 # float |  (optional)
     mdds_dt = 'mdds_dt_example' # str |  (optional)
     mow_wood = 3.4 # float |  (optional)
@@ -89,27 +89,27 @@ with openapi_client.ApiClient(configuration) as api_client:
     hh_cond__1 = 3.4 # float |  (optional)
     hh_cond__2 = 3.4 # float |  (optional)
     hh_cond__7 = 3.4 # float |  (optional)
-    hh_cond__8 = 3.4 # float |  (optional)
     mof_cem = 3.4 # float |  (optional)
+    hh_cond__8 = 3.4 # float |  (optional)
     hh_cond__5 = 3.4 # float |  (optional)
     hh_cond__6 = 3.4 # float |  (optional)
     ans_pl = 3.4 # float |  (optional)
     hh_cond__9 = 3.4 # float |  (optional)
     marg_cl_3_ = 3.4 # float |  (optional)
     mc_5_ = 3.4 # float |  (optional)
-    hhs_4 = 3.4 # float |  (optional)
     mainwork_m = 3.4 # float |  (optional)
+    hhs_4 = 3.4 # float |  (optional)
     hhs_5 = 3.4 # float |  (optional)
     fpfl_pss = 3.4 # float |  (optional)
     mainwork_p = 3.4 # float |  (optional)
-    mow_mub = 3.4 # float |  (optional)
     hh_tscs_sp = 3.4 # float |  (optional)
+    mow_mub = 3.4 # float |  (optional)
     kf_tot = 3.4 # float |  (optional)
     mainwork_f = 3.4 # float |  (optional)
     mor_mmt = 3.4 # float |  (optional)
     hhs_1 = 3.4 # float |  (optional)
-    hhs_2 = 3.4 # float |  (optional)
     os_non = 3.4 # float |  (optional)
+    hhs_2 = 3.4 # float |  (optional)
     hhs_3 = 3.4 # float |  (optional)
     main_cl_m = 3.4 # float |  (optional)
     no_hh = 3.4 # float |  (optional)
@@ -144,8 +144,8 @@ with openapi_client.ApiClient(configuration) as api_client:
     marg_cl_m = 3.4 # float |  (optional)
     marg_hh_32 = 3.4 # float |  (optional)
     marg_cl_p = 3.4 # float |  (optional)
-    marg_al_31 = 3.4 # float |  (optional)
     p_sc = 3.4 # float |  (optional)
+    marg_al_31 = 3.4 # float |  (optional)
     marg_al_32 = 3.4 # float |  (optional)
     ndr_3_r = 3.4 # float |  (optional)
     f_06 = 3.4 # float |  (optional)
@@ -157,15 +157,15 @@ with openapi_client.ApiClient(configuration) as api_client:
     nhh_hbfw_2 = 3.4 # float |  (optional)
     margwork_p = 3.4 # float |  (optional)
     margwork_m = 3.4 # float |  (optional)
-    marg_al_01 = 3.4 # float |  (optional)
     ldws_np = 3.4 # float |  (optional)
+    marg_al_01 = 3.4 # float |  (optional)
     f_st = 3.4 # float |  (optional)
     main_al_p = 3.4 # float |  (optional)
     wwoc_cd = 3.4 # float |  (optional)
     marg_al_02 = 3.4 # float |  (optional)
     margwork_4 = 3.4 # float |  (optional)
-    os_ao = 3.4 # float |  (optional)
     margwork_3 = 3.4 # float |  (optional)
+    os_ao = 3.4 # float |  (optional)
     margwork_2 = 3.4 # float |  (optional)
     margwork_1 = 3.4 # float |  (optional)
     margwork_0 = 3.4 # float |  (optional)
@@ -173,8 +173,8 @@ with openapi_client.ApiClient(configuration) as api_client:
     margwork_5 = 3.4 # float |  (optional)
     f_lit = 3.4 # float |  (optional)
     msl_kr = 3.4 # float |  (optional)
-    mow_pl_pol = 3.4 # float |  (optional)
     m_ill = 3.4 # float |  (optional)
+    mow_pl_pol = 3.4 # float |  (optional)
     tfufc_lpg_ = 3.4 # float |  (optional)
     mow_snpwm = 3.4 # float |  (optional)
     tfufc_cc = 3.4 # float |  (optional)
@@ -186,8 +186,8 @@ with openapi_client.ApiClient(configuration) as api_client:
     tot_work_p = 3.4 # float |  (optional)
     tot_work_m = 3.4 # float |  (optional)
     m_06 = 3.4 # float |  (optional)
-    marg_ot_m = 3.4 # float |  (optional)
     tot_work_f = 3.4 # float |  (optional)
+    marg_ot_m = 3.4 # float |  (optional)
     main_al_m = 3.4 # float |  (optional)
     main_al_f = 3.4 # float |  (optional)
     marg_ot_p = 3.4 # float |  (optional)
@@ -236,8 +236,8 @@ with openapi_client.ApiClient(configuration) as api_client:
     m_sc = 3.4 # float |  (optional)
     ans_op = 3.4 # float |  (optional)
     marg_ot_02 = 3.4 # float |  (optional)
-    name_dt = 'name_dt_example' # str |  (optional)
     marg_ot_01 = 3.4 # float |  (optional)
+    name_dt = 'name_dt_example' # str |  (optional)
     marg_cl_0_ = 3.4 # float |  (optional)
     mow_gtb = 3.4 # float |  (optional)
     m_st = 3.4 # float |  (optional)
@@ -251,8 +251,8 @@ with openapi_client.ApiClient(configuration) as api_client:
     main_ot_f = 3.4 # float |  (optional)
     msl_se = 3.4 # float |  (optional)
     mof_mud = 3.4 # float |  (optional)
-    aos_smm = 3.4 # float |  (optional)
     hhs_6_8 = 3.4 # float |  (optional)
+    aos_smm = 3.4 # float |  (optional)
     mof_wb = 3.4 # float |  (optional)
     mor_gr_th_ = 3.4 # float |  (optional)
     main_ot_m = 3.4 # float |  (optional)
@@ -261,20 +261,20 @@ with openapi_client.ApiClient(configuration) as api_client:
     total = 'total_example' # str |  (optional)
     msdw_os = 3.4 # float |  (optional)
     tfufc_nc = 3.4 # float |  (optional)
-    marg_al_f = 3.4 # float |  (optional)
     mor_ss = 3.4 # float |  (optional)
+    marg_al_f = 3.4 # float |  (optional)
+    hh_cond_11 = 3.4 # float |  (optional)
     m_lit = 3.4 # float |  (optional)
     mc_1 = 3.4 # float |  (optional)
-    hh_cond_11 = 3.4 # float |  (optional)
+    hh_tscs_ns = 3.4 # float |  (optional)
     marg_al_m = 3.4 # float |  (optional)
     mc_2 = 3.4 # float |  (optional)
-    hh_tscs_ns = 3.4 # float |  (optional)
-    mc_3 = 3.4 # float |  (optional)
     msdw_tfuts = 3.4 # float |  (optional)
+    mc_3 = 3.4 # float |  (optional)
     hh_cond_10 = 3.4 # float |  (optional)
     mc_4 = 3.4 # float |  (optional)
-    ldws_wp = 3.4 # float |  (optional)
     marg_al_p = 3.4 # float |  (optional)
+    ldws_wp = 3.4 # float |  (optional)
     mof_stone = 3.4 # float |  (optional)
     mdds_st = 'mdds_st_example' # str |  (optional)
     pl_wsvi = 3.4 # float |  (optional)
@@ -282,7 +282,7 @@ with openapi_client.ApiClient(configuration) as api_client:
 
     try:
         # Get features from Primary Census Abstract (2011) for Gurugram district in Haryana at village level
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, name_sdt=name_sdt, tot_m=tot_m, tot_f=tot_f, fpfl_os=fpfl_os, ndr_ner1=ndr_ner1, mor_bb=mor_bb, ndr_ner2=ndr_ner2, non_work_p=non_work_p, marg_ot_32=marg_ot_32, wwoc_nd=wwoc_nd, marg_ot_31=marg_ot_31, tot_p=tot_p, non_work_m=non_work_m, mof_aom=mof_aom, non_work_f=non_work_f, mof_mft=mof_mft, f_ill=f_ill, mdds_vt=mdds_vt, tfufc_elc=tfufc_elc, main_cl_p=main_cl_p, mor_conc=mor_conc, hh_tscs_uc=hh_tscs_uc, mow_gimas=mow_gimas, sl_nsrbh=sl_nsrbh, kf_hk=kf_hk, mdds_dt=mdds_dt, mow_wood=mow_wood, hh_tscs_tt=hh_tscs_tt, os_ren=os_ren, mow_bb=mow_bb, msl_el=msl_el, tfufc_kr=tfufc_kr, mor_pl_pol=mor_pl_pol, marg_ot_3_=marg_ot_3_, hh_cond__3=hh_cond__3, hh_cond__4=hh_cond__4, hh_cond__1=hh_cond__1, hh_cond__2=hh_cond__2, hh_cond__7=hh_cond__7, hh_cond__8=hh_cond__8, mof_cem=mof_cem, hh_cond__5=hh_cond__5, hh_cond__6=hh_cond__6, ans_pl=ans_pl, hh_cond__9=hh_cond__9, marg_cl_3_=marg_cl_3_, mc_5_=mc_5_, hhs_4=hhs_4, mainwork_m=mainwork_m, hhs_5=hhs_5, fpfl_pss=fpfl_pss, mainwork_p=mainwork_p, mow_mub=mow_mub, hh_tscs_sp=hh_tscs_sp, kf_tot=kf_tot, mainwork_f=mainwork_f, mor_mmt=mor_mmt, hhs_1=hhs_1, hhs_2=hhs_2, os_non=os_non, hhs_3=hhs_3, main_cl_m=main_cl_m, no_hh=no_hh, mdds_sdt=mdds_sdt, main_cl_f=main_cl_f, wwoc_od=wwoc_od, sl_nssba=sl_nssba, p_06=p_06, nhhnhl=nhhnhl, kf_coh=kf_coh, ldws_a=ldws_a, tnhh_abs=tnhh_abs, fpfl_st=fpfl_st, msdw_hp=msdw_hp, marg_al_0_=marg_al_0_, aos_tm_bot=aos_tm_bot, mor_gi_mas=mor_gi_mas, mow_aom=mow_aom, marg_hh_3_=marg_hh_3_, msdw_tpl=msdw_tpl, p_st=p_st, p_lit=p_lit, mor_hmt=mor_hmt, ndr_4_r=ndr_4_r, marg_hh_31=marg_hh_31, aos_tel=aos_tel, os_ow=os_ow, mof_bb=mof_bb, marg_cl_f=marg_cl_f, kf_hk1=kf_hk1, mor_aom=mor_aom, marg_cl_m=marg_cl_m, marg_hh_32=marg_hh_32, marg_cl_p=marg_cl_p, marg_al_31=marg_al_31, p_sc=p_sc, marg_al_32=marg_al_32, ndr_3_r=ndr_3_r, f_06=f_06, ndr_tr=ndr_tr, margwork_f=margwork_f, ndr_ner=ndr_ner, f_sc=f_sc, nhh_hbfw_1=nhh_hbfw_1, nhh_hbfw_2=nhh_hbfw_2, margwork_p=margwork_p, margwork_m=margwork_m, marg_al_01=marg_al_01, ldws_np=ldws_np, f_st=f_st, main_al_p=main_al_p, wwoc_cd=wwoc_cd, marg_al_02=marg_al_02, margwork_4=margwork_4, os_ao=os_ao, margwork_3=margwork_3, margwork_2=margwork_2, margwork_1=margwork_1, margwork_0=margwork_0, nhh_hlf=nhh_hlf, margwork_5=margwork_5, f_lit=f_lit, msl_kr=msl_kr, mow_pl_pol=mow_pl_pol, m_ill=m_ill, tfufc_lpg_=tfufc_lpg_, mow_snpwm=mow_snpwm, tfufc_cc=tfufc_cc, aos_=aos_, name_vt=name_vt, kf_dnhk1=kf_dnhk1, marg_hh_02=marg_hh_02, marg_hh_01=marg_hh_01, tot_work_p=tot_work_p, tot_work_m=tot_work_m, m_06=m_06, marg_ot_m=marg_ot_m, tot_work_f=tot_work_f, main_al_m=main_al_m, main_al_f=main_al_f, marg_ot_p=marg_ot_p, pl_wsop=pl_wsop, marg_ot_f=marg_ot_f, aos_tm_mo=aos_tm_mo, msl_nl=msl_nl, msl_ool=msl_ool, kf_dnhk=kf_dnhk, tfufc_cr=tfufc_cr, main_hh_p=main_hh_p, hhs_9_=hhs_9_, main_hh_m=main_hh_m, aos_tm_lo=aos_tm_lo, main_hh_f=main_hh_f, hh_tscs_p=hh_tscs_p, ndr_or=ndr_or, kf_nc=kf_nc, msdw_ucw=msdw_ucw, aos_noasic=aos_noasic, mow_spwm=mow_spwm, aos_cl_win=aos_cl_win, tfufc_=tfufc_, msdw_sp=msdw_sp, marg_al_3_=marg_al_3_, hh_tscs_s=hh_tscs_s, tfufc_ao=tfufc_ao, msdw_cw=msdw_cw, aos_cjv=aos_cjv, marg_hh_f=marg_hh_f, msdw_tb=msdw_tb, marg_hh_0_=marg_hh_0_, marg_hh_m=marg_hh_m, marg_hh_p=marg_hh_p, p_ill=p_ill, aos_bi=aos_bi, tfufc_bio=tfufc_bio, hh_cond_ch=hh_cond_ch, nsdiod=nsdiod, nhh_hbfwtp=nhh_hbfwtp, tfufc_clc=tfufc_clc, marg_cl_31=marg_cl_31, marg_cl_32=marg_cl_32, aos_cl_wii=aos_cl_wii, msdw_tfts=msdw_tfts, m_sc=m_sc, ans_op=ans_op, marg_ot_02=marg_ot_02, name_dt=name_dt, marg_ot_01=marg_ot_01, marg_cl_0_=marg_cl_0_, mow_gtb=mow_gtb, m_st=m_st, kf_cih=kf_cih, msl_ao=msl_ao, mow_conc=mow_conc, msdw_rc=msdw_rc, marg_cl_02=marg_cl_02, aos_hhw_tc=aos_hhw_tc, marg_cl_01=marg_cl_01, main_ot_f=main_ot_f, msl_se=msl_se, mof_mud=mof_mud, aos_smm=aos_smm, hhs_6_8=hhs_6_8, mof_wb=mof_wb, mor_gr_th_=mor_gr_th_, main_ot_m=main_ot_m, marg_ot_0_=marg_ot_0_, main_ot_p=main_ot_p, total=total, msdw_os=msdw_os, tfufc_nc=tfufc_nc, marg_al_f=marg_al_f, mor_ss=mor_ss, m_lit=m_lit, mc_1=mc_1, hh_cond_11=hh_cond_11, marg_al_m=marg_al_m, mc_2=mc_2, hh_tscs_ns=hh_tscs_ns, mc_3=mc_3, msdw_tfuts=msdw_tfuts, hh_cond_10=hh_cond_10, mc_4=mc_4, ldws_wp=ldws_wp, marg_al_p=marg_al_p, mof_stone=mof_stone, mdds_st=mdds_st, pl_wsvi=pl_wsvi, name_st=name_st)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, name_sdt=name_sdt, tot_m=tot_m, tot_f=tot_f, fpfl_os=fpfl_os, ndr_ner1=ndr_ner1, mor_bb=mor_bb, ndr_ner2=ndr_ner2, non_work_p=non_work_p, marg_ot_32=marg_ot_32, marg_ot_31=marg_ot_31, wwoc_nd=wwoc_nd, tot_p=tot_p, non_work_m=non_work_m, mof_aom=mof_aom, mof_mft=mof_mft, non_work_f=non_work_f, f_ill=f_ill, mdds_vt=mdds_vt, tfufc_elc=tfufc_elc, main_cl_p=main_cl_p, mor_conc=mor_conc, mow_gimas=mow_gimas, sl_nsrbh=sl_nsrbh, hh_tscs_uc=hh_tscs_uc, kf_hk=kf_hk, mdds_dt=mdds_dt, mow_wood=mow_wood, hh_tscs_tt=hh_tscs_tt, os_ren=os_ren, mow_bb=mow_bb, msl_el=msl_el, tfufc_kr=tfufc_kr, mor_pl_pol=mor_pl_pol, marg_ot_3_=marg_ot_3_, hh_cond__3=hh_cond__3, hh_cond__4=hh_cond__4, hh_cond__1=hh_cond__1, hh_cond__2=hh_cond__2, hh_cond__7=hh_cond__7, mof_cem=mof_cem, hh_cond__8=hh_cond__8, hh_cond__5=hh_cond__5, hh_cond__6=hh_cond__6, ans_pl=ans_pl, hh_cond__9=hh_cond__9, marg_cl_3_=marg_cl_3_, mc_5_=mc_5_, mainwork_m=mainwork_m, hhs_4=hhs_4, hhs_5=hhs_5, fpfl_pss=fpfl_pss, mainwork_p=mainwork_p, hh_tscs_sp=hh_tscs_sp, mow_mub=mow_mub, kf_tot=kf_tot, mainwork_f=mainwork_f, mor_mmt=mor_mmt, hhs_1=hhs_1, os_non=os_non, hhs_2=hhs_2, hhs_3=hhs_3, main_cl_m=main_cl_m, no_hh=no_hh, mdds_sdt=mdds_sdt, main_cl_f=main_cl_f, wwoc_od=wwoc_od, sl_nssba=sl_nssba, p_06=p_06, nhhnhl=nhhnhl, kf_coh=kf_coh, ldws_a=ldws_a, tnhh_abs=tnhh_abs, fpfl_st=fpfl_st, msdw_hp=msdw_hp, marg_al_0_=marg_al_0_, aos_tm_bot=aos_tm_bot, mor_gi_mas=mor_gi_mas, mow_aom=mow_aom, marg_hh_3_=marg_hh_3_, msdw_tpl=msdw_tpl, p_st=p_st, p_lit=p_lit, mor_hmt=mor_hmt, ndr_4_r=ndr_4_r, marg_hh_31=marg_hh_31, aos_tel=aos_tel, os_ow=os_ow, mof_bb=mof_bb, marg_cl_f=marg_cl_f, kf_hk1=kf_hk1, mor_aom=mor_aom, marg_cl_m=marg_cl_m, marg_hh_32=marg_hh_32, marg_cl_p=marg_cl_p, p_sc=p_sc, marg_al_31=marg_al_31, marg_al_32=marg_al_32, ndr_3_r=ndr_3_r, f_06=f_06, ndr_tr=ndr_tr, margwork_f=margwork_f, ndr_ner=ndr_ner, f_sc=f_sc, nhh_hbfw_1=nhh_hbfw_1, nhh_hbfw_2=nhh_hbfw_2, margwork_p=margwork_p, margwork_m=margwork_m, ldws_np=ldws_np, marg_al_01=marg_al_01, f_st=f_st, main_al_p=main_al_p, wwoc_cd=wwoc_cd, marg_al_02=marg_al_02, margwork_4=margwork_4, margwork_3=margwork_3, os_ao=os_ao, margwork_2=margwork_2, margwork_1=margwork_1, margwork_0=margwork_0, nhh_hlf=nhh_hlf, margwork_5=margwork_5, f_lit=f_lit, msl_kr=msl_kr, m_ill=m_ill, mow_pl_pol=mow_pl_pol, tfufc_lpg_=tfufc_lpg_, mow_snpwm=mow_snpwm, tfufc_cc=tfufc_cc, aos_=aos_, name_vt=name_vt, kf_dnhk1=kf_dnhk1, marg_hh_02=marg_hh_02, marg_hh_01=marg_hh_01, tot_work_p=tot_work_p, tot_work_m=tot_work_m, m_06=m_06, tot_work_f=tot_work_f, marg_ot_m=marg_ot_m, main_al_m=main_al_m, main_al_f=main_al_f, marg_ot_p=marg_ot_p, pl_wsop=pl_wsop, marg_ot_f=marg_ot_f, aos_tm_mo=aos_tm_mo, msl_nl=msl_nl, msl_ool=msl_ool, kf_dnhk=kf_dnhk, tfufc_cr=tfufc_cr, main_hh_p=main_hh_p, hhs_9_=hhs_9_, main_hh_m=main_hh_m, aos_tm_lo=aos_tm_lo, main_hh_f=main_hh_f, hh_tscs_p=hh_tscs_p, ndr_or=ndr_or, kf_nc=kf_nc, msdw_ucw=msdw_ucw, aos_noasic=aos_noasic, mow_spwm=mow_spwm, aos_cl_win=aos_cl_win, tfufc_=tfufc_, msdw_sp=msdw_sp, marg_al_3_=marg_al_3_, hh_tscs_s=hh_tscs_s, tfufc_ao=tfufc_ao, msdw_cw=msdw_cw, aos_cjv=aos_cjv, marg_hh_f=marg_hh_f, msdw_tb=msdw_tb, marg_hh_0_=marg_hh_0_, marg_hh_m=marg_hh_m, marg_hh_p=marg_hh_p, p_ill=p_ill, aos_bi=aos_bi, tfufc_bio=tfufc_bio, hh_cond_ch=hh_cond_ch, nsdiod=nsdiod, nhh_hbfwtp=nhh_hbfwtp, tfufc_clc=tfufc_clc, marg_cl_31=marg_cl_31, marg_cl_32=marg_cl_32, aos_cl_wii=aos_cl_wii, msdw_tfts=msdw_tfts, m_sc=m_sc, ans_op=ans_op, marg_ot_02=marg_ot_02, marg_ot_01=marg_ot_01, name_dt=name_dt, marg_cl_0_=marg_cl_0_, mow_gtb=mow_gtb, m_st=m_st, kf_cih=kf_cih, msl_ao=msl_ao, mow_conc=mow_conc, msdw_rc=msdw_rc, marg_cl_02=marg_cl_02, aos_hhw_tc=aos_hhw_tc, marg_cl_01=marg_cl_01, main_ot_f=main_ot_f, msl_se=msl_se, mof_mud=mof_mud, hhs_6_8=hhs_6_8, aos_smm=aos_smm, mof_wb=mof_wb, mor_gr_th_=mor_gr_th_, main_ot_m=main_ot_m, marg_ot_0_=marg_ot_0_, main_ot_p=main_ot_p, total=total, msdw_os=msdw_os, tfufc_nc=tfufc_nc, mor_ss=mor_ss, marg_al_f=marg_al_f, hh_cond_11=hh_cond_11, m_lit=m_lit, mc_1=mc_1, hh_tscs_ns=hh_tscs_ns, marg_al_m=marg_al_m, mc_2=mc_2, msdw_tfuts=msdw_tfuts, mc_3=mc_3, hh_cond_10=hh_cond_10, mc_4=mc_4, marg_al_p=marg_al_p, ldws_wp=ldws_wp, mof_stone=mof_stone, mdds_st=mdds_st, pl_wsvi=pl_wsvi, name_st=name_st)
         print("The response of PrimaryCensusAbstractOfGurugramHaryanaApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -311,21 +311,21 @@ Name | Type | Description  | Notes
  **ndr_ner2** | **float**|  | [optional] 
  **non_work_p** | **float**|  | [optional] 
  **marg_ot_32** | **float**|  | [optional] 
- **wwoc_nd** | **float**|  | [optional] 
  **marg_ot_31** | **float**|  | [optional] 
+ **wwoc_nd** | **float**|  | [optional] 
  **tot_p** | **float**|  | [optional] 
  **non_work_m** | **float**|  | [optional] 
  **mof_aom** | **float**|  | [optional] 
- **non_work_f** | **float**|  | [optional] 
  **mof_mft** | **float**|  | [optional] 
+ **non_work_f** | **float**|  | [optional] 
  **f_ill** | **float**|  | [optional] 
  **mdds_vt** | **str**|  | [optional] 
  **tfufc_elc** | **float**|  | [optional] 
  **main_cl_p** | **float**|  | [optional] 
  **mor_conc** | **float**|  | [optional] 
- **hh_tscs_uc** | **float**|  | [optional] 
  **mow_gimas** | **float**|  | [optional] 
  **sl_nsrbh** | **float**|  | [optional] 
+ **hh_tscs_uc** | **float**|  | [optional] 
  **kf_hk** | **float**|  | [optional] 
  **mdds_dt** | **str**|  | [optional] 
  **mow_wood** | **float**|  | [optional] 
@@ -341,27 +341,27 @@ Name | Type | Description  | Notes
  **hh_cond__1** | **float**|  | [optional] 
  **hh_cond__2** | **float**|  | [optional] 
  **hh_cond__7** | **float**|  | [optional] 
- **hh_cond__8** | **float**|  | [optional] 
  **mof_cem** | **float**|  | [optional] 
+ **hh_cond__8** | **float**|  | [optional] 
  **hh_cond__5** | **float**|  | [optional] 
  **hh_cond__6** | **float**|  | [optional] 
  **ans_pl** | **float**|  | [optional] 
  **hh_cond__9** | **float**|  | [optional] 
  **marg_cl_3_** | **float**|  | [optional] 
  **mc_5_** | **float**|  | [optional] 
- **hhs_4** | **float**|  | [optional] 
  **mainwork_m** | **float**|  | [optional] 
+ **hhs_4** | **float**|  | [optional] 
  **hhs_5** | **float**|  | [optional] 
  **fpfl_pss** | **float**|  | [optional] 
  **mainwork_p** | **float**|  | [optional] 
- **mow_mub** | **float**|  | [optional] 
  **hh_tscs_sp** | **float**|  | [optional] 
+ **mow_mub** | **float**|  | [optional] 
  **kf_tot** | **float**|  | [optional] 
  **mainwork_f** | **float**|  | [optional] 
  **mor_mmt** | **float**|  | [optional] 
  **hhs_1** | **float**|  | [optional] 
- **hhs_2** | **float**|  | [optional] 
  **os_non** | **float**|  | [optional] 
+ **hhs_2** | **float**|  | [optional] 
  **hhs_3** | **float**|  | [optional] 
  **main_cl_m** | **float**|  | [optional] 
  **no_hh** | **float**|  | [optional] 
@@ -396,8 +396,8 @@ Name | Type | Description  | Notes
  **marg_cl_m** | **float**|  | [optional] 
  **marg_hh_32** | **float**|  | [optional] 
  **marg_cl_p** | **float**|  | [optional] 
- **marg_al_31** | **float**|  | [optional] 
  **p_sc** | **float**|  | [optional] 
+ **marg_al_31** | **float**|  | [optional] 
  **marg_al_32** | **float**|  | [optional] 
  **ndr_3_r** | **float**|  | [optional] 
  **f_06** | **float**|  | [optional] 
@@ -409,15 +409,15 @@ Name | Type | Description  | Notes
  **nhh_hbfw_2** | **float**|  | [optional] 
  **margwork_p** | **float**|  | [optional] 
  **margwork_m** | **float**|  | [optional] 
- **marg_al_01** | **float**|  | [optional] 
  **ldws_np** | **float**|  | [optional] 
+ **marg_al_01** | **float**|  | [optional] 
  **f_st** | **float**|  | [optional] 
  **main_al_p** | **float**|  | [optional] 
  **wwoc_cd** | **float**|  | [optional] 
  **marg_al_02** | **float**|  | [optional] 
  **margwork_4** | **float**|  | [optional] 
- **os_ao** | **float**|  | [optional] 
  **margwork_3** | **float**|  | [optional] 
+ **os_ao** | **float**|  | [optional] 
  **margwork_2** | **float**|  | [optional] 
  **margwork_1** | **float**|  | [optional] 
  **margwork_0** | **float**|  | [optional] 
@@ -425,8 +425,8 @@ Name | Type | Description  | Notes
  **margwork_5** | **float**|  | [optional] 
  **f_lit** | **float**|  | [optional] 
  **msl_kr** | **float**|  | [optional] 
- **mow_pl_pol** | **float**|  | [optional] 
  **m_ill** | **float**|  | [optional] 
+ **mow_pl_pol** | **float**|  | [optional] 
  **tfufc_lpg_** | **float**|  | [optional] 
  **mow_snpwm** | **float**|  | [optional] 
  **tfufc_cc** | **float**|  | [optional] 
@@ -438,8 +438,8 @@ Name | Type | Description  | Notes
  **tot_work_p** | **float**|  | [optional] 
  **tot_work_m** | **float**|  | [optional] 
  **m_06** | **float**|  | [optional] 
- **marg_ot_m** | **float**|  | [optional] 
  **tot_work_f** | **float**|  | [optional] 
+ **marg_ot_m** | **float**|  | [optional] 
  **main_al_m** | **float**|  | [optional] 
  **main_al_f** | **float**|  | [optional] 
  **marg_ot_p** | **float**|  | [optional] 
@@ -488,8 +488,8 @@ Name | Type | Description  | Notes
  **m_sc** | **float**|  | [optional] 
  **ans_op** | **float**|  | [optional] 
  **marg_ot_02** | **float**|  | [optional] 
- **name_dt** | **str**|  | [optional] 
  **marg_ot_01** | **float**|  | [optional] 
+ **name_dt** | **str**|  | [optional] 
  **marg_cl_0_** | **float**|  | [optional] 
  **mow_gtb** | **float**|  | [optional] 
  **m_st** | **float**|  | [optional] 
@@ -503,8 +503,8 @@ Name | Type | Description  | Notes
  **main_ot_f** | **float**|  | [optional] 
  **msl_se** | **float**|  | [optional] 
  **mof_mud** | **float**|  | [optional] 
- **aos_smm** | **float**|  | [optional] 
  **hhs_6_8** | **float**|  | [optional] 
+ **aos_smm** | **float**|  | [optional] 
  **mof_wb** | **float**|  | [optional] 
  **mor_gr_th_** | **float**|  | [optional] 
  **main_ot_m** | **float**|  | [optional] 
@@ -513,20 +513,20 @@ Name | Type | Description  | Notes
  **total** | **str**|  | [optional] 
  **msdw_os** | **float**|  | [optional] 
  **tfufc_nc** | **float**|  | [optional] 
- **marg_al_f** | **float**|  | [optional] 
  **mor_ss** | **float**|  | [optional] 
+ **marg_al_f** | **float**|  | [optional] 
+ **hh_cond_11** | **float**|  | [optional] 
  **m_lit** | **float**|  | [optional] 
  **mc_1** | **float**|  | [optional] 
- **hh_cond_11** | **float**|  | [optional] 
+ **hh_tscs_ns** | **float**|  | [optional] 
  **marg_al_m** | **float**|  | [optional] 
  **mc_2** | **float**|  | [optional] 
- **hh_tscs_ns** | **float**|  | [optional] 
- **mc_3** | **float**|  | [optional] 
  **msdw_tfuts** | **float**|  | [optional] 
+ **mc_3** | **float**|  | [optional] 
  **hh_cond_10** | **float**|  | [optional] 
  **mc_4** | **float**|  | [optional] 
- **ldws_wp** | **float**|  | [optional] 
  **marg_al_p** | **float**|  | [optional] 
+ **ldws_wp** | **float**|  | [optional] 
  **mof_stone** | **float**|  | [optional] 
  **mdds_st** | **str**|  | [optional] 
  **pl_wsvi** | **float**|  | [optional] 

@@ -63,19 +63,19 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         f_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_vt: Optional[StrictStr] = None,
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_conc: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
-        sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gimas: Optional[Union[StrictFloat, StrictInt]] = None,
+        sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_dt: Optional[StrictStr] = None,
         mow_wood: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -92,8 +92,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -105,16 +105,16 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_1: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         os_non: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_3: Optional[Union[StrictFloat, StrictInt]] = None,
         sr: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_3: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
         no_hh: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_sdt: Optional[StrictStr] = None,
@@ -133,8 +133,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         mor_gi_mas: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_3_: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
         p_st: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
         p_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_hmt: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_4_r: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -164,8 +164,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         margwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
-        f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         lit_r: Optional[Union[StrictFloat, StrictInt]] = None,
+        f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_02: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -193,11 +193,11 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         tot_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         m_06: Optional[Union[StrictFloat, StrictInt]] = None,
         mar_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         pl_wsop: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_mo: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -234,9 +234,9 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         tfufc_bio: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
+        nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfts: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -265,27 +265,27 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         main_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         csr: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
-        sc_per: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        sc_per: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
-        mdds_st: Optional[StrictStr] = None,
         pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
+        mdds_st: Optional[StrictStr] = None,
         name_st: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -339,16 +339,16 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
-        :param non_work_m:
-        :type non_work_m: float
         :param tot_p:
         :type tot_p: float
+        :param non_work_m:
+        :type non_work_m: float
         :param mof_aom:
         :type mof_aom: float
-        :param mof_mft:
-        :type mof_mft: float
         :param non_work_f:
         :type non_work_f: float
+        :param mof_mft:
+        :type mof_mft: float
         :param f_ill:
         :type f_ill: float
         :param mdds_vt:
@@ -359,12 +359,12 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type main_cl_p: float
         :param mor_conc:
         :type mor_conc: float
-        :param hh_tscs_uc:
-        :type hh_tscs_uc: float
-        :param sl_nsrbh:
-        :type sl_nsrbh: float
         :param mow_gimas:
         :type mow_gimas: float
+        :param sl_nsrbh:
+        :type sl_nsrbh: float
+        :param hh_tscs_uc:
+        :type hh_tscs_uc: float
         :param kf_hk:
         :type kf_hk: float
         :param mdds_dt:
@@ -397,10 +397,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param hh_cond__8:
-        :type hh_cond__8: float
         :param mof_cem:
         :type mof_cem: float
+        :param hh_cond__8:
+        :type hh_cond__8: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -423,10 +423,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param hh_tscs_sp:
-        :type hh_tscs_sp: float
         :param mow_mub:
         :type mow_mub: float
+        :param hh_tscs_sp:
+        :type hh_tscs_sp: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -439,10 +439,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type hhs_2: float
         :param os_non:
         :type os_non: float
-        :param hhs_3:
-        :type hhs_3: float
         :param sr:
         :type sr: float
+        :param hhs_3:
+        :type hhs_3: float
         :param main_cl_m:
         :type main_cl_m: float
         :param no_hh:
@@ -479,10 +479,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type mow_aom: float
         :param marg_hh_3_:
         :type marg_hh_3_: float
-        :param msdw_tpl:
-        :type msdw_tpl: float
         :param p_st:
         :type p_st: float
+        :param msdw_tpl:
+        :type msdw_tpl: float
         :param p_lit:
         :type p_lit: float
         :param mor_hmt:
@@ -541,10 +541,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type marg_al_01: float
         :param ldws_np:
         :type ldws_np: float
-        :param f_st:
-        :type f_st: float
         :param lit_r:
         :type lit_r: float
+        :param f_st:
+        :type f_st: float
         :param main_al_p:
         :type main_al_p: float
         :param wwoc_cd:
@@ -599,16 +599,16 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type m_06: float
         :param mar_work_p:
         :type mar_work_p: float
-        :param marg_ot_m:
-        :type marg_ot_m: float
         :param tot_work_f:
         :type tot_work_f: float
+        :param marg_ot_m:
+        :type marg_ot_m: float
         :param main_al_m:
         :type main_al_m: float
-        :param marg_ot_p:
-        :type marg_ot_p: float
         :param main_al_f:
         :type main_al_f: float
+        :param marg_ot_p:
+        :type marg_ot_p: float
         :param pl_wsop:
         :type pl_wsop: float
         :param marg_ot_f:
@@ -681,12 +681,12 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type hh_cond_ch: float
         :param nsdiod:
         :type nsdiod: float
+        :param nhh_hbfwtp:
+        :type nhh_hbfwtp: float
         :param tfufc_clc:
         :type tfufc_clc: float
         :param marg_cl_31:
         :type marg_cl_31: float
-        :param nhh_hbfwtp:
-        :type nhh_hbfwtp: float
         :param marg_cl_32:
         :type marg_cl_32: float
         :param aos_cl_wii:
@@ -743,28 +743,28 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type marg_ot_0_: float
         :param main_ot_p:
         :type main_ot_p: float
-        :param msdw_os:
-        :type msdw_os: float
         :param csr:
         :type csr: float
+        :param msdw_os:
+        :type msdw_os: float
         :param tfufc_nc:
         :type tfufc_nc: float
-        :param mor_ss:
-        :type mor_ss: float
         :param marg_al_f:
         :type marg_al_f: float
+        :param mor_ss:
+        :type mor_ss: float
+        :param hh_cond_11:
+        :type hh_cond_11: float
         :param m_lit:
         :type m_lit: float
         :param mc_1:
         :type mc_1: float
-        :param hh_cond_11:
-        :type hh_cond_11: float
+        :param hh_tscs_ns:
+        :type hh_tscs_ns: float
         :param marg_al_m:
         :type marg_al_m: float
         :param mc_2:
         :type mc_2: float
-        :param hh_tscs_ns:
-        :type hh_tscs_ns: float
         :param msdw_tfuts:
         :type msdw_tfuts: float
         :param mc_3:
@@ -773,18 +773,18 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type hh_cond_10: float
         :param mc_4:
         :type mc_4: float
-        :param sc_per:
-        :type sc_per: float
-        :param marg_al_p:
-        :type marg_al_p: float
         :param ldws_wp:
         :type ldws_wp: float
+        :param marg_al_p:
+        :type marg_al_p: float
+        :param sc_per:
+        :type sc_per: float
         :param mof_stone:
         :type mof_stone: float
-        :param mdds_st:
-        :type mdds_st: str
         :param pl_wsvi:
         :type pl_wsvi: float
+        :param mdds_st:
+        :type mdds_st: str
         :param name_st:
         :type name_st: str
         :param _request_timeout: timeout setting for this request. If one
@@ -828,19 +828,19 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             marg_ot_32=marg_ot_32,
             wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
-            non_work_m=non_work_m,
             tot_p=tot_p,
+            non_work_m=non_work_m,
             mof_aom=mof_aom,
-            mof_mft=mof_mft,
             non_work_f=non_work_f,
+            mof_mft=mof_mft,
             f_ill=f_ill,
             mdds_vt=mdds_vt,
             tfufc_elc=tfufc_elc,
             main_cl_p=main_cl_p,
             mor_conc=mor_conc,
-            hh_tscs_uc=hh_tscs_uc,
-            sl_nsrbh=sl_nsrbh,
             mow_gimas=mow_gimas,
+            sl_nsrbh=sl_nsrbh,
+            hh_tscs_uc=hh_tscs_uc,
             kf_hk=kf_hk,
             mdds_dt=mdds_dt,
             mow_wood=mow_wood,
@@ -857,8 +857,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            hh_cond__8=hh_cond__8,
             mof_cem=mof_cem,
+            hh_cond__8=hh_cond__8,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
@@ -870,16 +870,16 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            hh_tscs_sp=hh_tscs_sp,
             mow_mub=mow_mub,
+            hh_tscs_sp=hh_tscs_sp,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
             hhs_1=hhs_1,
             hhs_2=hhs_2,
             os_non=os_non,
-            hhs_3=hhs_3,
             sr=sr,
+            hhs_3=hhs_3,
             main_cl_m=main_cl_m,
             no_hh=no_hh,
             mdds_sdt=mdds_sdt,
@@ -898,8 +898,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             mor_gi_mas=mor_gi_mas,
             mow_aom=mow_aom,
             marg_hh_3_=marg_hh_3_,
-            msdw_tpl=msdw_tpl,
             p_st=p_st,
+            msdw_tpl=msdw_tpl,
             p_lit=p_lit,
             mor_hmt=mor_hmt,
             ndr_4_r=ndr_4_r,
@@ -929,8 +929,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             margwork_m=margwork_m,
             marg_al_01=marg_al_01,
             ldws_np=ldws_np,
-            f_st=f_st,
             lit_r=lit_r,
+            f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
             marg_al_02=marg_al_02,
@@ -958,11 +958,11 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             tot_work_m=tot_work_m,
             m_06=m_06,
             mar_work_p=mar_work_p,
-            marg_ot_m=marg_ot_m,
             tot_work_f=tot_work_f,
+            marg_ot_m=marg_ot_m,
             main_al_m=main_al_m,
-            marg_ot_p=marg_ot_p,
             main_al_f=main_al_f,
+            marg_ot_p=marg_ot_p,
             pl_wsop=pl_wsop,
             marg_ot_f=marg_ot_f,
             aos_tm_mo=aos_tm_mo,
@@ -999,9 +999,9 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             tfufc_bio=tfufc_bio,
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
+            nhh_hbfwtp=nhh_hbfwtp,
             tfufc_clc=tfufc_clc,
             marg_cl_31=marg_cl_31,
-            nhh_hbfwtp=nhh_hbfwtp,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
             msdw_tfts=msdw_tfts,
@@ -1030,27 +1030,27 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             main_ot_m=main_ot_m,
             marg_ot_0_=marg_ot_0_,
             main_ot_p=main_ot_p,
-            msdw_os=msdw_os,
             csr=csr,
+            msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
-            mor_ss=mor_ss,
             marg_al_f=marg_al_f,
+            mor_ss=mor_ss,
+            hh_cond_11=hh_cond_11,
             m_lit=m_lit,
             mc_1=mc_1,
-            hh_cond_11=hh_cond_11,
+            hh_tscs_ns=hh_tscs_ns,
             marg_al_m=marg_al_m,
             mc_2=mc_2,
-            hh_tscs_ns=hh_tscs_ns,
             msdw_tfuts=msdw_tfuts,
             mc_3=mc_3,
             hh_cond_10=hh_cond_10,
             mc_4=mc_4,
-            sc_per=sc_per,
-            marg_al_p=marg_al_p,
             ldws_wp=ldws_wp,
+            marg_al_p=marg_al_p,
+            sc_per=sc_per,
             mof_stone=mof_stone,
-            mdds_st=mdds_st,
             pl_wsvi=pl_wsvi,
+            mdds_st=mdds_st,
             name_st=name_st,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1095,19 +1095,19 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         f_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_vt: Optional[StrictStr] = None,
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_conc: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
-        sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gimas: Optional[Union[StrictFloat, StrictInt]] = None,
+        sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_dt: Optional[StrictStr] = None,
         mow_wood: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1124,8 +1124,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1137,16 +1137,16 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_1: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         os_non: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_3: Optional[Union[StrictFloat, StrictInt]] = None,
         sr: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_3: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
         no_hh: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_sdt: Optional[StrictStr] = None,
@@ -1165,8 +1165,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         mor_gi_mas: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_3_: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
         p_st: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
         p_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_hmt: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_4_r: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1196,8 +1196,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         margwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
-        f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         lit_r: Optional[Union[StrictFloat, StrictInt]] = None,
+        f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_02: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1225,11 +1225,11 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         tot_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         m_06: Optional[Union[StrictFloat, StrictInt]] = None,
         mar_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         pl_wsop: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_mo: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1266,9 +1266,9 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         tfufc_bio: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
+        nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfts: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1297,27 +1297,27 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         main_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         csr: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
-        sc_per: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        sc_per: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
-        mdds_st: Optional[StrictStr] = None,
         pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
+        mdds_st: Optional[StrictStr] = None,
         name_st: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -1371,16 +1371,16 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
-        :param non_work_m:
-        :type non_work_m: float
         :param tot_p:
         :type tot_p: float
+        :param non_work_m:
+        :type non_work_m: float
         :param mof_aom:
         :type mof_aom: float
-        :param mof_mft:
-        :type mof_mft: float
         :param non_work_f:
         :type non_work_f: float
+        :param mof_mft:
+        :type mof_mft: float
         :param f_ill:
         :type f_ill: float
         :param mdds_vt:
@@ -1391,12 +1391,12 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type main_cl_p: float
         :param mor_conc:
         :type mor_conc: float
-        :param hh_tscs_uc:
-        :type hh_tscs_uc: float
-        :param sl_nsrbh:
-        :type sl_nsrbh: float
         :param mow_gimas:
         :type mow_gimas: float
+        :param sl_nsrbh:
+        :type sl_nsrbh: float
+        :param hh_tscs_uc:
+        :type hh_tscs_uc: float
         :param kf_hk:
         :type kf_hk: float
         :param mdds_dt:
@@ -1429,10 +1429,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param hh_cond__8:
-        :type hh_cond__8: float
         :param mof_cem:
         :type mof_cem: float
+        :param hh_cond__8:
+        :type hh_cond__8: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -1455,10 +1455,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param hh_tscs_sp:
-        :type hh_tscs_sp: float
         :param mow_mub:
         :type mow_mub: float
+        :param hh_tscs_sp:
+        :type hh_tscs_sp: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -1471,10 +1471,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type hhs_2: float
         :param os_non:
         :type os_non: float
-        :param hhs_3:
-        :type hhs_3: float
         :param sr:
         :type sr: float
+        :param hhs_3:
+        :type hhs_3: float
         :param main_cl_m:
         :type main_cl_m: float
         :param no_hh:
@@ -1511,10 +1511,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type mow_aom: float
         :param marg_hh_3_:
         :type marg_hh_3_: float
-        :param msdw_tpl:
-        :type msdw_tpl: float
         :param p_st:
         :type p_st: float
+        :param msdw_tpl:
+        :type msdw_tpl: float
         :param p_lit:
         :type p_lit: float
         :param mor_hmt:
@@ -1573,10 +1573,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type marg_al_01: float
         :param ldws_np:
         :type ldws_np: float
-        :param f_st:
-        :type f_st: float
         :param lit_r:
         :type lit_r: float
+        :param f_st:
+        :type f_st: float
         :param main_al_p:
         :type main_al_p: float
         :param wwoc_cd:
@@ -1631,16 +1631,16 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type m_06: float
         :param mar_work_p:
         :type mar_work_p: float
-        :param marg_ot_m:
-        :type marg_ot_m: float
         :param tot_work_f:
         :type tot_work_f: float
+        :param marg_ot_m:
+        :type marg_ot_m: float
         :param main_al_m:
         :type main_al_m: float
-        :param marg_ot_p:
-        :type marg_ot_p: float
         :param main_al_f:
         :type main_al_f: float
+        :param marg_ot_p:
+        :type marg_ot_p: float
         :param pl_wsop:
         :type pl_wsop: float
         :param marg_ot_f:
@@ -1713,12 +1713,12 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type hh_cond_ch: float
         :param nsdiod:
         :type nsdiod: float
+        :param nhh_hbfwtp:
+        :type nhh_hbfwtp: float
         :param tfufc_clc:
         :type tfufc_clc: float
         :param marg_cl_31:
         :type marg_cl_31: float
-        :param nhh_hbfwtp:
-        :type nhh_hbfwtp: float
         :param marg_cl_32:
         :type marg_cl_32: float
         :param aos_cl_wii:
@@ -1775,28 +1775,28 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type marg_ot_0_: float
         :param main_ot_p:
         :type main_ot_p: float
-        :param msdw_os:
-        :type msdw_os: float
         :param csr:
         :type csr: float
+        :param msdw_os:
+        :type msdw_os: float
         :param tfufc_nc:
         :type tfufc_nc: float
-        :param mor_ss:
-        :type mor_ss: float
         :param marg_al_f:
         :type marg_al_f: float
+        :param mor_ss:
+        :type mor_ss: float
+        :param hh_cond_11:
+        :type hh_cond_11: float
         :param m_lit:
         :type m_lit: float
         :param mc_1:
         :type mc_1: float
-        :param hh_cond_11:
-        :type hh_cond_11: float
+        :param hh_tscs_ns:
+        :type hh_tscs_ns: float
         :param marg_al_m:
         :type marg_al_m: float
         :param mc_2:
         :type mc_2: float
-        :param hh_tscs_ns:
-        :type hh_tscs_ns: float
         :param msdw_tfuts:
         :type msdw_tfuts: float
         :param mc_3:
@@ -1805,18 +1805,18 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type hh_cond_10: float
         :param mc_4:
         :type mc_4: float
-        :param sc_per:
-        :type sc_per: float
-        :param marg_al_p:
-        :type marg_al_p: float
         :param ldws_wp:
         :type ldws_wp: float
+        :param marg_al_p:
+        :type marg_al_p: float
+        :param sc_per:
+        :type sc_per: float
         :param mof_stone:
         :type mof_stone: float
-        :param mdds_st:
-        :type mdds_st: str
         :param pl_wsvi:
         :type pl_wsvi: float
+        :param mdds_st:
+        :type mdds_st: str
         :param name_st:
         :type name_st: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1860,19 +1860,19 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             marg_ot_32=marg_ot_32,
             wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
-            non_work_m=non_work_m,
             tot_p=tot_p,
+            non_work_m=non_work_m,
             mof_aom=mof_aom,
-            mof_mft=mof_mft,
             non_work_f=non_work_f,
+            mof_mft=mof_mft,
             f_ill=f_ill,
             mdds_vt=mdds_vt,
             tfufc_elc=tfufc_elc,
             main_cl_p=main_cl_p,
             mor_conc=mor_conc,
-            hh_tscs_uc=hh_tscs_uc,
-            sl_nsrbh=sl_nsrbh,
             mow_gimas=mow_gimas,
+            sl_nsrbh=sl_nsrbh,
+            hh_tscs_uc=hh_tscs_uc,
             kf_hk=kf_hk,
             mdds_dt=mdds_dt,
             mow_wood=mow_wood,
@@ -1889,8 +1889,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            hh_cond__8=hh_cond__8,
             mof_cem=mof_cem,
+            hh_cond__8=hh_cond__8,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
@@ -1902,16 +1902,16 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            hh_tscs_sp=hh_tscs_sp,
             mow_mub=mow_mub,
+            hh_tscs_sp=hh_tscs_sp,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
             hhs_1=hhs_1,
             hhs_2=hhs_2,
             os_non=os_non,
-            hhs_3=hhs_3,
             sr=sr,
+            hhs_3=hhs_3,
             main_cl_m=main_cl_m,
             no_hh=no_hh,
             mdds_sdt=mdds_sdt,
@@ -1930,8 +1930,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             mor_gi_mas=mor_gi_mas,
             mow_aom=mow_aom,
             marg_hh_3_=marg_hh_3_,
-            msdw_tpl=msdw_tpl,
             p_st=p_st,
+            msdw_tpl=msdw_tpl,
             p_lit=p_lit,
             mor_hmt=mor_hmt,
             ndr_4_r=ndr_4_r,
@@ -1961,8 +1961,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             margwork_m=margwork_m,
             marg_al_01=marg_al_01,
             ldws_np=ldws_np,
-            f_st=f_st,
             lit_r=lit_r,
+            f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
             marg_al_02=marg_al_02,
@@ -1990,11 +1990,11 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             tot_work_m=tot_work_m,
             m_06=m_06,
             mar_work_p=mar_work_p,
-            marg_ot_m=marg_ot_m,
             tot_work_f=tot_work_f,
+            marg_ot_m=marg_ot_m,
             main_al_m=main_al_m,
-            marg_ot_p=marg_ot_p,
             main_al_f=main_al_f,
+            marg_ot_p=marg_ot_p,
             pl_wsop=pl_wsop,
             marg_ot_f=marg_ot_f,
             aos_tm_mo=aos_tm_mo,
@@ -2031,9 +2031,9 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             tfufc_bio=tfufc_bio,
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
+            nhh_hbfwtp=nhh_hbfwtp,
             tfufc_clc=tfufc_clc,
             marg_cl_31=marg_cl_31,
-            nhh_hbfwtp=nhh_hbfwtp,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
             msdw_tfts=msdw_tfts,
@@ -2062,27 +2062,27 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             main_ot_m=main_ot_m,
             marg_ot_0_=marg_ot_0_,
             main_ot_p=main_ot_p,
-            msdw_os=msdw_os,
             csr=csr,
+            msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
-            mor_ss=mor_ss,
             marg_al_f=marg_al_f,
+            mor_ss=mor_ss,
+            hh_cond_11=hh_cond_11,
             m_lit=m_lit,
             mc_1=mc_1,
-            hh_cond_11=hh_cond_11,
+            hh_tscs_ns=hh_tscs_ns,
             marg_al_m=marg_al_m,
             mc_2=mc_2,
-            hh_tscs_ns=hh_tscs_ns,
             msdw_tfuts=msdw_tfuts,
             mc_3=mc_3,
             hh_cond_10=hh_cond_10,
             mc_4=mc_4,
-            sc_per=sc_per,
-            marg_al_p=marg_al_p,
             ldws_wp=ldws_wp,
+            marg_al_p=marg_al_p,
+            sc_per=sc_per,
             mof_stone=mof_stone,
-            mdds_st=mdds_st,
             pl_wsvi=pl_wsvi,
+            mdds_st=mdds_st,
             name_st=name_st,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2127,19 +2127,19 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         f_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_vt: Optional[StrictStr] = None,
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_conc: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
-        sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gimas: Optional[Union[StrictFloat, StrictInt]] = None,
+        sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_dt: Optional[StrictStr] = None,
         mow_wood: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2156,8 +2156,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2169,16 +2169,16 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_1: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         os_non: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_3: Optional[Union[StrictFloat, StrictInt]] = None,
         sr: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_3: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
         no_hh: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_sdt: Optional[StrictStr] = None,
@@ -2197,8 +2197,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         mor_gi_mas: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_3_: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
         p_st: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
         p_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_hmt: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_4_r: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2228,8 +2228,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         margwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
-        f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         lit_r: Optional[Union[StrictFloat, StrictInt]] = None,
+        f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_02: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2257,11 +2257,11 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         tot_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         m_06: Optional[Union[StrictFloat, StrictInt]] = None,
         mar_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         pl_wsop: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_mo: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2298,9 +2298,9 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         tfufc_bio: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
+        nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfts: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2329,27 +2329,27 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         main_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         csr: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
-        sc_per: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        sc_per: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
-        mdds_st: Optional[StrictStr] = None,
         pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
+        mdds_st: Optional[StrictStr] = None,
         name_st: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -2403,16 +2403,16 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
-        :param non_work_m:
-        :type non_work_m: float
         :param tot_p:
         :type tot_p: float
+        :param non_work_m:
+        :type non_work_m: float
         :param mof_aom:
         :type mof_aom: float
-        :param mof_mft:
-        :type mof_mft: float
         :param non_work_f:
         :type non_work_f: float
+        :param mof_mft:
+        :type mof_mft: float
         :param f_ill:
         :type f_ill: float
         :param mdds_vt:
@@ -2423,12 +2423,12 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type main_cl_p: float
         :param mor_conc:
         :type mor_conc: float
-        :param hh_tscs_uc:
-        :type hh_tscs_uc: float
-        :param sl_nsrbh:
-        :type sl_nsrbh: float
         :param mow_gimas:
         :type mow_gimas: float
+        :param sl_nsrbh:
+        :type sl_nsrbh: float
+        :param hh_tscs_uc:
+        :type hh_tscs_uc: float
         :param kf_hk:
         :type kf_hk: float
         :param mdds_dt:
@@ -2461,10 +2461,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param hh_cond__8:
-        :type hh_cond__8: float
         :param mof_cem:
         :type mof_cem: float
+        :param hh_cond__8:
+        :type hh_cond__8: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -2487,10 +2487,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param hh_tscs_sp:
-        :type hh_tscs_sp: float
         :param mow_mub:
         :type mow_mub: float
+        :param hh_tscs_sp:
+        :type hh_tscs_sp: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -2503,10 +2503,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type hhs_2: float
         :param os_non:
         :type os_non: float
-        :param hhs_3:
-        :type hhs_3: float
         :param sr:
         :type sr: float
+        :param hhs_3:
+        :type hhs_3: float
         :param main_cl_m:
         :type main_cl_m: float
         :param no_hh:
@@ -2543,10 +2543,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type mow_aom: float
         :param marg_hh_3_:
         :type marg_hh_3_: float
-        :param msdw_tpl:
-        :type msdw_tpl: float
         :param p_st:
         :type p_st: float
+        :param msdw_tpl:
+        :type msdw_tpl: float
         :param p_lit:
         :type p_lit: float
         :param mor_hmt:
@@ -2605,10 +2605,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type marg_al_01: float
         :param ldws_np:
         :type ldws_np: float
-        :param f_st:
-        :type f_st: float
         :param lit_r:
         :type lit_r: float
+        :param f_st:
+        :type f_st: float
         :param main_al_p:
         :type main_al_p: float
         :param wwoc_cd:
@@ -2663,16 +2663,16 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type m_06: float
         :param mar_work_p:
         :type mar_work_p: float
-        :param marg_ot_m:
-        :type marg_ot_m: float
         :param tot_work_f:
         :type tot_work_f: float
+        :param marg_ot_m:
+        :type marg_ot_m: float
         :param main_al_m:
         :type main_al_m: float
-        :param marg_ot_p:
-        :type marg_ot_p: float
         :param main_al_f:
         :type main_al_f: float
+        :param marg_ot_p:
+        :type marg_ot_p: float
         :param pl_wsop:
         :type pl_wsop: float
         :param marg_ot_f:
@@ -2745,12 +2745,12 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type hh_cond_ch: float
         :param nsdiod:
         :type nsdiod: float
+        :param nhh_hbfwtp:
+        :type nhh_hbfwtp: float
         :param tfufc_clc:
         :type tfufc_clc: float
         :param marg_cl_31:
         :type marg_cl_31: float
-        :param nhh_hbfwtp:
-        :type nhh_hbfwtp: float
         :param marg_cl_32:
         :type marg_cl_32: float
         :param aos_cl_wii:
@@ -2807,28 +2807,28 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type marg_ot_0_: float
         :param main_ot_p:
         :type main_ot_p: float
-        :param msdw_os:
-        :type msdw_os: float
         :param csr:
         :type csr: float
+        :param msdw_os:
+        :type msdw_os: float
         :param tfufc_nc:
         :type tfufc_nc: float
-        :param mor_ss:
-        :type mor_ss: float
         :param marg_al_f:
         :type marg_al_f: float
+        :param mor_ss:
+        :type mor_ss: float
+        :param hh_cond_11:
+        :type hh_cond_11: float
         :param m_lit:
         :type m_lit: float
         :param mc_1:
         :type mc_1: float
-        :param hh_cond_11:
-        :type hh_cond_11: float
+        :param hh_tscs_ns:
+        :type hh_tscs_ns: float
         :param marg_al_m:
         :type marg_al_m: float
         :param mc_2:
         :type mc_2: float
-        :param hh_tscs_ns:
-        :type hh_tscs_ns: float
         :param msdw_tfuts:
         :type msdw_tfuts: float
         :param mc_3:
@@ -2837,18 +2837,18 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         :type hh_cond_10: float
         :param mc_4:
         :type mc_4: float
-        :param sc_per:
-        :type sc_per: float
-        :param marg_al_p:
-        :type marg_al_p: float
         :param ldws_wp:
         :type ldws_wp: float
+        :param marg_al_p:
+        :type marg_al_p: float
+        :param sc_per:
+        :type sc_per: float
         :param mof_stone:
         :type mof_stone: float
-        :param mdds_st:
-        :type mdds_st: str
         :param pl_wsvi:
         :type pl_wsvi: float
+        :param mdds_st:
+        :type mdds_st: str
         :param name_st:
         :type name_st: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2892,19 +2892,19 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             marg_ot_32=marg_ot_32,
             wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
-            non_work_m=non_work_m,
             tot_p=tot_p,
+            non_work_m=non_work_m,
             mof_aom=mof_aom,
-            mof_mft=mof_mft,
             non_work_f=non_work_f,
+            mof_mft=mof_mft,
             f_ill=f_ill,
             mdds_vt=mdds_vt,
             tfufc_elc=tfufc_elc,
             main_cl_p=main_cl_p,
             mor_conc=mor_conc,
-            hh_tscs_uc=hh_tscs_uc,
-            sl_nsrbh=sl_nsrbh,
             mow_gimas=mow_gimas,
+            sl_nsrbh=sl_nsrbh,
+            hh_tscs_uc=hh_tscs_uc,
             kf_hk=kf_hk,
             mdds_dt=mdds_dt,
             mow_wood=mow_wood,
@@ -2921,8 +2921,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            hh_cond__8=hh_cond__8,
             mof_cem=mof_cem,
+            hh_cond__8=hh_cond__8,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
@@ -2934,16 +2934,16 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            hh_tscs_sp=hh_tscs_sp,
             mow_mub=mow_mub,
+            hh_tscs_sp=hh_tscs_sp,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
             hhs_1=hhs_1,
             hhs_2=hhs_2,
             os_non=os_non,
-            hhs_3=hhs_3,
             sr=sr,
+            hhs_3=hhs_3,
             main_cl_m=main_cl_m,
             no_hh=no_hh,
             mdds_sdt=mdds_sdt,
@@ -2962,8 +2962,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             mor_gi_mas=mor_gi_mas,
             mow_aom=mow_aom,
             marg_hh_3_=marg_hh_3_,
-            msdw_tpl=msdw_tpl,
             p_st=p_st,
+            msdw_tpl=msdw_tpl,
             p_lit=p_lit,
             mor_hmt=mor_hmt,
             ndr_4_r=ndr_4_r,
@@ -2993,8 +2993,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             margwork_m=margwork_m,
             marg_al_01=marg_al_01,
             ldws_np=ldws_np,
-            f_st=f_st,
             lit_r=lit_r,
+            f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
             marg_al_02=marg_al_02,
@@ -3022,11 +3022,11 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             tot_work_m=tot_work_m,
             m_06=m_06,
             mar_work_p=mar_work_p,
-            marg_ot_m=marg_ot_m,
             tot_work_f=tot_work_f,
+            marg_ot_m=marg_ot_m,
             main_al_m=main_al_m,
-            marg_ot_p=marg_ot_p,
             main_al_f=main_al_f,
+            marg_ot_p=marg_ot_p,
             pl_wsop=pl_wsop,
             marg_ot_f=marg_ot_f,
             aos_tm_mo=aos_tm_mo,
@@ -3063,9 +3063,9 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             tfufc_bio=tfufc_bio,
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
+            nhh_hbfwtp=nhh_hbfwtp,
             tfufc_clc=tfufc_clc,
             marg_cl_31=marg_cl_31,
-            nhh_hbfwtp=nhh_hbfwtp,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
             msdw_tfts=msdw_tfts,
@@ -3094,27 +3094,27 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             main_ot_m=main_ot_m,
             marg_ot_0_=marg_ot_0_,
             main_ot_p=main_ot_p,
-            msdw_os=msdw_os,
             csr=csr,
+            msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
-            mor_ss=mor_ss,
             marg_al_f=marg_al_f,
+            mor_ss=mor_ss,
+            hh_cond_11=hh_cond_11,
             m_lit=m_lit,
             mc_1=mc_1,
-            hh_cond_11=hh_cond_11,
+            hh_tscs_ns=hh_tscs_ns,
             marg_al_m=marg_al_m,
             mc_2=mc_2,
-            hh_tscs_ns=hh_tscs_ns,
             msdw_tfuts=msdw_tfuts,
             mc_3=mc_3,
             hh_cond_10=hh_cond_10,
             mc_4=mc_4,
-            sc_per=sc_per,
-            marg_al_p=marg_al_p,
             ldws_wp=ldws_wp,
+            marg_al_p=marg_al_p,
+            sc_per=sc_per,
             mof_stone=mof_stone,
-            mdds_st=mdds_st,
             pl_wsvi=pl_wsvi,
+            mdds_st=mdds_st,
             name_st=name_st,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3154,19 +3154,19 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         marg_ot_32,
         wwoc_nd,
         marg_ot_31,
-        non_work_m,
         tot_p,
+        non_work_m,
         mof_aom,
-        mof_mft,
         non_work_f,
+        mof_mft,
         f_ill,
         mdds_vt,
         tfufc_elc,
         main_cl_p,
         mor_conc,
-        hh_tscs_uc,
-        sl_nsrbh,
         mow_gimas,
+        sl_nsrbh,
+        hh_tscs_uc,
         kf_hk,
         mdds_dt,
         mow_wood,
@@ -3183,8 +3183,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         hh_cond__1,
         hh_cond__2,
         hh_cond__7,
-        hh_cond__8,
         mof_cem,
+        hh_cond__8,
         hh_cond__5,
         hh_cond__6,
         ans_pl,
@@ -3196,16 +3196,16 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         hhs_5,
         fpfl_pss,
         mainwork_p,
-        hh_tscs_sp,
         mow_mub,
+        hh_tscs_sp,
         kf_tot,
         mainwork_f,
         mor_mmt,
         hhs_1,
         hhs_2,
         os_non,
-        hhs_3,
         sr,
+        hhs_3,
         main_cl_m,
         no_hh,
         mdds_sdt,
@@ -3224,8 +3224,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         mor_gi_mas,
         mow_aom,
         marg_hh_3_,
-        msdw_tpl,
         p_st,
+        msdw_tpl,
         p_lit,
         mor_hmt,
         ndr_4_r,
@@ -3255,8 +3255,8 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         margwork_m,
         marg_al_01,
         ldws_np,
-        f_st,
         lit_r,
+        f_st,
         main_al_p,
         wwoc_cd,
         marg_al_02,
@@ -3284,11 +3284,11 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         tot_work_m,
         m_06,
         mar_work_p,
-        marg_ot_m,
         tot_work_f,
+        marg_ot_m,
         main_al_m,
-        marg_ot_p,
         main_al_f,
+        marg_ot_p,
         pl_wsop,
         marg_ot_f,
         aos_tm_mo,
@@ -3325,9 +3325,9 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         tfufc_bio,
         hh_cond_ch,
         nsdiod,
+        nhh_hbfwtp,
         tfufc_clc,
         marg_cl_31,
-        nhh_hbfwtp,
         marg_cl_32,
         aos_cl_wii,
         msdw_tfts,
@@ -3356,27 +3356,27 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         main_ot_m,
         marg_ot_0_,
         main_ot_p,
-        msdw_os,
         csr,
+        msdw_os,
         tfufc_nc,
-        mor_ss,
         marg_al_f,
+        mor_ss,
+        hh_cond_11,
         m_lit,
         mc_1,
-        hh_cond_11,
+        hh_tscs_ns,
         marg_al_m,
         mc_2,
-        hh_tscs_ns,
         msdw_tfuts,
         mc_3,
         hh_cond_10,
         mc_4,
-        sc_per,
-        marg_al_p,
         ldws_wp,
+        marg_al_p,
+        sc_per,
         mof_stone,
-        mdds_st,
         pl_wsvi,
+        mdds_st,
         name_st,
         _request_auth,
         _content_type,
@@ -3471,25 +3471,25 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             
             _query_params.append(('MARG_OT_31', marg_ot_31))
             
-        if non_work_m is not None:
-            
-            _query_params.append(('NON_WORK_M', non_work_m))
-            
         if tot_p is not None:
             
             _query_params.append(('TOT_P', tot_p))
+            
+        if non_work_m is not None:
+            
+            _query_params.append(('NON_WORK_M', non_work_m))
             
         if mof_aom is not None:
             
             _query_params.append(('MOF_AOM', mof_aom))
             
-        if mof_mft is not None:
-            
-            _query_params.append(('MOF_MFT', mof_mft))
-            
         if non_work_f is not None:
             
             _query_params.append(('NON_WORK_F', non_work_f))
+            
+        if mof_mft is not None:
+            
+            _query_params.append(('MOF_MFT', mof_mft))
             
         if f_ill is not None:
             
@@ -3511,17 +3511,17 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             
             _query_params.append(('MOR_CONC', mor_conc))
             
-        if hh_tscs_uc is not None:
+        if mow_gimas is not None:
             
-            _query_params.append(('HH_TSCS_UC', hh_tscs_uc))
+            _query_params.append(('MOW_GIMAS', mow_gimas))
             
         if sl_nsrbh is not None:
             
             _query_params.append(('SL_NSRBH', sl_nsrbh))
             
-        if mow_gimas is not None:
+        if hh_tscs_uc is not None:
             
-            _query_params.append(('MOW_GIMAS', mow_gimas))
+            _query_params.append(('HH_TSCS_UC', hh_tscs_uc))
             
         if kf_hk is not None:
             
@@ -3587,13 +3587,13 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             
             _query_params.append(('HH_COND__7', hh_cond__7))
             
-        if hh_cond__8 is not None:
-            
-            _query_params.append(('HH_COND__8', hh_cond__8))
-            
         if mof_cem is not None:
             
             _query_params.append(('MOF_CEM', mof_cem))
+            
+        if hh_cond__8 is not None:
+            
+            _query_params.append(('HH_COND__8', hh_cond__8))
             
         if hh_cond__5 is not None:
             
@@ -3639,13 +3639,13 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             
             _query_params.append(('MAINWORK_P', mainwork_p))
             
-        if hh_tscs_sp is not None:
-            
-            _query_params.append(('HH_TSCS_SP', hh_tscs_sp))
-            
         if mow_mub is not None:
             
             _query_params.append(('MOW_MUB', mow_mub))
+            
+        if hh_tscs_sp is not None:
+            
+            _query_params.append(('HH_TSCS_SP', hh_tscs_sp))
             
         if kf_tot is not None:
             
@@ -3671,13 +3671,13 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             
             _query_params.append(('OS_NON', os_non))
             
-        if hhs_3 is not None:
-            
-            _query_params.append(('HHS_3', hhs_3))
-            
         if sr is not None:
             
             _query_params.append(('SR', sr))
+            
+        if hhs_3 is not None:
+            
+            _query_params.append(('HHS_3', hhs_3))
             
         if main_cl_m is not None:
             
@@ -3751,13 +3751,13 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             
             _query_params.append(('MARG_HH_3_', marg_hh_3_))
             
-        if msdw_tpl is not None:
-            
-            _query_params.append(('MSDW_TPL', msdw_tpl))
-            
         if p_st is not None:
             
             _query_params.append(('P_ST', p_st))
+            
+        if msdw_tpl is not None:
+            
+            _query_params.append(('MSDW_TPL', msdw_tpl))
             
         if p_lit is not None:
             
@@ -3875,13 +3875,13 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             
             _query_params.append(('LDWS_NP', ldws_np))
             
-        if f_st is not None:
-            
-            _query_params.append(('F_ST', f_st))
-            
         if lit_r is not None:
             
             _query_params.append(('LIT_R', lit_r))
+            
+        if f_st is not None:
+            
+            _query_params.append(('F_ST', f_st))
             
         if main_al_p is not None:
             
@@ -3991,25 +3991,25 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             
             _query_params.append(('MAR_WORK_p', mar_work_p))
             
-        if marg_ot_m is not None:
-            
-            _query_params.append(('MARG_OT_M', marg_ot_m))
-            
         if tot_work_f is not None:
             
             _query_params.append(('TOT_WORK_F', tot_work_f))
+            
+        if marg_ot_m is not None:
+            
+            _query_params.append(('MARG_OT_M', marg_ot_m))
             
         if main_al_m is not None:
             
             _query_params.append(('MAIN_AL_M', main_al_m))
             
-        if marg_ot_p is not None:
-            
-            _query_params.append(('MARG_OT_P', marg_ot_p))
-            
         if main_al_f is not None:
             
             _query_params.append(('MAIN_AL_F', main_al_f))
+            
+        if marg_ot_p is not None:
+            
+            _query_params.append(('MARG_OT_P', marg_ot_p))
             
         if pl_wsop is not None:
             
@@ -4155,6 +4155,10 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             
             _query_params.append(('NSDIOD', nsdiod))
             
+        if nhh_hbfwtp is not None:
+            
+            _query_params.append(('NHH_HBFWTP', nhh_hbfwtp))
+            
         if tfufc_clc is not None:
             
             _query_params.append(('TFUFC_CLC', tfufc_clc))
@@ -4162,10 +4166,6 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         if marg_cl_31 is not None:
             
             _query_params.append(('MARG_CL_31', marg_cl_31))
-            
-        if nhh_hbfwtp is not None:
-            
-            _query_params.append(('NHH_HBFWTP', nhh_hbfwtp))
             
         if marg_cl_32 is not None:
             
@@ -4279,25 +4279,29 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             
             _query_params.append(('MAIN_OT_P', main_ot_p))
             
-        if msdw_os is not None:
-            
-            _query_params.append(('MSDW_OS', msdw_os))
-            
         if csr is not None:
             
             _query_params.append(('CSR', csr))
+            
+        if msdw_os is not None:
+            
+            _query_params.append(('MSDW_OS', msdw_os))
             
         if tfufc_nc is not None:
             
             _query_params.append(('TFUFC_NC', tfufc_nc))
             
+        if marg_al_f is not None:
+            
+            _query_params.append(('MARG_AL_F', marg_al_f))
+            
         if mor_ss is not None:
             
             _query_params.append(('MOR_SS', mor_ss))
             
-        if marg_al_f is not None:
+        if hh_cond_11 is not None:
             
-            _query_params.append(('MARG_AL_F', marg_al_f))
+            _query_params.append(('HH_COND_11', hh_cond_11))
             
         if m_lit is not None:
             
@@ -4307,9 +4311,9 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             
             _query_params.append(('MC_1', mc_1))
             
-        if hh_cond_11 is not None:
+        if hh_tscs_ns is not None:
             
-            _query_params.append(('HH_COND_11', hh_cond_11))
+            _query_params.append(('HH_TSCS_NS', hh_tscs_ns))
             
         if marg_al_m is not None:
             
@@ -4318,10 +4322,6 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
         if mc_2 is not None:
             
             _query_params.append(('MC_2', mc_2))
-            
-        if hh_tscs_ns is not None:
-            
-            _query_params.append(('HH_TSCS_NS', hh_tscs_ns))
             
         if msdw_tfuts is not None:
             
@@ -4339,29 +4339,29 @@ class PrimaryCensusAbstractOfSonipatHaryanaApi:
             
             _query_params.append(('MC_4', mc_4))
             
-        if sc_per is not None:
+        if ldws_wp is not None:
             
-            _query_params.append(('SC_PER', sc_per))
+            _query_params.append(('LDWS_WP', ldws_wp))
             
         if marg_al_p is not None:
             
             _query_params.append(('MARG_AL_P', marg_al_p))
             
-        if ldws_wp is not None:
+        if sc_per is not None:
             
-            _query_params.append(('LDWS_WP', ldws_wp))
+            _query_params.append(('SC_PER', sc_per))
             
         if mof_stone is not None:
             
             _query_params.append(('MOF_STONE', mof_stone))
             
-        if mdds_st is not None:
-            
-            _query_params.append(('MDDS_ST', mdds_st))
-            
         if pl_wsvi is not None:
             
             _query_params.append(('PL_WSVI', pl_wsvi))
+            
+        if mdds_st is not None:
+            
+            _query_params.append(('MDDS_ST', mdds_st))
             
         if name_st is not None:
             

@@ -56,17 +56,17 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_os: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         f_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_vt: Optional[StrictStr] = None,
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -90,27 +90,27 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__9: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_3_: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_5_: Optional[Union[StrictFloat, StrictInt]] = None,
-        mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
+        mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         os_non: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_3: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
         no_hh: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -130,8 +130,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         mor_gi_mas: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_3_: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
         p_st: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
         p_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_hmt: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_4_r: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -141,8 +141,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         mof_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_f: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_32: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -158,15 +158,15 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         nhh_hbfw_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
         f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_02: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_4: Optional[Union[StrictFloat, StrictInt]] = None,
-        os_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_3: Optional[Union[StrictFloat, StrictInt]] = None,
+        os_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_1: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_0: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -174,11 +174,11 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         margwork_5: Optional[Union[StrictFloat, StrictInt]] = None,
         f_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_kr: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_: Optional[Union[StrictFloat, StrictInt]] = None,
         name_vt: Optional[StrictStr] = None,
         kf_dnhk1: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -187,8 +187,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tot_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         m_06: Optional[Union[StrictFloat, StrictInt]] = None,
-        tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -228,8 +228,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tfufc_bio: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
-        tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
         nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
+        tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -243,12 +243,12 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         mow_gtb: Optional[Union[StrictFloat, StrictInt]] = None,
         m_st: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_cih: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_ao: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_rc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_se: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mud: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -263,21 +263,21 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
-        mdds_st: Optional[StrictStr] = None,
         pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
+        mdds_st: Optional[StrictStr] = None,
         name_st: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -317,10 +317,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type fpfl_os: float
         :param ndr_ner1:
         :type ndr_ner1: float
-        :param mor_bb:
-        :type mor_bb: float
         :param ndr_ner2:
         :type ndr_ner2: float
+        :param mor_bb:
+        :type mor_bb: float
         :param non_work_p:
         :type non_work_p: float
         :param marg_ot_32:
@@ -329,16 +329,16 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
-        :param tot_p:
-        :type tot_p: float
         :param non_work_m:
         :type non_work_m: float
+        :param tot_p:
+        :type tot_p: float
         :param mof_aom:
         :type mof_aom: float
-        :param mof_mft:
-        :type mof_mft: float
         :param non_work_f:
         :type non_work_f: float
+        :param mof_mft:
+        :type mof_mft: float
         :param f_ill:
         :type f_ill: float
         :param mdds_vt:
@@ -385,10 +385,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param hh_cond__8:
-        :type hh_cond__8: float
         :param mof_cem:
         :type mof_cem: float
+        :param hh_cond__8:
+        :type hh_cond__8: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -401,20 +401,20 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type marg_cl_3_: float
         :param mc_5_:
         :type mc_5_: float
-        :param mainwork_m:
-        :type mainwork_m: float
         :param hhs_4:
         :type hhs_4: float
+        :param mainwork_m:
+        :type mainwork_m: float
         :param hhs_5:
         :type hhs_5: float
         :param fpfl_pss:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param hh_tscs_sp:
-        :type hh_tscs_sp: float
         :param mow_mub:
         :type mow_mub: float
+        :param hh_tscs_sp:
+        :type hh_tscs_sp: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -423,10 +423,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type mor_mmt: float
         :param hhs_1:
         :type hhs_1: float
-        :param hhs_2:
-        :type hhs_2: float
         :param os_non:
         :type os_non: float
+        :param hhs_2:
+        :type hhs_2: float
         :param hhs_3:
         :type hhs_3: float
         :param main_cl_m:
@@ -465,10 +465,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type mow_aom: float
         :param marg_hh_3_:
         :type marg_hh_3_: float
-        :param msdw_tpl:
-        :type msdw_tpl: float
         :param p_st:
         :type p_st: float
+        :param msdw_tpl:
+        :type msdw_tpl: float
         :param p_lit:
         :type p_lit: float
         :param mor_hmt:
@@ -487,10 +487,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type marg_cl_f: float
         :param kf_hk1:
         :type kf_hk1: float
-        :param mor_aom:
-        :type mor_aom: float
         :param marg_cl_m:
         :type marg_cl_m: float
+        :param mor_aom:
+        :type mor_aom: float
         :param marg_hh_32:
         :type marg_hh_32: float
         :param marg_cl_p:
@@ -521,10 +521,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type margwork_p: float
         :param margwork_m:
         :type margwork_m: float
-        :param ldws_np:
-        :type ldws_np: float
         :param marg_al_01:
         :type marg_al_01: float
+        :param ldws_np:
+        :type ldws_np: float
         :param f_st:
         :type f_st: float
         :param main_al_p:
@@ -535,10 +535,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type marg_al_02: float
         :param margwork_4:
         :type margwork_4: float
-        :param os_ao:
-        :type os_ao: float
         :param margwork_3:
         :type margwork_3: float
+        :param os_ao:
+        :type os_ao: float
         :param margwork_2:
         :type margwork_2: float
         :param margwork_1:
@@ -553,16 +553,16 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type f_lit: float
         :param msl_kr:
         :type msl_kr: float
-        :param mow_pl_pol:
-        :type mow_pl_pol: float
         :param m_ill:
         :type m_ill: float
+        :param mow_pl_pol:
+        :type mow_pl_pol: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
-        :param mow_snpwm:
-        :type mow_snpwm: float
         :param tfufc_cc:
         :type tfufc_cc: float
+        :param mow_snpwm:
+        :type mow_snpwm: float
         :param aos_:
         :type aos_: float
         :param name_vt:
@@ -579,10 +579,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type tot_work_m: float
         :param m_06:
         :type m_06: float
-        :param tot_work_f:
-        :type tot_work_f: float
         :param marg_ot_m:
         :type marg_ot_m: float
+        :param tot_work_f:
+        :type tot_work_f: float
         :param main_al_m:
         :type main_al_m: float
         :param main_al_f:
@@ -661,10 +661,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type hh_cond_ch: float
         :param nsdiod:
         :type nsdiod: float
-        :param tfufc_clc:
-        :type tfufc_clc: float
         :param nhh_hbfwtp:
         :type nhh_hbfwtp: float
+        :param tfufc_clc:
+        :type tfufc_clc: float
         :param marg_cl_31:
         :type marg_cl_31: float
         :param marg_cl_32:
@@ -691,18 +691,18 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type m_st: float
         :param kf_cih:
         :type kf_cih: float
-        :param mow_conc:
-        :type mow_conc: float
         :param msl_ao:
         :type msl_ao: float
+        :param mow_conc:
+        :type mow_conc: float
         :param msdw_rc:
         :type msdw_rc: float
         :param marg_cl_02:
         :type marg_cl_02: float
-        :param aos_hhw_tc:
-        :type aos_hhw_tc: float
         :param marg_cl_01:
         :type marg_cl_01: float
+        :param aos_hhw_tc:
+        :type aos_hhw_tc: float
         :param main_ot_f:
         :type main_ot_f: float
         :param msl_se:
@@ -731,36 +731,36 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
-        :param hh_cond_11:
-        :type hh_cond_11: float
         :param m_lit:
         :type m_lit: float
         :param mc_1:
         :type mc_1: float
+        :param hh_cond_11:
+        :type hh_cond_11: float
         :param marg_al_m:
         :type marg_al_m: float
-        :param hh_tscs_ns:
-        :type hh_tscs_ns: float
         :param mc_2:
         :type mc_2: float
-        :param msdw_tfuts:
-        :type msdw_tfuts: float
+        :param hh_tscs_ns:
+        :type hh_tscs_ns: float
         :param mc_3:
         :type mc_3: float
-        :param mc_4:
-        :type mc_4: float
+        :param msdw_tfuts:
+        :type msdw_tfuts: float
         :param hh_cond_10:
         :type hh_cond_10: float
-        :param marg_al_p:
-        :type marg_al_p: float
+        :param mc_4:
+        :type mc_4: float
         :param ldws_wp:
         :type ldws_wp: float
+        :param marg_al_p:
+        :type marg_al_p: float
         :param mof_stone:
         :type mof_stone: float
-        :param mdds_st:
-        :type mdds_st: str
         :param pl_wsvi:
         :type pl_wsvi: float
+        :param mdds_st:
+        :type mdds_st: str
         :param name_st:
         :type name_st: str
         :param _request_timeout: timeout setting for this request. If one
@@ -797,17 +797,17 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             tot_f=tot_f,
             fpfl_os=fpfl_os,
             ndr_ner1=ndr_ner1,
-            mor_bb=mor_bb,
             ndr_ner2=ndr_ner2,
+            mor_bb=mor_bb,
             non_work_p=non_work_p,
             marg_ot_32=marg_ot_32,
             wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
-            tot_p=tot_p,
             non_work_m=non_work_m,
+            tot_p=tot_p,
             mof_aom=mof_aom,
-            mof_mft=mof_mft,
             non_work_f=non_work_f,
+            mof_mft=mof_mft,
             f_ill=f_ill,
             mdds_vt=mdds_vt,
             tfufc_elc=tfufc_elc,
@@ -831,27 +831,27 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            hh_cond__8=hh_cond__8,
             mof_cem=mof_cem,
+            hh_cond__8=hh_cond__8,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
             hh_cond__9=hh_cond__9,
             marg_cl_3_=marg_cl_3_,
             mc_5_=mc_5_,
-            mainwork_m=mainwork_m,
             hhs_4=hhs_4,
+            mainwork_m=mainwork_m,
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            hh_tscs_sp=hh_tscs_sp,
             mow_mub=mow_mub,
+            hh_tscs_sp=hh_tscs_sp,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
             hhs_1=hhs_1,
-            hhs_2=hhs_2,
             os_non=os_non,
+            hhs_2=hhs_2,
             hhs_3=hhs_3,
             main_cl_m=main_cl_m,
             no_hh=no_hh,
@@ -871,8 +871,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             mor_gi_mas=mor_gi_mas,
             mow_aom=mow_aom,
             marg_hh_3_=marg_hh_3_,
-            msdw_tpl=msdw_tpl,
             p_st=p_st,
+            msdw_tpl=msdw_tpl,
             p_lit=p_lit,
             mor_hmt=mor_hmt,
             ndr_4_r=ndr_4_r,
@@ -882,8 +882,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             mof_bb=mof_bb,
             marg_cl_f=marg_cl_f,
             kf_hk1=kf_hk1,
-            mor_aom=mor_aom,
             marg_cl_m=marg_cl_m,
+            mor_aom=mor_aom,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
             marg_al_31=marg_al_31,
@@ -899,15 +899,15 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             nhh_hbfw_2=nhh_hbfw_2,
             margwork_p=margwork_p,
             margwork_m=margwork_m,
-            ldws_np=ldws_np,
             marg_al_01=marg_al_01,
+            ldws_np=ldws_np,
             f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
             marg_al_02=marg_al_02,
             margwork_4=margwork_4,
-            os_ao=os_ao,
             margwork_3=margwork_3,
+            os_ao=os_ao,
             margwork_2=margwork_2,
             margwork_1=margwork_1,
             margwork_0=margwork_0,
@@ -915,11 +915,11 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             margwork_5=margwork_5,
             f_lit=f_lit,
             msl_kr=msl_kr,
-            mow_pl_pol=mow_pl_pol,
             m_ill=m_ill,
+            mow_pl_pol=mow_pl_pol,
             tfufc_lpg_=tfufc_lpg_,
-            mow_snpwm=mow_snpwm,
             tfufc_cc=tfufc_cc,
+            mow_snpwm=mow_snpwm,
             aos_=aos_,
             name_vt=name_vt,
             kf_dnhk1=kf_dnhk1,
@@ -928,8 +928,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             tot_work_p=tot_work_p,
             tot_work_m=tot_work_m,
             m_06=m_06,
-            tot_work_f=tot_work_f,
             marg_ot_m=marg_ot_m,
+            tot_work_f=tot_work_f,
             main_al_m=main_al_m,
             main_al_f=main_al_f,
             marg_ot_p=marg_ot_p,
@@ -969,8 +969,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             tfufc_bio=tfufc_bio,
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
-            tfufc_clc=tfufc_clc,
             nhh_hbfwtp=nhh_hbfwtp,
+            tfufc_clc=tfufc_clc,
             marg_cl_31=marg_cl_31,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
@@ -984,12 +984,12 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             mow_gtb=mow_gtb,
             m_st=m_st,
             kf_cih=kf_cih,
-            mow_conc=mow_conc,
             msl_ao=msl_ao,
+            mow_conc=mow_conc,
             msdw_rc=msdw_rc,
             marg_cl_02=marg_cl_02,
-            aos_hhw_tc=aos_hhw_tc,
             marg_cl_01=marg_cl_01,
+            aos_hhw_tc=aos_hhw_tc,
             main_ot_f=main_ot_f,
             msl_se=msl_se,
             mof_mud=mof_mud,
@@ -1004,21 +1004,21 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             tfufc_nc=tfufc_nc,
             marg_al_f=marg_al_f,
             mor_ss=mor_ss,
-            hh_cond_11=hh_cond_11,
             m_lit=m_lit,
             mc_1=mc_1,
+            hh_cond_11=hh_cond_11,
             marg_al_m=marg_al_m,
-            hh_tscs_ns=hh_tscs_ns,
             mc_2=mc_2,
-            msdw_tfuts=msdw_tfuts,
+            hh_tscs_ns=hh_tscs_ns,
             mc_3=mc_3,
-            mc_4=mc_4,
+            msdw_tfuts=msdw_tfuts,
             hh_cond_10=hh_cond_10,
-            marg_al_p=marg_al_p,
+            mc_4=mc_4,
             ldws_wp=ldws_wp,
+            marg_al_p=marg_al_p,
             mof_stone=mof_stone,
-            mdds_st=mdds_st,
             pl_wsvi=pl_wsvi,
+            mdds_st=mdds_st,
             name_st=name_st,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1056,17 +1056,17 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_os: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         f_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_vt: Optional[StrictStr] = None,
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1090,27 +1090,27 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__9: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_3_: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_5_: Optional[Union[StrictFloat, StrictInt]] = None,
-        mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
+        mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         os_non: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_3: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
         no_hh: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1130,8 +1130,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         mor_gi_mas: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_3_: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
         p_st: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
         p_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_hmt: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_4_r: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1141,8 +1141,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         mof_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_f: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_32: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1158,15 +1158,15 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         nhh_hbfw_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
         f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_02: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_4: Optional[Union[StrictFloat, StrictInt]] = None,
-        os_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_3: Optional[Union[StrictFloat, StrictInt]] = None,
+        os_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_1: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_0: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1174,11 +1174,11 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         margwork_5: Optional[Union[StrictFloat, StrictInt]] = None,
         f_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_kr: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_: Optional[Union[StrictFloat, StrictInt]] = None,
         name_vt: Optional[StrictStr] = None,
         kf_dnhk1: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1187,8 +1187,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tot_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         m_06: Optional[Union[StrictFloat, StrictInt]] = None,
-        tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1228,8 +1228,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tfufc_bio: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
-        tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
         nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
+        tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1243,12 +1243,12 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         mow_gtb: Optional[Union[StrictFloat, StrictInt]] = None,
         m_st: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_cih: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_ao: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_rc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_se: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mud: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1263,21 +1263,21 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
-        mdds_st: Optional[StrictStr] = None,
         pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
+        mdds_st: Optional[StrictStr] = None,
         name_st: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -1317,10 +1317,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type fpfl_os: float
         :param ndr_ner1:
         :type ndr_ner1: float
-        :param mor_bb:
-        :type mor_bb: float
         :param ndr_ner2:
         :type ndr_ner2: float
+        :param mor_bb:
+        :type mor_bb: float
         :param non_work_p:
         :type non_work_p: float
         :param marg_ot_32:
@@ -1329,16 +1329,16 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
-        :param tot_p:
-        :type tot_p: float
         :param non_work_m:
         :type non_work_m: float
+        :param tot_p:
+        :type tot_p: float
         :param mof_aom:
         :type mof_aom: float
-        :param mof_mft:
-        :type mof_mft: float
         :param non_work_f:
         :type non_work_f: float
+        :param mof_mft:
+        :type mof_mft: float
         :param f_ill:
         :type f_ill: float
         :param mdds_vt:
@@ -1385,10 +1385,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param hh_cond__8:
-        :type hh_cond__8: float
         :param mof_cem:
         :type mof_cem: float
+        :param hh_cond__8:
+        :type hh_cond__8: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -1401,20 +1401,20 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type marg_cl_3_: float
         :param mc_5_:
         :type mc_5_: float
-        :param mainwork_m:
-        :type mainwork_m: float
         :param hhs_4:
         :type hhs_4: float
+        :param mainwork_m:
+        :type mainwork_m: float
         :param hhs_5:
         :type hhs_5: float
         :param fpfl_pss:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param hh_tscs_sp:
-        :type hh_tscs_sp: float
         :param mow_mub:
         :type mow_mub: float
+        :param hh_tscs_sp:
+        :type hh_tscs_sp: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -1423,10 +1423,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type mor_mmt: float
         :param hhs_1:
         :type hhs_1: float
-        :param hhs_2:
-        :type hhs_2: float
         :param os_non:
         :type os_non: float
+        :param hhs_2:
+        :type hhs_2: float
         :param hhs_3:
         :type hhs_3: float
         :param main_cl_m:
@@ -1465,10 +1465,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type mow_aom: float
         :param marg_hh_3_:
         :type marg_hh_3_: float
-        :param msdw_tpl:
-        :type msdw_tpl: float
         :param p_st:
         :type p_st: float
+        :param msdw_tpl:
+        :type msdw_tpl: float
         :param p_lit:
         :type p_lit: float
         :param mor_hmt:
@@ -1487,10 +1487,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type marg_cl_f: float
         :param kf_hk1:
         :type kf_hk1: float
-        :param mor_aom:
-        :type mor_aom: float
         :param marg_cl_m:
         :type marg_cl_m: float
+        :param mor_aom:
+        :type mor_aom: float
         :param marg_hh_32:
         :type marg_hh_32: float
         :param marg_cl_p:
@@ -1521,10 +1521,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type margwork_p: float
         :param margwork_m:
         :type margwork_m: float
-        :param ldws_np:
-        :type ldws_np: float
         :param marg_al_01:
         :type marg_al_01: float
+        :param ldws_np:
+        :type ldws_np: float
         :param f_st:
         :type f_st: float
         :param main_al_p:
@@ -1535,10 +1535,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type marg_al_02: float
         :param margwork_4:
         :type margwork_4: float
-        :param os_ao:
-        :type os_ao: float
         :param margwork_3:
         :type margwork_3: float
+        :param os_ao:
+        :type os_ao: float
         :param margwork_2:
         :type margwork_2: float
         :param margwork_1:
@@ -1553,16 +1553,16 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type f_lit: float
         :param msl_kr:
         :type msl_kr: float
-        :param mow_pl_pol:
-        :type mow_pl_pol: float
         :param m_ill:
         :type m_ill: float
+        :param mow_pl_pol:
+        :type mow_pl_pol: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
-        :param mow_snpwm:
-        :type mow_snpwm: float
         :param tfufc_cc:
         :type tfufc_cc: float
+        :param mow_snpwm:
+        :type mow_snpwm: float
         :param aos_:
         :type aos_: float
         :param name_vt:
@@ -1579,10 +1579,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type tot_work_m: float
         :param m_06:
         :type m_06: float
-        :param tot_work_f:
-        :type tot_work_f: float
         :param marg_ot_m:
         :type marg_ot_m: float
+        :param tot_work_f:
+        :type tot_work_f: float
         :param main_al_m:
         :type main_al_m: float
         :param main_al_f:
@@ -1661,10 +1661,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type hh_cond_ch: float
         :param nsdiod:
         :type nsdiod: float
-        :param tfufc_clc:
-        :type tfufc_clc: float
         :param nhh_hbfwtp:
         :type nhh_hbfwtp: float
+        :param tfufc_clc:
+        :type tfufc_clc: float
         :param marg_cl_31:
         :type marg_cl_31: float
         :param marg_cl_32:
@@ -1691,18 +1691,18 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type m_st: float
         :param kf_cih:
         :type kf_cih: float
-        :param mow_conc:
-        :type mow_conc: float
         :param msl_ao:
         :type msl_ao: float
+        :param mow_conc:
+        :type mow_conc: float
         :param msdw_rc:
         :type msdw_rc: float
         :param marg_cl_02:
         :type marg_cl_02: float
-        :param aos_hhw_tc:
-        :type aos_hhw_tc: float
         :param marg_cl_01:
         :type marg_cl_01: float
+        :param aos_hhw_tc:
+        :type aos_hhw_tc: float
         :param main_ot_f:
         :type main_ot_f: float
         :param msl_se:
@@ -1731,36 +1731,36 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
-        :param hh_cond_11:
-        :type hh_cond_11: float
         :param m_lit:
         :type m_lit: float
         :param mc_1:
         :type mc_1: float
+        :param hh_cond_11:
+        :type hh_cond_11: float
         :param marg_al_m:
         :type marg_al_m: float
-        :param hh_tscs_ns:
-        :type hh_tscs_ns: float
         :param mc_2:
         :type mc_2: float
-        :param msdw_tfuts:
-        :type msdw_tfuts: float
+        :param hh_tscs_ns:
+        :type hh_tscs_ns: float
         :param mc_3:
         :type mc_3: float
-        :param mc_4:
-        :type mc_4: float
+        :param msdw_tfuts:
+        :type msdw_tfuts: float
         :param hh_cond_10:
         :type hh_cond_10: float
-        :param marg_al_p:
-        :type marg_al_p: float
+        :param mc_4:
+        :type mc_4: float
         :param ldws_wp:
         :type ldws_wp: float
+        :param marg_al_p:
+        :type marg_al_p: float
         :param mof_stone:
         :type mof_stone: float
-        :param mdds_st:
-        :type mdds_st: str
         :param pl_wsvi:
         :type pl_wsvi: float
+        :param mdds_st:
+        :type mdds_st: str
         :param name_st:
         :type name_st: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1797,17 +1797,17 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             tot_f=tot_f,
             fpfl_os=fpfl_os,
             ndr_ner1=ndr_ner1,
-            mor_bb=mor_bb,
             ndr_ner2=ndr_ner2,
+            mor_bb=mor_bb,
             non_work_p=non_work_p,
             marg_ot_32=marg_ot_32,
             wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
-            tot_p=tot_p,
             non_work_m=non_work_m,
+            tot_p=tot_p,
             mof_aom=mof_aom,
-            mof_mft=mof_mft,
             non_work_f=non_work_f,
+            mof_mft=mof_mft,
             f_ill=f_ill,
             mdds_vt=mdds_vt,
             tfufc_elc=tfufc_elc,
@@ -1831,27 +1831,27 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            hh_cond__8=hh_cond__8,
             mof_cem=mof_cem,
+            hh_cond__8=hh_cond__8,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
             hh_cond__9=hh_cond__9,
             marg_cl_3_=marg_cl_3_,
             mc_5_=mc_5_,
-            mainwork_m=mainwork_m,
             hhs_4=hhs_4,
+            mainwork_m=mainwork_m,
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            hh_tscs_sp=hh_tscs_sp,
             mow_mub=mow_mub,
+            hh_tscs_sp=hh_tscs_sp,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
             hhs_1=hhs_1,
-            hhs_2=hhs_2,
             os_non=os_non,
+            hhs_2=hhs_2,
             hhs_3=hhs_3,
             main_cl_m=main_cl_m,
             no_hh=no_hh,
@@ -1871,8 +1871,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             mor_gi_mas=mor_gi_mas,
             mow_aom=mow_aom,
             marg_hh_3_=marg_hh_3_,
-            msdw_tpl=msdw_tpl,
             p_st=p_st,
+            msdw_tpl=msdw_tpl,
             p_lit=p_lit,
             mor_hmt=mor_hmt,
             ndr_4_r=ndr_4_r,
@@ -1882,8 +1882,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             mof_bb=mof_bb,
             marg_cl_f=marg_cl_f,
             kf_hk1=kf_hk1,
-            mor_aom=mor_aom,
             marg_cl_m=marg_cl_m,
+            mor_aom=mor_aom,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
             marg_al_31=marg_al_31,
@@ -1899,15 +1899,15 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             nhh_hbfw_2=nhh_hbfw_2,
             margwork_p=margwork_p,
             margwork_m=margwork_m,
-            ldws_np=ldws_np,
             marg_al_01=marg_al_01,
+            ldws_np=ldws_np,
             f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
             marg_al_02=marg_al_02,
             margwork_4=margwork_4,
-            os_ao=os_ao,
             margwork_3=margwork_3,
+            os_ao=os_ao,
             margwork_2=margwork_2,
             margwork_1=margwork_1,
             margwork_0=margwork_0,
@@ -1915,11 +1915,11 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             margwork_5=margwork_5,
             f_lit=f_lit,
             msl_kr=msl_kr,
-            mow_pl_pol=mow_pl_pol,
             m_ill=m_ill,
+            mow_pl_pol=mow_pl_pol,
             tfufc_lpg_=tfufc_lpg_,
-            mow_snpwm=mow_snpwm,
             tfufc_cc=tfufc_cc,
+            mow_snpwm=mow_snpwm,
             aos_=aos_,
             name_vt=name_vt,
             kf_dnhk1=kf_dnhk1,
@@ -1928,8 +1928,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             tot_work_p=tot_work_p,
             tot_work_m=tot_work_m,
             m_06=m_06,
-            tot_work_f=tot_work_f,
             marg_ot_m=marg_ot_m,
+            tot_work_f=tot_work_f,
             main_al_m=main_al_m,
             main_al_f=main_al_f,
             marg_ot_p=marg_ot_p,
@@ -1969,8 +1969,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             tfufc_bio=tfufc_bio,
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
-            tfufc_clc=tfufc_clc,
             nhh_hbfwtp=nhh_hbfwtp,
+            tfufc_clc=tfufc_clc,
             marg_cl_31=marg_cl_31,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
@@ -1984,12 +1984,12 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             mow_gtb=mow_gtb,
             m_st=m_st,
             kf_cih=kf_cih,
-            mow_conc=mow_conc,
             msl_ao=msl_ao,
+            mow_conc=mow_conc,
             msdw_rc=msdw_rc,
             marg_cl_02=marg_cl_02,
-            aos_hhw_tc=aos_hhw_tc,
             marg_cl_01=marg_cl_01,
+            aos_hhw_tc=aos_hhw_tc,
             main_ot_f=main_ot_f,
             msl_se=msl_se,
             mof_mud=mof_mud,
@@ -2004,21 +2004,21 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             tfufc_nc=tfufc_nc,
             marg_al_f=marg_al_f,
             mor_ss=mor_ss,
-            hh_cond_11=hh_cond_11,
             m_lit=m_lit,
             mc_1=mc_1,
+            hh_cond_11=hh_cond_11,
             marg_al_m=marg_al_m,
-            hh_tscs_ns=hh_tscs_ns,
             mc_2=mc_2,
-            msdw_tfuts=msdw_tfuts,
+            hh_tscs_ns=hh_tscs_ns,
             mc_3=mc_3,
-            mc_4=mc_4,
+            msdw_tfuts=msdw_tfuts,
             hh_cond_10=hh_cond_10,
-            marg_al_p=marg_al_p,
+            mc_4=mc_4,
             ldws_wp=ldws_wp,
+            marg_al_p=marg_al_p,
             mof_stone=mof_stone,
-            mdds_st=mdds_st,
             pl_wsvi=pl_wsvi,
+            mdds_st=mdds_st,
             name_st=name_st,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2056,17 +2056,17 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_os: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         f_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_vt: Optional[StrictStr] = None,
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2090,27 +2090,27 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__9: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_3_: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_5_: Optional[Union[StrictFloat, StrictInt]] = None,
-        mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
+        mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         os_non: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_2: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_3: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
         no_hh: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2130,8 +2130,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         mor_gi_mas: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_3_: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
         p_st: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
         p_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_hmt: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_4_r: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2141,8 +2141,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         mof_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_f: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_32: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2158,15 +2158,15 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         nhh_hbfw_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
         f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_02: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_4: Optional[Union[StrictFloat, StrictInt]] = None,
-        os_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_3: Optional[Union[StrictFloat, StrictInt]] = None,
+        os_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_1: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_0: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2174,11 +2174,11 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         margwork_5: Optional[Union[StrictFloat, StrictInt]] = None,
         f_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_kr: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_: Optional[Union[StrictFloat, StrictInt]] = None,
         name_vt: Optional[StrictStr] = None,
         kf_dnhk1: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2187,8 +2187,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tot_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         m_06: Optional[Union[StrictFloat, StrictInt]] = None,
-        tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2228,8 +2228,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tfufc_bio: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
-        tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
         nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
+        tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2243,12 +2243,12 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         mow_gtb: Optional[Union[StrictFloat, StrictInt]] = None,
         m_st: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_cih: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_ao: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_rc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_se: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mud: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2263,21 +2263,21 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
-        mdds_st: Optional[StrictStr] = None,
         pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
+        mdds_st: Optional[StrictStr] = None,
         name_st: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -2317,10 +2317,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type fpfl_os: float
         :param ndr_ner1:
         :type ndr_ner1: float
-        :param mor_bb:
-        :type mor_bb: float
         :param ndr_ner2:
         :type ndr_ner2: float
+        :param mor_bb:
+        :type mor_bb: float
         :param non_work_p:
         :type non_work_p: float
         :param marg_ot_32:
@@ -2329,16 +2329,16 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
-        :param tot_p:
-        :type tot_p: float
         :param non_work_m:
         :type non_work_m: float
+        :param tot_p:
+        :type tot_p: float
         :param mof_aom:
         :type mof_aom: float
-        :param mof_mft:
-        :type mof_mft: float
         :param non_work_f:
         :type non_work_f: float
+        :param mof_mft:
+        :type mof_mft: float
         :param f_ill:
         :type f_ill: float
         :param mdds_vt:
@@ -2385,10 +2385,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param hh_cond__8:
-        :type hh_cond__8: float
         :param mof_cem:
         :type mof_cem: float
+        :param hh_cond__8:
+        :type hh_cond__8: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -2401,20 +2401,20 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type marg_cl_3_: float
         :param mc_5_:
         :type mc_5_: float
-        :param mainwork_m:
-        :type mainwork_m: float
         :param hhs_4:
         :type hhs_4: float
+        :param mainwork_m:
+        :type mainwork_m: float
         :param hhs_5:
         :type hhs_5: float
         :param fpfl_pss:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param hh_tscs_sp:
-        :type hh_tscs_sp: float
         :param mow_mub:
         :type mow_mub: float
+        :param hh_tscs_sp:
+        :type hh_tscs_sp: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -2423,10 +2423,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type mor_mmt: float
         :param hhs_1:
         :type hhs_1: float
-        :param hhs_2:
-        :type hhs_2: float
         :param os_non:
         :type os_non: float
+        :param hhs_2:
+        :type hhs_2: float
         :param hhs_3:
         :type hhs_3: float
         :param main_cl_m:
@@ -2465,10 +2465,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type mow_aom: float
         :param marg_hh_3_:
         :type marg_hh_3_: float
-        :param msdw_tpl:
-        :type msdw_tpl: float
         :param p_st:
         :type p_st: float
+        :param msdw_tpl:
+        :type msdw_tpl: float
         :param p_lit:
         :type p_lit: float
         :param mor_hmt:
@@ -2487,10 +2487,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type marg_cl_f: float
         :param kf_hk1:
         :type kf_hk1: float
-        :param mor_aom:
-        :type mor_aom: float
         :param marg_cl_m:
         :type marg_cl_m: float
+        :param mor_aom:
+        :type mor_aom: float
         :param marg_hh_32:
         :type marg_hh_32: float
         :param marg_cl_p:
@@ -2521,10 +2521,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type margwork_p: float
         :param margwork_m:
         :type margwork_m: float
-        :param ldws_np:
-        :type ldws_np: float
         :param marg_al_01:
         :type marg_al_01: float
+        :param ldws_np:
+        :type ldws_np: float
         :param f_st:
         :type f_st: float
         :param main_al_p:
@@ -2535,10 +2535,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type marg_al_02: float
         :param margwork_4:
         :type margwork_4: float
-        :param os_ao:
-        :type os_ao: float
         :param margwork_3:
         :type margwork_3: float
+        :param os_ao:
+        :type os_ao: float
         :param margwork_2:
         :type margwork_2: float
         :param margwork_1:
@@ -2553,16 +2553,16 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type f_lit: float
         :param msl_kr:
         :type msl_kr: float
-        :param mow_pl_pol:
-        :type mow_pl_pol: float
         :param m_ill:
         :type m_ill: float
+        :param mow_pl_pol:
+        :type mow_pl_pol: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
-        :param mow_snpwm:
-        :type mow_snpwm: float
         :param tfufc_cc:
         :type tfufc_cc: float
+        :param mow_snpwm:
+        :type mow_snpwm: float
         :param aos_:
         :type aos_: float
         :param name_vt:
@@ -2579,10 +2579,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type tot_work_m: float
         :param m_06:
         :type m_06: float
-        :param tot_work_f:
-        :type tot_work_f: float
         :param marg_ot_m:
         :type marg_ot_m: float
+        :param tot_work_f:
+        :type tot_work_f: float
         :param main_al_m:
         :type main_al_m: float
         :param main_al_f:
@@ -2661,10 +2661,10 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type hh_cond_ch: float
         :param nsdiod:
         :type nsdiod: float
-        :param tfufc_clc:
-        :type tfufc_clc: float
         :param nhh_hbfwtp:
         :type nhh_hbfwtp: float
+        :param tfufc_clc:
+        :type tfufc_clc: float
         :param marg_cl_31:
         :type marg_cl_31: float
         :param marg_cl_32:
@@ -2691,18 +2691,18 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type m_st: float
         :param kf_cih:
         :type kf_cih: float
-        :param mow_conc:
-        :type mow_conc: float
         :param msl_ao:
         :type msl_ao: float
+        :param mow_conc:
+        :type mow_conc: float
         :param msdw_rc:
         :type msdw_rc: float
         :param marg_cl_02:
         :type marg_cl_02: float
-        :param aos_hhw_tc:
-        :type aos_hhw_tc: float
         :param marg_cl_01:
         :type marg_cl_01: float
+        :param aos_hhw_tc:
+        :type aos_hhw_tc: float
         :param main_ot_f:
         :type main_ot_f: float
         :param msl_se:
@@ -2731,36 +2731,36 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
-        :param hh_cond_11:
-        :type hh_cond_11: float
         :param m_lit:
         :type m_lit: float
         :param mc_1:
         :type mc_1: float
+        :param hh_cond_11:
+        :type hh_cond_11: float
         :param marg_al_m:
         :type marg_al_m: float
-        :param hh_tscs_ns:
-        :type hh_tscs_ns: float
         :param mc_2:
         :type mc_2: float
-        :param msdw_tfuts:
-        :type msdw_tfuts: float
+        :param hh_tscs_ns:
+        :type hh_tscs_ns: float
         :param mc_3:
         :type mc_3: float
-        :param mc_4:
-        :type mc_4: float
+        :param msdw_tfuts:
+        :type msdw_tfuts: float
         :param hh_cond_10:
         :type hh_cond_10: float
-        :param marg_al_p:
-        :type marg_al_p: float
+        :param mc_4:
+        :type mc_4: float
         :param ldws_wp:
         :type ldws_wp: float
+        :param marg_al_p:
+        :type marg_al_p: float
         :param mof_stone:
         :type mof_stone: float
-        :param mdds_st:
-        :type mdds_st: str
         :param pl_wsvi:
         :type pl_wsvi: float
+        :param mdds_st:
+        :type mdds_st: str
         :param name_st:
         :type name_st: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2797,17 +2797,17 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             tot_f=tot_f,
             fpfl_os=fpfl_os,
             ndr_ner1=ndr_ner1,
-            mor_bb=mor_bb,
             ndr_ner2=ndr_ner2,
+            mor_bb=mor_bb,
             non_work_p=non_work_p,
             marg_ot_32=marg_ot_32,
             wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
-            tot_p=tot_p,
             non_work_m=non_work_m,
+            tot_p=tot_p,
             mof_aom=mof_aom,
-            mof_mft=mof_mft,
             non_work_f=non_work_f,
+            mof_mft=mof_mft,
             f_ill=f_ill,
             mdds_vt=mdds_vt,
             tfufc_elc=tfufc_elc,
@@ -2831,27 +2831,27 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            hh_cond__8=hh_cond__8,
             mof_cem=mof_cem,
+            hh_cond__8=hh_cond__8,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
             hh_cond__9=hh_cond__9,
             marg_cl_3_=marg_cl_3_,
             mc_5_=mc_5_,
-            mainwork_m=mainwork_m,
             hhs_4=hhs_4,
+            mainwork_m=mainwork_m,
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            hh_tscs_sp=hh_tscs_sp,
             mow_mub=mow_mub,
+            hh_tscs_sp=hh_tscs_sp,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
             hhs_1=hhs_1,
-            hhs_2=hhs_2,
             os_non=os_non,
+            hhs_2=hhs_2,
             hhs_3=hhs_3,
             main_cl_m=main_cl_m,
             no_hh=no_hh,
@@ -2871,8 +2871,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             mor_gi_mas=mor_gi_mas,
             mow_aom=mow_aom,
             marg_hh_3_=marg_hh_3_,
-            msdw_tpl=msdw_tpl,
             p_st=p_st,
+            msdw_tpl=msdw_tpl,
             p_lit=p_lit,
             mor_hmt=mor_hmt,
             ndr_4_r=ndr_4_r,
@@ -2882,8 +2882,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             mof_bb=mof_bb,
             marg_cl_f=marg_cl_f,
             kf_hk1=kf_hk1,
-            mor_aom=mor_aom,
             marg_cl_m=marg_cl_m,
+            mor_aom=mor_aom,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
             marg_al_31=marg_al_31,
@@ -2899,15 +2899,15 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             nhh_hbfw_2=nhh_hbfw_2,
             margwork_p=margwork_p,
             margwork_m=margwork_m,
-            ldws_np=ldws_np,
             marg_al_01=marg_al_01,
+            ldws_np=ldws_np,
             f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
             marg_al_02=marg_al_02,
             margwork_4=margwork_4,
-            os_ao=os_ao,
             margwork_3=margwork_3,
+            os_ao=os_ao,
             margwork_2=margwork_2,
             margwork_1=margwork_1,
             margwork_0=margwork_0,
@@ -2915,11 +2915,11 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             margwork_5=margwork_5,
             f_lit=f_lit,
             msl_kr=msl_kr,
-            mow_pl_pol=mow_pl_pol,
             m_ill=m_ill,
+            mow_pl_pol=mow_pl_pol,
             tfufc_lpg_=tfufc_lpg_,
-            mow_snpwm=mow_snpwm,
             tfufc_cc=tfufc_cc,
+            mow_snpwm=mow_snpwm,
             aos_=aos_,
             name_vt=name_vt,
             kf_dnhk1=kf_dnhk1,
@@ -2928,8 +2928,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             tot_work_p=tot_work_p,
             tot_work_m=tot_work_m,
             m_06=m_06,
-            tot_work_f=tot_work_f,
             marg_ot_m=marg_ot_m,
+            tot_work_f=tot_work_f,
             main_al_m=main_al_m,
             main_al_f=main_al_f,
             marg_ot_p=marg_ot_p,
@@ -2969,8 +2969,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             tfufc_bio=tfufc_bio,
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
-            tfufc_clc=tfufc_clc,
             nhh_hbfwtp=nhh_hbfwtp,
+            tfufc_clc=tfufc_clc,
             marg_cl_31=marg_cl_31,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
@@ -2984,12 +2984,12 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             mow_gtb=mow_gtb,
             m_st=m_st,
             kf_cih=kf_cih,
-            mow_conc=mow_conc,
             msl_ao=msl_ao,
+            mow_conc=mow_conc,
             msdw_rc=msdw_rc,
             marg_cl_02=marg_cl_02,
-            aos_hhw_tc=aos_hhw_tc,
             marg_cl_01=marg_cl_01,
+            aos_hhw_tc=aos_hhw_tc,
             main_ot_f=main_ot_f,
             msl_se=msl_se,
             mof_mud=mof_mud,
@@ -3004,21 +3004,21 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             tfufc_nc=tfufc_nc,
             marg_al_f=marg_al_f,
             mor_ss=mor_ss,
-            hh_cond_11=hh_cond_11,
             m_lit=m_lit,
             mc_1=mc_1,
+            hh_cond_11=hh_cond_11,
             marg_al_m=marg_al_m,
-            hh_tscs_ns=hh_tscs_ns,
             mc_2=mc_2,
-            msdw_tfuts=msdw_tfuts,
+            hh_tscs_ns=hh_tscs_ns,
             mc_3=mc_3,
-            mc_4=mc_4,
+            msdw_tfuts=msdw_tfuts,
             hh_cond_10=hh_cond_10,
-            marg_al_p=marg_al_p,
+            mc_4=mc_4,
             ldws_wp=ldws_wp,
+            marg_al_p=marg_al_p,
             mof_stone=mof_stone,
-            mdds_st=mdds_st,
             pl_wsvi=pl_wsvi,
+            mdds_st=mdds_st,
             name_st=name_st,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3051,17 +3051,17 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tot_f,
         fpfl_os,
         ndr_ner1,
-        mor_bb,
         ndr_ner2,
+        mor_bb,
         non_work_p,
         marg_ot_32,
         wwoc_nd,
         marg_ot_31,
-        tot_p,
         non_work_m,
+        tot_p,
         mof_aom,
-        mof_mft,
         non_work_f,
+        mof_mft,
         f_ill,
         mdds_vt,
         tfufc_elc,
@@ -3085,27 +3085,27 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         hh_cond__1,
         hh_cond__2,
         hh_cond__7,
-        hh_cond__8,
         mof_cem,
+        hh_cond__8,
         hh_cond__5,
         hh_cond__6,
         ans_pl,
         hh_cond__9,
         marg_cl_3_,
         mc_5_,
-        mainwork_m,
         hhs_4,
+        mainwork_m,
         hhs_5,
         fpfl_pss,
         mainwork_p,
-        hh_tscs_sp,
         mow_mub,
+        hh_tscs_sp,
         kf_tot,
         mainwork_f,
         mor_mmt,
         hhs_1,
-        hhs_2,
         os_non,
+        hhs_2,
         hhs_3,
         main_cl_m,
         no_hh,
@@ -3125,8 +3125,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         mor_gi_mas,
         mow_aom,
         marg_hh_3_,
-        msdw_tpl,
         p_st,
+        msdw_tpl,
         p_lit,
         mor_hmt,
         ndr_4_r,
@@ -3136,8 +3136,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         mof_bb,
         marg_cl_f,
         kf_hk1,
-        mor_aom,
         marg_cl_m,
+        mor_aom,
         marg_hh_32,
         marg_cl_p,
         marg_al_31,
@@ -3153,15 +3153,15 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         nhh_hbfw_2,
         margwork_p,
         margwork_m,
-        ldws_np,
         marg_al_01,
+        ldws_np,
         f_st,
         main_al_p,
         wwoc_cd,
         marg_al_02,
         margwork_4,
-        os_ao,
         margwork_3,
+        os_ao,
         margwork_2,
         margwork_1,
         margwork_0,
@@ -3169,11 +3169,11 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         margwork_5,
         f_lit,
         msl_kr,
-        mow_pl_pol,
         m_ill,
+        mow_pl_pol,
         tfufc_lpg_,
-        mow_snpwm,
         tfufc_cc,
+        mow_snpwm,
         aos_,
         name_vt,
         kf_dnhk1,
@@ -3182,8 +3182,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tot_work_p,
         tot_work_m,
         m_06,
-        tot_work_f,
         marg_ot_m,
+        tot_work_f,
         main_al_m,
         main_al_f,
         marg_ot_p,
@@ -3223,8 +3223,8 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tfufc_bio,
         hh_cond_ch,
         nsdiod,
-        tfufc_clc,
         nhh_hbfwtp,
+        tfufc_clc,
         marg_cl_31,
         marg_cl_32,
         aos_cl_wii,
@@ -3238,12 +3238,12 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         mow_gtb,
         m_st,
         kf_cih,
-        mow_conc,
         msl_ao,
+        mow_conc,
         msdw_rc,
         marg_cl_02,
-        aos_hhw_tc,
         marg_cl_01,
+        aos_hhw_tc,
         main_ot_f,
         msl_se,
         mof_mud,
@@ -3258,21 +3258,21 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
         tfufc_nc,
         marg_al_f,
         mor_ss,
-        hh_cond_11,
         m_lit,
         mc_1,
+        hh_cond_11,
         marg_al_m,
-        hh_tscs_ns,
         mc_2,
-        msdw_tfuts,
+        hh_tscs_ns,
         mc_3,
-        mc_4,
+        msdw_tfuts,
         hh_cond_10,
-        marg_al_p,
+        mc_4,
         ldws_wp,
+        marg_al_p,
         mof_stone,
-        mdds_st,
         pl_wsvi,
+        mdds_st,
         name_st,
         _request_auth,
         _content_type,
@@ -3339,13 +3339,13 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('NDR_NER1', ndr_ner1))
             
-        if mor_bb is not None:
-            
-            _query_params.append(('MOR_BB', mor_bb))
-            
         if ndr_ner2 is not None:
             
             _query_params.append(('NDR_NER2', ndr_ner2))
+            
+        if mor_bb is not None:
+            
+            _query_params.append(('MOR_BB', mor_bb))
             
         if non_work_p is not None:
             
@@ -3363,25 +3363,25 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('MARG_OT_31', marg_ot_31))
             
-        if tot_p is not None:
-            
-            _query_params.append(('TOT_P', tot_p))
-            
         if non_work_m is not None:
             
             _query_params.append(('NON_WORK_M', non_work_m))
+            
+        if tot_p is not None:
+            
+            _query_params.append(('TOT_P', tot_p))
             
         if mof_aom is not None:
             
             _query_params.append(('MOF_AOM', mof_aom))
             
-        if mof_mft is not None:
-            
-            _query_params.append(('MOF_MFT', mof_mft))
-            
         if non_work_f is not None:
             
             _query_params.append(('NON_WORK_F', non_work_f))
+            
+        if mof_mft is not None:
+            
+            _query_params.append(('MOF_MFT', mof_mft))
             
         if f_ill is not None:
             
@@ -3475,13 +3475,13 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('HH_COND__7', hh_cond__7))
             
-        if hh_cond__8 is not None:
-            
-            _query_params.append(('HH_COND__8', hh_cond__8))
-            
         if mof_cem is not None:
             
             _query_params.append(('MOF_CEM', mof_cem))
+            
+        if hh_cond__8 is not None:
+            
+            _query_params.append(('HH_COND__8', hh_cond__8))
             
         if hh_cond__5 is not None:
             
@@ -3507,13 +3507,13 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('MC_5_', mc_5_))
             
-        if mainwork_m is not None:
-            
-            _query_params.append(('MAINWORK_M', mainwork_m))
-            
         if hhs_4 is not None:
             
             _query_params.append(('HHS_4', hhs_4))
+            
+        if mainwork_m is not None:
+            
+            _query_params.append(('MAINWORK_M', mainwork_m))
             
         if hhs_5 is not None:
             
@@ -3527,13 +3527,13 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('MAINWORK_P', mainwork_p))
             
-        if hh_tscs_sp is not None:
-            
-            _query_params.append(('HH_TSCS_SP', hh_tscs_sp))
-            
         if mow_mub is not None:
             
             _query_params.append(('MOW_MUB', mow_mub))
+            
+        if hh_tscs_sp is not None:
+            
+            _query_params.append(('HH_TSCS_SP', hh_tscs_sp))
             
         if kf_tot is not None:
             
@@ -3551,13 +3551,13 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('HHS_1', hhs_1))
             
-        if hhs_2 is not None:
-            
-            _query_params.append(('HHS_2', hhs_2))
-            
         if os_non is not None:
             
             _query_params.append(('OS_NON', os_non))
+            
+        if hhs_2 is not None:
+            
+            _query_params.append(('HHS_2', hhs_2))
             
         if hhs_3 is not None:
             
@@ -3635,13 +3635,13 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('MARG_HH_3_', marg_hh_3_))
             
-        if msdw_tpl is not None:
-            
-            _query_params.append(('MSDW_TPL', msdw_tpl))
-            
         if p_st is not None:
             
             _query_params.append(('P_ST', p_st))
+            
+        if msdw_tpl is not None:
+            
+            _query_params.append(('MSDW_TPL', msdw_tpl))
             
         if p_lit is not None:
             
@@ -3679,13 +3679,13 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('KF_HK1', kf_hk1))
             
-        if mor_aom is not None:
-            
-            _query_params.append(('MOR_AOM', mor_aom))
-            
         if marg_cl_m is not None:
             
             _query_params.append(('MARG_CL_M', marg_cl_m))
+            
+        if mor_aom is not None:
+            
+            _query_params.append(('MOR_AOM', mor_aom))
             
         if marg_hh_32 is not None:
             
@@ -3747,13 +3747,13 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('MARGWORK_M', margwork_m))
             
-        if ldws_np is not None:
-            
-            _query_params.append(('LDWS_NP', ldws_np))
-            
         if marg_al_01 is not None:
             
             _query_params.append(('MARG_AL_01', marg_al_01))
+            
+        if ldws_np is not None:
+            
+            _query_params.append(('LDWS_NP', ldws_np))
             
         if f_st is not None:
             
@@ -3775,13 +3775,13 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('MARGWORK_4', margwork_4))
             
-        if os_ao is not None:
-            
-            _query_params.append(('OS_AO', os_ao))
-            
         if margwork_3 is not None:
             
             _query_params.append(('MARGWORK_3', margwork_3))
+            
+        if os_ao is not None:
+            
+            _query_params.append(('OS_AO', os_ao))
             
         if margwork_2 is not None:
             
@@ -3811,25 +3811,25 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('MSL_KR', msl_kr))
             
-        if mow_pl_pol is not None:
-            
-            _query_params.append(('MOW_PL_POL', mow_pl_pol))
-            
         if m_ill is not None:
             
             _query_params.append(('M_ILL', m_ill))
+            
+        if mow_pl_pol is not None:
+            
+            _query_params.append(('MOW_PL_POL', mow_pl_pol))
             
         if tfufc_lpg_ is not None:
             
             _query_params.append(('TFUFC_LPG_', tfufc_lpg_))
             
-        if mow_snpwm is not None:
-            
-            _query_params.append(('MOW_SNPWM', mow_snpwm))
-            
         if tfufc_cc is not None:
             
             _query_params.append(('TFUFC_CC', tfufc_cc))
+            
+        if mow_snpwm is not None:
+            
+            _query_params.append(('MOW_SNPWM', mow_snpwm))
             
         if aos_ is not None:
             
@@ -3863,13 +3863,13 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('M_06', m_06))
             
-        if tot_work_f is not None:
-            
-            _query_params.append(('TOT_WORK_F', tot_work_f))
-            
         if marg_ot_m is not None:
             
             _query_params.append(('MARG_OT_M', marg_ot_m))
+            
+        if tot_work_f is not None:
+            
+            _query_params.append(('TOT_WORK_F', tot_work_f))
             
         if main_al_m is not None:
             
@@ -4027,13 +4027,13 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('NSDIOD', nsdiod))
             
-        if tfufc_clc is not None:
-            
-            _query_params.append(('TFUFC_CLC', tfufc_clc))
-            
         if nhh_hbfwtp is not None:
             
             _query_params.append(('NHH_HBFWTP', nhh_hbfwtp))
+            
+        if tfufc_clc is not None:
+            
+            _query_params.append(('TFUFC_CLC', tfufc_clc))
             
         if marg_cl_31 is not None:
             
@@ -4087,13 +4087,13 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('KF_CIH', kf_cih))
             
-        if mow_conc is not None:
-            
-            _query_params.append(('MOW_CONC', mow_conc))
-            
         if msl_ao is not None:
             
             _query_params.append(('MSL_AO', msl_ao))
+            
+        if mow_conc is not None:
+            
+            _query_params.append(('MOW_CONC', mow_conc))
             
         if msdw_rc is not None:
             
@@ -4103,13 +4103,13 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('MARG_CL_02', marg_cl_02))
             
-        if aos_hhw_tc is not None:
-            
-            _query_params.append(('AOS_HHW_TC', aos_hhw_tc))
-            
         if marg_cl_01 is not None:
             
             _query_params.append(('MARG_CL_01', marg_cl_01))
+            
+        if aos_hhw_tc is not None:
+            
+            _query_params.append(('AOS_HHW_TC', aos_hhw_tc))
             
         if main_ot_f is not None:
             
@@ -4167,10 +4167,6 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('MOR_SS', mor_ss))
             
-        if hh_cond_11 is not None:
-            
-            _query_params.append(('HH_COND_11', hh_cond_11))
-            
         if m_lit is not None:
             
             _query_params.append(('M_LIT', m_lit))
@@ -4179,53 +4175,57 @@ class PrimaryCensusAbstractOfVaranasiUttarPradeshApi:
             
             _query_params.append(('MC_1', mc_1))
             
+        if hh_cond_11 is not None:
+            
+            _query_params.append(('HH_COND_11', hh_cond_11))
+            
         if marg_al_m is not None:
             
             _query_params.append(('MARG_AL_M', marg_al_m))
-            
-        if hh_tscs_ns is not None:
-            
-            _query_params.append(('HH_TSCS_NS', hh_tscs_ns))
             
         if mc_2 is not None:
             
             _query_params.append(('MC_2', mc_2))
             
-        if msdw_tfuts is not None:
+        if hh_tscs_ns is not None:
             
-            _query_params.append(('MSDW_TFUTS', msdw_tfuts))
+            _query_params.append(('HH_TSCS_NS', hh_tscs_ns))
             
         if mc_3 is not None:
             
             _query_params.append(('MC_3', mc_3))
             
-        if mc_4 is not None:
+        if msdw_tfuts is not None:
             
-            _query_params.append(('MC_4', mc_4))
+            _query_params.append(('MSDW_TFUTS', msdw_tfuts))
             
         if hh_cond_10 is not None:
             
             _query_params.append(('HH_COND_10', hh_cond_10))
             
-        if marg_al_p is not None:
+        if mc_4 is not None:
             
-            _query_params.append(('MARG_AL_P', marg_al_p))
+            _query_params.append(('MC_4', mc_4))
             
         if ldws_wp is not None:
             
             _query_params.append(('LDWS_WP', ldws_wp))
             
+        if marg_al_p is not None:
+            
+            _query_params.append(('MARG_AL_P', marg_al_p))
+            
         if mof_stone is not None:
             
             _query_params.append(('MOF_STONE', mof_stone))
             
-        if mdds_st is not None:
-            
-            _query_params.append(('MDDS_ST', mdds_st))
-            
         if pl_wsvi is not None:
             
             _query_params.append(('PL_WSVI', pl_wsvi))
+            
+        if mdds_st is not None:
+            
+            _query_params.append(('MDDS_ST', mdds_st))
             
         if name_st is not None:
             

@@ -53,8 +53,8 @@ class StateBoundariesCorrectedApi:
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         shape_leng: Optional[Union[StrictFloat, StrictInt]] = None,
         shape_area: Optional[Union[StrictFloat, StrictInt]] = None,
-        state: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
+        state: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -87,10 +87,10 @@ class StateBoundariesCorrectedApi:
         :type shape_leng: float
         :param shape_area:
         :type shape_area: float
-        :param state:
-        :type state: str
         :param state_lgd:
         :type state_lgd: int
+        :param state:
+        :type state: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -122,8 +122,8 @@ class StateBoundariesCorrectedApi:
             offset=offset,
             shape_leng=shape_leng,
             shape_area=shape_area,
-            state=state,
             state_lgd=state_lgd,
+            state=state,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -157,8 +157,8 @@ class StateBoundariesCorrectedApi:
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         shape_leng: Optional[Union[StrictFloat, StrictInt]] = None,
         shape_area: Optional[Union[StrictFloat, StrictInt]] = None,
-        state: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
+        state: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -191,10 +191,10 @@ class StateBoundariesCorrectedApi:
         :type shape_leng: float
         :param shape_area:
         :type shape_area: float
-        :param state:
-        :type state: str
         :param state_lgd:
         :type state_lgd: int
+        :param state:
+        :type state: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -226,8 +226,8 @@ class StateBoundariesCorrectedApi:
             offset=offset,
             shape_leng=shape_leng,
             shape_area=shape_area,
-            state=state,
             state_lgd=state_lgd,
+            state=state,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -261,8 +261,8 @@ class StateBoundariesCorrectedApi:
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         shape_leng: Optional[Union[StrictFloat, StrictInt]] = None,
         shape_area: Optional[Union[StrictFloat, StrictInt]] = None,
-        state: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
+        state: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -295,10 +295,10 @@ class StateBoundariesCorrectedApi:
         :type shape_leng: float
         :param shape_area:
         :type shape_area: float
-        :param state:
-        :type state: str
         :param state_lgd:
         :type state_lgd: int
+        :param state:
+        :type state: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -330,8 +330,8 @@ class StateBoundariesCorrectedApi:
             offset=offset,
             shape_leng=shape_leng,
             shape_area=shape_area,
-            state=state,
             state_lgd=state_lgd,
+            state=state,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -360,8 +360,8 @@ class StateBoundariesCorrectedApi:
         offset,
         shape_leng,
         shape_area,
-        state,
         state_lgd,
+        state,
         _request_auth,
         _content_type,
         _headers,
@@ -415,13 +415,13 @@ class StateBoundariesCorrectedApi:
             
             _query_params.append(('Shape_Area', shape_area))
             
-        if state is not None:
-            
-            _query_params.append(('STATE', state))
-            
         if state_lgd is not None:
             
             _query_params.append(('State_LGD', state_lgd))
+            
+        if state is not None:
+            
+            _query_params.append(('STATE', state))
             
         # process the header parameters
         # process the form parameters

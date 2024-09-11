@@ -55,14 +55,14 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         tot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_os: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner1: Optional[Union[StrictFloat, StrictInt]] = None,
-        ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
+        ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -89,21 +89,21 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__9: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_3_: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_5_: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -134,18 +134,18 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         p_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_hmt: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_4_r: Optional[Union[StrictFloat, StrictInt]] = None,
-        aos_tel: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_31: Optional[Union[StrictFloat, StrictInt]] = None,
+        aos_tel: Optional[Union[StrictFloat, StrictInt]] = None,
         os_ow: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_f: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_32: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
         p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_32: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_3_r: Optional[Union[StrictFloat, StrictInt]] = None,
         f_06: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -157,8 +157,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         nhh_hbfw_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
         f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -178,8 +178,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
-        tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
+        tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_: Optional[Union[StrictFloat, StrictInt]] = None,
         dt_name: Optional[StrictStr] = None,
         kf_dnhk1: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -191,8 +191,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         pl_wsop: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_mo: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -200,8 +200,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         msl_ool: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_dnhk: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cr: Optional[Union[StrictFloat, StrictInt]] = None,
-        main_hh_p: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
+        main_hh_p: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_m: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_lo: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_f: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -231,8 +231,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfts: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -244,17 +244,17 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         mow_gtb: Optional[Union[StrictFloat, StrictInt]] = None,
         m_st: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_cih: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_ao: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_rc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_se: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mud: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_wb: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -263,23 +263,23 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         total: Optional[StrictStr] = None,
         msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
-        pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_st: Optional[StrictStr] = None,
+        pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -316,10 +316,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type fpfl_os: float
         :param ndr_ner1:
         :type ndr_ner1: float
-        :param ndr_ner2:
-        :type ndr_ner2: float
         :param mor_bb:
         :type mor_bb: float
+        :param ndr_ner2:
+        :type ndr_ner2: float
         :param non_work_p:
         :type non_work_p: float
         :param marg_ot_32:
@@ -328,10 +328,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
-        :param non_work_m:
-        :type non_work_m: float
         :param tot_p:
         :type tot_p: float
+        :param non_work_m:
+        :type non_work_m: float
         :param mof_aom:
         :type mof_aom: float
         :param non_work_f:
@@ -384,10 +384,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param mof_cem:
-        :type mof_cem: float
         :param hh_cond__8:
         :type hh_cond__8: float
+        :param mof_cem:
+        :type mof_cem: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -400,20 +400,20 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type marg_cl_3_: float
         :param mc_5_:
         :type mc_5_: float
-        :param hhs_4:
-        :type hhs_4: float
         :param mainwork_m:
         :type mainwork_m: float
+        :param hhs_4:
+        :type hhs_4: float
         :param hhs_5:
         :type hhs_5: float
         :param fpfl_pss:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param hh_tscs_sp:
-        :type hh_tscs_sp: float
         :param mow_mub:
         :type mow_mub: float
+        :param hh_tscs_sp:
+        :type hh_tscs_sp: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -474,10 +474,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type mor_hmt: float
         :param ndr_4_r:
         :type ndr_4_r: float
-        :param aos_tel:
-        :type aos_tel: float
         :param marg_hh_31:
         :type marg_hh_31: float
+        :param aos_tel:
+        :type aos_tel: float
         :param os_ow:
         :type os_ow: float
         :param mof_bb:
@@ -486,18 +486,18 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type marg_cl_f: float
         :param kf_hk1:
         :type kf_hk1: float
-        :param mor_aom:
-        :type mor_aom: float
         :param marg_cl_m:
         :type marg_cl_m: float
+        :param mor_aom:
+        :type mor_aom: float
         :param marg_hh_32:
         :type marg_hh_32: float
         :param marg_cl_p:
         :type marg_cl_p: float
-        :param marg_al_31:
-        :type marg_al_31: float
         :param p_sc:
         :type p_sc: float
+        :param marg_al_31:
+        :type marg_al_31: float
         :param marg_al_32:
         :type marg_al_32: float
         :param ndr_3_r:
@@ -520,10 +520,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type margwork_p: float
         :param margwork_m:
         :type margwork_m: float
-        :param ldws_np:
-        :type ldws_np: float
         :param marg_al_01:
         :type marg_al_01: float
+        :param ldws_np:
+        :type ldws_np: float
         :param f_st:
         :type f_st: float
         :param main_al_p:
@@ -562,10 +562,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type m_ill: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
-        :param tfufc_cc:
-        :type tfufc_cc: float
         :param mow_snpwm:
         :type mow_snpwm: float
+        :param tfufc_cc:
+        :type tfufc_cc: float
         :param aos_:
         :type aos_: float
         :param dt_name:
@@ -588,10 +588,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type marg_ot_m: float
         :param main_al_m:
         :type main_al_m: float
-        :param marg_ot_p:
-        :type marg_ot_p: float
         :param main_al_f:
         :type main_al_f: float
+        :param marg_ot_p:
+        :type marg_ot_p: float
         :param pl_wsop:
         :type pl_wsop: float
         :param marg_ot_f:
@@ -606,10 +606,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type kf_dnhk: float
         :param tfufc_cr:
         :type tfufc_cr: float
-        :param main_hh_p:
-        :type main_hh_p: float
         :param hhs_9_:
         :type hhs_9_: float
+        :param main_hh_p:
+        :type main_hh_p: float
         :param main_hh_m:
         :type main_hh_m: float
         :param aos_tm_lo:
@@ -668,10 +668,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type nsdiod: float
         :param tfufc_clc:
         :type tfufc_clc: float
-        :param marg_cl_31:
-        :type marg_cl_31: float
         :param nhh_hbfwtp:
         :type nhh_hbfwtp: float
+        :param marg_cl_31:
+        :type marg_cl_31: float
         :param marg_cl_32:
         :type marg_cl_32: float
         :param aos_cl_wii:
@@ -694,28 +694,28 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type m_st: float
         :param kf_cih:
         :type kf_cih: float
-        :param mow_conc:
-        :type mow_conc: float
         :param msl_ao:
         :type msl_ao: float
+        :param mow_conc:
+        :type mow_conc: float
         :param msdw_rc:
         :type msdw_rc: float
         :param marg_cl_02:
         :type marg_cl_02: float
-        :param aos_hhw_tc:
-        :type aos_hhw_tc: float
         :param marg_cl_01:
         :type marg_cl_01: float
+        :param aos_hhw_tc:
+        :type aos_hhw_tc: float
         :param main_ot_f:
         :type main_ot_f: float
         :param msl_se:
         :type msl_se: float
         :param mof_mud:
         :type mof_mud: float
-        :param hhs_6_8:
-        :type hhs_6_8: float
         :param aos_smm:
         :type aos_smm: float
+        :param hhs_6_8:
+        :type hhs_6_8: float
         :param mof_wb:
         :type mof_wb: float
         :param main_ot_m:
@@ -732,26 +732,26 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type msdw_os: float
         :param tfufc_nc:
         :type tfufc_nc: float
-        :param marg_al_f:
-        :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
-        :param hh_cond_11:
-        :type hh_cond_11: float
-        :param mc_1:
-        :type mc_1: float
+        :param marg_al_f:
+        :type marg_al_f: float
         :param m_lit:
         :type m_lit: float
+        :param mc_1:
+        :type mc_1: float
+        :param hh_cond_11:
+        :type hh_cond_11: float
         :param marg_al_m:
         :type marg_al_m: float
         :param mc_2:
         :type mc_2: float
         :param hh_tscs_ns:
         :type hh_tscs_ns: float
-        :param mc_3:
-        :type mc_3: float
         :param msdw_tfuts:
         :type msdw_tfuts: float
+        :param mc_3:
+        :type mc_3: float
         :param mc_4:
         :type mc_4: float
         :param hh_cond_10:
@@ -762,10 +762,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type marg_al_p: float
         :param mof_stone:
         :type mof_stone: float
-        :param pl_wsvi:
-        :type pl_wsvi: float
         :param mdds_st:
         :type mdds_st: str
+        :param pl_wsvi:
+        :type pl_wsvi: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -799,14 +799,14 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             tot_f=tot_f,
             fpfl_os=fpfl_os,
             ndr_ner1=ndr_ner1,
-            ndr_ner2=ndr_ner2,
             mor_bb=mor_bb,
+            ndr_ner2=ndr_ner2,
             non_work_p=non_work_p,
             marg_ot_32=marg_ot_32,
             wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
-            non_work_m=non_work_m,
             tot_p=tot_p,
+            non_work_m=non_work_m,
             mof_aom=mof_aom,
             non_work_f=non_work_f,
             mof_mft=mof_mft,
@@ -833,21 +833,21 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            mof_cem=mof_cem,
             hh_cond__8=hh_cond__8,
+            mof_cem=mof_cem,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
             hh_cond__9=hh_cond__9,
             marg_cl_3_=marg_cl_3_,
             mc_5_=mc_5_,
-            hhs_4=hhs_4,
             mainwork_m=mainwork_m,
+            hhs_4=hhs_4,
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            hh_tscs_sp=hh_tscs_sp,
             mow_mub=mow_mub,
+            hh_tscs_sp=hh_tscs_sp,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
@@ -878,18 +878,18 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             p_lit=p_lit,
             mor_hmt=mor_hmt,
             ndr_4_r=ndr_4_r,
-            aos_tel=aos_tel,
             marg_hh_31=marg_hh_31,
+            aos_tel=aos_tel,
             os_ow=os_ow,
             mof_bb=mof_bb,
             marg_cl_f=marg_cl_f,
             kf_hk1=kf_hk1,
-            mor_aom=mor_aom,
             marg_cl_m=marg_cl_m,
+            mor_aom=mor_aom,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
-            marg_al_31=marg_al_31,
             p_sc=p_sc,
+            marg_al_31=marg_al_31,
             marg_al_32=marg_al_32,
             ndr_3_r=ndr_3_r,
             f_06=f_06,
@@ -901,8 +901,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             nhh_hbfw_2=nhh_hbfw_2,
             margwork_p=margwork_p,
             margwork_m=margwork_m,
-            ldws_np=ldws_np,
             marg_al_01=marg_al_01,
+            ldws_np=ldws_np,
             f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
@@ -922,8 +922,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             mow_pl_pol=mow_pl_pol,
             m_ill=m_ill,
             tfufc_lpg_=tfufc_lpg_,
-            tfufc_cc=tfufc_cc,
             mow_snpwm=mow_snpwm,
+            tfufc_cc=tfufc_cc,
             aos_=aos_,
             dt_name=dt_name,
             kf_dnhk1=kf_dnhk1,
@@ -935,8 +935,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             tot_work_f=tot_work_f,
             marg_ot_m=marg_ot_m,
             main_al_m=main_al_m,
-            marg_ot_p=marg_ot_p,
             main_al_f=main_al_f,
+            marg_ot_p=marg_ot_p,
             pl_wsop=pl_wsop,
             marg_ot_f=marg_ot_f,
             aos_tm_mo=aos_tm_mo,
@@ -944,8 +944,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             msl_ool=msl_ool,
             kf_dnhk=kf_dnhk,
             tfufc_cr=tfufc_cr,
-            main_hh_p=main_hh_p,
             hhs_9_=hhs_9_,
+            main_hh_p=main_hh_p,
             main_hh_m=main_hh_m,
             aos_tm_lo=aos_tm_lo,
             main_hh_f=main_hh_f,
@@ -975,8 +975,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
             tfufc_clc=tfufc_clc,
-            marg_cl_31=marg_cl_31,
             nhh_hbfwtp=nhh_hbfwtp,
+            marg_cl_31=marg_cl_31,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
             msdw_tfts=msdw_tfts,
@@ -988,17 +988,17 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             mow_gtb=mow_gtb,
             m_st=m_st,
             kf_cih=kf_cih,
-            mow_conc=mow_conc,
             msl_ao=msl_ao,
+            mow_conc=mow_conc,
             msdw_rc=msdw_rc,
             marg_cl_02=marg_cl_02,
-            aos_hhw_tc=aos_hhw_tc,
             marg_cl_01=marg_cl_01,
+            aos_hhw_tc=aos_hhw_tc,
             main_ot_f=main_ot_f,
             msl_se=msl_se,
             mof_mud=mof_mud,
-            hhs_6_8=hhs_6_8,
             aos_smm=aos_smm,
+            hhs_6_8=hhs_6_8,
             mof_wb=mof_wb,
             main_ot_m=main_ot_m,
             mor_gr_th_=mor_gr_th_,
@@ -1007,23 +1007,23 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             total=total,
             msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
-            marg_al_f=marg_al_f,
             mor_ss=mor_ss,
-            hh_cond_11=hh_cond_11,
-            mc_1=mc_1,
+            marg_al_f=marg_al_f,
             m_lit=m_lit,
+            mc_1=mc_1,
+            hh_cond_11=hh_cond_11,
             marg_al_m=marg_al_m,
             mc_2=mc_2,
             hh_tscs_ns=hh_tscs_ns,
-            mc_3=mc_3,
             msdw_tfuts=msdw_tfuts,
+            mc_3=mc_3,
             mc_4=mc_4,
             hh_cond_10=hh_cond_10,
             ldws_wp=ldws_wp,
             marg_al_p=marg_al_p,
             mof_stone=mof_stone,
-            pl_wsvi=pl_wsvi,
             mdds_st=mdds_st,
+            pl_wsvi=pl_wsvi,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1059,14 +1059,14 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         tot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_os: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner1: Optional[Union[StrictFloat, StrictInt]] = None,
-        ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
+        ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1093,21 +1093,21 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__9: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_3_: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_5_: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1138,18 +1138,18 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         p_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_hmt: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_4_r: Optional[Union[StrictFloat, StrictInt]] = None,
-        aos_tel: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_31: Optional[Union[StrictFloat, StrictInt]] = None,
+        aos_tel: Optional[Union[StrictFloat, StrictInt]] = None,
         os_ow: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_f: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_32: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
         p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_32: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_3_r: Optional[Union[StrictFloat, StrictInt]] = None,
         f_06: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1161,8 +1161,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         nhh_hbfw_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
         f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1182,8 +1182,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
-        tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
+        tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_: Optional[Union[StrictFloat, StrictInt]] = None,
         dt_name: Optional[StrictStr] = None,
         kf_dnhk1: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1195,8 +1195,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         pl_wsop: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_mo: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1204,8 +1204,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         msl_ool: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_dnhk: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cr: Optional[Union[StrictFloat, StrictInt]] = None,
-        main_hh_p: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
+        main_hh_p: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_m: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_lo: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_f: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1235,8 +1235,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfts: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1248,17 +1248,17 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         mow_gtb: Optional[Union[StrictFloat, StrictInt]] = None,
         m_st: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_cih: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_ao: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_rc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_se: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mud: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_wb: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1267,23 +1267,23 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         total: Optional[StrictStr] = None,
         msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
-        pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_st: Optional[StrictStr] = None,
+        pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1320,10 +1320,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type fpfl_os: float
         :param ndr_ner1:
         :type ndr_ner1: float
-        :param ndr_ner2:
-        :type ndr_ner2: float
         :param mor_bb:
         :type mor_bb: float
+        :param ndr_ner2:
+        :type ndr_ner2: float
         :param non_work_p:
         :type non_work_p: float
         :param marg_ot_32:
@@ -1332,10 +1332,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
-        :param non_work_m:
-        :type non_work_m: float
         :param tot_p:
         :type tot_p: float
+        :param non_work_m:
+        :type non_work_m: float
         :param mof_aom:
         :type mof_aom: float
         :param non_work_f:
@@ -1388,10 +1388,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param mof_cem:
-        :type mof_cem: float
         :param hh_cond__8:
         :type hh_cond__8: float
+        :param mof_cem:
+        :type mof_cem: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -1404,20 +1404,20 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type marg_cl_3_: float
         :param mc_5_:
         :type mc_5_: float
-        :param hhs_4:
-        :type hhs_4: float
         :param mainwork_m:
         :type mainwork_m: float
+        :param hhs_4:
+        :type hhs_4: float
         :param hhs_5:
         :type hhs_5: float
         :param fpfl_pss:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param hh_tscs_sp:
-        :type hh_tscs_sp: float
         :param mow_mub:
         :type mow_mub: float
+        :param hh_tscs_sp:
+        :type hh_tscs_sp: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -1478,10 +1478,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type mor_hmt: float
         :param ndr_4_r:
         :type ndr_4_r: float
-        :param aos_tel:
-        :type aos_tel: float
         :param marg_hh_31:
         :type marg_hh_31: float
+        :param aos_tel:
+        :type aos_tel: float
         :param os_ow:
         :type os_ow: float
         :param mof_bb:
@@ -1490,18 +1490,18 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type marg_cl_f: float
         :param kf_hk1:
         :type kf_hk1: float
-        :param mor_aom:
-        :type mor_aom: float
         :param marg_cl_m:
         :type marg_cl_m: float
+        :param mor_aom:
+        :type mor_aom: float
         :param marg_hh_32:
         :type marg_hh_32: float
         :param marg_cl_p:
         :type marg_cl_p: float
-        :param marg_al_31:
-        :type marg_al_31: float
         :param p_sc:
         :type p_sc: float
+        :param marg_al_31:
+        :type marg_al_31: float
         :param marg_al_32:
         :type marg_al_32: float
         :param ndr_3_r:
@@ -1524,10 +1524,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type margwork_p: float
         :param margwork_m:
         :type margwork_m: float
-        :param ldws_np:
-        :type ldws_np: float
         :param marg_al_01:
         :type marg_al_01: float
+        :param ldws_np:
+        :type ldws_np: float
         :param f_st:
         :type f_st: float
         :param main_al_p:
@@ -1566,10 +1566,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type m_ill: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
-        :param tfufc_cc:
-        :type tfufc_cc: float
         :param mow_snpwm:
         :type mow_snpwm: float
+        :param tfufc_cc:
+        :type tfufc_cc: float
         :param aos_:
         :type aos_: float
         :param dt_name:
@@ -1592,10 +1592,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type marg_ot_m: float
         :param main_al_m:
         :type main_al_m: float
-        :param marg_ot_p:
-        :type marg_ot_p: float
         :param main_al_f:
         :type main_al_f: float
+        :param marg_ot_p:
+        :type marg_ot_p: float
         :param pl_wsop:
         :type pl_wsop: float
         :param marg_ot_f:
@@ -1610,10 +1610,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type kf_dnhk: float
         :param tfufc_cr:
         :type tfufc_cr: float
-        :param main_hh_p:
-        :type main_hh_p: float
         :param hhs_9_:
         :type hhs_9_: float
+        :param main_hh_p:
+        :type main_hh_p: float
         :param main_hh_m:
         :type main_hh_m: float
         :param aos_tm_lo:
@@ -1672,10 +1672,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type nsdiod: float
         :param tfufc_clc:
         :type tfufc_clc: float
-        :param marg_cl_31:
-        :type marg_cl_31: float
         :param nhh_hbfwtp:
         :type nhh_hbfwtp: float
+        :param marg_cl_31:
+        :type marg_cl_31: float
         :param marg_cl_32:
         :type marg_cl_32: float
         :param aos_cl_wii:
@@ -1698,28 +1698,28 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type m_st: float
         :param kf_cih:
         :type kf_cih: float
-        :param mow_conc:
-        :type mow_conc: float
         :param msl_ao:
         :type msl_ao: float
+        :param mow_conc:
+        :type mow_conc: float
         :param msdw_rc:
         :type msdw_rc: float
         :param marg_cl_02:
         :type marg_cl_02: float
-        :param aos_hhw_tc:
-        :type aos_hhw_tc: float
         :param marg_cl_01:
         :type marg_cl_01: float
+        :param aos_hhw_tc:
+        :type aos_hhw_tc: float
         :param main_ot_f:
         :type main_ot_f: float
         :param msl_se:
         :type msl_se: float
         :param mof_mud:
         :type mof_mud: float
-        :param hhs_6_8:
-        :type hhs_6_8: float
         :param aos_smm:
         :type aos_smm: float
+        :param hhs_6_8:
+        :type hhs_6_8: float
         :param mof_wb:
         :type mof_wb: float
         :param main_ot_m:
@@ -1736,26 +1736,26 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type msdw_os: float
         :param tfufc_nc:
         :type tfufc_nc: float
-        :param marg_al_f:
-        :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
-        :param hh_cond_11:
-        :type hh_cond_11: float
-        :param mc_1:
-        :type mc_1: float
+        :param marg_al_f:
+        :type marg_al_f: float
         :param m_lit:
         :type m_lit: float
+        :param mc_1:
+        :type mc_1: float
+        :param hh_cond_11:
+        :type hh_cond_11: float
         :param marg_al_m:
         :type marg_al_m: float
         :param mc_2:
         :type mc_2: float
         :param hh_tscs_ns:
         :type hh_tscs_ns: float
-        :param mc_3:
-        :type mc_3: float
         :param msdw_tfuts:
         :type msdw_tfuts: float
+        :param mc_3:
+        :type mc_3: float
         :param mc_4:
         :type mc_4: float
         :param hh_cond_10:
@@ -1766,10 +1766,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type marg_al_p: float
         :param mof_stone:
         :type mof_stone: float
-        :param pl_wsvi:
-        :type pl_wsvi: float
         :param mdds_st:
         :type mdds_st: str
+        :param pl_wsvi:
+        :type pl_wsvi: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1803,14 +1803,14 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             tot_f=tot_f,
             fpfl_os=fpfl_os,
             ndr_ner1=ndr_ner1,
-            ndr_ner2=ndr_ner2,
             mor_bb=mor_bb,
+            ndr_ner2=ndr_ner2,
             non_work_p=non_work_p,
             marg_ot_32=marg_ot_32,
             wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
-            non_work_m=non_work_m,
             tot_p=tot_p,
+            non_work_m=non_work_m,
             mof_aom=mof_aom,
             non_work_f=non_work_f,
             mof_mft=mof_mft,
@@ -1837,21 +1837,21 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            mof_cem=mof_cem,
             hh_cond__8=hh_cond__8,
+            mof_cem=mof_cem,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
             hh_cond__9=hh_cond__9,
             marg_cl_3_=marg_cl_3_,
             mc_5_=mc_5_,
-            hhs_4=hhs_4,
             mainwork_m=mainwork_m,
+            hhs_4=hhs_4,
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            hh_tscs_sp=hh_tscs_sp,
             mow_mub=mow_mub,
+            hh_tscs_sp=hh_tscs_sp,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
@@ -1882,18 +1882,18 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             p_lit=p_lit,
             mor_hmt=mor_hmt,
             ndr_4_r=ndr_4_r,
-            aos_tel=aos_tel,
             marg_hh_31=marg_hh_31,
+            aos_tel=aos_tel,
             os_ow=os_ow,
             mof_bb=mof_bb,
             marg_cl_f=marg_cl_f,
             kf_hk1=kf_hk1,
-            mor_aom=mor_aom,
             marg_cl_m=marg_cl_m,
+            mor_aom=mor_aom,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
-            marg_al_31=marg_al_31,
             p_sc=p_sc,
+            marg_al_31=marg_al_31,
             marg_al_32=marg_al_32,
             ndr_3_r=ndr_3_r,
             f_06=f_06,
@@ -1905,8 +1905,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             nhh_hbfw_2=nhh_hbfw_2,
             margwork_p=margwork_p,
             margwork_m=margwork_m,
-            ldws_np=ldws_np,
             marg_al_01=marg_al_01,
+            ldws_np=ldws_np,
             f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
@@ -1926,8 +1926,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             mow_pl_pol=mow_pl_pol,
             m_ill=m_ill,
             tfufc_lpg_=tfufc_lpg_,
-            tfufc_cc=tfufc_cc,
             mow_snpwm=mow_snpwm,
+            tfufc_cc=tfufc_cc,
             aos_=aos_,
             dt_name=dt_name,
             kf_dnhk1=kf_dnhk1,
@@ -1939,8 +1939,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             tot_work_f=tot_work_f,
             marg_ot_m=marg_ot_m,
             main_al_m=main_al_m,
-            marg_ot_p=marg_ot_p,
             main_al_f=main_al_f,
+            marg_ot_p=marg_ot_p,
             pl_wsop=pl_wsop,
             marg_ot_f=marg_ot_f,
             aos_tm_mo=aos_tm_mo,
@@ -1948,8 +1948,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             msl_ool=msl_ool,
             kf_dnhk=kf_dnhk,
             tfufc_cr=tfufc_cr,
-            main_hh_p=main_hh_p,
             hhs_9_=hhs_9_,
+            main_hh_p=main_hh_p,
             main_hh_m=main_hh_m,
             aos_tm_lo=aos_tm_lo,
             main_hh_f=main_hh_f,
@@ -1979,8 +1979,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
             tfufc_clc=tfufc_clc,
-            marg_cl_31=marg_cl_31,
             nhh_hbfwtp=nhh_hbfwtp,
+            marg_cl_31=marg_cl_31,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
             msdw_tfts=msdw_tfts,
@@ -1992,17 +1992,17 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             mow_gtb=mow_gtb,
             m_st=m_st,
             kf_cih=kf_cih,
-            mow_conc=mow_conc,
             msl_ao=msl_ao,
+            mow_conc=mow_conc,
             msdw_rc=msdw_rc,
             marg_cl_02=marg_cl_02,
-            aos_hhw_tc=aos_hhw_tc,
             marg_cl_01=marg_cl_01,
+            aos_hhw_tc=aos_hhw_tc,
             main_ot_f=main_ot_f,
             msl_se=msl_se,
             mof_mud=mof_mud,
-            hhs_6_8=hhs_6_8,
             aos_smm=aos_smm,
+            hhs_6_8=hhs_6_8,
             mof_wb=mof_wb,
             main_ot_m=main_ot_m,
             mor_gr_th_=mor_gr_th_,
@@ -2011,23 +2011,23 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             total=total,
             msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
-            marg_al_f=marg_al_f,
             mor_ss=mor_ss,
-            hh_cond_11=hh_cond_11,
-            mc_1=mc_1,
+            marg_al_f=marg_al_f,
             m_lit=m_lit,
+            mc_1=mc_1,
+            hh_cond_11=hh_cond_11,
             marg_al_m=marg_al_m,
             mc_2=mc_2,
             hh_tscs_ns=hh_tscs_ns,
-            mc_3=mc_3,
             msdw_tfuts=msdw_tfuts,
+            mc_3=mc_3,
             mc_4=mc_4,
             hh_cond_10=hh_cond_10,
             ldws_wp=ldws_wp,
             marg_al_p=marg_al_p,
             mof_stone=mof_stone,
-            pl_wsvi=pl_wsvi,
             mdds_st=mdds_st,
+            pl_wsvi=pl_wsvi,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2063,14 +2063,14 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         tot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_os: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner1: Optional[Union[StrictFloat, StrictInt]] = None,
-        ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
+        ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2097,21 +2097,21 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__9: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_3_: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_5_: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2142,18 +2142,18 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         p_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_hmt: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_4_r: Optional[Union[StrictFloat, StrictInt]] = None,
-        aos_tel: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_31: Optional[Union[StrictFloat, StrictInt]] = None,
+        aos_tel: Optional[Union[StrictFloat, StrictInt]] = None,
         os_ow: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_f: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_32: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
         p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_32: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_3_r: Optional[Union[StrictFloat, StrictInt]] = None,
         f_06: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2165,8 +2165,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         nhh_hbfw_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
         f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2186,8 +2186,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
-        tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
+        tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_: Optional[Union[StrictFloat, StrictInt]] = None,
         dt_name: Optional[StrictStr] = None,
         kf_dnhk1: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2199,8 +2199,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         pl_wsop: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_mo: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2208,8 +2208,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         msl_ool: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_dnhk: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cr: Optional[Union[StrictFloat, StrictInt]] = None,
-        main_hh_p: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
+        main_hh_p: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_m: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_lo: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_f: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2239,8 +2239,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfts: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2252,17 +2252,17 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         mow_gtb: Optional[Union[StrictFloat, StrictInt]] = None,
         m_st: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_cih: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_ao: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_rc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_se: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mud: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_wb: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2271,23 +2271,23 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         total: Optional[StrictStr] = None,
         msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
-        pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_st: Optional[StrictStr] = None,
+        pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2324,10 +2324,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type fpfl_os: float
         :param ndr_ner1:
         :type ndr_ner1: float
-        :param ndr_ner2:
-        :type ndr_ner2: float
         :param mor_bb:
         :type mor_bb: float
+        :param ndr_ner2:
+        :type ndr_ner2: float
         :param non_work_p:
         :type non_work_p: float
         :param marg_ot_32:
@@ -2336,10 +2336,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
-        :param non_work_m:
-        :type non_work_m: float
         :param tot_p:
         :type tot_p: float
+        :param non_work_m:
+        :type non_work_m: float
         :param mof_aom:
         :type mof_aom: float
         :param non_work_f:
@@ -2392,10 +2392,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param mof_cem:
-        :type mof_cem: float
         :param hh_cond__8:
         :type hh_cond__8: float
+        :param mof_cem:
+        :type mof_cem: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -2408,20 +2408,20 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type marg_cl_3_: float
         :param mc_5_:
         :type mc_5_: float
-        :param hhs_4:
-        :type hhs_4: float
         :param mainwork_m:
         :type mainwork_m: float
+        :param hhs_4:
+        :type hhs_4: float
         :param hhs_5:
         :type hhs_5: float
         :param fpfl_pss:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param hh_tscs_sp:
-        :type hh_tscs_sp: float
         :param mow_mub:
         :type mow_mub: float
+        :param hh_tscs_sp:
+        :type hh_tscs_sp: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -2482,10 +2482,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type mor_hmt: float
         :param ndr_4_r:
         :type ndr_4_r: float
-        :param aos_tel:
-        :type aos_tel: float
         :param marg_hh_31:
         :type marg_hh_31: float
+        :param aos_tel:
+        :type aos_tel: float
         :param os_ow:
         :type os_ow: float
         :param mof_bb:
@@ -2494,18 +2494,18 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type marg_cl_f: float
         :param kf_hk1:
         :type kf_hk1: float
-        :param mor_aom:
-        :type mor_aom: float
         :param marg_cl_m:
         :type marg_cl_m: float
+        :param mor_aom:
+        :type mor_aom: float
         :param marg_hh_32:
         :type marg_hh_32: float
         :param marg_cl_p:
         :type marg_cl_p: float
-        :param marg_al_31:
-        :type marg_al_31: float
         :param p_sc:
         :type p_sc: float
+        :param marg_al_31:
+        :type marg_al_31: float
         :param marg_al_32:
         :type marg_al_32: float
         :param ndr_3_r:
@@ -2528,10 +2528,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type margwork_p: float
         :param margwork_m:
         :type margwork_m: float
-        :param ldws_np:
-        :type ldws_np: float
         :param marg_al_01:
         :type marg_al_01: float
+        :param ldws_np:
+        :type ldws_np: float
         :param f_st:
         :type f_st: float
         :param main_al_p:
@@ -2570,10 +2570,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type m_ill: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
-        :param tfufc_cc:
-        :type tfufc_cc: float
         :param mow_snpwm:
         :type mow_snpwm: float
+        :param tfufc_cc:
+        :type tfufc_cc: float
         :param aos_:
         :type aos_: float
         :param dt_name:
@@ -2596,10 +2596,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type marg_ot_m: float
         :param main_al_m:
         :type main_al_m: float
-        :param marg_ot_p:
-        :type marg_ot_p: float
         :param main_al_f:
         :type main_al_f: float
+        :param marg_ot_p:
+        :type marg_ot_p: float
         :param pl_wsop:
         :type pl_wsop: float
         :param marg_ot_f:
@@ -2614,10 +2614,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type kf_dnhk: float
         :param tfufc_cr:
         :type tfufc_cr: float
-        :param main_hh_p:
-        :type main_hh_p: float
         :param hhs_9_:
         :type hhs_9_: float
+        :param main_hh_p:
+        :type main_hh_p: float
         :param main_hh_m:
         :type main_hh_m: float
         :param aos_tm_lo:
@@ -2676,10 +2676,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type nsdiod: float
         :param tfufc_clc:
         :type tfufc_clc: float
-        :param marg_cl_31:
-        :type marg_cl_31: float
         :param nhh_hbfwtp:
         :type nhh_hbfwtp: float
+        :param marg_cl_31:
+        :type marg_cl_31: float
         :param marg_cl_32:
         :type marg_cl_32: float
         :param aos_cl_wii:
@@ -2702,28 +2702,28 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type m_st: float
         :param kf_cih:
         :type kf_cih: float
-        :param mow_conc:
-        :type mow_conc: float
         :param msl_ao:
         :type msl_ao: float
+        :param mow_conc:
+        :type mow_conc: float
         :param msdw_rc:
         :type msdw_rc: float
         :param marg_cl_02:
         :type marg_cl_02: float
-        :param aos_hhw_tc:
-        :type aos_hhw_tc: float
         :param marg_cl_01:
         :type marg_cl_01: float
+        :param aos_hhw_tc:
+        :type aos_hhw_tc: float
         :param main_ot_f:
         :type main_ot_f: float
         :param msl_se:
         :type msl_se: float
         :param mof_mud:
         :type mof_mud: float
-        :param hhs_6_8:
-        :type hhs_6_8: float
         :param aos_smm:
         :type aos_smm: float
+        :param hhs_6_8:
+        :type hhs_6_8: float
         :param mof_wb:
         :type mof_wb: float
         :param main_ot_m:
@@ -2740,26 +2740,26 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type msdw_os: float
         :param tfufc_nc:
         :type tfufc_nc: float
-        :param marg_al_f:
-        :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
-        :param hh_cond_11:
-        :type hh_cond_11: float
-        :param mc_1:
-        :type mc_1: float
+        :param marg_al_f:
+        :type marg_al_f: float
         :param m_lit:
         :type m_lit: float
+        :param mc_1:
+        :type mc_1: float
+        :param hh_cond_11:
+        :type hh_cond_11: float
         :param marg_al_m:
         :type marg_al_m: float
         :param mc_2:
         :type mc_2: float
         :param hh_tscs_ns:
         :type hh_tscs_ns: float
-        :param mc_3:
-        :type mc_3: float
         :param msdw_tfuts:
         :type msdw_tfuts: float
+        :param mc_3:
+        :type mc_3: float
         :param mc_4:
         :type mc_4: float
         :param hh_cond_10:
@@ -2770,10 +2770,10 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         :type marg_al_p: float
         :param mof_stone:
         :type mof_stone: float
-        :param pl_wsvi:
-        :type pl_wsvi: float
         :param mdds_st:
         :type mdds_st: str
+        :param pl_wsvi:
+        :type pl_wsvi: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2807,14 +2807,14 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             tot_f=tot_f,
             fpfl_os=fpfl_os,
             ndr_ner1=ndr_ner1,
-            ndr_ner2=ndr_ner2,
             mor_bb=mor_bb,
+            ndr_ner2=ndr_ner2,
             non_work_p=non_work_p,
             marg_ot_32=marg_ot_32,
             wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
-            non_work_m=non_work_m,
             tot_p=tot_p,
+            non_work_m=non_work_m,
             mof_aom=mof_aom,
             non_work_f=non_work_f,
             mof_mft=mof_mft,
@@ -2841,21 +2841,21 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            mof_cem=mof_cem,
             hh_cond__8=hh_cond__8,
+            mof_cem=mof_cem,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
             hh_cond__9=hh_cond__9,
             marg_cl_3_=marg_cl_3_,
             mc_5_=mc_5_,
-            hhs_4=hhs_4,
             mainwork_m=mainwork_m,
+            hhs_4=hhs_4,
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            hh_tscs_sp=hh_tscs_sp,
             mow_mub=mow_mub,
+            hh_tscs_sp=hh_tscs_sp,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
@@ -2886,18 +2886,18 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             p_lit=p_lit,
             mor_hmt=mor_hmt,
             ndr_4_r=ndr_4_r,
-            aos_tel=aos_tel,
             marg_hh_31=marg_hh_31,
+            aos_tel=aos_tel,
             os_ow=os_ow,
             mof_bb=mof_bb,
             marg_cl_f=marg_cl_f,
             kf_hk1=kf_hk1,
-            mor_aom=mor_aom,
             marg_cl_m=marg_cl_m,
+            mor_aom=mor_aom,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
-            marg_al_31=marg_al_31,
             p_sc=p_sc,
+            marg_al_31=marg_al_31,
             marg_al_32=marg_al_32,
             ndr_3_r=ndr_3_r,
             f_06=f_06,
@@ -2909,8 +2909,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             nhh_hbfw_2=nhh_hbfw_2,
             margwork_p=margwork_p,
             margwork_m=margwork_m,
-            ldws_np=ldws_np,
             marg_al_01=marg_al_01,
+            ldws_np=ldws_np,
             f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
@@ -2930,8 +2930,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             mow_pl_pol=mow_pl_pol,
             m_ill=m_ill,
             tfufc_lpg_=tfufc_lpg_,
-            tfufc_cc=tfufc_cc,
             mow_snpwm=mow_snpwm,
+            tfufc_cc=tfufc_cc,
             aos_=aos_,
             dt_name=dt_name,
             kf_dnhk1=kf_dnhk1,
@@ -2943,8 +2943,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             tot_work_f=tot_work_f,
             marg_ot_m=marg_ot_m,
             main_al_m=main_al_m,
-            marg_ot_p=marg_ot_p,
             main_al_f=main_al_f,
+            marg_ot_p=marg_ot_p,
             pl_wsop=pl_wsop,
             marg_ot_f=marg_ot_f,
             aos_tm_mo=aos_tm_mo,
@@ -2952,8 +2952,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             msl_ool=msl_ool,
             kf_dnhk=kf_dnhk,
             tfufc_cr=tfufc_cr,
-            main_hh_p=main_hh_p,
             hhs_9_=hhs_9_,
+            main_hh_p=main_hh_p,
             main_hh_m=main_hh_m,
             aos_tm_lo=aos_tm_lo,
             main_hh_f=main_hh_f,
@@ -2983,8 +2983,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
             tfufc_clc=tfufc_clc,
-            marg_cl_31=marg_cl_31,
             nhh_hbfwtp=nhh_hbfwtp,
+            marg_cl_31=marg_cl_31,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
             msdw_tfts=msdw_tfts,
@@ -2996,17 +2996,17 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             mow_gtb=mow_gtb,
             m_st=m_st,
             kf_cih=kf_cih,
-            mow_conc=mow_conc,
             msl_ao=msl_ao,
+            mow_conc=mow_conc,
             msdw_rc=msdw_rc,
             marg_cl_02=marg_cl_02,
-            aos_hhw_tc=aos_hhw_tc,
             marg_cl_01=marg_cl_01,
+            aos_hhw_tc=aos_hhw_tc,
             main_ot_f=main_ot_f,
             msl_se=msl_se,
             mof_mud=mof_mud,
-            hhs_6_8=hhs_6_8,
             aos_smm=aos_smm,
+            hhs_6_8=hhs_6_8,
             mof_wb=mof_wb,
             main_ot_m=main_ot_m,
             mor_gr_th_=mor_gr_th_,
@@ -3015,23 +3015,23 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             total=total,
             msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
-            marg_al_f=marg_al_f,
             mor_ss=mor_ss,
-            hh_cond_11=hh_cond_11,
-            mc_1=mc_1,
+            marg_al_f=marg_al_f,
             m_lit=m_lit,
+            mc_1=mc_1,
+            hh_cond_11=hh_cond_11,
             marg_al_m=marg_al_m,
             mc_2=mc_2,
             hh_tscs_ns=hh_tscs_ns,
-            mc_3=mc_3,
             msdw_tfuts=msdw_tfuts,
+            mc_3=mc_3,
             mc_4=mc_4,
             hh_cond_10=hh_cond_10,
             ldws_wp=ldws_wp,
             marg_al_p=marg_al_p,
             mof_stone=mof_stone,
-            pl_wsvi=pl_wsvi,
             mdds_st=mdds_st,
+            pl_wsvi=pl_wsvi,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -3062,14 +3062,14 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         tot_f,
         fpfl_os,
         ndr_ner1,
-        ndr_ner2,
         mor_bb,
+        ndr_ner2,
         non_work_p,
         marg_ot_32,
         wwoc_nd,
         marg_ot_31,
-        non_work_m,
         tot_p,
+        non_work_m,
         mof_aom,
         non_work_f,
         mof_mft,
@@ -3096,21 +3096,21 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         hh_cond__1,
         hh_cond__2,
         hh_cond__7,
-        mof_cem,
         hh_cond__8,
+        mof_cem,
         hh_cond__5,
         hh_cond__6,
         ans_pl,
         hh_cond__9,
         marg_cl_3_,
         mc_5_,
-        hhs_4,
         mainwork_m,
+        hhs_4,
         hhs_5,
         fpfl_pss,
         mainwork_p,
-        hh_tscs_sp,
         mow_mub,
+        hh_tscs_sp,
         kf_tot,
         mainwork_f,
         mor_mmt,
@@ -3141,18 +3141,18 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         p_lit,
         mor_hmt,
         ndr_4_r,
-        aos_tel,
         marg_hh_31,
+        aos_tel,
         os_ow,
         mof_bb,
         marg_cl_f,
         kf_hk1,
-        mor_aom,
         marg_cl_m,
+        mor_aom,
         marg_hh_32,
         marg_cl_p,
-        marg_al_31,
         p_sc,
+        marg_al_31,
         marg_al_32,
         ndr_3_r,
         f_06,
@@ -3164,8 +3164,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         nhh_hbfw_2,
         margwork_p,
         margwork_m,
-        ldws_np,
         marg_al_01,
+        ldws_np,
         f_st,
         main_al_p,
         wwoc_cd,
@@ -3185,8 +3185,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         mow_pl_pol,
         m_ill,
         tfufc_lpg_,
-        tfufc_cc,
         mow_snpwm,
+        tfufc_cc,
         aos_,
         dt_name,
         kf_dnhk1,
@@ -3198,8 +3198,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         tot_work_f,
         marg_ot_m,
         main_al_m,
-        marg_ot_p,
         main_al_f,
+        marg_ot_p,
         pl_wsop,
         marg_ot_f,
         aos_tm_mo,
@@ -3207,8 +3207,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         msl_ool,
         kf_dnhk,
         tfufc_cr,
-        main_hh_p,
         hhs_9_,
+        main_hh_p,
         main_hh_m,
         aos_tm_lo,
         main_hh_f,
@@ -3238,8 +3238,8 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         hh_cond_ch,
         nsdiod,
         tfufc_clc,
-        marg_cl_31,
         nhh_hbfwtp,
+        marg_cl_31,
         marg_cl_32,
         aos_cl_wii,
         msdw_tfts,
@@ -3251,17 +3251,17 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         mow_gtb,
         m_st,
         kf_cih,
-        mow_conc,
         msl_ao,
+        mow_conc,
         msdw_rc,
         marg_cl_02,
-        aos_hhw_tc,
         marg_cl_01,
+        aos_hhw_tc,
         main_ot_f,
         msl_se,
         mof_mud,
-        hhs_6_8,
         aos_smm,
+        hhs_6_8,
         mof_wb,
         main_ot_m,
         mor_gr_th_,
@@ -3270,23 +3270,23 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
         total,
         msdw_os,
         tfufc_nc,
-        marg_al_f,
         mor_ss,
-        hh_cond_11,
-        mc_1,
+        marg_al_f,
         m_lit,
+        mc_1,
+        hh_cond_11,
         marg_al_m,
         mc_2,
         hh_tscs_ns,
-        mc_3,
         msdw_tfuts,
+        mc_3,
         mc_4,
         hh_cond_10,
         ldws_wp,
         marg_al_p,
         mof_stone,
-        pl_wsvi,
         mdds_st,
+        pl_wsvi,
         _request_auth,
         _content_type,
         _headers,
@@ -3348,13 +3348,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('NDR_NER1', ndr_ner1))
             
-        if ndr_ner2 is not None:
-            
-            _query_params.append(('NDR_NER2', ndr_ner2))
-            
         if mor_bb is not None:
             
             _query_params.append(('MOR_BB', mor_bb))
+            
+        if ndr_ner2 is not None:
+            
+            _query_params.append(('NDR_NER2', ndr_ner2))
             
         if non_work_p is not None:
             
@@ -3372,13 +3372,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('MARG_OT_31', marg_ot_31))
             
-        if non_work_m is not None:
-            
-            _query_params.append(('NON_WORK_M', non_work_m))
-            
         if tot_p is not None:
             
             _query_params.append(('TOT_P', tot_p))
+            
+        if non_work_m is not None:
+            
+            _query_params.append(('NON_WORK_M', non_work_m))
             
         if mof_aom is not None:
             
@@ -3484,13 +3484,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('HH_COND__7', hh_cond__7))
             
-        if mof_cem is not None:
-            
-            _query_params.append(('MOF_CEM', mof_cem))
-            
         if hh_cond__8 is not None:
             
             _query_params.append(('HH_COND__8', hh_cond__8))
+            
+        if mof_cem is not None:
+            
+            _query_params.append(('MOF_CEM', mof_cem))
             
         if hh_cond__5 is not None:
             
@@ -3516,13 +3516,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('MC_5_', mc_5_))
             
-        if hhs_4 is not None:
-            
-            _query_params.append(('HHS_4', hhs_4))
-            
         if mainwork_m is not None:
             
             _query_params.append(('MAINWORK_M', mainwork_m))
+            
+        if hhs_4 is not None:
+            
+            _query_params.append(('HHS_4', hhs_4))
             
         if hhs_5 is not None:
             
@@ -3536,13 +3536,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('MAINWORK_P', mainwork_p))
             
-        if hh_tscs_sp is not None:
-            
-            _query_params.append(('HH_TSCS_SP', hh_tscs_sp))
-            
         if mow_mub is not None:
             
             _query_params.append(('MOW_MUB', mow_mub))
+            
+        if hh_tscs_sp is not None:
+            
+            _query_params.append(('HH_TSCS_SP', hh_tscs_sp))
             
         if kf_tot is not None:
             
@@ -3664,13 +3664,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('NDR_4R', ndr_4_r))
             
-        if aos_tel is not None:
-            
-            _query_params.append(('AOS_TEL', aos_tel))
-            
         if marg_hh_31 is not None:
             
             _query_params.append(('MARG_HH_31', marg_hh_31))
+            
+        if aos_tel is not None:
+            
+            _query_params.append(('AOS_TEL', aos_tel))
             
         if os_ow is not None:
             
@@ -3688,13 +3688,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('KF_HK1', kf_hk1))
             
-        if mor_aom is not None:
-            
-            _query_params.append(('MOR_AOM', mor_aom))
-            
         if marg_cl_m is not None:
             
             _query_params.append(('MARG_CL_M', marg_cl_m))
+            
+        if mor_aom is not None:
+            
+            _query_params.append(('MOR_AOM', mor_aom))
             
         if marg_hh_32 is not None:
             
@@ -3704,13 +3704,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('MARG_CL_P', marg_cl_p))
             
-        if marg_al_31 is not None:
-            
-            _query_params.append(('MARG_AL_31', marg_al_31))
-            
         if p_sc is not None:
             
             _query_params.append(('P_SC', p_sc))
+            
+        if marg_al_31 is not None:
+            
+            _query_params.append(('MARG_AL_31', marg_al_31))
             
         if marg_al_32 is not None:
             
@@ -3756,13 +3756,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('MARGWORK_M', margwork_m))
             
-        if ldws_np is not None:
-            
-            _query_params.append(('LDWS_NP', ldws_np))
-            
         if marg_al_01 is not None:
             
             _query_params.append(('MARG_AL_01', marg_al_01))
+            
+        if ldws_np is not None:
+            
+            _query_params.append(('LDWS_NP', ldws_np))
             
         if f_st is not None:
             
@@ -3840,13 +3840,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('TFUFC_LPG_', tfufc_lpg_))
             
-        if tfufc_cc is not None:
-            
-            _query_params.append(('TFUFC_CC', tfufc_cc))
-            
         if mow_snpwm is not None:
             
             _query_params.append(('MOW_SNPWM', mow_snpwm))
+            
+        if tfufc_cc is not None:
+            
+            _query_params.append(('TFUFC_CC', tfufc_cc))
             
         if aos_ is not None:
             
@@ -3892,13 +3892,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('MAIN_AL_M', main_al_m))
             
-        if marg_ot_p is not None:
-            
-            _query_params.append(('MARG_OT_P', marg_ot_p))
-            
         if main_al_f is not None:
             
             _query_params.append(('MAIN_AL_F', main_al_f))
+            
+        if marg_ot_p is not None:
+            
+            _query_params.append(('MARG_OT_P', marg_ot_p))
             
         if pl_wsop is not None:
             
@@ -3928,13 +3928,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('TFUFC_CR', tfufc_cr))
             
-        if main_hh_p is not None:
-            
-            _query_params.append(('MAIN_HH_P', main_hh_p))
-            
         if hhs_9_ is not None:
             
             _query_params.append(('HHS_9_', hhs_9_))
+            
+        if main_hh_p is not None:
+            
+            _query_params.append(('MAIN_HH_P', main_hh_p))
             
         if main_hh_m is not None:
             
@@ -4052,13 +4052,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('TFUFC_CLC', tfufc_clc))
             
-        if marg_cl_31 is not None:
-            
-            _query_params.append(('MARG_CL_31', marg_cl_31))
-            
         if nhh_hbfwtp is not None:
             
             _query_params.append(('NHH_HBFWTP', nhh_hbfwtp))
+            
+        if marg_cl_31 is not None:
+            
+            _query_params.append(('MARG_CL_31', marg_cl_31))
             
         if marg_cl_32 is not None:
             
@@ -4104,13 +4104,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('KF_CIH', kf_cih))
             
-        if mow_conc is not None:
-            
-            _query_params.append(('MOW_CONC', mow_conc))
-            
         if msl_ao is not None:
             
             _query_params.append(('MSL_AO', msl_ao))
+            
+        if mow_conc is not None:
+            
+            _query_params.append(('MOW_CONC', mow_conc))
             
         if msdw_rc is not None:
             
@@ -4120,13 +4120,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('MARG_CL_02', marg_cl_02))
             
-        if aos_hhw_tc is not None:
-            
-            _query_params.append(('AOS_HHW_TC', aos_hhw_tc))
-            
         if marg_cl_01 is not None:
             
             _query_params.append(('MARG_CL_01', marg_cl_01))
+            
+        if aos_hhw_tc is not None:
+            
+            _query_params.append(('AOS_HHW_TC', aos_hhw_tc))
             
         if main_ot_f is not None:
             
@@ -4140,13 +4140,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('MOF_MUD', mof_mud))
             
-        if hhs_6_8 is not None:
-            
-            _query_params.append(('HHS_6_8', hhs_6_8))
-            
         if aos_smm is not None:
             
             _query_params.append(('AOS_SMM', aos_smm))
+            
+        if hhs_6_8 is not None:
+            
+            _query_params.append(('HHS_6_8', hhs_6_8))
             
         if mof_wb is not None:
             
@@ -4180,25 +4180,25 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('TFUFC_NC', tfufc_nc))
             
-        if marg_al_f is not None:
-            
-            _query_params.append(('MARG_AL_F', marg_al_f))
-            
         if mor_ss is not None:
             
             _query_params.append(('MOR_SS', mor_ss))
             
-        if hh_cond_11 is not None:
+        if marg_al_f is not None:
             
-            _query_params.append(('HH_COND_11', hh_cond_11))
+            _query_params.append(('MARG_AL_F', marg_al_f))
+            
+        if m_lit is not None:
+            
+            _query_params.append(('M_LIT', m_lit))
             
         if mc_1 is not None:
             
             _query_params.append(('MC_1', mc_1))
             
-        if m_lit is not None:
+        if hh_cond_11 is not None:
             
-            _query_params.append(('M_LIT', m_lit))
+            _query_params.append(('HH_COND_11', hh_cond_11))
             
         if marg_al_m is not None:
             
@@ -4212,13 +4212,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('HH_TSCS_NS', hh_tscs_ns))
             
-        if mc_3 is not None:
-            
-            _query_params.append(('MC_3', mc_3))
-            
         if msdw_tfuts is not None:
             
             _query_params.append(('MSDW_TFUTS', msdw_tfuts))
+            
+        if mc_3 is not None:
+            
+            _query_params.append(('MC_3', mc_3))
             
         if mc_4 is not None:
             
@@ -4240,13 +4240,13 @@ class PrimaryCensusAbstractOfKamrupAssamApi:
             
             _query_params.append(('MOF_STONE', mof_stone))
             
-        if pl_wsvi is not None:
-            
-            _query_params.append(('PL_WSVI', pl_wsvi))
-            
         if mdds_st is not None:
             
             _query_params.append(('MDDS_ST', mdds_st))
+            
+        if pl_wsvi is not None:
+            
+            _query_params.append(('PL_WSVI', pl_wsvi))
             
         # process the header parameters
         # process the form parameters

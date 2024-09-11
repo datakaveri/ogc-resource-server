@@ -54,8 +54,8 @@ class CanalsInWashimMaharashtraApi:
         prjcode: Optional[StrictStr] = None,
         cancode: Optional[StrictStr] = None,
         prjname: Optional[StrictStr] = None,
-        canname: Optional[StrictStr] = None,
         state: Optional[StrictStr] = None,
+        canname: Optional[StrictStr] = None,
         can_type: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -91,10 +91,10 @@ class CanalsInWashimMaharashtraApi:
         :type cancode: str
         :param prjname:
         :type prjname: str
-        :param canname:
-        :type canname: str
         :param state:
         :type state: str
+        :param canname:
+        :type canname: str
         :param can_type:
         :type can_type: str
         :param _request_timeout: timeout setting for this request. If one
@@ -129,8 +129,8 @@ class CanalsInWashimMaharashtraApi:
             prjcode=prjcode,
             cancode=cancode,
             prjname=prjname,
-            canname=canname,
             state=state,
+            canname=canname,
             can_type=can_type,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -166,8 +166,8 @@ class CanalsInWashimMaharashtraApi:
         prjcode: Optional[StrictStr] = None,
         cancode: Optional[StrictStr] = None,
         prjname: Optional[StrictStr] = None,
-        canname: Optional[StrictStr] = None,
         state: Optional[StrictStr] = None,
+        canname: Optional[StrictStr] = None,
         can_type: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -203,10 +203,10 @@ class CanalsInWashimMaharashtraApi:
         :type cancode: str
         :param prjname:
         :type prjname: str
-        :param canname:
-        :type canname: str
         :param state:
         :type state: str
+        :param canname:
+        :type canname: str
         :param can_type:
         :type can_type: str
         :param _request_timeout: timeout setting for this request. If one
@@ -241,8 +241,8 @@ class CanalsInWashimMaharashtraApi:
             prjcode=prjcode,
             cancode=cancode,
             prjname=prjname,
-            canname=canname,
             state=state,
+            canname=canname,
             can_type=can_type,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -278,8 +278,8 @@ class CanalsInWashimMaharashtraApi:
         prjcode: Optional[StrictStr] = None,
         cancode: Optional[StrictStr] = None,
         prjname: Optional[StrictStr] = None,
-        canname: Optional[StrictStr] = None,
         state: Optional[StrictStr] = None,
+        canname: Optional[StrictStr] = None,
         can_type: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -315,10 +315,10 @@ class CanalsInWashimMaharashtraApi:
         :type cancode: str
         :param prjname:
         :type prjname: str
-        :param canname:
-        :type canname: str
         :param state:
         :type state: str
+        :param canname:
+        :type canname: str
         :param can_type:
         :type can_type: str
         :param _request_timeout: timeout setting for this request. If one
@@ -353,8 +353,8 @@ class CanalsInWashimMaharashtraApi:
             prjcode=prjcode,
             cancode=cancode,
             prjname=prjname,
-            canname=canname,
             state=state,
+            canname=canname,
             can_type=can_type,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -385,8 +385,8 @@ class CanalsInWashimMaharashtraApi:
         prjcode,
         cancode,
         prjname,
-        canname,
         state,
+        canname,
         can_type,
         _request_auth,
         _content_type,
@@ -445,13 +445,13 @@ class CanalsInWashimMaharashtraApi:
             
             _query_params.append(('prjname', prjname))
             
-        if canname is not None:
-            
-            _query_params.append(('canname', canname))
-            
         if state is not None:
             
             _query_params.append(('state', state))
+            
+        if canname is not None:
+            
+            _query_params.append(('canname', canname))
             
         if can_type is not None:
             

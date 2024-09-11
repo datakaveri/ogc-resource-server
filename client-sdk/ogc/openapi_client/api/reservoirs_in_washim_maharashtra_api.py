@@ -54,10 +54,10 @@ class ReservoirsInWashimMaharashtraApi:
         stcode: Optional[StrictStr] = None,
         wbrscode: Optional[StrictStr] = None,
         dtcode: Optional[StrictStr] = None,
-        wbclass: Optional[StrictStr] = None,
         basin: Optional[StrictStr] = None,
-        bacode: Optional[StrictStr] = None,
+        wbclass: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
+        bacode: Optional[StrictStr] = None,
         strucode: Optional[StrictStr] = None,
         setname: Optional[StrictStr] = None,
         subbasin: Optional[StrictStr] = None,
@@ -98,14 +98,14 @@ class ReservoirsInWashimMaharashtraApi:
         :type wbrscode: str
         :param dtcode:
         :type dtcode: str
-        :param wbclass:
-        :type wbclass: str
         :param basin:
         :type basin: str
-        :param bacode:
-        :type bacode: str
+        :param wbclass:
+        :type wbclass: str
         :param sbcode:
         :type sbcode: str
+        :param bacode:
+        :type bacode: str
         :param strucode:
         :type strucode: str
         :param setname:
@@ -150,10 +150,10 @@ class ReservoirsInWashimMaharashtraApi:
             stcode=stcode,
             wbrscode=wbrscode,
             dtcode=dtcode,
-            wbclass=wbclass,
             basin=basin,
-            bacode=bacode,
+            wbclass=wbclass,
             sbcode=sbcode,
+            bacode=bacode,
             strucode=strucode,
             setname=setname,
             subbasin=subbasin,
@@ -194,10 +194,10 @@ class ReservoirsInWashimMaharashtraApi:
         stcode: Optional[StrictStr] = None,
         wbrscode: Optional[StrictStr] = None,
         dtcode: Optional[StrictStr] = None,
-        wbclass: Optional[StrictStr] = None,
         basin: Optional[StrictStr] = None,
-        bacode: Optional[StrictStr] = None,
+        wbclass: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
+        bacode: Optional[StrictStr] = None,
         strucode: Optional[StrictStr] = None,
         setname: Optional[StrictStr] = None,
         subbasin: Optional[StrictStr] = None,
@@ -238,14 +238,14 @@ class ReservoirsInWashimMaharashtraApi:
         :type wbrscode: str
         :param dtcode:
         :type dtcode: str
-        :param wbclass:
-        :type wbclass: str
         :param basin:
         :type basin: str
-        :param bacode:
-        :type bacode: str
+        :param wbclass:
+        :type wbclass: str
         :param sbcode:
         :type sbcode: str
+        :param bacode:
+        :type bacode: str
         :param strucode:
         :type strucode: str
         :param setname:
@@ -290,10 +290,10 @@ class ReservoirsInWashimMaharashtraApi:
             stcode=stcode,
             wbrscode=wbrscode,
             dtcode=dtcode,
-            wbclass=wbclass,
             basin=basin,
-            bacode=bacode,
+            wbclass=wbclass,
             sbcode=sbcode,
+            bacode=bacode,
             strucode=strucode,
             setname=setname,
             subbasin=subbasin,
@@ -334,10 +334,10 @@ class ReservoirsInWashimMaharashtraApi:
         stcode: Optional[StrictStr] = None,
         wbrscode: Optional[StrictStr] = None,
         dtcode: Optional[StrictStr] = None,
-        wbclass: Optional[StrictStr] = None,
         basin: Optional[StrictStr] = None,
-        bacode: Optional[StrictStr] = None,
+        wbclass: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
+        bacode: Optional[StrictStr] = None,
         strucode: Optional[StrictStr] = None,
         setname: Optional[StrictStr] = None,
         subbasin: Optional[StrictStr] = None,
@@ -378,14 +378,14 @@ class ReservoirsInWashimMaharashtraApi:
         :type wbrscode: str
         :param dtcode:
         :type dtcode: str
-        :param wbclass:
-        :type wbclass: str
         :param basin:
         :type basin: str
-        :param bacode:
-        :type bacode: str
+        :param wbclass:
+        :type wbclass: str
         :param sbcode:
         :type sbcode: str
+        :param bacode:
+        :type bacode: str
         :param strucode:
         :type strucode: str
         :param setname:
@@ -430,10 +430,10 @@ class ReservoirsInWashimMaharashtraApi:
             stcode=stcode,
             wbrscode=wbrscode,
             dtcode=dtcode,
-            wbclass=wbclass,
             basin=basin,
-            bacode=bacode,
+            wbclass=wbclass,
             sbcode=sbcode,
+            bacode=bacode,
             strucode=strucode,
             setname=setname,
             subbasin=subbasin,
@@ -469,10 +469,10 @@ class ReservoirsInWashimMaharashtraApi:
         stcode,
         wbrscode,
         dtcode,
-        wbclass,
         basin,
-        bacode,
+        wbclass,
         sbcode,
+        bacode,
         strucode,
         setname,
         subbasin,
@@ -536,21 +536,21 @@ class ReservoirsInWashimMaharashtraApi:
             
             _query_params.append(('dtcode', dtcode))
             
-        if wbclass is not None:
-            
-            _query_params.append(('wbclass', wbclass))
-            
         if basin is not None:
             
             _query_params.append(('basin', basin))
             
-        if bacode is not None:
+        if wbclass is not None:
             
-            _query_params.append(('bacode', bacode))
+            _query_params.append(('wbclass', wbclass))
             
         if sbcode is not None:
             
             _query_params.append(('sbcode', sbcode))
+            
+        if bacode is not None:
+            
+            _query_params.append(('bacode', bacode))
             
         if strucode is not None:
             
