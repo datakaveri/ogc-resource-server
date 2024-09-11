@@ -72,7 +72,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
 
     checkForProcess.onSuccess(processExist -> {
       String processName = processExist.getString("title");
-      boolean isAsync = processExist.getJsonArray("response").contains("async"); // Check for async
+      boolean isAsync = processExist.getJsonArray("response").contains("ASYNC"); // Check for async
 
       boolean validateInput = validateInput(input, processExist);
       if (validateInput) {
@@ -96,7 +96,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
         startAJobInDB.onSuccess(jobStarted -> {
           if (isAsync) {
             // Handle async process
-            LOGGER.info("Job started in DB with jobId {} for process with processId {}",
+            LOGGER.info("Async Job started in DB with jobId {} for process with processId {}",
                     jobStarted.getValue("jobId"), input.getString("processId"));
             handler.handle(Future.succeededFuture(
                     new JsonObject()
@@ -112,7 +112,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
             finalProcessService.execute(input); // Start async process
           } else {
             // Handle sync process
-            LOGGER.info("Job started in DB with jobId {} for process with processId {}",
+            LOGGER.info("Sync Job started in DB with jobId {} for process with processId {}",
                     jobStarted.getValue("jobId"), input.getString("processId"));
             finalProcessService.execute(input).onSuccess(result -> {
               JsonObject response = result.copy();
