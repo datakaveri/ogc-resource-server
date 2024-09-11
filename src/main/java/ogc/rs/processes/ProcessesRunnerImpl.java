@@ -124,7 +124,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
                               .concat(jobStarted.getString("jobId")));
               handler.handle(Future.succeededFuture(response));
             }).onFailure(failureHandler -> {
-              handler.handle(Future.failedFuture(failureHandler.getMessage()));
+              handler.handle(Future.failedFuture(failureHandler));
             });
           }
         }).onFailure(jobFailed -> {

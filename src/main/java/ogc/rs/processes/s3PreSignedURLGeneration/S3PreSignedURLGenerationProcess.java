@@ -10,7 +10,9 @@ import io.vertx.pgclient.PgPool;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.util.Status;
+import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.processes.util.UtilClass;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -184,7 +186,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                     String fileExtension = fileTypeMap.getOrDefault(fileType, "");
                     if (fileExtension.isEmpty()) {
                         // Unsupported file type
-                        return Future.failedFuture("Unsupported file type");
+                        return Future.failedFuture(UNSUPPORTED_FILE_TYPE_ERROR);
                     }
 
                     // Construct the object key name and update requestInput
@@ -300,14 +302,14 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
         utilClass.updateJobTableStatus(requestInput, Status.FAILED, errorMessage)
                 .onSuccess(successHandler -> {
                     LOGGER.error("Process failed: {}", errorMessage);
-                    promise.fail(errorMessage);
+                    promise.fail(new OgcException(500, "Internal Server Error", errorMessage));
                 })
                 .onFailure(failureHandler -> {
                     LOGGER.error(HANDLE_FAILURE_MESSAGE + ": " + failureHandler.getMessage());
                     promise.fail(HANDLE_FAILURE_MESSAGE);
                 });
     }
-    
+
     /**
      * Calculates the progress percentage of the process based on the current step.
      *

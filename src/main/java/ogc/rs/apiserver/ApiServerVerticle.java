@@ -229,7 +229,7 @@ public class ApiServerVerticle extends AbstractVerticle {
         routingContext.put("response", result.toString());
         routingContext.response().setStatusCode(statusCode).end(result.toString());
       } else {
-        LOGGER.error("Process failed {}", handler.cause().getMessage());
+        LOGGER.error("Process failed: {}", handler.cause().getMessage());
         routingContext.fail(handler.cause());
       }
     });
