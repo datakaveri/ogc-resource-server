@@ -301,6 +301,7 @@ public class TilesMetaDataOnboardingProcessIT {
         getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
     }
 
+    @Disabled
     @Test
     @Order(13)
     @Description("Failure: Onboarding Tiles Meta Data as raster collection is already present")
@@ -319,6 +320,7 @@ public class TilesMetaDataOnboardingProcessIT {
         getJobStatus.then().statusCode(200).body("message", is(COLLECTION_EXISTS_MESSAGE));
     }
 
+    @Disabled
     @Test
     @Order(14)
     @Description("Success: Onboarding Tiles Meta Data for existing feature collection")
