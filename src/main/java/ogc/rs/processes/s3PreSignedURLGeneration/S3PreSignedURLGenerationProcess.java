@@ -79,7 +79,10 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
      * Executes the Pre-Signed URL process. It updates the progress and status of the process
      * in the job table at various stages.
      *
-     * @param requestInput The input JSON object containing details like AWS S3 bucket name, region and type of the file which gets uploaded into S3.
+     * @param requestInput
+     * The input JSON object containing details like ResourceId,
+     * AWS S3 bucket name, region and type of the file which gets uploaded into S3.
+     *
      * @return A Future object containing the result of the process execution.
      */
     @Override
@@ -99,7 +102,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                     if (checkResult) {
                         return generatePreSignedUrl(requestInput);
                     } else {
-                        return Future.failedFuture(OBJECT_ALREADY_EXISTS_MESSAGE);
+                        return Future.failedFuture(new OgcException(409, "Conflict", OBJECT_ALREADY_EXISTS_MESSAGE));
                     }
                 })
                 .compose(preSignedURLHandler -> utilClass.updateJobTableProgress(
@@ -120,7 +123,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                 })
                 .onFailure(failureHandler -> {
                     LOGGER.error(S3_PRE_SIGNED_URL_PROCESS_FAILURE_MESSAGE);
-                    handleFailure(requestInput, failureHandler.getMessage(), objectPromise);
+                    objectPromise.fail(failureHandler);
                 });
 
         return objectPromise.future();
@@ -142,16 +145,17 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                         JsonObject result = response.bodyAsJsonObject().getJsonArray("results").getJsonObject(0);
                         promise.complete(result);
                     } else {
-                        promise.fail(ITEM_NOT_PRESENT_ERROR);
+                        promise.fail(new OgcException(404, "Not Found", ITEM_NOT_PRESENT_ERROR));
                     }
                 })
                 .onFailure(failureResponseFromCat -> {
                     LOGGER.error(CAT_RESPONSE_FAILURE + failureResponseFromCat.getMessage());
-                    promise.fail(CAT_RESPONSE_FAILURE);
+                    promise.fail(new OgcException(500, "Internal Server Error", CAT_RESPONSE_FAILURE));
                 });
 
         return promise.future();
     }
+
     /**
      * Handles the process of making catalogue API requests, checking resource ownership,
      * and constructing the object key name.
@@ -170,7 +174,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                     if (!ownerUserId.equals(requestInput.getString("userId"))) {
                         // Ownership check failed
                         LOGGER.error(RESOURCE_OWNERSHIP_ERROR);
-                        return Future.failedFuture(RESOURCE_OWNERSHIP_ERROR);
+                        return Future.failedFuture(new OgcException(403, "Forbidden", RESOURCE_OWNERSHIP_ERROR));
                     }
 
                     // Extract resourceId name (riName) and call CAT API to get resourceGroup ID info
@@ -186,7 +190,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                     String fileExtension = fileTypeMap.getOrDefault(fileType, "");
                     if (fileExtension.isEmpty()) {
                         // Unsupported file type
-                        return Future.failedFuture(UNSUPPORTED_FILE_TYPE_ERROR);
+                        return Future.failedFuture(new OgcException(415, "Unsupported Media Type", UNSUPPORTED_FILE_TYPE_ERROR));
                     }
 
                     // Construct the object key name and update requestInput
@@ -203,7 +207,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                 .onFailure(failure -> {
                     // Failure case: log the error and fail the promise
                     LOGGER.error(failure.getMessage());
-                    promise.fail(failure.getMessage());
+                    promise.fail(failure);
                 });
 
         return promise.future();
@@ -234,7 +238,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                 .onSuccess(responseFromS3 -> {
                     if (responseFromS3.statusCode() == 200) {
                         LOGGER.error("Object already exists in S3: {}", objectKeyName);
-                        promise.fail(OBJECT_ALREADY_EXISTS_MESSAGE);
+                        promise.fail(new OgcException(409, "Conflict", OBJECT_ALREADY_EXISTS_MESSAGE));
                     }
                 })
                 .onFailure(failure -> {
@@ -286,28 +290,9 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
             }
         } catch (Exception e) {
             LOGGER.error(S3_PRE_SIGNED_URL_GENERATOR_FAILURE_MESSAGE +  e);
-            promise.fail(S3_PRE_SIGNED_URL_GENERATOR_FAILURE_MESSAGE);
+            promise.fail(new OgcException(500, "Internal Server Error", S3_PRE_SIGNED_URL_GENERATOR_FAILURE_MESSAGE));
         }
         return promise.future();
-    }
-
-    /**
-     * Handles the failure scenario by updating the job table status to FAILED and logging the error.
-     *
-     * @param requestInput The input JSON object containing the process details.
-     * @param errorMessage The error message to log and store.
-     * @param promise      The promise to fail after handling the error.
-     */
-    private void handleFailure(JsonObject requestInput, String errorMessage, Promise<JsonObject> promise) {
-        utilClass.updateJobTableStatus(requestInput, Status.FAILED, errorMessage)
-                .onSuccess(successHandler -> {
-                    LOGGER.error("Process failed: {}", errorMessage);
-                    promise.fail(new OgcException(500, "Internal Server Error", errorMessage));
-                })
-                .onFailure(failureHandler -> {
-                    LOGGER.error(HANDLE_FAILURE_MESSAGE + ": " + failureHandler.getMessage());
-                    promise.fail(HANDLE_FAILURE_MESSAGE);
-                });
     }
 
     /**
