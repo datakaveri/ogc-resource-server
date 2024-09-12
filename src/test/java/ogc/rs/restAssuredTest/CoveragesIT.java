@@ -43,7 +43,7 @@ public class CoveragesIT {
   }
 
   @Test
-  @Description("Fail: provider RI different from item")
+  @Description("Fail: provider RI different from collection id")
   public void testGetCoverageInvalidProviderRiFail() {
     String token =
         new FakeTokenBuilder()
@@ -107,7 +107,7 @@ public class CoveragesIT {
   }
 
   @Test
-  @Description("Fail: provider delegate RI different from item")
+  @Description("Fail: provider delegate RI different from collection id")
   public void testGetCoverageInvalidProviderDelegateRiFail() {
     String token =
         new FakeTokenBuilder()
@@ -150,7 +150,7 @@ public class CoveragesIT {
   }
 
   @Test
-  @Description("Fail: provider RI different from item")
+  @Description("Fail: provider RI different from collection id")
   public void testGetCoverageInvalidProviderRiFaill() {
     String token =
         new FakeTokenBuilder()
@@ -193,7 +193,7 @@ public class CoveragesIT {
   }
 
   @Test
-  @Description("Fail: consumer RI different from item")
+  @Description("Fail: consumer RI different from collection id")
   public void testGetCoverageInvalidConsumerRiFail() {
     String token =
         new FakeTokenBuilder()
@@ -279,7 +279,7 @@ public class CoveragesIT {
   }
 
   @Test
-  @Description("Fail: Consumer Delegate RI different from item")
+  @Description("Fail: Consumer Delegate RI different from collection id")
   public void testGetCoverageInvalidConsumerDelegateRiFail() {
     String token =
         new FakeTokenBuilder()
