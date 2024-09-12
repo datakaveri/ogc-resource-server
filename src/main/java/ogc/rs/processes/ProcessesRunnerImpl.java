@@ -72,9 +72,11 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
 
     checkForProcess.onSuccess(processExist -> {
       String processName = processExist.getString("title");
-      boolean isAsync = processExist.getJsonArray("response").contains("ASYNC"); // Check for async
-
+      boolean isAsync = processExist.getJsonArray("response")
+              .stream()
+              .anyMatch(item -> item.toString().equalsIgnoreCase("ASYNC"));
       boolean validateInput = validateInput(input, processExist);
+
       if (validateInput) {
         ProcessService processService = null;
 
