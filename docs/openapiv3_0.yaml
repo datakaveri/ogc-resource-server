@@ -1301,9 +1301,6 @@ components:
           additionalProperties:
             oneOf:
               - $ref: '#/components/schemas/inlineOrRefData'
-              - type: array
-                items:
-                  $ref: '#/components/schemas/inlineOrRefData'
         response:
           type: string
           default: raw
@@ -1321,8 +1318,8 @@ components:
         - type: integer
         - type: boolean
         - type: array
-          items:
-            type: string
+          oneOf:
+            - $ref: '#/components/schemas/inputValueNoObject'
     featureGeoJSON:
       type: object
       properties:

@@ -2942,12 +2942,6 @@
           "oneOf": [
             {
               "$ref": "#/components/schemas/inlineOrRefData"
-            },
-            {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/inlineOrRefData"
-              }
             }
           ]
         }
@@ -2978,15 +2972,16 @@
         "type": "number"
       },
       {
-        "type": "integer"
-      },
-      {
         "type": "boolean"
       },
       {
         "type": "array",
         "items": {
-          "type": "string"
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/inputValueNoObject"
+            }
+          ]
         }
       }
     ]

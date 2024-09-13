@@ -15,7 +15,9 @@ import io.vertx.sqlclient.Tuple;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
+import ogc.rs.processes.tilesMetaDataOnboarding.TilesMetaDataOnboardingProcess;
 import ogc.rs.processes.s3PreSignedURLGeneration.S3PreSignedURLGenerationProcess;
+
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.logging.log4j.LogManager;
@@ -89,6 +91,9 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
             break;
           case "S3PreSignedURLGeneration":
             processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, getS3Object(config), config);
+            break;
+          case "TilesMetaDataOnboarding":
+            processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config,getS3Object(config), vertx);
             break;
         }
 
