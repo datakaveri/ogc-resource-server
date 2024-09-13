@@ -17,56 +17,75 @@ import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.tilesMetaDataOnboarding.TilesMetaDataOnboardingProcess;
 import ogc.rs.processes.s3PreSignedURLGeneration.S3PreSignedURLGenerationProcess;
-
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import java.util.Set;
 import java.util.UUID;
-
 import static ogc.rs.common.Constants.processException404;
 import static ogc.rs.common.Constants.processException500;
 import static ogc.rs.processes.util.Constants.PROCESS_EXIST_CHECK_QUERY;
 
+/**
+ * The {@code ProcessesRunnerImpl} class implements the {@link ProcessesRunnerService} interface
+ * to handle the execution of various processes. It validates the input, checks for the existence
+ * of the process, and then executes it either asynchronously or synchronously.
+ */
 public class ProcessesRunnerImpl implements ProcessesRunnerService {
+
   private final PgPool pgPool;
   private final WebClient webClient;
   private final UtilClass utilClass;
   private final JsonObject config;
   private final Vertx vertx;
-  private String S3_BUCKET;
-  private String S3_REGION;
-  private String S3_ACCESS_KEY;
-  private String S3_SECRET_KEY;
-  private HttpClientOptions httpClientOptions;
-  private HttpClient httpClient;
   Logger LOGGER = LogManager.getLogger(ProcessesRunnerImpl.class);
 
+  /**
+   * Constructs a new {@code ProcessesRunnerImpl} instance.
+   *
+   * @param pgPool    the PostgreSQL pool for database operations
+   * @param webClient the web client used for making HTTP requests
+   * @param config    the configuration object
+   * @param vertx     the Vert.x instance
+   */
   ProcessesRunnerImpl(PgPool pgPool, WebClient webClient, JsonObject config, Vertx vertx) {
     this.pgPool = pgPool;
     this.webClient = webClient;
     this.utilClass = new UtilClass(pgPool);
     this.config = config;
-    this.vertx=vertx;
+    this.vertx = vertx;
   }
-  private DataFromS3 getS3Object(JsonObject config){
-    S3_BUCKET = config.getString("s3BucketUrl");
-    S3_REGION = config.getString("awsRegion");
-    S3_ACCESS_KEY = config.getString("awsAccessKey");
-    S3_SECRET_KEY = config.getString("awsSecretKey");
 
-    httpClientOptions = new HttpClientOptions().setSsl(true);
-    if(System.getProperty("s3.mock") != null){
+  /**
+   * Returns an instance of {@link DataFromS3} for interacting with S3.
+   *
+   * @param config the configuration object containing S3 settings
+   * @return a {@code DataFromS3} instance
+   */
+  private DataFromS3 getS3Object(JsonObject config) {
+    String s3_BUCKET = config.getString("s3BucketUrl");
+    String s3_REGION = config.getString("awsRegion");
+    String s3_ACCESS_KEY = config.getString("awsAccessKey");
+    String s3_SECRET_KEY = config.getString("awsSecretKey");
+
+    HttpClientOptions httpClientOptions = new HttpClientOptions().setSsl(true);
+    if (System.getProperty("s3.mock") != null) {
       LOGGER.fatal("S3 is being mocked!! Are you testing something?");
       httpClientOptions.setTrustAll(true).setVerifyHost(false);
     }
-    httpClient = vertx.createHttpClient(httpClientOptions);
-    DataFromS3 dataFromS3 =
-            new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
-    return dataFromS3;
+    HttpClient httpClient = vertx.createHttpClient(httpClientOptions);
+    return new DataFromS3(httpClient, s3_BUCKET, s3_REGION, s3_ACCESS_KEY, s3_SECRET_KEY);
   }
+
+  /**
+   * Runs the specified process by validating input and starting the process either synchronously
+   * or asynchronously, depending on the process type.
+   *
+   * @param input   the input JSON containing process details
+   * @param handler the handler to manage async results
+   * @return the current instance of {@code ProcessesRunnerService}
+   */
   @Override
   public ProcessesRunnerService run(JsonObject input, Handler<AsyncResult<JsonObject>> handler) {
 
@@ -82,6 +101,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
       if (validateInput) {
         ProcessService processService;
 
+        // Switch case to handle different processes
         switch (processName) {
           case "CollectionOnboarding":
             processService = new CollectionOnboardingProcess(pgPool, webClient, config, getS3Object(config), vertx);
@@ -134,65 +154,59 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
                               .concat("/jobs/")
                               .concat(jobStarted.getString("jobId")));
               handler.handle(Future.succeededFuture(response));
-            }).onFailure(failureHandler -> {
-              handler.handle(Future.failedFuture(failureHandler));
-            });
+            }).onFailure(failureHandler -> handler.handle(Future.failedFuture(failureHandler)));
           }
-        }).onFailure(jobFailed -> {
-          handler.handle(Future.failedFuture(jobFailed.getMessage()));
-        });
+        }).onFailure(jobFailed -> handler.handle(Future.failedFuture(jobFailed.getMessage())));
 
       } else {
         LOGGER.error("Failed to validate the input");
         handler.handle(Future.failedFuture(processException500));
       }
-    }).onFailure(processNotExist -> {
-      handler.handle(Future.failedFuture(processNotExist));
-    });
+    }).onFailure(processNotExist -> handler.handle(Future.failedFuture(processNotExist)));
     return this;
   }
 
   /**
-   * This method is used to check if the process exists or not.
+   * Checks if the process exists in the database.
    *
-   * @param input the input json
-   * @return a future with the result
+   * @param input the input JSON containing processId
+   * @return a future containing the process details if it exists, or an error if it doesn't
    */
   private Future<JsonObject> processExistCheck(JsonObject input) {
     Promise<JsonObject> promise = Promise.promise();
 
     pgPool.withConnection(sqlConnection -> sqlConnection.preparedQuery(PROCESS_EXIST_CHECK_QUERY)
-        .execute(Tuple.of(UUID.fromString(input.getString("processId")))))
-      .onSuccess(successResult -> {
-        if (successResult.size() > 0) {
-          Row row = successResult.iterator().next();
-          JsonObject rowJson = row.toJson();
-          promise.complete(rowJson);
-        } else {
-          LOGGER.error("Process does not exist");
-          promise.fail(processException404);
-        }
-      }).onFailure(failureHandler -> {
-        LOGGER.error("Failed to check process in database {}",failureHandler.getMessage());
-        promise.fail(processException500);
-      });
+                    .execute(Tuple.of(UUID.fromString(input.getString("processId")))))
+            .onSuccess(successResult -> {
+              if (successResult.size() > 0) {
+                Row row = successResult.iterator().next();
+                JsonObject rowJson = row.toJson();
+                promise.complete(rowJson);
+              } else {
+                LOGGER.error("Process does not exist");
+                promise.fail(processException404);
+              }
+            }).onFailure(failureHandler -> {
+              LOGGER.error("Failed to check process in database {}", failureHandler.getMessage());
+              promise.fail(processException500);
+            });
 
     return promise.future();
   }
 
   /**
-   * This method is used to validate the input.
+   * Validates the input for a specific process by checking if all required fields are present
+   * and non-empty.
    *
-   * @param requestBody   contains the inputs of the request
-   * @param processInputs the process input json
-   * @return true if the input is valid, false otherwise
+   * @param requestBody   the input JSON containing request data
+   * @param processInputs the JSON containing the required input fields for the process
+   * @return {@code true} if the input is valid, {@code false} otherwise
    */
   private boolean validateInput(JsonObject requestBody, JsonObject processInputs) {
     Set<String> processInputKeys = processInputs.getJsonObject("input", new JsonObject())
-      .getJsonObject("inputs", new JsonObject()).getMap().keySet();
+            .getJsonObject("inputs", new JsonObject()).getMap().keySet();
     return processInputKeys.stream().allMatch(
-      inputKey -> requestBody.containsKey(inputKey) && !requestBody.getString(inputKey).isEmpty());
+            inputKey -> requestBody.containsKey(inputKey) && !requestBody.getString(inputKey).isEmpty());
   }
-
 
 }
