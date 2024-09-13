@@ -80,7 +80,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
       boolean validateInput = validateInput(input, processExist);
 
       if (validateInput) {
-        ProcessService processService = null;
+        ProcessService processService;
 
         switch (processName) {
           case "CollectionOnboarding":
@@ -93,8 +93,12 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
             processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, getS3Object(config), config);
             break;
           case "TilesMetaDataOnboarding":
-            processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config,getS3Object(config), vertx);
+            processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, getS3Object(config), vertx);
             break;
+          default:
+            LOGGER.error("No method specified for process {}", processName);
+            handler.handle(Future.failedFuture("Process could not be executed: no method specified for process " + processName));
+            return;
         }
 
         ProcessService finalProcessService = processService;
