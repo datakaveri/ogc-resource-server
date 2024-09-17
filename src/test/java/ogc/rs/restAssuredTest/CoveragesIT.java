@@ -5,17 +5,28 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import jdk.jfr.Description;
 import ogc.rs.util.FakeTokenBuilder;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static ogc.rs.apiserver.util.Constants.USER_NOT_AUTHORIZED;
+import static ogc.rs.restAssuredTest.Constant.ASSET_PATH;
+import static ogc.rs.restAssuredTest.Constant.PORT;
 import static org.hamcrest.Matchers.equalTo;
 
 @ExtendWith(RestAssuredConfigExtension.class)
 public class CoveragesIT {
+
+  @BeforeAll
+  public static void setup() throws IOException {
+    File file = new File("src/test/resources/assets/AssetSample.txt");
+    given().port(PORT).multiPart("file", file).when().put(ASSET_PATH).then().statusCode(200);
+  }
 
   private static final UUID OPEN_RESOURCE = UUID.fromString("a5a6e26f-d252-446d-b7dd-4d50ea945102");
   private static final UUID SECURE_RESOURCE =
