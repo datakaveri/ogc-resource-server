@@ -2,12 +2,12 @@
   "openapi": "3.0.0",
   "info": {
     "version": "1.0.1",
-    "title": "OGC Compliant IUDX Resource Server",
-    "description": "OGC compliant Features and Common API definitions.\nIncludes Schema and Response Objects.",
+    "title": "OGC Compliant DX Resource Server",
+    "description": "OGC compliant Features and Common API definitions.\nIncludes Schema and Response Objects.\n\n <a href='/stac/api'>STAC API Documentation</a> \n\n <a href='/metering/api'>DX Metering API Documentation</a>",
     "contact": {
-      "name": "India Urban Data eXchange (IUDX)",
+      "name": "Geospatial Data eXchange (GSX)",
       "email": "info@iudx.org.in",
-      "url": "https://iudx.org.in"
+      "url": "https://gsx.org.in"
     },
     "license": {
       "url": "https://opensource.org/license/apache-2-0",
@@ -808,10 +808,6 @@
       "description": "Essential characteristics of OGC APIs"
     },
     {
-      "name": "Data",
-      "description": "Access to data belonging to a collection (features)"
-    },
-    {
       "name": "Map Tiles",
       "description": "Map Tiles available with the server"
     },
@@ -1027,7 +1023,7 @@
             "examples": {
               "default": {
                 "value": {
-                  "title": "OGC Compliant IUDX Geospatial Resource Server Landing Page",
+                  "title": "OGC Compliant DX Geospatial Resource Server Landing Page",
                   "description": "This landing page provides all the links as per the OGC compliance in JSON format",
                   "links": [
                     {
@@ -1464,7 +1460,7 @@
           "links"
         ],
         "example": {
-          "title": "OGC Compliant IUDX Geospatial Resource Server Landing Page",
+          "title": "OGC Compliant DX Geospatial Resource Server Landing Page",
           "description": "This landing page provides all the links as per the OGC compliance in JSON format",
           "links": [
             {
