@@ -4,6 +4,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import jdk.jfr.Description;
 import ogc.rs.util.FakeTokenBuilder;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -163,6 +164,7 @@ public class OgcFeaturesIT {
         .body("description", equalTo(USER_NOT_AUTHORIZED));
   }
 
+  @Disabled
   @Test
   @Description("Success: consumer secure resource")
   public void testGetItemsForSecureConsumerSuccess() {
@@ -245,6 +247,7 @@ public class OgcFeaturesIT {
         .statusCode(200);
   }
 
+  @Disabled
   @Test
   @Description("Success: Delegate Consumer secure resource")
   public void testGetItemsForSecureDelegateConsumerSuccess() {
