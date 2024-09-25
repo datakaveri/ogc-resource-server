@@ -35,7 +35,7 @@ services:
   integ-test:
     image: ghcr.io/datakaveri/geoserver-test:latest
     environment:
-      - LOG_LEVEL=INFO
+      - LOG_LEVEL=DEBUG
     volumes:
       - ./src/:/usr/share/app/src
       - /home/ubuntu/configs/ogc-config-dev.json:/usr/share/app/configs/config.json
