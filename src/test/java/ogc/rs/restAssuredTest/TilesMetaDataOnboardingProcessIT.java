@@ -168,7 +168,7 @@ public class TilesMetaDataOnboardingProcessIT {
         String jobId = sendExecutionRequest.body().path("jobId");
 
         // Use Awaitility to wait for the job status response
-        await().atMost(10, TimeUnit.SECONDS).until(() -> {
+        await().atMost(3, TimeUnit.SECONDS).until(() -> {
             Response getJobStatus = sendJobStatusRequest(jobId, invalidToken);
             return getJobStatus.body().path("message").equals(RESOURCE_OWNERSHIP_ERROR);
         });
@@ -212,7 +212,7 @@ public class TilesMetaDataOnboardingProcessIT {
         String jobId = sendExecutionRequest.body().path("jobId");
 
         // Use Awaitility to wait for the job status
-        await().atMost(10, TimeUnit.SECONDS).until(() -> {
+        await().atMost(3, TimeUnit.SECONDS).until(() -> {
             Response getJobStatus = sendJobStatusRequest(jobId, token);
             return getJobStatus.body().path("message").equals(RESOURCE_OWNERSHIP_ERROR);
         });
@@ -237,7 +237,7 @@ public class TilesMetaDataOnboardingProcessIT {
         String jobId = sendExecutionRequest.body().path("jobId");
 
         // Use Awaitility to wait for the job status
-        await().atMost(10, TimeUnit.SECONDS).until(() -> {
+        await().atMost(3, TimeUnit.SECONDS).until(() -> {
             Response getJobStatus = sendJobStatusRequest(jobId, token);
             return getJobStatus.body().path("message").equals(INVALID_ENCODING_FORMAT_MESSAGE);
         });
@@ -262,7 +262,7 @@ public class TilesMetaDataOnboardingProcessIT {
         String jobId = sendExecutionRequest.body().path("jobId");
 
         // Use Awaitility to wait for the job status response
-        await().atMost(10, TimeUnit.SECONDS).until(() -> {
+        await().atMost(3, TimeUnit.SECONDS).until(() -> {
             Response getJobStatus = sendJobStatusRequest(jobId, token);
             return getJobStatus.body().path("message").equals(TILE_MATRIX_SET_NOT_FOUND_MESSAGE);
         });
@@ -287,7 +287,7 @@ public class TilesMetaDataOnboardingProcessIT {
         String jobId = sendExecutionRequest.body().path("jobId");
 
         // Use Awaitility to wait for the job status response
-        await().atMost(10, TimeUnit.SECONDS).until(() -> {
+        await().atMost(3, TimeUnit.SECONDS).until(() -> {
             Response getJobStatus = sendJobStatusRequest(jobId, token);
             return getJobStatus.body().path("message").equals(S3_FILE_EXISTENCE_FAIL_MESSAGE);
         });
@@ -312,7 +312,7 @@ public class TilesMetaDataOnboardingProcessIT {
         String jobId = sendExecutionRequest.body().path("jobId");
 
         // Use Awaitility to wait for the job status response
-        await().atMost(60, TimeUnit.SECONDS).until(() -> {
+        await().atMost(4, TimeUnit.SECONDS).until(() -> {
             Response getJobStatus = sendJobStatusRequest(jobId, token);
             return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
         });
@@ -337,7 +337,7 @@ public class TilesMetaDataOnboardingProcessIT {
         String jobId = sendExecutionRequest.body().path("jobId");
 
         // Use Awaitility to wait for the job status response
-        await().atMost(60, TimeUnit.SECONDS).until(() -> {
+        await().atMost(4, TimeUnit.SECONDS).until(() -> {
             Response getJobStatus = sendJobStatusRequest(jobId, token);
             return getJobStatus.body().path("message").equals(COLLECTION_EXISTS_MESSAGE);
         });
@@ -364,7 +364,7 @@ public class TilesMetaDataOnboardingProcessIT {
         String jobId = sendExecutionRequest.body().path("jobId");
 
         // Use Awaitility to wait for the job status response
-        await().atMost(60, TimeUnit.SECONDS).until(() -> {
+        await().atMost(4, TimeUnit.SECONDS).until(() -> {
             Response getJobStatus = sendJobStatusRequest(jobId, token);
             return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
         });
@@ -391,7 +391,7 @@ public class TilesMetaDataOnboardingProcessIT {
         String jobId = sendExecutionRequest.body().path("jobId");
 
         // Use Awaitility to wait for the job status response
-        await().atMost(60, TimeUnit.SECONDS).until(() -> {
+        await().atMost(4, TimeUnit.SECONDS).until(() -> {
             Response getJobStatus = sendJobStatusRequest(jobId, token);
             return getJobStatus.body().path("message").equals(COLLECTION_EXISTS_MESSAGE);
         });
@@ -417,7 +417,7 @@ public class TilesMetaDataOnboardingProcessIT {
         String jobId = sendExecutionRequest.body().path("jobId");
 
         // Use Awaitility to wait for the job status response
-        await().atMost(60, TimeUnit.SECONDS).until(() -> {
+        await().atMost(4, TimeUnit.SECONDS).until(() -> {
             Response getJobStatus = sendJobStatusRequest(jobId, token);
             return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
         });
