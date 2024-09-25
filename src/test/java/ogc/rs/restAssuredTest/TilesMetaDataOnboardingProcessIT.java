@@ -266,44 +266,9 @@ public class TilesMetaDataOnboardingProcessIT {
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
     }
+
     @Test
     @Order(11)
-    @Description("Failure: Onboarding Tiles Meta Data as vector collection is already present")
-    public void testExecuteVectorTileCollectionAlreadyPresent() throws InterruptedException {
-        LOGGER.debug("Failure: Onboarding Tiles Meta Data of existing vector collection");
-
-        String token = getToken();
-        JsonObject requestBody = requestBody();
-        requestBody.getJsonObject("inputs").put("title", "Existing Vector Tile Meta Data Onboarding Process Failure")
-                .put("description", "Testing Existing Vector Tile Meta Data Onboarding Process");
-        Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
-        String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(40000);
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(COLLECTION_EXISTS_MESSAGE));
-    }
-
-    @Test
-    @Order(12)
-    @Description("Success: Onboarding Tiles Meta Data for raster collection")
-    public void testExecuteTilesMetaDataOnboardingSuccessForRasterCollection() throws InterruptedException {
-        LOGGER.debug("Success: Onboarding Tiles Meta Data for raster collection");
-
-        String token = getToken();
-        JsonObject requestBody = requestBody();
-        requestBody.getJsonObject("inputs").put("resourceId", RESOURCE_ID_FOR_RASTER_TEST).put("encoding", "PNG")
-                .put("title", "Raster Tile Meta Data Onboarding Process Success")
-                .put("description", "Testing Raster Tile Meta Data Onboarding Process Success");
-        Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
-        String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(40000);
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
-    }
-
-    @Disabled
-    @Test
-    @Order(13)
     @Description("Failure: Onboarding Tiles Meta Data as raster collection is already present")
     public void testExecuteRasterTileCollectionAlreadyPresent() throws InterruptedException {
         LOGGER.debug("Failure: Onboarding Tiles Meta Data of existing raster collection");
@@ -321,7 +286,7 @@ public class TilesMetaDataOnboardingProcessIT {
     }
 
     @Test
-    @Order(14)
+    @Order(12)
     @Description("Success: Onboarding Tiles Meta Data for existing feature collection")
     public void testExecuteTilesMetaDataOnboardingSuccessForExistingFeatureCollection() throws InterruptedException {
         LOGGER.debug("Success: Onboarding Tiles Meta Data for existing feature collection");
@@ -337,5 +302,40 @@ public class TilesMetaDataOnboardingProcessIT {
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
     }
+    @Test
+    @Order(13)
+    @Description("Failure: Onboarding Tiles Meta Data as vector collection is already present")
+    public void testExecuteVectorTileCollectionAlreadyPresent() throws InterruptedException {
+        LOGGER.debug("Failure: Onboarding Tiles Meta Data of existing vector collection");
+
+        String token = getToken();
+        JsonObject requestBody = requestBody();
+        requestBody.getJsonObject("inputs").put("title", "Existing Vector Tile Meta Data Onboarding Process Failure")
+                .put("description", "Testing Existing Vector Tile Meta Data Onboarding Process");
+        Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
+        String jobId = sendExecutionRequest.body().path("jobId");
+        Thread.sleep(40000);
+        Response getJobStatus = sendJobStatusRequest(jobId, token);
+        getJobStatus.then().statusCode(200).body("message", is(COLLECTION_EXISTS_MESSAGE));
+    }
+
+    @Test
+    @Order(14)
+    @Description("Success: Onboarding Tiles Meta Data for raster collection")
+    public void testExecuteTilesMetaDataOnboardingSuccessForRasterCollection() throws InterruptedException {
+        LOGGER.debug("Success: Onboarding Tiles Meta Data for raster collection");
+
+        String token = getToken();
+        JsonObject requestBody = requestBody();
+        requestBody.getJsonObject("inputs").put("resourceId", RESOURCE_ID_FOR_RASTER_TEST).put("encoding", "PNG")
+                .put("title", "Raster Tile Meta Data Onboarding Process Success")
+                .put("description", "Testing Raster Tile Meta Data Onboarding Process Success");
+        Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
+        String jobId = sendExecutionRequest.body().path("jobId");
+        Thread.sleep(40000);
+        Response getJobStatus = sendJobStatusRequest(jobId, token);
+        getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
+    }
+
 
 }
