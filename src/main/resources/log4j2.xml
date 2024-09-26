@@ -18,20 +18,23 @@
             <appender-ref ref="ConsoleAppender" />
 			<!-- <appender-ref ref="RollingFile" /> -->
         </logger>
-        <logger name="com.hazelcast" level="ERROR" additivity="false">
+        <logger name="com.hazelcast" level="DEBUG" additivity="false">
             <appender-ref ref="ConsoleAppender" />
         </logger>
-        <logger name="io.netty" level="ERROR" additivity="false">
+        <logger name="io.vertx" level="TRACE" additivity="false">
             <appender-ref ref="ConsoleAppender" />
         </logger>
-        <Root level="ERROR">
+        <logger name="io.netty" level="TRACE" additivity="false">
+            <appender-ref ref="ConsoleAppender" />
+        </logger>
+    <!--  <Root level="ERROR">
             <appender-ref ref="ConsoleAppender"/>
         </Root>
-<!--        <Root level="INFO">-->
-<!--            <appender-ref ref="ConsoleAppender"/>-->
-<!--        </Root>-->
-<!--        <Root level="DEBUG">-->
-<!--            <appender-ref ref="ConsoleAppender"/>-->
-<!--        </Root>-->
+        <Root level="INFO">
+            <appender-ref ref="ConsoleAppender"/>
+    </Root> -->
+        <Root level="DEBUG">
+            <appender-ref ref="ConsoleAppender"/>
+        </Root>
     </Loggers>
 </Configuration>
