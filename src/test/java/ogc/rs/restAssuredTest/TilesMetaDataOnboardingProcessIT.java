@@ -158,7 +158,7 @@ public class TilesMetaDataOnboardingProcessIT {
                 .withCons(new JsonObject()).build();
         Response sendExecutionRequest = sendExecutionRequest(processId, invalidToken, requestBody());
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(3000);
+        Thread.sleep(30000);
         Response getJobStatus = sendJobStatusRequest(jobId, invalidToken);
         getJobStatus.then().statusCode(200).body("message", is(RESOURCE_OWNERSHIP_ERROR));
     }
@@ -194,7 +194,7 @@ public class TilesMetaDataOnboardingProcessIT {
                 .withResourceServer().withRoleProvider().withCons(new JsonObject()).build();
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody());
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(3000);
+        Thread.sleep(30000);
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(RESOURCE_OWNERSHIP_ERROR));
     }
@@ -211,7 +211,7 @@ public class TilesMetaDataOnboardingProcessIT {
                 .put("encoding", "SVG");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(3000);
+        Thread.sleep(30000);
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(INVALID_ENCODING_FORMAT_MESSAGE));
     }
@@ -228,7 +228,7 @@ public class TilesMetaDataOnboardingProcessIT {
                 .put("tileMatrixSet", "EuropeanETRS89_LAEAQuad");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(3000);
+        Thread.sleep(30000);
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(TILE_MATRIX_SET_NOT_FOUND_MESSAGE));
     }
@@ -245,7 +245,7 @@ public class TilesMetaDataOnboardingProcessIT {
                 .put("testTileCoordinateIndexes", "111/111/111");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(3000);
+        Thread.sleep(30000);
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(S3_FILE_EXISTENCE_FAIL_MESSAGE));
     }
