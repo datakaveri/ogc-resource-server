@@ -8,22 +8,26 @@ import ogc.rs.util.FakeTokenBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.*;
+import static org.awaitility.Awaitility.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static io.restassured.RestAssured.given;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.processes.tilesMetaDataOnboarding.MessageConstants.*;
 import static ogc.rs.processes.collectionOnboarding.Constants.RESOURCE_OWNERSHIP_ERROR;
 import static ogc.rs.restAssuredTest.Constant.*;
+
 import static org.hamcrest.Matchers.is;
 
 @ExtendWith(RestAssuredConfigExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TilesMetaDataOnboardingProcessIT {
+
     private static final Logger LOGGER = LogManager.getLogger(TilesMetaDataOnboardingProcessIT.class);
     String executionEndpoint = "/processes/{processId}/execution";
     String jobStatusEndpoint = "/jobs/{jobId}";
@@ -150,15 +154,26 @@ public class TilesMetaDataOnboardingProcessIT {
     @Test
     @Order(3)
     @Description("Failure: Provider Delegate with different provider id")
-    public void testExecuteWithDifferentDelegateUserIdFail() throws InterruptedException {
+    public void testExecuteWithDifferentDelegateUserIdFail() {
         LOGGER.debug("Testing Failure: Provider Delegate with different DID");
+
         String invalidToken = new FakeTokenBuilder()
                 .withSub(UUID.randomUUID())
-                .withResourceServer().withDelegate(UUID.fromString("9304cb99-7125-47f1-8686-a070bb6c3eaf"), "provider")
-                .withCons(new JsonObject()).build();
+                .withResourceServer()
+                .withDelegate(UUID.fromString("9304cb99-7125-47f1-8686-a070bb6c3eaf"), "provider")
+                .withCons(new JsonObject())
+                .build();
+
         Response sendExecutionRequest = sendExecutionRequest(processId, invalidToken, requestBody());
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(3000);
+
+        // Use Awaitility to wait for the job status response
+        await().atMost(3, TimeUnit.SECONDS).until(() -> {
+            Response getJobStatus = sendJobStatusRequest(jobId, invalidToken);
+            return getJobStatus.body().path("message").equals(RESOURCE_OWNERSHIP_ERROR);
+        });
+
+        // Validate the job status response
         Response getJobStatus = sendJobStatusRequest(jobId, invalidToken);
         getJobStatus.then().statusCode(200).body("message", is(RESOURCE_OWNERSHIP_ERROR));
     }
@@ -187,14 +202,22 @@ public class TilesMetaDataOnboardingProcessIT {
     @Test
     @Order(6)
     @Description("Failure: Ownership Error")
-    public void testExecuteFailOwnershipError() throws InterruptedException {
+    public void testExecuteFailOwnershipError() {
         LOGGER.debug("Failure: Ownership Error");
 
         String token = new FakeTokenBuilder().withSub(UUID.randomUUID())
                 .withResourceServer().withRoleProvider().withCons(new JsonObject()).build();
+
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody());
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(3000);
+
+        // Use Awaitility to wait for the job status
+        await().atMost(3, TimeUnit.SECONDS).until(() -> {
+            Response getJobStatus = sendJobStatusRequest(jobId, token);
+            return getJobStatus.body().path("message").equals(RESOURCE_OWNERSHIP_ERROR);
+        });
+
+        // Validate the job status response
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(RESOURCE_OWNERSHIP_ERROR));
     }
@@ -202,16 +225,24 @@ public class TilesMetaDataOnboardingProcessIT {
     @Test
     @Order(7)
     @Description("Failure: Check the encoding format")
-    public void testFailCheckEncodingFormat() throws InterruptedException {
+    public void testFailCheckEncodingFormat() {
         LOGGER.debug("Failure: Invalid Encoding Format");
 
         String token = getToken();
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("title", "Non-existing encoding format test")
                 .put("encoding", "SVG");
+
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(3000);
+
+        // Use Awaitility to wait for the job status
+        await().atMost(3, TimeUnit.SECONDS).until(() -> {
+            Response getJobStatus = sendJobStatusRequest(jobId, token);
+            return getJobStatus.body().path("message").equals(INVALID_ENCODING_FORMAT_MESSAGE);
+        });
+
+        // Validate the job status response
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(INVALID_ENCODING_FORMAT_MESSAGE));
     }
@@ -219,16 +250,24 @@ public class TilesMetaDataOnboardingProcessIT {
     @Test
     @Order(8)
     @Description("Failure: Check the tile matrix set")
-    public void testFailCheckTileMatrixSet() throws InterruptedException {
+    public void testFailCheckTileMatrixSet() {
         LOGGER.debug("Failure: Invalid TileMatrixSet");
 
         String token = getToken();
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("title", "Non-existing tile matrix set test")
                 .put("tileMatrixSet", "EuropeanETRS89_LAEAQuad");
+
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(3000);
+
+        // Use Awaitility to wait for the job status response
+        await().atMost(3, TimeUnit.SECONDS).until(() -> {
+            Response getJobStatus = sendJobStatusRequest(jobId, token);
+            return getJobStatus.body().path("message").equals(TILE_MATRIX_SET_NOT_FOUND_MESSAGE);
+        });
+
+        // Validate the job status response
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(TILE_MATRIX_SET_NOT_FOUND_MESSAGE));
     }
@@ -236,16 +275,24 @@ public class TilesMetaDataOnboardingProcessIT {
     @Test
     @Order(9)
     @Description("Failure: Check the file existence in S3")
-    public void testFailCheckFileExistenceInS3() throws InterruptedException {
+    public void testFailCheckFileExistenceInS3() {
         LOGGER.debug("Failure: Invalid File which does not exist in S3");
 
         String token = getToken();
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("title", "Non-existing file in S3 test")
                 .put("testTileCoordinateIndexes", "111/111/111");
+
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(3000);
+
+        // Use Awaitility to wait for the job status response
+        await().atMost(3, TimeUnit.SECONDS).until(() -> {
+            Response getJobStatus = sendJobStatusRequest(jobId, token);
+            return getJobStatus.body().path("message").equals(S3_FILE_EXISTENCE_FAIL_MESSAGE);
+        });
+
+        // Validate the job status response
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(S3_FILE_EXISTENCE_FAIL_MESSAGE));
     }
@@ -253,32 +300,49 @@ public class TilesMetaDataOnboardingProcessIT {
     @Test
     @Order(10)
     @Description("Success: Onboarding Tiles Meta Data for vector collection")
-    public void testExecuteTilesMetaDataOnboardingSuccessForVectorCollection() throws InterruptedException {
+    public void testExecuteTilesMetaDataOnboardingSuccessForVectorCollection() {
         LOGGER.debug("Success: Onboarding Tiles Meta Data for vector collection");
 
         String token = getToken();
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("title", "Vector Tile Meta Data Onboarding Process Success")
                 .put("description", "Testing Vector Tile Meta Data Onboarding Process Success");
+
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(40000);
+
+        // Use Awaitility to wait for the job status response
+        await().atMost(4, TimeUnit.SECONDS).until(() -> {
+            Response getJobStatus = sendJobStatusRequest(jobId, token);
+            return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
+        });
+
+        // Validate the job status response
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
     }
+
     @Test
     @Order(11)
     @Description("Failure: Onboarding Tiles Meta Data as vector collection is already present")
-    public void testExecuteVectorTileCollectionAlreadyPresent() throws InterruptedException {
+    public void testExecuteVectorTileCollectionAlreadyPresent() {
         LOGGER.debug("Failure: Onboarding Tiles Meta Data of existing vector collection");
 
         String token = getToken();
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("title", "Existing Vector Tile Meta Data Onboarding Process Failure")
                 .put("description", "Testing Existing Vector Tile Meta Data Onboarding Process");
+
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(40000);
+
+        // Use Awaitility to wait for the job status response
+        await().atMost(4, TimeUnit.SECONDS).until(() -> {
+            Response getJobStatus = sendJobStatusRequest(jobId, token);
+            return getJobStatus.body().path("message").equals(COLLECTION_EXISTS_MESSAGE);
+        });
+
+        // Validate the job status response
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(COLLECTION_EXISTS_MESSAGE));
     }
@@ -286,57 +350,82 @@ public class TilesMetaDataOnboardingProcessIT {
     @Test
     @Order(12)
     @Description("Success: Onboarding Tiles Meta Data for raster collection")
-    public void testExecuteTilesMetaDataOnboardingSuccessForRasterCollection() throws InterruptedException {
+    public void testExecuteTilesMetaDataOnboardingSuccessForRasterCollection() {
         LOGGER.debug("Success: Onboarding Tiles Meta Data for raster collection");
 
         String token = getToken();
         JsonObject requestBody = requestBody();
-        requestBody.getJsonObject("inputs").put("resourceId", RESOURCE_ID_FOR_RASTER_TEST).put("encoding", "PNG")
+        requestBody.getJsonObject("inputs").put("resourceId", RESOURCE_ID_FOR_RASTER_TEST)
+                .put("encoding", "PNG")
                 .put("title", "Raster Tile Meta Data Onboarding Process Success")
                 .put("description", "Testing Raster Tile Meta Data Onboarding Process Success");
+
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(40000);
+
+        // Use Awaitility to wait for the job status response
+        await().atMost(4, TimeUnit.SECONDS).until(() -> {
+            Response getJobStatus = sendJobStatusRequest(jobId, token);
+            return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
+        });
+
+        // Validate the job status response
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
     }
 
-    @Disabled
     @Test
     @Order(13)
     @Description("Failure: Onboarding Tiles Meta Data as raster collection is already present")
-    public void testExecuteRasterTileCollectionAlreadyPresent() throws InterruptedException {
+    public void testExecuteRasterTileCollectionAlreadyPresent() {
         LOGGER.debug("Failure: Onboarding Tiles Meta Data of existing raster collection");
 
         String token = getToken();
         JsonObject requestBody = requestBody();
-        requestBody.getJsonObject("inputs").put("resourceId", RESOURCE_ID_FOR_RASTER_TEST).put("encoding", "PNG")
+        requestBody.getJsonObject("inputs").put("resourceId", RESOURCE_ID_FOR_RASTER_TEST)
+                .put("encoding", "PNG")
                 .put("title", "Existing Raster Tile Meta Data Onboarding Process Failure")
                 .put("description", "Testing Existing Raster Tile Meta Data Onboarding Process");
+
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(40000);
+
+        // Use Awaitility to wait for the job status response
+        await().atMost(4, TimeUnit.SECONDS).until(() -> {
+            Response getJobStatus = sendJobStatusRequest(jobId, token);
+            return getJobStatus.body().path("message").equals(COLLECTION_EXISTS_MESSAGE);
+        });
+
+        // Validate the job status response
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(COLLECTION_EXISTS_MESSAGE));
     }
 
-    @Disabled
     @Test
     @Order(14)
     @Description("Success: Onboarding Tiles Meta Data for existing feature collection")
-    public void testExecuteTilesMetaDataOnboardingSuccessForExistingFeatureCollection() throws InterruptedException {
+    public void testExecuteTilesMetaDataOnboardingSuccessForExistingFeatureCollection() {
         LOGGER.debug("Success: Onboarding Tiles Meta Data for existing feature collection");
 
         String token = getToken();
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("resourceId", RESOURCE_ID_EXISTING_FEATURE_COLLECTION_TEST)
                 .put("title", "Test Existing Feature Flow for Tiles MetaData Onboarding")
-                .put("description", "Tiles Meta Data Onboarding Existing Feature Flow  Test");
+                .put("description", "Tiles Meta Data Onboarding Existing Feature Flow Test");
+
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(40000);
+
+        // Use Awaitility to wait for the job status response
+        await().atMost(4, TimeUnit.SECONDS).until(() -> {
+            Response getJobStatus = sendJobStatusRequest(jobId, token);
+            return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
+        });
+
+        // Validate the job status response
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
     }
+
 
 }
