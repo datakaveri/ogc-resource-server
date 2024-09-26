@@ -315,6 +315,7 @@ public class TilesMetaDataOnboardingProcessIT {
                 .put("description", "Testing Existing Raster Tile Meta Data Onboarding Process");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
+        Thread.sleep(9000);
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(COLLECTION_EXISTS_MESSAGE));
     }
@@ -332,6 +333,7 @@ public class TilesMetaDataOnboardingProcessIT {
                 .put("description", "Tiles Meta Data Onboarding Existing Feature Flow  Test");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
+        Thread.sleep(9000);
         Response getJobStatus = sendJobStatusRequest(jobId, token);
         getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
     }
