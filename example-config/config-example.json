@@ -118,15 +118,6 @@
       "databasePassword": "",
       "databaseName": "",
       "poolSize": 10
-    },
-    {
-      "id": "ogc.rs.jobs.JobsVerticle",
-      "verticleInstances": 1,
-      "databasePort": 153,
-      "databaseUser": "",
-      "databasePassword": "",
-      "databaseName": "",
-      "poolSize": 10
     }
   ]
 }

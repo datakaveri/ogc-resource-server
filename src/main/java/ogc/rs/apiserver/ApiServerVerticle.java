@@ -37,7 +37,6 @@ import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.ProcessException;
 import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.database.DatabaseService;
-import ogc.rs.jobs.JobsService;
 import ogc.rs.metering.MeteringService;
 import ogc.rs.processes.ProcessesRunnerService;
 import org.apache.logging.log4j.LogManager;
@@ -84,7 +83,6 @@ public class ApiServerVerticle extends AbstractVerticle {
   private Buffer ogcLandingPageBuf;
   private HttpClient httpClient;
   private ProcessesRunnerService processService;
-  private JobsService jobsService;
 
   String tileMatrixSetUrl = "https://raw.githubusercontent.com/opengeospatial/2D-Tile-Matrix-Set/master/registry" +
       "/json/$.json";
@@ -119,7 +117,6 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     processService = ProcessesRunnerService.createProxy(vertx,PROCESSING_SERVICE_ADDRESS);
     dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
-    jobsService = JobsService.createProxy(vertx,JOBS_SERVICE_ADDRESS);
 
     // TODO: ssl configuration
     HttpServerOptions serverOptions = new HttpServerOptions();
@@ -243,11 +240,9 @@ public class ApiServerVerticle extends AbstractVerticle {
     RequestParameters paramsFromOasValidation =
       routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
     JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
-    JsonObject requestBody = new JsonObject();
-    requestBody.put("jobId", paramsFromOasValidation.pathParameter("jobId").getString())
-      .put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
-
-    jobsService.getStatus(requestBody).onSuccess(handler -> {
+  String jobId = paramsFromOasValidation.pathParameter("jobId").getString();
+  String userId = authInfo.getString("userId");
+    dbService.getJobStatus(jobId,userId).onSuccess(handler -> {
       {
         LOGGER.debug("Job status found.");
         routingContext.put("response", handler.toString());

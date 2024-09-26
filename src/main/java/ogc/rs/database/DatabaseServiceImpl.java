@@ -19,6 +19,7 @@ import java.util.UUID;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.common.Constants;
 import ogc.rs.database.util.FeatureQueryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -87,6 +88,36 @@ public class DatabaseServiceImpl implements DatabaseService{
                 result.fail("Error!");
             });
         return result.future();
+    }
+
+    @Override
+    public Future<JsonObject> getJobStatus(String jobId, String userId) {
+        LOGGER.info("Trying to get status");
+
+        Promise<JsonObject> promise = Promise.promise();
+        client.withConnection(
+                sqlClient -> sqlClient.preparedQuery("Select * from jobs_table where id=$1")
+                        .execute(Tuple.of(jobId)).map(s -> s.iterator().next()).onSuccess(row -> {
+                            if (row.getValue("user_id").toString().equals(userId)) {
+                                JsonObject result = row.toJson();
+                                result.remove("output");
+                                JsonObject links = new JsonObject();
+                                links.put("href", config.getString("hostName").concat("/jobs/").concat(jobId));
+                                links.put("rel", "self");
+                                links.put("title", row.getJsonObject("input").getString("title"));
+                                result.remove("input");
+                                result.put("links", links);
+                                promise.complete(result);
+                            } else {
+                                LOGGER.error("Job does not belong to the specified user");
+                                promise.fail(Constants.processException404);
+                            }
+                        }).onFailure(failureHandler -> {
+                            LOGGER.error(failureHandler.toString());
+                            promise.fail(Constants.processException404);
+                        }));
+
+        return promise.future();
     }
     @Override
     public Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams,
