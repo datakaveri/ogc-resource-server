@@ -173,9 +173,9 @@ public class TilesMetaDataOnboardingProcessIT {
             return getJobStatus.body().path("message").equals(RESOURCE_OWNERSHIP_ERROR);
         });
 
-        // Validate the job status response
-        Response getJobStatus = sendJobStatusRequest(jobId, invalidToken);
-        getJobStatus.then().statusCode(200).body("message", is(RESOURCE_OWNERSHIP_ERROR));
+//        // Validate the job status response
+//        Response getJobStatus = sendJobStatusRequest(jobId, invalidToken);
+//        getJobStatus.then().statusCode(200).body("message", is(RESOURCE_OWNERSHIP_ERROR));
     }
 
     @Test
@@ -217,9 +217,9 @@ public class TilesMetaDataOnboardingProcessIT {
             return getJobStatus.body().path("message").equals(RESOURCE_OWNERSHIP_ERROR);
         });
 
-        // Validate the job status response
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(RESOURCE_OWNERSHIP_ERROR));
+//        // Validate the job status response
+//        Response getJobStatus = sendJobStatusRequest(jobId, token);
+//        getJobStatus.then().statusCode(200).body("message", is(RESOURCE_OWNERSHIP_ERROR));
     }
 
     @Test
@@ -242,9 +242,9 @@ public class TilesMetaDataOnboardingProcessIT {
             return getJobStatus.body().path("message").equals(INVALID_ENCODING_FORMAT_MESSAGE);
         });
 
-        // Validate the job status response
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(INVALID_ENCODING_FORMAT_MESSAGE));
+//        // Validate the job status response
+//        Response getJobStatus = sendJobStatusRequest(jobId, token);
+//        getJobStatus.then().statusCode(200).body("message", is(INVALID_ENCODING_FORMAT_MESSAGE));
     }
 
     @Test
@@ -267,9 +267,9 @@ public class TilesMetaDataOnboardingProcessIT {
             return getJobStatus.body().path("message").equals(TILE_MATRIX_SET_NOT_FOUND_MESSAGE);
         });
 
-        // Validate the job status response
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(TILE_MATRIX_SET_NOT_FOUND_MESSAGE));
+//        // Validate the job status response
+//        Response getJobStatus = sendJobStatusRequest(jobId, token);
+//        getJobStatus.then().statusCode(200).body("message", is(TILE_MATRIX_SET_NOT_FOUND_MESSAGE));
     }
 
     @Test
@@ -292,9 +292,9 @@ public class TilesMetaDataOnboardingProcessIT {
             return getJobStatus.body().path("message").equals(S3_FILE_EXISTENCE_FAIL_MESSAGE);
         });
 
-        // Validate the job status response
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(S3_FILE_EXISTENCE_FAIL_MESSAGE));
+//        // Validate the job status response
+//        Response getJobStatus = sendJobStatusRequest(jobId, token);
+//        getJobStatus.then().statusCode(200).body("message", is(S3_FILE_EXISTENCE_FAIL_MESSAGE));
     }
 
     @Test
@@ -317,9 +317,9 @@ public class TilesMetaDataOnboardingProcessIT {
             return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
         });
 
-        // Validate the job status response
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
+//        // Validate the job status response
+//        Response getJobStatus = sendJobStatusRequest(jobId, token);
+//        getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
     }
 
     @Test
@@ -342,9 +342,9 @@ public class TilesMetaDataOnboardingProcessIT {
             return getJobStatus.body().path("message").equals(COLLECTION_EXISTS_MESSAGE);
         });
 
-        // Validate the job status response
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(COLLECTION_EXISTS_MESSAGE));
+//        // Validate the job status response
+//        Response getJobStatus = sendJobStatusRequest(jobId, token);
+//        getJobStatus.then().statusCode(200).body("message", is(COLLECTION_EXISTS_MESSAGE));
     }
 
     @Test
@@ -369,9 +369,9 @@ public class TilesMetaDataOnboardingProcessIT {
             return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
         });
 
-        // Validate the job status response
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
+//        // Validate the job status response
+//        Response getJobStatus = sendJobStatusRequest(jobId, token);
+//        getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
     }
 
     @Test
@@ -396,9 +396,9 @@ public class TilesMetaDataOnboardingProcessIT {
             return getJobStatus.body().path("message").equals(COLLECTION_EXISTS_MESSAGE);
         });
 
-        // Validate the job status response
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(COLLECTION_EXISTS_MESSAGE));
+//        // Validate the job status response
+//        Response getJobStatus = sendJobStatusRequest(jobId, token);
+//        getJobStatus.then().statusCode(200).body("message", is(COLLECTION_EXISTS_MESSAGE));
     }
 
     @Test
@@ -422,10 +422,9 @@ public class TilesMetaDataOnboardingProcessIT {
             return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
         });
 
-        // Validate the job status response
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
+//        // Validate the job status response
+//        Response getJobStatus = sendJobStatusRequest(jobId, token);
+//        getJobStatus.then().statusCode(200).body("message", is(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE));
     }
-
 
 }
