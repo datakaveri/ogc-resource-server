@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 import static io.restassured.RestAssured.given;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.processes.collectionAppending.Constants.*;
-import static ogc.rs.processes.collectionAppending.Constants.RESOURCE_OWNERSHIP_ERROR;
 import static ogc.rs.processes.util.Status.ACCEPTED;
 import static ogc.rs.restAssuredTest.Constant.*;
 import static org.awaitility.Awaitility.await;

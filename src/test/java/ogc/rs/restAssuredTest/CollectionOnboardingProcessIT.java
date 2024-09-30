@@ -146,9 +146,9 @@ public class CollectionOnboardingProcessIT {
 
     @Test
     @Order(5)
-    @Description("Failure: Item not present in cat")
+    @Description("Failure: Item is not present in catalogue")
     public void testExecuteFailItemNotPresent() {
-        LOGGER.debug("Failure: Item not present in cat");
+        LOGGER.debug("Failure: Item is not present in catalogue");
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("resourceId", "2dfc08b8-a43d-40d4-ba98-c6fdfa76a0c1");
 
