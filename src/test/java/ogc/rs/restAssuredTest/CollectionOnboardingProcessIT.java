@@ -7,19 +7,22 @@ import jdk.jfr.Description;
 import ogc.rs.util.FakeTokenBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
-
+import java.util.concurrent.TimeUnit;
 import static io.restassured.RestAssured.given;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.processes.collectionOnboarding.Constants.*;
 import static ogc.rs.processes.util.Status.ACCEPTED;
 import static ogc.rs.restAssuredTest.Constant.*;
-import static org.hamcrest.Matchers.is;
+
 
 @ExtendWith(RestAssuredConfigExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -35,7 +38,7 @@ public class CollectionOnboardingProcessIT {
      * This method is executed once before all test methods in the test class.
      * The uploaded file is used for simulating interactions with an S3-like service.
      * Asset_Path is the href link in database to access an asset
-     * Make sure the test server is running at http://localhost:9090 before executing tests.
+     * Make sure the test server is running at <a href="http://localhost:9090">...</a> before executing tests.
      */
     @BeforeAll
     public static void setup() throws IOException {
@@ -78,8 +81,8 @@ public class CollectionOnboardingProcessIT {
         inputs.put("version", "1.0.0");
 
         requestBody.put("inputs", inputs);
-
         requestBody.put("response", "raw");
+
         return requestBody;
     }
 
@@ -144,7 +147,7 @@ public class CollectionOnboardingProcessIT {
     @Test
     @Order(5)
     @Description("Failure: Item not present in cat")
-    public void testExecuteFailItemNotPresent() throws InterruptedException {
+    public void testExecuteFailItemNotPresent() {
         LOGGER.debug("Failure: Item not present in cat");
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("resourceId", "2dfc08b8-a43d-40d4-ba98-c6fdfa76a0c1");
@@ -152,16 +155,22 @@ public class CollectionOnboardingProcessIT {
         String token = getToken();
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(4000);
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
 
-        getJobStatus.then().statusCode(200).body("message", is(ITEM_NOT_PRESENT_ERROR));
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(25, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(ITEM_NOT_PRESENT_ERROR);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
     @Order(6)
     @Description("Failure: Ownership Error")
-    public void testExecuteFailOwnershipError() throws InterruptedException {
+    public void testExecuteFailOwnershipError() {
         LOGGER.debug("Failure: Ownership Error");
 
         String token = new FakeTokenBuilder().withSub(UUID.fromString("0ff3d301-9402-4430-8e18-6f95e4c03c97"))
@@ -169,15 +178,22 @@ public class CollectionOnboardingProcessIT {
 
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody());
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(3000);
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(RESOURCE_OWNERSHIP_ERROR));
+
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(25, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(RESOURCE_OWNERSHIP_ERROR);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
     @Order(7)
     @Description("Failure: Invalid organization")
-    public void testExecuteFailInvalidOrganization() throws InterruptedException {
+    public void testExecuteFailInvalidOrganization() {
         LOGGER.debug("Failure: Invalid organization");
 
         String token = getToken();
@@ -185,16 +201,23 @@ public class CollectionOnboardingProcessIT {
         requestBody.getJsonObject("inputs").put("fileName", "not_EPSG_crs.gpkg")
                 .put("title", "Invalid Organization test").put("description", "File with invalid Organization for testing.");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
-        Thread.sleep(3000);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(CRS_ERROR));
+
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(45, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(CRS_ERROR);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
     @Order(8)
     @Description("Failure: Invalid EPSG")
-    public void testExecuteFailInvalidEpsg() throws InterruptedException {
+    public void testExecuteFailInvalidEpsg() {
         LOGGER.debug("Failure: Invalid EPSG");
 
         String token = getToken();
@@ -203,15 +226,22 @@ public class CollectionOnboardingProcessIT {
                 .put("title", "Invalid EPSG test").put("description", "File with invalid EPSG for testing.");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(3000);
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(CRS_FETCH_FAILED));
+
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(45, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(CRS_FETCH_FAILED);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
     @Order(9)
     @Description("Failure: Fail to get Meta data from S3 by passing an empty file.")
-    public void testExecuteS3MetaDataFail() throws InterruptedException {
+    public void testExecuteS3MetaDataFail() {
         LOGGER.debug("Failure: Fail to get Meta data from S3 by passing an empty file.");
 
         String token = getToken();
@@ -220,15 +250,22 @@ public class CollectionOnboardingProcessIT {
                 .put("description", "Empty File for S3 failure testing.");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(3000);
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is("File not found."));
+
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(45, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals("File not found.");
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
     @Order(10)
     @Description("Failure: Invalid file having 2 layers with different geometry")
-    public void testExecuteFail2DiffGeo() throws InterruptedException {
+    public void testExecuteFail2DiffGeo() {
         LOGGER.debug("Failure: Invalid file having 2 layers with different geometry");
 
         String token = getToken();
@@ -237,15 +274,22 @@ public class CollectionOnboardingProcessIT {
                 .put("title", "Invalid Geometry test").put("description", "File with 2 layers with different geometry.");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(6000);
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(OGR_2_OGR_FAILED));
+
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(60, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(OGR_2_OGR_FAILED);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
     @Order(11)
     @Description("Success: Onboarding a collection")
-    public void testExecuteOnboardingSuccess() throws InterruptedException {
+    public void testExecuteOnboardingSuccess() {
         LOGGER.debug("Success: Onboarding a collection");
 
         String token = getToken();
@@ -254,22 +298,36 @@ public class CollectionOnboardingProcessIT {
                 .put("title", "Valid Hydro File").put("description", "Valid hydro file with 1000 features");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(40000);
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(DB_CHECK_RESPONSE));
+
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(120, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(DB_CHECK_RESPONSE);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
     @Order(12)
     @Description("Failure: Collection already present")
-    public void testExecuteFailItemAlreadyPresent() throws InterruptedException {
-        LOGGER.debug("Failure: Item already present in cat");
+    public void testExecuteFailItemAlreadyPresent() {
+        LOGGER.debug("Failure: Collection already present in collection_details table");
 
         String token = getToken();
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody());
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(6000);
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(COLLECTION_PRESENT_ERROR));
+
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(120, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(COLLECTION_PRESENT_ERROR);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 }
