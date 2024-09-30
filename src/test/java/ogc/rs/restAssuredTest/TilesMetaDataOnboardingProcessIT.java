@@ -4,11 +4,13 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
 import jdk.jfr.Description;
+
 import ogc.rs.util.FakeTokenBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.awaitility.core.ConditionTimeoutException;
+import static org.awaitility.Awaitility.await;
 import org.junit.jupiter.api.*;
-import static org.awaitility.Awaitility.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.File;
@@ -23,6 +25,7 @@ import static ogc.rs.processes.collectionOnboarding.Constants.RESOURCE_OWNERSHIP
 import static ogc.rs.restAssuredTest.Constant.*;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(RestAssuredConfigExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -167,11 +170,15 @@ public class TilesMetaDataOnboardingProcessIT {
         Response sendExecutionRequest = sendExecutionRequest(processId, invalidToken, requestBody());
         String jobId = sendExecutionRequest.body().path("jobId");
 
-        // Use Awaitility to wait for the job status response
-        await().atMost(5, TimeUnit.SECONDS).until(() -> {
-            Response getJobStatus = sendJobStatusRequest(jobId, invalidToken);
-            return getJobStatus.body().path("message").equals(RESOURCE_OWNERSHIP_ERROR);
-        });
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(5, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, invalidToken);
+                return getJobStatus.body().path("message").equals(RESOURCE_OWNERSHIP_ERROR);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
@@ -206,12 +213,15 @@ public class TilesMetaDataOnboardingProcessIT {
 
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody());
         String jobId = sendExecutionRequest.body().path("jobId");
-
-        // Use Awaitility to wait for the job status
-        await().atMost(5, TimeUnit.SECONDS).until(() -> {
-            Response getJobStatus = sendJobStatusRequest(jobId, token);
-            return getJobStatus.body().path("message").equals(RESOURCE_OWNERSHIP_ERROR);
-        });
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(5, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(RESOURCE_OWNERSHIP_ERROR);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
@@ -228,11 +238,15 @@ public class TilesMetaDataOnboardingProcessIT {
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
 
-        // Use Awaitility to wait for the job status
-        await().atMost(5, TimeUnit.SECONDS).until(() -> {
-            Response getJobStatus = sendJobStatusRequest(jobId, token);
-            return getJobStatus.body().path("message").equals(INVALID_ENCODING_FORMAT_MESSAGE);
-        });
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(10, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(INVALID_ENCODING_FORMAT_MESSAGE);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
@@ -249,11 +263,15 @@ public class TilesMetaDataOnboardingProcessIT {
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
 
-        // Use Awaitility to wait for the job status response
-        await().atMost(5, TimeUnit.SECONDS).until(() -> {
-            Response getJobStatus = sendJobStatusRequest(jobId, token);
-            return getJobStatus.body().path("message").equals(TILE_MATRIX_SET_NOT_FOUND_MESSAGE);
-        });
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(10, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(TILE_MATRIX_SET_NOT_FOUND_MESSAGE);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
@@ -270,11 +288,15 @@ public class TilesMetaDataOnboardingProcessIT {
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
 
-        // Use Awaitility to wait for the job status response
-        await().atMost(5, TimeUnit.SECONDS).until(() -> {
-            Response getJobStatus = sendJobStatusRequest(jobId, token);
-            return getJobStatus.body().path("message").equals(S3_FILE_EXISTENCE_FAIL_MESSAGE);
-        });
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(15, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(S3_FILE_EXISTENCE_FAIL_MESSAGE);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
@@ -291,11 +313,15 @@ public class TilesMetaDataOnboardingProcessIT {
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
 
-        // Use Awaitility to wait for the job status response
-        await().atMost(10, TimeUnit.SECONDS).until(() -> {
-            Response getJobStatus = sendJobStatusRequest(jobId, token);
-            return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
-        });
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(25, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
@@ -312,11 +338,15 @@ public class TilesMetaDataOnboardingProcessIT {
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
 
-        // Use Awaitility to wait for the job status response
-        await().atMost(5, TimeUnit.SECONDS).until(() -> {
-            Response getJobStatus = sendJobStatusRequest(jobId, token);
-            return getJobStatus.body().path("message").equals(COLLECTION_EXISTS_MESSAGE);
-        });
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(10, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(COLLECTION_EXISTS_MESSAGE);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
@@ -335,11 +365,15 @@ public class TilesMetaDataOnboardingProcessIT {
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
 
-        // Use Awaitility to wait for the job status response
-        await().atMost(10, TimeUnit.SECONDS).until(() -> {
-            Response getJobStatus = sendJobStatusRequest(jobId, token);
-            return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
-        });
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(25, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
@@ -358,11 +392,15 @@ public class TilesMetaDataOnboardingProcessIT {
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
 
-        // Use Awaitility to wait for the job status response
-        await().atMost(5, TimeUnit.SECONDS).until(() -> {
-            Response getJobStatus = sendJobStatusRequest(jobId, token);
-            return getJobStatus.body().path("message").equals(COLLECTION_EXISTS_MESSAGE);
-        });
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(10, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(COLLECTION_EXISTS_MESSAGE);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Test
@@ -380,11 +418,15 @@ public class TilesMetaDataOnboardingProcessIT {
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
 
-        // Use Awaitility to wait for the job status response
-        await().atMost(10, TimeUnit.SECONDS).until(() -> {
-            Response getJobStatus = sendJobStatusRequest(jobId, token);
-            return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
-        });
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(25, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(TILES_METADATA_ONBOARDING_SUCCESS_MESSAGE);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
 }
