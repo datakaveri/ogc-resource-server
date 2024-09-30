@@ -245,8 +245,8 @@ public class DatabaseServiceImpl implements DatabaseService{
     Promise<JsonObject> result = Promise.promise();
 
     Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
-    Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0)
-      , row -> row.getInteger("count"));
+    // Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0)
+     // , row -> row.getInteger("count"));
     String srid = String.valueOf(crs.get(queryParams.get("crs")));
     String geoColumn = "cast(st_asgeojson(st_transform(geom," + srid + "),9,0) as json)";
     String sqlQuery = "Select id, 'Feature' as type," + geoColumn + " as geometry, " +
@@ -403,6 +403,53 @@ public class DatabaseServiceImpl implements DatabaseService{
                       LOGGER.error("Failed at getCollection- {}", fail.getMessage());
                       result.fail("Error!");
                     }));
+    return result.future();
+  }
+
+  @Override
+  public Future<List<JsonObject>> getStacItems(String collectionId) {
+    Promise<List<JsonObject>> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+    String getItemsQuery = String.format("select %1$s.id, st_asgeojson(%1$s.geom), %1$s.bbox, %1$s.properties" +
+        ", jsonb_agg((row_to_json(stac_item_assets.*)::jsonb-'stac_item_id')) as assets, 'Feature' as type, %1$s as" +
+            " collection from %1$s join stac_item_assets on %1$s.id=stac_item_assets.item_id" +
+            " group by %1$s.id, %1$s.geometry, %1$s.bbox, %1$s.properties limit 10", collectionId);
+    client.withConnection(
+        conn ->
+            conn.preparedQuery(
+                    getItemsQuery)
+                .collecting(collector)
+                .execute()
+                .map(SqlResult::value)
+                .onSuccess(result::complete)
+                .onFailure(failed -> {
+                  LOGGER.error("Failed at stac_items_retrieval- {}", failed.getMessage());
+                  result.fail("Error!");
+                }));
+    return result.future();
+  }
+
+  @Override
+  public Future<JsonObject> getStacItemById(String collectionId, String stacItemId) {
+    Promise<JsonObject> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+    String getItemQuery = String.format("select %1$s.id, st_asgeojson(%1$s.geom), %1$s.bbox, %1$s.properties" +
+        ", jsonb_agg((row_to_json(stac_item_assets.*)::jsonb-'stac_item_id')) as assets, 'Feature' as type, %1$s as" +
+        " collection from %1$s join stac_item_assets on %1$s.id=stac_item_assets.item_id" +
+        " group by %1$s.id, %1$s.geometry, %1$s.bbox, %1$s.properties having id = $1::uuid", collectionId);
+    client.withConnection(
+        conn ->
+            conn.preparedQuery(getItemQuery)
+                .collecting(collector)
+                .execute(Tuple.of(UUID.fromString(stacItemId)))
+                .map(SqlResult::value)
+                .onSuccess(success -> result.complete(success.get(0)))
+                .onFailure(failed -> {
+                  LOGGER.error("Failed at stac_item_retrieval- {}", failed.getMessage());
+                  result.fail("Error!");
+                }));
     return result.future();
   }
   public Future<List<JsonObject>> getTileMatrixSetMetaData(String tileMatrixSet) {
