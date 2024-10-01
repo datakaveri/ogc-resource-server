@@ -5,9 +5,9 @@
     "title": "OGC Compliant DX Resource Server",
     "description": "OGC compliant Features and Common API definitions.\nIncludes Schema and Response Objects.\n\n <a href='/stac/api'>STAC API Documentation</a> \n\n <a href='/metering/api'>DX Metering API Documentation</a>",
     "contact": {
-      "name": "Geospatial Data eXchange (GSX)",
+      "name": "Integrated Geospatial Data-Sharing Interface (GDI)",
       "email": "info@iudx.org.in",
-      "url": "https://gsx.org.in"
+      "url": "https://gdi.org.in"
     },
     "license": {
       "url": "https://opensource.org/license/apache-2-0",
