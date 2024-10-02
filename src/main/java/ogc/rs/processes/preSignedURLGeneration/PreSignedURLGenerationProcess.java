@@ -1,4 +1,4 @@
-package ogc.rs.processes.s3PreSignedURLGeneration;
+package ogc.rs.processes.preSignedURLGeneration;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -15,6 +15,7 @@ import ogc.rs.processes.util.UtilClass;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -23,34 +24,38 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
+import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
 
-import static ogc.rs.processes.s3PreSignedURLGeneration.Constants.*;
+import static ogc.rs.processes.preSignedURLGeneration.Constants.*;
 
 /**
  * This class handles the process of generating an S3 Pre-Signed URL and updating the job status
  * of the process in a PostgreSQL database.
  */
-public class S3PreSignedURLGenerationProcess implements ProcessService {
-    private static final Logger LOGGER = LogManager.getLogger(S3PreSignedURLGenerationProcess.class);
+public class PreSignedURLGenerationProcess implements ProcessService {
+    private static final Logger LOGGER = LogManager.getLogger(PreSignedURLGenerationProcess.class);
+    private final boolean isMinIO;
     private final UtilClass utilClass;
     private final DataFromS3 dataFromS3;
     private final WebClient webClient;
     private String accessKey;
     private String secretKey;
+    private String awsEndPoint;
     private String catServerHost;
     private String catRequestUri;
     private int catServerPort;
 
     /**
-     * Constructor to initialize the S3PreSignedURLGenerationProcess with PostgreSQL pool, WebClient and configuration.
+     * Constructor to initialize the PreSignedURLGenerationProcess with PostgreSQL pool, WebClient and configuration.
      *
      * @param pgPool  The PostgreSQL connection pool.
      * @param webClient  The WebClient instance for making HTTP requests.
      * @param config  The configuration containing AWS and database details.
      */
-    public S3PreSignedURLGenerationProcess(PgPool pgPool, WebClient webClient, DataFromS3 dataFromS3, JsonObject config) {
+    public PreSignedURLGenerationProcess(PgPool pgPool, WebClient webClient, DataFromS3 dataFromS3, JsonObject config) {
+        this.isMinIO = config.getBoolean("isMinIO");
         this.utilClass = new UtilClass(pgPool);
         this.webClient = webClient;
         initializeConfig(config);
@@ -63,8 +68,10 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
      * @param config The configuration object containing the AWS credentials and CAT API details.
      */
     private void initializeConfig(JsonObject config) {
+
         this.accessKey = config.getString("awsAccessKey");
         this.secretKey = config.getString("awsSecretKey");
+        this.awsEndPoint = config.getString("awsEndPoint");
         this.catRequestUri = config.getString("catRequestItemsUri");
         this.catServerHost = config.getString("catServerHost");
         this.catServerPort = config.getInteger("catServerPort");
@@ -81,7 +88,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
      *
      * @param requestInput
      * The input JSON object containing details like ResourceId,
-     * AWS S3 bucket name, region and type of the file which gets uploaded into S3.
+     * AWS bucket name, region and type of the file which gets uploaded into S3/MinIO.
      *
      * @return A Future object containing the result of the process execution.
      */
@@ -94,10 +101,10 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
 
         // Chain the process steps and handle success or failure
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, STARTING_PRE_SIGNED_URL_PROCESS_MESSAGE)
-                .compose(progressUpdateHandler -> checkResourceOwnershipAndBuildS3ObjectKey(requestInput))
+                .compose(progressUpdateHandler -> checkResourceOwnershipAndBuildAWSObjectKey(requestInput))
                 .compose(catResponseHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2)).put(MESSAGE, CAT_REQUEST_RESPONSE)))
-                .compose(progressUpdateHandler -> checkIfObjectExistsInS3(requestInput))
+                .compose(progressUpdateHandler -> checkIfObjectExistsInAwsBucket(requestInput))
                 .compose(checkResult -> {
                     if (checkResult) {
                         return generatePreSignedUrl(requestInput);
@@ -107,22 +114,22 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                 })
                 .compose(preSignedURLHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(3))
-                                .put(MESSAGE, S3_PRE_SIGNED_URL_GENERATOR_MESSAGE)
+                                .put(MESSAGE, PRE_SIGNED_URL_GENERATOR_MESSAGE)
                                 .put("preSignedUrl", preSignedURLHandler.getString("preSignedUrl"))))
                 .compose(progressUpdateHandler -> utilClass.updateJobTableStatus(
-                        requestInput, Status.SUCCESSFUL, S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE))
+                        requestInput, Status.SUCCESSFUL, PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE))
                 .onSuccess(successHandler -> {
-                    // Pass the preSignedUrl, s3ObjectKeyName and message as the output of the process
+                    // Pass the preSignedUrl, AWSObjectKeyName and message as the output of the process
                     JsonObject result = new JsonObject()
-                            .put("S3PreSignedUrl", requestInput.getString("preSignedUrl"))
-                            .put("s3ObjectKeyName", requestInput.getString("objectKeyName"))
-                            .put("message", S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE);
+                            .put("PreSignedUrl", requestInput.getString("preSignedUrl"))
+                            .put("ObjectKeyName", requestInput.getString("objectKeyName"))
+                            .put("message", PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE);
 
-                    LOGGER.debug(S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE);
+                    LOGGER.debug(PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE);
                     objectPromise.complete(result);
                 })
                 .onFailure(failureHandler -> {
-                    LOGGER.error(S3_PRE_SIGNED_URL_PROCESS_FAILURE_MESSAGE);
+                    LOGGER.error(PRE_SIGNED_URL_PROCESS_FAILURE_MESSAGE);
                     objectPromise.fail(failureHandler);
                 });
 
@@ -163,7 +170,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
      * @param requestInput The input JSON object containing details like resourceId, userId, and fileType.
      * @return A Future containing the updated requestInput with objectKeyName, or an error message.
      */
-    public Future<JsonObject> checkResourceOwnershipAndBuildS3ObjectKey(JsonObject requestInput) {
+    public Future<JsonObject> checkResourceOwnershipAndBuildAWSObjectKey(JsonObject requestInput) {
         Promise<JsonObject> promise = Promise.promise();
 
         // Call catalogue API to get resource info
@@ -214,21 +221,27 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
     }
 
     /**
-     * Checks if the object already exists in S3 using a HEAD request.
+     * Checks if the object already exists in S3/MinIO using a HEAD request.
      * If the object exists, fail the process. If not, proceed with URL generation.
      *
-     * @param requestInput The input JSON object containing the key of the object in S3.
+     * @param requestInput The input JSON object containing the key of the object in S3/MinIO.
      * @return A {@link Future<Boolean>} that completes with {@code true} if the object does not exist,
      *         or fails with an appropriate error message if the object exists.
      */
-    private Future<Boolean> checkIfObjectExistsInS3(JsonObject requestInput) {
+    private Future<Boolean> checkIfObjectExistsInAwsBucket(JsonObject requestInput) {
         Promise<Boolean> promise = Promise.promise();
 
         String objectKeyName = requestInput.getString("objectKeyName");
         LOGGER.debug("Checking existence of object: {}", objectKeyName);
-
-        // Construct the URL for the object
-        String urlString = dataFromS3.getFullyQualifiedUrlString(objectKeyName);
+        String urlString;
+        if (isMinIO) {
+            // Construct the URL for the object in MinIO
+            urlString = awsEndPoint  + requestInput.getString("bucketName") + "/" + objectKeyName;
+           }
+           else {
+               // Construct the URL for the object in S3
+               urlString = dataFromS3.getFullyQualifiedUrlString(objectKeyName);
+            }
         LOGGER.debug("Constructed URL: {}", urlString);
         dataFromS3.setUrlFromString(urlString);
         dataFromS3.setSignatureHeader(HttpMethod.HEAD);
@@ -237,12 +250,12 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
         dataFromS3.getDataFromS3(HttpMethod.HEAD)
                 .onSuccess(responseFromS3 -> {
                     if (responseFromS3.statusCode() == 200) {
-                        LOGGER.error("Object already exists in S3: {}", objectKeyName);
+                        LOGGER.error("Object already exists in AWS bucket: {}", objectKeyName);
                         promise.fail(new OgcException(409, "Conflict", OBJECT_ALREADY_EXISTS_MESSAGE));
                     }
                 })
                 .onFailure(failure -> {
-                    LOGGER.debug("Object does not exist in S3: {}", objectKeyName);
+                    LOGGER.debug("Object does not exist in AWS bucket: {}", objectKeyName);
                     promise.complete(true);
                 });
 
@@ -250,7 +263,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
     }
 
     /**
-     * Generates a Pre-Signed URL for the given S3 object using the AWS SDK.
+     * Generates a Pre-Signed URL for the given AWS object using the AWS SDK.
      *
      * @param requestInput The input JSON object containing AWS details such as bucket name, region, and object key.
      * @return A Future containing a JSON object with the generated Pre-Signed URL.
@@ -259,21 +272,38 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
         Promise<JsonObject> promise = Promise.promise();
         try {
             // Create AWS credentials and presigner
+
             Region region = Region.of(requestInput.getString("region"));
             AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKey, secretKey);
+            S3Presigner preSigner;
 
-            try (S3Presigner preSigner = S3Presigner.builder()
-                    .region(region)
-                    .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
-                    .build()) {
-
-                // Create the S3 PutObjectRequest
+            if(isMinIO){
+                // MinIO pre-signed URL generation logic
+                LOGGER.debug("Generating pre-signed URL using MinIO");
+                preSigner = S3Presigner.builder()
+                        .endpointOverride(URI.create(awsEndPoint))
+                        .region(region)
+                        .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                        .serviceConfiguration(S3Configuration.builder()
+                                .pathStyleAccessEnabled(true)
+                                .build())
+                        .build();
+            }
+            else {
+                LOGGER.debug("Generating pre-signed URL using S3");
+                preSigner = S3Presigner.builder()
+                        .endpointOverride(URI.create(awsEndPoint))
+                        .region(region)
+                        .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                        .build();
+            }
+                // Create the PutObjectRequest
                 PutObjectRequest objectRequest = PutObjectRequest.builder()
                         .bucket(requestInput.getString("bucketName"))
                         .key(requestInput.getString("objectKeyName"))
                         .build();
 
-                // Create the S3 Pre-Signed URL request
+                // Create the Pre-Signed URL request
                 PutObjectPresignRequest preSignRequest = PutObjectPresignRequest.builder()
                         .signatureDuration(Duration.ofMinutes(5)) // Set URL expiration time
                         .putObjectRequest(objectRequest)
@@ -287,10 +317,10 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                 JsonObject result = new JsonObject().put("preSignedUrl", preSignedUrl);
                 LOGGER.debug("Generated pre-signed URL: {}", preSignedUrl);
                 promise.complete(result);
-            }
+
         } catch (Exception e) {
-            LOGGER.error(S3_PRE_SIGNED_URL_GENERATOR_FAILURE_MESSAGE +  e);
-            promise.fail(new OgcException(500, "Internal Server Error", S3_PRE_SIGNED_URL_GENERATOR_FAILURE_MESSAGE));
+            LOGGER.error(PRE_SIGNED_URL_GENERATOR_FAILURE_MESSAGE +  e);
+            promise.fail(new OgcException(500, "Internal Server Error", PRE_SIGNED_URL_GENERATOR_FAILURE_MESSAGE));
         }
         return promise.future();
     }
