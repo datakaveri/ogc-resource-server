@@ -237,13 +237,27 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
         dataFromS3.getDataFromS3(HttpMethod.HEAD)
                 .onSuccess(responseFromS3 -> {
                     if (responseFromS3.statusCode() == 200) {
+                        // Object already exists in S3
                         LOGGER.error("Object already exists in S3: {}", objectKeyName);
                         promise.fail(new OgcException(409, "Conflict", OBJECT_ALREADY_EXISTS_MESSAGE));
                     }
                 })
                 .onFailure(failure -> {
-                    LOGGER.debug("Object does not exist in S3: {}", objectKeyName);
-                    promise.complete(true);
+                    if (failure instanceof OgcException) {
+                        OgcException ogcEx = (OgcException) failure;
+                        if (ogcEx.getStatusCode() == 404) {
+                            // Object does not exist in S3
+                            LOGGER.debug("Object does not exist in S3: {}", objectKeyName);
+                            promise.complete(true);
+                        } else {
+                            LOGGER.error("Failed to check S3 object existence: {}", ogcEx.getMessage());
+                            promise.fail(failure);
+                        }
+                    } else {
+                        // General failure case
+                        LOGGER.error("Error while checking object existence in S3: {}", failure.getMessage());
+                        promise.fail(failure);
+                    }
                 });
 
         return promise.future();
