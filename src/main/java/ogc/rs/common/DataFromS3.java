@@ -34,7 +34,7 @@ public class DataFromS3 {
     S3_REGION = region;
     S3_ACCESS_KEY = accessKey;
     S3_SECRET_KEY = secretKey;
-    this.s3Url = "https://" + S3_BUCKET + ".s3." + S3_REGION + ".amazonaws.com" + "/";
+    this.s3Url = "https://s3." + S3_REGION + ".amazonaws.com" + "/" + S3_BUCKET + "/";
     DataFromS3.client = client;
     this.headers = new HashMap<>();
   }

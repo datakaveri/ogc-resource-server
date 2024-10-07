@@ -32,7 +32,8 @@ public class StacAssetsIT {
   @BeforeAll
   public static void setup() throws IOException {
     File file = new File("src/test/resources/assets/AssetSample.txt");
-    given().port(PORT).multiPart("file", file).when().put(ASSET_PATH).then().statusCode(200);
+    given().baseUri("https://localhost").relaxedHTTPSValidation().port(PORT).multiPart("file", file)
+        .when().put(ASSET_PATH).then().statusCode(200);
   }
 
   // Define constant UUIDs for test

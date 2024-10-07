@@ -47,6 +47,7 @@ services:
         target: /usr/share/app/storage/temp-dir
     depends_on:
       - "s3mockModded"
+      - "createIntegBucket"
     ports:
       - "8443:8080"
     restart: on-failure
@@ -83,17 +84,40 @@ services:
     command: bash -c "exec java -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -jar -Ds3.mock=true ./fatjar.jar  --host $$(hostname) -c configs/config.json"
 
   s3mockModded:
-    image: s3-mock-modded:latest
+    image: minio/minio:RELEASE.2024-07-31T05-46-26Z
     environment:
-      - initialBuckets=bucket1
+      - MINIO_ROOT_USER=user
+      - MINIO_ROOT_PASSWORD=password
+      - MINIO_VOLUMES="/data"    
     networks:
       ogc-net:
         aliases:
-          - bucket1.s3.aws-region.amazonaws.com
           - s3.aws-region.amazonaws.com
+    volumes:
+      - /tmp/data:/data
+      - ./src/test/resources/minioCerts:/opt/certs  
     ports:
-      - 9090:9090
-      - 9293:443
+      - 9090:443
+      - 9001:9001  
+    command: server --address :443 --console-address :9001 --certs-dir /opt/certs /data
 
+  createIntegBucket:
+    image: minio/minio:RELEASE.2024-07-31T05-46-26Z
+    networks:
+      - ogc-net
+    volumes:
+      - /tmp/data:/data        
+    depends_on:
+      - "s3mockModded"
+    entrypoint: >
+      /bin/sh -c "
+      set -euxo;
+      sleep 5;
+      /usr/bin/mc config host add myminio https://s3MockModded user password --insecure;
+      /usr/bin/mc mb myminio/bucket1 --insecure;
+      /usr/bin/mc anonymous set public myminio/bucket1 --insecure;
+      exit 0;
+      "    
+        
 volumes:
   ogc-volume:
