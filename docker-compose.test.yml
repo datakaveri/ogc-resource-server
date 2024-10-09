@@ -19,7 +19,7 @@ services:
         source: ogc-volume
         target: /usr/share/app/storage/temp-dir
     depends_on:
-      - "s3mockModded"
+      - "s3mock"
     ports:
       - "8443:8080"
     restart: on-failure
@@ -30,7 +30,7 @@ services:
       options:
         max-file: "5"
         max-size: "100m"
-    command: bash -c "exec java -jar -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -javaagent:/tmp/jacoco/lib/jacocoagent.jar=output=tcpserver,address=0.0.0.0,port=57070,dumponexit=false -Ddisable.auth=true -Ds3.mock=true ./fatjar.jar  --host $$(hostname) -c configs/test.json"
+    command: bash -c "exec java -jar -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -javaagent:/tmp/jacoco/lib/jacocoagent.jar=output=tcpserver,address=0.0.0.0,port=57070,dumponexit=false -Ddisable.auth=true ./fatjar.jar  --host $$(hostname) -c configs/test.json"
 
   integ-test:
     image: ghcr.io/datakaveri/geoserver-test:latest
@@ -46,7 +46,7 @@ services:
         source: ogc-volume
         target: /usr/share/app/storage/temp-dir
     depends_on:
-      - "s3mockModded"
+      - "s3mock"
     ports:
       - "8443:8080"
     restart: on-failure
@@ -57,7 +57,7 @@ services:
       options:
         max-file: "5"
         max-size: "100m"
-    command: bash -c "exec java -jar -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -javaagent:/tmp/jacoco/lib/jacocoagent.jar=output=tcpserver,address=0.0.0.0,port=57070,dumponexit=false -Dfake-token=true -Ds3.mock=true ./fatjar.jar  --host $$(hostname) -c configs/test.json"
+    command: bash -c "exec java -jar -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -javaagent:/tmp/jacoco/lib/jacocoagent.jar=output=tcpserver,address=0.0.0.0,port=57070,dumponexit=false -Dfake-token=true ./fatjar.jar  --host $$(hostname) -c configs/test.json"
 
   perfTest:
     image: ghcr.io/datakaveri/geoserver-test:latest
@@ -69,7 +69,7 @@ services:
         source: ogc-volume
         target: /usr/share/app/storage/temp-dir
     depends_on:
-      - "s3mockModded"
+      - "s3mock"
     ports:
       - "8443:8080"
     restart: on-failure
@@ -80,20 +80,18 @@ services:
       options:
         max-file: "5"
         max-size: "100m"
-    command: bash -c "exec java -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -jar -Ds3.mock=true ./fatjar.jar  --host $$(hostname) -c configs/config.json"
+    command: bash -c "exec java -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4j2LogDelegateFactory -jar ./fatjar.jar  --host $$(hostname) -c configs/config.json"
 
-  s3mockModded:
-    image: s3-mock-modded:latest
+  s3mock:
+    image: adobe/s3mock:3.1.0
     environment:
       - initialBuckets=bucket1
     networks:
       ogc-net:
         aliases:
-          - bucket1.s3.aws-region.amazonaws.com
           - s3.aws-region.amazonaws.com
     ports:
       - 9090:9090
-      - 9293:443
 
 volumes:
   ogc-volume:
