@@ -10,6 +10,13 @@ import java.net.URISyntaxException;
  */
 public class S3Config {
   
+  public static final String BUCKET_CONF_OP = "s3Bucket";
+  public static final String REGION_CONF_OP = "s3Region";
+  public static final String ENDPOINT_CONF_OP = "s3Endpoint";
+  public static final String ACCESS_KEY_CONF_OP = "s3AccessKey";
+  public static final String SECRET_KEY_CONF_OP = "s3SecretKey";
+  public static final String PATH_BASED_ACC_CONF_OP = "s3PathBasedAccess";
+  
   private String bucket;
   private String region;
 
@@ -202,7 +209,7 @@ public class S3Config {
       if (bucket == null || region == null || endpoint == null || accessKey == null
           || secretKey == null) {
         throw new IllegalArgumentException(
-            "Failed to initialize S3 config : one of bucket, region, endpoint, access key, secret key is null");
+            "Failed to initialize S3 config : atleast one of bucket, region, endpoint, access key, secret key is null");
       }
 
       try {
