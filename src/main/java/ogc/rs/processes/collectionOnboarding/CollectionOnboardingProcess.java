@@ -70,9 +70,15 @@ public class CollectionOnboardingProcess implements ProcessService {
    * @param config the JSON object containing the configuration parameters
    */
   private void initializeConfig(JsonObject config) {
-    this.s3conf = new S3Config.Builder().endpoint(config.getString("awsEndPoint")).region(config.getString("s3Region"))
-        .accessKey(config.getString("awsAccessKey")).secretKey(config.getString("awsSecretKey"))
-        .bucket(config.getString("s3BucketUrl")).pathBasedAccess(config.getBoolean("s3PathBasedAccess")).build();
+
+    this.s3conf = new S3Config.Builder()
+        .endpoint(config.getString(S3Config.ENDPOINT_CONF_OP))
+        .bucket(config.getString(S3Config.BUCKET_CONF_OP))
+        .region(config.getString(S3Config.REGION_CONF_OP))
+        .accessKey(config.getString(S3Config.ACCESS_KEY_CONF_OP))
+        .secretKey(config.getString(S3Config.SECRET_KEY_CONF_OP))
+        .pathBasedAccess(config.getBoolean(S3Config.PATH_BASED_ACC_CONF_OP))
+        .build();
 
     this.catRequestUri = config.getString("catRequestItemsUri");
     this.catServerHost = config.getString("catServerHost");

@@ -123,9 +123,14 @@ public class ApiServerVerticle extends AbstractVerticle {
     stacMetaJson.put("hostname", hostName);
 
     /* Initialize S3-related things */
-    s3conf = new S3Config.Builder().endpoint(config().getString("awsEndpoint")).bucket(config().getString("s3BucketName"))
-        .region(config().getString("s3Region")).accessKey(config().getString("s3AccessKey"))
-        .secretKey(config().getString("s3SecretKey")).pathBasedAccess(config().getBoolean("s3PathBasedAccess")).build();
+    s3conf = new S3Config.Builder()
+        .endpoint(config().getString(S3Config.ENDPOINT_CONF_OP))
+        .bucket(config().getString(S3Config.BUCKET_CONF_OP))
+        .region(config().getString(S3Config.REGION_CONF_OP))
+        .accessKey(config().getString(S3Config.ACCESS_KEY_CONF_OP))
+        .secretKey(config().getString(S3Config.SECRET_KEY_CONF_OP))
+        .pathBasedAccess(config().getBoolean(S3Config.PATH_BASED_ACC_CONF_OP))
+        .build();
 
     processService = ProcessesRunnerService.createProxy(vertx,PROCESSING_SERVICE_ADDRESS);
     dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
