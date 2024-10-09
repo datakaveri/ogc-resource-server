@@ -13,6 +13,7 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.router.RouterManager;
 import ogc.rs.common.DataFromS3;
+import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
@@ -41,10 +42,7 @@ public class CollectionOnboardingProcess implements ProcessService {
   private final PgPool pgPool;
   private final WebClient webClient;
   private final UtilClass utilClass;
-  private String awsEndPoint;
-  private String accessKey;
-  private String secretKey;
-  private String awsBucketUrl;
+  private S3Config s3conf;
   private String catServerHost;
   private String catRequestUri;
   private int catServerPort;
@@ -72,10 +70,10 @@ public class CollectionOnboardingProcess implements ProcessService {
    * @param config the JSON object containing the configuration parameters
    */
   private void initializeConfig(JsonObject config) {
-    this.awsEndPoint = "s3.".concat(config.getString("awsRegion")).concat(".amazonaws.com");
-    this.accessKey = config.getString("awsAccessKey");
-    this.secretKey = config.getString("awsSecretKey");
-    this.awsBucketUrl = config.getString("s3BucketUrl");
+    this.s3conf = new S3Config.Builder().endpoint(config.getString("awsEndPoint")).region(config.getString("s3Region"))
+        .accessKey(config.getString("awsAccessKey")).secretKey(config.getString("awsSecretKey"))
+        .bucket(config.getString("s3BucketUrl")).pathBasedAccess(config.getBoolean("s3PathBasedAccess")).build();
+
     this.catRequestUri = config.getString("catRequestItemsUri");
     this.catServerHost = config.getString("catServerHost");
     this.catServerPort = config.getInteger("catServerPort");
@@ -297,17 +295,24 @@ public class CollectionOnboardingProcess implements ProcessService {
       }));
   }
 
-  // this method is for Integration Testing.
-  private void setS3OptionsForTesting(CommandLine ogrinfo){
-    if(System.getProperty("s3.mock") != null){
-      LOGGER.fatal("S3 mock is enabled therefore disabling SSL check and setting Virtual hosting to false.");
-      ogrinfo.addArgument("--config");
-      ogrinfo.addArgument("GDAL_HTTP_UNSAFESSL");
-      ogrinfo.addArgument("YES");
-      ogrinfo.addArgument("--config");
-      ogrinfo.addArgument("AWS_VIRTUAL_HOSTING");
-      ogrinfo.addArgument("FALSE");
-    }
+  /**
+   * Configures S3 options for HTTP access and path-based access.
+   *
+   * @param ogrinfo the {@link CommandLine} object to be configured with S3 options.
+   */
+
+  private void setS3Options(CommandLine ogrinfo){
+      if (!s3conf.isHttps()) {
+            ogrinfo.addArgument("--config");
+            ogrinfo.addArgument("AWS_HTTPS");
+            ogrinfo.addArgument("NO");
+      }
+      
+      if (s3conf.isPathBasedAccess()) {
+            ogrinfo.addArgument("--config");
+            ogrinfo.addArgument("AWS_VIRTUAL_HOSTING");
+            ogrinfo.addArgument("FALSE");
+      }
   }
 
   /**
@@ -325,19 +330,19 @@ public class CollectionOnboardingProcess implements ProcessService {
     ogrinfo.addArgument("--config");
     ogrinfo.addArgument("CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE");
     ogrinfo.addArgument("NO");
-    setS3OptionsForTesting(ogrinfo);
+    setS3Options(ogrinfo);
     ogrinfo.addArgument("--config");
     ogrinfo.addArgument("AWS_S3_ENDPOINT");
-    ogrinfo.addArgument(awsEndPoint);
+    ogrinfo.addArgument(s3conf.getEndpoint().replaceFirst("https?://", "")); // GDAL needs endpoint without protocol
     ogrinfo.addArgument("--config");
     ogrinfo.addArgument("AWS_ACCESS_KEY_ID");
-    ogrinfo.addArgument(accessKey);
+    ogrinfo.addArgument(s3conf.getAccessKey());
     ogrinfo.addArgument("--config");
     ogrinfo.addArgument("AWS_SECRET_ACCESS_KEY");
-    ogrinfo.addArgument(secretKey);
+    ogrinfo.addArgument(s3conf.getSecretKey());
     ogrinfo.addArgument("-json");
     ogrinfo.addArgument("-ro");
-    ogrinfo.addArgument(String.format("/vsis3/%s%s", awsBucketUrl, filename));
+    ogrinfo.addArgument(String.format("/vsis3/%s%s", s3conf.getBucket(), filename));
 
     return ogrinfo;
   }
@@ -462,18 +467,18 @@ public class CollectionOnboardingProcess implements ProcessService {
     cmdLine.addArgument("--debug");
     cmdLine.addArgument("ON");
     cmdLine.addArgument("-append");
-    setS3OptionsForTesting(cmdLine);
+    setS3Options(cmdLine);
     cmdLine.addArgument("--config");
     cmdLine.addArgument("AWS_S3_ENDPOINT");
-    cmdLine.addArgument(awsEndPoint);
+    cmdLine.addArgument(s3conf.getEndpoint().replaceFirst("https?://", "")); // GDAL needs endpoint without protocol
     cmdLine.addArgument("--config");
     cmdLine.addArgument("AWS_ACCESS_KEY_ID");
-    cmdLine.addArgument(accessKey);
+    cmdLine.addArgument(s3conf.getAccessKey());
     cmdLine.addArgument("--config");
     cmdLine.addArgument("AWS_SECRET_ACCESS_KEY");
-    cmdLine.addArgument(secretKey);
+    cmdLine.addArgument(s3conf.getSecretKey());
 
-    cmdLine.addArgument(String.format("/vsis3/%s%s", awsBucketUrl, filename));
+    cmdLine.addArgument(String.format("/vsis3/%s%s", s3conf.getBucket(), filename));
     return cmdLine;
   }
 

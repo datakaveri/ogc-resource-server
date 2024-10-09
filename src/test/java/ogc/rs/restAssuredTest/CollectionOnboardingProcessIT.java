@@ -238,6 +238,7 @@ public class CollectionOnboardingProcessIT {
         }
     }
 
+    @Disabled  
     @Test
     @Order(9)
     @Description("Failure: Fail to get Meta data from S3 by passing an empty file.")

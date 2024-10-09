@@ -13,6 +13,7 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.common.DataFromS3;
+import ogc.rs.common.S3Config;
 import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.tilesMetaDataOnboarding.TilesMetaDataOnboardingProcess;
@@ -64,18 +65,13 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
    * @return a {@code DataFromS3} instance
    */
   private DataFromS3 getS3Object(JsonObject config) {
-    String s3_BUCKET = config.getString("s3BucketUrl");
-    String s3_REGION = config.getString("awsRegion");
-    String s3_ACCESS_KEY = config.getString("awsAccessKey");
-    String s3_SECRET_KEY = config.getString("awsSecretKey");
+    S3Config s3conf = new S3Config.Builder().endpoint(config.getString("awsEndPoint"))
+        .region(config.getString("s3Region")).accessKey(config.getString("awsAccessKey"))
+        .secretKey(config.getString("awsSecretKey")).bucket(config.getString("s3BucketUrl"))
+        .pathBasedAccess(config.getBoolean("s3PathBasedAccess")).build();
 
-    HttpClientOptions httpClientOptions = new HttpClientOptions().setSsl(true);
-    if (System.getProperty("s3.mock") != null) {
-      LOGGER.fatal("S3 is being mocked!! Are you testing something?");
-      httpClientOptions.setTrustAll(true).setVerifyHost(false);
-    }
-    HttpClient httpClient = vertx.createHttpClient(httpClientOptions);
-    return new DataFromS3(httpClient, s3_BUCKET, s3_REGION, s3_ACCESS_KEY, s3_SECRET_KEY);
+    HttpClient httpClient = vertx.createHttpClient();
+    return new DataFromS3(httpClient, s3conf);
   }
 
   /**

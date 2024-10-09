@@ -46,27 +46,27 @@ public class TilesMetaDataOnboardingProcessIT {
         // Upload a test file to the root path /c432b3df-0a22-485d-80a5-ace8195f6074
         File vectorFile = new File("src/test/resources/processFiles/c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf");
 
-        given().port(PORT).body(vectorFile).when().put( "c432b3df-0a22-485d-80a5-ace8195f6074")
-                .then().statusCode(200);
+        //given().port(PORT).body(vectorFile).when().put( "c432b3df-0a22-485d-80a5-ace8195f6074")
+          //      .then().statusCode(200);
 
         // Upload the same test file to the S3 path /c432b3df-0a22-485d-80a5-ace8195f6074/c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf
-        given().port(PORT).body(vectorFile).when().put( "c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf")
+        given().port(PORT).body(vectorFile).when().put( "bucket1/c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf")
                 .then().statusCode(200);
 
         File existingFeatureCollectionFile = new File("src/test/resources/processFiles/5d568f26-ccaf-456d-ba04-7feb589c1185/WebMercatorQuad/0/0/0.pbf");
 
-        given().port(PORT).body(existingFeatureCollectionFile).when().put( "5d568f26-ccaf-456d-ba04-7feb589c1185")
-                .then().statusCode(200);
+        //given().port(PORT).body(existingFeatureCollectionFile).when().put( "5d568f26-ccaf-456d-ba04-7feb589c1185")
+          //      .then().statusCode(200);
 
-        given().port(PORT).body(existingFeatureCollectionFile).when().put( "5d568f26-ccaf-456d-ba04-7feb589c1185/WebMercatorQuad/0/0/0.pbf")
+        given().port(PORT).body(existingFeatureCollectionFile).when().put( "bucket1/5d568f26-ccaf-456d-ba04-7feb589c1185/WebMercatorQuad/0/0/0.pbf")
                 .then().statusCode(200);
 
         File rasterFile = new File("src/test/resources/processFiles/a7c85951-9c1d-4b45-ad98-a395bef571d0/WebMercatorQuad/0/0/0.png");
 
-        given().port(PORT).body(rasterFile).when().put( "a7c85951-9c1d-4b45-ad98-a395bef571d0")
-                .then().statusCode(200);
+        //given().port(PORT).body(rasterFile).when().put( "a7c85951-9c1d-4b45-ad98-a395bef571d0")
+          //      .then().statusCode(200);
 
-        given().port(PORT).body(rasterFile).when().put( "a7c85951-9c1d-4b45-ad98-a395bef571d0/WebMercatorQuad/0/0/0.png")
+        given().port(PORT).body(rasterFile).when().put( "bucket1/a7c85951-9c1d-4b45-ad98-a395bef571d0/WebMercatorQuad/0/0/0.png")
                 .then().statusCode(200);
 
     }
@@ -74,23 +74,23 @@ public class TilesMetaDataOnboardingProcessIT {
     @AfterAll
     public static void tearDown() throws IOException {
 
-        given().port(PORT).when().delete( "c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf")
+        given().port(PORT).when().delete( "bucket1/c432b3df-0a22-485d-80a5-ace8195f6074/WebMercatorQuad/0/0/0.pbf")
                 .then().statusCode(204);
 
-        given().port(PORT).when().delete( "c432b3df-0a22-485d-80a5-ace8195f6074")
+        //given().port(PORT).when().delete( "c432b3df-0a22-485d-80a5-ace8195f6074")
+          //      .then().statusCode(204);
+
+        given().port(PORT).when().delete( "bucket1/5d568f26-ccaf-456d-ba04-7feb589c1185/WebMercatorQuad/0/0/0.pbf")
                 .then().statusCode(204);
 
-        given().port(PORT).when().delete( "5d568f26-ccaf-456d-ba04-7feb589c1185/WebMercatorQuad/0/0/0.pbf")
+        //given().port(PORT).when().delete( "5d568f26-ccaf-456d-ba04-7feb589c1185")
+          //      .then().statusCode(204);
+
+        given().port(PORT).when().delete( "bucket1/a7c85951-9c1d-4b45-ad98-a395bef571d0/WebMercatorQuad/0/0/0.png")
                 .then().statusCode(204);
 
-        given().port(PORT).when().delete( "5d568f26-ccaf-456d-ba04-7feb589c1185")
-                .then().statusCode(204);
-
-        given().port(PORT).when().delete( "a7c85951-9c1d-4b45-ad98-a395bef571d0/WebMercatorQuad/0/0/0.png")
-                .then().statusCode(204);
-
-        given().port(PORT).when().delete( "a7c85951-9c1d-4b45-ad98-a395bef571d0")
-                .then().statusCode(204);
+        //given().port(PORT).when().delete( "a7c85951-9c1d-4b45-ad98-a395bef571d0")
+         //       .then().statusCode(204);
 
     }
 

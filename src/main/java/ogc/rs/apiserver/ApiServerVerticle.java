@@ -37,6 +37,20 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
+import ogc.rs.apiserver.util.AuthInfo;
+import ogc.rs.apiserver.util.AuthInfo.RoleEnum;
+import ogc.rs.common.DataFromS3;
+import ogc.rs.common.S3Config;
+import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.apiserver.util.ProcessException;
+import ogc.rs.catalogue.CatalogueService;
+import ogc.rs.database.DatabaseService;
+import ogc.rs.jobs.JobsService;
+import ogc.rs.metering.MeteringService;
+import ogc.rs.processes.ProcessesRunnerService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.apiserver.util.Constants.NOT_FOUND;
@@ -65,10 +79,7 @@ import static ogc.rs.metering.util.MeteringConstant.*;
  */
 public class ApiServerVerticle extends AbstractVerticle {
   private static final Logger LOGGER = LogManager.getLogger(ApiServerVerticle.class);
-  static String S3_BUCKET;
-  static String S3_REGION;
-  static String S3_ACCESS_KEY;
-  static String S3_SECRET_KEY;
+  private S3Config s3conf;
   CatalogueService catalogueService;
   MeteringService meteringService;
   private Router router;
@@ -112,10 +123,9 @@ public class ApiServerVerticle extends AbstractVerticle {
     stacMetaJson.put("hostname", hostName);
 
     /* Initialize S3-related things */
-    S3_BUCKET = config().getString("s3BucketName");
-    S3_REGION = config().getString("s3Region");
-    S3_ACCESS_KEY = config().getString("s3AccessKey");
-    S3_SECRET_KEY = config().getString("s3SecretKey");
+    s3conf = new S3Config.Builder().endpoint(config().getString("awsEndpoint")).bucket(config().getString("s3BucketName"))
+        .region(config().getString("s3Region")).accessKey(config().getString("s3AccessKey"))
+        .secretKey(config().getString("s3SecretKey")).pathBasedAccess(config().getBoolean("s3PathBasedAccess")).build();
 
     processService = ProcessesRunnerService.createProxy(vertx,PROCESSING_SERVICE_ADDRESS);
     dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
@@ -158,14 +168,7 @@ public class ApiServerVerticle extends AbstractVerticle {
       }
     });
 
-    HttpClientOptions httpCliOptions = new HttpClientOptions().setSsl(true);
-
-    if(System.getProperty("s3.mock") != null){
-        LOGGER.fatal("S3 is being mocked!! Are you testing something?");
-        httpCliOptions.setTrustAll(true).setVerifyHost(false);
-    }
-
-    httpClient = vertx.createHttpClient(httpCliOptions);
+    httpClient = vertx.createHttpClient();
   }
 
   /**
@@ -653,7 +656,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     // beforehand.
     response.setChunked(true);
     DataFromS3 dataFromS3 =
-        new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
+        new DataFromS3(httpClient, s3conf);
 
     // determine tile format if it is a map (PNG image) or vector (MVT tile) using request header.
     String encodingType = getEncodingFromRequest(routingContext.request().getHeader("Accept"));
@@ -1642,7 +1645,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             handler -> {
               response.putHeader("Content-Type", handler.getString("type"));
               DataFromS3 dataFromS3 =
-                  new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
+                  new DataFromS3(httpClient, s3conf);
               String urlString =
                   dataFromS3.getFullyQualifiedUrlString(handler.getString("href"));
               dataFromS3.setUrlFromString(urlString);
@@ -2096,7 +2099,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             handler -> {
               response.putHeader(CONTENT_TYPE, COLLECTION_COVERAGE_TYPE);
               DataFromS3 dataFromS3 =
-                  new DataFromS3(httpClient, S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY);
+                  new DataFromS3(httpClient, s3conf);
               String urlString = dataFromS3.getFullyQualifiedUrlString(handler.getString("href"));
               dataFromS3.setUrlFromString(urlString);
               dataFromS3.setSignatureHeader(HttpMethod.GET);

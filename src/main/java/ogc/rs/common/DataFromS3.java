@@ -1,10 +1,12 @@
 package ogc.rs.common;
 
 import io.vertx.core.Future;
+import io.vertx.core.MultiMap;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.RequestOptions;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.common.awss3.AWS4SignerBase;
 import ogc.rs.common.awss3.AWS4SignerForAuthorizationHeader;
@@ -29,22 +31,31 @@ public class DataFromS3 {
   private final Map<String, String> headers;
   private URL url;
 
-  public DataFromS3(HttpClient client, String bucket, String region, String accessKey, String secretKey) {
-    S3_BUCKET = bucket;
-    S3_REGION = region;
-    S3_ACCESS_KEY = accessKey;
-    S3_SECRET_KEY = secretKey;
-    this.s3Url = "https://" + S3_BUCKET + ".s3." + S3_REGION + ".amazonaws.com" + "/";
+  public DataFromS3(HttpClient client, S3Config config) {
+    S3_BUCKET = config.getBucket();
+    S3_REGION = config.getRegion();
+    S3_ACCESS_KEY = config.getAccessKey();
+    S3_SECRET_KEY = config.getSecretKey();
+    
+    if (config.isPathBasedAccess()) {
+      this.s3Url = config.getEndpoint() + "/" + S3_BUCKET + "/";
+    } else {
+      this.s3Url = (config.isHttps() ? "https://" : "http://") + S3_BUCKET + "."
+          + config.getEndpoint().replaceFirst("https?://", "") + "/";
+    }
+    
     DataFromS3.client = client;
     this.headers = new HashMap<>();
   }
+
   public Future<HttpClientResponse> getDataFromS3(HttpMethod httpMethod) {
     Promise <HttpClientResponse> response  = Promise.promise();
-    client.request(httpMethod, url.getDefaultPort(), url.getHost(), url.getPath())
-        .compose(req -> {
-          headers.forEach(req::putHeader);
-          return req.send();
-        })
+
+    RequestOptions options = new RequestOptions().setAbsoluteURI(url).setMethod(httpMethod)
+        .setHeaders(MultiMap.caseInsensitiveMultiMap().addAll(headers));
+
+    client.request(options)
+        .compose(req -> req.send())
         .onSuccess(res -> {
           if (res.statusCode() == 404) {
             LOGGER.error("FILE not found {}",url.toString());
