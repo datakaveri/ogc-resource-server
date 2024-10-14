@@ -110,7 +110,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
             processService = new CollectionAppendingProcess(pgPool, webClient, config, getS3Object(config), vertx);
             break;
           case "S3PreSignedURLGeneration":
-            processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, getS3Object(config), config);
+            processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, config);
             break;
           case "TilesMetaDataOnboarding":
             processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, getS3Object(config), vertx);
