@@ -1,6 +1,9 @@
 package ogc.rs.processes.s3PreSignedURLGeneration;
 
 public class Constants {
+    // SQL query to check if the resource is already onboarded
+    public static final String COLLECTION_TYPE_QUERY = "SELECT COUNT(*) FROM public.collection_type WHERE collection_id = $1 AND type = $2";
+
     public static final String MESSAGE = "message";
     public static final String STARTING_PRE_SIGNED_URL_PROCESS_MESSAGE =
             "Starting the process to generate a Pre-Signed URL.";
@@ -10,8 +13,8 @@ public class Constants {
     public static final String UNSUPPORTED_FILE_TYPE_ERROR = "Unsupported file type.";
     public static final String CAT_REQUEST_RESPONSE =
             "CAT API response received successfully. Resource ownership validated, and object key generated.";
-    public static final String OBJECT_ALREADY_EXISTS_MESSAGE =
-            "Object already exists in S3, no need to generate pre-signed URL.";
+    public static final String RESOURCE_ALREADY_EXISTS_MESSAGE =
+            "Resource is already onboarded, no need to generate pre-signed URL.";
     public static final String S3_PRE_SIGNED_URL_GENERATOR_MESSAGE =
             "Generating the S3 Pre-Signed URL.";
     public static final String S3_PRE_SIGNED_URL_GENERATOR_FAILURE_MESSAGE =
