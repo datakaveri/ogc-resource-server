@@ -2,17 +2,15 @@ package ogc.rs.processes.s3PreSignedURLGeneration;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
-
-import ogc.rs.common.DataFromS3;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.Tuple;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.util.Status;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.processes.util.UtilClass;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -22,10 +20,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
-
 import java.time.Duration;
 import java.util.Map;
-
 import static ogc.rs.processes.s3PreSignedURLGeneration.Constants.*;
 
 /**
@@ -35,8 +31,8 @@ import static ogc.rs.processes.s3PreSignedURLGeneration.Constants.*;
 public class S3PreSignedURLGenerationProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(S3PreSignedURLGenerationProcess.class);
     private final UtilClass utilClass;
-    private final DataFromS3 dataFromS3;
     private final WebClient webClient;
+    private final PgPool pgPool;
     private String accessKey;
     private String secretKey;
     private String catServerHost;
@@ -50,11 +46,11 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
      * @param webClient  The WebClient instance for making HTTP requests.
      * @param config  The configuration containing AWS and database details.
      */
-    public S3PreSignedURLGenerationProcess(PgPool pgPool, WebClient webClient, DataFromS3 dataFromS3, JsonObject config) {
+    public S3PreSignedURLGenerationProcess(PgPool pgPool, WebClient webClient,  JsonObject config) {
+        this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.webClient = webClient;
         initializeConfig(config);
-        this.dataFromS3 = dataFromS3;
     }
 
     /**
@@ -72,7 +68,11 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
 
     // Map file types to extensions
     private static final Map<String, String> fileTypeMap = Map.of(
-            "geopackage", ".gpkg" // Add more mappings as needed in the future
+            "geopackage", ".gpkg"
+    );
+    // Map file types to item types
+    private static final Map<String, String> entityTypeMap = Map.of(
+            "geopackage", "FEATURE"
     );
 
     /**
@@ -92,17 +92,19 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
         // Update initial progress
         requestInput.put("progress", calculateProgress(1));
 
-        // Chain the process steps and handle success or failure
+       // Chain the process steps and handle success or failure
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, STARTING_PRE_SIGNED_URL_PROCESS_MESSAGE)
                 .compose(progressUpdateHandler -> checkResourceOwnershipAndBuildS3ObjectKey(requestInput))
                 .compose(catResponseHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2)).put(MESSAGE, CAT_REQUEST_RESPONSE)))
-                .compose(progressUpdateHandler -> checkIfObjectExistsInS3(requestInput))
-                .compose(checkResult -> {
-                    if (checkResult) {
-                        return generatePreSignedUrl(requestInput);
+                // Check if the resource has already been onboarded in collection_type table
+                .compose(progressUpdateHandler -> checkIfResourceOnboarded(requestInput))
+                .compose(onboarded -> {
+                    if (onboarded) {
+                        // Resource is already onboarded, block re-upload
+                        return Future.failedFuture(new OgcException(409, "Conflict", RESOURCE_ALREADY_EXISTS_MESSAGE));
                     } else {
-                        return Future.failedFuture(new OgcException(409, "Conflict", OBJECT_ALREADY_EXISTS_MESSAGE));
+                        return generatePreSignedUrl(requestInput);
                     }
                 })
                 .compose(preSignedURLHandler -> utilClass.updateJobTableProgress(
@@ -117,7 +119,6 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                             .put("S3PreSignedUrl", requestInput.getString("preSignedUrl"))
                             .put("s3ObjectKeyName", requestInput.getString("objectKeyName"))
                             .put("message", S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE);
-
                     LOGGER.debug(S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE);
                     objectPromise.complete(result);
                 })
@@ -214,50 +215,42 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
     }
 
     /**
-     * Checks if the object already exists in S3 using a HEAD request.
-     * If the object exists, fail the process. If not, proceed with URL generation.
+     * Checks if a resource has been onboarded by querying the `collection_type` table.
+     * Maps the provided `fileType` to an entity type and checks if a row with the given `collectionId`
+     * and entity type exists.
      *
-     * @param requestInput The input JSON object containing the key of the object in S3.
-     * @return A {@link Future<Boolean>} that completes with {@code true} if the object does not exist,
-     *         or fails with an appropriate error message if the object exists.
+     * @param requestInput JSON object containing "resourceId" and "fileType"
+     * @return Future<Boolean> indicating `true` if the resource is onboarded, or `false` otherwise.
      */
-    private Future<Boolean> checkIfObjectExistsInS3(JsonObject requestInput) {
+    private Future<Boolean> checkIfResourceOnboarded(JsonObject requestInput) {
         Promise<Boolean> promise = Promise.promise();
 
-        String objectKeyName = requestInput.getString("objectKeyName");
-        LOGGER.debug("Checking existence of object: {}", objectKeyName);
+        // Get the resourceId (collection_id) and map the fileType to entity type
+        String collectionId = requestInput.getString("resourceId");
+        String fileType = requestInput.getString("fileType").toLowerCase();
+        String entityType = entityTypeMap.getOrDefault(fileType, "");
 
-        // Construct the URL for the object
-        String urlString = dataFromS3.getFullyQualifiedUrlString(objectKeyName);
-        LOGGER.debug("Constructed URL: {}", urlString);
-        dataFromS3.setUrlFromString(urlString);
-        dataFromS3.setSignatureHeader(HttpMethod.HEAD);
+        if (entityType.isEmpty()) {
+            // Unsupported file type
+            return Future.failedFuture(new OgcException(415, "Unsupported Media Type", UNSUPPORTED_FILE_TYPE_ERROR));
+        }
 
-        // Send the HEAD request to check if the object exists
-        dataFromS3.getDataFromS3(HttpMethod.HEAD)
-                .onSuccess(responseFromS3 -> {
-                    if (responseFromS3.statusCode() == 200) {
-                        // Object already exists in S3
-                        LOGGER.error("Object already exists in S3: {}", objectKeyName);
-                        promise.fail(new OgcException(409, "Conflict", OBJECT_ALREADY_EXISTS_MESSAGE));
+        pgPool.preparedQuery(COLLECTION_TYPE_QUERY)
+                .execute(Tuple.of(collectionId, entityType))
+                .onSuccess(rows -> {
+                    Row row = rows.iterator().next();
+                    long count = row.getLong(0);
+                    if (count > 0) {
+                        // Resource is already onboarded
+                        promise.complete(true);
+                    } else {
+                        // Resource is not onboarded yet
+                        promise.complete(false);
                     }
                 })
                 .onFailure(failure -> {
-                    if (failure instanceof OgcException) {
-                        OgcException ogcEx = (OgcException) failure;
-                        if (ogcEx.getStatusCode() == 404) {
-                            // Object does not exist in S3
-                            LOGGER.debug("Object does not exist in S3: {}", objectKeyName);
-                            promise.complete(true);
-                        } else {
-                            LOGGER.error("Failed to check S3 object existence: {}", ogcEx.getMessage());
-                            promise.fail(failure);
-                        }
-                    } else {
-                        // General failure case
-                        LOGGER.error("Error while checking object existence in S3: {}", failure.getMessage());
-                        promise.fail(failure);
-                    }
+                    LOGGER.error("Error checking collection_type table: {}", failure.getMessage());
+                    promise.fail(new OgcException(500, "Internal Server Error", "Error checking collection_type table."));
                 });
 
         return promise.future();
