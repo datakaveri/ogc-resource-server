@@ -38,7 +38,8 @@ measures, including authentication and authorization.
 
 # Explanation
 ## Understanding OGC Resource Server
-- The section available [here](./docs/Solution_Architecture.md) explains the components/services used in implementing the OGC Resource Server
+- The section available [here](./docs/Solution_Architecture.md) explains the components used in implementing the OGC Resource Server
+- The section available [here](./docs/Explanation.md) provides an extensive explanation of the various API services exposed by the OGC Resource Server
 
 # How To Guide
 ## Setup and Installation
@@ -48,6 +49,9 @@ Setup and Installation guide is available [here](./docs/SETUP-and-Installation.m
 ## API Docs
 API docs are available [here](https://geoserver.dx.gsx.org.in/api)
 
-## License
+## FAQ
+FAQs are available [here](./docs/FAQ.md)
+
+# License
 [View License](./LICENSE)
 
