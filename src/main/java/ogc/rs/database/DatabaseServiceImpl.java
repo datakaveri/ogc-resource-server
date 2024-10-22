@@ -407,24 +407,33 @@ public class DatabaseServiceImpl implements DatabaseService{
   }
 
   @Override
-  public Future<List<JsonObject>> getStacItems(String collectionId) {
+  public Future<List<JsonObject>> getStacItems(String collectionId, int limit, int offset) {
     Promise<List<JsonObject>> result = Promise.promise();
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());
+    // pagination
     String getItemsQuery = String.format("select %1$s.id, st_asgeojson(%1$s.geom), %1$s.bbox, %1$s.properties" +
-        ", jsonb_agg((row_to_json(stac_item_assets.*)::jsonb-'stac_item_id')) as assets, 'Feature' as type, %1$s as" +
-            " collection from %1$s join stac_item_assets on %1$s.id=stac_item_assets.item_id" +
-            " group by %1$s.id, %1$s.geometry, %1$s.bbox, %1$s.properties limit 10", collectionId);
+        ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb-'item_id')) as assets, 'Feature' as type, %1$s as" +
+            " collection from %1$s join stac_items_assets on %1$s.id=stac_items_assets.item_id" +
+            " group by %1$s.id, %1$s.geom, %1$s.bbox, %1$s.properties where p_id >= %2$d limit %3$d order by p_id"
+        , collectionId, offset, limit);
     client.withConnection(
         conn ->
-            conn.preparedQuery(
-                    getItemsQuery)
+            conn.preparedQuery(getItemsQuery)
                 .collecting(collector)
                 .execute()
                 .map(SqlResult::value)
-                .onSuccess(result::complete)
+                .onSuccess(success -> {
+                  if(success.isEmpty()) {
+                    LOGGER.debug("No STAC items found!");
+                    result.complete(new ArrayList<>());
+                  } else {
+                    LOGGER.debug("STAC Items query successful.");
+                    result.complete(success);
+                  }
+                })
                 .onFailure(failed -> {
-                  LOGGER.error("Failed at stac_items_retrieval- {}", failed.getMessage());
+                  LOGGER.error("Failed to retrieve STAC items- {}", failed.getMessage());
                   result.fail("Error!");
                 }));
     return result.future();

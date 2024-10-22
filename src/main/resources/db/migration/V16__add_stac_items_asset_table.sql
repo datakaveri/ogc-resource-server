@@ -10,7 +10,7 @@ CREATE TABLE stac_items_assets (
     type VARCHAR(50) not null,
     size BIGINT not null,
     roles asset_role_enum[] not null,
-    properties jsonb
+    properties jsonb default '{}'::jsonb
 );
 
 ALTER TABLE stac_items_assets ADD CONSTRAINT unique_collection_stac_item_asset UNIQUE (collection_id, item_id, id);
