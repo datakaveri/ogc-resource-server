@@ -413,8 +413,8 @@ public class DatabaseServiceImpl implements DatabaseService{
         Collectors.mapping(Row::toJson, Collectors.toList());
     // pagination
     String getItemsQuery = String.format("select %1$s.id, st_asgeojson(%1$s.geom), %1$s.bbox, %1$s.properties" +
-        ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb-'item_id')) as assets, 'Feature' as type, %1$s as" +
-            " collection from %1$s join stac_items_assets on %1$s.id=stac_items_assets.item_id" +
+        ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb-'item_id')) as assetObjects, 'Feature' as type, %1$s " +
+            " as collection from %1$s join stac_items_assets on %1$s.id=stac_items_assets.item_id" +
             " group by %1$s.id, %1$s.geom, %1$s.bbox, %1$s.properties where p_id >= %2$d limit %3$d order by p_id"
         , collectionId, offset, limit);
     client.withConnection(
@@ -445,8 +445,8 @@ public class DatabaseServiceImpl implements DatabaseService{
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());
     String getItemQuery = String.format("select %1$s.id, st_asgeojson(%1$s.geom), %1$s.bbox, %1$s.properties" +
-        ", jsonb_agg((row_to_json(stac_item_assets.*)::jsonb-'stac_item_id')) as assets, 'Feature' as type, %1$s as" +
-        " collection from %1$s join stac_item_assets on %1$s.id=stac_item_assets.item_id" +
+        ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb-'item_id')) as assetObjects, 'Feature' as type, %1$s as" +
+        " collection from %1$s join stac_items_assets on %1$s.id=stac_items_assets.item_id" +
         " group by %1$s.id, %1$s.geometry, %1$s.bbox, %1$s.properties having id = $1::uuid", collectionId);
     client.withConnection(
         conn ->

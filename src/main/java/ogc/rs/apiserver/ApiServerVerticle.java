@@ -1272,20 +1272,9 @@ public class ApiServerVerticle extends AbstractVerticle {
                             .put("type", "application/json")
                             .put("href", stacMetaJson.getString("hostname")
                                 + "/stac/collections/" + stacCollectionId + "/items/" + stacItem.getString("id")));
-                    stacItem.getJsonArray("assets").forEach(asset -> {
-                      JsonObject assetObj = (JsonObject) asset;
-                      String assetId = assetObj.getString("id");
-                      assetObj.remove("id");
-                      assetObj.put("href", hostName + ogcBasePath + "assets/" + assetId);
-                      assetObj.put("file:size", assetObj.getInteger("size"));
-                      assetObj.remove("size");
-                      if (assetObj.getString("title") == null)
-                        assetObj.remove("title");
-                      if (assetObj.getString("description") == null)
-                        assetObj.remove("description");
-                      assets.put(assetId, assetObj);
-                    });
+                    assets = formatAssetObjectsAsPerStacSchema(stacItem.getJsonArray("assetObjects"));
                     stacItem.put("assets", assets);
+                    stacItem.remove("assetObjects");
                     stacItem.put("links", allLinksInFeature);
                   });
                   featureCollections.put("features", stacItems);
@@ -1362,9 +1351,9 @@ public class ApiServerVerticle extends AbstractVerticle {
             .put("href", stacMetaJson.getString("hostname") + "/stac"));
     dbService
         .getStacItemById(stacCollectionId, stacItemId)
-        .onSuccess(
-            stacItem -> {
+        .onSuccess(stacItem -> {
               LOGGER.debug("Success! - {}", stacItem.toString());
+              JsonObject assets = new JsonObject();
               try {
                     JsonArray allLinksInFeature = new JsonArray()
                         .add(commonLinksInFeature)
@@ -1373,6 +1362,9 @@ public class ApiServerVerticle extends AbstractVerticle {
                             .put("type", "application/json")
                             .put("href", stacMetaJson.getString("hostname")
                                 + "/stac/collections/" + stacCollectionId + "/items/" + stacItem.getString("id")));
+                    assets = formatAssetObjectsAsPerStacSchema(stacItem.getJsonArray("assetObjects"));
+                    stacItem.put("assets", assets);
+                    stacItem.remove("assetObjects");
                     stacItem.put("links", allLinksInFeature);
                     stacItem.put("stac_version", stacMetaJson.getString("stacVersion"));
                 } catch (Exception e) {
@@ -1403,6 +1395,24 @@ public class ApiServerVerticle extends AbstractVerticle {
               routingContext.next();
             });
 
+  }
+
+  private JsonObject formatAssetObjectsAsPerStacSchema(JsonArray assetArray) {
+    JsonObject assets = new JsonObject();
+    assetArray.forEach(asset -> {
+      JsonObject assetObj = (JsonObject) asset;
+      String assetId = assetObj.getString("id");
+      assetObj.remove("id");
+      assetObj.put("href", hostName + ogcBasePath + "assets/" + assetId);
+      assetObj.put("file:size", assetObj.getInteger("size"));
+      assetObj.remove("size");
+      if (assetObj.getString("title") == null)
+        assetObj.remove("title");
+      if (assetObj.getString("description") == null)
+        assetObj.remove("description");
+      assets.put(assetId, assetObj);
+    });
+    return assets;
   }
 
   // /search for item_search, rel = search, href = /search, mediaType = application/geo+json, method = GET
