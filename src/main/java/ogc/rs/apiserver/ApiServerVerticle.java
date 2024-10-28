@@ -939,7 +939,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                                               + collection.getString("id"),
                                           collection.getString("title")))
                                   .add(createLink("items", STAC + "/" + COLLECTIONS + "/" +
-                                          collection.getString("id") + "/items", collection.getString("title")))
+                                          collection.getString("id") + "/items", "Items API to fetch items belonging " +
+                                      "to this collection"))
                               )
                           .put("stac_version", stacVersion)
                           .put(
@@ -1162,7 +1163,11 @@ public class ApiServerVerticle extends AbstractVerticle {
                                 createLink(
                                     "self",
                                     STAC + "/" + COLLECTIONS + "/" + collection.getString("id"),
-                                    collection.getString("title"))))
+                                    collection.getString("title")))
+                            .add(createLink(
+                              "items",
+                              STAC + "/" + COLLECTIONS + "/" + collection.getString("id") + "/items",
+                              "Items API link to fetch Items for the collection")))
                     .put("stac_version", stacVersion)
                     .put(
                         "extent",
