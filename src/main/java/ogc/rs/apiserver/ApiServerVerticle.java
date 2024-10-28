@@ -1272,9 +1272,9 @@ public class ApiServerVerticle extends AbstractVerticle {
                             .put("type", "application/json")
                             .put("href", stacMetaJson.getString("hostname")
                                 + "/stac/collections/" + stacCollectionId + "/items/" + stacItem.getString("id")));
-                    assets = formatAssetObjectsAsPerStacSchema(stacItem.getJsonArray("assetObjects"));
+                    assets = formatAssetObjectsAsPerStacSchema(stacItem.getJsonArray("assetobjects"));
                     stacItem.put("assets", assets);
-                    stacItem.remove("assetObjects");
+                    stacItem.remove("assetobjects");
                     stacItem.put("links", allLinksInFeature);
                   });
                   featureCollections.put("features", stacItems);
@@ -1362,9 +1362,9 @@ public class ApiServerVerticle extends AbstractVerticle {
                             .put("type", "application/json")
                             .put("href", stacMetaJson.getString("hostname")
                                 + "/stac/collections/" + stacCollectionId + "/items/" + stacItem.getString("id")));
-                    assets = formatAssetObjectsAsPerStacSchema(stacItem.getJsonArray("assetObjects"));
+                    assets = formatAssetObjectsAsPerStacSchema(stacItem.getJsonArray("assetobjects"));
                     stacItem.put("assets", assets);
-                    stacItem.remove("assetObjects");
+                    stacItem.remove("assetobjects");
                     stacItem.put("links", allLinksInFeature);
                     stacItem.put("stac_version", stacMetaJson.getString("stacVersion"));
                 } catch (Exception e) {
