@@ -460,7 +460,13 @@ public class DatabaseServiceImpl implements DatabaseService{
                 .collecting(collector)
                 .execute(Tuple.of(stacItemId))
                 .map(SqlResult::value)
-                .onSuccess(success -> result.complete(success.get(0)))
+                .onSuccess(success -> {
+                  if (success.isEmpty())
+                    result.fail(new OgcException(404, "NotFoundError", "Item " + stacItemId + " not found in " +
+                        "collection " + collectionId));
+                  else
+                    result.complete(success.get(0));
+                })
                 .onFailure(failed -> {
                   LOGGER.error("Failed at stac_item_retrieval- {}", failed.getMessage());
                   result.fail("Error!");

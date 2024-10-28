@@ -1265,7 +1265,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             String nextLink = "";
             int lastIdOffset =  stacItems.get(stacItems.size() - 1).getInteger("p_id") + 1;
             String requestPath = routingContext.request().path();
-            nextLink = requestPath.substring(0, requestPath.length() - 2).concat(String.valueOf(lastIdOffset));
+            nextLink = requestPath.concat("?offset="+lastIdOffset).concat("&limit="+limit);
                 try {
                   stacItems.forEach(stacItem -> {
                     stacItem.remove("p_id");
@@ -1294,7 +1294,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                           .put("rel", "next")
                           .put("type", "application/geo+json")
                           .put("method", "GET")
-                          .put("href", nextLink)));
+                          .put("href", hostName + nextLink)));
                 } catch (Exception e) {
                   LOGGER.error("Something went wrong here: {}", e.getMessage());
                   routingContext.put(
