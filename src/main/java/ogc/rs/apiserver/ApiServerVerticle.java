@@ -1270,8 +1270,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                   stacItems.forEach(stacItem -> {
                     stacItem.remove("p_id");
                     JsonObject assets = new JsonObject();
-                    JsonArray allLinksInFeature = new JsonArray()
-                        .add(commonLinksInFeature)
+                    JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
+                    allLinksInFeature
                         .add(new JsonObject()
                             .put("rel", "self")
                             .put("type", "application/json")
@@ -1283,8 +1283,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                     stacItem.put("links", allLinksInFeature);
                   });
                   featureCollections.put("features", stacItems);
-                  featureCollections.put("links", new JsonArray()
-                      .add(commonLinksInFeature)
+                  featureCollections.put("links", commonLinksInFeature
                       .add(new JsonObject()
                           .put("rel", "self")
                           .put("type", "application/json")
@@ -1307,8 +1306,7 @@ public class ApiServerVerticle extends AbstractVerticle {
               }
           } else {
             featureCollections.put("features", stacItems);
-            featureCollections.put("links", new JsonArray()
-                .add(commonLinksInFeature)
+            featureCollections.put("links", commonLinksInFeature
                 .add(new JsonObject()
                     .put("rel", "self")
                     .put("type", "application/json")
@@ -1359,8 +1357,8 @@ public class ApiServerVerticle extends AbstractVerticle {
         .onSuccess(stacItem -> {
               JsonObject assets = new JsonObject();
               try {
-                    JsonArray allLinksInFeature = new JsonArray()
-                        .add(commonLinksInFeature)
+                    JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
+                    allLinksInFeature
                         .add(new JsonObject()
                             .put("rel", "self")
                             .put("type", "application/json")

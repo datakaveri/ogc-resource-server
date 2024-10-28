@@ -447,8 +447,8 @@ public class DatabaseServiceImpl implements DatabaseService{
     Promise<JsonObject> result = Promise.promise();
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());
-    String getItemQuery = String.format("select item_table.id, cast(st_asgeojson(item_table.geom) as json) as " +
-        "geometry, item_table.bbox, item_table.properties" +
+    String getItemQuery = String.format("select item_table.id, cast(st_asgeojson(item_table.geom) as json) as" +
+        " geometry, item_table.bbox, item_table.properties" +
         ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb-'item_id')) as assetobjects, 'Feature' as type" +
         ", '%1$s' as collection from \"%1$s\" as item_table join stac_items_assets" +
         " on item_table.id=stac_items_assets.item_id" +
