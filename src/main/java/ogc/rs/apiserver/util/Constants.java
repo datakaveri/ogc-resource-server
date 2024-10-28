@@ -43,8 +43,8 @@ public class Constants {
     public static final String STAC_CATALOG_API = "getStacLandingPage";
     public static final String STAC_COLLECTIONS_API = "getStacCollections";
     public static final String STAC_COLLECTION_API = "describeStacCollection";
-    public static final String STAC_ITEMS_API = "getItems";
-    public static final String STAC_ITEM_BY_ID_API = "getItemById";
+    public static final String STAC_ITEMS_API = "getStacItems";
+    public static final String STAC_ITEM_BY_ID_API = "getStacItemById";
     public static final String ASSET_API = "getAsset";
     public static final String STAC_CONFORMANCE_CLASSES = "getConformanceDeclaration";
     public static final String PROCESS_EXECUTION_REGEX = "/processes/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/execution";

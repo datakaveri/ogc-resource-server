@@ -62,7 +62,13 @@
           "500": {
             "$ref": "#/components/responses/ServerError"
           }
-        }
+        },
+        "servers": [
+          {
+            "url": "${HOSTNAME}",
+            "description": "OGC-Resource-Server"
+          }
+        ]
       }
     },
     "/stac/conformance": {
@@ -80,7 +86,13 @@
           "500": {
             "$ref": "#/components/responses/ServerError"
           }
-        }
+        },
+        "servers": [
+          {
+            "url": "${HOSTNAME}",
+            "description": "OGC-Resource-Server"
+          }
+        ]
       }
     },
     "/stac/collections": {
@@ -101,7 +113,13 @@
           "500": {
             "$ref": "#/components/responses/ServerError"
           }
-        }
+        },
+        "servers": [
+          {
+            "url": "${HOSTNAME}",
+            "description": "OGC-Resource-Server"
+          }
+        ]
       }
     },
     "/assets/{assetId}": {
@@ -112,11 +130,6 @@
         "summary": "gets the assets links that can be used to download assets",
         "description": "Based on the 'assetId', it gives the link to asset that can be downloaded",
         "operationId": "getAsset",
-        "security": [
-          {
-            "DX-AAA-Token": []
-          }
-        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/assetId"
@@ -132,7 +145,105 @@
           "500": {
             "$ref": "#/components/responses/ServerError"
           }
-        }
+        },
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "servers": [
+          {
+            "url": "${HOSTNAME}",
+            "description": "OGC-Resource-Server"
+          }
+        ]
+      }
+    },
+    "/stac/collections/{collectionId}/items": {
+      "get": {
+        "summary": "Your GET endpoint",
+        "operationId": "getStacItems",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "integer [ 1 .. 100 ] Default: 10 The optional limit parameter recommends the number of items that should be present in the response document.  If the limit parameter value is greater than advertised limit maximum, the server must return the maximum possible number of items, rather than responding with an error.  Only items are counted that are on the first level of the collection in the response document. Nested objects contained within the explicitly requested items must not be counted.",
+            "schema": {
+              "type": "string",
+              "default": "10"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "collectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Downloads the file associated with the asset identified by 'assetId'."
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "servers": [
+          {
+            "url": "${HOSTNAME}",
+            "description": "OGC-Resource-Server"
+          }
+        ]
+      }
+    },
+    "/stac/collections/{collectionId}/items/{itemId}": {
+      "get": {
+        "summary": "Your GET endpoint",
+        "operationId": "getStacItemById",
+        "parameters": [
+          {
+            "name": "collectionId",
+            "in": "path",
+            "description": "local identifier of a collection",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "description": "local identifier of an item",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Downloads the file associated with the asset identified by 'assetId'."
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "servers": [
+          {
+            "url": "${HOSTNAME}",
+            "description": "OGC-Resource-Server"
+          }
+        ]
       }
     }
   },
@@ -143,14 +254,6 @@
     }
   ],
   "components": {
-    "securitySchemes": {
-      "DX-AAA-Token": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT",
-        "description": "A <b> valid Auth token </b> to process the request."
-      }
-    },
     "parameters": {
       "bbox": {
         "name": "bbox",
@@ -225,6 +328,14 @@
         }
       }
     },
+    "securitySchemes": {
+      "DX-AAA-Token": {
+        "type": "http",
+        "description": "A <b> valid Auth token </b> to process the request.",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
     "responses": {
       "CatalogLandingPage": {
         "description": "The landing page provides links to the API definition\n(link relations `service-desc` and `service-doc`).",
@@ -233,40 +344,44 @@
             "schema": {
               "$ref": "#/components/schemas/catalogLandingPage"
             },
-            "example": {
-              "type": "Catalog",
-              "stac_version": "1.0.0",
-              "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-              "description": "This object represents a Catalog in a SpatioTemporal Asset Catalog.",
-              "conformsTo": [
-                "https://api.stacspec.org/v1.0.0/core"
-              ],
-              "links": [
-                {
-                  "rel": "child",
-                  "href": "${HOSTNAME}/collections/af1c526b-283e-441b-a4fb-09e6760de9c7",
-                  "type": "application/json",
-                  "title": "Link to the STAC collection"
-                },
-                {
-                  "rel": "child",
-                  "href": "${HOSTNAME}/collections/f64743f6-1f74-4ada-8020-45cfb2d08a1b",
-                  "type": "application/json",
-                  "title": "Link to the STAC collection"
-                },
-                {
-                  "rel": "self",
-                  "href": "${HOSTNAME}/catalog",
-                  "type": "application/json",
-                  "title": "Link to the STAC catalog"
-                },
-                {
-                  "rel": "root",
-                  "href": "${HOSTNAME}/catalog",
-                  "type": "application/json",
-                  "title": "Link to the STAC catalog"
+            "examples": {
+              "default": {
+                "value": {
+                  "type": "Catalog",
+                  "stac_version": "1.0.0",
+                  "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                  "description": "This object represents a Catalog in a SpatioTemporal Asset Catalog.",
+                  "conformsTo": [
+                    "https://api.stacspec.org/v1.0.0/core"
+                  ],
+                  "links": [
+                    {
+                      "rel": "child",
+                      "href": "${HOSTNAME}/collections/af1c526b-283e-441b-a4fb-09e6760de9c7",
+                      "type": "application/json",
+                      "title": "Link to the STAC collection"
+                    },
+                    {
+                      "rel": "child",
+                      "href": "${HOSTNAME}/collections/f64743f6-1f74-4ada-8020-45cfb2d08a1b",
+                      "type": "application/json",
+                      "title": "Link to the STAC collection"
+                    },
+                    {
+                      "rel": "self",
+                      "href": "${HOSTNAME}/catalog",
+                      "type": "application/json",
+                      "title": "Link to the STAC catalog"
+                    },
+                    {
+                      "rel": "root",
+                      "href": "${HOSTNAME}/catalog",
+                      "type": "application/json",
+                      "title": "Link to the STAC catalog"
+                    }
+                  ]
                 }
-              ]
+              }
             }
           }
         }
@@ -323,16 +438,20 @@
                       "extent": {
                         "spatial": {
                           "bbox": [
-                            -180,
-                            56,
-                            -180,
-                            83
+                            [
+                              -180,
+                              56,
+                              -180,
+                              83
+                            ]
                           ]
                         },
                         "temporal": {
                           "interval": [
-                            "2015-06-23T00:00:00Z",
-                            "2019-07-10T13:44:56Z"
+                            [
+                              "2015-06-23T00:00:00Z",
+                              "2019-07-10T13:44:56Z"
+                            ]
                           ]
                         }
                       },
@@ -483,6 +602,7 @@
                   "type": "collection",
                   "title": "Districts in India",
                   "description": "Geographic information of districts in India",
+                  "stac_version": "1.0.0",
                   "license": "proprietary",
                   "links": [
                     {
@@ -506,61 +626,8 @@
       }
     },
     "schemas": {
-      "confClasses": {
-        "type": "object",
-        "properties": {
-          "conformsTo": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "conformsTo"
-        ],
-        "example": {
-          "conformsTo": [
-            "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core",
-            "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/oas30",
-            "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson"
-          ]
-        }
-      },
-      "link": {
-        "type": "object",
-        "properties": {
-          "href": {
-            "type": "string",
-            "example": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d"
-          },
-          "rel": {
-            "type": "string",
-            "example": "self"
-          },
-          "type": {
-            "type": "string",
-            "example": "application/geo+json"
-          },
-          "title": {
-            "type": "string",
-            "example": "Districts in India"
-          }
-        },
-        "required": [
-          "href",
-          "rel"
-        ]
-      },
       "catalogLandingPage": {
         "type": "object",
-        "required": [
-          "stac_version",
-          "type",
-          "id",
-          "description",
-          "links"
-        ],
         "properties": {
           "id": {
             "type": "string"
@@ -607,25 +674,49 @@
             "items": {
               "anyOf": [
                 {
-                  "title": "Reference to a JSON Schema",
                   "type": "string",
+                  "title": "Reference to a JSON Schema",
                   "format": "uri"
                 },
                 {
-                  "title": "Reference to a core extension",
-                  "type": "string"
+                  "type": "string",
+                  "title": "Reference to a core extension"
                 }
               ]
             }
           }
+        },
+        "required": [
+          "id",
+          "type",
+          "description",
+          "links",
+          "stac_version"
+        ]
+      },
+      "confClasses": {
+        "type": "object",
+        "properties": {
+          "conformsTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "conformsTo"
+        ],
+        "example": {
+          "conformsTo": [
+            "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core",
+            "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/oas30",
+            "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson"
+          ]
         }
       },
       "stacCollections": {
         "type": "object",
-        "required": [
-          "links",
-          "collections"
-        ],
         "properties": {
           "links": {
             "type": "array",
@@ -657,27 +748,22 @@
               "$ref": "#/components/schemas/stacCollection"
             }
           }
-        }
+        },
+        "required": [
+          "links",
+          "collections"
+        ]
       },
       "stacCollection": {
         "type": "object",
-        "required": [
-          "stac_version",
-          "type",
-          "id",
-          "description",
-          "license",
-          "extent",
-          "links"
-        ],
         "properties": {
           "id": {
-            "description": "identifier of the collection used, for example, in URIs",
-            "type": "string"
+            "type": "string",
+            "description": "identifier of the collection used, for example, in URIs"
           },
           "title": {
-            "description": "human readable title of the collection",
-            "type": "string"
+            "type": "string",
+            "description": "human readable title of the collection"
           },
           "type": {
             "type": "string"
@@ -719,13 +805,13 @@
             "items": {
               "anyOf": [
                 {
-                  "title": "Reference to a JSON Schema",
                   "type": "string",
+                  "title": "Reference to a JSON Schema",
                   "format": "uri"
                 },
                 {
-                  "title": "Reference to a core extension",
-                  "type": "string"
+                  "type": "string",
+                  "title": "Reference to a core extension"
                 }
               ]
             }
@@ -744,25 +830,18 @@
           "extent": {
             "type": "object",
             "description": "The extent of the features in the collection. In the Core only spatial and temporal extents are specified. Extensions may add additional  members to represent other extents, for example, thermal or pressure  ranges.\nThe first item in the array describes the overall extent of the data.  All subsequent items describe more precise extents, e.g.,  to identify clusters of data.\nClients only interested in the overall extent will only need to access the first item in each array.",
-            "required": [
-              "spatial",
-              "temporal"
-            ],
             "properties": {
               "spatial": {
-                "description": "The spatial extent of the features in the collection.",
                 "type": "object",
-                "required": [
-                  "bbox"
-                ],
+                "description": "The spatial extent of the features in the collection.",
                 "properties": {
                   "bbox": {
-                    "description": "One or more bounding boxes that describe the spatial extent of the dataset.\n\nThe first bounding box describes the overall spatial extent of the data. All subsequent bounding boxes describe  more precise bounding boxes, e.g., to identify clusters of data. Clients only interested in the overall spatial extent will only need to access the first item in each array.",
                     "type": "array",
+                    "description": "One or more bounding boxes that describe the spatial extent of the dataset.\n\nThe first bounding box describes the overall spatial extent of the data. All subsequent bounding boxes describe  more precise bounding boxes, e.g., to identify clusters of data. Clients only interested in the overall spatial extent will only need to access the first item in each array.",
                     "minItems": 1,
                     "items": {
-                      "description": "Each bounding box is provided as four or six numbers, depending on whether the coordinate reference system includes a vertical axis\n(height or depth):\n* Lower left corner, coordinate axis 1\n* Lower left corner, coordinate axis 2\n* Minimum value, coordinate axis 3 (optional)\n* Upper right corner, coordinate axis 1\n* Upper right corner, coordinate axis 2\n* Maximum value, coordinate axis 3 (optional)\nThe coordinate reference system of the values is WGS 84 longitude/latitude  (http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a different coordinate reference system is specified in `crs`.\nFor WGS 84 longitude/latitude the values are in most cases the sequence of minimum longitude, minimum latitude,  maximum longitude and maximum latitude.\nHowever, in cases where the box spans the antimeridian the first value (west-most box edge) is larger than the third  value (east-most box edge).\nIf the vertical axis is included, the third and the sixth  number are the bottom and the top of the 3-dimensional  bounding box.\nIf a feature has multiple spatial geometry properties, it is the decision of the server whether only a single spatial  geometry property is used to determine the extent or all  relevant geometries.",
                       "type": "array",
+                      "description": "Each bounding box is provided as four or six numbers, depending on whether the coordinate reference system includes a vertical axis\n(height or depth):\n* Lower left corner, coordinate axis 1\n* Lower left corner, coordinate axis 2\n* Minimum value, coordinate axis 3 (optional)\n* Upper right corner, coordinate axis 1\n* Upper right corner, coordinate axis 2\n* Maximum value, coordinate axis 3 (optional)\nThe coordinate reference system of the values is WGS 84 longitude/latitude  (http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a different coordinate reference system is specified in `crs`.\nFor WGS 84 longitude/latitude the values are in most cases the sequence of minimum longitude, minimum latitude,  maximum longitude and maximum latitude.\nHowever, in cases where the box spans the antimeridian the first value (west-most box edge) is larger than the third  value (east-most box edge).\nIf the vertical axis is included, the third and the sixth  number are the bottom and the top of the 3-dimensional  bounding box.\nIf a feature has multiple spatial geometry properties, it is the decision of the server whether only a single spatial  geometry property is used to determine the extent or all  relevant geometries.",
                       "minItems": 4,
                       "maxItems": 6,
                       "items": {
@@ -777,35 +856,35 @@
                     }
                   },
                   "crs": {
-                    "description": "Coordinate reference system of the coordinates in the spatial extent\n(property `bbox`). The default reference system is WGS 84 longitude/latitude.\nIn the Core this is the only supported coordinate reference system.\nExtensions may support additional coordinate reference systems and add additional enum values.",
                     "type": "string",
                     "enum": [
                       "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
                     ],
+                    "description": "Coordinate reference system of the coordinates in the spatial extent\n(property `bbox`). The default reference system is WGS 84 longitude/latitude.\nIn the Core this is the only supported coordinate reference system.\nExtensions may support additional coordinate reference systems and add additional enum values.",
                     "default": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
                   }
-                }
+                },
+                "required": [
+                  "bbox"
+                ]
               },
               "temporal": {
-                "description": "The temporal extent of the features in the collection.",
                 "type": "object",
-                "required": [
-                  "interval"
-                ],
+                "description": "The temporal extent of the features in the collection.",
                 "properties": {
                   "interval": {
-                    "description": "One or more time intervals that describe the temporal extent of the dataset.\nThe first time interval describes the overall temporal extent of the data. All subsequent time intervals  describe more precise time intervals, e.g., to identify  clusters of data.\nClients only interested in the overall extent will only need to access the first item in each array.",
                     "type": "array",
+                    "description": "One or more time intervals that describe the temporal extent of the dataset.\nThe first time interval describes the overall temporal extent of the data. All subsequent time intervals  describe more precise time intervals, e.g., to identify  clusters of data.\nClients only interested in the overall extent will only need to access the first item in each array.",
                     "minItems": 1,
                     "items": {
-                      "description": "Begin and end times of the time interval. The timestamps are in the coordinate reference system specified in `trs`. By default this is the Gregorian calendar.\nThe value `null` is supported and indicates an open time interval.",
                       "type": "array",
+                      "description": "Begin and end times of the time interval. The timestamps are in the coordinate reference system specified in `trs`. By default this is the Gregorian calendar.\nThe value `null` is supported and indicates an open time interval.",
                       "minItems": 2,
                       "maxItems": 2,
                       "items": {
                         "type": "string",
-                        "format": "date-time",
-                        "nullable": true
+                        "nullable": true,
+                        "format": "date-time"
                       },
                       "example": [
                         "2011-11-11T12:22:11Z",
@@ -814,20 +893,27 @@
                     }
                   },
                   "trs": {
-                    "description": "Coordinate reference system of the coordinates in the temporal extent\n(property `interval`). The default reference system is the Gregorian calendar.\nIn the Core this is the only supported temporal reference system.\nExtensions may support additional temporal reference systems and add additional enum values.",
                     "type": "string",
                     "enum": [
                       "http://www.opengis.net/def/uom/ISO-8601/0/Gregorian"
                     ],
+                    "description": "Coordinate reference system of the coordinates in the temporal extent\n(property `interval`). The default reference system is the Gregorian calendar.\nIn the Core this is the only supported temporal reference system.\nExtensions may support additional temporal reference systems and add additional enum values.",
                     "default": "http://www.opengis.net/def/uom/ISO-8601/0/Gregorian"
                   }
-                }
+                },
+                "required": [
+                  "interval"
+                ]
               }
-            }
+            },
+            "required": [
+              "spatial",
+              "temporal"
+            ]
           },
           "summaries": {
-            "description": "Summaries are either a unique set of all available values *or*\nstatistics. Statistics by default only specify the range (minimum\nand maximum values), but can optionally be accompanied by additional\nstatistical values. The range can specify the potential range of\nvalues, but it is recommended to be as precise as possible. The set\nof values must contain at least one element and it is strongly\nrecommended to list all values. It is recommended to list as many\nproperties as reasonable so that consumers get a full overview of\nthe Collection. Properties that are covered by the Collection\nspecification (e.g. `providers` and `license`) may not be repeated\nin the summaries.",
             "type": "object",
+            "description": "Summaries are either a unique set of all available values *or*\nstatistics. Statistics by default only specify the range (minimum\nand maximum values), but can optionally be accompanied by additional\nstatistical values. The range can specify the potential range of\nvalues, but it is recommended to be as precise as possible. The set\nof values must contain at least one element and it is strongly\nrecommended to list all values. It is recommended to list as many\nproperties as reasonable so that consumers get a full overview of\nthe Collection. Properties that are covered by the Collection\nspecification (e.g. `providers` and `license`) may not be repeated\nin the summaries.",
             "additionalProperties": {
               "oneOf": [
                 {
@@ -841,10 +927,6 @@
                   "type": "object",
                   "title": "Statistics",
                   "description": "By default, only ranges with a minimum and a maximum value can\nbe specified. Ranges can be specified for ordinal values only,\nwhich means they need to have a rank order. Therefore, ranges\ncan only be specified for numbers and some special types of\nstrings. Examples: grades (A to F), dates or times.\nImplementors are free to add other derived statistical values\nto the object, for example `mean` or `stddev`.",
-                  "required": [
-                    "min",
-                    "max"
-                  ],
                   "properties": {
                     "min": {
                       "anyOf": [
@@ -866,12 +948,25 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ]
                 }
               ]
             }
           }
-        }
+        },
+        "required": [
+          "id",
+          "type",
+          "description",
+          "links",
+          "stac_version",
+          "license",
+          "extent"
+        ]
       },
       "stacFeatureCollectionGeoJSON": {
         "allOf": [
@@ -880,9 +975,6 @@
           },
           {
             "type": "object",
-            "required": [
-              "features"
-            ],
             "properties": {
               "features": {
                 "type": "array",
@@ -894,10 +986,6 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "required": [
-                    "href",
-                    "rel"
-                  ],
                   "properties": {
                     "href": {
                       "type": "string"
@@ -911,7 +999,11 @@
                     "title": {
                       "type": "string"
                     }
-                  }
+                  },
+                  "required": [
+                    "href",
+                    "rel"
+                  ]
                 }
               },
               "timeStamp": {
@@ -923,14 +1015,39 @@
               "numberReturned": {
                 "$ref": "#/components/schemas/numberReturned"
               }
+            },
+            "required": [
+              "features"
+            ]
+          }
+        ]
+      },
+      "schemas-featureCollectionGeoJSON": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "FeatureCollection"
+            ]
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/featureGeoJSON"
             }
           }
+        },
+        "required": [
+          "type",
+          "features"
         ]
       },
       "featureGeoJSON": {
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "Feature"
             ]
@@ -993,6 +1110,7 @@
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "Point"
             ]
@@ -1014,6 +1132,7 @@
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "MultiPoint"
             ]
@@ -1034,46 +1153,11 @@
           "coordinates"
         ]
       },
-      "item": {
-        "description": "A GeoJSON Feature augmented with foreign members that contain values relevant to a STAC entity",
-        "type": "object",
-        "required": [
-          "stac_version",
-          "id",
-          "type",
-          "geometry",
-          "bbox",
-          "links",
-          "properties",
-          "assets"
-        ],
-        "properties": {
-          "stac_version": {
-            "type": "string"
-          },
-          "stac_extensions": {
-            "type": "array",
-            "uniqueItems": true,
-            "items": {
-              "anyOf": [
-                {
-                  "title": "Reference to a JSON Schema",
-                  "type": "string",
-                  "format": "uri"
-                },
-                {
-                  "title": "Reference to a core extension",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        }
-      },
       "linestringGeoJSON": {
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "LineString"
             ]
@@ -1095,36 +1179,40 @@
           "coordinates"
         ]
       },
-      "timeStamp": {
-        "description": "This property indicates the time and date when the response was generated.",
-        "type": "string",
-        "format": "date-time"
-      },
-      "schemas-featureCollectionGeoJSON": {
+      "multilinestringGeoJSON": {
         "type": "object",
-        "required": [
-          "type",
-          "features"
-        ],
         "properties": {
           "type": {
             "type": "string",
             "enum": [
-              "FeatureCollection"
+              "MultiLineString"
             ]
           },
-          "features": {
+          "coordinates": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/featureGeoJSON"
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "number"
+                }
+              }
             }
           }
-        }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ]
       },
       "polygonGeoJSON": {
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "Polygon"
             ]
@@ -1153,6 +1241,7 @@
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "MultiPolygon"
             ]
@@ -1180,38 +1269,11 @@
           "coordinates"
         ]
       },
-      "multilinestringGeoJSON": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "enum": [
-              "MultiLineString"
-            ]
-          },
-          "coordinates": {
-            "type": "array",
-            "items": {
-              "type": "array",
-              "minItems": 2,
-              "items": {
-                "type": "array",
-                "minItems": 2,
-                "items": {
-                  "type": "number"
-                }
-              }
-            }
-          }
-        },
-        "required": [
-          "type",
-          "coordinates"
-        ]
-      },
       "geometrycollectionGeoJSON": {
         "type": "object",
         "properties": {
           "type": {
+            "type": "string",
             "enum": [
               "GeometryCollection"
             ]
@@ -1227,6 +1289,65 @@
           "type",
           "geometries"
         ]
+      },
+      "link": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "example": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d"
+          },
+          "rel": {
+            "type": "string",
+            "example": "self"
+          },
+          "type": {
+            "type": "string",
+            "example": "application/geo+json"
+          },
+          "title": {
+            "type": "string",
+            "example": "Districts in India"
+          }
+        },
+        "required": [
+          "href",
+          "rel"
+        ]
+      },
+      "item": {
+        "type": "object",
+        "description": "A GeoJSON Feature augmented with foreign members that contain values relevant to a STAC entity",
+        "properties": {
+          "stac_version": {
+            "type": "string"
+          },
+          "stac_extensions": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "title": "Reference to a JSON Schema",
+                  "format": "uri"
+                },
+                {
+                  "type": "string",
+                  "title": "Reference to a core extension"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "stac_version"
+        ]
+      },
+      "timeStamp": {
+        "type": "string",
+        "description": "This property indicates the time and date when the response was generated.",
+        "format": "date-time"
       },
       "numberMatched": {
         "type": "integer",
