@@ -412,10 +412,13 @@ public class DatabaseServiceImpl implements DatabaseService{
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());
     // pagination
-    String getItemsQuery = String.format("select %1$s.id, st_asgeojson(%1$s.geom), %1$s.bbox, %1$s.properties" +
-        ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb-'item_id')) as assetobjects, 'Feature' as type, %1$s " +
-            " as collection from %1$s join stac_items_assets on %1$s.id=stac_items_assets.item_id" +
-            " group by %1$s.id, %1$s.geom, %1$s.bbox, %1$s.properties where p_id >= %2$d limit %3$d order by p_id"
+    String getItemsQuery = String.format("select item_table.id, cast(st_asgeojson(item_table.geom) as json) as" +
+            " geometry, item_table.bbox, item_table.properties, item_table.p_id" +
+            ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb - 'item_id')) as assetobjects" +
+            ", 'Feature' as type, '%1$s' as collection from \"%1$s\" as item_table join stac_items_assets" +
+            " on item_table.id=stac_items_assets.item_id" +
+            " group by item_table.id, item_table.geom, item_table.bbox" +
+            ", item_table.properties having p_id >= %2$d order by p_id limit %3$d"
         , collectionId, offset, limit);
     client.withConnection(
         conn ->
@@ -444,15 +447,18 @@ public class DatabaseServiceImpl implements DatabaseService{
     Promise<JsonObject> result = Promise.promise();
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());
-    String getItemQuery = String.format("select %1$s.id, st_asgeojson(%1$s.geom), %1$s.bbox, %1$s.properties" +
-        ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb-'item_id')) as assetobjects, 'Feature' as type, %1$s as" +
-        " collection from %1$s join stac_items_assets on %1$s.id=stac_items_assets.item_id" +
-        " group by %1$s.id, %1$s.geometry, %1$s.bbox, %1$s.properties having id = $1::uuid", collectionId);
+    String getItemQuery = String.format("select item_table.id, cast(st_asgeojson(item_table.geom) as json) as " +
+        "geometry, item_table.bbox, item_table.properties" +
+        ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb-'item_id')) as assetobjects, 'Feature' as type" +
+        ", '%1$s' as collection from \"%1$s\" as item_table join stac_items_assets" +
+        " on item_table.id=stac_items_assets.item_id" +
+        " group by item_table.id, item_table.geom, item_table.bbox, item_table.properties" +
+        " having item_table.id = $1::text", collectionId);
     client.withConnection(
         conn ->
             conn.preparedQuery(getItemQuery)
                 .collecting(collector)
-                .execute(Tuple.of(UUID.fromString(stacItemId)))
+                .execute(Tuple.of(stacItemId))
                 .map(SqlResult::value)
                 .onSuccess(success -> result.complete(success.get(0)))
                 .onFailure(failed -> {

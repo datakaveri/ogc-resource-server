@@ -1352,7 +1352,6 @@ public class ApiServerVerticle extends AbstractVerticle {
     dbService
         .getStacItemById(stacCollectionId, stacItemId)
         .onSuccess(stacItem -> {
-              LOGGER.debug("Success! - {}", stacItem.toString());
               JsonObject assets = new JsonObject();
               try {
                     JsonArray allLinksInFeature = new JsonArray()
