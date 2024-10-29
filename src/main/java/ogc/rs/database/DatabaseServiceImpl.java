@@ -582,8 +582,28 @@ public class DatabaseServiceImpl implements DatabaseService{
         .onSuccess(
             success -> {
               if (success.isEmpty()) {
-                LOGGER.error("Given assets is not present");
-                result.fail(new OgcException(404, "Not found", "Asset not found"));
+                LOGGER.info("Given asset is not present in stac_collections_assets table. Trying stac_items_assets " +
+                    "table...");
+                client.withConnection(conn1 ->
+                  conn1.preparedQuery("select * from stac_items_assets where id = $1::uuid")
+                      .collecting(collector)
+                      .execute(Tuple.of(UUID.fromString(assetId)))
+                      .map(SqlResult::value)
+                      .onSuccess(successAsset -> {
+                        if (successAsset.isEmpty()) {
+                          LOGGER.error("Given asset is not present in either stac_collections_assets or " +
+                              "stac_items_assets table");
+                          result.fail(new OgcException(404, "Not found", "Asset not found"));
+                        }
+                        else {
+                          LOGGER.debug("Asset Result: {}", successAsset.get(0));
+                          result.complete(successAsset.get(0));
+                        }
+                      })
+                      .onFailure(failedOp -> {
+                        LOGGER.error("Failed to get assets! - {}", failedOp.getMessage());
+                        result.fail("Error!");
+                      }));
               } else {
                 LOGGER.debug("Asset Result: {}", success.get(0));
                 result.complete(success.get(0));
