@@ -5,13 +5,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.http.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
@@ -19,6 +13,19 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.RequestParameters;
 import io.vertx.ext.web.validation.ValidationHandler;
+import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
+import ogc.rs.apiserver.util.AuthInfo;
+import ogc.rs.apiserver.util.AuthInfo.RoleEnum;
+import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueService;
+import ogc.rs.common.DataFromS3;
+import ogc.rs.database.DatabaseService;
+import ogc.rs.jobs.JobsService;
+import ogc.rs.metering.MeteringService;
+import ogc.rs.processes.ProcessesRunnerService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -29,27 +36,13 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
-import ogc.rs.apiserver.util.AuthInfo;
-import ogc.rs.apiserver.util.AuthInfo.RoleEnum;
-import ogc.rs.common.DataFromS3;
-import ogc.rs.apiserver.util.OgcException;
-import ogc.rs.apiserver.util.ProcessException;
-import ogc.rs.catalogue.CatalogueService;
-import ogc.rs.database.DatabaseService;
-import ogc.rs.jobs.JobsService;
-import ogc.rs.metering.MeteringService;
-import ogc.rs.processes.ProcessesRunnerService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
-import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.apiserver.util.Constants.NOT_FOUND;
+import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.*;
-import static ogc.rs.metering.util.MeteringConstant.*;
-import static ogc.rs.metering.util.MeteringConstant.ROLE;
 import static ogc.rs.metering.util.MeteringConstant.USER_ID;
+import static ogc.rs.metering.util.MeteringConstant.*;
 
 /**
  * The OGC Resource Server API Verticle.
@@ -82,6 +75,7 @@ public class ApiServerVerticle extends AbstractVerticle {
   private String hostName;
   private DatabaseService dbService;
   private Buffer ogcLandingPageBuf;
+  private JsonObject stacMetaJson;
   private HttpClient httpClient;
   private ProcessesRunnerService processService;
   private JobsService jobsService;
@@ -110,6 +104,11 @@ public class ApiServerVerticle extends AbstractVerticle {
     /* Initialize OGC landing page buffer - since configured hostname needs to be in it */
     String landingPageTemplate = vertx.fileSystem().readFileBlocking("docs/landingPage.json").toString();
     ogcLandingPageBuf = Buffer.buffer(landingPageTemplate.replace("$HOSTNAME", hostName));
+
+    /* Initialise STAC_metadata_object from filesystem */
+    String stacMetaObject = vertx.fileSystem().readFileBlocking("docs/getStacLandingPage.json").toString();
+    stacMetaJson = new JsonObject(stacMetaObject);
+    stacMetaJson.put("hostname", hostName);
 
     /* Initialize S3-related things */
     S3_BUCKET = config().getString("s3BucketName");
@@ -356,6 +355,7 @@ public class ApiServerVerticle extends AbstractVerticle {
           })
         .compose(dbCall -> dbService.getFeatures(collectionId, queryParamsMap, isCrsValid.result()))
         .onSuccess(success -> {
+          success.put("links", new JsonArray());
           int limit = Integer.parseInt(queryParamsMap.get("limit"));
           String nextLink = "";
           JsonArray features = success.getJsonArray("features");
@@ -370,8 +370,18 @@ public class ApiServerVerticle extends AbstractVerticle {
             nextLink = requestPath.toString().substring(0, requestPath.toString().length() - 1);
             nextLink = nextLink.replace("[", "").replace("]","");
             LOGGER.debug("**** nextLink- {}", nextLink);
+            if ( limit < success.getInteger("numberMatched")
+                && (success.getInteger("numberMatched") > success.getInteger("numberReturned"))
+                && success.getInteger("numberReturned") != 0 ) {
+              success.getJsonArray("links")
+                  .add(new JsonObject()
+                      .put("href",
+                          hostName + nextLink)
+                      .put("rel", "next")
+                      .put("type", "application/geo+json" ));
+            }
           }
-          success.put("links", new JsonArray()
+          success.getJsonArray("links")
                   .add(new JsonObject()
                       .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items")
                       .put("rel", "self")
@@ -379,18 +389,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                   .add(new JsonObject()
                       .put("href", hostName + ogcBasePath  + COLLECTIONS + "/" + collectionId + "/items")
                       .put("rel", "alternate")
-                      .put("type", "application/geo+json")))
-              .put("timeStamp", Instant.now().toString());
-          if ( limit < success.getInteger("numberMatched")
-              && (success.getInteger("numberMatched") > success.getInteger("numberReturned"))
-              && success.getInteger("numberReturned") != 0 ) {
-            success.getJsonArray("links")
-                .add(new JsonObject()
-                    .put("href",
-                        hostName + nextLink)
-                    .put("rel", "next")
-                    .put("type", "application/geo+json" ));
-          }
+                      .put("type", "application/geo+json"));
+          success.put("timeStamp", Instant.now().toString());
           routingContext.put("response",success.toString());
           routingContext.put("statusCode", 200);
           routingContext.put("crs", "<" + queryParamsMap.getOrDefault("crs", DEFAULT_SERVER_CRS) + ">");
@@ -938,19 +938,9 @@ public class ApiServerVerticle extends AbstractVerticle {
                                               + "/"
                                               + collection.getString("id"),
                                           collection.getString("title")))
-                              //                                  .add(
-                              //                                      createLink(
-                              //                                          "items",
-                              //                                          STAC
-                              //                                              + "/"
-                              //                                              + COLLECTIONS
-                              //                                              + "/"
-                              //                                              +
-                              // collection.getString("id")
-                              //                                              + "/"
-                              //                                              + ITEMS,
-                              //
-                              // collection.getString("title")))
+                                  .add(createLink("items", STAC + "/" + COLLECTIONS + "/" +
+                                          collection.getString("id") + "/items", "Items API to fetch items belonging " +
+                                      "to this collection"))
                               )
                           .put("stac_version", stacVersion)
                           .put(
@@ -1147,22 +1137,22 @@ public class ApiServerVerticle extends AbstractVerticle {
         .onSuccess(
             collection -> {
               LOGGER.debug("Success! - {}", collection.toString());
-              JsonObject jsonResult = collection;
               try {
-                String jsonFilePath = "docs/getStacLandingPage.json";
-                FileSystem fileSystem = vertx.fileSystem();
-                Buffer buffer = fileSystem.readFileBlocking(jsonFilePath);
-                JsonObject stacMetadata = new JsonObject(buffer.toString());
-                if (jsonResult.getJsonArray("temporal") == null
-                    || jsonResult.getJsonArray("temporal").isEmpty()) {
-                  jsonResult.put("temporal", new JsonArray().add(null).add(null));
+//                String jsonFilePath = "docs/getStacLandingPage.json";
+//                FileSystem fileSystem = vertx.fileSystem();
+//                Buffer buffer = fileSystem.readFileBlocking(jsonFilePath);
+//                JsonObject stacMetadata = new JsonObject(buffer.toString());
+
+                if (collection.getJsonArray("temporal") == null
+                    || collection.getJsonArray("temporal").isEmpty()) {
+                  collection.put("temporal", new JsonArray().add(null).add(null));
                 }
-                if (jsonResult.getString("license") == null
-                    || jsonResult.getString("license").isEmpty()) {
-                  jsonResult.put("license", stacMetadata.getString("stacLicense"));
+                if (collection.getString("license") == null
+                    || collection.getString("license").isEmpty()) {
+                  collection.put("license", stacMetaJson.getString("stacLicense"));
                 }
-                String stacVersion = stacMetadata.getString("stacVersion");
-                jsonResult
+                String stacVersion = stacMetaJson.getString("stacVersion");
+                collection
                     .put("type", "Collection")
                     .put(
                         "links",
@@ -1172,8 +1162,12 @@ public class ApiServerVerticle extends AbstractVerticle {
                             .add(
                                 createLink(
                                     "self",
-                                    STAC + "/" + COLLECTIONS + "/" + jsonResult.getString("id"),
-                                    jsonResult.getString("title"))))
+                                    STAC + "/" + COLLECTIONS + "/" + collection.getString("id"),
+                                    collection.getString("title")))
+                            .add(createLink(
+                              "items",
+                              STAC + "/" + COLLECTIONS + "/" + collection.getString("id") + "/items",
+                              "Items API link to fetch Items for the collection")))
                     .put("stac_version", stacVersion)
                     .put(
                         "extent",
@@ -1183,17 +1177,17 @@ public class ApiServerVerticle extends AbstractVerticle {
                                 new JsonObject()
                                     .put(
                                         "bbox",
-                                        new JsonArray().add(jsonResult.getJsonArray("bbox"))))
+                                        new JsonArray().add(collection.getJsonArray("bbox"))))
                             .put(
                                 "temporal",
                                 new JsonObject()
                                     .put(
                                         "interval",
-                                        new JsonArray().add(jsonResult.getJsonArray("temporal")))));
-                if (jsonResult.containsKey("assets")) {
+                                        new JsonArray().add(collection.getJsonArray("temporal")))));
+                if (collection.containsKey("assets")) {
                   JsonObject assets = new JsonObject();
 
-                  jsonResult
+                  collection
                       .getJsonArray("assets")
                       .forEach(
                           assetJson -> {
@@ -1208,11 +1202,11 @@ public class ApiServerVerticle extends AbstractVerticle {
                             asset.remove("stac_collections_id");
                             assets.put(((JsonObject) assetJson).getString("id"), asset);
                           });
-                  jsonResult.put("assets", assets);
+                  collection.put("assets", assets);
                 }
 
-                jsonResult.remove("bbox");
-                jsonResult.remove("temporal");
+                collection.remove("bbox");
+                collection.remove("temporal");
               } catch (Exception e) {
                 LOGGER.error("Something went wrong here: {}", e.getMessage());
                 routingContext.put(
@@ -1223,7 +1217,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                 routingContext.put("statusCode", 500);
                 routingContext.next();
               }
-              routingContext.put("response", jsonResult.toString());
+              routingContext.put("response", collection.toString());
               routingContext.put("statusCode", 200);
               routingContext.next();
             })
@@ -1242,6 +1236,196 @@ public class ApiServerVerticle extends AbstractVerticle {
             });
   }
 
+  // /items for stac_collection
+  public void getStacItems(RoutingContext routingContext){
+    String stacCollectionId = routingContext.pathParam("collectionId");
+    int limit = routingContext.queryParams().contains("limit")
+        ? Integer.parseInt(routingContext.queryParams().get("limit")):10;
+    int offset = routingContext.queryParams().contains("offset")
+        ? Integer.parseInt(routingContext.queryParams().get("offset")):1;
+    LOGGER.debug("collectionId- {}", stacCollectionId);
+    JsonObject featureCollections = new JsonObject();
+    JsonArray commonLinksInFeature = new JsonArray()
+        .add(new JsonObject()
+            .put("rel", "collection")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac/collections/" + stacCollectionId))
+        .add(new JsonObject()
+            .put("rel", "parent")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac/collections/" + stacCollectionId))
+        .add(new JsonObject()
+            .put("rel", "root")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac"));
+    dbService
+        .getStacItems(stacCollectionId, limit, offset)
+        .onSuccess(stacItems -> {
+          if (!stacItems.isEmpty()) {
+            String nextLink = "";
+            int lastIdOffset =  stacItems.get(stacItems.size() - 1).getInteger("p_id") + 1;
+            String requestPath = routingContext.request().path();
+            nextLink = requestPath.concat("?offset="+lastIdOffset).concat("&limit="+limit);
+                try {
+                  stacItems.forEach(stacItem -> {
+                    stacItem.remove("p_id");
+                    JsonObject assets = new JsonObject();
+                    JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
+                    allLinksInFeature
+                        .add(new JsonObject()
+                            .put("rel", "self")
+                            .put("type", "application/json")
+                            .put("href", stacMetaJson.getString("hostname")
+                                + "/stac/collections/" + stacCollectionId + "/items/" + stacItem.getString("id")));
+                    assets = formatAssetObjectsAsPerStacSchema(stacItem.getJsonArray("assetobjects"));
+                    stacItem.put("assets", assets);
+                    stacItem.remove("assetobjects");
+                    stacItem.put("links", allLinksInFeature);
+                  });
+                  featureCollections.put("features", stacItems);
+                  featureCollections.put("links", commonLinksInFeature
+                      .add(new JsonObject()
+                          .put("rel", "self")
+                          .put("type", "application/json")
+                          .put("href", stacMetaJson.getString("hostname")
+                              + "/stac/collections/" + stacCollectionId + "/items"))
+                      .add(new JsonObject()
+                          .put("rel", "next")
+                          .put("type", "application/geo+json")
+                          .put("method", "GET")
+                          .put("href", hostName + nextLink)));
+                } catch (Exception e) {
+                  LOGGER.error("Something went wrong here: {}", e.getMessage());
+                  routingContext.put(
+                      "response",
+                      new OgcException(500, "Internal Server Error", "Something broke")
+                          .getJson()
+                          .toString());
+                  routingContext.put("statusCode", 500);
+                  routingContext.next();
+              }
+          } else {
+            featureCollections.put("features", stacItems);
+            featureCollections.put("links", commonLinksInFeature
+                .add(new JsonObject()
+                    .put("rel", "self")
+                    .put("type", "application/json")
+                    .put("href", stacMetaJson.getString("hostname")
+                        + "/stac/collections/" + stacCollectionId + "/items")));
+          }
+          routingContext.put("response", featureCollections.toString());
+          routingContext.put("statusCode", 200);
+          routingContext.next();
+        })
+        .onFailure(
+            failed -> {
+              if (failed instanceof OgcException) {
+                routingContext.put("response", ((OgcException) failed).getJson().toString());
+                routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+              } else {
+                OgcException ogcException =
+                    new OgcException(500, "Internal Server Error", "Internal Server Error");
+                routingContext.put("response", ogcException.getJson().toString());
+                routingContext.put("statusCode", ogcException.getStatusCode());
+              }
+              routingContext.next();
+            });
+  }
+
+  // /item/<item-id> for stac_item
+  public void getStacItemById(RoutingContext routingContext){
+//    String stacCollectionId = routingContext.normalizedPath().split("/")[3];
+//    String stacItemId = routingContext.normalizedPath().split("/")[5];
+    String stacCollectionId = routingContext.pathParam("collectionId");
+    String stacItemId = routingContext.pathParam("itemId");
+        LOGGER.debug("stacCollectionId- {}, stacItemId- {}", stacCollectionId, stacItemId);
+    JsonArray commonLinksInFeature = new JsonArray()
+        .add(new JsonObject()
+            .put("rel", "collection")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac/collections/" + stacCollectionId))
+        .add(new JsonObject()
+            .put("rel", "parent")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac/collections/" + stacCollectionId))
+        .add(new JsonObject()
+            .put("rel", "root")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac"));
+    dbService
+        .getStacItemById(stacCollectionId, stacItemId)
+        .onSuccess(stacItem -> {
+              JsonObject assets = new JsonObject();
+              try {
+                    JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
+                    allLinksInFeature
+                        .add(new JsonObject()
+                            .put("rel", "self")
+                            .put("type", "application/json")
+                            .put("href", stacMetaJson.getString("hostname")
+                                + "/stac/collections/" + stacCollectionId + "/items/" + stacItem.getString("id")));
+                    assets = formatAssetObjectsAsPerStacSchema(stacItem.getJsonArray("assetobjects"));
+                    stacItem.put("assets", assets);
+                    stacItem.remove("assetobjects");
+                    stacItem.put("links", allLinksInFeature);
+                    stacItem.put("stac_version", stacMetaJson.getString("stacVersion"));
+                } catch (Exception e) {
+                LOGGER.error("Something went wrong here: {}", e.getMessage());
+                routingContext.put(
+                    "response",
+                    new OgcException(500, "Internal Server Error", "Something broke")
+                        .getJson()
+                        .toString());
+                routingContext.put("statusCode", 500);
+                routingContext.next();
+              }
+              routingContext.put("response", stacItem.toString());
+              routingContext.put("statusCode", 200);
+              routingContext.next();
+            })
+        .onFailure(
+            failed -> {
+              if (failed instanceof OgcException) {
+                routingContext.put("response", ((OgcException) failed).getJson().toString());
+                routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+              } else {
+                OgcException ogcException =
+                    new OgcException(500, "Internal Server Error", "Internal Server Error");
+                routingContext.put("response", ogcException.getJson().toString());
+                routingContext.put("statusCode", ogcException.getStatusCode());
+              }
+              routingContext.next();
+            });
+
+  }
+
+  private JsonObject formatAssetObjectsAsPerStacSchema(JsonArray assetArray) {
+    JsonObject assets = new JsonObject();
+    assetArray.forEach(asset -> {
+      JsonObject assetObj = (JsonObject) asset;
+      String assetId = assetObj.getString("id");
+      assetObj.remove("id");
+      assetObj.put("href", hostName + ogcBasePath + "assets/" + assetId);
+      assetObj.put("file:size", assetObj.getInteger("size"));
+      assetObj.remove("size");
+      if (assetObj.getString("title") == null)
+        assetObj.remove("title");
+      if (assetObj.getString("description") == null)
+        assetObj.remove("description");
+      assets.put(assetId, assetObj);
+    });
+    return assets;
+  }
+
+  // /search for item_search, rel = search, href = /search, mediaType = application/geo+json, method = GET
+  public void getStacItemByItemSearch(RoutingContext routingContext){
+
+  }
+
+  // /search for item_search, rel = search, href = /search, mediaType = application/geo+json, method = POST
+  public void postStacItemByItemSearch(RoutingContext routingContext){
+
+  }
   public void getAssets(RoutingContext routingContext) {
     String assetId = routingContext.pathParam("assetId");
 

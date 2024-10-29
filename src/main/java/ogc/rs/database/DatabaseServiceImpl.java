@@ -245,8 +245,8 @@ public class DatabaseServiceImpl implements DatabaseService{
     Promise<JsonObject> result = Promise.promise();
 
     Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
-    Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0)
-      , row -> row.getInteger("count"));
+    // Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0)
+     // , row -> row.getInteger("count"));
     String srid = String.valueOf(crs.get(queryParams.get("crs")));
     String geoColumn = "cast(st_asgeojson(st_transform(geom," + srid + "),9,0) as json)";
     String sqlQuery = "Select id, 'Feature' as type," + geoColumn + " as geometry, " +
@@ -405,6 +405,74 @@ public class DatabaseServiceImpl implements DatabaseService{
                     }));
     return result.future();
   }
+
+  @Override
+  public Future<List<JsonObject>> getStacItems(String collectionId, int limit, int offset) {
+    Promise<List<JsonObject>> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+    // pagination
+    String getItemsQuery = String.format("select item_table.id, cast(st_asgeojson(item_table.geom) as json) as" +
+            " geometry, item_table.bbox, item_table.properties, item_table.p_id" +
+            ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb - 'item_id')) as assetobjects" +
+            ", 'Feature' as type, '%1$s' as collection from \"%1$s\" as item_table join stac_items_assets" +
+            " on item_table.id=stac_items_assets.item_id" +
+            " group by item_table.id, item_table.geom, item_table.bbox" +
+            ", item_table.properties having p_id >= %2$d order by p_id limit %3$d"
+        , collectionId, offset, limit);
+    client.withConnection(
+        conn ->
+            conn.preparedQuery(getItemsQuery)
+                .collecting(collector)
+                .execute()
+                .map(SqlResult::value)
+                .onSuccess(success -> {
+                  if(success.isEmpty()) {
+                    LOGGER.debug("No STAC items found!");
+                    result.complete(new ArrayList<>());
+                  } else {
+                    LOGGER.debug("STAC Items query successful.");
+                    result.complete(success);
+                  }
+                })
+                .onFailure(failed -> {
+                  LOGGER.error("Failed to retrieve STAC items- {}", failed.getMessage());
+                  result.fail("Error!");
+                }));
+    return result.future();
+  }
+
+  @Override
+  public Future<JsonObject> getStacItemById(String collectionId, String stacItemId) {
+    Promise<JsonObject> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+    String getItemQuery = String.format("select item_table.id, cast(st_asgeojson(item_table.geom) as json) as" +
+        " geometry, item_table.bbox, item_table.properties" +
+        ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb-'item_id')) as assetobjects, 'Feature' as type" +
+        ", '%1$s' as collection from \"%1$s\" as item_table join stac_items_assets" +
+        " on item_table.id=stac_items_assets.item_id" +
+        " group by item_table.id, item_table.geom, item_table.bbox, item_table.properties" +
+        " having item_table.id = $1::text", collectionId);
+    client.withConnection(
+        conn ->
+            conn.preparedQuery(getItemQuery)
+                .collecting(collector)
+                .execute(Tuple.of(stacItemId))
+                .map(SqlResult::value)
+                .onSuccess(success -> {
+                  if (success.isEmpty())
+                    result.fail(new OgcException(404, "NotFoundError", "Item " + stacItemId + " not found in " +
+                        "collection " + collectionId));
+                  else
+                    result.complete(success.get(0));
+                })
+                .onFailure(failed -> {
+                  LOGGER.error("Failed at stac_item_retrieval- {}", failed.getMessage());
+                  result.fail("Error!");
+                }));
+    return result.future();
+  }
   public Future<List<JsonObject>> getTileMatrixSetMetaData(String tileMatrixSet) {
     LOGGER.info("getTileMatrixSetMetaData");
     Promise<List<JsonObject>> result = Promise.promise();
@@ -514,8 +582,28 @@ public class DatabaseServiceImpl implements DatabaseService{
         .onSuccess(
             success -> {
               if (success.isEmpty()) {
-                LOGGER.error("Given assets is not present");
-                result.fail(new OgcException(404, "Not found", "Asset not found"));
+                LOGGER.info("Given asset is not present in stac_collections_assets table. Trying stac_items_assets " +
+                    "table...");
+                client.withConnection(conn1 ->
+                  conn1.preparedQuery("select * from stac_items_assets where id = $1::uuid")
+                      .collecting(collector)
+                      .execute(Tuple.of(UUID.fromString(assetId)))
+                      .map(SqlResult::value)
+                      .onSuccess(successAsset -> {
+                        if (successAsset.isEmpty()) {
+                          LOGGER.error("Given asset is not present in either stac_collections_assets or " +
+                              "stac_items_assets table");
+                          result.fail(new OgcException(404, "Not found", "Asset not found"));
+                        }
+                        else {
+                          LOGGER.debug("Asset Result: {}", successAsset.get(0));
+                          result.complete(successAsset.get(0));
+                        }
+                      })
+                      .onFailure(failedOp -> {
+                        LOGGER.error("Failed to get assets! - {}", failedOp.getMessage());
+                        result.fail("Error!");
+                      }));
               } else {
                 LOGGER.debug("Asset Result: {}", success.get(0));
                 result.complete(success.get(0));

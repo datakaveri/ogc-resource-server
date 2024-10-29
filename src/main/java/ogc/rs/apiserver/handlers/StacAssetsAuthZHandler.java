@@ -48,35 +48,42 @@ public class StacAssetsAuthZHandler implements Handler<RoutingContext> {
               }
 
               LOGGER.debug("Asset found: {}", asset);
+            try {
+                String collectionId = asset.containsKey("stac_collections_id")
+                  ? asset.getString("stac_collections_id") : asset.getString("collection_id");
+                if (!user.isRsToken()
+                    && !collectionId.equals(resourceId.toString())) {
+                  LOGGER.error("Collection associated with asset is not the same as in token.");
+                  routingContext.fail(new OgcException(401, NOT_AUTHORIZED, INVALID_COLLECTION_ID));
+                  return;
+                }
 
-              if (!user.isRsToken()
-                  && !asset.getString("stac_collections_id").equals(resourceId.toString())) {
-                LOGGER.error("Collection associated with asset is not the same as in token.");
-                routingContext.fail(new OgcException(401, NOT_AUTHORIZED, INVALID_COLLECTION_ID));
-                return;
+                LOGGER.debug("Collection ID in token validated.");
+
+
+                databaseService
+                    .getAccess(collectionId)
+                    .onSuccess(
+                        isOpenResource -> {
+                          user.setResourceId(UUID.fromString(asset.getString("stac_collections_id")));
+
+                          if (isOpenResource && user.isRsToken()) {
+                            LOGGER.debug("Resource is open, access granted.");
+                            routingContext.next();
+                          } else {
+                            handleSecureResource(routingContext, user, isOpenResource);
+                          }
+                        })
+                    .onFailure(
+                        failure -> {
+                          LOGGER.error(
+                              "Failed to retrieve collection access: {}", failure.getMessage());
+                          routingContext.fail(failure);
+                        });
+              } catch (Exception e) {
+                LOGGER.error("Something went wrong here! {}",e.getMessage());
+                routingContext.fail(e.getCause());
               }
-
-              LOGGER.debug("Collection ID in token validated.");
-
-              databaseService
-                  .getAccess(asset.getString("stac_collections_id"))
-                  .onSuccess(
-                      isOpenResource -> {
-                        user.setResourceId(UUID.fromString(asset.getString("stac_collections_id")));
-                        
-                        if (isOpenResource && user.isRsToken()) {
-                          LOGGER.debug("Resource is open, access granted.");
-                          routingContext.next();
-                        } else {
-                          handleSecureResource(routingContext, user, isOpenResource);
-                        }
-                      })
-                  .onFailure(
-                      failure -> {
-                        LOGGER.error(
-                            "Failed to retrieve collection access: {}", failure.getMessage());
-                        routingContext.fail(failure);
-                      });
             })
         .onFailure(
             failure -> {

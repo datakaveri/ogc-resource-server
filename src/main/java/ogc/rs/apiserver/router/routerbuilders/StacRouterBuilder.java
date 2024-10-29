@@ -60,11 +60,11 @@ public class StacRouterBuilder extends EntityRouterBuilder {
   void addImplSpecificRoutes() {
 
     routerBuilder
-    .operation(STAC_CATALOG_API)
-    .handler(apiServerVerticle::stacCatalog)
-    .handler(apiServerVerticle::putCommonResponseHeaders)
-    .handler(apiServerVerticle::buildResponse)
-    .failureHandler(failureHandler);
+        .operation(STAC_CATALOG_API)
+        .handler(apiServerVerticle::stacCatalog)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
 
     routerBuilder
     .operation(STAC_CONFORMANCE_CLASSES)
@@ -75,17 +75,31 @@ public class StacRouterBuilder extends EntityRouterBuilder {
         });
 
     routerBuilder
-    .operation(STAC_COLLECTIONS_API)
-    .handler(apiServerVerticle::stacCollections)
-    .handler(apiServerVerticle::putCommonResponseHeaders)
-    .handler(apiServerVerticle::buildResponse)
-    .failureHandler(failureHandler);
+        .operation(STAC_COLLECTIONS_API)
+        .handler(apiServerVerticle::stacCollections)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
 
     routerBuilder
         .operation(ASSET_API)
         .handler(stacAssetsAuthZHandler)
         .handler(apiServerVerticle::auditAfterApiEnded)
         .handler(apiServerVerticle::getAssets)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
+
+    routerBuilder
+        .operation(STAC_ITEMS_API)
+        .handler(apiServerVerticle::getStacItems)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
+
+    routerBuilder
+        .operation(STAC_ITEM_BY_ID_API)
+        .handler(apiServerVerticle::getStacItemById)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)
         .failureHandler(failureHandler);
