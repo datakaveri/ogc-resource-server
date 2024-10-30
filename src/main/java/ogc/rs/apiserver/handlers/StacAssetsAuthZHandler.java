@@ -65,7 +65,7 @@ public class StacAssetsAuthZHandler implements Handler<RoutingContext> {
                     .getAccess(collectionId)
                     .onSuccess(
                         isOpenResource -> {
-                          user.setResourceId(UUID.fromString(asset.getString("stac_collections_id")));
+                          user.setResourceId(UUID.fromString(collectionId));
 
                           if (isOpenResource && user.isRsToken()) {
                             LOGGER.debug("Resource is open, access granted.");
