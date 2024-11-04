@@ -2,6 +2,7 @@ package ogc.rs.apiserver;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.MultiMap;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
@@ -1418,14 +1419,112 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   // /search for item_search, rel = search, href = /search, mediaType = application/geo+json, method = GET
-  public void getStacItemByItemSearch(RoutingContext routingContext){
+  public void getStacItemByItemSearch(RoutingContext routingContext) {
+    Map<String, String> queryParamsMap = new HashMap<>();
+    try {
+      MultiMap queryParams = routingContext.queryParams();
+      queryParams.forEach(param -> queryParamsMap.put(param.getKey(), param.getValue()));
+    } catch (NullPointerException ne) {
+      OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
+      routingContext.put("response", ogcException.getJson().toString());
+      routingContext.put("statusCode", ogcException.getStatusCode());
+      routingContext.next();
+      return;
+    }
+    LOGGER.debug("<APIServer> QP- {}", queryParamsMap);
 
+    try {
+      String datetime;
+      ZonedDateTime zone, zone2;
+      DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+      if (queryParamsMap.containsKey("datetime")) {
+        datetime = queryParamsMap.get("datetime");
+        if (!datetime.contains("/")) {
+          zone = ZonedDateTime.parse(datetime, formatter);
+        } else if (datetime.contains("/")) {
+          String[] dateTimeArr = datetime.split("/");
+          if (dateTimeArr[0].equals("..")) { // -- before
+            zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
+          }
+          else if (dateTimeArr[1].equals("..")) { // -- after
+            zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
+          }
+          else {
+            zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
+            zone2 = ZonedDateTime.parse(dateTimeArr[1], formatter);
+            if (zone2.isBefore(zone)){
+              OgcException ogcException = new OgcException(400, "Bad Request", "After time cannot be lesser " +
+                  "than Before time");
+              routingContext.put("response", ogcException.getJson().toString());
+              routingContext.put("statusCode", ogcException.getStatusCode());
+              routingContext.next();
+              return;
+            }
+          }
+        }
+      }
+    } catch (NullPointerException ne) {
+      OgcException ogcException =
+          new OgcException(500, "Internal Server Error", "Internal Server Error");
+      routingContext.put("response", ogcException.getJson().toString());
+      routingContext.put("statusCode", ogcException.getStatusCode());
+      routingContext.next();
+      return;
+
+    } catch (DateTimeParseException dtpe) {
+      OgcException ogcException =
+          new OgcException(400, "Bad Request", "Time parameter not in ISO format");
+      routingContext.put("response", ogcException.getJson().toString());
+      routingContext.put("statusCode", ogcException.getStatusCode());
+      routingContext.next();
+      return;
+    }
+    dbService.stacItemSearch(queryParamsMap)
+    .onSuccess(success -> {
+      success.put("links", new JsonArray());
+      int limit = Integer.parseInt(queryParamsMap.getOrDefault("limit", "10"));
+      String nextLink = "";
+      JsonArray features = success.getJsonArray("features");
+      if (!features.isEmpty()) {
+        int lastIdOffset = features.getJsonObject(features.size() - 1).getInteger("id") + 1;
+        queryParamsMap.put("offset", String.valueOf(lastIdOffset));
+        AtomicReference<String> requestPath = new AtomicReference<>(routingContext.request().path());
+        if (!queryParamsMap.isEmpty()) {
+          requestPath.set(requestPath + "?");
+          queryParamsMap.forEach((key, value) -> requestPath.set(requestPath + key + "=" + value + "&"));
+        }
+        nextLink = requestPath.toString().substring(0, requestPath.toString().length() - 1);
+        nextLink = nextLink.replace("[", "").replace("]","");
+        LOGGER.debug("**** nextLink- {}", nextLink);
+      }
+      success.getJsonArray("links")
+          .add(new JsonObject()
+              .put("href", hostName + ogcBasePath + "/stac/search")
+              .put("rel", "self")
+              .put("type", "application/geo+json"));
+      success.put("timeStamp", Instant.now().toString());
+      routingContext.put("response",success.toString());
+      routingContext.put("statusCode", 200);
+      routingContext.next();
+    })
+    .onFailure(failed -> {
+      if (failed instanceof OgcException){
+        routingContext.put("response",((OgcException) failed).getJson().toString());
+        routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+      }
+      else{
+        OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
+        routingContext.put("response", ogcException.getJson().toString());
+        routingContext.put("statusCode", ogcException.getStatusCode());
+      }
+      routingContext.next();
+    });
   }
 
   // /search for item_search, rel = search, href = /search, mediaType = application/geo+json, method = POST
-  public void postStacItemByItemSearch(RoutingContext routingContext){
-
-  }
+//  public void postStacItemByItemSearch(RoutingContext routingContext){
+//
+//  }
   public void getAssets(RoutingContext routingContext) {
     String assetId = routingContext.pathParam("assetId");
 

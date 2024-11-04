@@ -6,7 +6,10 @@ import org.apache.logging.log4j.Logger;
 import static ogc.rs.common.Constants.DEFAULT_CRS_SRID;
 
 public class FeatureQueryBuilder {
+  private static final Logger LOGGER = LogManager.getLogger(FeatureQueryBuilder.class);
+
   private String tableName;
+  private String[] tableNames;
   private int limit;
   private String bbox;
   private String datetime;
@@ -18,8 +21,8 @@ public class FeatureQueryBuilder {
   private String bboxCrsSrid;
   private String geoColumn;
   private String datetimeKey;
-  private static final Logger LOGGER = LogManager.getLogger(FeatureQueryBuilder.class);
-
+  private String itemIds;
+  private String geometry;
 
   public FeatureQueryBuilder(String tableName) {
     this.tableName = tableName;
@@ -31,14 +34,23 @@ public class FeatureQueryBuilder {
     additionalParams = "";
     sqlString = "";
     datetimeKey = "";
-//<<<<<<< HEAD
-//    defaultCrsSrid = "4326";
-//    bboxCrs = "4326";
-//    geoColumn = "cast(st_asgeojson(st_transform(geom,4326)) as json)";
-//=======
     defaultCrsSrid = String.valueOf(DEFAULT_CRS_SRID);
     bboxCrsSrid = "";
     geoColumn = "cast(st_asgeojson(st_transform(geom," + defaultCrsSrid + ")) as json)";
+  }
+
+  // STAC
+  public FeatureQueryBuilder(String[] tableNames) {
+    this.tableNames = tableNames;
+    bbox = "";
+    datetime = "";
+    additionalParams = "";
+    sqlString = "";
+    datetimeKey = "datetime";
+    defaultCrsSrid = String.valueOf(DEFAULT_CRS_SRID);
+    bboxCrsSrid = "";
+    geoColumn = "cast(st_asgeojson(geom) as json)";
+    itemIds = "";
   }
 
   public void setLimit(int limit) {
@@ -54,15 +66,11 @@ public class FeatureQueryBuilder {
   }
 
   public void setBbox(String coordinates, String storageCrs) {
-    if (!bboxCrsSrid.isEmpty() && !bboxCrsSrid.equalsIgnoreCase(defaultCrsSrid)){
-      //TODO: do bbox transformation to the specified bbox-crs parameter
-      // find the storage crs and then transform accordingly
+    if (!bboxCrsSrid.isEmpty() && !bboxCrsSrid.equalsIgnoreCase(defaultCrsSrid))
       coordinates = coordinates.concat(",").concat(bboxCrsSrid);
-    }
     else
       coordinates = coordinates.concat(",").concat(defaultCrsSrid);
 
-    //TODO: validation for lat, lon values (0<=lat<=90, 0<=lon<=180);
     if (bboxCrsSrid.equalsIgnoreCase(storageCrs))
       this.bbox = "st_intersects(geom, st_makeenvelope(" + coordinates + "))";
     else
@@ -111,6 +119,15 @@ public class FeatureQueryBuilder {
 
   public void setDatetimeKey(String datetimeKey) {
     this.datetimeKey = datetimeKey;
+  }
+
+  public void setItemIds(String itemIds) {
+    this.itemIds = " and id = in (" + itemIds + ")";
+  }
+
+  public void setGeometryIntersects(String geometry) {
+    // this is a geojson geometry
+    this.geometry = "st_intersects(geom, st_geomfromgeojson(" + geometry +"))";
   }
 
   public String buildSqlString() {
@@ -205,4 +222,66 @@ public class FeatureQueryBuilder {
     LOGGER.debug("<builder>Count query- {}", sqlString);
     return sqlString;
   }
+  public String buildItemSearchSqlString() {
+
+    if (!geometry.isEmpty())
+     this.bbox ="";
+
+    int i = 0;
+    StringBuilder selectStatementUnion = new StringBuilder();
+    String selectStatement = " select id, 'Feature' as type, %1$s as geometry, properties" +
+       " '_tablename_' as tablename, p_id from \"_tablename_\" ";
+
+    while (i < tableNames.length) {
+     String sql = selectStatement.replace("_tablename_", tableNames[i]);
+     if (i == tableNames.length-1) {
+       selectStatementUnion.append(sql);
+     }
+     else {
+       selectStatementUnion.append(sql).append(" union ");
+     }
+     i++;
+    }
+
+    LOGGER.debug("ItemSearch SQL String (concat)" + selectStatementUnion);
+
+    this.sqlString = String.format(String.valueOf(selectStatementUnion.append(" where p_id > %2$d %4$s ORDER BY p_id, " +
+           " tablename limit %3$d"))
+     , this.geoColumn, this.offset, this.limit, this.itemIds);
+
+    if (!bbox.isEmpty()) {
+     this.sqlString = String.format(String.valueOf(selectStatementUnion.append(" where %4$s and p_id > %2$d ORDER BY " +
+             "p_id, tablename limit %3$d"))
+         , this.geoColumn,this.offset, this.limit, this.bbox);
+    }
+
+    if(!datetime.isEmpty() ){
+     this.sqlString = String.format(String.valueOf(selectStatementUnion.append(" where %4$s and p_id > %2$d %5$s" +
+             " ORDER BY p_id, tablename limit %3$d"))
+         , this.geoColumn, this.offset, this.limit, this.datetime, this.itemIds);
+    }
+
+    if(!geometry.isEmpty()) {
+     this.sqlString = String.format(String.valueOf(selectStatementUnion.append(" where %4$s and p_id > %2$d %5$s" +
+             " ORDER BY p_id, tablename limit %3$d"))
+         , this.geoColumn, this.offset, this.limit, this.geometry, this.itemIds);
+    }
+
+    if (!bbox.isEmpty() && !datetime.isEmpty()) {
+     this.sqlString = String.format(String.valueOf(selectStatementUnion.append(" where %4$s and %5$s and p_id > %2$d" +
+             " %6$s ORDER BY p_id, tablename limit %3$d"))
+         , this.geoColumn, this.offset, this.limit, this.bbox, this.datetime, this.itemIds);
+    }
+
+    if (!geometry.isEmpty() && !datetime.isEmpty()) {
+     this.sqlString = String.format(String.valueOf(selectStatementUnion.append(" where %4$s and %5$s and p_id > %2$d" +
+             " %6$s ORDER BY p_id, tablename limit %3$d"))
+         , this.geoColumn, this.offset, this.limit, this.geometry, this.datetime, this.itemIds);
+    }
+
+    LOGGER.debug("<builder>Sql query- {}", sqlString);
+    return sqlString;
+  }
+
+
 }

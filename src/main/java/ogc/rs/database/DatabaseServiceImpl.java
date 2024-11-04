@@ -473,6 +473,58 @@ public class DatabaseServiceImpl implements DatabaseService{
                 }));
     return result.future();
   }
+
+  @Override
+  public Future<JsonObject> stacItemSearch(Map<String, String> queryParams) {
+    LOGGER.debug("stacItemSearch");
+    Promise<JsonObject> result = Promise.promise();
+    Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+    String[] collectionIds = queryParams.get("collections").split(",");
+    FeatureQueryBuilder featureQuery = new FeatureQueryBuilder(collectionIds);
+    featureQuery.setLimit(Integer.parseInt(queryParams.getOrDefault("limit","10")));
+    featureQuery.setOffset(Integer.parseInt(queryParams.getOrDefault("offset", "0")));
+
+    if (queryParams.containsKey("bbox")){
+      featureQuery.setBboxCrsSrid(String.valueOf(DEFAULT_CRS_SRID));
+      featureQuery.setBbox(queryParams.get("bbox"), String.valueOf(DEFAULT_CRS_SRID));
+    }
+    //TODO: convert individual DB calls to a transaction
+    if (queryParams.containsKey("datetime")) {
+      featureQuery.setDatetime(queryParams.get("datetime"));
+    }
+
+    if (queryParams.containsKey("ids")) {
+      featureQuery.setItemIds(queryParams.get("ids"));
+    }
+
+    if (queryParams.containsKey("intersects")) {
+      featureQuery.setGeometryIntersects(queryParams.get("geometry"));
+    }
+
+    JsonObject resultJson = new JsonObject();
+    client.withConnection(conn ->
+        conn.preparedQuery(featureQuery.buildItemSearchSqlString())
+          .collecting(collector).execute().map(SqlResult::value)
+          .onSuccess(success -> {
+            if (!success.isEmpty())
+              resultJson
+                  .put("features", new JsonArray(success))
+                  .put("numberReturned", success.size());
+            else
+              resultJson
+                  .put("features", new JsonArray())
+                  .put("numberReturned", 0);
+            resultJson.put("type", "FeatureCollection");
+            result.complete(resultJson);
+          })
+          .onFailure(failed -> {
+            LOGGER.error("Failed at getFeatures- {}",failed.getMessage());
+            result.fail("Error!");
+          }));
+    return result.future();
+  }
+
+  @Override
   public Future<List<JsonObject>> getTileMatrixSetMetaData(String tileMatrixSet) {
     LOGGER.info("getTileMatrixSetMetaData");
     Promise<List<JsonObject>> result = Promise.promise();
