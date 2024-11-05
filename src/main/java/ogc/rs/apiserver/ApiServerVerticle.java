@@ -1421,19 +1421,12 @@ public class ApiServerVerticle extends AbstractVerticle {
   // /search for item_search, rel = search, href = /search, mediaType = application/geo+json, method = GET
   public void getStacItemByItemSearch(RoutingContext routingContext) {
     Map<String, String> queryParamsMap = new HashMap<>();
+    String stacCollectionId;
     try {
       MultiMap queryParams = routingContext.queryParams();
       queryParams.forEach(param -> queryParamsMap.put(param.getKey(), param.getValue()));
-    } catch (NullPointerException ne) {
-      OgcException ogcException = new OgcException(500, "InternalServerError", "Something broke");
-      routingContext.put("response", ogcException.getJson().toString());
-      routingContext.put("statusCode", ogcException.getStatusCode());
-      routingContext.next();
-      return;
-    }
-    LOGGER.debug("<APIServer> QP- {}", queryParamsMap);
-
-    try {
+      LOGGER.debug("<APIServer> QP- {}", queryParamsMap);
+      stacCollectionId = queryParams.get("collections");
       String datetime;
       ZonedDateTime zone, zone2;
       DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
@@ -1470,7 +1463,6 @@ public class ApiServerVerticle extends AbstractVerticle {
       routingContext.put("statusCode", ogcException.getStatusCode());
       routingContext.next();
       return;
-
     } catch (DateTimeParseException dtpe) {
       OgcException ogcException =
           new OgcException(400, "Bad Request", "Time parameter not in ISO format");
@@ -1479,31 +1471,84 @@ public class ApiServerVerticle extends AbstractVerticle {
       routingContext.next();
       return;
     }
+    JsonArray commonLinksInFeature = new JsonArray()
+        .add(new JsonObject()
+            .put("rel", "collection")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac/collections/" + stacCollectionId))
+        .add(new JsonObject()
+            .put("rel", "root")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac"));
+
     dbService.stacItemSearch(queryParamsMap)
-    .onSuccess(success -> {
-      success.put("links", new JsonArray());
-      int limit = Integer.parseInt(queryParamsMap.getOrDefault("limit", "10"));
-      String nextLink = "";
-      JsonArray features = success.getJsonArray("features");
-      if (!features.isEmpty()) {
-        int lastIdOffset = features.getJsonObject(features.size() - 1).getInteger("id") + 1;
-        queryParamsMap.put("offset", String.valueOf(lastIdOffset));
-        AtomicReference<String> requestPath = new AtomicReference<>(routingContext.request().path());
+    .onSuccess(stacItemsObject -> {
+      JsonArray stacItems = stacItemsObject.getJsonArray("features");
+      if (!stacItems.isEmpty()) {
+        String nextLink = "";
+        final String[] selfLink = {""};
+        selfLink[0] = routingContext.request().path();
         if (!queryParamsMap.isEmpty()) {
-          requestPath.set(requestPath + "?");
-          queryParamsMap.forEach((key, value) -> requestPath.set(requestPath + key + "=" + value + "&"));
+          queryParamsMap.forEach((key, value) -> selfLink[0] += key + "=" + value + "&");
+         selfLink[0] =  selfLink[0].substring(0, selfLink[0].length()-1);
         }
+        String token = stacItems.getJsonObject (stacItems.size() - 1).getString("collection")
+            + (stacItems.getJsonObject(stacItems.size() - 1).getInteger("p_id") + 1);
+        AtomicReference<String> requestPath = new AtomicReference<>(routingContext.request().path());
+        queryParamsMap.put("token", token);
+        requestPath.set(requestPath + "?");
+        queryParamsMap.forEach((key, value) -> requestPath.set(requestPath + key + "=" + value + "&"));
         nextLink = requestPath.toString().substring(0, requestPath.toString().length() - 1);
         nextLink = nextLink.replace("[", "").replace("]","");
         LOGGER.debug("**** nextLink- {}", nextLink);
+        try {
+          stacItems.forEach(stacItem -> {
+            JsonObject stacItemJson = (JsonObject) stacItem;
+            stacItemJson.remove("p_id");
+            JsonObject assets = new JsonObject();
+            JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
+            allLinksInFeature
+                .add(new JsonObject()
+                    .put("rel", "self")
+                    .put("type", "application/json")
+                    .put("href", stacMetaJson.getString("hostname")
+                        + "/stac/collections/" + stacCollectionId + "/items/" + stacItemJson.getString("id")));
+            assets = formatAssetObjectsAsPerStacSchema(stacItemJson.getJsonArray("assetobjects"));
+            stacItemJson.put("assets", assets);
+            stacItemJson.remove("assetobjects");
+            stacItemJson.put("links", allLinksInFeature);
+          });
+
+          stacItemsObject.put("links", commonLinksInFeature
+              .add(new JsonObject()
+                  .put("rel", "self")
+                  .put("type", "application/json")
+                  .put("href", stacMetaJson.getString("hostname")
+                      + selfLink[0]))
+              .add(new JsonObject()
+                  .put("rel", "next")
+                  .put("type", "application/geo+json")
+                  .put("method", "GET")
+                  .put("href", hostName + nextLink)));
+        } catch (Exception e) {
+          LOGGER.error("Something went wrong here: {}", e.getMessage());
+          routingContext.put(
+              "response",
+              new OgcException(500, "Internal Server Error", "Something broke")
+                  .getJson()
+                  .toString());
+          routingContext.put("statusCode", 500);
+          routingContext.next();
+        }
+      } else {
+        stacItemsObject.put("links", commonLinksInFeature
+            .add(new JsonObject()
+                .put("rel", "self")
+                .put("type", "application/json")
+                .put("href", stacMetaJson.getString("hostname")
+                    + "/stac/search")));
       }
-      success.getJsonArray("links")
-          .add(new JsonObject()
-              .put("href", hostName + ogcBasePath + "/stac/search")
-              .put("rel", "self")
-              .put("type", "application/geo+json"));
-      success.put("timeStamp", Instant.now().toString());
-      routingContext.put("response",success.toString());
+      routingContext.put("response", stacItemsObject.toString());
       routingContext.put("statusCode", 200);
       routingContext.next();
     })
