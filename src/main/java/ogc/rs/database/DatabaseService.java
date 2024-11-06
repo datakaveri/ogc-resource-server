@@ -41,6 +41,8 @@ public interface DatabaseService {
 
     Future<JsonObject> getStacItemById(String collectionId, String stacItemId);
 
+    Future<JsonObject> stacItemSearch(Map<String, String> queryParams);
+
     Future<List<JsonObject>> getTileMatrixSetMetaData(String tileMatrixSet);
 
     Future<List<JsonObject>> getTileMatrixSetRelation(String collectionId);
