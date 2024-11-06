@@ -5,9 +5,9 @@
     "title": "DX Metering APIs",
     "description": "DX Metering APIs for OGC/STAC Resource Server",
     "contact": {
-      "name": "Geospatial Data eXchange (GSX)",
+      "name": "Integrated Geospatial Data-Sharing Interface (GDI)",
       "email": "info@iudx.org.in",
-      "url": "https://gsx.org.in"
+      "url": "https://gdi.org.in"
     },
     "license": {
       "url": "https://opensource.org/license/apache-2-0",
@@ -20,7 +20,7 @@
       "description": "Development Server"
     },
     {
-      "url": "https://geoserver.dx.gsx.org.in",
+      "url": "https://geoserver.dx.gdi.org.in",
       "description": "Production Server"
     }
   ],
