@@ -23,12 +23,7 @@ import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import java.util.Set;
 import ogc.rs.apiserver.ApiServerVerticle;
-import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
-import ogc.rs.apiserver.handlers.FailureHandler;
-import ogc.rs.apiserver.handlers.MeteringAuthZHandler;
-import ogc.rs.apiserver.handlers.OgcFeaturesAuthZHandler;
-import ogc.rs.apiserver.handlers.ProcessAuthZHandler;
-import ogc.rs.apiserver.handlers.StacAssetsAuthZHandler;
+import ogc.rs.apiserver.handlers.*;
 import ogc.rs.apiserver.util.OgcException;
 
 /**
@@ -62,6 +57,8 @@ public abstract class EntityRouterBuilder {
   public MeteringAuthZHandler meteringAuthZHandler = new MeteringAuthZHandler();
   public OgcFeaturesAuthZHandler ogcFeaturesAuthZHandler;
   public ProcessAuthZHandler processAuthZHandler = new ProcessAuthZHandler();
+  public TilesMeteringHandler tilesMeteringHandler;
+
 
   EntityRouterBuilder(ApiServerVerticle apiServerVerticle, Vertx vertx, RouterBuilder routerBuilder,
       JsonObject config) {
@@ -72,6 +69,8 @@ public abstract class EntityRouterBuilder {
     tokenAuthenticationHandler = new DxTokenAuthenticationHandler(vertx, config);
     stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx);
     ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(vertx);
+    tilesMeteringHandler = new TilesMeteringHandler(vertx, config);
+
   }
 
   /**

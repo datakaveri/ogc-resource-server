@@ -5,6 +5,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import ogc.rs.apiserver.ApiServerVerticle;
 import ogc.rs.apiserver.handlers.FailureHandler;
+import ogc.rs.apiserver.handlers.TilesMeteringHandler;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 import ogc.rs.apiserver.router.routerbuilders.OgcRouterBuilder;
 import ogc.rs.apiserver.router.routerbuilders.StacRouterBuilder;
@@ -60,6 +61,11 @@ public class OgcTilesEntity implements GisEntityInterface{
         .operation(TILE_API)
             .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
             .handler(apiServerVerticle::getTile)
+            .handler(ctx -> {
+                TilesMeteringHandler tilesMeteringHandler = ogcRouterBuilder.tilesMeteringHandler;
+                tilesMeteringHandler.handleMetering(ctx);
+                ctx.addBodyEndHandler(tilesMeteringHandler);
+            })
             .handler(apiServerVerticle::putCommonResponseHeaders)
             .handler(apiServerVerticle::buildResponse)
             .failureHandler(failureHandler);
