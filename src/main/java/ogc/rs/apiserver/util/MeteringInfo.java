@@ -29,6 +29,15 @@ public class MeteringInfo implements Shareable {
   private final JsonObject requestBody;
   private final String resourceId;
 
+  /**
+   *
+   * @param authInfo is information taken from the token
+   * @param resourceGroup is the id of the resource group fetch from catalogue
+   * @param providerId is the provider of the resource group
+   * @param api is the api path
+   * @param responseSize is the response size of json object sent to RMQ
+   * @param requestBody is the context body
+   */
   public MeteringInfo(
       AuthInfo authInfo,
       String resourceGroup,
@@ -54,6 +63,10 @@ public class MeteringInfo implements Shareable {
     return (int) totalResponseSize;
   }
 
+  /**
+   *
+   * @return the structured Json Body
+   */
   public JsonObject toJson() {
     return new JsonObject()
         .put(RESOURCE_GROUP, resourceGroup)
@@ -68,6 +81,12 @@ public class MeteringInfo implements Shareable {
         .put(ID, resourceId);
   }
 
+  /**
+   *
+   * @param o o the object to compare with this instance.
+   * @return true if the specified object is identical to this instance or
+   *  if it is an instance of `MeteringInfo` with the same `userId` and `api` values.
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -76,6 +95,10 @@ public class MeteringInfo implements Shareable {
     return Objects.equals(userId, that.userId) && Objects.equals(api, that.api);
   }
 
+  /**
+   *
+   * @return the key based on api path and userId
+   */
   @Override
   public int hashCode() {
     return Objects.hash(userId, api);
