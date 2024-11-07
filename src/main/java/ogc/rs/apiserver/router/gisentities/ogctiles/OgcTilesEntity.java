@@ -16,7 +16,7 @@ import com.google.auto.service.AutoService;
 
 /**
  * Class to handle creation of routes for OGC Tiles.
- * 
+ *
  */
 @AutoService(GisEntityInterface.class)
 public class OgcTilesEntity implements GisEntityInterface{
@@ -24,11 +24,11 @@ public class OgcTilesEntity implements GisEntityInterface{
   @Override
   public void giveOgcRoutes(OgcRouterBuilder ogcRouterBuilder) {
     // TODO Auto-generated method stub
-    
+
     RouterBuilder builder = ogcRouterBuilder.routerBuilder;
     ApiServerVerticle apiServerVerticle = ogcRouterBuilder.apiServerVerticle;
     FailureHandler failureHandler = ogcRouterBuilder.failureHandler;
-    
+
           builder
               .operation(TILEMATRIXSETS_API)
               .handler(apiServerVerticle::getTileMatrixSetList)
@@ -59,16 +59,17 @@ public class OgcTilesEntity implements GisEntityInterface{
 
     builder
         .operation(TILE_API)
-            .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
-            .handler(apiServerVerticle::getTile)
-            .handler(ctx -> {
-                TilesMeteringHandler tilesMeteringHandler = ogcRouterBuilder.tilesMeteringHandler;
-                tilesMeteringHandler.handleMetering(ctx);
-                ctx.addBodyEndHandler(tilesMeteringHandler);
+        .handler(
+            ctx -> {
+              ctx.addBodyEndHandler(
+                  context -> ogcRouterBuilder.tilesMeteringHandler.handleMetering(ctx));
+              ctx.next();
             })
-            .handler(apiServerVerticle::putCommonResponseHeaders)
-            .handler(apiServerVerticle::buildResponse)
-            .failureHandler(failureHandler);
+        .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
+        .handler(apiServerVerticle::getTile)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
   }
 
   @Override
@@ -77,8 +78,11 @@ public class OgcTilesEntity implements GisEntityInterface{
   }
 
   @Override
-  public Future<OasFragments> generateNewSpecFragments(JsonObject existingOgcSpec,
-      JsonObject existingStacSpec, DatabaseService dbService, JsonObject config) {
+  public Future<OasFragments> generateNewSpecFragments(
+      JsonObject existingOgcSpec,
+      JsonObject existingStacSpec,
+      DatabaseService dbService,
+      JsonObject config) {
     // no custom spec generation for now
     return Future.succeededFuture(new OasFragments());
   }

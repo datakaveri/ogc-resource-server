@@ -24,7 +24,7 @@ public class TilesMeteringHandler implements Handler<Void> {
   private final CatalogueService catalogueService;
   private final MeteringService meteringService;
   private final Vertx vertx;
-  Promise<Void> promise = Promise.promise();
+  private final LocalMap<MeteringInfo, Integer> meteringDataMap;
 
   /**
    * Constructs a TilesMeteringHandler instance.
@@ -43,34 +43,32 @@ public class TilesMeteringHandler implements Handler<Void> {
     this.vertx = vertx;
     this.catalogueService = new CatalogueService(vertx, config);
     this.meteringService = MeteringService.createProxy(vertx, METERING_SERVICE_ADDRESS);
+    this.meteringDataMap = vertx.sharedData().getLocalMap("MeteringDataMap");
 
     // Set up a periodic task to clean up the shared data map
     vertx.setPeriodic(
-        2000,
+        METERING_UPDATE_PERIOD,
         id -> {
-          LocalMap<MeteringInfo, Integer> meteringMap = vertx.sharedData().getLocalMap("NAME");
-          meteringMap
+          meteringDataMap
               .keySet()
               .forEach(
                   key -> {
-                    Integer value = meteringMap.remove(key);
+                    Integer value = meteringDataMap.remove(key);
                     if (value != null) {
-                      LOGGER.info(this + " removed " + key.toJson() + " " + value);
+                      LOGGER.debug(this + " removed " + key.toJson(value) + " " + value);
                       meteringService
-                          .insertMeteringValuesInRmq(key.toJson())
+                          .insertMeteringValuesInRmq(key.toJson(value))
                           .onComplete(
                               handler -> {
                                 if (handler.succeeded()) {
                                   LOGGER.debug("message published in RMQ.");
-                                  promise.complete();
                                 } else {
                                   LOGGER.error("failed to publish message in RMQ.");
-                                  promise.complete();
                                 }
                               });
 
                     } else {
-                      LOGGER.info(this + " NOT removed " + key);
+                      LOGGER.error(this + " NOT removed " + key);
                     }
                   });
         });
@@ -132,10 +130,7 @@ public class TilesMeteringHandler implements Handler<Void> {
                         routingContext.response().bytesWritten(),
                         reqBody);
 
-                LocalMap<MeteringInfo, Integer> meteringMap =
-                    vertx.sharedData().getLocalMap("NAME");
-
-                meteringMap.compute(
+                meteringDataMap.compute(
                     meteringInfo,
                     (k, v) -> (v == null) ? meteringInfo.getSize() : v + meteringInfo.getSize());
 

@@ -67,7 +67,7 @@ public class MeteringInfo implements Shareable {
    *
    * @return the structured Json Body
    */
-  public JsonObject toJson() {
+  public JsonObject toJson(int aggregatedSize) {
     return new JsonObject()
         .put(RESOURCE_GROUP, resourceGroup)
         .put(EPOCH_TIME, epochTime)
@@ -75,7 +75,7 @@ public class MeteringInfo implements Shareable {
         .put(USER_ID, userId)
         .put(DELEGATOR_ID, delegatorId)
         .put(API, api)
-        .put(RESPONSE_SIZE, totalResponseSize)
+        .put(RESPONSE_SIZE, aggregatedSize)
         .put(PROVIDER_ID, providerId)
         .put(REQUEST_JSON, requestBody)
         .put(ID, resourceId);
