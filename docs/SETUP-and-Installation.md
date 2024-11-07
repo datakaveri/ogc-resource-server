@@ -197,7 +197,6 @@ Integration tests for the OGC Resource Server are handled using **Rest Assured**
 ### Compliance Testing
 - Compliant testing ensures that the OGC Resource Server correctly implements OGC standards, which are essential for achieving reliability and interoperability between systems
 - These tests validate the server's adherence to OGC specifications, helping ensure seamless integration with other geospatial systems
-- The compliance testing process involves running specific tests designed for OGC standards such as the Web Feature Service (WFS) and Web Map Service (WMS)
 - Successfully passing these tests confirms that the server is compliant with OGC standards, which provides confidence in the server’s capabilities, ensuring it meets the high standards required for modern geospatial applications
 - For more details and to review the compliance test results for our server, visit: [OGC Resource Server Compliance Test Reports](https://jenkins.iudx.io/job/ogc_resource-server_master_pipeline/OGC_20Feature_20Compliance_20Test_20Reports/)
 

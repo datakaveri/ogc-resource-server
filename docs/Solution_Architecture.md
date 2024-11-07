@@ -4,7 +4,7 @@
 
 ## Solution Architecture
 
-This section provides an overview of the OGC Resource Server and its components, detailing how different services and systems interact to enable efficient geospatial data handling, authentication, and auditing. The architecture is built using Vert.x, a reactive toolkit for building applications on the Java Virtual Machine (JVM), and is designed for scalability, fault tolerance, and monitoring.
+This section provides an overview of the OGC Resource Server and its components, detailing how different services and systems interact to enable efficient geospatial data handling, authentication, and auditing. The architecture is built using Vert.x, a reactive toolkit for building applications on  Java, and is designed for scalability, fault tolerance, and monitoring.
 
 The following block diagram shows different components/services used in implementing the OGC Resource Server.
 ![Solution Architecture](./ogc-resource-server-solution-architecture.png)
@@ -20,8 +20,8 @@ The API Server is the core component of the architecture, responsible for handli
   - Interact with the catalog service to index and retrieve resources metadata and datasets
   - Log system metrics and performance
 
-### Open Geospatial Consortium (OGC) and SpatioTemporal Asset Catalog (STAC)
-The solution adheres to Open Geospatial Consortium (OGC) standards and implements SpatioTemporal Asset Catalog (STAC) specifications, ensuring interoperability with external geospatial systems and services.
+### Open Geospatial Consortium (OGC) and SpatioTemporal Asset Catalog (STAC) APIs
+The solution adheres to Open Geospatial Consortium (OGC) APIs standards and implements SpatioTemporal Asset Catalog (STAC) APIs specifications, ensuring interoperability with external geospatial systems and services.
 - Responsibilities:
   - Ensure that geospatial data complies with open standards (OGC, STAC)
   - Enable easy integration with external systems and data sources
@@ -49,8 +49,8 @@ The DX Catalogue Server is responsible for managing the indexing and retrieval o
   - Index and retrieve metadata and datasets for efficient search and discovery
   - Ensure resources are discoverable and accessible via API interactions
 
-### Auditing Service
-The Auditing Service is responsible for tracking user activity, recording API access, and ensuring compliance with data usage policies. The service utilizes RabbitMQ for queuing and processes audit logs asynchronously.
+### DX Auditing and Metering Service
+The DX Auditing and Metering Service is responsible for tracking user activity, recording API access, and ensuring compliance with data usage policies. The service utilizes RabbitMQ for queuing and processes audit logs asynchronously.
 - Technology: RabbitMQ, PostgreSQL, Vert.x
 - Responsibilities:
   - Track user actions on the API server

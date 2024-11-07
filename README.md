@@ -30,10 +30,9 @@ measures, including authentication and authorization.
 - Supports OGC Tiles API to serve vector and  map tiles for rendering geospatial data
 - Supports OGC Processes API to facilitate the execution of geospatial processes
 - Supports OGC Coverages API to manage and serve multi-dimensional data (e.g., satellite imagery, elevation models)
-- Integrates with DX AAA Server for token introspection to verify and manage access before serving data to the designated user
-- Integrates with DX Catalogue Server for fetching the list of resources and providers related information          
-- Integrates with DX Auditing Server for logging and auditing the access for metering purposes
-- Uses Vert.x and Postgres, ensuring a scalable service-mesh infrastructure
+- Utilizes DX AAA Server for token introspection to verify and manage access before serving data to the designated user
+- Utilizes DX Catalogue Server for fetching the list of resources and providers related information          
+- Utilizes DX Auditing Server for metering and auditing the access for metering purposes
 - Regularly updated with the latest software and client libraries, with enhanced testing for reliability and performance
 
 # Explanation
