@@ -1123,6 +1123,13 @@ public class ApiServerVerticle extends AbstractVerticle {
                       .put("type", "application/json"))
               .add(
                   new JsonObject()
+                      .put("rel", "search")
+                      .put("href", hostName + ogcBasePath + "stac/search")
+                      .put("method", "GET")
+                      .put("title", "STAC Search")
+                      .put("type", "application/geo+json"))
+              .add(
+                  new JsonObject()
                       .put("rel", "conformance")
                       .put("href", hostName + ogcBasePath + "stac/conformance")
                       .put("type", "application/json")
