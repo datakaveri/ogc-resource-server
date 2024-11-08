@@ -2,14 +2,15 @@ package ogc.rs.database.util;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import io.vertx.core.json.JsonObject;
+import io.vertx.sqlclient.Tuple;
 import static ogc.rs.common.Constants.DEFAULT_CRS_SRID;
 
 public class FeatureQueryBuilder {
   private static final Logger LOGGER = LogManager.getLogger(FeatureQueryBuilder.class);
 
   private String tableName;
-  private String[] tableNames;
+  private String[] stacCollectionIds = {};
   private int limit;
   private String bbox;
   private String datetime;
@@ -21,8 +22,8 @@ public class FeatureQueryBuilder {
   private String bboxCrsSrid;
   private String geoColumn;
   private String datetimeKey;
-  private String itemIds;
-  private String geometry;
+  private String[] stacItemIds = {};
+  private String stacIntersectsGeom;
 
   public FeatureQueryBuilder(String tableName) {
     this.tableName = tableName;
@@ -39,9 +40,10 @@ public class FeatureQueryBuilder {
     geoColumn = "cast(st_asgeojson(st_transform(geom," + defaultCrsSrid + ")) as json)";
   }
 
-  // STAC
-  public FeatureQueryBuilder(String[] tableNames) {
-    this.tableNames = tableNames;
+  /**
+   * {@link FeatureQueryBuilder} meant for building STAC Item Search queries.
+   */
+  public FeatureQueryBuilder() {
     bbox = "";
     datetime = "";
     additionalParams = "";
@@ -50,7 +52,7 @@ public class FeatureQueryBuilder {
     defaultCrsSrid = String.valueOf(DEFAULT_CRS_SRID);
     bboxCrsSrid = "";
     geoColumn = "cast(st_asgeojson(geom) as json)";
-    itemIds = "";
+    stacIntersectsGeom = "";
   }
 
   public void setLimit(int limit) {
@@ -121,13 +123,18 @@ public class FeatureQueryBuilder {
     this.datetimeKey = datetimeKey;
   }
 
-  public void setItemIds(String itemIds) {
-    this.itemIds = " and id = in (" + itemIds + ")";
+  public void setStacItemIds(String[] itemIds) {
+    this.stacItemIds = itemIds;
+  }
+  
+  public void setStacCollectionIds(String[] collectionIds) {
+    this.stacCollectionIds = collectionIds;
   }
 
-  public void setGeometryIntersects(String geometry) {
+  public void setStacIntersectsGeom(JsonObject geometry) {
     // this is a geojson geometry
-    this.geometry = "st_intersects(geom, st_geomfromgeojson(" + geometry +"))";
+    this.stacIntersectsGeom =
+        "st_intersects(geom, st_geomfromgeojson(" + geometry.toString() + "))";
   }
 
   public String buildSqlString() {
@@ -222,65 +229,82 @@ public class FeatureQueryBuilder {
     LOGGER.debug("<builder>Count query- {}", sqlString);
     return sqlString;
   }
-  public String buildItemSearchSqlString() {
+  
+  /**
+   * Build query string needed for STAC Item Search. An empty {@link Tuple} is passed in as a
+   * parameter. Query params are added to tuple when a safe-query string formed by appending cannot
+   * be created. The returned query must be executed with the tuple.
+   * 
+   * STAC Item Search uses PostgreSQL table inheritance. A parent table called
+   * <em>stac_collection_parent</em> is queried instead of querying individual STAC collection
+   * tables.
+   * 
+   * @param tup empty tuple to which query params can be added
+   * @return the formed query which must be run with the passed-in tuple
+   */
+  public String buildItemSearchSqlString(Tuple tup) {
 
-    if (!geometry.isEmpty())
-     this.bbox ="";
+    StringBuilder stacParentTableQuery = new StringBuilder();
 
-    int i = 0;
-    StringBuilder selectStatementUnion = new StringBuilder();
-    String selectStatement = " select id, 'Feature' as type, %1$s as geometry, properties" +
-       " '_tablename_' as tablename, p_id from \"_tablename_\" ";
+    stacParentTableQuery.append(
+        "SELECT scp.id AS id, 'Feature' AS type, trim(scp.tableoid::regclass::text, '\"') AS collection, "
+            + this.geoColumn
+            + " AS geometry, properties, p_id FROM stac_collection_parent scp WHERE 1=1");
 
-    while (i < tableNames.length) {
-     String sql = selectStatement.replace("_tablename_", tableNames[i]);
-     if (i == tableNames.length-1) {
-       selectStatementUnion.append(sql);
-     }
-     else {
-       selectStatementUnion.append(sql).append(" union ");
-     }
-     i++;
-    }
-
-    LOGGER.debug("ItemSearch SQL String (concat)" + selectStatementUnion);
-
-    this.sqlString = String.format(String.valueOf(selectStatementUnion.append(" where p_id > %2$d %4$s ORDER BY p_id, " +
-           " tablename limit %3$d"))
-     , this.geoColumn, this.offset, this.limit, this.itemIds);
+    // integer that stores the parameter index as params are added to the tuple
+    int parameterIndex = 0;
 
     if (!bbox.isEmpty()) {
-     this.sqlString = String.format(String.valueOf(selectStatementUnion.append(" where %4$s and p_id > %2$d ORDER BY " +
-             "p_id, tablename limit %3$d"))
-         , this.geoColumn,this.offset, this.limit, this.bbox);
+      stacParentTableQuery.append(" AND ").append(this.bbox);
     }
 
-    if(!datetime.isEmpty() ){
-     this.sqlString = String.format(String.valueOf(selectStatementUnion.append(" where %4$s and p_id > %2$d %5$s" +
-             " ORDER BY p_id, tablename limit %3$d"))
-         , this.geoColumn, this.offset, this.limit, this.datetime, this.itemIds);
+    if (!datetime.isEmpty()) {
+      stacParentTableQuery.append(" AND ").append(this.datetime);
     }
 
-    if(!geometry.isEmpty()) {
-     this.sqlString = String.format(String.valueOf(selectStatementUnion.append(" where %4$s and p_id > %2$d %5$s" +
-             " ORDER BY p_id, tablename limit %3$d"))
-         , this.geoColumn, this.offset, this.limit, this.geometry, this.itemIds);
+    if (!stacIntersectsGeom.isEmpty()) {
+      stacParentTableQuery.append(" AND ").append(this.stacIntersectsGeom);
     }
 
-    if (!bbox.isEmpty() && !datetime.isEmpty()) {
-     this.sqlString = String.format(String.valueOf(selectStatementUnion.append(" where %4$s and %5$s and p_id > %2$d" +
-             " %6$s ORDER BY p_id, tablename limit %3$d"))
-         , this.geoColumn, this.offset, this.limit, this.bbox, this.datetime, this.itemIds);
+    // need to use tuple here otherwise need to do a lot of work to create the collection ID string
+    if (stacCollectionIds.length != 0) {
+      parameterIndex++;
+      stacParentTableQuery
+          .append(" AND trim(tableoid::regclass::text, '\"') = ANY($" + parameterIndex + ")");
+      tup.addArrayOfString(stacCollectionIds);
     }
 
-    if (!geometry.isEmpty() && !datetime.isEmpty()) {
-     this.sqlString = String.format(String.valueOf(selectStatementUnion.append(" where %4$s and %5$s and p_id > %2$d" +
-             " %6$s ORDER BY p_id, tablename limit %3$d"))
-         , this.geoColumn, this.offset, this.limit, this.geometry, this.datetime, this.itemIds);
+    // need to use tuple here since anything can be passed in as item ID, so chance of SQL injection
+    // (?)
+    if (stacItemIds.length != 0) {
+      parameterIndex++;
+      stacParentTableQuery.append(" AND id = ANY($" + parameterIndex + ")");
+      tup.addArrayOfString(stacItemIds);
     }
 
-    LOGGER.debug("<builder>Sql query- {}", sqlString);
-    return sqlString;
+    if (offset != 0) {
+      stacParentTableQuery.append(" AND p_id > ").append(offset);
+    }
+    
+    // limit always added
+    stacParentTableQuery.append(" LIMIT ").append(this.limit);
+
+    // forming CTE with the stac_collection_parent query to get required data from stac_items_assets
+    // and then joining the result
+    StringBuilder finalCteQuery = new StringBuilder().append("WITH items AS (")
+        .append(stacParentTableQuery.toString())
+        .append("), assets AS (SELECT collection_id::text AS collection_id, item_id,"
+            + " jsonb_agg((row_to_json(stac_items_assets.*)::jsonb - 'item_id'))"
+            + " AS assetobjects FROM stac_items_assets"
+            + " JOIN items ON item_id = items.id AND collection_id::text = items.collection"
+            + " GROUP BY collection_id, item_id)"
+            + " SELECT items.*, assets.assetobjects FROM assets"
+            + " JOIN items ON items.collection = assets.collection_id AND assets.item_id = items.id"
+            + " ORDER BY items.p_id");
+
+    LOGGER.debug("<builder> Item Search SQL query - {}", finalCteQuery.toString());
+
+    return finalCteQuery.toString();
   }
 
 
