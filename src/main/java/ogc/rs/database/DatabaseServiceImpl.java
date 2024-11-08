@@ -418,7 +418,7 @@ public class DatabaseServiceImpl implements DatabaseService{
             ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb - 'item_id')) as assetobjects" +
             ", 'Feature' as type, '%1$s' as collection from \"%1$s\" as item_table join stac_items_assets" +
             " on item_table.id=stac_items_assets.item_id" +
-            " group by item_table.id, item_table.geom, item_table.bbox" +
+            " group by item_table.id, item_table.geom, item_table.bbox, item_table.p_id" +
             ", item_table.properties having p_id >= %2$d order by p_id limit %3$d"
         , collectionId, offset, limit);
     client.withConnection(
