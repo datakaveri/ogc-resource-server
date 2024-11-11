@@ -23,5 +23,6 @@ public interface JobsService {
    * @return a JSON object containing the status of the job, including the "links" property
    */
   Future<JsonObject> getStatus(JsonObject requestBody);
-
+  Future<JsonObject> listAllJobs(JsonObject requestBody);
+  Future<JsonObject> retrieveJobResults(JsonObject requestBody);
 }

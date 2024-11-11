@@ -718,6 +718,156 @@
         }
       }
     },
+    "/jobs": {
+      "get": {
+        "tags": [
+          "List All Jobs"
+        ],
+        "summary": "Retrieve all the jobs",
+        "description": "Show all the jobs with respect to a particular user.",
+        "operationId": "listAllJobs",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of all jobs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/jobList"
+                },
+                "example": {
+                  "jobs": [
+                    {
+                      "processId": "dd0eb191-7f66-4663-8afa-cfd644de5890",
+                      "jobID": "cc0eb191-7f66-4663-8afa-cfd644de5839",
+                      "type": "PROCESS",
+                      "status": "RUNNING",
+                      "message": "Process Running",
+                      "progress": 66.67,
+                      "links": {
+                        "href": "${HOSTNAME}/jobs/cc0eb191-7f66-4663-8afa-cfd644de5839",
+                        "rel": "status",
+                        "title": "Districts in India",
+                        "type": "application/json",
+                        "hreflang": "en"
+                      }
+                    },
+                    {
+                      "processId": "dd0eb191-7f66-4663-8afa-cfd644de5890",
+                      "jobID": "7853c10d-c270-4e4d-9e53-fc726d97bbd5",
+                      "type": "PROCESS",
+                      "status": "RUNNING",
+                      "message": "Process Running",
+                      "progress": 66.67,
+                      "links": {
+                        "href": "${HOSTNAME}/jobs/7853c10d-c270-4e4d-9e53-fc726d97bbd5",
+                        "rel": "status",
+                        "title": "Airports in India",
+                        "type": "application/json",
+                        "hreflang": "en"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested URI was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                },
+                "example": {
+                  "type": "Internal Server Error",
+                  "title": "Internal Server Error",
+                  "detail": "Internal Server Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{jobId}/results": {
+      "get": {
+        "tags": [
+          "Results"
+        ],
+        "summary": "Retrieves the results of a job",
+        "description": "Shows the results of a job.",
+        "operationId": "getJobResults",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "local identifier of a job",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The results of a job.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/execute"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested URI was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                },
+                "example": {
+                  "type": "Internal Server Error",
+                  "title": "Internal Server Error",
+                  "detail": "Internal Server Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/collections/{collectionId}/schema": {
       "get": {
         "tags": [
@@ -2982,6 +3132,55 @@
       }
     ]
   },
+      "jobList": {
+        "required": [
+          "jobs",
+          "links"
+        ],
+        "type": "object",
+        "properties": {
+          "jobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/statusInfo"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/jobLinks"
+            }
+          }
+        }
+      },
+      "jobLinks": {
+        "required": [
+          "href"
+        ],
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "example": "${HOSTNAME}/jobs"
+          },
+          "rel": {
+            "type": "string",
+            "example": "self"
+          },
+          "type": {
+            "type": "string",
+            "example": "application/json"
+          },
+          "hreflang": {
+            "type": "string",
+            "example": "en"
+          },
+          "title": {
+            "type": "string",
+            "example": "Echo process"
+          }
+        }
+      },
   "statusInfo": {
     "required": [
       "jobID",

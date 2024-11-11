@@ -5,13 +5,8 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
-import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
 import ogc.rs.common.Constants;
-import ogc.rs.metering.MeteringServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,8 +46,90 @@ public class JobsServiceImpl implements JobsService {
           }
         }).onFailure(failureHandler -> {
           LOGGER.error(failureHandler.toString());
-          promise.fail(Constants.processException404);
+          promise.fail(Constants.processException500);
         }));
+
+    return promise.future();
+  }
+
+  @Override
+  public Future<JsonObject> listAllJobs(JsonObject requestBody) {
+    LOGGER.info("Trying to list all jobs");
+
+    Promise<JsonObject> promise = Promise.promise();
+    String userId = requestBody.getString("userId");
+
+    pgPool.withConnection(sqlClient ->
+            sqlClient.preparedQuery("SELECT * FROM jobs_table WHERE user_id = $1")
+                    .execute(Tuple.of(userId))
+                    .onSuccess(rows -> {
+                      if (!rows.iterator().hasNext()) {
+                        // No rows found for the given userId
+                        LOGGER.error("No jobs found for user ID: " + userId);
+                        promise.fail(Constants.processException404);
+                      } else {
+                        // Rows found, process each row
+                        JsonArray jobsArray = new JsonArray();
+
+                        rows.forEach(row -> {
+                          JsonObject job = new JsonObject();
+                          job.put("processID", row.getUUID("process_id").toString());
+                          job.put("jobID", row.getUUID("id").toString());
+                          job.put("status", row.getString("status"));
+                          job.put("type", row.getString("type"));
+                          job.put("message", row.getString("message"));
+                          job.put("progress", row.getNumeric("progress"));
+
+                          // Generate links for each job
+                          JsonArray links = new JsonArray();
+                          JsonObject link = new JsonObject();
+                          link.put("href", config.getString("hostName") + "/jobs/" + row.getUUID("id").toString());
+                          link.put("rel", "status");
+                          link.put("title", row.getJsonObject("input").getString("title"));
+                          link.put("type", "application/json");
+                          link.put("hreflang", "en");
+                          links.add(link);
+
+                          job.put("links", links);
+                          jobsArray.add(job);
+                        });
+
+                        JsonObject response = new JsonObject();
+                        response.put("jobs", jobsArray);
+                        promise.complete(response);
+                      }
+                    })
+                    .onFailure(failureHandler -> {
+                      LOGGER.error("Failed to list jobs: " + failureHandler.toString());
+                      promise.fail(Constants.processException500);
+                    })
+    );
+    return promise.future();
+  }
+
+  @Override
+  public Future<JsonObject> retrieveJobResults(JsonObject requestBody) {
+    LOGGER.info("Trying to retrieve job results");
+
+    Promise<JsonObject> promise = Promise.promise();
+    String jobId = requestBody.getString("jobId");
+    String userId = requestBody.getString("userId");
+    pgPool.withConnection(
+            sqlClient -> sqlClient.preparedQuery("Select * from jobs_table where id=$1")
+                    .execute(Tuple.of(jobId)).map(s -> s.iterator().next()).onSuccess(row -> {
+                      if (row.getValue("user_id").toString().equals(userId)) {
+                        JsonObject rowJson = row.toJson();
+                        JsonObject result = new JsonObject();
+                        result.put("output", rowJson.getJsonObject("output"));
+                        promise.complete(result);
+                      } else {
+                        LOGGER.error("Job does not belong to the specified user");
+                        promise.fail(Constants.processException404);
+                      }
+                    }).onFailure(failureHandler -> {
+                      LOGGER.error(failureHandler.toString());
+                      promise.fail(Constants.processException500);
+                    }));
 
     return promise.future();
   }

@@ -52,6 +52,20 @@ public class OgcProcessesEntity implements GisEntityInterface{
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)
         .failureHandler(failureHandler);
+
+    builder.operation(LIST_JOBS_API)
+            .handler(ogcRouterBuilder.processAuthZHandler)
+            .handler(apiServerVerticle::listAllJobs)
+            .handler(apiServerVerticle::putCommonResponseHeaders)
+            .handler(apiServerVerticle::buildResponse)
+            .failureHandler(failureHandler);
+
+    builder.operation(GET_JOB_RESULTS)
+            .handler(ogcRouterBuilder.processAuthZHandler)
+            .handler(apiServerVerticle::retrieveJobResults)
+            .handler(apiServerVerticle::putCommonResponseHeaders)
+            .handler(apiServerVerticle::buildResponse)
+            .failureHandler(failureHandler);
   }
 
   @Override
