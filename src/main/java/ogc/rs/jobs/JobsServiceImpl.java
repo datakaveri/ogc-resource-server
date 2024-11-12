@@ -46,7 +46,7 @@ public class JobsServiceImpl implements JobsService {
           }
         }).onFailure(failureHandler -> {
           LOGGER.error(failureHandler.toString());
-          promise.fail(Constants.processException500);
+          promise.fail(Constants.processException404);
         }));
 
     return promise.future();
@@ -127,14 +127,9 @@ public class JobsServiceImpl implements JobsService {
                         promise.fail(Constants.processException404);
                       }
                     }).onFailure(failureHandler -> {
-                      LOGGER.error(failureHandler.toString());
+                      LOGGER.error("Failed to retrieve job results: " +failureHandler.toString());
                       promise.fail(Constants.processException500);
                     }));
-
     return promise.future();
   }
-
 }
-
-
-
