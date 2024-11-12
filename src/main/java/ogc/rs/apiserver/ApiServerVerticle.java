@@ -855,6 +855,36 @@ public class ApiServerVerticle extends AbstractVerticle {
                 .put("templated","true")))
         .put("itemType", "feature")
         .put("crs", collection.getJsonArray("crs"));
+    if (success.get(0).getJsonArray("type").contains("COVERAGE")) {
+      collection
+          .getJsonArray("links")
+          .add(
+              new JsonObject()
+                  .put(
+                      "href",
+                      hostName
+                          + ogcBasePath
+                          + COLLECTIONS
+                          + "/"
+                          + collection.getString("id")
+                          + "/coverage")
+                  .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/coverage")
+                  .put("type", "application/json")
+                  .put("title", collection.getString("title")))
+          .add(
+              new JsonObject()
+                  .put(
+                      "href",
+                      hostName
+                          + ogcBasePath
+                          + COLLECTIONS
+                          + "/"
+                          + collection.getString("id")
+                          + "/schema")
+                  .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/schema")
+                  .put("type", "application/json")
+                  .put("title", "Schema (as JSON)"));
+    }
     if (collection.getJsonArray("type").contains("VECTOR"))
       collection.getJsonArray("links")
           .add(new JsonObject()
