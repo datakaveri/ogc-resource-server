@@ -5,6 +5,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import ogc.rs.apiserver.ApiServerVerticle;
 import ogc.rs.apiserver.handlers.FailureHandler;
+import ogc.rs.apiserver.handlers.TilesMeteringHandler;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 import ogc.rs.apiserver.router.routerbuilders.OgcRouterBuilder;
 import ogc.rs.apiserver.router.routerbuilders.StacRouterBuilder;
@@ -15,7 +16,7 @@ import com.google.auto.service.AutoService;
 
 /**
  * Class to handle creation of routes for OGC Tiles.
- * 
+ *
  */
 @AutoService(GisEntityInterface.class)
 public class OgcTilesEntity implements GisEntityInterface{
@@ -23,11 +24,11 @@ public class OgcTilesEntity implements GisEntityInterface{
   @Override
   public void giveOgcRoutes(OgcRouterBuilder ogcRouterBuilder) {
     // TODO Auto-generated method stub
-    
+
     RouterBuilder builder = ogcRouterBuilder.routerBuilder;
     ApiServerVerticle apiServerVerticle = ogcRouterBuilder.apiServerVerticle;
     FailureHandler failureHandler = ogcRouterBuilder.failureHandler;
-    
+
           builder
               .operation(TILEMATRIXSETS_API)
               .handler(apiServerVerticle::getTileMatrixSetList)
@@ -58,11 +59,17 @@ public class OgcTilesEntity implements GisEntityInterface{
 
     builder
         .operation(TILE_API)
-            .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
-            .handler(apiServerVerticle::getTile)
-            .handler(apiServerVerticle::putCommonResponseHeaders)
-            .handler(apiServerVerticle::buildResponse)
-            .failureHandler(failureHandler);
+        .handler(
+            ctx -> {
+              ctx.addBodyEndHandler(
+                  context -> ogcRouterBuilder.tilesMeteringHandler.handleMetering(ctx));
+              ctx.next();
+            })
+        .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
+        .handler(apiServerVerticle::getTile)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
   }
 
   @Override
@@ -71,8 +78,11 @@ public class OgcTilesEntity implements GisEntityInterface{
   }
 
   @Override
-  public Future<OasFragments> generateNewSpecFragments(JsonObject existingOgcSpec,
-      JsonObject existingStacSpec, DatabaseService dbService, JsonObject config) {
+  public Future<OasFragments> generateNewSpecFragments(
+      JsonObject existingOgcSpec,
+      JsonObject existingStacSpec,
+      DatabaseService dbService,
+      JsonObject config) {
     // no custom spec generation for now
     return Future.succeededFuture(new OasFragments());
   }

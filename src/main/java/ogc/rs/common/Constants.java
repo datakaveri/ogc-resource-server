@@ -19,7 +19,7 @@ public class Constants {
     public static final Set<String> WELL_KNOWN_QUERY_PARAMETERS =
         Set.of("limit", "bbox", "datetime", "offset", "bbox-crs", "crs");
     public static final String UUID_REGEX = "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$";
-    
+
     public static final String OAS_BEARER_SECURITY_SCHEME = "DX-AAA-Token";
     public static final JsonObject OAS_TOKEN_SECURITY = new JsonObject().put("security",
         new JsonArray().add(new JsonObject().put(OAS_BEARER_SECURITY_SCHEME, new JsonArray())));
@@ -52,5 +52,6 @@ public class Constants {
   public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
   public static final ProcessException processException500 =
       new ProcessException(500, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR);
-  public static final String INVALID_ENDPOINT_ERROR="API / Collection not found";
+  public static final String INVALID_ENDPOINT_ERROR = "API / Collection not found";
+  public static final int METERING_UPDATE_PERIOD = 60000;
 }
