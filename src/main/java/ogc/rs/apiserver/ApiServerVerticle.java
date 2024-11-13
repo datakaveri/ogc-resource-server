@@ -235,9 +235,6 @@ public class ApiServerVerticle extends AbstractVerticle {
     });
   }
 
-
-
-
   public void getStatus(RoutingContext routingContext) {
 
     RequestParameters paramsFromOasValidation =
@@ -250,6 +247,40 @@ public class ApiServerVerticle extends AbstractVerticle {
     jobsService.getStatus(requestBody).onSuccess(handler -> {
       {
         LOGGER.debug("Job status found.");
+        routingContext.put("response", handler.toString());
+        routingContext.put("statusCode", 200);
+        routingContext.next();
+      }
+    }).onFailure(routingContext::fail);
+  }
+
+  public void listAllJobs(RoutingContext routingContext) {
+
+    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
+    JsonObject requestBody = new JsonObject();
+    requestBody.put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
+
+    jobsService.listAllJobs(requestBody).onSuccess(handler -> {
+      {
+        LOGGER.debug("All jobs are listed.");
+        routingContext.put("response", handler.toString());
+        routingContext.put("statusCode", 200);
+        routingContext.next();
+      }
+    }).onFailure(routingContext::fail);
+  }
+  public void retrieveJobResults(RoutingContext routingContext) {
+
+    RequestParameters paramsFromOasValidation =
+            routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
+    JsonObject requestBody = new JsonObject();
+    requestBody.put("jobId", paramsFromOasValidation.pathParameter("jobId").getString())
+            .put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
+
+    jobsService.retrieveJobResults(requestBody).onSuccess(handler -> {
+      {
+        LOGGER.debug("Job results found.");
         routingContext.put("response", handler.toString());
         routingContext.put("statusCode", 200);
         routingContext.next();
