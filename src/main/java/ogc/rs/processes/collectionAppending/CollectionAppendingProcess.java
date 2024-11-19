@@ -11,6 +11,7 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.ProcessException;
 import ogc.rs.common.DataFromS3;
+import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.util.Status;
@@ -48,10 +49,7 @@ public class CollectionAppendingProcess implements ProcessService {
     private final PgPool pgPool;
     private final UtilClass utilClass;
     private final CollectionOnboardingProcess collectionOnboarding;
-    private String awsEndPoint;
-    private String accessKey;
-    private String secretKey;
-    private String awsBucketUrl;
+    private S3Config s3conf;
     private String databaseName;
     private String databaseHost;
     private String databasePassword;
@@ -87,10 +85,15 @@ public class CollectionAppendingProcess implements ProcessService {
 
     private void initializeConfig(JsonObject config) {
 
-        this.awsEndPoint = config.getString("awsEndPoint");
-        this.accessKey = config.getString("awsAccessKey");
-        this.secretKey = config.getString("awsSecretKey");
-        this.awsBucketUrl = config.getString("s3BucketUrl");
+        this.s3conf = new S3Config.Builder()
+            .endpoint(config.getString(S3Config.ENDPOINT_CONF_OP))
+            .bucket(config.getString(S3Config.BUCKET_CONF_OP))
+            .region(config.getString(S3Config.REGION_CONF_OP))
+            .accessKey(config.getString(S3Config.ACCESS_KEY_CONF_OP))
+            .secretKey(config.getString(S3Config.SECRET_KEY_CONF_OP))
+            .pathBasedAccess(config.getBoolean(S3Config.PATH_BASED_ACC_CONF_OP))
+            .build();
+        
         this.databaseName = config.getString("databaseName");
         this.databaseHost = config.getString("databaseHost");
         this.databasePassword = config.getString("databasePassword");
@@ -306,20 +309,20 @@ public class CollectionAppendingProcess implements ProcessService {
         ogrinfo.addArgument("--debug");
         ogrinfo.addArgument("ON");
 
-        setS3OptionsForTesting(ogrinfo);
+        setS3Options(ogrinfo);
         ogrinfo.addArgument("--config");
         ogrinfo.addArgument("AWS_S3_ENDPOINT");
-        ogrinfo.addArgument(awsEndPoint);
+        ogrinfo.addArgument(s3conf.getEndpoint().replaceFirst("https?://", "")); // GDAL needs endpoint without protocol
         ogrinfo.addArgument("--config");
         ogrinfo.addArgument("AWS_ACCESS_KEY_ID");
-        ogrinfo.addArgument(accessKey);
+        ogrinfo.addArgument(s3conf.getAccessKey());
         ogrinfo.addArgument("--config");
         ogrinfo.addArgument("AWS_SECRET_ACCESS_KEY");
-        ogrinfo.addArgument(secretKey);
+        ogrinfo.addArgument(s3conf.getSecretKey());
 
         ogrinfo.addArgument("-json");
         ogrinfo.addArgument("-ro");
-        ogrinfo.addArgument(String.format("/vsis3/%s%s", awsBucketUrl, filename));
+        ogrinfo.addArgument(String.format("/vsis3/%s%s", s3conf.getBucket(), filename));
 
         return ogrinfo;
     }
@@ -509,18 +512,18 @@ public class CollectionAppendingProcess implements ProcessService {
         cmdLine.addArgument("--debug");
         cmdLine.addArgument("ON");
 
-        setS3OptionsForTesting(cmdLine);
+        setS3Options(cmdLine);
         cmdLine.addArgument("--config");
         cmdLine.addArgument("AWS_S3_ENDPOINT");
-        cmdLine.addArgument(awsEndPoint);
+        cmdLine.addArgument(s3conf.getEndpoint().replaceFirst("https?://", "")); // GDAL needs endpoint without protocol
         cmdLine.addArgument("--config");
         cmdLine.addArgument("AWS_ACCESS_KEY_ID");
-        cmdLine.addArgument(accessKey);
+        cmdLine.addArgument(s3conf.getAccessKey());
         cmdLine.addArgument("--config");
         cmdLine.addArgument("AWS_SECRET_ACCESS_KEY");
-        cmdLine.addArgument(secretKey);
+        cmdLine.addArgument(s3conf.getSecretKey());
 
-        cmdLine.addArgument(String.format("/vsis3/%s%s", awsBucketUrl, fileName));
+        cmdLine.addArgument(String.format("/vsis3/%s%s", s3conf.getBucket(), fileName));
 
         return cmdLine;
     }
@@ -639,25 +642,22 @@ public class CollectionAppendingProcess implements ProcessService {
     }
 
     /**
-     * Configures S3 options for integration testing. This method modifies the given
-     * {@link CommandLine} object to disable SSL checks and set virtual hosting to false
-     * if the "s3.mock" system property is enabled. These settings are useful for testing
-     * environments where SSL certificates and S3 virtual hosting are not needed or can cause issues.
+     * Configures S3 options for HTTP access and path-based access.
      *
      * @param ogrinfo the {@link CommandLine} object to be configured with S3 options.
      */
 
-    private void setS3OptionsForTesting(CommandLine ogrinfo){
-        if(System.getProperty("s3.mock") != null){
-            LOGGER.fatal("S3 mock is enabled therefore disabling SSL check and setting Virtual hosting to false.");
+    private void setS3Options(CommandLine ogrinfo){
+      if (!s3conf.isHttps()) {
             ogrinfo.addArgument("--config");
-            ogrinfo.addArgument("GDAL_HTTP_UNSAFESSL");
-            ogrinfo.addArgument("YES");
+            ogrinfo.addArgument("AWS_HTTPS");
+            ogrinfo.addArgument("NO");
+      }
+      
+      if (s3conf.isPathBasedAccess()) {
             ogrinfo.addArgument("--config");
             ogrinfo.addArgument("AWS_VIRTUAL_HOSTING");
             ogrinfo.addArgument("FALSE");
-        }
+      }
     }
-
-
 }

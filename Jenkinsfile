@@ -21,7 +21,6 @@ pipeline {
         script {
           devImage = docker.build( devRegistry, "-f ./docker/dev.dockerfile .")
           testImage = docker.build( testRegistry, "-f ./docker/test.dockerfile .")
-          moddedS3Mock = docker.build( "s3-mock-modded", "-f ./docker/s3_mock_modded_to_443.dockerfile .")
         }
       }
     }
