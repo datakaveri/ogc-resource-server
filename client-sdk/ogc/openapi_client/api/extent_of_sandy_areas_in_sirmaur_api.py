@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -51,8 +51,8 @@ class ExtentOfSandyAreasInSirmaurApi:
         datetime: Annotated[Optional[StrictStr], Field(description="Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.")] = None,
         limit: Optional[Annotated[int, Field(le=10, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
-        asso_f: Optional[StrictStr] = None,
         category: Optional[StrictStr] = None,
+        asso_f: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -81,10 +81,10 @@ class ExtentOfSandyAreasInSirmaurApi:
         :type limit: int
         :param offset: OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.
         :type offset: int
-        :param asso_f:
-        :type asso_f: str
         :param category:
         :type category: str
+        :param asso_f:
+        :type asso_f: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -114,8 +114,8 @@ class ExtentOfSandyAreasInSirmaurApi:
             datetime=datetime,
             limit=limit,
             offset=offset,
-            asso_f=asso_f,
             category=category,
+            asso_f=asso_f,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -147,8 +147,8 @@ class ExtentOfSandyAreasInSirmaurApi:
         datetime: Annotated[Optional[StrictStr], Field(description="Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.")] = None,
         limit: Optional[Annotated[int, Field(le=10, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
-        asso_f: Optional[StrictStr] = None,
         category: Optional[StrictStr] = None,
+        asso_f: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -177,10 +177,10 @@ class ExtentOfSandyAreasInSirmaurApi:
         :type limit: int
         :param offset: OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.
         :type offset: int
-        :param asso_f:
-        :type asso_f: str
         :param category:
         :type category: str
+        :param asso_f:
+        :type asso_f: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -210,8 +210,8 @@ class ExtentOfSandyAreasInSirmaurApi:
             datetime=datetime,
             limit=limit,
             offset=offset,
-            asso_f=asso_f,
             category=category,
+            asso_f=asso_f,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -243,8 +243,8 @@ class ExtentOfSandyAreasInSirmaurApi:
         datetime: Annotated[Optional[StrictStr], Field(description="Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.")] = None,
         limit: Optional[Annotated[int, Field(le=10, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
-        asso_f: Optional[StrictStr] = None,
         category: Optional[StrictStr] = None,
+        asso_f: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -273,10 +273,10 @@ class ExtentOfSandyAreasInSirmaurApi:
         :type limit: int
         :param offset: OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.
         :type offset: int
-        :param asso_f:
-        :type asso_f: str
         :param category:
         :type category: str
+        :param asso_f:
+        :type asso_f: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -306,8 +306,8 @@ class ExtentOfSandyAreasInSirmaurApi:
             datetime=datetime,
             limit=limit,
             offset=offset,
-            asso_f=asso_f,
             category=category,
+            asso_f=asso_f,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -334,8 +334,8 @@ class ExtentOfSandyAreasInSirmaurApi:
         datetime,
         limit,
         offset,
-        asso_f,
         category,
+        asso_f,
         _request_auth,
         _content_type,
         _headers,
@@ -381,13 +381,13 @@ class ExtentOfSandyAreasInSirmaurApi:
             
             _query_params.append(('offset', offset))
             
-        if asso_f is not None:
-            
-            _query_params.append(('ASSO_F', asso_f))
-            
         if category is not None:
             
             _query_params.append(('CATEGORY', category))
+            
+        if asso_f is not None:
+            
+            _query_params.append(('ASSO_F', asso_f))
             
         # process the header parameters
         # process the form parameters

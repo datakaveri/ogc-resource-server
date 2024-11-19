@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -52,8 +52,8 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         stcode: Optional[StrictStr] = None,
-        spillway_l: Optional[StrictStr] = None,
         operating_: Optional[StrictStr] = None,
+        spillway_l: Optional[StrictStr] = None,
         river_name: Optional[StrictStr] = None,
         spillway_1: Optional[StrictStr] = None,
         spillway_3: Optional[StrictInt] = None,
@@ -61,9 +61,9 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         canal_gate: Optional[StrictInt] = None,
         res_area_s: Optional[Union[StrictFloat, StrictInt]] = None,
         dtcode: Optional[StrictStr] = None,
-        spillway_t: Optional[StrictStr] = None,
         dam_length: Optional[StrictStr] = None,
         spillway_4: Optional[Union[StrictFloat, StrictInt]] = None,
+        spillway_t: Optional[StrictStr] = None,
         max_height: Optional[StrictStr] = None,
         type: Optional[StrictStr] = None,
         seismic_zo: Optional[StrictStr] = None,
@@ -80,11 +80,11 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         bacode: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
         nearest_ci: Optional[StrictStr] = None,
+        struct_typ: Optional[StrictStr] = None,
         dm_long: Optional[Union[StrictFloat, StrictInt]] = None,
         grs_stor_c: Optional[Union[StrictFloat, StrictInt]] = None,
-        struct_typ: Optional[StrictStr] = None,
-        strucode: Optional[StrictStr] = None,
         dam_volume: Optional[Union[StrictFloat, StrictInt]] = None,
+        strucode: Optional[StrictStr] = None,
         nrld_no: Optional[StrictStr] = None,
         district: Optional[StrictStr] = None,
         name: Optional[StrictStr] = None,
@@ -92,8 +92,8 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         eff_stor_c: Optional[Union[StrictFloat, StrictInt]] = None,
         name_nrld_: Optional[StrictStr] = None,
         powerhouse: Optional[StrictInt] = None,
-        status: Optional[StrictStr] = None,
         commenceme: Optional[StrictStr] = None,
+        status: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -124,10 +124,10 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         :type offset: int
         :param stcode:
         :type stcode: str
-        :param spillway_l:
-        :type spillway_l: str
         :param operating_:
         :type operating_: str
+        :param spillway_l:
+        :type spillway_l: str
         :param river_name:
         :type river_name: str
         :param spillway_1:
@@ -142,12 +142,12 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         :type res_area_s: float
         :param dtcode:
         :type dtcode: str
-        :param spillway_t:
-        :type spillway_t: str
         :param dam_length:
         :type dam_length: str
         :param spillway_4:
         :type spillway_4: float
+        :param spillway_t:
+        :type spillway_t: str
         :param max_height:
         :type max_height: str
         :param type:
@@ -180,16 +180,16 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         :type sbcode: str
         :param nearest_ci:
         :type nearest_ci: str
+        :param struct_typ:
+        :type struct_typ: str
         :param dm_long:
         :type dm_long: float
         :param grs_stor_c:
         :type grs_stor_c: float
-        :param struct_typ:
-        :type struct_typ: str
-        :param strucode:
-        :type strucode: str
         :param dam_volume:
         :type dam_volume: float
+        :param strucode:
+        :type strucode: str
         :param nrld_no:
         :type nrld_no: str
         :param district:
@@ -204,10 +204,10 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         :type name_nrld_: str
         :param powerhouse:
         :type powerhouse: int
-        :param status:
-        :type status: str
         :param commenceme:
         :type commenceme: str
+        :param status:
+        :type status: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -238,8 +238,8 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             limit=limit,
             offset=offset,
             stcode=stcode,
-            spillway_l=spillway_l,
             operating_=operating_,
+            spillway_l=spillway_l,
             river_name=river_name,
             spillway_1=spillway_1,
             spillway_3=spillway_3,
@@ -247,9 +247,9 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             canal_gate=canal_gate,
             res_area_s=res_area_s,
             dtcode=dtcode,
-            spillway_t=spillway_t,
             dam_length=dam_length,
             spillway_4=spillway_4,
+            spillway_t=spillway_t,
             max_height=max_height,
             type=type,
             seismic_zo=seismic_zo,
@@ -266,11 +266,11 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             bacode=bacode,
             sbcode=sbcode,
             nearest_ci=nearest_ci,
+            struct_typ=struct_typ,
             dm_long=dm_long,
             grs_stor_c=grs_stor_c,
-            struct_typ=struct_typ,
-            strucode=strucode,
             dam_volume=dam_volume,
+            strucode=strucode,
             nrld_no=nrld_no,
             district=district,
             name=name,
@@ -278,8 +278,8 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             eff_stor_c=eff_stor_c,
             name_nrld_=name_nrld_,
             powerhouse=powerhouse,
-            status=status,
             commenceme=commenceme,
+            status=status,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -312,8 +312,8 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         stcode: Optional[StrictStr] = None,
-        spillway_l: Optional[StrictStr] = None,
         operating_: Optional[StrictStr] = None,
+        spillway_l: Optional[StrictStr] = None,
         river_name: Optional[StrictStr] = None,
         spillway_1: Optional[StrictStr] = None,
         spillway_3: Optional[StrictInt] = None,
@@ -321,9 +321,9 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         canal_gate: Optional[StrictInt] = None,
         res_area_s: Optional[Union[StrictFloat, StrictInt]] = None,
         dtcode: Optional[StrictStr] = None,
-        spillway_t: Optional[StrictStr] = None,
         dam_length: Optional[StrictStr] = None,
         spillway_4: Optional[Union[StrictFloat, StrictInt]] = None,
+        spillway_t: Optional[StrictStr] = None,
         max_height: Optional[StrictStr] = None,
         type: Optional[StrictStr] = None,
         seismic_zo: Optional[StrictStr] = None,
@@ -340,11 +340,11 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         bacode: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
         nearest_ci: Optional[StrictStr] = None,
+        struct_typ: Optional[StrictStr] = None,
         dm_long: Optional[Union[StrictFloat, StrictInt]] = None,
         grs_stor_c: Optional[Union[StrictFloat, StrictInt]] = None,
-        struct_typ: Optional[StrictStr] = None,
-        strucode: Optional[StrictStr] = None,
         dam_volume: Optional[Union[StrictFloat, StrictInt]] = None,
+        strucode: Optional[StrictStr] = None,
         nrld_no: Optional[StrictStr] = None,
         district: Optional[StrictStr] = None,
         name: Optional[StrictStr] = None,
@@ -352,8 +352,8 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         eff_stor_c: Optional[Union[StrictFloat, StrictInt]] = None,
         name_nrld_: Optional[StrictStr] = None,
         powerhouse: Optional[StrictInt] = None,
-        status: Optional[StrictStr] = None,
         commenceme: Optional[StrictStr] = None,
+        status: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -384,10 +384,10 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         :type offset: int
         :param stcode:
         :type stcode: str
-        :param spillway_l:
-        :type spillway_l: str
         :param operating_:
         :type operating_: str
+        :param spillway_l:
+        :type spillway_l: str
         :param river_name:
         :type river_name: str
         :param spillway_1:
@@ -402,12 +402,12 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         :type res_area_s: float
         :param dtcode:
         :type dtcode: str
-        :param spillway_t:
-        :type spillway_t: str
         :param dam_length:
         :type dam_length: str
         :param spillway_4:
         :type spillway_4: float
+        :param spillway_t:
+        :type spillway_t: str
         :param max_height:
         :type max_height: str
         :param type:
@@ -440,16 +440,16 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         :type sbcode: str
         :param nearest_ci:
         :type nearest_ci: str
+        :param struct_typ:
+        :type struct_typ: str
         :param dm_long:
         :type dm_long: float
         :param grs_stor_c:
         :type grs_stor_c: float
-        :param struct_typ:
-        :type struct_typ: str
-        :param strucode:
-        :type strucode: str
         :param dam_volume:
         :type dam_volume: float
+        :param strucode:
+        :type strucode: str
         :param nrld_no:
         :type nrld_no: str
         :param district:
@@ -464,10 +464,10 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         :type name_nrld_: str
         :param powerhouse:
         :type powerhouse: int
-        :param status:
-        :type status: str
         :param commenceme:
         :type commenceme: str
+        :param status:
+        :type status: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -498,8 +498,8 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             limit=limit,
             offset=offset,
             stcode=stcode,
-            spillway_l=spillway_l,
             operating_=operating_,
+            spillway_l=spillway_l,
             river_name=river_name,
             spillway_1=spillway_1,
             spillway_3=spillway_3,
@@ -507,9 +507,9 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             canal_gate=canal_gate,
             res_area_s=res_area_s,
             dtcode=dtcode,
-            spillway_t=spillway_t,
             dam_length=dam_length,
             spillway_4=spillway_4,
+            spillway_t=spillway_t,
             max_height=max_height,
             type=type,
             seismic_zo=seismic_zo,
@@ -526,11 +526,11 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             bacode=bacode,
             sbcode=sbcode,
             nearest_ci=nearest_ci,
+            struct_typ=struct_typ,
             dm_long=dm_long,
             grs_stor_c=grs_stor_c,
-            struct_typ=struct_typ,
-            strucode=strucode,
             dam_volume=dam_volume,
+            strucode=strucode,
             nrld_no=nrld_no,
             district=district,
             name=name,
@@ -538,8 +538,8 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             eff_stor_c=eff_stor_c,
             name_nrld_=name_nrld_,
             powerhouse=powerhouse,
-            status=status,
             commenceme=commenceme,
+            status=status,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -572,8 +572,8 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         stcode: Optional[StrictStr] = None,
-        spillway_l: Optional[StrictStr] = None,
         operating_: Optional[StrictStr] = None,
+        spillway_l: Optional[StrictStr] = None,
         river_name: Optional[StrictStr] = None,
         spillway_1: Optional[StrictStr] = None,
         spillway_3: Optional[StrictInt] = None,
@@ -581,9 +581,9 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         canal_gate: Optional[StrictInt] = None,
         res_area_s: Optional[Union[StrictFloat, StrictInt]] = None,
         dtcode: Optional[StrictStr] = None,
-        spillway_t: Optional[StrictStr] = None,
         dam_length: Optional[StrictStr] = None,
         spillway_4: Optional[Union[StrictFloat, StrictInt]] = None,
+        spillway_t: Optional[StrictStr] = None,
         max_height: Optional[StrictStr] = None,
         type: Optional[StrictStr] = None,
         seismic_zo: Optional[StrictStr] = None,
@@ -600,11 +600,11 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         bacode: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
         nearest_ci: Optional[StrictStr] = None,
+        struct_typ: Optional[StrictStr] = None,
         dm_long: Optional[Union[StrictFloat, StrictInt]] = None,
         grs_stor_c: Optional[Union[StrictFloat, StrictInt]] = None,
-        struct_typ: Optional[StrictStr] = None,
-        strucode: Optional[StrictStr] = None,
         dam_volume: Optional[Union[StrictFloat, StrictInt]] = None,
+        strucode: Optional[StrictStr] = None,
         nrld_no: Optional[StrictStr] = None,
         district: Optional[StrictStr] = None,
         name: Optional[StrictStr] = None,
@@ -612,8 +612,8 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         eff_stor_c: Optional[Union[StrictFloat, StrictInt]] = None,
         name_nrld_: Optional[StrictStr] = None,
         powerhouse: Optional[StrictInt] = None,
-        status: Optional[StrictStr] = None,
         commenceme: Optional[StrictStr] = None,
+        status: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -644,10 +644,10 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         :type offset: int
         :param stcode:
         :type stcode: str
-        :param spillway_l:
-        :type spillway_l: str
         :param operating_:
         :type operating_: str
+        :param spillway_l:
+        :type spillway_l: str
         :param river_name:
         :type river_name: str
         :param spillway_1:
@@ -662,12 +662,12 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         :type res_area_s: float
         :param dtcode:
         :type dtcode: str
-        :param spillway_t:
-        :type spillway_t: str
         :param dam_length:
         :type dam_length: str
         :param spillway_4:
         :type spillway_4: float
+        :param spillway_t:
+        :type spillway_t: str
         :param max_height:
         :type max_height: str
         :param type:
@@ -700,16 +700,16 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         :type sbcode: str
         :param nearest_ci:
         :type nearest_ci: str
+        :param struct_typ:
+        :type struct_typ: str
         :param dm_long:
         :type dm_long: float
         :param grs_stor_c:
         :type grs_stor_c: float
-        :param struct_typ:
-        :type struct_typ: str
-        :param strucode:
-        :type strucode: str
         :param dam_volume:
         :type dam_volume: float
+        :param strucode:
+        :type strucode: str
         :param nrld_no:
         :type nrld_no: str
         :param district:
@@ -724,10 +724,10 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         :type name_nrld_: str
         :param powerhouse:
         :type powerhouse: int
-        :param status:
-        :type status: str
         :param commenceme:
         :type commenceme: str
+        :param status:
+        :type status: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -758,8 +758,8 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             limit=limit,
             offset=offset,
             stcode=stcode,
-            spillway_l=spillway_l,
             operating_=operating_,
+            spillway_l=spillway_l,
             river_name=river_name,
             spillway_1=spillway_1,
             spillway_3=spillway_3,
@@ -767,9 +767,9 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             canal_gate=canal_gate,
             res_area_s=res_area_s,
             dtcode=dtcode,
-            spillway_t=spillway_t,
             dam_length=dam_length,
             spillway_4=spillway_4,
+            spillway_t=spillway_t,
             max_height=max_height,
             type=type,
             seismic_zo=seismic_zo,
@@ -786,11 +786,11 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             bacode=bacode,
             sbcode=sbcode,
             nearest_ci=nearest_ci,
+            struct_typ=struct_typ,
             dm_long=dm_long,
             grs_stor_c=grs_stor_c,
-            struct_typ=struct_typ,
-            strucode=strucode,
             dam_volume=dam_volume,
+            strucode=strucode,
             nrld_no=nrld_no,
             district=district,
             name=name,
@@ -798,8 +798,8 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             eff_stor_c=eff_stor_c,
             name_nrld_=name_nrld_,
             powerhouse=powerhouse,
-            status=status,
             commenceme=commenceme,
+            status=status,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -827,8 +827,8 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         limit,
         offset,
         stcode,
-        spillway_l,
         operating_,
+        spillway_l,
         river_name,
         spillway_1,
         spillway_3,
@@ -836,9 +836,9 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         canal_gate,
         res_area_s,
         dtcode,
-        spillway_t,
         dam_length,
         spillway_4,
+        spillway_t,
         max_height,
         type,
         seismic_zo,
@@ -855,11 +855,11 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         bacode,
         sbcode,
         nearest_ci,
+        struct_typ,
         dm_long,
         grs_stor_c,
-        struct_typ,
-        strucode,
         dam_volume,
+        strucode,
         nrld_no,
         district,
         name,
@@ -867,8 +867,8 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         eff_stor_c,
         name_nrld_,
         powerhouse,
-        status,
         commenceme,
+        status,
         _request_auth,
         _content_type,
         _headers,
@@ -918,13 +918,13 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             
             _query_params.append(('stcode', stcode))
             
-        if spillway_l is not None:
-            
-            _query_params.append(('spillway_l', spillway_l))
-            
         if operating_ is not None:
             
             _query_params.append(('operating_', operating_))
+            
+        if spillway_l is not None:
+            
+            _query_params.append(('spillway_l', spillway_l))
             
         if river_name is not None:
             
@@ -954,10 +954,6 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             
             _query_params.append(('dtcode', dtcode))
             
-        if spillway_t is not None:
-            
-            _query_params.append(('spillway_t', spillway_t))
-            
         if dam_length is not None:
             
             _query_params.append(('dam_length', dam_length))
@@ -965,6 +961,10 @@ class DamLocationsInAndAroundVizianagaramAPApi:
         if spillway_4 is not None:
             
             _query_params.append(('spillway_4', spillway_4))
+            
+        if spillway_t is not None:
+            
+            _query_params.append(('spillway_t', spillway_t))
             
         if max_height is not None:
             
@@ -1030,6 +1030,10 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             
             _query_params.append(('nearest_ci', nearest_ci))
             
+        if struct_typ is not None:
+            
+            _query_params.append(('Struct_Typ', struct_typ))
+            
         if dm_long is not None:
             
             _query_params.append(('dm_long', dm_long))
@@ -1038,17 +1042,13 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             
             _query_params.append(('grs_stor_c', grs_stor_c))
             
-        if struct_typ is not None:
+        if dam_volume is not None:
             
-            _query_params.append(('Struct_Typ', struct_typ))
+            _query_params.append(('dam_volume', dam_volume))
             
         if strucode is not None:
             
             _query_params.append(('strucode', strucode))
-            
-        if dam_volume is not None:
-            
-            _query_params.append(('dam_volume', dam_volume))
             
         if nrld_no is not None:
             
@@ -1078,13 +1078,13 @@ class DamLocationsInAndAroundVizianagaramAPApi:
             
             _query_params.append(('powerhouse', powerhouse))
             
-        if status is not None:
-            
-            _query_params.append(('status', status))
-            
         if commenceme is not None:
             
             _query_params.append(('commenceme', commenceme))
+            
+        if status is not None:
+            
+            _query_params.append(('status', status))
             
         # process the header parameters
         # process the form parameters

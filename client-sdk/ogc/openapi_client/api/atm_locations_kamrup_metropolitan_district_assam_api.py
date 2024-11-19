@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -53,8 +53,8 @@ class ATMLocationsKamrupMetropolitanDistrictAssamApi:
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         dist_lgd: Optional[StrictInt] = None,
         atm_lat: Optional[Union[StrictFloat, StrictInt]] = None,
-        atm_long: Optional[Union[StrictFloat, StrictInt]] = None,
         atm_ad: Optional[StrictStr] = None,
+        atm_long: Optional[Union[StrictFloat, StrictInt]] = None,
         state_name: Optional[StrictStr] = None,
         bank_name: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
@@ -92,10 +92,10 @@ class ATMLocationsKamrupMetropolitanDistrictAssamApi:
         :type dist_lgd: int
         :param atm_lat:
         :type atm_lat: float
-        :param atm_long:
-        :type atm_long: float
         :param atm_ad:
         :type atm_ad: str
+        :param atm_long:
+        :type atm_long: float
         :param state_name:
         :type state_name: str
         :param bank_name:
@@ -137,8 +137,8 @@ class ATMLocationsKamrupMetropolitanDistrictAssamApi:
             offset=offset,
             dist_lgd=dist_lgd,
             atm_lat=atm_lat,
-            atm_long=atm_long,
             atm_ad=atm_ad,
+            atm_long=atm_long,
             state_name=state_name,
             bank_name=bank_name,
             state_lgd=state_lgd,
@@ -177,8 +177,8 @@ class ATMLocationsKamrupMetropolitanDistrictAssamApi:
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         dist_lgd: Optional[StrictInt] = None,
         atm_lat: Optional[Union[StrictFloat, StrictInt]] = None,
-        atm_long: Optional[Union[StrictFloat, StrictInt]] = None,
         atm_ad: Optional[StrictStr] = None,
+        atm_long: Optional[Union[StrictFloat, StrictInt]] = None,
         state_name: Optional[StrictStr] = None,
         bank_name: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
@@ -216,10 +216,10 @@ class ATMLocationsKamrupMetropolitanDistrictAssamApi:
         :type dist_lgd: int
         :param atm_lat:
         :type atm_lat: float
-        :param atm_long:
-        :type atm_long: float
         :param atm_ad:
         :type atm_ad: str
+        :param atm_long:
+        :type atm_long: float
         :param state_name:
         :type state_name: str
         :param bank_name:
@@ -261,8 +261,8 @@ class ATMLocationsKamrupMetropolitanDistrictAssamApi:
             offset=offset,
             dist_lgd=dist_lgd,
             atm_lat=atm_lat,
-            atm_long=atm_long,
             atm_ad=atm_ad,
+            atm_long=atm_long,
             state_name=state_name,
             bank_name=bank_name,
             state_lgd=state_lgd,
@@ -301,8 +301,8 @@ class ATMLocationsKamrupMetropolitanDistrictAssamApi:
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         dist_lgd: Optional[StrictInt] = None,
         atm_lat: Optional[Union[StrictFloat, StrictInt]] = None,
-        atm_long: Optional[Union[StrictFloat, StrictInt]] = None,
         atm_ad: Optional[StrictStr] = None,
+        atm_long: Optional[Union[StrictFloat, StrictInt]] = None,
         state_name: Optional[StrictStr] = None,
         bank_name: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
@@ -340,10 +340,10 @@ class ATMLocationsKamrupMetropolitanDistrictAssamApi:
         :type dist_lgd: int
         :param atm_lat:
         :type atm_lat: float
-        :param atm_long:
-        :type atm_long: float
         :param atm_ad:
         :type atm_ad: str
+        :param atm_long:
+        :type atm_long: float
         :param state_name:
         :type state_name: str
         :param bank_name:
@@ -385,8 +385,8 @@ class ATMLocationsKamrupMetropolitanDistrictAssamApi:
             offset=offset,
             dist_lgd=dist_lgd,
             atm_lat=atm_lat,
-            atm_long=atm_long,
             atm_ad=atm_ad,
+            atm_long=atm_long,
             state_name=state_name,
             bank_name=bank_name,
             state_lgd=state_lgd,
@@ -420,8 +420,8 @@ class ATMLocationsKamrupMetropolitanDistrictAssamApi:
         offset,
         dist_lgd,
         atm_lat,
-        atm_long,
         atm_ad,
+        atm_long,
         state_name,
         bank_name,
         state_lgd,
@@ -480,13 +480,13 @@ class ATMLocationsKamrupMetropolitanDistrictAssamApi:
             
             _query_params.append(('atm_lat', atm_lat))
             
-        if atm_long is not None:
-            
-            _query_params.append(('atm_long', atm_long))
-            
         if atm_ad is not None:
             
             _query_params.append(('atm_ad', atm_ad))
+            
+        if atm_long is not None:
+            
+            _query_params.append(('atm_long', atm_long))
             
         if state_name is not None:
             

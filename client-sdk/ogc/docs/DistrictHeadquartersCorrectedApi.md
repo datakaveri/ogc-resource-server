@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, objectid=objectid, district=district, indiadpt_=indiadpt_, area=area, town=town, hq=hq, state=state, taluk=taluk, indiadpt_i=indiadpt_i, perimeter=perimeter)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, objectid=objectid, district=district, indiadpt_=indiadpt_, area=area, town=town, state=state, hq=hq, indiadpt_i=indiadpt_i, taluk=taluk, perimeter=perimeter)
 
 Get features from Fetched from Administrative_Boundary_Database_For_Entire_Country_Upto_Taluk_level_with_HQ
 
@@ -55,15 +55,15 @@ with openapi_client.ApiClient(configuration) as api_client:
     indiadpt_ = 56 # int |  (optional)
     area = 3.4 # float |  (optional)
     town = 'town_example' # str |  (optional)
-    hq = 'hq_example' # str |  (optional)
     state = 'state_example' # str |  (optional)
-    taluk = 'taluk_example' # str |  (optional)
+    hq = 'hq_example' # str |  (optional)
     indiadpt_i = 56 # int |  (optional)
+    taluk = 'taluk_example' # str |  (optional)
     perimeter = 3.4 # float |  (optional)
 
     try:
         # Get features from Fetched from Administrative_Boundary_Database_For_Entire_Country_Upto_Taluk_level_with_HQ
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, objectid=objectid, district=district, indiadpt_=indiadpt_, area=area, town=town, hq=hq, state=state, taluk=taluk, indiadpt_i=indiadpt_i, perimeter=perimeter)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, objectid=objectid, district=district, indiadpt_=indiadpt_, area=area, town=town, state=state, hq=hq, indiadpt_i=indiadpt_i, taluk=taluk, perimeter=perimeter)
         print("The response of DistrictHeadquartersCorrectedApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -88,10 +88,10 @@ Name | Type | Description  | Notes
  **indiadpt_** | **int**|  | [optional] 
  **area** | **float**|  | [optional] 
  **town** | **str**|  | [optional] 
- **hq** | **str**|  | [optional] 
  **state** | **str**|  | [optional] 
- **taluk** | **str**|  | [optional] 
+ **hq** | **str**|  | [optional] 
  **indiadpt_i** | **int**|  | [optional] 
+ **taluk** | **str**|  | [optional] 
  **perimeter** | **float**|  | [optional] 
 
 ### Return type

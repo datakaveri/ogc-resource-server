@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, ass_const_=ass_const_, pop_m=pop_m, pop_f=pop_f, pop_total=pop_total, ass_const1=ass_const1, ward_no=ward_no, lon=lon, area_sq_km=area_sq_km, ward_name=ward_name, pop_sc=pop_sc, pop_st=pop_st, lat=lat)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, ass_const_=ass_const_, pop_m=pop_m, pop_f=pop_f, pop_total=pop_total, ass_const1=ass_const1, ward_no=ward_no, area_sq_km=area_sq_km, lon=lon, ward_name=ward_name, pop_sc=pop_sc, pop_st=pop_st, lat=lat)
 
 Get features from Polygon boundary of the wards in Bruhat Bengaluru Mahanagara Palike (BBMP)
 
@@ -56,8 +56,8 @@ with openapi_client.ApiClient(configuration) as api_client:
     pop_total = 3.4 # float |  (optional)
     ass_const1 = 'ass_const1_example' # str |  (optional)
     ward_no = 3.4 # float |  (optional)
-    lon = 3.4 # float |  (optional)
     area_sq_km = 3.4 # float |  (optional)
+    lon = 3.4 # float |  (optional)
     ward_name = 'ward_name_example' # str |  (optional)
     pop_sc = 3.4 # float |  (optional)
     pop_st = 3.4 # float |  (optional)
@@ -65,7 +65,7 @@ with openapi_client.ApiClient(configuration) as api_client:
 
     try:
         # Get features from Polygon boundary of the wards in Bruhat Bengaluru Mahanagara Palike (BBMP)
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, ass_const_=ass_const_, pop_m=pop_m, pop_f=pop_f, pop_total=pop_total, ass_const1=ass_const1, ward_no=ward_no, lon=lon, area_sq_km=area_sq_km, ward_name=ward_name, pop_sc=pop_sc, pop_st=pop_st, lat=lat)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, ass_const_=ass_const_, pop_m=pop_m, pop_f=pop_f, pop_total=pop_total, ass_const1=ass_const1, ward_no=ward_no, area_sq_km=area_sq_km, lon=lon, ward_name=ward_name, pop_sc=pop_sc, pop_st=pop_st, lat=lat)
         print("The response of WardBoundariesOfBBMPApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -91,8 +91,8 @@ Name | Type | Description  | Notes
  **pop_total** | **float**|  | [optional] 
  **ass_const1** | **str**|  | [optional] 
  **ward_no** | **float**|  | [optional] 
- **lon** | **float**|  | [optional] 
  **area_sq_km** | **float**|  | [optional] 
+ **lon** | **float**|  | [optional] 
  **ward_name** | **str**|  | [optional] 
  **pop_sc** | **float**|  | [optional] 
  **pop_st** | **float**|  | [optional] 

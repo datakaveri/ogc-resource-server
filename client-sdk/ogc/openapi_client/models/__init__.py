@@ -2,9 +2,9 @@
 
 # flake8: noqa
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -49,6 +49,7 @@ from openapi_client.models.inline_or_ref_data import InlineOrRefData
 from openapi_client.models.input_description import InputDescription
 from openapi_client.models.input_description_all_of_max_occurs import InputDescriptionAllOfMaxOccurs
 from openapi_client.models.input_value_no_object import InputValueNoObject
+from openapi_client.models.input_value_no_object_one_of_inner import InputValueNoObjectOneOfInner
 from openapi_client.models.job_control_options import JobControlOptions
 from openapi_client.models.landing_page import LandingPage
 from openapi_client.models.landing_page_links_inner import LandingPageLinksInner

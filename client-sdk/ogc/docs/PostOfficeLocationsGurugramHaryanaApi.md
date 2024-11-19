@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, facilty_ty=facilty_ty, subd_name=subd_name, pin=pin, longitude=longitude, state=state, po_name=po_name, latitude=latitude, division=division, circle=circle, region=region)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, facilty_ty=facilty_ty, subd_name=subd_name, pin=pin, longitude=longitude, state=state, po_name=po_name, latitude=latitude, division=division, region=region, circle=circle)
 
 Get features from Point features of post offices in Gurugram District, Haryana
 
@@ -58,12 +58,12 @@ with openapi_client.ApiClient(configuration) as api_client:
     po_name = 'po_name_example' # str |  (optional)
     latitude = 'latitude_example' # str |  (optional)
     division = 'division_example' # str |  (optional)
-    circle = 'circle_example' # str |  (optional)
     region = 'region_example' # str |  (optional)
+    circle = 'circle_example' # str |  (optional)
 
     try:
         # Get features from Point features of post offices in Gurugram District, Haryana
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, facilty_ty=facilty_ty, subd_name=subd_name, pin=pin, longitude=longitude, state=state, po_name=po_name, latitude=latitude, division=division, circle=circle, region=region)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, facilty_ty=facilty_ty, subd_name=subd_name, pin=pin, longitude=longitude, state=state, po_name=po_name, latitude=latitude, division=division, region=region, circle=circle)
         print("The response of PostOfficeLocationsGurugramHaryanaApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -91,8 +91,8 @@ Name | Type | Description  | Notes
  **po_name** | **str**|  | [optional] 
  **latitude** | **str**|  | [optional] 
  **division** | **str**|  | [optional] 
- **circle** | **str**|  | [optional] 
  **region** | **str**|  | [optional] 
+ **circle** | **str**|  | [optional] 
 
 ### Return type
 

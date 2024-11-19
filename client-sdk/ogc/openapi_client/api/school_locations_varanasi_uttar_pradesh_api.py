@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -51,23 +51,23 @@ class SchoolLocationsVaranasiUttarPradeshApi:
         datetime: Annotated[Optional[StrictStr], Field(description="Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.")] = None,
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
-        school_cat: Optional[StrictStr] = None,
         block_lgd: Optional[StrictInt] = None,
+        school_cat: Optional[StrictStr] = None,
         dtname: Optional[StrictStr] = None,
         latitude: Optional[Union[StrictFloat, StrictInt]] = None,
         schname: Optional[StrictStr] = None,
         block_name: Optional[StrictStr] = None,
         subdt_lgd: Optional[StrictInt] = None,
-        vilname: Optional[StrictStr] = None,
         management: Optional[StrictStr] = None,
+        vilname: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
         dist_lgd: Optional[StrictInt] = None,
         schcd: Optional[StrictStr] = None,
         gp_code: Optional[Union[StrictFloat, StrictInt]] = None,
-        gp_name: Optional[StrictStr] = None,
         vilcode11: Optional[StrictStr] = None,
-        stname: Optional[StrictStr] = None,
+        gp_name: Optional[StrictStr] = None,
         longitude: Optional[Union[StrictFloat, StrictInt]] = None,
+        stname: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -96,10 +96,10 @@ class SchoolLocationsVaranasiUttarPradeshApi:
         :type limit: int
         :param offset: OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.
         :type offset: int
-        :param school_cat:
-        :type school_cat: str
         :param block_lgd:
         :type block_lgd: int
+        :param school_cat:
+        :type school_cat: str
         :param dtname:
         :type dtname: str
         :param latitude:
@@ -110,10 +110,10 @@ class SchoolLocationsVaranasiUttarPradeshApi:
         :type block_name: str
         :param subdt_lgd:
         :type subdt_lgd: int
-        :param vilname:
-        :type vilname: str
         :param management:
         :type management: str
+        :param vilname:
+        :type vilname: str
         :param state_lgd:
         :type state_lgd: int
         :param dist_lgd:
@@ -122,14 +122,14 @@ class SchoolLocationsVaranasiUttarPradeshApi:
         :type schcd: str
         :param gp_code:
         :type gp_code: float
-        :param gp_name:
-        :type gp_name: str
         :param vilcode11:
         :type vilcode11: str
-        :param stname:
-        :type stname: str
+        :param gp_name:
+        :type gp_name: str
         :param longitude:
         :type longitude: float
+        :param stname:
+        :type stname: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -159,23 +159,23 @@ class SchoolLocationsVaranasiUttarPradeshApi:
             datetime=datetime,
             limit=limit,
             offset=offset,
-            school_cat=school_cat,
             block_lgd=block_lgd,
+            school_cat=school_cat,
             dtname=dtname,
             latitude=latitude,
             schname=schname,
             block_name=block_name,
             subdt_lgd=subdt_lgd,
-            vilname=vilname,
             management=management,
+            vilname=vilname,
             state_lgd=state_lgd,
             dist_lgd=dist_lgd,
             schcd=schcd,
             gp_code=gp_code,
-            gp_name=gp_name,
             vilcode11=vilcode11,
-            stname=stname,
+            gp_name=gp_name,
             longitude=longitude,
+            stname=stname,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -207,23 +207,23 @@ class SchoolLocationsVaranasiUttarPradeshApi:
         datetime: Annotated[Optional[StrictStr], Field(description="Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.")] = None,
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
-        school_cat: Optional[StrictStr] = None,
         block_lgd: Optional[StrictInt] = None,
+        school_cat: Optional[StrictStr] = None,
         dtname: Optional[StrictStr] = None,
         latitude: Optional[Union[StrictFloat, StrictInt]] = None,
         schname: Optional[StrictStr] = None,
         block_name: Optional[StrictStr] = None,
         subdt_lgd: Optional[StrictInt] = None,
-        vilname: Optional[StrictStr] = None,
         management: Optional[StrictStr] = None,
+        vilname: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
         dist_lgd: Optional[StrictInt] = None,
         schcd: Optional[StrictStr] = None,
         gp_code: Optional[Union[StrictFloat, StrictInt]] = None,
-        gp_name: Optional[StrictStr] = None,
         vilcode11: Optional[StrictStr] = None,
-        stname: Optional[StrictStr] = None,
+        gp_name: Optional[StrictStr] = None,
         longitude: Optional[Union[StrictFloat, StrictInt]] = None,
+        stname: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -252,10 +252,10 @@ class SchoolLocationsVaranasiUttarPradeshApi:
         :type limit: int
         :param offset: OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.
         :type offset: int
-        :param school_cat:
-        :type school_cat: str
         :param block_lgd:
         :type block_lgd: int
+        :param school_cat:
+        :type school_cat: str
         :param dtname:
         :type dtname: str
         :param latitude:
@@ -266,10 +266,10 @@ class SchoolLocationsVaranasiUttarPradeshApi:
         :type block_name: str
         :param subdt_lgd:
         :type subdt_lgd: int
-        :param vilname:
-        :type vilname: str
         :param management:
         :type management: str
+        :param vilname:
+        :type vilname: str
         :param state_lgd:
         :type state_lgd: int
         :param dist_lgd:
@@ -278,14 +278,14 @@ class SchoolLocationsVaranasiUttarPradeshApi:
         :type schcd: str
         :param gp_code:
         :type gp_code: float
-        :param gp_name:
-        :type gp_name: str
         :param vilcode11:
         :type vilcode11: str
-        :param stname:
-        :type stname: str
+        :param gp_name:
+        :type gp_name: str
         :param longitude:
         :type longitude: float
+        :param stname:
+        :type stname: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -315,23 +315,23 @@ class SchoolLocationsVaranasiUttarPradeshApi:
             datetime=datetime,
             limit=limit,
             offset=offset,
-            school_cat=school_cat,
             block_lgd=block_lgd,
+            school_cat=school_cat,
             dtname=dtname,
             latitude=latitude,
             schname=schname,
             block_name=block_name,
             subdt_lgd=subdt_lgd,
-            vilname=vilname,
             management=management,
+            vilname=vilname,
             state_lgd=state_lgd,
             dist_lgd=dist_lgd,
             schcd=schcd,
             gp_code=gp_code,
-            gp_name=gp_name,
             vilcode11=vilcode11,
-            stname=stname,
+            gp_name=gp_name,
             longitude=longitude,
+            stname=stname,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -363,23 +363,23 @@ class SchoolLocationsVaranasiUttarPradeshApi:
         datetime: Annotated[Optional[StrictStr], Field(description="Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.")] = None,
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
-        school_cat: Optional[StrictStr] = None,
         block_lgd: Optional[StrictInt] = None,
+        school_cat: Optional[StrictStr] = None,
         dtname: Optional[StrictStr] = None,
         latitude: Optional[Union[StrictFloat, StrictInt]] = None,
         schname: Optional[StrictStr] = None,
         block_name: Optional[StrictStr] = None,
         subdt_lgd: Optional[StrictInt] = None,
-        vilname: Optional[StrictStr] = None,
         management: Optional[StrictStr] = None,
+        vilname: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
         dist_lgd: Optional[StrictInt] = None,
         schcd: Optional[StrictStr] = None,
         gp_code: Optional[Union[StrictFloat, StrictInt]] = None,
-        gp_name: Optional[StrictStr] = None,
         vilcode11: Optional[StrictStr] = None,
-        stname: Optional[StrictStr] = None,
+        gp_name: Optional[StrictStr] = None,
         longitude: Optional[Union[StrictFloat, StrictInt]] = None,
+        stname: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -408,10 +408,10 @@ class SchoolLocationsVaranasiUttarPradeshApi:
         :type limit: int
         :param offset: OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.
         :type offset: int
-        :param school_cat:
-        :type school_cat: str
         :param block_lgd:
         :type block_lgd: int
+        :param school_cat:
+        :type school_cat: str
         :param dtname:
         :type dtname: str
         :param latitude:
@@ -422,10 +422,10 @@ class SchoolLocationsVaranasiUttarPradeshApi:
         :type block_name: str
         :param subdt_lgd:
         :type subdt_lgd: int
-        :param vilname:
-        :type vilname: str
         :param management:
         :type management: str
+        :param vilname:
+        :type vilname: str
         :param state_lgd:
         :type state_lgd: int
         :param dist_lgd:
@@ -434,14 +434,14 @@ class SchoolLocationsVaranasiUttarPradeshApi:
         :type schcd: str
         :param gp_code:
         :type gp_code: float
-        :param gp_name:
-        :type gp_name: str
         :param vilcode11:
         :type vilcode11: str
-        :param stname:
-        :type stname: str
+        :param gp_name:
+        :type gp_name: str
         :param longitude:
         :type longitude: float
+        :param stname:
+        :type stname: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -471,23 +471,23 @@ class SchoolLocationsVaranasiUttarPradeshApi:
             datetime=datetime,
             limit=limit,
             offset=offset,
-            school_cat=school_cat,
             block_lgd=block_lgd,
+            school_cat=school_cat,
             dtname=dtname,
             latitude=latitude,
             schname=schname,
             block_name=block_name,
             subdt_lgd=subdt_lgd,
-            vilname=vilname,
             management=management,
+            vilname=vilname,
             state_lgd=state_lgd,
             dist_lgd=dist_lgd,
             schcd=schcd,
             gp_code=gp_code,
-            gp_name=gp_name,
             vilcode11=vilcode11,
-            stname=stname,
+            gp_name=gp_name,
             longitude=longitude,
+            stname=stname,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -514,23 +514,23 @@ class SchoolLocationsVaranasiUttarPradeshApi:
         datetime,
         limit,
         offset,
-        school_cat,
         block_lgd,
+        school_cat,
         dtname,
         latitude,
         schname,
         block_name,
         subdt_lgd,
-        vilname,
         management,
+        vilname,
         state_lgd,
         dist_lgd,
         schcd,
         gp_code,
-        gp_name,
         vilcode11,
-        stname,
+        gp_name,
         longitude,
+        stname,
         _request_auth,
         _content_type,
         _headers,
@@ -576,13 +576,13 @@ class SchoolLocationsVaranasiUttarPradeshApi:
             
             _query_params.append(('offset', offset))
             
-        if school_cat is not None:
-            
-            _query_params.append(('school_cat', school_cat))
-            
         if block_lgd is not None:
             
             _query_params.append(('Block_lgd', block_lgd))
+            
+        if school_cat is not None:
+            
+            _query_params.append(('school_cat', school_cat))
             
         if dtname is not None:
             
@@ -604,13 +604,13 @@ class SchoolLocationsVaranasiUttarPradeshApi:
             
             _query_params.append(('Subdt_LGD', subdt_lgd))
             
-        if vilname is not None:
-            
-            _query_params.append(('vilname', vilname))
-            
         if management is not None:
             
             _query_params.append(('management', management))
+            
+        if vilname is not None:
+            
+            _query_params.append(('vilname', vilname))
             
         if state_lgd is not None:
             
@@ -628,21 +628,21 @@ class SchoolLocationsVaranasiUttarPradeshApi:
             
             _query_params.append(('GP_CODE', gp_code))
             
-        if gp_name is not None:
-            
-            _query_params.append(('GP_NAME', gp_name))
-            
         if vilcode11 is not None:
             
             _query_params.append(('VILCODE11', vilcode11))
             
-        if stname is not None:
+        if gp_name is not None:
             
-            _query_params.append(('stname', stname))
+            _query_params.append(('GP_NAME', gp_name))
             
         if longitude is not None:
             
             _query_params.append(('longitude', longitude))
+            
+        if stname is not None:
+            
+            _query_params.append(('stname', stname))
             
         # process the header parameters
         # process the form parameters

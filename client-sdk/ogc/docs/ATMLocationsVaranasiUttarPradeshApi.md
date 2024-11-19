@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, dist_lgd=dist_lgd, atm_lat=atm_lat, atm_long=atm_long, atm_ad=atm_ad, state_name=state_name, bank_name=bank_name, state_lgd=state_lgd, bank_cd=bank_cd, atm_city=atm_city)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, dist_lgd=dist_lgd, atm_lat=atm_lat, atm_ad=atm_ad, atm_long=atm_long, state_name=state_name, bank_name=bank_name, state_lgd=state_lgd, bank_cd=bank_cd, atm_city=atm_city)
 
 Get features from Point features of ATMs in Varanasi District, Uttar Pradesh
 
@@ -52,8 +52,8 @@ with openapi_client.ApiClient(configuration) as api_client:
     offset = 1 # int | OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10. (optional) (default to 1)
     dist_lgd = 56 # int |  (optional)
     atm_lat = 3.4 # float |  (optional)
-    atm_long = 3.4 # float |  (optional)
     atm_ad = 'atm_ad_example' # str |  (optional)
+    atm_long = 3.4 # float |  (optional)
     state_name = 'state_name_example' # str |  (optional)
     bank_name = 'bank_name_example' # str |  (optional)
     state_lgd = 56 # int |  (optional)
@@ -62,7 +62,7 @@ with openapi_client.ApiClient(configuration) as api_client:
 
     try:
         # Get features from Point features of ATMs in Varanasi District, Uttar Pradesh
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, dist_lgd=dist_lgd, atm_lat=atm_lat, atm_long=atm_long, atm_ad=atm_ad, state_name=state_name, bank_name=bank_name, state_lgd=state_lgd, bank_cd=bank_cd, atm_city=atm_city)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, dist_lgd=dist_lgd, atm_lat=atm_lat, atm_ad=atm_ad, atm_long=atm_long, state_name=state_name, bank_name=bank_name, state_lgd=state_lgd, bank_cd=bank_cd, atm_city=atm_city)
         print("The response of ATMLocationsVaranasiUttarPradeshApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -84,8 +84,8 @@ Name | Type | Description  | Notes
  **offset** | **int**| OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum &#x3D; 0. Maximum &#x3D; 1000. Default &#x3D; 10. | [optional] [default to 1]
  **dist_lgd** | **int**|  | [optional] 
  **atm_lat** | **float**|  | [optional] 
- **atm_long** | **float**|  | [optional] 
  **atm_ad** | **str**|  | [optional] 
+ **atm_long** | **float**|  | [optional] 
  **state_name** | **str**|  | [optional] 
  **bank_name** | **str**|  | [optional] 
  **state_lgd** | **int**|  | [optional] 

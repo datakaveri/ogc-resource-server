@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, block_lgd=block_lgd, school_cat=school_cat, dtname=dtname, latitude=latitude, schname=schname, block_name=block_name, subdt_lgd=subdt_lgd, vilname=vilname, management=management, state_lgd=state_lgd, dist_lgd=dist_lgd, schcd=schcd, gp_code=gp_code, vilcode11=vilcode11, gp_name=gp_name, stname=stname, longitude=longitude)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, block_lgd=block_lgd, school_cat=school_cat, dtname=dtname, latitude=latitude, schname=schname, block_name=block_name, subdt_lgd=subdt_lgd, vilname=vilname, management=management, state_lgd=state_lgd, schcd=schcd, dist_lgd=dist_lgd, gp_code=gp_code, gp_name=gp_name, vilcode11=vilcode11, stname=stname, longitude=longitude)
 
 Get features from Point features of schools in Kamrup Metropolitan District, Assam
 
@@ -60,17 +60,17 @@ with openapi_client.ApiClient(configuration) as api_client:
     vilname = 'vilname_example' # str |  (optional)
     management = 'management_example' # str |  (optional)
     state_lgd = 56 # int |  (optional)
-    dist_lgd = 56 # int |  (optional)
     schcd = 'schcd_example' # str |  (optional)
+    dist_lgd = 56 # int |  (optional)
     gp_code = 3.4 # float |  (optional)
-    vilcode11 = 'vilcode11_example' # str |  (optional)
     gp_name = 'gp_name_example' # str |  (optional)
+    vilcode11 = 'vilcode11_example' # str |  (optional)
     stname = 'stname_example' # str |  (optional)
     longitude = 3.4 # float |  (optional)
 
     try:
         # Get features from Point features of schools in Kamrup Metropolitan District, Assam
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, block_lgd=block_lgd, school_cat=school_cat, dtname=dtname, latitude=latitude, schname=schname, block_name=block_name, subdt_lgd=subdt_lgd, vilname=vilname, management=management, state_lgd=state_lgd, dist_lgd=dist_lgd, schcd=schcd, gp_code=gp_code, vilcode11=vilcode11, gp_name=gp_name, stname=stname, longitude=longitude)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, block_lgd=block_lgd, school_cat=school_cat, dtname=dtname, latitude=latitude, schname=schname, block_name=block_name, subdt_lgd=subdt_lgd, vilname=vilname, management=management, state_lgd=state_lgd, schcd=schcd, dist_lgd=dist_lgd, gp_code=gp_code, gp_name=gp_name, vilcode11=vilcode11, stname=stname, longitude=longitude)
         print("The response of SchoolLocationsKamrupAssamApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -100,11 +100,11 @@ Name | Type | Description  | Notes
  **vilname** | **str**|  | [optional] 
  **management** | **str**|  | [optional] 
  **state_lgd** | **int**|  | [optional] 
- **dist_lgd** | **int**|  | [optional] 
  **schcd** | **str**|  | [optional] 
+ **dist_lgd** | **int**|  | [optional] 
  **gp_code** | **float**|  | [optional] 
- **vilcode11** | **str**|  | [optional] 
  **gp_name** | **str**|  | [optional] 
+ **vilcode11** | **str**|  | [optional] 
  **stname** | **str**|  | [optional] 
  **longitude** | **float**|  | [optional] 
 

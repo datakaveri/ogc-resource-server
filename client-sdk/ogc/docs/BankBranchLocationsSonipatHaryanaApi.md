@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, dist_lgd=dist_lgd, br_ifsc_cd=br_ifsc_cd, br_name=br_name, district_n=district_n, state_lgd=state_lgd, bank_cd=bank_cd, br_city=br_city, br_bsr_cod=br_bsr_cod, br_long=br_long, br_micr_co=br_micr_co, state_name=state_name, bank_name=bank_name, br_add=br_add, br_lat=br_lat)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, dist_lgd=dist_lgd, br_ifsc_cd=br_ifsc_cd, br_name=br_name, district_n=district_n, state_lgd=state_lgd, bank_cd=bank_cd, br_city=br_city, br_bsr_cod=br_bsr_cod, br_micr_co=br_micr_co, br_long=br_long, state_name=state_name, bank_name=bank_name, br_add=br_add, br_lat=br_lat)
 
 Get features from Point features of bank branches in Sonipat District, Haryana
 
@@ -58,8 +58,8 @@ with openapi_client.ApiClient(configuration) as api_client:
     bank_cd = 'bank_cd_example' # str |  (optional)
     br_city = 'br_city_example' # str |  (optional)
     br_bsr_cod = 'br_bsr_cod_example' # str |  (optional)
-    br_long = 3.4 # float |  (optional)
     br_micr_co = 'br_micr_co_example' # str |  (optional)
+    br_long = 3.4 # float |  (optional)
     state_name = 'state_name_example' # str |  (optional)
     bank_name = 'bank_name_example' # str |  (optional)
     br_add = 'br_add_example' # str |  (optional)
@@ -67,7 +67,7 @@ with openapi_client.ApiClient(configuration) as api_client:
 
     try:
         # Get features from Point features of bank branches in Sonipat District, Haryana
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, dist_lgd=dist_lgd, br_ifsc_cd=br_ifsc_cd, br_name=br_name, district_n=district_n, state_lgd=state_lgd, bank_cd=bank_cd, br_city=br_city, br_bsr_cod=br_bsr_cod, br_long=br_long, br_micr_co=br_micr_co, state_name=state_name, bank_name=bank_name, br_add=br_add, br_lat=br_lat)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, dist_lgd=dist_lgd, br_ifsc_cd=br_ifsc_cd, br_name=br_name, district_n=district_n, state_lgd=state_lgd, bank_cd=bank_cd, br_city=br_city, br_bsr_cod=br_bsr_cod, br_micr_co=br_micr_co, br_long=br_long, state_name=state_name, bank_name=bank_name, br_add=br_add, br_lat=br_lat)
         print("The response of BankBranchLocationsSonipatHaryanaApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -95,8 +95,8 @@ Name | Type | Description  | Notes
  **bank_cd** | **str**|  | [optional] 
  **br_city** | **str**|  | [optional] 
  **br_bsr_cod** | **str**|  | [optional] 
- **br_long** | **float**|  | [optional] 
  **br_micr_co** | **str**|  | [optional] 
+ **br_long** | **float**|  | [optional] 
  **state_name** | **str**|  | [optional] 
  **bank_name** | **str**|  | [optional] 
  **br_add** | **str**|  | [optional] 

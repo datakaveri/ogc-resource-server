@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, school_cat=school_cat, block_lgd=block_lgd, dtname=dtname, latitude=latitude, schname=schname, block_name=block_name, subdt_lgd=subdt_lgd, management=management, vilname=vilname, state_lgd=state_lgd, dist_lgd=dist_lgd, schcd=schcd, gp_code=gp_code, vilcode11=vilcode11, gp_name=gp_name, longitude=longitude, stname=stname)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, block_lgd=block_lgd, school_cat=school_cat, dtname=dtname, latitude=latitude, schname=schname, block_name=block_name, management=management, vilname=vilname, subdt_lgd=subdt_lgd, state_lgd=state_lgd, schcd=schcd, dist_lgd=dist_lgd, gp_code=gp_code, gp_name=gp_name, vilcode11=vilcode11, longitude=longitude, stname=stname)
 
 Get features from Point features of schools in Vizianagaram District, Andhra Pradesh
 
@@ -50,27 +50,27 @@ with openapi_client.ApiClient(configuration) as api_client:
     datetime = 'datetime_example' # str | Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties. (optional)
     limit = 5000 # int |  (optional) (default to 5000)
     offset = 1 # int | OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10. (optional) (default to 1)
-    school_cat = 'school_cat_example' # str |  (optional)
     block_lgd = 56 # int |  (optional)
+    school_cat = 'school_cat_example' # str |  (optional)
     dtname = 'dtname_example' # str |  (optional)
     latitude = 3.4 # float |  (optional)
     schname = 'schname_example' # str |  (optional)
     block_name = 'block_name_example' # str |  (optional)
-    subdt_lgd = 56 # int |  (optional)
     management = 'management_example' # str |  (optional)
     vilname = 'vilname_example' # str |  (optional)
+    subdt_lgd = 56 # int |  (optional)
     state_lgd = 56 # int |  (optional)
-    dist_lgd = 56 # int |  (optional)
     schcd = 'schcd_example' # str |  (optional)
+    dist_lgd = 56 # int |  (optional)
     gp_code = 3.4 # float |  (optional)
-    vilcode11 = 'vilcode11_example' # str |  (optional)
     gp_name = 'gp_name_example' # str |  (optional)
+    vilcode11 = 'vilcode11_example' # str |  (optional)
     longitude = 3.4 # float |  (optional)
     stname = 'stname_example' # str |  (optional)
 
     try:
         # Get features from Point features of schools in Vizianagaram District, Andhra Pradesh
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, school_cat=school_cat, block_lgd=block_lgd, dtname=dtname, latitude=latitude, schname=schname, block_name=block_name, subdt_lgd=subdt_lgd, management=management, vilname=vilname, state_lgd=state_lgd, dist_lgd=dist_lgd, schcd=schcd, gp_code=gp_code, vilcode11=vilcode11, gp_name=gp_name, longitude=longitude, stname=stname)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, block_lgd=block_lgd, school_cat=school_cat, dtname=dtname, latitude=latitude, schname=schname, block_name=block_name, management=management, vilname=vilname, subdt_lgd=subdt_lgd, state_lgd=state_lgd, schcd=schcd, dist_lgd=dist_lgd, gp_code=gp_code, gp_name=gp_name, vilcode11=vilcode11, longitude=longitude, stname=stname)
         print("The response of SchoolLocationsVizianagaramAPApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -90,21 +90,21 @@ Name | Type | Description  | Notes
  **datetime** | **str**| Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \&quot;2018-02-12T23:20:50Z\&quot; * A bounded interval: \&quot;2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\&quot; * Half-bounded intervals: \&quot;2018-02-12T00:00:00Z/..\&quot; or \&quot;../2018-03-18T12:31:12Z\&quot;  Only features that have a temporal property that intersects the value of &#x60;datetime&#x60; are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties. | [optional] 
  **limit** | **int**|  | [optional] [default to 5000]
  **offset** | **int**| OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum &#x3D; 0. Maximum &#x3D; 1000. Default &#x3D; 10. | [optional] [default to 1]
- **school_cat** | **str**|  | [optional] 
  **block_lgd** | **int**|  | [optional] 
+ **school_cat** | **str**|  | [optional] 
  **dtname** | **str**|  | [optional] 
  **latitude** | **float**|  | [optional] 
  **schname** | **str**|  | [optional] 
  **block_name** | **str**|  | [optional] 
- **subdt_lgd** | **int**|  | [optional] 
  **management** | **str**|  | [optional] 
  **vilname** | **str**|  | [optional] 
+ **subdt_lgd** | **int**|  | [optional] 
  **state_lgd** | **int**|  | [optional] 
- **dist_lgd** | **int**|  | [optional] 
  **schcd** | **str**|  | [optional] 
+ **dist_lgd** | **int**|  | [optional] 
  **gp_code** | **float**|  | [optional] 
- **vilcode11** | **str**|  | [optional] 
  **gp_name** | **str**|  | [optional] 
+ **vilcode11** | **str**|  | [optional] 
  **longitude** | **float**|  | [optional] 
  **stname** | **str**|  | [optional] 
 

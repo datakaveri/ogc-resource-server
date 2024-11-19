@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, adl_info=adl_info, category=category, subcat=subcat, c_value=c_value, type=type)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, adl_info=adl_info, category=category, subcat=subcat, type=type, c_value=c_value)
 
 Get features from Contour lines features in Sirmaur
 
@@ -53,12 +53,12 @@ with openapi_client.ApiClient(configuration) as api_client:
     adl_info = 'adl_info_example' # str |  (optional)
     category = 'category_example' # str |  (optional)
     subcat = 'subcat_example' # str |  (optional)
-    c_value = 3.4 # float |  (optional)
     type = 'type_example' # str |  (optional)
+    c_value = 3.4 # float |  (optional)
 
     try:
         # Get features from Contour lines features in Sirmaur
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, adl_info=adl_info, category=category, subcat=subcat, c_value=c_value, type=type)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, adl_info=adl_info, category=category, subcat=subcat, type=type, c_value=c_value)
         print("The response of ContourLinesInSirmaurApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -81,8 +81,8 @@ Name | Type | Description  | Notes
  **adl_info** | **str**|  | [optional] 
  **category** | **str**|  | [optional] 
  **subcat** | **str**|  | [optional] 
- **c_value** | **float**|  | [optional] 
  **type** | **str**|  | [optional] 
+ **c_value** | **float**|  | [optional] 
 
 ### Return type
 

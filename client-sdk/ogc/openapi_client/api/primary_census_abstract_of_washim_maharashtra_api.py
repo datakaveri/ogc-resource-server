@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -56,25 +56,25 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         tot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_os: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
-        wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         f_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_vt: Optional[StrictStr] = None,
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_conc: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
-        sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gimas: Optional[Union[StrictFloat, StrictInt]] = None,
+        sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_dt: Optional[StrictStr] = None,
         mow_wood: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -90,21 +90,21 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__9: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_3_: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_5_: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -130,8 +130,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         mor_gi_mas: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_3_: Optional[Union[StrictFloat, StrictInt]] = None,
-        p_st: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
+        p_st: Optional[Union[StrictFloat, StrictInt]] = None,
         p_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_hmt: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_4_r: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -141,12 +141,12 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         mof_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_f: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_32: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
+        p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_32: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_3_r: Optional[Union[StrictFloat, StrictInt]] = None,
         f_06: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -177,8 +177,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_: Optional[Union[StrictFloat, StrictInt]] = None,
         name_vt: Optional[StrictStr] = None,
         kf_dnhk1: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -187,11 +187,11 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         tot_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         m_06: Optional[Union[StrictFloat, StrictInt]] = None,
-        tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         pl_wsop: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_mo: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -199,8 +199,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         msl_ool: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_dnhk: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cr: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_m: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_lo: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_f: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -228,56 +228,56 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         tfufc_bio: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
-        nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
+        nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfts: Optional[Union[StrictFloat, StrictInt]] = None,
         m_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_op: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        name_dt: Optional[StrictStr] = None,
         marg_ot_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        name_dt: Optional[StrictStr] = None,
         marg_cl_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gtb: Optional[Union[StrictFloat, StrictInt]] = None,
         m_st: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_cih: Optional[Union[StrictFloat, StrictInt]] = None,
-        msl_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
+        msl_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_rc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_cl_01: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_cl_01: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_se: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mud: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_wb: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
-        m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
+        m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
-        ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
-        pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_st: Optional[StrictStr] = None,
+        pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
         name_st: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -317,28 +317,28 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type fpfl_os: float
         :param ndr_ner1:
         :type ndr_ner1: float
-        :param mor_bb:
-        :type mor_bb: float
         :param ndr_ner2:
         :type ndr_ner2: float
+        :param mor_bb:
+        :type mor_bb: float
         :param non_work_p:
         :type non_work_p: float
         :param marg_ot_32:
         :type marg_ot_32: float
-        :param wwoc_nd:
-        :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
-        :param non_work_m:
-        :type non_work_m: float
+        :param wwoc_nd:
+        :type wwoc_nd: float
         :param tot_p:
         :type tot_p: float
+        :param non_work_m:
+        :type non_work_m: float
         :param mof_aom:
         :type mof_aom: float
-        :param mof_mft:
-        :type mof_mft: float
         :param non_work_f:
         :type non_work_f: float
+        :param mof_mft:
+        :type mof_mft: float
         :param f_ill:
         :type f_ill: float
         :param mdds_vt:
@@ -349,12 +349,12 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type main_cl_p: float
         :param mor_conc:
         :type mor_conc: float
-        :param hh_tscs_uc:
-        :type hh_tscs_uc: float
-        :param sl_nsrbh:
-        :type sl_nsrbh: float
         :param mow_gimas:
         :type mow_gimas: float
+        :param sl_nsrbh:
+        :type sl_nsrbh: float
+        :param hh_tscs_uc:
+        :type hh_tscs_uc: float
         :param kf_hk:
         :type kf_hk: float
         :param mdds_dt:
@@ -385,10 +385,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param mof_cem:
-        :type mof_cem: float
         :param hh_cond__8:
         :type hh_cond__8: float
+        :param mof_cem:
+        :type mof_cem: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -401,20 +401,20 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type marg_cl_3_: float
         :param mc_5_:
         :type mc_5_: float
-        :param hhs_4:
-        :type hhs_4: float
         :param mainwork_m:
         :type mainwork_m: float
+        :param hhs_4:
+        :type hhs_4: float
         :param hhs_5:
         :type hhs_5: float
         :param fpfl_pss:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param mow_mub:
-        :type mow_mub: float
         :param hh_tscs_sp:
         :type hh_tscs_sp: float
+        :param mow_mub:
+        :type mow_mub: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -465,10 +465,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type mow_aom: float
         :param marg_hh_3_:
         :type marg_hh_3_: float
-        :param p_st:
-        :type p_st: float
         :param msdw_tpl:
         :type msdw_tpl: float
+        :param p_st:
+        :type p_st: float
         :param p_lit:
         :type p_lit: float
         :param mor_hmt:
@@ -487,18 +487,18 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type marg_cl_f: float
         :param kf_hk1:
         :type kf_hk1: float
-        :param mor_aom:
-        :type mor_aom: float
         :param marg_cl_m:
         :type marg_cl_m: float
+        :param mor_aom:
+        :type mor_aom: float
         :param marg_hh_32:
         :type marg_hh_32: float
         :param marg_cl_p:
         :type marg_cl_p: float
-        :param p_sc:
-        :type p_sc: float
         :param marg_al_31:
         :type marg_al_31: float
+        :param p_sc:
+        :type p_sc: float
         :param marg_al_32:
         :type marg_al_32: float
         :param ndr_3_r:
@@ -559,10 +559,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type mow_pl_pol: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
-        :param mow_snpwm:
-        :type mow_snpwm: float
         :param tfufc_cc:
         :type tfufc_cc: float
+        :param mow_snpwm:
+        :type mow_snpwm: float
         :param aos_:
         :type aos_: float
         :param name_vt:
@@ -579,16 +579,16 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type tot_work_m: float
         :param m_06:
         :type m_06: float
-        :param tot_work_f:
-        :type tot_work_f: float
         :param marg_ot_m:
         :type marg_ot_m: float
+        :param tot_work_f:
+        :type tot_work_f: float
         :param main_al_m:
         :type main_al_m: float
-        :param main_al_f:
-        :type main_al_f: float
         :param marg_ot_p:
         :type marg_ot_p: float
+        :param main_al_f:
+        :type main_al_f: float
         :param pl_wsop:
         :type pl_wsop: float
         :param marg_ot_f:
@@ -603,10 +603,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type kf_dnhk: float
         :param tfufc_cr:
         :type tfufc_cr: float
-        :param hhs_9_:
-        :type hhs_9_: float
         :param main_hh_p:
         :type main_hh_p: float
+        :param hhs_9_:
+        :type hhs_9_: float
         :param main_hh_m:
         :type main_hh_m: float
         :param aos_tm_lo:
@@ -661,12 +661,12 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type hh_cond_ch: float
         :param nsdiod:
         :type nsdiod: float
-        :param nhh_hbfwtp:
-        :type nhh_hbfwtp: float
         :param marg_cl_31:
         :type marg_cl_31: float
         :param tfufc_clc:
         :type tfufc_clc: float
+        :param nhh_hbfwtp:
+        :type nhh_hbfwtp: float
         :param marg_cl_32:
         :type marg_cl_32: float
         :param aos_cl_wii:
@@ -679,10 +679,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type ans_op: float
         :param marg_ot_02:
         :type marg_ot_02: float
-        :param name_dt:
-        :type name_dt: str
         :param marg_ot_01:
         :type marg_ot_01: float
+        :param name_dt:
+        :type name_dt: str
         :param marg_cl_0_:
         :type marg_cl_0_: float
         :param mow_gtb:
@@ -691,34 +691,34 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type m_st: float
         :param kf_cih:
         :type kf_cih: float
-        :param msl_ao:
-        :type msl_ao: float
         :param mow_conc:
         :type mow_conc: float
+        :param msl_ao:
+        :type msl_ao: float
         :param msdw_rc:
         :type msdw_rc: float
         :param marg_cl_02:
         :type marg_cl_02: float
-        :param marg_cl_01:
-        :type marg_cl_01: float
         :param aos_hhw_tc:
         :type aos_hhw_tc: float
+        :param marg_cl_01:
+        :type marg_cl_01: float
         :param main_ot_f:
         :type main_ot_f: float
         :param msl_se:
         :type msl_se: float
         :param mof_mud:
         :type mof_mud: float
-        :param hhs_6_8:
-        :type hhs_6_8: float
         :param aos_smm:
         :type aos_smm: float
+        :param hhs_6_8:
+        :type hhs_6_8: float
         :param mof_wb:
         :type mof_wb: float
-        :param mor_gr_th_:
-        :type mor_gr_th_: float
         :param main_ot_m:
         :type main_ot_m: float
+        :param mor_gr_th_:
+        :type mor_gr_th_: float
         :param marg_ot_0_:
         :type marg_ot_0_: float
         :param main_ot_p:
@@ -731,36 +731,36 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
-        :param m_lit:
-        :type m_lit: float
         :param mc_1:
         :type mc_1: float
         :param hh_cond_11:
         :type hh_cond_11: float
+        :param m_lit:
+        :type m_lit: float
         :param hh_tscs_ns:
         :type hh_tscs_ns: float
         :param marg_al_m:
         :type marg_al_m: float
         :param mc_2:
         :type mc_2: float
-        :param msdw_tfuts:
-        :type msdw_tfuts: float
         :param mc_3:
         :type mc_3: float
+        :param msdw_tfuts:
+        :type msdw_tfuts: float
         :param mc_4:
         :type mc_4: float
         :param hh_cond_10:
         :type hh_cond_10: float
-        :param ldws_wp:
-        :type ldws_wp: float
         :param marg_al_p:
         :type marg_al_p: float
+        :param ldws_wp:
+        :type ldws_wp: float
         :param mof_stone:
         :type mof_stone: float
-        :param pl_wsvi:
-        :type pl_wsvi: float
         :param mdds_st:
         :type mdds_st: str
+        :param pl_wsvi:
+        :type pl_wsvi: float
         :param name_st:
         :type name_st: str
         :param _request_timeout: timeout setting for this request. If one
@@ -797,25 +797,25 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             tot_f=tot_f,
             fpfl_os=fpfl_os,
             ndr_ner1=ndr_ner1,
-            mor_bb=mor_bb,
             ndr_ner2=ndr_ner2,
+            mor_bb=mor_bb,
             non_work_p=non_work_p,
             marg_ot_32=marg_ot_32,
-            wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
-            non_work_m=non_work_m,
+            wwoc_nd=wwoc_nd,
             tot_p=tot_p,
+            non_work_m=non_work_m,
             mof_aom=mof_aom,
-            mof_mft=mof_mft,
             non_work_f=non_work_f,
+            mof_mft=mof_mft,
             f_ill=f_ill,
             mdds_vt=mdds_vt,
             tfufc_elc=tfufc_elc,
             main_cl_p=main_cl_p,
             mor_conc=mor_conc,
-            hh_tscs_uc=hh_tscs_uc,
-            sl_nsrbh=sl_nsrbh,
             mow_gimas=mow_gimas,
+            sl_nsrbh=sl_nsrbh,
+            hh_tscs_uc=hh_tscs_uc,
             kf_hk=kf_hk,
             mdds_dt=mdds_dt,
             mow_wood=mow_wood,
@@ -831,21 +831,21 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            mof_cem=mof_cem,
             hh_cond__8=hh_cond__8,
+            mof_cem=mof_cem,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
             hh_cond__9=hh_cond__9,
             marg_cl_3_=marg_cl_3_,
             mc_5_=mc_5_,
-            hhs_4=hhs_4,
             mainwork_m=mainwork_m,
+            hhs_4=hhs_4,
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            mow_mub=mow_mub,
             hh_tscs_sp=hh_tscs_sp,
+            mow_mub=mow_mub,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
@@ -871,8 +871,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             mor_gi_mas=mor_gi_mas,
             mow_aom=mow_aom,
             marg_hh_3_=marg_hh_3_,
-            p_st=p_st,
             msdw_tpl=msdw_tpl,
+            p_st=p_st,
             p_lit=p_lit,
             mor_hmt=mor_hmt,
             ndr_4_r=ndr_4_r,
@@ -882,12 +882,12 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             mof_bb=mof_bb,
             marg_cl_f=marg_cl_f,
             kf_hk1=kf_hk1,
-            mor_aom=mor_aom,
             marg_cl_m=marg_cl_m,
+            mor_aom=mor_aom,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
-            p_sc=p_sc,
             marg_al_31=marg_al_31,
+            p_sc=p_sc,
             marg_al_32=marg_al_32,
             ndr_3_r=ndr_3_r,
             f_06=f_06,
@@ -918,8 +918,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             m_ill=m_ill,
             mow_pl_pol=mow_pl_pol,
             tfufc_lpg_=tfufc_lpg_,
-            mow_snpwm=mow_snpwm,
             tfufc_cc=tfufc_cc,
+            mow_snpwm=mow_snpwm,
             aos_=aos_,
             name_vt=name_vt,
             kf_dnhk1=kf_dnhk1,
@@ -928,11 +928,11 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             tot_work_p=tot_work_p,
             tot_work_m=tot_work_m,
             m_06=m_06,
-            tot_work_f=tot_work_f,
             marg_ot_m=marg_ot_m,
+            tot_work_f=tot_work_f,
             main_al_m=main_al_m,
-            main_al_f=main_al_f,
             marg_ot_p=marg_ot_p,
+            main_al_f=main_al_f,
             pl_wsop=pl_wsop,
             marg_ot_f=marg_ot_f,
             aos_tm_mo=aos_tm_mo,
@@ -940,8 +940,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             msl_ool=msl_ool,
             kf_dnhk=kf_dnhk,
             tfufc_cr=tfufc_cr,
-            hhs_9_=hhs_9_,
             main_hh_p=main_hh_p,
+            hhs_9_=hhs_9_,
             main_hh_m=main_hh_m,
             aos_tm_lo=aos_tm_lo,
             main_hh_f=main_hh_f,
@@ -969,56 +969,56 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             tfufc_bio=tfufc_bio,
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
-            nhh_hbfwtp=nhh_hbfwtp,
             marg_cl_31=marg_cl_31,
             tfufc_clc=tfufc_clc,
+            nhh_hbfwtp=nhh_hbfwtp,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
             msdw_tfts=msdw_tfts,
             m_sc=m_sc,
             ans_op=ans_op,
             marg_ot_02=marg_ot_02,
-            name_dt=name_dt,
             marg_ot_01=marg_ot_01,
+            name_dt=name_dt,
             marg_cl_0_=marg_cl_0_,
             mow_gtb=mow_gtb,
             m_st=m_st,
             kf_cih=kf_cih,
-            msl_ao=msl_ao,
             mow_conc=mow_conc,
+            msl_ao=msl_ao,
             msdw_rc=msdw_rc,
             marg_cl_02=marg_cl_02,
-            marg_cl_01=marg_cl_01,
             aos_hhw_tc=aos_hhw_tc,
+            marg_cl_01=marg_cl_01,
             main_ot_f=main_ot_f,
             msl_se=msl_se,
             mof_mud=mof_mud,
-            hhs_6_8=hhs_6_8,
             aos_smm=aos_smm,
+            hhs_6_8=hhs_6_8,
             mof_wb=mof_wb,
-            mor_gr_th_=mor_gr_th_,
             main_ot_m=main_ot_m,
+            mor_gr_th_=mor_gr_th_,
             marg_ot_0_=marg_ot_0_,
             main_ot_p=main_ot_p,
             msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
             marg_al_f=marg_al_f,
             mor_ss=mor_ss,
-            m_lit=m_lit,
             mc_1=mc_1,
             hh_cond_11=hh_cond_11,
+            m_lit=m_lit,
             hh_tscs_ns=hh_tscs_ns,
             marg_al_m=marg_al_m,
             mc_2=mc_2,
-            msdw_tfuts=msdw_tfuts,
             mc_3=mc_3,
+            msdw_tfuts=msdw_tfuts,
             mc_4=mc_4,
             hh_cond_10=hh_cond_10,
-            ldws_wp=ldws_wp,
             marg_al_p=marg_al_p,
+            ldws_wp=ldws_wp,
             mof_stone=mof_stone,
-            pl_wsvi=pl_wsvi,
             mdds_st=mdds_st,
+            pl_wsvi=pl_wsvi,
             name_st=name_st,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1056,25 +1056,25 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         tot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_os: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
-        wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         f_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_vt: Optional[StrictStr] = None,
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_conc: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
-        sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gimas: Optional[Union[StrictFloat, StrictInt]] = None,
+        sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_dt: Optional[StrictStr] = None,
         mow_wood: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1090,21 +1090,21 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__9: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_3_: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_5_: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1130,8 +1130,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         mor_gi_mas: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_3_: Optional[Union[StrictFloat, StrictInt]] = None,
-        p_st: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
+        p_st: Optional[Union[StrictFloat, StrictInt]] = None,
         p_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_hmt: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_4_r: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1141,12 +1141,12 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         mof_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_f: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_32: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
+        p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_32: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_3_r: Optional[Union[StrictFloat, StrictInt]] = None,
         f_06: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1177,8 +1177,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_: Optional[Union[StrictFloat, StrictInt]] = None,
         name_vt: Optional[StrictStr] = None,
         kf_dnhk1: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1187,11 +1187,11 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         tot_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         m_06: Optional[Union[StrictFloat, StrictInt]] = None,
-        tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         pl_wsop: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_mo: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1199,8 +1199,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         msl_ool: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_dnhk: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cr: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_m: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_lo: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_f: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1228,56 +1228,56 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         tfufc_bio: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
-        nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
+        nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfts: Optional[Union[StrictFloat, StrictInt]] = None,
         m_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_op: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        name_dt: Optional[StrictStr] = None,
         marg_ot_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        name_dt: Optional[StrictStr] = None,
         marg_cl_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gtb: Optional[Union[StrictFloat, StrictInt]] = None,
         m_st: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_cih: Optional[Union[StrictFloat, StrictInt]] = None,
-        msl_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
+        msl_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_rc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_cl_01: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_cl_01: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_se: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mud: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_wb: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
-        m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
+        m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
-        ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
-        pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_st: Optional[StrictStr] = None,
+        pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
         name_st: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -1317,28 +1317,28 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type fpfl_os: float
         :param ndr_ner1:
         :type ndr_ner1: float
-        :param mor_bb:
-        :type mor_bb: float
         :param ndr_ner2:
         :type ndr_ner2: float
+        :param mor_bb:
+        :type mor_bb: float
         :param non_work_p:
         :type non_work_p: float
         :param marg_ot_32:
         :type marg_ot_32: float
-        :param wwoc_nd:
-        :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
-        :param non_work_m:
-        :type non_work_m: float
+        :param wwoc_nd:
+        :type wwoc_nd: float
         :param tot_p:
         :type tot_p: float
+        :param non_work_m:
+        :type non_work_m: float
         :param mof_aom:
         :type mof_aom: float
-        :param mof_mft:
-        :type mof_mft: float
         :param non_work_f:
         :type non_work_f: float
+        :param mof_mft:
+        :type mof_mft: float
         :param f_ill:
         :type f_ill: float
         :param mdds_vt:
@@ -1349,12 +1349,12 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type main_cl_p: float
         :param mor_conc:
         :type mor_conc: float
-        :param hh_tscs_uc:
-        :type hh_tscs_uc: float
-        :param sl_nsrbh:
-        :type sl_nsrbh: float
         :param mow_gimas:
         :type mow_gimas: float
+        :param sl_nsrbh:
+        :type sl_nsrbh: float
+        :param hh_tscs_uc:
+        :type hh_tscs_uc: float
         :param kf_hk:
         :type kf_hk: float
         :param mdds_dt:
@@ -1385,10 +1385,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param mof_cem:
-        :type mof_cem: float
         :param hh_cond__8:
         :type hh_cond__8: float
+        :param mof_cem:
+        :type mof_cem: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -1401,20 +1401,20 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type marg_cl_3_: float
         :param mc_5_:
         :type mc_5_: float
-        :param hhs_4:
-        :type hhs_4: float
         :param mainwork_m:
         :type mainwork_m: float
+        :param hhs_4:
+        :type hhs_4: float
         :param hhs_5:
         :type hhs_5: float
         :param fpfl_pss:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param mow_mub:
-        :type mow_mub: float
         :param hh_tscs_sp:
         :type hh_tscs_sp: float
+        :param mow_mub:
+        :type mow_mub: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -1465,10 +1465,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type mow_aom: float
         :param marg_hh_3_:
         :type marg_hh_3_: float
-        :param p_st:
-        :type p_st: float
         :param msdw_tpl:
         :type msdw_tpl: float
+        :param p_st:
+        :type p_st: float
         :param p_lit:
         :type p_lit: float
         :param mor_hmt:
@@ -1487,18 +1487,18 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type marg_cl_f: float
         :param kf_hk1:
         :type kf_hk1: float
-        :param mor_aom:
-        :type mor_aom: float
         :param marg_cl_m:
         :type marg_cl_m: float
+        :param mor_aom:
+        :type mor_aom: float
         :param marg_hh_32:
         :type marg_hh_32: float
         :param marg_cl_p:
         :type marg_cl_p: float
-        :param p_sc:
-        :type p_sc: float
         :param marg_al_31:
         :type marg_al_31: float
+        :param p_sc:
+        :type p_sc: float
         :param marg_al_32:
         :type marg_al_32: float
         :param ndr_3_r:
@@ -1559,10 +1559,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type mow_pl_pol: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
-        :param mow_snpwm:
-        :type mow_snpwm: float
         :param tfufc_cc:
         :type tfufc_cc: float
+        :param mow_snpwm:
+        :type mow_snpwm: float
         :param aos_:
         :type aos_: float
         :param name_vt:
@@ -1579,16 +1579,16 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type tot_work_m: float
         :param m_06:
         :type m_06: float
-        :param tot_work_f:
-        :type tot_work_f: float
         :param marg_ot_m:
         :type marg_ot_m: float
+        :param tot_work_f:
+        :type tot_work_f: float
         :param main_al_m:
         :type main_al_m: float
-        :param main_al_f:
-        :type main_al_f: float
         :param marg_ot_p:
         :type marg_ot_p: float
+        :param main_al_f:
+        :type main_al_f: float
         :param pl_wsop:
         :type pl_wsop: float
         :param marg_ot_f:
@@ -1603,10 +1603,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type kf_dnhk: float
         :param tfufc_cr:
         :type tfufc_cr: float
-        :param hhs_9_:
-        :type hhs_9_: float
         :param main_hh_p:
         :type main_hh_p: float
+        :param hhs_9_:
+        :type hhs_9_: float
         :param main_hh_m:
         :type main_hh_m: float
         :param aos_tm_lo:
@@ -1661,12 +1661,12 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type hh_cond_ch: float
         :param nsdiod:
         :type nsdiod: float
-        :param nhh_hbfwtp:
-        :type nhh_hbfwtp: float
         :param marg_cl_31:
         :type marg_cl_31: float
         :param tfufc_clc:
         :type tfufc_clc: float
+        :param nhh_hbfwtp:
+        :type nhh_hbfwtp: float
         :param marg_cl_32:
         :type marg_cl_32: float
         :param aos_cl_wii:
@@ -1679,10 +1679,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type ans_op: float
         :param marg_ot_02:
         :type marg_ot_02: float
-        :param name_dt:
-        :type name_dt: str
         :param marg_ot_01:
         :type marg_ot_01: float
+        :param name_dt:
+        :type name_dt: str
         :param marg_cl_0_:
         :type marg_cl_0_: float
         :param mow_gtb:
@@ -1691,34 +1691,34 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type m_st: float
         :param kf_cih:
         :type kf_cih: float
-        :param msl_ao:
-        :type msl_ao: float
         :param mow_conc:
         :type mow_conc: float
+        :param msl_ao:
+        :type msl_ao: float
         :param msdw_rc:
         :type msdw_rc: float
         :param marg_cl_02:
         :type marg_cl_02: float
-        :param marg_cl_01:
-        :type marg_cl_01: float
         :param aos_hhw_tc:
         :type aos_hhw_tc: float
+        :param marg_cl_01:
+        :type marg_cl_01: float
         :param main_ot_f:
         :type main_ot_f: float
         :param msl_se:
         :type msl_se: float
         :param mof_mud:
         :type mof_mud: float
-        :param hhs_6_8:
-        :type hhs_6_8: float
         :param aos_smm:
         :type aos_smm: float
+        :param hhs_6_8:
+        :type hhs_6_8: float
         :param mof_wb:
         :type mof_wb: float
-        :param mor_gr_th_:
-        :type mor_gr_th_: float
         :param main_ot_m:
         :type main_ot_m: float
+        :param mor_gr_th_:
+        :type mor_gr_th_: float
         :param marg_ot_0_:
         :type marg_ot_0_: float
         :param main_ot_p:
@@ -1731,36 +1731,36 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
-        :param m_lit:
-        :type m_lit: float
         :param mc_1:
         :type mc_1: float
         :param hh_cond_11:
         :type hh_cond_11: float
+        :param m_lit:
+        :type m_lit: float
         :param hh_tscs_ns:
         :type hh_tscs_ns: float
         :param marg_al_m:
         :type marg_al_m: float
         :param mc_2:
         :type mc_2: float
-        :param msdw_tfuts:
-        :type msdw_tfuts: float
         :param mc_3:
         :type mc_3: float
+        :param msdw_tfuts:
+        :type msdw_tfuts: float
         :param mc_4:
         :type mc_4: float
         :param hh_cond_10:
         :type hh_cond_10: float
-        :param ldws_wp:
-        :type ldws_wp: float
         :param marg_al_p:
         :type marg_al_p: float
+        :param ldws_wp:
+        :type ldws_wp: float
         :param mof_stone:
         :type mof_stone: float
-        :param pl_wsvi:
-        :type pl_wsvi: float
         :param mdds_st:
         :type mdds_st: str
+        :param pl_wsvi:
+        :type pl_wsvi: float
         :param name_st:
         :type name_st: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1797,25 +1797,25 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             tot_f=tot_f,
             fpfl_os=fpfl_os,
             ndr_ner1=ndr_ner1,
-            mor_bb=mor_bb,
             ndr_ner2=ndr_ner2,
+            mor_bb=mor_bb,
             non_work_p=non_work_p,
             marg_ot_32=marg_ot_32,
-            wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
-            non_work_m=non_work_m,
+            wwoc_nd=wwoc_nd,
             tot_p=tot_p,
+            non_work_m=non_work_m,
             mof_aom=mof_aom,
-            mof_mft=mof_mft,
             non_work_f=non_work_f,
+            mof_mft=mof_mft,
             f_ill=f_ill,
             mdds_vt=mdds_vt,
             tfufc_elc=tfufc_elc,
             main_cl_p=main_cl_p,
             mor_conc=mor_conc,
-            hh_tscs_uc=hh_tscs_uc,
-            sl_nsrbh=sl_nsrbh,
             mow_gimas=mow_gimas,
+            sl_nsrbh=sl_nsrbh,
+            hh_tscs_uc=hh_tscs_uc,
             kf_hk=kf_hk,
             mdds_dt=mdds_dt,
             mow_wood=mow_wood,
@@ -1831,21 +1831,21 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            mof_cem=mof_cem,
             hh_cond__8=hh_cond__8,
+            mof_cem=mof_cem,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
             hh_cond__9=hh_cond__9,
             marg_cl_3_=marg_cl_3_,
             mc_5_=mc_5_,
-            hhs_4=hhs_4,
             mainwork_m=mainwork_m,
+            hhs_4=hhs_4,
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            mow_mub=mow_mub,
             hh_tscs_sp=hh_tscs_sp,
+            mow_mub=mow_mub,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
@@ -1871,8 +1871,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             mor_gi_mas=mor_gi_mas,
             mow_aom=mow_aom,
             marg_hh_3_=marg_hh_3_,
-            p_st=p_st,
             msdw_tpl=msdw_tpl,
+            p_st=p_st,
             p_lit=p_lit,
             mor_hmt=mor_hmt,
             ndr_4_r=ndr_4_r,
@@ -1882,12 +1882,12 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             mof_bb=mof_bb,
             marg_cl_f=marg_cl_f,
             kf_hk1=kf_hk1,
-            mor_aom=mor_aom,
             marg_cl_m=marg_cl_m,
+            mor_aom=mor_aom,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
-            p_sc=p_sc,
             marg_al_31=marg_al_31,
+            p_sc=p_sc,
             marg_al_32=marg_al_32,
             ndr_3_r=ndr_3_r,
             f_06=f_06,
@@ -1918,8 +1918,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             m_ill=m_ill,
             mow_pl_pol=mow_pl_pol,
             tfufc_lpg_=tfufc_lpg_,
-            mow_snpwm=mow_snpwm,
             tfufc_cc=tfufc_cc,
+            mow_snpwm=mow_snpwm,
             aos_=aos_,
             name_vt=name_vt,
             kf_dnhk1=kf_dnhk1,
@@ -1928,11 +1928,11 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             tot_work_p=tot_work_p,
             tot_work_m=tot_work_m,
             m_06=m_06,
-            tot_work_f=tot_work_f,
             marg_ot_m=marg_ot_m,
+            tot_work_f=tot_work_f,
             main_al_m=main_al_m,
-            main_al_f=main_al_f,
             marg_ot_p=marg_ot_p,
+            main_al_f=main_al_f,
             pl_wsop=pl_wsop,
             marg_ot_f=marg_ot_f,
             aos_tm_mo=aos_tm_mo,
@@ -1940,8 +1940,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             msl_ool=msl_ool,
             kf_dnhk=kf_dnhk,
             tfufc_cr=tfufc_cr,
-            hhs_9_=hhs_9_,
             main_hh_p=main_hh_p,
+            hhs_9_=hhs_9_,
             main_hh_m=main_hh_m,
             aos_tm_lo=aos_tm_lo,
             main_hh_f=main_hh_f,
@@ -1969,56 +1969,56 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             tfufc_bio=tfufc_bio,
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
-            nhh_hbfwtp=nhh_hbfwtp,
             marg_cl_31=marg_cl_31,
             tfufc_clc=tfufc_clc,
+            nhh_hbfwtp=nhh_hbfwtp,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
             msdw_tfts=msdw_tfts,
             m_sc=m_sc,
             ans_op=ans_op,
             marg_ot_02=marg_ot_02,
-            name_dt=name_dt,
             marg_ot_01=marg_ot_01,
+            name_dt=name_dt,
             marg_cl_0_=marg_cl_0_,
             mow_gtb=mow_gtb,
             m_st=m_st,
             kf_cih=kf_cih,
-            msl_ao=msl_ao,
             mow_conc=mow_conc,
+            msl_ao=msl_ao,
             msdw_rc=msdw_rc,
             marg_cl_02=marg_cl_02,
-            marg_cl_01=marg_cl_01,
             aos_hhw_tc=aos_hhw_tc,
+            marg_cl_01=marg_cl_01,
             main_ot_f=main_ot_f,
             msl_se=msl_se,
             mof_mud=mof_mud,
-            hhs_6_8=hhs_6_8,
             aos_smm=aos_smm,
+            hhs_6_8=hhs_6_8,
             mof_wb=mof_wb,
-            mor_gr_th_=mor_gr_th_,
             main_ot_m=main_ot_m,
+            mor_gr_th_=mor_gr_th_,
             marg_ot_0_=marg_ot_0_,
             main_ot_p=main_ot_p,
             msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
             marg_al_f=marg_al_f,
             mor_ss=mor_ss,
-            m_lit=m_lit,
             mc_1=mc_1,
             hh_cond_11=hh_cond_11,
+            m_lit=m_lit,
             hh_tscs_ns=hh_tscs_ns,
             marg_al_m=marg_al_m,
             mc_2=mc_2,
-            msdw_tfuts=msdw_tfuts,
             mc_3=mc_3,
+            msdw_tfuts=msdw_tfuts,
             mc_4=mc_4,
             hh_cond_10=hh_cond_10,
-            ldws_wp=ldws_wp,
             marg_al_p=marg_al_p,
+            ldws_wp=ldws_wp,
             mof_stone=mof_stone,
-            pl_wsvi=pl_wsvi,
             mdds_st=mdds_st,
+            pl_wsvi=pl_wsvi,
             name_st=name_st,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2056,25 +2056,25 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         tot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_os: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_ner2: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_32: Optional[Union[StrictFloat, StrictInt]] = None,
-        wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_31: Optional[Union[StrictFloat, StrictInt]] = None,
-        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
         f_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_vt: Optional[StrictStr] = None,
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_conc: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
-        sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gimas: Optional[Union[StrictFloat, StrictInt]] = None,
+        sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_dt: Optional[StrictStr] = None,
         mow_wood: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2090,21 +2090,21 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__9: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_3_: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_5_: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hhs_5: Optional[Union[StrictFloat, StrictInt]] = None,
         fpfl_pss: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_sp: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_mub: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_tot: Optional[Union[StrictFloat, StrictInt]] = None,
         mainwork_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_mmt: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2130,8 +2130,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         mor_gi_mas: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_3_: Optional[Union[StrictFloat, StrictInt]] = None,
-        p_st: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tpl: Optional[Union[StrictFloat, StrictInt]] = None,
+        p_st: Optional[Union[StrictFloat, StrictInt]] = None,
         p_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_hmt: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_4_r: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2141,12 +2141,12 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         mof_bb: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_f: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk1: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_hh_32: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
-        p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_31: Optional[Union[StrictFloat, StrictInt]] = None,
+        p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_32: Optional[Union[StrictFloat, StrictInt]] = None,
         ndr_3_r: Optional[Union[StrictFloat, StrictInt]] = None,
         f_06: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2177,8 +2177,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_: Optional[Union[StrictFloat, StrictInt]] = None,
         name_vt: Optional[StrictStr] = None,
         kf_dnhk1: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2187,11 +2187,11 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         tot_work_p: Optional[Union[StrictFloat, StrictInt]] = None,
         tot_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
         m_06: Optional[Union[StrictFloat, StrictInt]] = None,
-        tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        tot_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        main_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         pl_wsop: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_mo: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2199,8 +2199,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         msl_ool: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_dnhk: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cr: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_m: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_lo: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_f: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2228,56 +2228,56 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         tfufc_bio: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
-        nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
+        nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfts: Optional[Union[StrictFloat, StrictInt]] = None,
         m_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_op: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        name_dt: Optional[StrictStr] = None,
         marg_ot_01: Optional[Union[StrictFloat, StrictInt]] = None,
+        name_dt: Optional[StrictStr] = None,
         marg_cl_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gtb: Optional[Union[StrictFloat, StrictInt]] = None,
         m_st: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_cih: Optional[Union[StrictFloat, StrictInt]] = None,
-        msl_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_conc: Optional[Union[StrictFloat, StrictInt]] = None,
+        msl_ao: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_rc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_02: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_cl_01: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_hhw_tc: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_cl_01: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_f: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_se: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mud: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_wb: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
-        m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
+        m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
-        msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
+        msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_4: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
-        ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        ldws_wp: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_stone: Optional[Union[StrictFloat, StrictInt]] = None,
-        pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_st: Optional[StrictStr] = None,
+        pl_wsvi: Optional[Union[StrictFloat, StrictInt]] = None,
         name_st: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
@@ -2317,28 +2317,28 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type fpfl_os: float
         :param ndr_ner1:
         :type ndr_ner1: float
-        :param mor_bb:
-        :type mor_bb: float
         :param ndr_ner2:
         :type ndr_ner2: float
+        :param mor_bb:
+        :type mor_bb: float
         :param non_work_p:
         :type non_work_p: float
         :param marg_ot_32:
         :type marg_ot_32: float
-        :param wwoc_nd:
-        :type wwoc_nd: float
         :param marg_ot_31:
         :type marg_ot_31: float
-        :param non_work_m:
-        :type non_work_m: float
+        :param wwoc_nd:
+        :type wwoc_nd: float
         :param tot_p:
         :type tot_p: float
+        :param non_work_m:
+        :type non_work_m: float
         :param mof_aom:
         :type mof_aom: float
-        :param mof_mft:
-        :type mof_mft: float
         :param non_work_f:
         :type non_work_f: float
+        :param mof_mft:
+        :type mof_mft: float
         :param f_ill:
         :type f_ill: float
         :param mdds_vt:
@@ -2349,12 +2349,12 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type main_cl_p: float
         :param mor_conc:
         :type mor_conc: float
-        :param hh_tscs_uc:
-        :type hh_tscs_uc: float
-        :param sl_nsrbh:
-        :type sl_nsrbh: float
         :param mow_gimas:
         :type mow_gimas: float
+        :param sl_nsrbh:
+        :type sl_nsrbh: float
+        :param hh_tscs_uc:
+        :type hh_tscs_uc: float
         :param kf_hk:
         :type kf_hk: float
         :param mdds_dt:
@@ -2385,10 +2385,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param mof_cem:
-        :type mof_cem: float
         :param hh_cond__8:
         :type hh_cond__8: float
+        :param mof_cem:
+        :type mof_cem: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -2401,20 +2401,20 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type marg_cl_3_: float
         :param mc_5_:
         :type mc_5_: float
-        :param hhs_4:
-        :type hhs_4: float
         :param mainwork_m:
         :type mainwork_m: float
+        :param hhs_4:
+        :type hhs_4: float
         :param hhs_5:
         :type hhs_5: float
         :param fpfl_pss:
         :type fpfl_pss: float
         :param mainwork_p:
         :type mainwork_p: float
-        :param mow_mub:
-        :type mow_mub: float
         :param hh_tscs_sp:
         :type hh_tscs_sp: float
+        :param mow_mub:
+        :type mow_mub: float
         :param kf_tot:
         :type kf_tot: float
         :param mainwork_f:
@@ -2465,10 +2465,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type mow_aom: float
         :param marg_hh_3_:
         :type marg_hh_3_: float
-        :param p_st:
-        :type p_st: float
         :param msdw_tpl:
         :type msdw_tpl: float
+        :param p_st:
+        :type p_st: float
         :param p_lit:
         :type p_lit: float
         :param mor_hmt:
@@ -2487,18 +2487,18 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type marg_cl_f: float
         :param kf_hk1:
         :type kf_hk1: float
-        :param mor_aom:
-        :type mor_aom: float
         :param marg_cl_m:
         :type marg_cl_m: float
+        :param mor_aom:
+        :type mor_aom: float
         :param marg_hh_32:
         :type marg_hh_32: float
         :param marg_cl_p:
         :type marg_cl_p: float
-        :param p_sc:
-        :type p_sc: float
         :param marg_al_31:
         :type marg_al_31: float
+        :param p_sc:
+        :type p_sc: float
         :param marg_al_32:
         :type marg_al_32: float
         :param ndr_3_r:
@@ -2559,10 +2559,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type mow_pl_pol: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
-        :param mow_snpwm:
-        :type mow_snpwm: float
         :param tfufc_cc:
         :type tfufc_cc: float
+        :param mow_snpwm:
+        :type mow_snpwm: float
         :param aos_:
         :type aos_: float
         :param name_vt:
@@ -2579,16 +2579,16 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type tot_work_m: float
         :param m_06:
         :type m_06: float
-        :param tot_work_f:
-        :type tot_work_f: float
         :param marg_ot_m:
         :type marg_ot_m: float
+        :param tot_work_f:
+        :type tot_work_f: float
         :param main_al_m:
         :type main_al_m: float
-        :param main_al_f:
-        :type main_al_f: float
         :param marg_ot_p:
         :type marg_ot_p: float
+        :param main_al_f:
+        :type main_al_f: float
         :param pl_wsop:
         :type pl_wsop: float
         :param marg_ot_f:
@@ -2603,10 +2603,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type kf_dnhk: float
         :param tfufc_cr:
         :type tfufc_cr: float
-        :param hhs_9_:
-        :type hhs_9_: float
         :param main_hh_p:
         :type main_hh_p: float
+        :param hhs_9_:
+        :type hhs_9_: float
         :param main_hh_m:
         :type main_hh_m: float
         :param aos_tm_lo:
@@ -2661,12 +2661,12 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type hh_cond_ch: float
         :param nsdiod:
         :type nsdiod: float
-        :param nhh_hbfwtp:
-        :type nhh_hbfwtp: float
         :param marg_cl_31:
         :type marg_cl_31: float
         :param tfufc_clc:
         :type tfufc_clc: float
+        :param nhh_hbfwtp:
+        :type nhh_hbfwtp: float
         :param marg_cl_32:
         :type marg_cl_32: float
         :param aos_cl_wii:
@@ -2679,10 +2679,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type ans_op: float
         :param marg_ot_02:
         :type marg_ot_02: float
-        :param name_dt:
-        :type name_dt: str
         :param marg_ot_01:
         :type marg_ot_01: float
+        :param name_dt:
+        :type name_dt: str
         :param marg_cl_0_:
         :type marg_cl_0_: float
         :param mow_gtb:
@@ -2691,34 +2691,34 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type m_st: float
         :param kf_cih:
         :type kf_cih: float
-        :param msl_ao:
-        :type msl_ao: float
         :param mow_conc:
         :type mow_conc: float
+        :param msl_ao:
+        :type msl_ao: float
         :param msdw_rc:
         :type msdw_rc: float
         :param marg_cl_02:
         :type marg_cl_02: float
-        :param marg_cl_01:
-        :type marg_cl_01: float
         :param aos_hhw_tc:
         :type aos_hhw_tc: float
+        :param marg_cl_01:
+        :type marg_cl_01: float
         :param main_ot_f:
         :type main_ot_f: float
         :param msl_se:
         :type msl_se: float
         :param mof_mud:
         :type mof_mud: float
-        :param hhs_6_8:
-        :type hhs_6_8: float
         :param aos_smm:
         :type aos_smm: float
+        :param hhs_6_8:
+        :type hhs_6_8: float
         :param mof_wb:
         :type mof_wb: float
-        :param mor_gr_th_:
-        :type mor_gr_th_: float
         :param main_ot_m:
         :type main_ot_m: float
+        :param mor_gr_th_:
+        :type mor_gr_th_: float
         :param marg_ot_0_:
         :type marg_ot_0_: float
         :param main_ot_p:
@@ -2731,36 +2731,36 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
-        :param m_lit:
-        :type m_lit: float
         :param mc_1:
         :type mc_1: float
         :param hh_cond_11:
         :type hh_cond_11: float
+        :param m_lit:
+        :type m_lit: float
         :param hh_tscs_ns:
         :type hh_tscs_ns: float
         :param marg_al_m:
         :type marg_al_m: float
         :param mc_2:
         :type mc_2: float
-        :param msdw_tfuts:
-        :type msdw_tfuts: float
         :param mc_3:
         :type mc_3: float
+        :param msdw_tfuts:
+        :type msdw_tfuts: float
         :param mc_4:
         :type mc_4: float
         :param hh_cond_10:
         :type hh_cond_10: float
-        :param ldws_wp:
-        :type ldws_wp: float
         :param marg_al_p:
         :type marg_al_p: float
+        :param ldws_wp:
+        :type ldws_wp: float
         :param mof_stone:
         :type mof_stone: float
-        :param pl_wsvi:
-        :type pl_wsvi: float
         :param mdds_st:
         :type mdds_st: str
+        :param pl_wsvi:
+        :type pl_wsvi: float
         :param name_st:
         :type name_st: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2797,25 +2797,25 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             tot_f=tot_f,
             fpfl_os=fpfl_os,
             ndr_ner1=ndr_ner1,
-            mor_bb=mor_bb,
             ndr_ner2=ndr_ner2,
+            mor_bb=mor_bb,
             non_work_p=non_work_p,
             marg_ot_32=marg_ot_32,
-            wwoc_nd=wwoc_nd,
             marg_ot_31=marg_ot_31,
-            non_work_m=non_work_m,
+            wwoc_nd=wwoc_nd,
             tot_p=tot_p,
+            non_work_m=non_work_m,
             mof_aom=mof_aom,
-            mof_mft=mof_mft,
             non_work_f=non_work_f,
+            mof_mft=mof_mft,
             f_ill=f_ill,
             mdds_vt=mdds_vt,
             tfufc_elc=tfufc_elc,
             main_cl_p=main_cl_p,
             mor_conc=mor_conc,
-            hh_tscs_uc=hh_tscs_uc,
-            sl_nsrbh=sl_nsrbh,
             mow_gimas=mow_gimas,
+            sl_nsrbh=sl_nsrbh,
+            hh_tscs_uc=hh_tscs_uc,
             kf_hk=kf_hk,
             mdds_dt=mdds_dt,
             mow_wood=mow_wood,
@@ -2831,21 +2831,21 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            mof_cem=mof_cem,
             hh_cond__8=hh_cond__8,
+            mof_cem=mof_cem,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
             hh_cond__9=hh_cond__9,
             marg_cl_3_=marg_cl_3_,
             mc_5_=mc_5_,
-            hhs_4=hhs_4,
             mainwork_m=mainwork_m,
+            hhs_4=hhs_4,
             hhs_5=hhs_5,
             fpfl_pss=fpfl_pss,
             mainwork_p=mainwork_p,
-            mow_mub=mow_mub,
             hh_tscs_sp=hh_tscs_sp,
+            mow_mub=mow_mub,
             kf_tot=kf_tot,
             mainwork_f=mainwork_f,
             mor_mmt=mor_mmt,
@@ -2871,8 +2871,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             mor_gi_mas=mor_gi_mas,
             mow_aom=mow_aom,
             marg_hh_3_=marg_hh_3_,
-            p_st=p_st,
             msdw_tpl=msdw_tpl,
+            p_st=p_st,
             p_lit=p_lit,
             mor_hmt=mor_hmt,
             ndr_4_r=ndr_4_r,
@@ -2882,12 +2882,12 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             mof_bb=mof_bb,
             marg_cl_f=marg_cl_f,
             kf_hk1=kf_hk1,
-            mor_aom=mor_aom,
             marg_cl_m=marg_cl_m,
+            mor_aom=mor_aom,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
-            p_sc=p_sc,
             marg_al_31=marg_al_31,
+            p_sc=p_sc,
             marg_al_32=marg_al_32,
             ndr_3_r=ndr_3_r,
             f_06=f_06,
@@ -2918,8 +2918,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             m_ill=m_ill,
             mow_pl_pol=mow_pl_pol,
             tfufc_lpg_=tfufc_lpg_,
-            mow_snpwm=mow_snpwm,
             tfufc_cc=tfufc_cc,
+            mow_snpwm=mow_snpwm,
             aos_=aos_,
             name_vt=name_vt,
             kf_dnhk1=kf_dnhk1,
@@ -2928,11 +2928,11 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             tot_work_p=tot_work_p,
             tot_work_m=tot_work_m,
             m_06=m_06,
-            tot_work_f=tot_work_f,
             marg_ot_m=marg_ot_m,
+            tot_work_f=tot_work_f,
             main_al_m=main_al_m,
-            main_al_f=main_al_f,
             marg_ot_p=marg_ot_p,
+            main_al_f=main_al_f,
             pl_wsop=pl_wsop,
             marg_ot_f=marg_ot_f,
             aos_tm_mo=aos_tm_mo,
@@ -2940,8 +2940,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             msl_ool=msl_ool,
             kf_dnhk=kf_dnhk,
             tfufc_cr=tfufc_cr,
-            hhs_9_=hhs_9_,
             main_hh_p=main_hh_p,
+            hhs_9_=hhs_9_,
             main_hh_m=main_hh_m,
             aos_tm_lo=aos_tm_lo,
             main_hh_f=main_hh_f,
@@ -2969,56 +2969,56 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             tfufc_bio=tfufc_bio,
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
-            nhh_hbfwtp=nhh_hbfwtp,
             marg_cl_31=marg_cl_31,
             tfufc_clc=tfufc_clc,
+            nhh_hbfwtp=nhh_hbfwtp,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
             msdw_tfts=msdw_tfts,
             m_sc=m_sc,
             ans_op=ans_op,
             marg_ot_02=marg_ot_02,
-            name_dt=name_dt,
             marg_ot_01=marg_ot_01,
+            name_dt=name_dt,
             marg_cl_0_=marg_cl_0_,
             mow_gtb=mow_gtb,
             m_st=m_st,
             kf_cih=kf_cih,
-            msl_ao=msl_ao,
             mow_conc=mow_conc,
+            msl_ao=msl_ao,
             msdw_rc=msdw_rc,
             marg_cl_02=marg_cl_02,
-            marg_cl_01=marg_cl_01,
             aos_hhw_tc=aos_hhw_tc,
+            marg_cl_01=marg_cl_01,
             main_ot_f=main_ot_f,
             msl_se=msl_se,
             mof_mud=mof_mud,
-            hhs_6_8=hhs_6_8,
             aos_smm=aos_smm,
+            hhs_6_8=hhs_6_8,
             mof_wb=mof_wb,
-            mor_gr_th_=mor_gr_th_,
             main_ot_m=main_ot_m,
+            mor_gr_th_=mor_gr_th_,
             marg_ot_0_=marg_ot_0_,
             main_ot_p=main_ot_p,
             msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
             marg_al_f=marg_al_f,
             mor_ss=mor_ss,
-            m_lit=m_lit,
             mc_1=mc_1,
             hh_cond_11=hh_cond_11,
+            m_lit=m_lit,
             hh_tscs_ns=hh_tscs_ns,
             marg_al_m=marg_al_m,
             mc_2=mc_2,
-            msdw_tfuts=msdw_tfuts,
             mc_3=mc_3,
+            msdw_tfuts=msdw_tfuts,
             mc_4=mc_4,
             hh_cond_10=hh_cond_10,
-            ldws_wp=ldws_wp,
             marg_al_p=marg_al_p,
+            ldws_wp=ldws_wp,
             mof_stone=mof_stone,
-            pl_wsvi=pl_wsvi,
             mdds_st=mdds_st,
+            pl_wsvi=pl_wsvi,
             name_st=name_st,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3051,25 +3051,25 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         tot_f,
         fpfl_os,
         ndr_ner1,
-        mor_bb,
         ndr_ner2,
+        mor_bb,
         non_work_p,
         marg_ot_32,
-        wwoc_nd,
         marg_ot_31,
-        non_work_m,
+        wwoc_nd,
         tot_p,
+        non_work_m,
         mof_aom,
-        mof_mft,
         non_work_f,
+        mof_mft,
         f_ill,
         mdds_vt,
         tfufc_elc,
         main_cl_p,
         mor_conc,
-        hh_tscs_uc,
-        sl_nsrbh,
         mow_gimas,
+        sl_nsrbh,
+        hh_tscs_uc,
         kf_hk,
         mdds_dt,
         mow_wood,
@@ -3085,21 +3085,21 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         hh_cond__1,
         hh_cond__2,
         hh_cond__7,
-        mof_cem,
         hh_cond__8,
+        mof_cem,
         hh_cond__5,
         hh_cond__6,
         ans_pl,
         hh_cond__9,
         marg_cl_3_,
         mc_5_,
-        hhs_4,
         mainwork_m,
+        hhs_4,
         hhs_5,
         fpfl_pss,
         mainwork_p,
-        mow_mub,
         hh_tscs_sp,
+        mow_mub,
         kf_tot,
         mainwork_f,
         mor_mmt,
@@ -3125,8 +3125,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         mor_gi_mas,
         mow_aom,
         marg_hh_3_,
-        p_st,
         msdw_tpl,
+        p_st,
         p_lit,
         mor_hmt,
         ndr_4_r,
@@ -3136,12 +3136,12 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         mof_bb,
         marg_cl_f,
         kf_hk1,
-        mor_aom,
         marg_cl_m,
+        mor_aom,
         marg_hh_32,
         marg_cl_p,
-        p_sc,
         marg_al_31,
+        p_sc,
         marg_al_32,
         ndr_3_r,
         f_06,
@@ -3172,8 +3172,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         m_ill,
         mow_pl_pol,
         tfufc_lpg_,
-        mow_snpwm,
         tfufc_cc,
+        mow_snpwm,
         aos_,
         name_vt,
         kf_dnhk1,
@@ -3182,11 +3182,11 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         tot_work_p,
         tot_work_m,
         m_06,
-        tot_work_f,
         marg_ot_m,
+        tot_work_f,
         main_al_m,
-        main_al_f,
         marg_ot_p,
+        main_al_f,
         pl_wsop,
         marg_ot_f,
         aos_tm_mo,
@@ -3194,8 +3194,8 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         msl_ool,
         kf_dnhk,
         tfufc_cr,
-        hhs_9_,
         main_hh_p,
+        hhs_9_,
         main_hh_m,
         aos_tm_lo,
         main_hh_f,
@@ -3223,56 +3223,56 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         tfufc_bio,
         hh_cond_ch,
         nsdiod,
-        nhh_hbfwtp,
         marg_cl_31,
         tfufc_clc,
+        nhh_hbfwtp,
         marg_cl_32,
         aos_cl_wii,
         msdw_tfts,
         m_sc,
         ans_op,
         marg_ot_02,
-        name_dt,
         marg_ot_01,
+        name_dt,
         marg_cl_0_,
         mow_gtb,
         m_st,
         kf_cih,
-        msl_ao,
         mow_conc,
+        msl_ao,
         msdw_rc,
         marg_cl_02,
-        marg_cl_01,
         aos_hhw_tc,
+        marg_cl_01,
         main_ot_f,
         msl_se,
         mof_mud,
-        hhs_6_8,
         aos_smm,
+        hhs_6_8,
         mof_wb,
-        mor_gr_th_,
         main_ot_m,
+        mor_gr_th_,
         marg_ot_0_,
         main_ot_p,
         msdw_os,
         tfufc_nc,
         marg_al_f,
         mor_ss,
-        m_lit,
         mc_1,
         hh_cond_11,
+        m_lit,
         hh_tscs_ns,
         marg_al_m,
         mc_2,
-        msdw_tfuts,
         mc_3,
+        msdw_tfuts,
         mc_4,
         hh_cond_10,
-        ldws_wp,
         marg_al_p,
+        ldws_wp,
         mof_stone,
-        pl_wsvi,
         mdds_st,
+        pl_wsvi,
         name_st,
         _request_auth,
         _content_type,
@@ -3339,13 +3339,13 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('NDR_NER1', ndr_ner1))
             
-        if mor_bb is not None:
-            
-            _query_params.append(('MOR_BB', mor_bb))
-            
         if ndr_ner2 is not None:
             
             _query_params.append(('NDR_NER2', ndr_ner2))
+            
+        if mor_bb is not None:
+            
+            _query_params.append(('MOR_BB', mor_bb))
             
         if non_work_p is not None:
             
@@ -3355,33 +3355,33 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('MARG_OT_32', marg_ot_32))
             
-        if wwoc_nd is not None:
-            
-            _query_params.append(('WWOC_ND', wwoc_nd))
-            
         if marg_ot_31 is not None:
             
             _query_params.append(('MARG_OT_31', marg_ot_31))
             
-        if non_work_m is not None:
+        if wwoc_nd is not None:
             
-            _query_params.append(('NON_WORK_M', non_work_m))
+            _query_params.append(('WWOC_ND', wwoc_nd))
             
         if tot_p is not None:
             
             _query_params.append(('TOT_P', tot_p))
             
+        if non_work_m is not None:
+            
+            _query_params.append(('NON_WORK_M', non_work_m))
+            
         if mof_aom is not None:
             
             _query_params.append(('MOF_AOM', mof_aom))
             
-        if mof_mft is not None:
-            
-            _query_params.append(('MOF_MFT', mof_mft))
-            
         if non_work_f is not None:
             
             _query_params.append(('NON_WORK_F', non_work_f))
+            
+        if mof_mft is not None:
+            
+            _query_params.append(('MOF_MFT', mof_mft))
             
         if f_ill is not None:
             
@@ -3403,17 +3403,17 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('MOR_CONC', mor_conc))
             
-        if hh_tscs_uc is not None:
+        if mow_gimas is not None:
             
-            _query_params.append(('HH_TSCS_UC', hh_tscs_uc))
+            _query_params.append(('MOW_GIMAS', mow_gimas))
             
         if sl_nsrbh is not None:
             
             _query_params.append(('SL_NSRBH', sl_nsrbh))
             
-        if mow_gimas is not None:
+        if hh_tscs_uc is not None:
             
-            _query_params.append(('MOW_GIMAS', mow_gimas))
+            _query_params.append(('HH_TSCS_UC', hh_tscs_uc))
             
         if kf_hk is not None:
             
@@ -3475,13 +3475,13 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('HH_COND__7', hh_cond__7))
             
-        if mof_cem is not None:
-            
-            _query_params.append(('MOF_CEM', mof_cem))
-            
         if hh_cond__8 is not None:
             
             _query_params.append(('HH_COND__8', hh_cond__8))
+            
+        if mof_cem is not None:
+            
+            _query_params.append(('MOF_CEM', mof_cem))
             
         if hh_cond__5 is not None:
             
@@ -3507,13 +3507,13 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('MC_5_', mc_5_))
             
-        if hhs_4 is not None:
-            
-            _query_params.append(('HHS_4', hhs_4))
-            
         if mainwork_m is not None:
             
             _query_params.append(('MAINWORK_M', mainwork_m))
+            
+        if hhs_4 is not None:
+            
+            _query_params.append(('HHS_4', hhs_4))
             
         if hhs_5 is not None:
             
@@ -3527,13 +3527,13 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('MAINWORK_P', mainwork_p))
             
-        if mow_mub is not None:
-            
-            _query_params.append(('MOW_MUB', mow_mub))
-            
         if hh_tscs_sp is not None:
             
             _query_params.append(('HH_TSCS_SP', hh_tscs_sp))
+            
+        if mow_mub is not None:
+            
+            _query_params.append(('MOW_MUB', mow_mub))
             
         if kf_tot is not None:
             
@@ -3635,13 +3635,13 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('MARG_HH_3_', marg_hh_3_))
             
-        if p_st is not None:
-            
-            _query_params.append(('P_ST', p_st))
-            
         if msdw_tpl is not None:
             
             _query_params.append(('MSDW_TPL', msdw_tpl))
+            
+        if p_st is not None:
+            
+            _query_params.append(('P_ST', p_st))
             
         if p_lit is not None:
             
@@ -3679,13 +3679,13 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('KF_HK1', kf_hk1))
             
-        if mor_aom is not None:
-            
-            _query_params.append(('MOR_AOM', mor_aom))
-            
         if marg_cl_m is not None:
             
             _query_params.append(('MARG_CL_M', marg_cl_m))
+            
+        if mor_aom is not None:
+            
+            _query_params.append(('MOR_AOM', mor_aom))
             
         if marg_hh_32 is not None:
             
@@ -3695,13 +3695,13 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('MARG_CL_P', marg_cl_p))
             
-        if p_sc is not None:
-            
-            _query_params.append(('P_SC', p_sc))
-            
         if marg_al_31 is not None:
             
             _query_params.append(('MARG_AL_31', marg_al_31))
+            
+        if p_sc is not None:
+            
+            _query_params.append(('P_SC', p_sc))
             
         if marg_al_32 is not None:
             
@@ -3823,13 +3823,13 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('TFUFC_LPG_', tfufc_lpg_))
             
-        if mow_snpwm is not None:
-            
-            _query_params.append(('MOW_SNPWM', mow_snpwm))
-            
         if tfufc_cc is not None:
             
             _query_params.append(('TFUFC_CC', tfufc_cc))
+            
+        if mow_snpwm is not None:
+            
+            _query_params.append(('MOW_SNPWM', mow_snpwm))
             
         if aos_ is not None:
             
@@ -3863,25 +3863,25 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('M_06', m_06))
             
-        if tot_work_f is not None:
-            
-            _query_params.append(('TOT_WORK_F', tot_work_f))
-            
         if marg_ot_m is not None:
             
             _query_params.append(('MARG_OT_M', marg_ot_m))
+            
+        if tot_work_f is not None:
+            
+            _query_params.append(('TOT_WORK_F', tot_work_f))
             
         if main_al_m is not None:
             
             _query_params.append(('MAIN_AL_M', main_al_m))
             
-        if main_al_f is not None:
-            
-            _query_params.append(('MAIN_AL_F', main_al_f))
-            
         if marg_ot_p is not None:
             
             _query_params.append(('MARG_OT_P', marg_ot_p))
+            
+        if main_al_f is not None:
+            
+            _query_params.append(('MAIN_AL_F', main_al_f))
             
         if pl_wsop is not None:
             
@@ -3911,13 +3911,13 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('TFUFC_CR', tfufc_cr))
             
-        if hhs_9_ is not None:
-            
-            _query_params.append(('HHS_9_', hhs_9_))
-            
         if main_hh_p is not None:
             
             _query_params.append(('MAIN_HH_P', main_hh_p))
+            
+        if hhs_9_ is not None:
+            
+            _query_params.append(('HHS_9_', hhs_9_))
             
         if main_hh_m is not None:
             
@@ -4027,10 +4027,6 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('NSDIOD', nsdiod))
             
-        if nhh_hbfwtp is not None:
-            
-            _query_params.append(('NHH_HBFWTP', nhh_hbfwtp))
-            
         if marg_cl_31 is not None:
             
             _query_params.append(('MARG_CL_31', marg_cl_31))
@@ -4038,6 +4034,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         if tfufc_clc is not None:
             
             _query_params.append(('TFUFC_CLC', tfufc_clc))
+            
+        if nhh_hbfwtp is not None:
+            
+            _query_params.append(('NHH_HBFWTP', nhh_hbfwtp))
             
         if marg_cl_32 is not None:
             
@@ -4063,13 +4063,13 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('MARG_OT_02', marg_ot_02))
             
-        if name_dt is not None:
-            
-            _query_params.append(('NAME_DT', name_dt))
-            
         if marg_ot_01 is not None:
             
             _query_params.append(('MARG_OT_01', marg_ot_01))
+            
+        if name_dt is not None:
+            
+            _query_params.append(('NAME_DT', name_dt))
             
         if marg_cl_0_ is not None:
             
@@ -4087,13 +4087,13 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('KF_CIH', kf_cih))
             
-        if msl_ao is not None:
-            
-            _query_params.append(('MSL_AO', msl_ao))
-            
         if mow_conc is not None:
             
             _query_params.append(('MOW_CONC', mow_conc))
+            
+        if msl_ao is not None:
+            
+            _query_params.append(('MSL_AO', msl_ao))
             
         if msdw_rc is not None:
             
@@ -4103,13 +4103,13 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('MARG_CL_02', marg_cl_02))
             
-        if marg_cl_01 is not None:
-            
-            _query_params.append(('MARG_CL_01', marg_cl_01))
-            
         if aos_hhw_tc is not None:
             
             _query_params.append(('AOS_HHW_TC', aos_hhw_tc))
+            
+        if marg_cl_01 is not None:
+            
+            _query_params.append(('MARG_CL_01', marg_cl_01))
             
         if main_ot_f is not None:
             
@@ -4123,25 +4123,25 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('MOF_MUD', mof_mud))
             
-        if hhs_6_8 is not None:
-            
-            _query_params.append(('HHS_6_8', hhs_6_8))
-            
         if aos_smm is not None:
             
             _query_params.append(('AOS_SMM', aos_smm))
+            
+        if hhs_6_8 is not None:
+            
+            _query_params.append(('HHS_6_8', hhs_6_8))
             
         if mof_wb is not None:
             
             _query_params.append(('MOF_WB', mof_wb))
             
-        if mor_gr_th_ is not None:
-            
-            _query_params.append(('MOR_GR_TH_', mor_gr_th_))
-            
         if main_ot_m is not None:
             
             _query_params.append(('MAIN_OT_M', main_ot_m))
+            
+        if mor_gr_th_ is not None:
+            
+            _query_params.append(('MOR_GR_TH_', mor_gr_th_))
             
         if marg_ot_0_ is not None:
             
@@ -4167,10 +4167,6 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('MOR_SS', mor_ss))
             
-        if m_lit is not None:
-            
-            _query_params.append(('M_LIT', m_lit))
-            
         if mc_1 is not None:
             
             _query_params.append(('MC_1', mc_1))
@@ -4178,6 +4174,10 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
         if hh_cond_11 is not None:
             
             _query_params.append(('HH_COND_11', hh_cond_11))
+            
+        if m_lit is not None:
+            
+            _query_params.append(('M_LIT', m_lit))
             
         if hh_tscs_ns is not None:
             
@@ -4191,13 +4191,13 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('MC_2', mc_2))
             
-        if msdw_tfuts is not None:
-            
-            _query_params.append(('MSDW_TFUTS', msdw_tfuts))
-            
         if mc_3 is not None:
             
             _query_params.append(('MC_3', mc_3))
+            
+        if msdw_tfuts is not None:
+            
+            _query_params.append(('MSDW_TFUTS', msdw_tfuts))
             
         if mc_4 is not None:
             
@@ -4207,25 +4207,25 @@ class PrimaryCensusAbstractOfWashimMaharashtraApi:
             
             _query_params.append(('HH_COND_10', hh_cond_10))
             
-        if ldws_wp is not None:
-            
-            _query_params.append(('LDWS_WP', ldws_wp))
-            
         if marg_al_p is not None:
             
             _query_params.append(('MARG_AL_P', marg_al_p))
+            
+        if ldws_wp is not None:
+            
+            _query_params.append(('LDWS_WP', ldws_wp))
             
         if mof_stone is not None:
             
             _query_params.append(('MOF_STONE', mof_stone))
             
-        if pl_wsvi is not None:
-            
-            _query_params.append(('PL_WSVI', pl_wsvi))
-            
         if mdds_st is not None:
             
             _query_params.append(('MDDS_ST', mdds_st))
+            
+        if pl_wsvi is not None:
+            
+            _query_params.append(('PL_WSVI', pl_wsvi))
             
         if name_st is not None:
             

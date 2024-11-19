@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -54,8 +54,8 @@ class ContourLinesInSirmaurApi:
         adl_info: Optional[StrictStr] = None,
         category: Optional[StrictStr] = None,
         subcat: Optional[StrictStr] = None,
-        c_value: Optional[Union[StrictFloat, StrictInt]] = None,
         type: Optional[StrictStr] = None,
+        c_value: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -90,10 +90,10 @@ class ContourLinesInSirmaurApi:
         :type category: str
         :param subcat:
         :type subcat: str
-        :param c_value:
-        :type c_value: float
         :param type:
         :type type: str
+        :param c_value:
+        :type c_value: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -126,8 +126,8 @@ class ContourLinesInSirmaurApi:
             adl_info=adl_info,
             category=category,
             subcat=subcat,
-            c_value=c_value,
             type=type,
+            c_value=c_value,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -162,8 +162,8 @@ class ContourLinesInSirmaurApi:
         adl_info: Optional[StrictStr] = None,
         category: Optional[StrictStr] = None,
         subcat: Optional[StrictStr] = None,
-        c_value: Optional[Union[StrictFloat, StrictInt]] = None,
         type: Optional[StrictStr] = None,
+        c_value: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -198,10 +198,10 @@ class ContourLinesInSirmaurApi:
         :type category: str
         :param subcat:
         :type subcat: str
-        :param c_value:
-        :type c_value: float
         :param type:
         :type type: str
+        :param c_value:
+        :type c_value: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -234,8 +234,8 @@ class ContourLinesInSirmaurApi:
             adl_info=adl_info,
             category=category,
             subcat=subcat,
-            c_value=c_value,
             type=type,
+            c_value=c_value,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -270,8 +270,8 @@ class ContourLinesInSirmaurApi:
         adl_info: Optional[StrictStr] = None,
         category: Optional[StrictStr] = None,
         subcat: Optional[StrictStr] = None,
-        c_value: Optional[Union[StrictFloat, StrictInt]] = None,
         type: Optional[StrictStr] = None,
+        c_value: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -306,10 +306,10 @@ class ContourLinesInSirmaurApi:
         :type category: str
         :param subcat:
         :type subcat: str
-        :param c_value:
-        :type c_value: float
         :param type:
         :type type: str
+        :param c_value:
+        :type c_value: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -342,8 +342,8 @@ class ContourLinesInSirmaurApi:
             adl_info=adl_info,
             category=category,
             subcat=subcat,
-            c_value=c_value,
             type=type,
+            c_value=c_value,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -373,8 +373,8 @@ class ContourLinesInSirmaurApi:
         adl_info,
         category,
         subcat,
-        c_value,
         type,
+        c_value,
         _request_auth,
         _content_type,
         _headers,
@@ -432,13 +432,13 @@ class ContourLinesInSirmaurApi:
             
             _query_params.append(('SUBCAT', subcat))
             
-        if c_value is not None:
-            
-            _query_params.append(('C_VALUE', c_value))
-            
         if type is not None:
             
             _query_params.append(('TYPE', type))
+            
+        if c_value is not None:
+            
+            _query_params.append(('C_VALUE', c_value))
             
         # process the header parameters
         # process the form parameters

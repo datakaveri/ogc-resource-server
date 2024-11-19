@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, bwa_bay_no=bwa_bay_no, bwa_long=bwa_long, dtcode=dtcode, bwa_pond_l=bwa_pond_l, bwa_gate_s=bwa_gate_s, bwa_spil_c=bwa_spil_c, bwa_gate_n=bwa_gate_n, bwa_name=bwa_name, bwa_status=bwa_status, var_class=var_class, bwa_cn_gat=bwa_cn_gat, bwa_head_r=bwa_head_r, bwa_spil_n=bwa_spil_n, bwa_head_1=bwa_head_1, bwa_crt_ve=bwa_crt_ve, bwa_spil_l=bwa_spil_l, bwa_perlia=bwa_perlia, rivcode=rivcode, bacode=bacode, bwa_spil_t=bwa_spil_t, strucode=strucode, bwa_size_h=bwa_size_h, bwa_len=bwa_len, bwa_ph_gat=bwa_ph_gat, bwa_ncity=bwa_ncity, bwa_cmp_yr=bwa_cmp_yr, bwa_ses_zo=bwa_ses_zo, bwa_lat=bwa_lat, bwa_disc_c=bwa_disc_c, bwa_wd_rb=bwa_wd_rb, bwa_disc_d=bwa_disc_d)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, bwa_bay_no=bwa_bay_no, stcode=stcode, bwa_long=bwa_long, dtcode=dtcode, bwa_pond_l=bwa_pond_l, bwa_gate_s=bwa_gate_s, bwa_spil_c=bwa_spil_c, bwa_gate_n=bwa_gate_n, bwa_name=bwa_name, bwa_status=bwa_status, var_class=var_class, bwa_cn_gat=bwa_cn_gat, bwa_spil_n=bwa_spil_n, bwa_head_r=bwa_head_r, bwa_head_1=bwa_head_1, bwa_crt_ve=bwa_crt_ve, bwa_spil_l=bwa_spil_l, bwa_perlia=bwa_perlia, bacode=bacode, rivcode=rivcode, bwa_spil_t=bwa_spil_t, strucode=strucode, bwa_size_h=bwa_size_h, bwa_ph_gat=bwa_ph_gat, bwa_ncity=bwa_ncity, bwa_len=bwa_len, bwa_cmp_yr=bwa_cmp_yr, bwa_ses_zo=bwa_ses_zo, bwa_lat=bwa_lat, bwa_wd_rb=bwa_wd_rb, bwa_disc_c=bwa_disc_c, bwa_disc_d=bwa_disc_d)
 
 Get features from Points representing barrage, weir and anicut locations in and around Vizianagaram, Andhra Pradesh
 
@@ -50,8 +50,8 @@ with openapi_client.ApiClient(configuration) as api_client:
     datetime = 'datetime_example' # str | Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties. (optional)
     limit = 5000 # int |  (optional) (default to 5000)
     offset = 1 # int | OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10. (optional) (default to 1)
-    stcode = 'stcode_example' # str |  (optional)
     bwa_bay_no = 'bwa_bay_no_example' # str |  (optional)
+    stcode = 'stcode_example' # str |  (optional)
     bwa_long = 3.4 # float |  (optional)
     dtcode = 'dtcode_example' # str |  (optional)
     bwa_pond_l = 'bwa_pond_l_example' # str |  (optional)
@@ -62,30 +62,30 @@ with openapi_client.ApiClient(configuration) as api_client:
     bwa_status = 'bwa_status_example' # str |  (optional)
     var_class = 'var_class_example' # str |  (optional)
     bwa_cn_gat = 56 # int |  (optional)
-    bwa_head_r = 56 # int |  (optional)
     bwa_spil_n = 56 # int |  (optional)
+    bwa_head_r = 56 # int |  (optional)
     bwa_head_1 = 56 # int |  (optional)
     bwa_crt_ve = 'bwa_crt_ve_example' # str |  (optional)
     bwa_spil_l = 3.4 # float |  (optional)
     bwa_perlia = 'bwa_perlia_example' # str |  (optional)
-    rivcode = 'rivcode_example' # str |  (optional)
     bacode = 'bacode_example' # str |  (optional)
+    rivcode = 'rivcode_example' # str |  (optional)
     bwa_spil_t = 'bwa_spil_t_example' # str |  (optional)
     strucode = 'strucode_example' # str |  (optional)
     bwa_size_h = 3.4 # float |  (optional)
-    bwa_len = 3.4 # float |  (optional)
     bwa_ph_gat = 56 # int |  (optional)
     bwa_ncity = 'bwa_ncity_example' # str |  (optional)
+    bwa_len = 3.4 # float |  (optional)
     bwa_cmp_yr = 'bwa_cmp_yr_example' # str |  (optional)
     bwa_ses_zo = 'bwa_ses_zo_example' # str |  (optional)
     bwa_lat = 3.4 # float |  (optional)
-    bwa_disc_c = 'bwa_disc_c_example' # str |  (optional)
     bwa_wd_rb = 56 # int |  (optional)
+    bwa_disc_c = 'bwa_disc_c_example' # str |  (optional)
     bwa_disc_d = 3.4 # float |  (optional)
 
     try:
         # Get features from Points representing barrage, weir and anicut locations in and around Vizianagaram, Andhra Pradesh
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, bwa_bay_no=bwa_bay_no, bwa_long=bwa_long, dtcode=dtcode, bwa_pond_l=bwa_pond_l, bwa_gate_s=bwa_gate_s, bwa_spil_c=bwa_spil_c, bwa_gate_n=bwa_gate_n, bwa_name=bwa_name, bwa_status=bwa_status, var_class=var_class, bwa_cn_gat=bwa_cn_gat, bwa_head_r=bwa_head_r, bwa_spil_n=bwa_spil_n, bwa_head_1=bwa_head_1, bwa_crt_ve=bwa_crt_ve, bwa_spil_l=bwa_spil_l, bwa_perlia=bwa_perlia, rivcode=rivcode, bacode=bacode, bwa_spil_t=bwa_spil_t, strucode=strucode, bwa_size_h=bwa_size_h, bwa_len=bwa_len, bwa_ph_gat=bwa_ph_gat, bwa_ncity=bwa_ncity, bwa_cmp_yr=bwa_cmp_yr, bwa_ses_zo=bwa_ses_zo, bwa_lat=bwa_lat, bwa_disc_c=bwa_disc_c, bwa_wd_rb=bwa_wd_rb, bwa_disc_d=bwa_disc_d)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, bwa_bay_no=bwa_bay_no, stcode=stcode, bwa_long=bwa_long, dtcode=dtcode, bwa_pond_l=bwa_pond_l, bwa_gate_s=bwa_gate_s, bwa_spil_c=bwa_spil_c, bwa_gate_n=bwa_gate_n, bwa_name=bwa_name, bwa_status=bwa_status, var_class=var_class, bwa_cn_gat=bwa_cn_gat, bwa_spil_n=bwa_spil_n, bwa_head_r=bwa_head_r, bwa_head_1=bwa_head_1, bwa_crt_ve=bwa_crt_ve, bwa_spil_l=bwa_spil_l, bwa_perlia=bwa_perlia, bacode=bacode, rivcode=rivcode, bwa_spil_t=bwa_spil_t, strucode=strucode, bwa_size_h=bwa_size_h, bwa_ph_gat=bwa_ph_gat, bwa_ncity=bwa_ncity, bwa_len=bwa_len, bwa_cmp_yr=bwa_cmp_yr, bwa_ses_zo=bwa_ses_zo, bwa_lat=bwa_lat, bwa_wd_rb=bwa_wd_rb, bwa_disc_c=bwa_disc_c, bwa_disc_d=bwa_disc_d)
         print("The response of BarragesWeirsAnicutsVizianagaramAPApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -105,8 +105,8 @@ Name | Type | Description  | Notes
  **datetime** | **str**| Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \&quot;2018-02-12T23:20:50Z\&quot; * A bounded interval: \&quot;2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\&quot; * Half-bounded intervals: \&quot;2018-02-12T00:00:00Z/..\&quot; or \&quot;../2018-03-18T12:31:12Z\&quot;  Only features that have a temporal property that intersects the value of &#x60;datetime&#x60; are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties. | [optional] 
  **limit** | **int**|  | [optional] [default to 5000]
  **offset** | **int**| OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum &#x3D; 0. Maximum &#x3D; 1000. Default &#x3D; 10. | [optional] [default to 1]
- **stcode** | **str**|  | [optional] 
  **bwa_bay_no** | **str**|  | [optional] 
+ **stcode** | **str**|  | [optional] 
  **bwa_long** | **float**|  | [optional] 
  **dtcode** | **str**|  | [optional] 
  **bwa_pond_l** | **str**|  | [optional] 
@@ -117,25 +117,25 @@ Name | Type | Description  | Notes
  **bwa_status** | **str**|  | [optional] 
  **var_class** | **str**|  | [optional] 
  **bwa_cn_gat** | **int**|  | [optional] 
- **bwa_head_r** | **int**|  | [optional] 
  **bwa_spil_n** | **int**|  | [optional] 
+ **bwa_head_r** | **int**|  | [optional] 
  **bwa_head_1** | **int**|  | [optional] 
  **bwa_crt_ve** | **str**|  | [optional] 
  **bwa_spil_l** | **float**|  | [optional] 
  **bwa_perlia** | **str**|  | [optional] 
- **rivcode** | **str**|  | [optional] 
  **bacode** | **str**|  | [optional] 
+ **rivcode** | **str**|  | [optional] 
  **bwa_spil_t** | **str**|  | [optional] 
  **strucode** | **str**|  | [optional] 
  **bwa_size_h** | **float**|  | [optional] 
- **bwa_len** | **float**|  | [optional] 
  **bwa_ph_gat** | **int**|  | [optional] 
  **bwa_ncity** | **str**|  | [optional] 
+ **bwa_len** | **float**|  | [optional] 
  **bwa_cmp_yr** | **str**|  | [optional] 
  **bwa_ses_zo** | **str**|  | [optional] 
  **bwa_lat** | **float**|  | [optional] 
- **bwa_disc_c** | **str**|  | [optional] 
  **bwa_wd_rb** | **int**|  | [optional] 
+ **bwa_disc_c** | **str**|  | [optional] 
  **bwa_disc_d** | **float**|  | [optional] 
 
 ### Return type

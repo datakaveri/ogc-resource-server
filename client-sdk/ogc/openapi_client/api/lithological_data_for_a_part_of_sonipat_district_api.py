@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -51,16 +51,16 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
         datetime: Annotated[Optional[StrictStr], Field(description="Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.")] = None,
         limit: Optional[Annotated[int, Field(le=10, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
-        toposheet_: Optional[StrictStr] = None,
         group_name: Optional[StrictStr] = None,
+        toposheet_: Optional[StrictStr] = None,
         formation: Optional[StrictStr] = None,
         supergroup: Optional[StrictStr] = None,
         lithologic: Optional[StrictStr] = None,
         stratigrap: Optional[StrictStr] = None,
         sub_group: Optional[StrictStr] = None,
         intrusive: Optional[StrictStr] = None,
-        age: Optional[StrictStr] = None,
         member: Optional[StrictStr] = None,
+        age: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -89,10 +89,10 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
         :type limit: int
         :param offset: OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.
         :type offset: int
-        :param toposheet_:
-        :type toposheet_: str
         :param group_name:
         :type group_name: str
+        :param toposheet_:
+        :type toposheet_: str
         :param formation:
         :type formation: str
         :param supergroup:
@@ -105,10 +105,10 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
         :type sub_group: str
         :param intrusive:
         :type intrusive: str
-        :param age:
-        :type age: str
         :param member:
         :type member: str
+        :param age:
+        :type age: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -138,16 +138,16 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
             datetime=datetime,
             limit=limit,
             offset=offset,
-            toposheet_=toposheet_,
             group_name=group_name,
+            toposheet_=toposheet_,
             formation=formation,
             supergroup=supergroup,
             lithologic=lithologic,
             stratigrap=stratigrap,
             sub_group=sub_group,
             intrusive=intrusive,
-            age=age,
             member=member,
+            age=age,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -179,16 +179,16 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
         datetime: Annotated[Optional[StrictStr], Field(description="Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.")] = None,
         limit: Optional[Annotated[int, Field(le=10, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
-        toposheet_: Optional[StrictStr] = None,
         group_name: Optional[StrictStr] = None,
+        toposheet_: Optional[StrictStr] = None,
         formation: Optional[StrictStr] = None,
         supergroup: Optional[StrictStr] = None,
         lithologic: Optional[StrictStr] = None,
         stratigrap: Optional[StrictStr] = None,
         sub_group: Optional[StrictStr] = None,
         intrusive: Optional[StrictStr] = None,
-        age: Optional[StrictStr] = None,
         member: Optional[StrictStr] = None,
+        age: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -217,10 +217,10 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
         :type limit: int
         :param offset: OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.
         :type offset: int
-        :param toposheet_:
-        :type toposheet_: str
         :param group_name:
         :type group_name: str
+        :param toposheet_:
+        :type toposheet_: str
         :param formation:
         :type formation: str
         :param supergroup:
@@ -233,10 +233,10 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
         :type sub_group: str
         :param intrusive:
         :type intrusive: str
-        :param age:
-        :type age: str
         :param member:
         :type member: str
+        :param age:
+        :type age: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -266,16 +266,16 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
             datetime=datetime,
             limit=limit,
             offset=offset,
-            toposheet_=toposheet_,
             group_name=group_name,
+            toposheet_=toposheet_,
             formation=formation,
             supergroup=supergroup,
             lithologic=lithologic,
             stratigrap=stratigrap,
             sub_group=sub_group,
             intrusive=intrusive,
-            age=age,
             member=member,
+            age=age,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -307,16 +307,16 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
         datetime: Annotated[Optional[StrictStr], Field(description="Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.")] = None,
         limit: Optional[Annotated[int, Field(le=10, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
-        toposheet_: Optional[StrictStr] = None,
         group_name: Optional[StrictStr] = None,
+        toposheet_: Optional[StrictStr] = None,
         formation: Optional[StrictStr] = None,
         supergroup: Optional[StrictStr] = None,
         lithologic: Optional[StrictStr] = None,
         stratigrap: Optional[StrictStr] = None,
         sub_group: Optional[StrictStr] = None,
         intrusive: Optional[StrictStr] = None,
-        age: Optional[StrictStr] = None,
         member: Optional[StrictStr] = None,
+        age: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -345,10 +345,10 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
         :type limit: int
         :param offset: OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.
         :type offset: int
-        :param toposheet_:
-        :type toposheet_: str
         :param group_name:
         :type group_name: str
+        :param toposheet_:
+        :type toposheet_: str
         :param formation:
         :type formation: str
         :param supergroup:
@@ -361,10 +361,10 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
         :type sub_group: str
         :param intrusive:
         :type intrusive: str
-        :param age:
-        :type age: str
         :param member:
         :type member: str
+        :param age:
+        :type age: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -394,16 +394,16 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
             datetime=datetime,
             limit=limit,
             offset=offset,
-            toposheet_=toposheet_,
             group_name=group_name,
+            toposheet_=toposheet_,
             formation=formation,
             supergroup=supergroup,
             lithologic=lithologic,
             stratigrap=stratigrap,
             sub_group=sub_group,
             intrusive=intrusive,
-            age=age,
             member=member,
+            age=age,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -430,16 +430,16 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
         datetime,
         limit,
         offset,
-        toposheet_,
         group_name,
+        toposheet_,
         formation,
         supergroup,
         lithologic,
         stratigrap,
         sub_group,
         intrusive,
-        age,
         member,
+        age,
         _request_auth,
         _content_type,
         _headers,
@@ -485,13 +485,13 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
             
             _query_params.append(('offset', offset))
             
-        if toposheet_ is not None:
-            
-            _query_params.append(('TOPOSHEET_', toposheet_))
-            
         if group_name is not None:
             
             _query_params.append(('GROUP_NAME', group_name))
+            
+        if toposheet_ is not None:
+            
+            _query_params.append(('TOPOSHEET_', toposheet_))
             
         if formation is not None:
             
@@ -517,13 +517,13 @@ class LithologicalDataForAPartOfSonipatDistrictApi:
             
             _query_params.append(('INTRUSIVE', intrusive))
             
-        if age is not None:
-            
-            _query_params.append(('AGE', age))
-            
         if member is not None:
             
             _query_params.append(('MEMBER', member))
+            
+        if age is not None:
+            
+            _query_params.append(('AGE', age))
             
         # process the header parameters
         # process the form parameters

@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -62,8 +62,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         marg_ot_32: Optional[StrictStr] = None,
         marg_ot_31: Optional[StrictStr] = None,
         wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
-        tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -72,8 +72,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_conc: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gimas: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_dt: Optional[StrictStr] = None,
@@ -90,8 +90,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -145,8 +145,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         marg_cl_m: Optional[StrictStr] = None,
         marg_hh_32: Optional[StrictStr] = None,
         marg_cl_p: Optional[StrictStr] = None,
-        p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_31: Optional[StrictStr] = None,
+        p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_32: Optional[StrictStr] = None,
         ndr_3_r: Optional[Union[StrictFloat, StrictInt]] = None,
         f_06: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -158,8 +158,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         nhh_hbfw_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_p: Optional[StrictStr] = None,
         margwork_m: Optional[StrictStr] = None,
-        marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -174,8 +174,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         margwork_5: Optional[Union[StrictFloat, StrictInt]] = None,
         f_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_kr: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -199,8 +199,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         msl_ool: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_dnhk: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cr: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_m: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_lo: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_f: Optional[StrictStr] = None,
@@ -228,9 +228,9 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         tfufc_bio: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
         nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfts: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -255,21 +255,21 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_wb: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_m: Optional[StrictStr] = None,
+        mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_p: Optional[StrictStr] = None,
         total: Optional[StrictStr] = None,
         msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
-        m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
+        m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -330,10 +330,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type marg_ot_31: str
         :param wwoc_nd:
         :type wwoc_nd: float
-        :param tot_p:
-        :type tot_p: float
         :param non_work_m:
         :type non_work_m: float
+        :param tot_p:
+        :type tot_p: float
         :param mof_aom:
         :type mof_aom: float
         :param non_work_f:
@@ -350,10 +350,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type main_cl_p: float
         :param mor_conc:
         :type mor_conc: float
-        :param hh_tscs_uc:
-        :type hh_tscs_uc: float
         :param sl_nsrbh:
         :type sl_nsrbh: float
+        :param hh_tscs_uc:
+        :type hh_tscs_uc: float
         :param mow_gimas:
         :type mow_gimas: float
         :param kf_hk:
@@ -386,10 +386,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param mof_cem:
-        :type mof_cem: float
         :param hh_cond__8:
         :type hh_cond__8: float
+        :param mof_cem:
+        :type mof_cem: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -496,10 +496,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type marg_hh_32: str
         :param marg_cl_p:
         :type marg_cl_p: str
-        :param p_sc:
-        :type p_sc: float
         :param marg_al_31:
         :type marg_al_31: str
+        :param p_sc:
+        :type p_sc: float
         :param marg_al_32:
         :type marg_al_32: str
         :param ndr_3_r:
@@ -522,10 +522,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type margwork_p: str
         :param margwork_m:
         :type margwork_m: str
-        :param marg_al_01:
-        :type marg_al_01: float
         :param ldws_np:
         :type ldws_np: float
+        :param marg_al_01:
+        :type marg_al_01: float
         :param f_st:
         :type f_st: float
         :param main_al_p:
@@ -554,10 +554,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type f_lit: float
         :param msl_kr:
         :type msl_kr: float
-        :param mow_pl_pol:
-        :type mow_pl_pol: float
         :param m_ill:
         :type m_ill: float
+        :param mow_pl_pol:
+        :type mow_pl_pol: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
         :param mow_snpwm:
@@ -604,10 +604,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type kf_dnhk: float
         :param tfufc_cr:
         :type tfufc_cr: float
-        :param hhs_9_:
-        :type hhs_9_: float
         :param main_hh_p:
         :type main_hh_p: float
+        :param hhs_9_:
+        :type hhs_9_: float
         :param main_hh_m:
         :type main_hh_m: float
         :param aos_tm_lo:
@@ -662,12 +662,12 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type hh_cond_ch: float
         :param nsdiod:
         :type nsdiod: float
-        :param marg_cl_31:
-        :type marg_cl_31: float
         :param tfufc_clc:
         :type tfufc_clc: float
         :param nhh_hbfwtp:
         :type nhh_hbfwtp: float
+        :param marg_cl_31:
+        :type marg_cl_31: float
         :param marg_cl_32:
         :type marg_cl_32: float
         :param aos_cl_wii:
@@ -716,10 +716,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type aos_smm: float
         :param mof_wb:
         :type mof_wb: float
-        :param mor_gr_th_:
-        :type mor_gr_th_: float
         :param main_ot_m:
         :type main_ot_m: str
+        :param mor_gr_th_:
+        :type mor_gr_th_: float
         :param marg_ot_0_:
         :type marg_ot_0_: float
         :param main_ot_p:
@@ -730,22 +730,22 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type msdw_os: float
         :param tfufc_nc:
         :type tfufc_nc: float
-        :param marg_al_f:
-        :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
-        :param m_lit:
-        :type m_lit: float
+        :param marg_al_f:
+        :type marg_al_f: float
         :param hh_cond_11:
         :type hh_cond_11: float
+        :param m_lit:
+        :type m_lit: float
         :param mc_1:
         :type mc_1: float
-        :param marg_al_m:
-        :type marg_al_m: float
-        :param mc_2:
-        :type mc_2: float
         :param hh_tscs_ns:
         :type hh_tscs_ns: float
+        :param mc_2:
+        :type mc_2: float
+        :param marg_al_m:
+        :type marg_al_m: float
         :param msdw_tfuts:
         :type msdw_tfuts: float
         :param mc_3:
@@ -806,8 +806,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             marg_ot_32=marg_ot_32,
             marg_ot_31=marg_ot_31,
             wwoc_nd=wwoc_nd,
-            tot_p=tot_p,
             non_work_m=non_work_m,
+            tot_p=tot_p,
             mof_aom=mof_aom,
             non_work_f=non_work_f,
             mof_mft=mof_mft,
@@ -816,8 +816,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             tfufc_elc=tfufc_elc,
             main_cl_p=main_cl_p,
             mor_conc=mor_conc,
-            hh_tscs_uc=hh_tscs_uc,
             sl_nsrbh=sl_nsrbh,
+            hh_tscs_uc=hh_tscs_uc,
             mow_gimas=mow_gimas,
             kf_hk=kf_hk,
             mdds_dt=mdds_dt,
@@ -834,8 +834,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            mof_cem=mof_cem,
             hh_cond__8=hh_cond__8,
+            mof_cem=mof_cem,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
@@ -889,8 +889,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             marg_cl_m=marg_cl_m,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
-            p_sc=p_sc,
             marg_al_31=marg_al_31,
+            p_sc=p_sc,
             marg_al_32=marg_al_32,
             ndr_3_r=ndr_3_r,
             f_06=f_06,
@@ -902,8 +902,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             nhh_hbfw_2=nhh_hbfw_2,
             margwork_p=margwork_p,
             margwork_m=margwork_m,
-            marg_al_01=marg_al_01,
             ldws_np=ldws_np,
+            marg_al_01=marg_al_01,
             f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
@@ -918,8 +918,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             margwork_5=margwork_5,
             f_lit=f_lit,
             msl_kr=msl_kr,
-            mow_pl_pol=mow_pl_pol,
             m_ill=m_ill,
+            mow_pl_pol=mow_pl_pol,
             tfufc_lpg_=tfufc_lpg_,
             mow_snpwm=mow_snpwm,
             tfufc_cc=tfufc_cc,
@@ -943,8 +943,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             msl_ool=msl_ool,
             kf_dnhk=kf_dnhk,
             tfufc_cr=tfufc_cr,
-            hhs_9_=hhs_9_,
             main_hh_p=main_hh_p,
+            hhs_9_=hhs_9_,
             main_hh_m=main_hh_m,
             aos_tm_lo=aos_tm_lo,
             main_hh_f=main_hh_f,
@@ -972,9 +972,9 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             tfufc_bio=tfufc_bio,
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
-            marg_cl_31=marg_cl_31,
             tfufc_clc=tfufc_clc,
             nhh_hbfwtp=nhh_hbfwtp,
+            marg_cl_31=marg_cl_31,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
             msdw_tfts=msdw_tfts,
@@ -999,21 +999,21 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             hhs_6_8=hhs_6_8,
             aos_smm=aos_smm,
             mof_wb=mof_wb,
-            mor_gr_th_=mor_gr_th_,
             main_ot_m=main_ot_m,
+            mor_gr_th_=mor_gr_th_,
             marg_ot_0_=marg_ot_0_,
             main_ot_p=main_ot_p,
             total=total,
             msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
-            marg_al_f=marg_al_f,
             mor_ss=mor_ss,
-            m_lit=m_lit,
+            marg_al_f=marg_al_f,
             hh_cond_11=hh_cond_11,
+            m_lit=m_lit,
             mc_1=mc_1,
-            marg_al_m=marg_al_m,
-            mc_2=mc_2,
             hh_tscs_ns=hh_tscs_ns,
+            mc_2=mc_2,
+            marg_al_m=marg_al_m,
             msdw_tfuts=msdw_tfuts,
             mc_3=mc_3,
             hh_cond_10=hh_cond_10,
@@ -1066,8 +1066,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         marg_ot_32: Optional[StrictStr] = None,
         marg_ot_31: Optional[StrictStr] = None,
         wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
-        tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1076,8 +1076,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_conc: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gimas: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_dt: Optional[StrictStr] = None,
@@ -1094,8 +1094,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1149,8 +1149,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         marg_cl_m: Optional[StrictStr] = None,
         marg_hh_32: Optional[StrictStr] = None,
         marg_cl_p: Optional[StrictStr] = None,
-        p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_31: Optional[StrictStr] = None,
+        p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_32: Optional[StrictStr] = None,
         ndr_3_r: Optional[Union[StrictFloat, StrictInt]] = None,
         f_06: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1162,8 +1162,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         nhh_hbfw_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_p: Optional[StrictStr] = None,
         margwork_m: Optional[StrictStr] = None,
-        marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1178,8 +1178,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         margwork_5: Optional[Union[StrictFloat, StrictInt]] = None,
         f_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_kr: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1203,8 +1203,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         msl_ool: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_dnhk: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cr: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_m: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_lo: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_f: Optional[StrictStr] = None,
@@ -1232,9 +1232,9 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         tfufc_bio: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
         nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfts: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1259,21 +1259,21 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_wb: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_m: Optional[StrictStr] = None,
+        mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_p: Optional[StrictStr] = None,
         total: Optional[StrictStr] = None,
         msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
-        m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
+        m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -1334,10 +1334,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type marg_ot_31: str
         :param wwoc_nd:
         :type wwoc_nd: float
-        :param tot_p:
-        :type tot_p: float
         :param non_work_m:
         :type non_work_m: float
+        :param tot_p:
+        :type tot_p: float
         :param mof_aom:
         :type mof_aom: float
         :param non_work_f:
@@ -1354,10 +1354,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type main_cl_p: float
         :param mor_conc:
         :type mor_conc: float
-        :param hh_tscs_uc:
-        :type hh_tscs_uc: float
         :param sl_nsrbh:
         :type sl_nsrbh: float
+        :param hh_tscs_uc:
+        :type hh_tscs_uc: float
         :param mow_gimas:
         :type mow_gimas: float
         :param kf_hk:
@@ -1390,10 +1390,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param mof_cem:
-        :type mof_cem: float
         :param hh_cond__8:
         :type hh_cond__8: float
+        :param mof_cem:
+        :type mof_cem: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -1500,10 +1500,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type marg_hh_32: str
         :param marg_cl_p:
         :type marg_cl_p: str
-        :param p_sc:
-        :type p_sc: float
         :param marg_al_31:
         :type marg_al_31: str
+        :param p_sc:
+        :type p_sc: float
         :param marg_al_32:
         :type marg_al_32: str
         :param ndr_3_r:
@@ -1526,10 +1526,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type margwork_p: str
         :param margwork_m:
         :type margwork_m: str
-        :param marg_al_01:
-        :type marg_al_01: float
         :param ldws_np:
         :type ldws_np: float
+        :param marg_al_01:
+        :type marg_al_01: float
         :param f_st:
         :type f_st: float
         :param main_al_p:
@@ -1558,10 +1558,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type f_lit: float
         :param msl_kr:
         :type msl_kr: float
-        :param mow_pl_pol:
-        :type mow_pl_pol: float
         :param m_ill:
         :type m_ill: float
+        :param mow_pl_pol:
+        :type mow_pl_pol: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
         :param mow_snpwm:
@@ -1608,10 +1608,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type kf_dnhk: float
         :param tfufc_cr:
         :type tfufc_cr: float
-        :param hhs_9_:
-        :type hhs_9_: float
         :param main_hh_p:
         :type main_hh_p: float
+        :param hhs_9_:
+        :type hhs_9_: float
         :param main_hh_m:
         :type main_hh_m: float
         :param aos_tm_lo:
@@ -1666,12 +1666,12 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type hh_cond_ch: float
         :param nsdiod:
         :type nsdiod: float
-        :param marg_cl_31:
-        :type marg_cl_31: float
         :param tfufc_clc:
         :type tfufc_clc: float
         :param nhh_hbfwtp:
         :type nhh_hbfwtp: float
+        :param marg_cl_31:
+        :type marg_cl_31: float
         :param marg_cl_32:
         :type marg_cl_32: float
         :param aos_cl_wii:
@@ -1720,10 +1720,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type aos_smm: float
         :param mof_wb:
         :type mof_wb: float
-        :param mor_gr_th_:
-        :type mor_gr_th_: float
         :param main_ot_m:
         :type main_ot_m: str
+        :param mor_gr_th_:
+        :type mor_gr_th_: float
         :param marg_ot_0_:
         :type marg_ot_0_: float
         :param main_ot_p:
@@ -1734,22 +1734,22 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type msdw_os: float
         :param tfufc_nc:
         :type tfufc_nc: float
-        :param marg_al_f:
-        :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
-        :param m_lit:
-        :type m_lit: float
+        :param marg_al_f:
+        :type marg_al_f: float
         :param hh_cond_11:
         :type hh_cond_11: float
+        :param m_lit:
+        :type m_lit: float
         :param mc_1:
         :type mc_1: float
-        :param marg_al_m:
-        :type marg_al_m: float
-        :param mc_2:
-        :type mc_2: float
         :param hh_tscs_ns:
         :type hh_tscs_ns: float
+        :param mc_2:
+        :type mc_2: float
+        :param marg_al_m:
+        :type marg_al_m: float
         :param msdw_tfuts:
         :type msdw_tfuts: float
         :param mc_3:
@@ -1810,8 +1810,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             marg_ot_32=marg_ot_32,
             marg_ot_31=marg_ot_31,
             wwoc_nd=wwoc_nd,
-            tot_p=tot_p,
             non_work_m=non_work_m,
+            tot_p=tot_p,
             mof_aom=mof_aom,
             non_work_f=non_work_f,
             mof_mft=mof_mft,
@@ -1820,8 +1820,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             tfufc_elc=tfufc_elc,
             main_cl_p=main_cl_p,
             mor_conc=mor_conc,
-            hh_tscs_uc=hh_tscs_uc,
             sl_nsrbh=sl_nsrbh,
+            hh_tscs_uc=hh_tscs_uc,
             mow_gimas=mow_gimas,
             kf_hk=kf_hk,
             mdds_dt=mdds_dt,
@@ -1838,8 +1838,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            mof_cem=mof_cem,
             hh_cond__8=hh_cond__8,
+            mof_cem=mof_cem,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
@@ -1893,8 +1893,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             marg_cl_m=marg_cl_m,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
-            p_sc=p_sc,
             marg_al_31=marg_al_31,
+            p_sc=p_sc,
             marg_al_32=marg_al_32,
             ndr_3_r=ndr_3_r,
             f_06=f_06,
@@ -1906,8 +1906,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             nhh_hbfw_2=nhh_hbfw_2,
             margwork_p=margwork_p,
             margwork_m=margwork_m,
-            marg_al_01=marg_al_01,
             ldws_np=ldws_np,
+            marg_al_01=marg_al_01,
             f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
@@ -1922,8 +1922,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             margwork_5=margwork_5,
             f_lit=f_lit,
             msl_kr=msl_kr,
-            mow_pl_pol=mow_pl_pol,
             m_ill=m_ill,
+            mow_pl_pol=mow_pl_pol,
             tfufc_lpg_=tfufc_lpg_,
             mow_snpwm=mow_snpwm,
             tfufc_cc=tfufc_cc,
@@ -1947,8 +1947,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             msl_ool=msl_ool,
             kf_dnhk=kf_dnhk,
             tfufc_cr=tfufc_cr,
-            hhs_9_=hhs_9_,
             main_hh_p=main_hh_p,
+            hhs_9_=hhs_9_,
             main_hh_m=main_hh_m,
             aos_tm_lo=aos_tm_lo,
             main_hh_f=main_hh_f,
@@ -1976,9 +1976,9 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             tfufc_bio=tfufc_bio,
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
-            marg_cl_31=marg_cl_31,
             tfufc_clc=tfufc_clc,
             nhh_hbfwtp=nhh_hbfwtp,
+            marg_cl_31=marg_cl_31,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
             msdw_tfts=msdw_tfts,
@@ -2003,21 +2003,21 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             hhs_6_8=hhs_6_8,
             aos_smm=aos_smm,
             mof_wb=mof_wb,
-            mor_gr_th_=mor_gr_th_,
             main_ot_m=main_ot_m,
+            mor_gr_th_=mor_gr_th_,
             marg_ot_0_=marg_ot_0_,
             main_ot_p=main_ot_p,
             total=total,
             msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
-            marg_al_f=marg_al_f,
             mor_ss=mor_ss,
-            m_lit=m_lit,
+            marg_al_f=marg_al_f,
             hh_cond_11=hh_cond_11,
+            m_lit=m_lit,
             mc_1=mc_1,
-            marg_al_m=marg_al_m,
-            mc_2=mc_2,
             hh_tscs_ns=hh_tscs_ns,
+            mc_2=mc_2,
+            marg_al_m=marg_al_m,
             msdw_tfuts=msdw_tfuts,
             mc_3=mc_3,
             hh_cond_10=hh_cond_10,
@@ -2070,8 +2070,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         marg_ot_32: Optional[StrictStr] = None,
         marg_ot_31: Optional[StrictStr] = None,
         wwoc_nd: Optional[Union[StrictFloat, StrictInt]] = None,
-        tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_m: Optional[Union[StrictFloat, StrictInt]] = None,
+        tot_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_aom: Optional[Union[StrictFloat, StrictInt]] = None,
         non_work_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_mft: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2080,8 +2080,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         tfufc_elc: Optional[Union[StrictFloat, StrictInt]] = None,
         main_cl_p: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_conc: Optional[Union[StrictFloat, StrictInt]] = None,
-        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         sl_nsrbh: Optional[Union[StrictFloat, StrictInt]] = None,
+        hh_tscs_uc: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_gimas: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_hk: Optional[Union[StrictFloat, StrictInt]] = None,
         mdds_dt: Optional[StrictStr] = None,
@@ -2098,8 +2098,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         hh_cond__1: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__7: Optional[Union[StrictFloat, StrictInt]] = None,
-        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__8: Optional[Union[StrictFloat, StrictInt]] = None,
+        mof_cem: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__5: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond__6: Optional[Union[StrictFloat, StrictInt]] = None,
         ans_pl: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2153,8 +2153,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         marg_cl_m: Optional[StrictStr] = None,
         marg_hh_32: Optional[StrictStr] = None,
         marg_cl_p: Optional[StrictStr] = None,
-        p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_31: Optional[StrictStr] = None,
+        p_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_al_32: Optional[StrictStr] = None,
         ndr_3_r: Optional[Union[StrictFloat, StrictInt]] = None,
         f_06: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2166,8 +2166,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         nhh_hbfw_2: Optional[Union[StrictFloat, StrictInt]] = None,
         margwork_p: Optional[StrictStr] = None,
         margwork_m: Optional[StrictStr] = None,
-        marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         ldws_np: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_01: Optional[Union[StrictFloat, StrictInt]] = None,
         f_st: Optional[Union[StrictFloat, StrictInt]] = None,
         main_al_p: Optional[Union[StrictFloat, StrictInt]] = None,
         wwoc_cd: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2182,8 +2182,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         margwork_5: Optional[Union[StrictFloat, StrictInt]] = None,
         f_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         msl_kr: Optional[Union[StrictFloat, StrictInt]] = None,
-        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         m_ill: Optional[Union[StrictFloat, StrictInt]] = None,
+        mow_pl_pol: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_lpg_: Optional[Union[StrictFloat, StrictInt]] = None,
         mow_snpwm: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cc: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2207,8 +2207,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         msl_ool: Optional[Union[StrictFloat, StrictInt]] = None,
         kf_dnhk: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_cr: Optional[Union[StrictFloat, StrictInt]] = None,
-        hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_p: Optional[Union[StrictFloat, StrictInt]] = None,
+        hhs_9_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_m: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_tm_lo: Optional[Union[StrictFloat, StrictInt]] = None,
         main_hh_f: Optional[StrictStr] = None,
@@ -2236,9 +2236,9 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         tfufc_bio: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_ch: Optional[Union[StrictFloat, StrictInt]] = None,
         nsdiod: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_clc: Optional[Union[StrictFloat, StrictInt]] = None,
         nhh_hbfwtp: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_cl_31: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_cl_32: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_cl_wii: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfts: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2263,21 +2263,21 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         hhs_6_8: Optional[Union[StrictFloat, StrictInt]] = None,
         aos_smm: Optional[Union[StrictFloat, StrictInt]] = None,
         mof_wb: Optional[Union[StrictFloat, StrictInt]] = None,
-        mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_m: Optional[StrictStr] = None,
+        mor_gr_th_: Optional[Union[StrictFloat, StrictInt]] = None,
         marg_ot_0_: Optional[Union[StrictFloat, StrictInt]] = None,
         main_ot_p: Optional[StrictStr] = None,
         total: Optional[StrictStr] = None,
         msdw_os: Optional[Union[StrictFloat, StrictInt]] = None,
         tfufc_nc: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         mor_ss: Optional[Union[StrictFloat, StrictInt]] = None,
-        m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_f: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_11: Optional[Union[StrictFloat, StrictInt]] = None,
+        m_lit: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_1: Optional[Union[StrictFloat, StrictInt]] = None,
-        marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
-        mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_tscs_ns: Optional[Union[StrictFloat, StrictInt]] = None,
+        mc_2: Optional[Union[StrictFloat, StrictInt]] = None,
+        marg_al_m: Optional[Union[StrictFloat, StrictInt]] = None,
         msdw_tfuts: Optional[Union[StrictFloat, StrictInt]] = None,
         mc_3: Optional[Union[StrictFloat, StrictInt]] = None,
         hh_cond_10: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -2338,10 +2338,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type marg_ot_31: str
         :param wwoc_nd:
         :type wwoc_nd: float
-        :param tot_p:
-        :type tot_p: float
         :param non_work_m:
         :type non_work_m: float
+        :param tot_p:
+        :type tot_p: float
         :param mof_aom:
         :type mof_aom: float
         :param non_work_f:
@@ -2358,10 +2358,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type main_cl_p: float
         :param mor_conc:
         :type mor_conc: float
-        :param hh_tscs_uc:
-        :type hh_tscs_uc: float
         :param sl_nsrbh:
         :type sl_nsrbh: float
+        :param hh_tscs_uc:
+        :type hh_tscs_uc: float
         :param mow_gimas:
         :type mow_gimas: float
         :param kf_hk:
@@ -2394,10 +2394,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type hh_cond__2: float
         :param hh_cond__7:
         :type hh_cond__7: float
-        :param mof_cem:
-        :type mof_cem: float
         :param hh_cond__8:
         :type hh_cond__8: float
+        :param mof_cem:
+        :type mof_cem: float
         :param hh_cond__5:
         :type hh_cond__5: float
         :param hh_cond__6:
@@ -2504,10 +2504,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type marg_hh_32: str
         :param marg_cl_p:
         :type marg_cl_p: str
-        :param p_sc:
-        :type p_sc: float
         :param marg_al_31:
         :type marg_al_31: str
+        :param p_sc:
+        :type p_sc: float
         :param marg_al_32:
         :type marg_al_32: str
         :param ndr_3_r:
@@ -2530,10 +2530,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type margwork_p: str
         :param margwork_m:
         :type margwork_m: str
-        :param marg_al_01:
-        :type marg_al_01: float
         :param ldws_np:
         :type ldws_np: float
+        :param marg_al_01:
+        :type marg_al_01: float
         :param f_st:
         :type f_st: float
         :param main_al_p:
@@ -2562,10 +2562,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type f_lit: float
         :param msl_kr:
         :type msl_kr: float
-        :param mow_pl_pol:
-        :type mow_pl_pol: float
         :param m_ill:
         :type m_ill: float
+        :param mow_pl_pol:
+        :type mow_pl_pol: float
         :param tfufc_lpg_:
         :type tfufc_lpg_: float
         :param mow_snpwm:
@@ -2612,10 +2612,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type kf_dnhk: float
         :param tfufc_cr:
         :type tfufc_cr: float
-        :param hhs_9_:
-        :type hhs_9_: float
         :param main_hh_p:
         :type main_hh_p: float
+        :param hhs_9_:
+        :type hhs_9_: float
         :param main_hh_m:
         :type main_hh_m: float
         :param aos_tm_lo:
@@ -2670,12 +2670,12 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type hh_cond_ch: float
         :param nsdiod:
         :type nsdiod: float
-        :param marg_cl_31:
-        :type marg_cl_31: float
         :param tfufc_clc:
         :type tfufc_clc: float
         :param nhh_hbfwtp:
         :type nhh_hbfwtp: float
+        :param marg_cl_31:
+        :type marg_cl_31: float
         :param marg_cl_32:
         :type marg_cl_32: float
         :param aos_cl_wii:
@@ -2724,10 +2724,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type aos_smm: float
         :param mof_wb:
         :type mof_wb: float
-        :param mor_gr_th_:
-        :type mor_gr_th_: float
         :param main_ot_m:
         :type main_ot_m: str
+        :param mor_gr_th_:
+        :type mor_gr_th_: float
         :param marg_ot_0_:
         :type marg_ot_0_: float
         :param main_ot_p:
@@ -2738,22 +2738,22 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         :type msdw_os: float
         :param tfufc_nc:
         :type tfufc_nc: float
-        :param marg_al_f:
-        :type marg_al_f: float
         :param mor_ss:
         :type mor_ss: float
-        :param m_lit:
-        :type m_lit: float
+        :param marg_al_f:
+        :type marg_al_f: float
         :param hh_cond_11:
         :type hh_cond_11: float
+        :param m_lit:
+        :type m_lit: float
         :param mc_1:
         :type mc_1: float
-        :param marg_al_m:
-        :type marg_al_m: float
-        :param mc_2:
-        :type mc_2: float
         :param hh_tscs_ns:
         :type hh_tscs_ns: float
+        :param mc_2:
+        :type mc_2: float
+        :param marg_al_m:
+        :type marg_al_m: float
         :param msdw_tfuts:
         :type msdw_tfuts: float
         :param mc_3:
@@ -2814,8 +2814,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             marg_ot_32=marg_ot_32,
             marg_ot_31=marg_ot_31,
             wwoc_nd=wwoc_nd,
-            tot_p=tot_p,
             non_work_m=non_work_m,
+            tot_p=tot_p,
             mof_aom=mof_aom,
             non_work_f=non_work_f,
             mof_mft=mof_mft,
@@ -2824,8 +2824,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             tfufc_elc=tfufc_elc,
             main_cl_p=main_cl_p,
             mor_conc=mor_conc,
-            hh_tscs_uc=hh_tscs_uc,
             sl_nsrbh=sl_nsrbh,
+            hh_tscs_uc=hh_tscs_uc,
             mow_gimas=mow_gimas,
             kf_hk=kf_hk,
             mdds_dt=mdds_dt,
@@ -2842,8 +2842,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             hh_cond__1=hh_cond__1,
             hh_cond__2=hh_cond__2,
             hh_cond__7=hh_cond__7,
-            mof_cem=mof_cem,
             hh_cond__8=hh_cond__8,
+            mof_cem=mof_cem,
             hh_cond__5=hh_cond__5,
             hh_cond__6=hh_cond__6,
             ans_pl=ans_pl,
@@ -2897,8 +2897,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             marg_cl_m=marg_cl_m,
             marg_hh_32=marg_hh_32,
             marg_cl_p=marg_cl_p,
-            p_sc=p_sc,
             marg_al_31=marg_al_31,
+            p_sc=p_sc,
             marg_al_32=marg_al_32,
             ndr_3_r=ndr_3_r,
             f_06=f_06,
@@ -2910,8 +2910,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             nhh_hbfw_2=nhh_hbfw_2,
             margwork_p=margwork_p,
             margwork_m=margwork_m,
-            marg_al_01=marg_al_01,
             ldws_np=ldws_np,
+            marg_al_01=marg_al_01,
             f_st=f_st,
             main_al_p=main_al_p,
             wwoc_cd=wwoc_cd,
@@ -2926,8 +2926,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             margwork_5=margwork_5,
             f_lit=f_lit,
             msl_kr=msl_kr,
-            mow_pl_pol=mow_pl_pol,
             m_ill=m_ill,
+            mow_pl_pol=mow_pl_pol,
             tfufc_lpg_=tfufc_lpg_,
             mow_snpwm=mow_snpwm,
             tfufc_cc=tfufc_cc,
@@ -2951,8 +2951,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             msl_ool=msl_ool,
             kf_dnhk=kf_dnhk,
             tfufc_cr=tfufc_cr,
-            hhs_9_=hhs_9_,
             main_hh_p=main_hh_p,
+            hhs_9_=hhs_9_,
             main_hh_m=main_hh_m,
             aos_tm_lo=aos_tm_lo,
             main_hh_f=main_hh_f,
@@ -2980,9 +2980,9 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             tfufc_bio=tfufc_bio,
             hh_cond_ch=hh_cond_ch,
             nsdiod=nsdiod,
-            marg_cl_31=marg_cl_31,
             tfufc_clc=tfufc_clc,
             nhh_hbfwtp=nhh_hbfwtp,
+            marg_cl_31=marg_cl_31,
             marg_cl_32=marg_cl_32,
             aos_cl_wii=aos_cl_wii,
             msdw_tfts=msdw_tfts,
@@ -3007,21 +3007,21 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             hhs_6_8=hhs_6_8,
             aos_smm=aos_smm,
             mof_wb=mof_wb,
-            mor_gr_th_=mor_gr_th_,
             main_ot_m=main_ot_m,
+            mor_gr_th_=mor_gr_th_,
             marg_ot_0_=marg_ot_0_,
             main_ot_p=main_ot_p,
             total=total,
             msdw_os=msdw_os,
             tfufc_nc=tfufc_nc,
-            marg_al_f=marg_al_f,
             mor_ss=mor_ss,
-            m_lit=m_lit,
+            marg_al_f=marg_al_f,
             hh_cond_11=hh_cond_11,
+            m_lit=m_lit,
             mc_1=mc_1,
-            marg_al_m=marg_al_m,
-            mc_2=mc_2,
             hh_tscs_ns=hh_tscs_ns,
+            mc_2=mc_2,
+            marg_al_m=marg_al_m,
             msdw_tfuts=msdw_tfuts,
             mc_3=mc_3,
             hh_cond_10=hh_cond_10,
@@ -3069,8 +3069,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         marg_ot_32,
         marg_ot_31,
         wwoc_nd,
-        tot_p,
         non_work_m,
+        tot_p,
         mof_aom,
         non_work_f,
         mof_mft,
@@ -3079,8 +3079,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         tfufc_elc,
         main_cl_p,
         mor_conc,
-        hh_tscs_uc,
         sl_nsrbh,
+        hh_tscs_uc,
         mow_gimas,
         kf_hk,
         mdds_dt,
@@ -3097,8 +3097,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         hh_cond__1,
         hh_cond__2,
         hh_cond__7,
-        mof_cem,
         hh_cond__8,
+        mof_cem,
         hh_cond__5,
         hh_cond__6,
         ans_pl,
@@ -3152,8 +3152,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         marg_cl_m,
         marg_hh_32,
         marg_cl_p,
-        p_sc,
         marg_al_31,
+        p_sc,
         marg_al_32,
         ndr_3_r,
         f_06,
@@ -3165,8 +3165,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         nhh_hbfw_2,
         margwork_p,
         margwork_m,
-        marg_al_01,
         ldws_np,
+        marg_al_01,
         f_st,
         main_al_p,
         wwoc_cd,
@@ -3181,8 +3181,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         margwork_5,
         f_lit,
         msl_kr,
-        mow_pl_pol,
         m_ill,
+        mow_pl_pol,
         tfufc_lpg_,
         mow_snpwm,
         tfufc_cc,
@@ -3206,8 +3206,8 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         msl_ool,
         kf_dnhk,
         tfufc_cr,
-        hhs_9_,
         main_hh_p,
+        hhs_9_,
         main_hh_m,
         aos_tm_lo,
         main_hh_f,
@@ -3235,9 +3235,9 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         tfufc_bio,
         hh_cond_ch,
         nsdiod,
-        marg_cl_31,
         tfufc_clc,
         nhh_hbfwtp,
+        marg_cl_31,
         marg_cl_32,
         aos_cl_wii,
         msdw_tfts,
@@ -3262,21 +3262,21 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         hhs_6_8,
         aos_smm,
         mof_wb,
-        mor_gr_th_,
         main_ot_m,
+        mor_gr_th_,
         marg_ot_0_,
         main_ot_p,
         total,
         msdw_os,
         tfufc_nc,
-        marg_al_f,
         mor_ss,
-        m_lit,
+        marg_al_f,
         hh_cond_11,
+        m_lit,
         mc_1,
-        marg_al_m,
-        mc_2,
         hh_tscs_ns,
+        mc_2,
+        marg_al_m,
         msdw_tfuts,
         mc_3,
         hh_cond_10,
@@ -3376,13 +3376,13 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             
             _query_params.append(('WWOC_ND', wwoc_nd))
             
-        if tot_p is not None:
-            
-            _query_params.append(('TOT_P', tot_p))
-            
         if non_work_m is not None:
             
             _query_params.append(('NON_WORK_M', non_work_m))
+            
+        if tot_p is not None:
+            
+            _query_params.append(('TOT_P', tot_p))
             
         if mof_aom is not None:
             
@@ -3416,13 +3416,13 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             
             _query_params.append(('MOR_CONC', mor_conc))
             
-        if hh_tscs_uc is not None:
-            
-            _query_params.append(('HH_TSCS_UC', hh_tscs_uc))
-            
         if sl_nsrbh is not None:
             
             _query_params.append(('SL_NSRBH', sl_nsrbh))
+            
+        if hh_tscs_uc is not None:
+            
+            _query_params.append(('HH_TSCS_UC', hh_tscs_uc))
             
         if mow_gimas is not None:
             
@@ -3488,13 +3488,13 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             
             _query_params.append(('HH_COND__7', hh_cond__7))
             
-        if mof_cem is not None:
-            
-            _query_params.append(('MOF_CEM', mof_cem))
-            
         if hh_cond__8 is not None:
             
             _query_params.append(('HH_COND__8', hh_cond__8))
+            
+        if mof_cem is not None:
+            
+            _query_params.append(('MOF_CEM', mof_cem))
             
         if hh_cond__5 is not None:
             
@@ -3708,13 +3708,13 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             
             _query_params.append(('MARG_CL_P', marg_cl_p))
             
-        if p_sc is not None:
-            
-            _query_params.append(('P_SC', p_sc))
-            
         if marg_al_31 is not None:
             
             _query_params.append(('MARG_AL_31', marg_al_31))
+            
+        if p_sc is not None:
+            
+            _query_params.append(('P_SC', p_sc))
             
         if marg_al_32 is not None:
             
@@ -3760,13 +3760,13 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             
             _query_params.append(('MARGWORK_M', margwork_m))
             
-        if marg_al_01 is not None:
-            
-            _query_params.append(('MARG_AL_01', marg_al_01))
-            
         if ldws_np is not None:
             
             _query_params.append(('LDWS_NP', ldws_np))
+            
+        if marg_al_01 is not None:
+            
+            _query_params.append(('MARG_AL_01', marg_al_01))
             
         if f_st is not None:
             
@@ -3824,13 +3824,13 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             
             _query_params.append(('MSL_KR', msl_kr))
             
-        if mow_pl_pol is not None:
-            
-            _query_params.append(('MOW_PL_POL', mow_pl_pol))
-            
         if m_ill is not None:
             
             _query_params.append(('M_ILL', m_ill))
+            
+        if mow_pl_pol is not None:
+            
+            _query_params.append(('MOW_PL_POL', mow_pl_pol))
             
         if tfufc_lpg_ is not None:
             
@@ -3924,13 +3924,13 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             
             _query_params.append(('TFUFC_CR', tfufc_cr))
             
-        if hhs_9_ is not None:
-            
-            _query_params.append(('HHS_9_', hhs_9_))
-            
         if main_hh_p is not None:
             
             _query_params.append(('MAIN_HH_P', main_hh_p))
+            
+        if hhs_9_ is not None:
+            
+            _query_params.append(('HHS_9_', hhs_9_))
             
         if main_hh_m is not None:
             
@@ -4040,10 +4040,6 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             
             _query_params.append(('NSDIOD', nsdiod))
             
-        if marg_cl_31 is not None:
-            
-            _query_params.append(('MARG_CL_31', marg_cl_31))
-            
         if tfufc_clc is not None:
             
             _query_params.append(('TFUFC_CLC', tfufc_clc))
@@ -4051,6 +4047,10 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
         if nhh_hbfwtp is not None:
             
             _query_params.append(('NHH_HBFWTP', nhh_hbfwtp))
+            
+        if marg_cl_31 is not None:
+            
+            _query_params.append(('MARG_CL_31', marg_cl_31))
             
         if marg_cl_32 is not None:
             
@@ -4148,13 +4148,13 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             
             _query_params.append(('MOF_WB', mof_wb))
             
-        if mor_gr_th_ is not None:
-            
-            _query_params.append(('MOR_GR_TH_', mor_gr_th_))
-            
         if main_ot_m is not None:
             
             _query_params.append(('MAIN_OT_M', main_ot_m))
+            
+        if mor_gr_th_ is not None:
+            
+            _query_params.append(('MOR_GR_TH_', mor_gr_th_))
             
         if marg_ot_0_ is not None:
             
@@ -4176,37 +4176,37 @@ class PrimaryCensusAbstractOfVizianagaramAPApi:
             
             _query_params.append(('TFUFC_NC', tfufc_nc))
             
-        if marg_al_f is not None:
-            
-            _query_params.append(('MARG_AL_F', marg_al_f))
-            
         if mor_ss is not None:
             
             _query_params.append(('MOR_SS', mor_ss))
             
-        if m_lit is not None:
+        if marg_al_f is not None:
             
-            _query_params.append(('M_LIT', m_lit))
+            _query_params.append(('MARG_AL_F', marg_al_f))
             
         if hh_cond_11 is not None:
             
             _query_params.append(('HH_COND_11', hh_cond_11))
             
+        if m_lit is not None:
+            
+            _query_params.append(('M_LIT', m_lit))
+            
         if mc_1 is not None:
             
             _query_params.append(('MC_1', mc_1))
             
-        if marg_al_m is not None:
+        if hh_tscs_ns is not None:
             
-            _query_params.append(('MARG_AL_M', marg_al_m))
+            _query_params.append(('HH_TSCS_NS', hh_tscs_ns))
             
         if mc_2 is not None:
             
             _query_params.append(('MC_2', mc_2))
             
-        if hh_tscs_ns is not None:
+        if marg_al_m is not None:
             
-            _query_params.append(('HH_TSCS_NS', hh_tscs_ns))
+            _query_params.append(('MARG_AL_M', marg_al_m))
             
         if msdw_tfuts is not None:
             

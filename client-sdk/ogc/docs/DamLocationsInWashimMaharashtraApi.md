@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, spillway_l=spillway_l, operating_=operating_, river_name=river_name, spillway_1=spillway_1, spillway_3=spillway_3, res_area_s=res_area_s, dam_perlia=dam_perlia, spillway_2=spillway_2, canal_gate=canal_gate, dtcode=dtcode, dam_length=dam_length, spillway_4=spillway_4, spillway_t=spillway_t, max_height=max_height, type=type, seismic_zo=seismic_zo, subbasin=subbasin, spillway_c=spillway_c, spillway_g=spillway_g, state=state, var_class=var_class, completion=completion, total_volu=total_volu, purpose=purpose, basin=basin, design_flo=design_flo, bacode=bacode, sbcode=sbcode, nearest_ci=nearest_ci, grs_stor_c=grs_stor_c, dm_long=dm_long, struct_typ=struct_typ, dam_volume=dam_volume, strucode=strucode, nrld_no=nrld_no, district=district, dm_lat=dm_lat, name=name, eff_stor_c=eff_stor_c, name_nrld_=name_nrld_, powerhouse=powerhouse, status=status)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, operating_=operating_, spillway_l=spillway_l, river_name=river_name, spillway_1=spillway_1, spillway_3=spillway_3, dam_perlia=dam_perlia, res_area_s=res_area_s, spillway_2=spillway_2, canal_gate=canal_gate, dtcode=dtcode, spillway_4=spillway_4, dam_length=dam_length, spillway_t=spillway_t, max_height=max_height, type=type, seismic_zo=seismic_zo, subbasin=subbasin, spillway_c=spillway_c, spillway_g=spillway_g, state=state, var_class=var_class, completion=completion, total_volu=total_volu, purpose=purpose, basin=basin, design_flo=design_flo, bacode=bacode, sbcode=sbcode, nearest_ci=nearest_ci, struct_typ=struct_typ, grs_stor_c=grs_stor_c, dm_long=dm_long, dam_volume=dam_volume, strucode=strucode, nrld_no=nrld_no, district=district, name=name, dm_lat=dm_lat, eff_stor_c=eff_stor_c, name_nrld_=name_nrld_, powerhouse=powerhouse, status=status)
 
 Get features from Point features representing dam locations in Washim district, Maharashtra
 
@@ -51,18 +51,18 @@ with openapi_client.ApiClient(configuration) as api_client:
     limit = 5000 # int |  (optional) (default to 5000)
     offset = 1 # int | OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10. (optional) (default to 1)
     stcode = 'stcode_example' # str |  (optional)
-    spillway_l = 'spillway_l_example' # str |  (optional)
     operating_ = 'operating__example' # str |  (optional)
+    spillway_l = 'spillway_l_example' # str |  (optional)
     river_name = 'river_name_example' # str |  (optional)
     spillway_1 = 'spillway_1_example' # str |  (optional)
     spillway_3 = 56 # int |  (optional)
-    res_area_s = 3.4 # float |  (optional)
     dam_perlia = 'dam_perlia_example' # str |  (optional)
+    res_area_s = 3.4 # float |  (optional)
     spillway_2 = 'spillway_2_example' # str |  (optional)
     canal_gate = 56 # int |  (optional)
     dtcode = 'dtcode_example' # str |  (optional)
-    dam_length = 'dam_length_example' # str |  (optional)
     spillway_4 = 3.4 # float |  (optional)
+    dam_length = 'dam_length_example' # str |  (optional)
     spillway_t = 'spillway_t_example' # str |  (optional)
     max_height = 'max_height_example' # str |  (optional)
     type = 'type_example' # str |  (optional)
@@ -80,15 +80,15 @@ with openapi_client.ApiClient(configuration) as api_client:
     bacode = 'bacode_example' # str |  (optional)
     sbcode = 'sbcode_example' # str |  (optional)
     nearest_ci = 'nearest_ci_example' # str |  (optional)
+    struct_typ = 'struct_typ_example' # str |  (optional)
     grs_stor_c = 3.4 # float |  (optional)
     dm_long = 3.4 # float |  (optional)
-    struct_typ = 'struct_typ_example' # str |  (optional)
     dam_volume = 3.4 # float |  (optional)
     strucode = 'strucode_example' # str |  (optional)
     nrld_no = 'nrld_no_example' # str |  (optional)
     district = 'district_example' # str |  (optional)
-    dm_lat = 3.4 # float |  (optional)
     name = 'name_example' # str |  (optional)
+    dm_lat = 3.4 # float |  (optional)
     eff_stor_c = 3.4 # float |  (optional)
     name_nrld_ = 'name_nrld__example' # str |  (optional)
     powerhouse = 56 # int |  (optional)
@@ -96,7 +96,7 @@ with openapi_client.ApiClient(configuration) as api_client:
 
     try:
         # Get features from Point features representing dam locations in Washim district, Maharashtra
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, spillway_l=spillway_l, operating_=operating_, river_name=river_name, spillway_1=spillway_1, spillway_3=spillway_3, res_area_s=res_area_s, dam_perlia=dam_perlia, spillway_2=spillway_2, canal_gate=canal_gate, dtcode=dtcode, dam_length=dam_length, spillway_4=spillway_4, spillway_t=spillway_t, max_height=max_height, type=type, seismic_zo=seismic_zo, subbasin=subbasin, spillway_c=spillway_c, spillway_g=spillway_g, state=state, var_class=var_class, completion=completion, total_volu=total_volu, purpose=purpose, basin=basin, design_flo=design_flo, bacode=bacode, sbcode=sbcode, nearest_ci=nearest_ci, grs_stor_c=grs_stor_c, dm_long=dm_long, struct_typ=struct_typ, dam_volume=dam_volume, strucode=strucode, nrld_no=nrld_no, district=district, dm_lat=dm_lat, name=name, eff_stor_c=eff_stor_c, name_nrld_=name_nrld_, powerhouse=powerhouse, status=status)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, stcode=stcode, operating_=operating_, spillway_l=spillway_l, river_name=river_name, spillway_1=spillway_1, spillway_3=spillway_3, dam_perlia=dam_perlia, res_area_s=res_area_s, spillway_2=spillway_2, canal_gate=canal_gate, dtcode=dtcode, spillway_4=spillway_4, dam_length=dam_length, spillway_t=spillway_t, max_height=max_height, type=type, seismic_zo=seismic_zo, subbasin=subbasin, spillway_c=spillway_c, spillway_g=spillway_g, state=state, var_class=var_class, completion=completion, total_volu=total_volu, purpose=purpose, basin=basin, design_flo=design_flo, bacode=bacode, sbcode=sbcode, nearest_ci=nearest_ci, struct_typ=struct_typ, grs_stor_c=grs_stor_c, dm_long=dm_long, dam_volume=dam_volume, strucode=strucode, nrld_no=nrld_no, district=district, name=name, dm_lat=dm_lat, eff_stor_c=eff_stor_c, name_nrld_=name_nrld_, powerhouse=powerhouse, status=status)
         print("The response of DamLocationsInWashimMaharashtraApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -117,18 +117,18 @@ Name | Type | Description  | Notes
  **limit** | **int**|  | [optional] [default to 5000]
  **offset** | **int**| OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum &#x3D; 0. Maximum &#x3D; 1000. Default &#x3D; 10. | [optional] [default to 1]
  **stcode** | **str**|  | [optional] 
- **spillway_l** | **str**|  | [optional] 
  **operating_** | **str**|  | [optional] 
+ **spillway_l** | **str**|  | [optional] 
  **river_name** | **str**|  | [optional] 
  **spillway_1** | **str**|  | [optional] 
  **spillway_3** | **int**|  | [optional] 
- **res_area_s** | **float**|  | [optional] 
  **dam_perlia** | **str**|  | [optional] 
+ **res_area_s** | **float**|  | [optional] 
  **spillway_2** | **str**|  | [optional] 
  **canal_gate** | **int**|  | [optional] 
  **dtcode** | **str**|  | [optional] 
- **dam_length** | **str**|  | [optional] 
  **spillway_4** | **float**|  | [optional] 
+ **dam_length** | **str**|  | [optional] 
  **spillway_t** | **str**|  | [optional] 
  **max_height** | **str**|  | [optional] 
  **type** | **str**|  | [optional] 
@@ -146,15 +146,15 @@ Name | Type | Description  | Notes
  **bacode** | **str**|  | [optional] 
  **sbcode** | **str**|  | [optional] 
  **nearest_ci** | **str**|  | [optional] 
+ **struct_typ** | **str**|  | [optional] 
  **grs_stor_c** | **float**|  | [optional] 
  **dm_long** | **float**|  | [optional] 
- **struct_typ** | **str**|  | [optional] 
  **dam_volume** | **float**|  | [optional] 
  **strucode** | **str**|  | [optional] 
  **nrld_no** | **str**|  | [optional] 
  **district** | **str**|  | [optional] 
- **dm_lat** | **float**|  | [optional] 
  **name** | **str**|  | [optional] 
+ **dm_lat** | **float**|  | [optional] 
  **eff_stor_c** | **float**|  | [optional] 
  **name_nrld_** | **str**|  | [optional] 
  **powerhouse** | **int**|  | [optional] 

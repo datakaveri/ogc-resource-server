@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -56,10 +56,10 @@ class DistrictHeadquartersCorrectedApi:
         indiadpt_: Optional[StrictInt] = None,
         area: Optional[Union[StrictFloat, StrictInt]] = None,
         town: Optional[StrictStr] = None,
-        hq: Optional[StrictStr] = None,
         state: Optional[StrictStr] = None,
-        taluk: Optional[StrictStr] = None,
+        hq: Optional[StrictStr] = None,
         indiadpt_i: Optional[StrictInt] = None,
+        taluk: Optional[StrictStr] = None,
         perimeter: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
@@ -99,14 +99,14 @@ class DistrictHeadquartersCorrectedApi:
         :type area: float
         :param town:
         :type town: str
-        :param hq:
-        :type hq: str
         :param state:
         :type state: str
-        :param taluk:
-        :type taluk: str
+        :param hq:
+        :type hq: str
         :param indiadpt_i:
         :type indiadpt_i: int
+        :param taluk:
+        :type taluk: str
         :param perimeter:
         :type perimeter: float
         :param _request_timeout: timeout setting for this request. If one
@@ -143,10 +143,10 @@ class DistrictHeadquartersCorrectedApi:
             indiadpt_=indiadpt_,
             area=area,
             town=town,
-            hq=hq,
             state=state,
-            taluk=taluk,
+            hq=hq,
             indiadpt_i=indiadpt_i,
+            taluk=taluk,
             perimeter=perimeter,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -184,10 +184,10 @@ class DistrictHeadquartersCorrectedApi:
         indiadpt_: Optional[StrictInt] = None,
         area: Optional[Union[StrictFloat, StrictInt]] = None,
         town: Optional[StrictStr] = None,
-        hq: Optional[StrictStr] = None,
         state: Optional[StrictStr] = None,
-        taluk: Optional[StrictStr] = None,
+        hq: Optional[StrictStr] = None,
         indiadpt_i: Optional[StrictInt] = None,
+        taluk: Optional[StrictStr] = None,
         perimeter: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
@@ -227,14 +227,14 @@ class DistrictHeadquartersCorrectedApi:
         :type area: float
         :param town:
         :type town: str
-        :param hq:
-        :type hq: str
         :param state:
         :type state: str
-        :param taluk:
-        :type taluk: str
+        :param hq:
+        :type hq: str
         :param indiadpt_i:
         :type indiadpt_i: int
+        :param taluk:
+        :type taluk: str
         :param perimeter:
         :type perimeter: float
         :param _request_timeout: timeout setting for this request. If one
@@ -271,10 +271,10 @@ class DistrictHeadquartersCorrectedApi:
             indiadpt_=indiadpt_,
             area=area,
             town=town,
-            hq=hq,
             state=state,
-            taluk=taluk,
+            hq=hq,
             indiadpt_i=indiadpt_i,
+            taluk=taluk,
             perimeter=perimeter,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -312,10 +312,10 @@ class DistrictHeadquartersCorrectedApi:
         indiadpt_: Optional[StrictInt] = None,
         area: Optional[Union[StrictFloat, StrictInt]] = None,
         town: Optional[StrictStr] = None,
-        hq: Optional[StrictStr] = None,
         state: Optional[StrictStr] = None,
-        taluk: Optional[StrictStr] = None,
+        hq: Optional[StrictStr] = None,
         indiadpt_i: Optional[StrictInt] = None,
+        taluk: Optional[StrictStr] = None,
         perimeter: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
@@ -355,14 +355,14 @@ class DistrictHeadquartersCorrectedApi:
         :type area: float
         :param town:
         :type town: str
-        :param hq:
-        :type hq: str
         :param state:
         :type state: str
-        :param taluk:
-        :type taluk: str
+        :param hq:
+        :type hq: str
         :param indiadpt_i:
         :type indiadpt_i: int
+        :param taluk:
+        :type taluk: str
         :param perimeter:
         :type perimeter: float
         :param _request_timeout: timeout setting for this request. If one
@@ -399,10 +399,10 @@ class DistrictHeadquartersCorrectedApi:
             indiadpt_=indiadpt_,
             area=area,
             town=town,
-            hq=hq,
             state=state,
-            taluk=taluk,
+            hq=hq,
             indiadpt_i=indiadpt_i,
+            taluk=taluk,
             perimeter=perimeter,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -435,10 +435,10 @@ class DistrictHeadquartersCorrectedApi:
         indiadpt_,
         area,
         town,
-        hq,
         state,
-        taluk,
+        hq,
         indiadpt_i,
+        taluk,
         perimeter,
         _request_auth,
         _content_type,
@@ -505,21 +505,21 @@ class DistrictHeadquartersCorrectedApi:
             
             _query_params.append(('TOWN', town))
             
-        if hq is not None:
-            
-            _query_params.append(('HQ', hq))
-            
         if state is not None:
             
             _query_params.append(('STATE', state))
             
-        if taluk is not None:
+        if hq is not None:
             
-            _query_params.append(('TALUK', taluk))
+            _query_params.append(('HQ', hq))
             
         if indiadpt_i is not None:
             
             _query_params.append(('INDIADPT_I', indiadpt_i))
+            
+        if taluk is not None:
+            
+            _query_params.append(('TALUK', taluk))
             
         if perimeter is not None:
             

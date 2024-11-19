@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -51,8 +51,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         datetime: Annotated[Optional[StrictStr], Field(description="Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.")] = None,
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
-        stcode: Optional[StrictStr] = None,
         bwa_bay_no: Optional[StrictStr] = None,
+        stcode: Optional[StrictStr] = None,
         bwa_long: Optional[Union[StrictFloat, StrictInt]] = None,
         dtcode: Optional[StrictStr] = None,
         bwa_pond_l: Optional[StrictStr] = None,
@@ -63,25 +63,25 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         bwa_status: Optional[StrictStr] = None,
         var_class: Optional[StrictStr] = None,
         bwa_cn_gat: Optional[StrictInt] = None,
-        bwa_head_r: Optional[StrictInt] = None,
         bwa_spil_n: Optional[StrictInt] = None,
+        bwa_head_r: Optional[StrictInt] = None,
         bwa_head_1: Optional[StrictInt] = None,
         bwa_crt_ve: Optional[StrictStr] = None,
         bwa_spil_l: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_perlia: Optional[StrictStr] = None,
-        rivcode: Optional[StrictStr] = None,
         bacode: Optional[StrictStr] = None,
+        rivcode: Optional[StrictStr] = None,
         bwa_spil_t: Optional[StrictStr] = None,
         strucode: Optional[StrictStr] = None,
         bwa_size_h: Optional[Union[StrictFloat, StrictInt]] = None,
-        bwa_len: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_ph_gat: Optional[StrictInt] = None,
         bwa_ncity: Optional[StrictStr] = None,
+        bwa_len: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_cmp_yr: Optional[StrictStr] = None,
         bwa_ses_zo: Optional[StrictStr] = None,
         bwa_lat: Optional[Union[StrictFloat, StrictInt]] = None,
-        bwa_disc_c: Optional[StrictStr] = None,
         bwa_wd_rb: Optional[StrictInt] = None,
+        bwa_disc_c: Optional[StrictStr] = None,
         bwa_disc_d: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
@@ -111,10 +111,10 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type limit: int
         :param offset: OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.
         :type offset: int
-        :param stcode:
-        :type stcode: str
         :param bwa_bay_no:
         :type bwa_bay_no: str
+        :param stcode:
+        :type stcode: str
         :param bwa_long:
         :type bwa_long: float
         :param dtcode:
@@ -135,10 +135,10 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type var_class: str
         :param bwa_cn_gat:
         :type bwa_cn_gat: int
-        :param bwa_head_r:
-        :type bwa_head_r: int
         :param bwa_spil_n:
         :type bwa_spil_n: int
+        :param bwa_head_r:
+        :type bwa_head_r: int
         :param bwa_head_1:
         :type bwa_head_1: int
         :param bwa_crt_ve:
@@ -147,32 +147,32 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type bwa_spil_l: float
         :param bwa_perlia:
         :type bwa_perlia: str
-        :param rivcode:
-        :type rivcode: str
         :param bacode:
         :type bacode: str
+        :param rivcode:
+        :type rivcode: str
         :param bwa_spil_t:
         :type bwa_spil_t: str
         :param strucode:
         :type strucode: str
         :param bwa_size_h:
         :type bwa_size_h: float
-        :param bwa_len:
-        :type bwa_len: float
         :param bwa_ph_gat:
         :type bwa_ph_gat: int
         :param bwa_ncity:
         :type bwa_ncity: str
+        :param bwa_len:
+        :type bwa_len: float
         :param bwa_cmp_yr:
         :type bwa_cmp_yr: str
         :param bwa_ses_zo:
         :type bwa_ses_zo: str
         :param bwa_lat:
         :type bwa_lat: float
-        :param bwa_disc_c:
-        :type bwa_disc_c: str
         :param bwa_wd_rb:
         :type bwa_wd_rb: int
+        :param bwa_disc_c:
+        :type bwa_disc_c: str
         :param bwa_disc_d:
         :type bwa_disc_d: float
         :param _request_timeout: timeout setting for this request. If one
@@ -204,8 +204,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             datetime=datetime,
             limit=limit,
             offset=offset,
-            stcode=stcode,
             bwa_bay_no=bwa_bay_no,
+            stcode=stcode,
             bwa_long=bwa_long,
             dtcode=dtcode,
             bwa_pond_l=bwa_pond_l,
@@ -216,25 +216,25 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             bwa_status=bwa_status,
             var_class=var_class,
             bwa_cn_gat=bwa_cn_gat,
-            bwa_head_r=bwa_head_r,
             bwa_spil_n=bwa_spil_n,
+            bwa_head_r=bwa_head_r,
             bwa_head_1=bwa_head_1,
             bwa_crt_ve=bwa_crt_ve,
             bwa_spil_l=bwa_spil_l,
             bwa_perlia=bwa_perlia,
-            rivcode=rivcode,
             bacode=bacode,
+            rivcode=rivcode,
             bwa_spil_t=bwa_spil_t,
             strucode=strucode,
             bwa_size_h=bwa_size_h,
-            bwa_len=bwa_len,
             bwa_ph_gat=bwa_ph_gat,
             bwa_ncity=bwa_ncity,
+            bwa_len=bwa_len,
             bwa_cmp_yr=bwa_cmp_yr,
             bwa_ses_zo=bwa_ses_zo,
             bwa_lat=bwa_lat,
-            bwa_disc_c=bwa_disc_c,
             bwa_wd_rb=bwa_wd_rb,
+            bwa_disc_c=bwa_disc_c,
             bwa_disc_d=bwa_disc_d,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -267,8 +267,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         datetime: Annotated[Optional[StrictStr], Field(description="Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.")] = None,
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
-        stcode: Optional[StrictStr] = None,
         bwa_bay_no: Optional[StrictStr] = None,
+        stcode: Optional[StrictStr] = None,
         bwa_long: Optional[Union[StrictFloat, StrictInt]] = None,
         dtcode: Optional[StrictStr] = None,
         bwa_pond_l: Optional[StrictStr] = None,
@@ -279,25 +279,25 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         bwa_status: Optional[StrictStr] = None,
         var_class: Optional[StrictStr] = None,
         bwa_cn_gat: Optional[StrictInt] = None,
-        bwa_head_r: Optional[StrictInt] = None,
         bwa_spil_n: Optional[StrictInt] = None,
+        bwa_head_r: Optional[StrictInt] = None,
         bwa_head_1: Optional[StrictInt] = None,
         bwa_crt_ve: Optional[StrictStr] = None,
         bwa_spil_l: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_perlia: Optional[StrictStr] = None,
-        rivcode: Optional[StrictStr] = None,
         bacode: Optional[StrictStr] = None,
+        rivcode: Optional[StrictStr] = None,
         bwa_spil_t: Optional[StrictStr] = None,
         strucode: Optional[StrictStr] = None,
         bwa_size_h: Optional[Union[StrictFloat, StrictInt]] = None,
-        bwa_len: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_ph_gat: Optional[StrictInt] = None,
         bwa_ncity: Optional[StrictStr] = None,
+        bwa_len: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_cmp_yr: Optional[StrictStr] = None,
         bwa_ses_zo: Optional[StrictStr] = None,
         bwa_lat: Optional[Union[StrictFloat, StrictInt]] = None,
-        bwa_disc_c: Optional[StrictStr] = None,
         bwa_wd_rb: Optional[StrictInt] = None,
+        bwa_disc_c: Optional[StrictStr] = None,
         bwa_disc_d: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
@@ -327,10 +327,10 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type limit: int
         :param offset: OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.
         :type offset: int
-        :param stcode:
-        :type stcode: str
         :param bwa_bay_no:
         :type bwa_bay_no: str
+        :param stcode:
+        :type stcode: str
         :param bwa_long:
         :type bwa_long: float
         :param dtcode:
@@ -351,10 +351,10 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type var_class: str
         :param bwa_cn_gat:
         :type bwa_cn_gat: int
-        :param bwa_head_r:
-        :type bwa_head_r: int
         :param bwa_spil_n:
         :type bwa_spil_n: int
+        :param bwa_head_r:
+        :type bwa_head_r: int
         :param bwa_head_1:
         :type bwa_head_1: int
         :param bwa_crt_ve:
@@ -363,32 +363,32 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type bwa_spil_l: float
         :param bwa_perlia:
         :type bwa_perlia: str
-        :param rivcode:
-        :type rivcode: str
         :param bacode:
         :type bacode: str
+        :param rivcode:
+        :type rivcode: str
         :param bwa_spil_t:
         :type bwa_spil_t: str
         :param strucode:
         :type strucode: str
         :param bwa_size_h:
         :type bwa_size_h: float
-        :param bwa_len:
-        :type bwa_len: float
         :param bwa_ph_gat:
         :type bwa_ph_gat: int
         :param bwa_ncity:
         :type bwa_ncity: str
+        :param bwa_len:
+        :type bwa_len: float
         :param bwa_cmp_yr:
         :type bwa_cmp_yr: str
         :param bwa_ses_zo:
         :type bwa_ses_zo: str
         :param bwa_lat:
         :type bwa_lat: float
-        :param bwa_disc_c:
-        :type bwa_disc_c: str
         :param bwa_wd_rb:
         :type bwa_wd_rb: int
+        :param bwa_disc_c:
+        :type bwa_disc_c: str
         :param bwa_disc_d:
         :type bwa_disc_d: float
         :param _request_timeout: timeout setting for this request. If one
@@ -420,8 +420,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             datetime=datetime,
             limit=limit,
             offset=offset,
-            stcode=stcode,
             bwa_bay_no=bwa_bay_no,
+            stcode=stcode,
             bwa_long=bwa_long,
             dtcode=dtcode,
             bwa_pond_l=bwa_pond_l,
@@ -432,25 +432,25 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             bwa_status=bwa_status,
             var_class=var_class,
             bwa_cn_gat=bwa_cn_gat,
-            bwa_head_r=bwa_head_r,
             bwa_spil_n=bwa_spil_n,
+            bwa_head_r=bwa_head_r,
             bwa_head_1=bwa_head_1,
             bwa_crt_ve=bwa_crt_ve,
             bwa_spil_l=bwa_spil_l,
             bwa_perlia=bwa_perlia,
-            rivcode=rivcode,
             bacode=bacode,
+            rivcode=rivcode,
             bwa_spil_t=bwa_spil_t,
             strucode=strucode,
             bwa_size_h=bwa_size_h,
-            bwa_len=bwa_len,
             bwa_ph_gat=bwa_ph_gat,
             bwa_ncity=bwa_ncity,
+            bwa_len=bwa_len,
             bwa_cmp_yr=bwa_cmp_yr,
             bwa_ses_zo=bwa_ses_zo,
             bwa_lat=bwa_lat,
-            bwa_disc_c=bwa_disc_c,
             bwa_wd_rb=bwa_wd_rb,
+            bwa_disc_c=bwa_disc_c,
             bwa_disc_d=bwa_disc_d,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -483,8 +483,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         datetime: Annotated[Optional[StrictStr], Field(description="Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.")] = None,
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
-        stcode: Optional[StrictStr] = None,
         bwa_bay_no: Optional[StrictStr] = None,
+        stcode: Optional[StrictStr] = None,
         bwa_long: Optional[Union[StrictFloat, StrictInt]] = None,
         dtcode: Optional[StrictStr] = None,
         bwa_pond_l: Optional[StrictStr] = None,
@@ -495,25 +495,25 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         bwa_status: Optional[StrictStr] = None,
         var_class: Optional[StrictStr] = None,
         bwa_cn_gat: Optional[StrictInt] = None,
-        bwa_head_r: Optional[StrictInt] = None,
         bwa_spil_n: Optional[StrictInt] = None,
+        bwa_head_r: Optional[StrictInt] = None,
         bwa_head_1: Optional[StrictInt] = None,
         bwa_crt_ve: Optional[StrictStr] = None,
         bwa_spil_l: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_perlia: Optional[StrictStr] = None,
-        rivcode: Optional[StrictStr] = None,
         bacode: Optional[StrictStr] = None,
+        rivcode: Optional[StrictStr] = None,
         bwa_spil_t: Optional[StrictStr] = None,
         strucode: Optional[StrictStr] = None,
         bwa_size_h: Optional[Union[StrictFloat, StrictInt]] = None,
-        bwa_len: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_ph_gat: Optional[StrictInt] = None,
         bwa_ncity: Optional[StrictStr] = None,
+        bwa_len: Optional[Union[StrictFloat, StrictInt]] = None,
         bwa_cmp_yr: Optional[StrictStr] = None,
         bwa_ses_zo: Optional[StrictStr] = None,
         bwa_lat: Optional[Union[StrictFloat, StrictInt]] = None,
-        bwa_disc_c: Optional[StrictStr] = None,
         bwa_wd_rb: Optional[StrictInt] = None,
+        bwa_disc_c: Optional[StrictStr] = None,
         bwa_disc_d: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
             None,
@@ -543,10 +543,10 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type limit: int
         :param offset: OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.
         :type offset: int
-        :param stcode:
-        :type stcode: str
         :param bwa_bay_no:
         :type bwa_bay_no: str
+        :param stcode:
+        :type stcode: str
         :param bwa_long:
         :type bwa_long: float
         :param dtcode:
@@ -567,10 +567,10 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type var_class: str
         :param bwa_cn_gat:
         :type bwa_cn_gat: int
-        :param bwa_head_r:
-        :type bwa_head_r: int
         :param bwa_spil_n:
         :type bwa_spil_n: int
+        :param bwa_head_r:
+        :type bwa_head_r: int
         :param bwa_head_1:
         :type bwa_head_1: int
         :param bwa_crt_ve:
@@ -579,32 +579,32 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         :type bwa_spil_l: float
         :param bwa_perlia:
         :type bwa_perlia: str
-        :param rivcode:
-        :type rivcode: str
         :param bacode:
         :type bacode: str
+        :param rivcode:
+        :type rivcode: str
         :param bwa_spil_t:
         :type bwa_spil_t: str
         :param strucode:
         :type strucode: str
         :param bwa_size_h:
         :type bwa_size_h: float
-        :param bwa_len:
-        :type bwa_len: float
         :param bwa_ph_gat:
         :type bwa_ph_gat: int
         :param bwa_ncity:
         :type bwa_ncity: str
+        :param bwa_len:
+        :type bwa_len: float
         :param bwa_cmp_yr:
         :type bwa_cmp_yr: str
         :param bwa_ses_zo:
         :type bwa_ses_zo: str
         :param bwa_lat:
         :type bwa_lat: float
-        :param bwa_disc_c:
-        :type bwa_disc_c: str
         :param bwa_wd_rb:
         :type bwa_wd_rb: int
+        :param bwa_disc_c:
+        :type bwa_disc_c: str
         :param bwa_disc_d:
         :type bwa_disc_d: float
         :param _request_timeout: timeout setting for this request. If one
@@ -636,8 +636,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             datetime=datetime,
             limit=limit,
             offset=offset,
-            stcode=stcode,
             bwa_bay_no=bwa_bay_no,
+            stcode=stcode,
             bwa_long=bwa_long,
             dtcode=dtcode,
             bwa_pond_l=bwa_pond_l,
@@ -648,25 +648,25 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             bwa_status=bwa_status,
             var_class=var_class,
             bwa_cn_gat=bwa_cn_gat,
-            bwa_head_r=bwa_head_r,
             bwa_spil_n=bwa_spil_n,
+            bwa_head_r=bwa_head_r,
             bwa_head_1=bwa_head_1,
             bwa_crt_ve=bwa_crt_ve,
             bwa_spil_l=bwa_spil_l,
             bwa_perlia=bwa_perlia,
-            rivcode=rivcode,
             bacode=bacode,
+            rivcode=rivcode,
             bwa_spil_t=bwa_spil_t,
             strucode=strucode,
             bwa_size_h=bwa_size_h,
-            bwa_len=bwa_len,
             bwa_ph_gat=bwa_ph_gat,
             bwa_ncity=bwa_ncity,
+            bwa_len=bwa_len,
             bwa_cmp_yr=bwa_cmp_yr,
             bwa_ses_zo=bwa_ses_zo,
             bwa_lat=bwa_lat,
-            bwa_disc_c=bwa_disc_c,
             bwa_wd_rb=bwa_wd_rb,
+            bwa_disc_c=bwa_disc_c,
             bwa_disc_d=bwa_disc_d,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -694,8 +694,8 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         datetime,
         limit,
         offset,
-        stcode,
         bwa_bay_no,
+        stcode,
         bwa_long,
         dtcode,
         bwa_pond_l,
@@ -706,25 +706,25 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         bwa_status,
         var_class,
         bwa_cn_gat,
-        bwa_head_r,
         bwa_spil_n,
+        bwa_head_r,
         bwa_head_1,
         bwa_crt_ve,
         bwa_spil_l,
         bwa_perlia,
-        rivcode,
         bacode,
+        rivcode,
         bwa_spil_t,
         strucode,
         bwa_size_h,
-        bwa_len,
         bwa_ph_gat,
         bwa_ncity,
+        bwa_len,
         bwa_cmp_yr,
         bwa_ses_zo,
         bwa_lat,
-        bwa_disc_c,
         bwa_wd_rb,
+        bwa_disc_c,
         bwa_disc_d,
         _request_auth,
         _content_type,
@@ -771,13 +771,13 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             
             _query_params.append(('offset', offset))
             
-        if stcode is not None:
-            
-            _query_params.append(('stcode', stcode))
-            
         if bwa_bay_no is not None:
             
             _query_params.append(('bwa_bay_no', bwa_bay_no))
+            
+        if stcode is not None:
+            
+            _query_params.append(('stcode', stcode))
             
         if bwa_long is not None:
             
@@ -819,13 +819,13 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             
             _query_params.append(('bwa_cn_gat', bwa_cn_gat))
             
-        if bwa_head_r is not None:
-            
-            _query_params.append(('bwa_head_r', bwa_head_r))
-            
         if bwa_spil_n is not None:
             
             _query_params.append(('bwa_spil_n', bwa_spil_n))
+            
+        if bwa_head_r is not None:
+            
+            _query_params.append(('bwa_head_r', bwa_head_r))
             
         if bwa_head_1 is not None:
             
@@ -843,13 +843,13 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             
             _query_params.append(('bwa_perlia', bwa_perlia))
             
-        if rivcode is not None:
-            
-            _query_params.append(('rivcode', rivcode))
-            
         if bacode is not None:
             
             _query_params.append(('bacode', bacode))
+            
+        if rivcode is not None:
+            
+            _query_params.append(('rivcode', rivcode))
             
         if bwa_spil_t is not None:
             
@@ -863,10 +863,6 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             
             _query_params.append(('bwa_size_h', bwa_size_h))
             
-        if bwa_len is not None:
-            
-            _query_params.append(('bwa_len', bwa_len))
-            
         if bwa_ph_gat is not None:
             
             _query_params.append(('bwa_ph_gat', bwa_ph_gat))
@@ -874,6 +870,10 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
         if bwa_ncity is not None:
             
             _query_params.append(('bwa_ncity', bwa_ncity))
+            
+        if bwa_len is not None:
+            
+            _query_params.append(('bwa_len', bwa_len))
             
         if bwa_cmp_yr is not None:
             
@@ -887,13 +887,13 @@ class BarragesWeirsAnicutsVizianagaramAPApi:
             
             _query_params.append(('bwa_lat', bwa_lat))
             
-        if bwa_disc_c is not None:
-            
-            _query_params.append(('bwa_disc_c', bwa_disc_c))
-            
         if bwa_wd_rb is not None:
             
             _query_params.append(('bwa_wd_rb', bwa_wd_rb))
+            
+        if bwa_disc_c is not None:
+            
+            _query_params.append(('bwa_disc_c', bwa_disc_c))
             
         if bwa_disc_d is not None:
             

@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_features**
-> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, toposheet_=toposheet_, group_name=group_name, formation=formation, supergroup=supergroup, lithologic=lithologic, stratigrap=stratigrap, sub_group=sub_group, intrusive=intrusive, age=age, member=member)
+> FeatureCollectionGeoJSON get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, group_name=group_name, toposheet_=toposheet_, formation=formation, supergroup=supergroup, lithologic=lithologic, stratigrap=stratigrap, sub_group=sub_group, intrusive=intrusive, member=member, age=age)
 
 Get features from Polygon features representing lithological data for a part of Sonipat district, Haryana
 
@@ -50,20 +50,20 @@ with openapi_client.ApiClient(configuration) as api_client:
     datetime = 'datetime_example' # str | Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \"2018-02-12T23:20:50Z\" * A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" * Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"  Only features that have a temporal property that intersects the value of `datetime` are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties. (optional)
     limit = 10 # int |  (optional) (default to 10)
     offset = 1 # int | OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10. (optional) (default to 1)
-    toposheet_ = 'toposheet__example' # str |  (optional)
     group_name = 'group_name_example' # str |  (optional)
+    toposheet_ = 'toposheet__example' # str |  (optional)
     formation = 'formation_example' # str |  (optional)
     supergroup = 'supergroup_example' # str |  (optional)
     lithologic = 'lithologic_example' # str |  (optional)
     stratigrap = 'stratigrap_example' # str |  (optional)
     sub_group = 'sub_group_example' # str |  (optional)
     intrusive = 'intrusive_example' # str |  (optional)
-    age = 'age_example' # str |  (optional)
     member = 'member_example' # str |  (optional)
+    age = 'age_example' # str |  (optional)
 
     try:
         # Get features from Polygon features representing lithological data for a part of Sonipat district, Haryana
-        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, toposheet_=toposheet_, group_name=group_name, formation=formation, supergroup=supergroup, lithologic=lithologic, stratigrap=stratigrap, sub_group=sub_group, intrusive=intrusive, age=age, member=member)
+        api_response = api_instance.get_features(bbox_crs=bbox_crs, crs=crs, bbox=bbox, datetime=datetime, limit=limit, offset=offset, group_name=group_name, toposheet_=toposheet_, formation=formation, supergroup=supergroup, lithologic=lithologic, stratigrap=stratigrap, sub_group=sub_group, intrusive=intrusive, member=member, age=age)
         print("The response of LithologicalDataForAPartOfSonipatDistrictApi->get_features:\n")
         pprint(api_response)
     except Exception as e:
@@ -83,16 +83,16 @@ Name | Type | Description  | Notes
  **datetime** | **str**| Either a date-time or an interval. Date and time expressions adhere to RFC 3339. Intervals may be bounded or half-bounded (double-dots at start or end).  Examples:  * A date-time: \&quot;2018-02-12T23:20:50Z\&quot; * A bounded interval: \&quot;2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\&quot; * Half-bounded intervals: \&quot;2018-02-12T00:00:00Z/..\&quot; or \&quot;../2018-03-18T12:31:12Z\&quot;  Only features that have a temporal property that intersects the value of &#x60;datetime&#x60; are selected.  If a feature has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties. | [optional] 
  **limit** | **int**|  | [optional] [default to 10]
  **offset** | **int**| OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum &#x3D; 0. Maximum &#x3D; 1000. Default &#x3D; 10. | [optional] [default to 1]
- **toposheet_** | **str**|  | [optional] 
  **group_name** | **str**|  | [optional] 
+ **toposheet_** | **str**|  | [optional] 
  **formation** | **str**|  | [optional] 
  **supergroup** | **str**|  | [optional] 
  **lithologic** | **str**|  | [optional] 
  **stratigrap** | **str**|  | [optional] 
  **sub_group** | **str**|  | [optional] 
  **intrusive** | **str**|  | [optional] 
- **age** | **str**|  | [optional] 
  **member** | **str**|  | [optional] 
+ **age** | **str**|  | [optional] 
 
 ### Return type
 

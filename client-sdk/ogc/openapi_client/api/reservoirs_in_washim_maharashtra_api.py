@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -54,8 +54,8 @@ class ReservoirsInWashimMaharashtraApi:
         stcode: Optional[StrictStr] = None,
         wbrscode: Optional[StrictStr] = None,
         dtcode: Optional[StrictStr] = None,
-        basin: Optional[StrictStr] = None,
         wbclass: Optional[StrictStr] = None,
+        basin: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
         bacode: Optional[StrictStr] = None,
         strucode: Optional[StrictStr] = None,
@@ -98,10 +98,10 @@ class ReservoirsInWashimMaharashtraApi:
         :type wbrscode: str
         :param dtcode:
         :type dtcode: str
-        :param basin:
-        :type basin: str
         :param wbclass:
         :type wbclass: str
+        :param basin:
+        :type basin: str
         :param sbcode:
         :type sbcode: str
         :param bacode:
@@ -150,8 +150,8 @@ class ReservoirsInWashimMaharashtraApi:
             stcode=stcode,
             wbrscode=wbrscode,
             dtcode=dtcode,
-            basin=basin,
             wbclass=wbclass,
+            basin=basin,
             sbcode=sbcode,
             bacode=bacode,
             strucode=strucode,
@@ -194,8 +194,8 @@ class ReservoirsInWashimMaharashtraApi:
         stcode: Optional[StrictStr] = None,
         wbrscode: Optional[StrictStr] = None,
         dtcode: Optional[StrictStr] = None,
-        basin: Optional[StrictStr] = None,
         wbclass: Optional[StrictStr] = None,
+        basin: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
         bacode: Optional[StrictStr] = None,
         strucode: Optional[StrictStr] = None,
@@ -238,10 +238,10 @@ class ReservoirsInWashimMaharashtraApi:
         :type wbrscode: str
         :param dtcode:
         :type dtcode: str
-        :param basin:
-        :type basin: str
         :param wbclass:
         :type wbclass: str
+        :param basin:
+        :type basin: str
         :param sbcode:
         :type sbcode: str
         :param bacode:
@@ -290,8 +290,8 @@ class ReservoirsInWashimMaharashtraApi:
             stcode=stcode,
             wbrscode=wbrscode,
             dtcode=dtcode,
-            basin=basin,
             wbclass=wbclass,
+            basin=basin,
             sbcode=sbcode,
             bacode=bacode,
             strucode=strucode,
@@ -334,8 +334,8 @@ class ReservoirsInWashimMaharashtraApi:
         stcode: Optional[StrictStr] = None,
         wbrscode: Optional[StrictStr] = None,
         dtcode: Optional[StrictStr] = None,
-        basin: Optional[StrictStr] = None,
         wbclass: Optional[StrictStr] = None,
+        basin: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
         bacode: Optional[StrictStr] = None,
         strucode: Optional[StrictStr] = None,
@@ -378,10 +378,10 @@ class ReservoirsInWashimMaharashtraApi:
         :type wbrscode: str
         :param dtcode:
         :type dtcode: str
-        :param basin:
-        :type basin: str
         :param wbclass:
         :type wbclass: str
+        :param basin:
+        :type basin: str
         :param sbcode:
         :type sbcode: str
         :param bacode:
@@ -430,8 +430,8 @@ class ReservoirsInWashimMaharashtraApi:
             stcode=stcode,
             wbrscode=wbrscode,
             dtcode=dtcode,
-            basin=basin,
             wbclass=wbclass,
+            basin=basin,
             sbcode=sbcode,
             bacode=bacode,
             strucode=strucode,
@@ -469,8 +469,8 @@ class ReservoirsInWashimMaharashtraApi:
         stcode,
         wbrscode,
         dtcode,
-        basin,
         wbclass,
+        basin,
         sbcode,
         bacode,
         strucode,
@@ -536,13 +536,13 @@ class ReservoirsInWashimMaharashtraApi:
             
             _query_params.append(('dtcode', dtcode))
             
-        if basin is not None:
-            
-            _query_params.append(('basin', basin))
-            
         if wbclass is not None:
             
             _query_params.append(('wbclass', wbclass))
+            
+        if basin is not None:
+            
+            _query_params.append(('basin', basin))
             
         if sbcode is not None:
             

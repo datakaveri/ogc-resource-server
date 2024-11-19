@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -57,13 +57,13 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
         gp: Optional[StrictStr] = None,
         rhmin: Optional[Union[StrictFloat, StrictInt]] = None,
         rhavg: Optional[Union[StrictFloat, StrictInt]] = None,
-        maxwind: Optional[Union[StrictFloat, StrictInt]] = None,
         observation_date_time: Optional[StrictStr] = None,
+        maxwind: Optional[Union[StrictFloat, StrictInt]] = None,
         daylength: Optional[Union[StrictFloat, StrictInt]] = None,
         tdew: Optional[Union[StrictFloat, StrictInt]] = None,
         subdistrict: Optional[StrictStr] = None,
-        district: Optional[StrictStr] = None,
         srad: Optional[Union[StrictFloat, StrictInt]] = None,
+        district: Optional[StrictStr] = None,
         rhmax: Optional[Union[StrictFloat, StrictInt]] = None,
         prcp: Optional[Union[StrictFloat, StrictInt]] = None,
         village: Optional[StrictStr] = None,
@@ -107,20 +107,20 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
         :type rhmin: float
         :param rhavg:
         :type rhavg: float
-        :param maxwind:
-        :type maxwind: float
         :param observation_date_time:
         :type observation_date_time: str
+        :param maxwind:
+        :type maxwind: float
         :param daylength:
         :type daylength: float
         :param tdew:
         :type tdew: float
         :param subdistrict:
         :type subdistrict: str
-        :param district:
-        :type district: str
         :param srad:
         :type srad: float
+        :param district:
+        :type district: str
         :param rhmax:
         :type rhmax: float
         :param prcp:
@@ -162,13 +162,13 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
             gp=gp,
             rhmin=rhmin,
             rhavg=rhavg,
-            maxwind=maxwind,
             observation_date_time=observation_date_time,
+            maxwind=maxwind,
             daylength=daylength,
             tdew=tdew,
             subdistrict=subdistrict,
-            district=district,
             srad=srad,
+            district=district,
             rhmax=rhmax,
             prcp=prcp,
             village=village,
@@ -209,13 +209,13 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
         gp: Optional[StrictStr] = None,
         rhmin: Optional[Union[StrictFloat, StrictInt]] = None,
         rhavg: Optional[Union[StrictFloat, StrictInt]] = None,
-        maxwind: Optional[Union[StrictFloat, StrictInt]] = None,
         observation_date_time: Optional[StrictStr] = None,
+        maxwind: Optional[Union[StrictFloat, StrictInt]] = None,
         daylength: Optional[Union[StrictFloat, StrictInt]] = None,
         tdew: Optional[Union[StrictFloat, StrictInt]] = None,
         subdistrict: Optional[StrictStr] = None,
-        district: Optional[StrictStr] = None,
         srad: Optional[Union[StrictFloat, StrictInt]] = None,
+        district: Optional[StrictStr] = None,
         rhmax: Optional[Union[StrictFloat, StrictInt]] = None,
         prcp: Optional[Union[StrictFloat, StrictInt]] = None,
         village: Optional[StrictStr] = None,
@@ -259,20 +259,20 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
         :type rhmin: float
         :param rhavg:
         :type rhavg: float
-        :param maxwind:
-        :type maxwind: float
         :param observation_date_time:
         :type observation_date_time: str
+        :param maxwind:
+        :type maxwind: float
         :param daylength:
         :type daylength: float
         :param tdew:
         :type tdew: float
         :param subdistrict:
         :type subdistrict: str
-        :param district:
-        :type district: str
         :param srad:
         :type srad: float
+        :param district:
+        :type district: str
         :param rhmax:
         :type rhmax: float
         :param prcp:
@@ -314,13 +314,13 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
             gp=gp,
             rhmin=rhmin,
             rhavg=rhavg,
-            maxwind=maxwind,
             observation_date_time=observation_date_time,
+            maxwind=maxwind,
             daylength=daylength,
             tdew=tdew,
             subdistrict=subdistrict,
-            district=district,
             srad=srad,
+            district=district,
             rhmax=rhmax,
             prcp=prcp,
             village=village,
@@ -361,13 +361,13 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
         gp: Optional[StrictStr] = None,
         rhmin: Optional[Union[StrictFloat, StrictInt]] = None,
         rhavg: Optional[Union[StrictFloat, StrictInt]] = None,
-        maxwind: Optional[Union[StrictFloat, StrictInt]] = None,
         observation_date_time: Optional[StrictStr] = None,
+        maxwind: Optional[Union[StrictFloat, StrictInt]] = None,
         daylength: Optional[Union[StrictFloat, StrictInt]] = None,
         tdew: Optional[Union[StrictFloat, StrictInt]] = None,
         subdistrict: Optional[StrictStr] = None,
-        district: Optional[StrictStr] = None,
         srad: Optional[Union[StrictFloat, StrictInt]] = None,
+        district: Optional[StrictStr] = None,
         rhmax: Optional[Union[StrictFloat, StrictInt]] = None,
         prcp: Optional[Union[StrictFloat, StrictInt]] = None,
         village: Optional[StrictStr] = None,
@@ -411,20 +411,20 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
         :type rhmin: float
         :param rhavg:
         :type rhavg: float
-        :param maxwind:
-        :type maxwind: float
         :param observation_date_time:
         :type observation_date_time: str
+        :param maxwind:
+        :type maxwind: float
         :param daylength:
         :type daylength: float
         :param tdew:
         :type tdew: float
         :param subdistrict:
         :type subdistrict: str
-        :param district:
-        :type district: str
         :param srad:
         :type srad: float
+        :param district:
+        :type district: str
         :param rhmax:
         :type rhmax: float
         :param prcp:
@@ -466,13 +466,13 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
             gp=gp,
             rhmin=rhmin,
             rhavg=rhavg,
-            maxwind=maxwind,
             observation_date_time=observation_date_time,
+            maxwind=maxwind,
             daylength=daylength,
             tdew=tdew,
             subdistrict=subdistrict,
-            district=district,
             srad=srad,
+            district=district,
             rhmax=rhmax,
             prcp=prcp,
             village=village,
@@ -508,13 +508,13 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
         gp,
         rhmin,
         rhavg,
-        maxwind,
         observation_date_time,
+        maxwind,
         daylength,
         tdew,
         subdistrict,
-        district,
         srad,
+        district,
         rhmax,
         prcp,
         village,
@@ -587,13 +587,13 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
             
             _query_params.append(('rhavg', rhavg))
             
-        if maxwind is not None:
-            
-            _query_params.append(('maxwind', maxwind))
-            
         if observation_date_time is not None:
             
             _query_params.append(('observationDateTime', observation_date_time))
+            
+        if maxwind is not None:
+            
+            _query_params.append(('maxwind', maxwind))
             
         if daylength is not None:
             
@@ -607,13 +607,13 @@ class NiruthisGranularWeatherInsightsForTelanganaApi:
             
             _query_params.append(('subdistrict', subdistrict))
             
-        if district is not None:
-            
-            _query_params.append(('district', district))
-            
         if srad is not None:
             
             _query_params.append(('srad', srad))
+            
+        if district is not None:
+            
+            _query_params.append(('district', district))
             
         if rhmax is not None:
             

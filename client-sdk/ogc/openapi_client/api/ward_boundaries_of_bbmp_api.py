@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -57,8 +57,8 @@ class WardBoundariesOfBBMPApi:
         pop_total: Optional[Union[StrictFloat, StrictInt]] = None,
         ass_const1: Optional[StrictStr] = None,
         ward_no: Optional[Union[StrictFloat, StrictInt]] = None,
-        lon: Optional[Union[StrictFloat, StrictInt]] = None,
         area_sq_km: Optional[Union[StrictFloat, StrictInt]] = None,
+        lon: Optional[Union[StrictFloat, StrictInt]] = None,
         ward_name: Optional[StrictStr] = None,
         pop_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         pop_st: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -103,10 +103,10 @@ class WardBoundariesOfBBMPApi:
         :type ass_const1: str
         :param ward_no:
         :type ward_no: float
-        :param lon:
-        :type lon: float
         :param area_sq_km:
         :type area_sq_km: float
+        :param lon:
+        :type lon: float
         :param ward_name:
         :type ward_name: str
         :param pop_sc:
@@ -150,8 +150,8 @@ class WardBoundariesOfBBMPApi:
             pop_total=pop_total,
             ass_const1=ass_const1,
             ward_no=ward_no,
-            lon=lon,
             area_sq_km=area_sq_km,
+            lon=lon,
             ward_name=ward_name,
             pop_sc=pop_sc,
             pop_st=pop_st,
@@ -193,8 +193,8 @@ class WardBoundariesOfBBMPApi:
         pop_total: Optional[Union[StrictFloat, StrictInt]] = None,
         ass_const1: Optional[StrictStr] = None,
         ward_no: Optional[Union[StrictFloat, StrictInt]] = None,
-        lon: Optional[Union[StrictFloat, StrictInt]] = None,
         area_sq_km: Optional[Union[StrictFloat, StrictInt]] = None,
+        lon: Optional[Union[StrictFloat, StrictInt]] = None,
         ward_name: Optional[StrictStr] = None,
         pop_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         pop_st: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -239,10 +239,10 @@ class WardBoundariesOfBBMPApi:
         :type ass_const1: str
         :param ward_no:
         :type ward_no: float
-        :param lon:
-        :type lon: float
         :param area_sq_km:
         :type area_sq_km: float
+        :param lon:
+        :type lon: float
         :param ward_name:
         :type ward_name: str
         :param pop_sc:
@@ -286,8 +286,8 @@ class WardBoundariesOfBBMPApi:
             pop_total=pop_total,
             ass_const1=ass_const1,
             ward_no=ward_no,
-            lon=lon,
             area_sq_km=area_sq_km,
+            lon=lon,
             ward_name=ward_name,
             pop_sc=pop_sc,
             pop_st=pop_st,
@@ -329,8 +329,8 @@ class WardBoundariesOfBBMPApi:
         pop_total: Optional[Union[StrictFloat, StrictInt]] = None,
         ass_const1: Optional[StrictStr] = None,
         ward_no: Optional[Union[StrictFloat, StrictInt]] = None,
-        lon: Optional[Union[StrictFloat, StrictInt]] = None,
         area_sq_km: Optional[Union[StrictFloat, StrictInt]] = None,
+        lon: Optional[Union[StrictFloat, StrictInt]] = None,
         ward_name: Optional[StrictStr] = None,
         pop_sc: Optional[Union[StrictFloat, StrictInt]] = None,
         pop_st: Optional[Union[StrictFloat, StrictInt]] = None,
@@ -375,10 +375,10 @@ class WardBoundariesOfBBMPApi:
         :type ass_const1: str
         :param ward_no:
         :type ward_no: float
-        :param lon:
-        :type lon: float
         :param area_sq_km:
         :type area_sq_km: float
+        :param lon:
+        :type lon: float
         :param ward_name:
         :type ward_name: str
         :param pop_sc:
@@ -422,8 +422,8 @@ class WardBoundariesOfBBMPApi:
             pop_total=pop_total,
             ass_const1=ass_const1,
             ward_no=ward_no,
-            lon=lon,
             area_sq_km=area_sq_km,
+            lon=lon,
             ward_name=ward_name,
             pop_sc=pop_sc,
             pop_st=pop_st,
@@ -460,8 +460,8 @@ class WardBoundariesOfBBMPApi:
         pop_total,
         ass_const1,
         ward_no,
-        lon,
         area_sq_km,
+        lon,
         ward_name,
         pop_sc,
         pop_st,
@@ -535,13 +535,13 @@ class WardBoundariesOfBBMPApi:
             
             _query_params.append(('WARD_NO', ward_no))
             
-        if lon is not None:
-            
-            _query_params.append(('LON', lon))
-            
         if area_sq_km is not None:
             
             _query_params.append(('AREA_SQ_KM', area_sq_km))
+            
+        if lon is not None:
+            
+            _query_params.append(('LON', lon))
             
         if ward_name is not None:
             

@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -22,7 +22,7 @@ from pydantic import StrictStr, Field
 from typing import Union, List, Set, Optional, Dict
 from typing_extensions import Literal, Self
 
-INPUTVALUENOOBJECT_ONE_OF_SCHEMAS = ["List[str]", "bool", "float", "int", "str"]
+INPUTVALUENOOBJECT_ONE_OF_SCHEMAS = ["List[InputValueNoObjectOneOfInner]", "bool", "float", "str"]
 
 class InputValueNoObject(BaseModel):
     """
@@ -32,14 +32,12 @@ class InputValueNoObject(BaseModel):
     oneof_schema_1_validator: Optional[StrictStr] = None
     # data type: float
     oneof_schema_2_validator: Optional[Union[StrictFloat, StrictInt]] = None
-    # data type: int
-    oneof_schema_3_validator: Optional[StrictInt] = None
     # data type: bool
-    oneof_schema_4_validator: Optional[StrictBool] = None
-    # data type: List[str]
-    oneof_schema_5_validator: Optional[List[StrictStr]] = None
-    actual_instance: Optional[Union[List[str], bool, float, int, str]] = None
-    one_of_schemas: Set[str] = { "List[str]", "bool", "float", "int", "str" }
+    oneof_schema_3_validator: Optional[StrictBool] = None
+    # data type: List[InputValueNoObjectOneOfInner]
+    oneof_schema_4_validator: Optional[List[InputValueNoObjectOneOfInner]] = None
+    actual_instance: Optional[Union[List[InputValueNoObjectOneOfInner], bool, float, str]] = None
+    one_of_schemas: Set[str] = { "List[InputValueNoObjectOneOfInner]", "bool", "float", "str" }
 
     model_config = ConfigDict(
         validate_assignment=True,
@@ -74,30 +72,24 @@ class InputValueNoObject(BaseModel):
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
-        # validate data type: int
+        # validate data type: bool
         try:
             instance.oneof_schema_3_validator = v
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
-        # validate data type: bool
+        # validate data type: List[InputValueNoObjectOneOfInner]
         try:
             instance.oneof_schema_4_validator = v
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
-        # validate data type: List[str]
-        try:
-            instance.oneof_schema_5_validator = v
-            match += 1
-        except (ValidationError, ValueError) as e:
-            error_messages.append(str(e))
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when setting `actual_instance` in InputValueNoObject with oneOf schemas: List[str], bool, float, int, str. Details: " + ", ".join(error_messages))
+            raise ValueError("Multiple matches found when setting `actual_instance` in InputValueNoObject with oneOf schemas: List[InputValueNoObjectOneOfInner], bool, float, str. Details: " + ", ".join(error_messages))
         elif match == 0:
             # no match
-            raise ValueError("No match found when setting `actual_instance` in InputValueNoObject with oneOf schemas: List[str], bool, float, int, str. Details: " + ", ".join(error_messages))
+            raise ValueError("No match found when setting `actual_instance` in InputValueNoObject with oneOf schemas: List[InputValueNoObjectOneOfInner], bool, float, str. Details: " + ", ".join(error_messages))
         else:
             return v
 
@@ -130,7 +122,7 @@ class InputValueNoObject(BaseModel):
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
-        # deserialize data into int
+        # deserialize data into bool
         try:
             # validation
             instance.oneof_schema_3_validator = json.loads(json_str)
@@ -139,7 +131,7 @@ class InputValueNoObject(BaseModel):
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
-        # deserialize data into bool
+        # deserialize data into List[InputValueNoObjectOneOfInner]
         try:
             # validation
             instance.oneof_schema_4_validator = json.loads(json_str)
@@ -148,22 +140,13 @@ class InputValueNoObject(BaseModel):
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
-        # deserialize data into List[str]
-        try:
-            # validation
-            instance.oneof_schema_5_validator = json.loads(json_str)
-            # assign value to actual_instance
-            instance.actual_instance = instance.oneof_schema_5_validator
-            match += 1
-        except (ValidationError, ValueError) as e:
-            error_messages.append(str(e))
 
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when deserializing the JSON string into InputValueNoObject with oneOf schemas: List[str], bool, float, int, str. Details: " + ", ".join(error_messages))
+            raise ValueError("Multiple matches found when deserializing the JSON string into InputValueNoObject with oneOf schemas: List[InputValueNoObjectOneOfInner], bool, float, str. Details: " + ", ".join(error_messages))
         elif match == 0:
             # no match
-            raise ValueError("No match found when deserializing the JSON string into InputValueNoObject with oneOf schemas: List[str], bool, float, int, str. Details: " + ", ".join(error_messages))
+            raise ValueError("No match found when deserializing the JSON string into InputValueNoObject with oneOf schemas: List[InputValueNoObjectOneOfInner], bool, float, str. Details: " + ", ".join(error_messages))
         else:
             return instance
 
@@ -177,7 +160,7 @@ class InputValueNoObject(BaseModel):
         else:
             return json.dumps(self.actual_instance)
 
-    def to_dict(self) -> Optional[Union[Dict[str, Any], List[str], bool, float, int, str]]:
+    def to_dict(self) -> Optional[Union[Dict[str, Any], List[InputValueNoObjectOneOfInner], bool, float, str]]:
         """Returns the dict representation of the actual instance"""
         if self.actual_instance is None:
             return None
@@ -192,4 +175,7 @@ class InputValueNoObject(BaseModel):
         """Returns the string representation of the actual instance"""
         return pprint.pformat(self.model_dump())
 
+from openapi_client.models.input_value_no_object_one_of_inner import InputValueNoObjectOneOfInner
+# TODO: Rewrite to not use raise_errors
+InputValueNoObject.model_rebuild(raise_errors=False)
 

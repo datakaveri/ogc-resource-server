@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -61,11 +61,11 @@ class SchoolLocationsKamrupAssamApi:
         vilname: Optional[StrictStr] = None,
         management: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
-        dist_lgd: Optional[StrictInt] = None,
         schcd: Optional[StrictStr] = None,
+        dist_lgd: Optional[StrictInt] = None,
         gp_code: Optional[Union[StrictFloat, StrictInt]] = None,
-        vilcode11: Optional[StrictStr] = None,
         gp_name: Optional[StrictStr] = None,
+        vilcode11: Optional[StrictStr] = None,
         stname: Optional[StrictStr] = None,
         longitude: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
@@ -116,16 +116,16 @@ class SchoolLocationsKamrupAssamApi:
         :type management: str
         :param state_lgd:
         :type state_lgd: int
-        :param dist_lgd:
-        :type dist_lgd: int
         :param schcd:
         :type schcd: str
+        :param dist_lgd:
+        :type dist_lgd: int
         :param gp_code:
         :type gp_code: float
-        :param vilcode11:
-        :type vilcode11: str
         :param gp_name:
         :type gp_name: str
+        :param vilcode11:
+        :type vilcode11: str
         :param stname:
         :type stname: str
         :param longitude:
@@ -169,11 +169,11 @@ class SchoolLocationsKamrupAssamApi:
             vilname=vilname,
             management=management,
             state_lgd=state_lgd,
-            dist_lgd=dist_lgd,
             schcd=schcd,
+            dist_lgd=dist_lgd,
             gp_code=gp_code,
-            vilcode11=vilcode11,
             gp_name=gp_name,
+            vilcode11=vilcode11,
             stname=stname,
             longitude=longitude,
             _request_auth=_request_auth,
@@ -217,11 +217,11 @@ class SchoolLocationsKamrupAssamApi:
         vilname: Optional[StrictStr] = None,
         management: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
-        dist_lgd: Optional[StrictInt] = None,
         schcd: Optional[StrictStr] = None,
+        dist_lgd: Optional[StrictInt] = None,
         gp_code: Optional[Union[StrictFloat, StrictInt]] = None,
-        vilcode11: Optional[StrictStr] = None,
         gp_name: Optional[StrictStr] = None,
+        vilcode11: Optional[StrictStr] = None,
         stname: Optional[StrictStr] = None,
         longitude: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
@@ -272,16 +272,16 @@ class SchoolLocationsKamrupAssamApi:
         :type management: str
         :param state_lgd:
         :type state_lgd: int
-        :param dist_lgd:
-        :type dist_lgd: int
         :param schcd:
         :type schcd: str
+        :param dist_lgd:
+        :type dist_lgd: int
         :param gp_code:
         :type gp_code: float
-        :param vilcode11:
-        :type vilcode11: str
         :param gp_name:
         :type gp_name: str
+        :param vilcode11:
+        :type vilcode11: str
         :param stname:
         :type stname: str
         :param longitude:
@@ -325,11 +325,11 @@ class SchoolLocationsKamrupAssamApi:
             vilname=vilname,
             management=management,
             state_lgd=state_lgd,
-            dist_lgd=dist_lgd,
             schcd=schcd,
+            dist_lgd=dist_lgd,
             gp_code=gp_code,
-            vilcode11=vilcode11,
             gp_name=gp_name,
+            vilcode11=vilcode11,
             stname=stname,
             longitude=longitude,
             _request_auth=_request_auth,
@@ -373,11 +373,11 @@ class SchoolLocationsKamrupAssamApi:
         vilname: Optional[StrictStr] = None,
         management: Optional[StrictStr] = None,
         state_lgd: Optional[StrictInt] = None,
-        dist_lgd: Optional[StrictInt] = None,
         schcd: Optional[StrictStr] = None,
+        dist_lgd: Optional[StrictInt] = None,
         gp_code: Optional[Union[StrictFloat, StrictInt]] = None,
-        vilcode11: Optional[StrictStr] = None,
         gp_name: Optional[StrictStr] = None,
+        vilcode11: Optional[StrictStr] = None,
         stname: Optional[StrictStr] = None,
         longitude: Optional[Union[StrictFloat, StrictInt]] = None,
         _request_timeout: Union[
@@ -428,16 +428,16 @@ class SchoolLocationsKamrupAssamApi:
         :type management: str
         :param state_lgd:
         :type state_lgd: int
-        :param dist_lgd:
-        :type dist_lgd: int
         :param schcd:
         :type schcd: str
+        :param dist_lgd:
+        :type dist_lgd: int
         :param gp_code:
         :type gp_code: float
-        :param vilcode11:
-        :type vilcode11: str
         :param gp_name:
         :type gp_name: str
+        :param vilcode11:
+        :type vilcode11: str
         :param stname:
         :type stname: str
         :param longitude:
@@ -481,11 +481,11 @@ class SchoolLocationsKamrupAssamApi:
             vilname=vilname,
             management=management,
             state_lgd=state_lgd,
-            dist_lgd=dist_lgd,
             schcd=schcd,
+            dist_lgd=dist_lgd,
             gp_code=gp_code,
-            vilcode11=vilcode11,
             gp_name=gp_name,
+            vilcode11=vilcode11,
             stname=stname,
             longitude=longitude,
             _request_auth=_request_auth,
@@ -524,11 +524,11 @@ class SchoolLocationsKamrupAssamApi:
         vilname,
         management,
         state_lgd,
-        dist_lgd,
         schcd,
+        dist_lgd,
         gp_code,
-        vilcode11,
         gp_name,
+        vilcode11,
         stname,
         longitude,
         _request_auth,
@@ -616,25 +616,25 @@ class SchoolLocationsKamrupAssamApi:
             
             _query_params.append(('State_LGD', state_lgd))
             
-        if dist_lgd is not None:
-            
-            _query_params.append(('Dist_LGD', dist_lgd))
-            
         if schcd is not None:
             
             _query_params.append(('schcd', schcd))
+            
+        if dist_lgd is not None:
+            
+            _query_params.append(('Dist_LGD', dist_lgd))
             
         if gp_code is not None:
             
             _query_params.append(('GP_CODE', gp_code))
             
-        if vilcode11 is not None:
-            
-            _query_params.append(('VILCODE11', vilcode11))
-            
         if gp_name is not None:
             
             _query_params.append(('GP_NAME', gp_name))
+            
+        if vilcode11 is not None:
+            
+            _query_params.append(('VILCODE11', vilcode11))
             
         if stname is not None:
             

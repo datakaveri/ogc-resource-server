@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -52,18 +52,18 @@ class DamLocationsInWashimMaharashtraApi:
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         stcode: Optional[StrictStr] = None,
-        spillway_l: Optional[StrictStr] = None,
         operating_: Optional[StrictStr] = None,
+        spillway_l: Optional[StrictStr] = None,
         river_name: Optional[StrictStr] = None,
         spillway_1: Optional[StrictStr] = None,
         spillway_3: Optional[StrictInt] = None,
-        res_area_s: Optional[Union[StrictFloat, StrictInt]] = None,
         dam_perlia: Optional[StrictStr] = None,
+        res_area_s: Optional[Union[StrictFloat, StrictInt]] = None,
         spillway_2: Optional[StrictStr] = None,
         canal_gate: Optional[StrictInt] = None,
         dtcode: Optional[StrictStr] = None,
-        dam_length: Optional[StrictStr] = None,
         spillway_4: Optional[Union[StrictFloat, StrictInt]] = None,
+        dam_length: Optional[StrictStr] = None,
         spillway_t: Optional[StrictStr] = None,
         max_height: Optional[StrictStr] = None,
         type: Optional[StrictStr] = None,
@@ -81,15 +81,15 @@ class DamLocationsInWashimMaharashtraApi:
         bacode: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
         nearest_ci: Optional[StrictStr] = None,
+        struct_typ: Optional[StrictStr] = None,
         grs_stor_c: Optional[Union[StrictFloat, StrictInt]] = None,
         dm_long: Optional[Union[StrictFloat, StrictInt]] = None,
-        struct_typ: Optional[StrictStr] = None,
         dam_volume: Optional[Union[StrictFloat, StrictInt]] = None,
         strucode: Optional[StrictStr] = None,
         nrld_no: Optional[StrictStr] = None,
         district: Optional[StrictStr] = None,
-        dm_lat: Optional[Union[StrictFloat, StrictInt]] = None,
         name: Optional[StrictStr] = None,
+        dm_lat: Optional[Union[StrictFloat, StrictInt]] = None,
         eff_stor_c: Optional[Union[StrictFloat, StrictInt]] = None,
         name_nrld_: Optional[StrictStr] = None,
         powerhouse: Optional[StrictInt] = None,
@@ -124,30 +124,30 @@ class DamLocationsInWashimMaharashtraApi:
         :type offset: int
         :param stcode:
         :type stcode: str
-        :param spillway_l:
-        :type spillway_l: str
         :param operating_:
         :type operating_: str
+        :param spillway_l:
+        :type spillway_l: str
         :param river_name:
         :type river_name: str
         :param spillway_1:
         :type spillway_1: str
         :param spillway_3:
         :type spillway_3: int
-        :param res_area_s:
-        :type res_area_s: float
         :param dam_perlia:
         :type dam_perlia: str
+        :param res_area_s:
+        :type res_area_s: float
         :param spillway_2:
         :type spillway_2: str
         :param canal_gate:
         :type canal_gate: int
         :param dtcode:
         :type dtcode: str
-        :param dam_length:
-        :type dam_length: str
         :param spillway_4:
         :type spillway_4: float
+        :param dam_length:
+        :type dam_length: str
         :param spillway_t:
         :type spillway_t: str
         :param max_height:
@@ -182,12 +182,12 @@ class DamLocationsInWashimMaharashtraApi:
         :type sbcode: str
         :param nearest_ci:
         :type nearest_ci: str
+        :param struct_typ:
+        :type struct_typ: str
         :param grs_stor_c:
         :type grs_stor_c: float
         :param dm_long:
         :type dm_long: float
-        :param struct_typ:
-        :type struct_typ: str
         :param dam_volume:
         :type dam_volume: float
         :param strucode:
@@ -196,10 +196,10 @@ class DamLocationsInWashimMaharashtraApi:
         :type nrld_no: str
         :param district:
         :type district: str
-        :param dm_lat:
-        :type dm_lat: float
         :param name:
         :type name: str
+        :param dm_lat:
+        :type dm_lat: float
         :param eff_stor_c:
         :type eff_stor_c: float
         :param name_nrld_:
@@ -238,18 +238,18 @@ class DamLocationsInWashimMaharashtraApi:
             limit=limit,
             offset=offset,
             stcode=stcode,
-            spillway_l=spillway_l,
             operating_=operating_,
+            spillway_l=spillway_l,
             river_name=river_name,
             spillway_1=spillway_1,
             spillway_3=spillway_3,
-            res_area_s=res_area_s,
             dam_perlia=dam_perlia,
+            res_area_s=res_area_s,
             spillway_2=spillway_2,
             canal_gate=canal_gate,
             dtcode=dtcode,
-            dam_length=dam_length,
             spillway_4=spillway_4,
+            dam_length=dam_length,
             spillway_t=spillway_t,
             max_height=max_height,
             type=type,
@@ -267,15 +267,15 @@ class DamLocationsInWashimMaharashtraApi:
             bacode=bacode,
             sbcode=sbcode,
             nearest_ci=nearest_ci,
+            struct_typ=struct_typ,
             grs_stor_c=grs_stor_c,
             dm_long=dm_long,
-            struct_typ=struct_typ,
             dam_volume=dam_volume,
             strucode=strucode,
             nrld_no=nrld_no,
             district=district,
-            dm_lat=dm_lat,
             name=name,
+            dm_lat=dm_lat,
             eff_stor_c=eff_stor_c,
             name_nrld_=name_nrld_,
             powerhouse=powerhouse,
@@ -312,18 +312,18 @@ class DamLocationsInWashimMaharashtraApi:
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         stcode: Optional[StrictStr] = None,
-        spillway_l: Optional[StrictStr] = None,
         operating_: Optional[StrictStr] = None,
+        spillway_l: Optional[StrictStr] = None,
         river_name: Optional[StrictStr] = None,
         spillway_1: Optional[StrictStr] = None,
         spillway_3: Optional[StrictInt] = None,
-        res_area_s: Optional[Union[StrictFloat, StrictInt]] = None,
         dam_perlia: Optional[StrictStr] = None,
+        res_area_s: Optional[Union[StrictFloat, StrictInt]] = None,
         spillway_2: Optional[StrictStr] = None,
         canal_gate: Optional[StrictInt] = None,
         dtcode: Optional[StrictStr] = None,
-        dam_length: Optional[StrictStr] = None,
         spillway_4: Optional[Union[StrictFloat, StrictInt]] = None,
+        dam_length: Optional[StrictStr] = None,
         spillway_t: Optional[StrictStr] = None,
         max_height: Optional[StrictStr] = None,
         type: Optional[StrictStr] = None,
@@ -341,15 +341,15 @@ class DamLocationsInWashimMaharashtraApi:
         bacode: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
         nearest_ci: Optional[StrictStr] = None,
+        struct_typ: Optional[StrictStr] = None,
         grs_stor_c: Optional[Union[StrictFloat, StrictInt]] = None,
         dm_long: Optional[Union[StrictFloat, StrictInt]] = None,
-        struct_typ: Optional[StrictStr] = None,
         dam_volume: Optional[Union[StrictFloat, StrictInt]] = None,
         strucode: Optional[StrictStr] = None,
         nrld_no: Optional[StrictStr] = None,
         district: Optional[StrictStr] = None,
-        dm_lat: Optional[Union[StrictFloat, StrictInt]] = None,
         name: Optional[StrictStr] = None,
+        dm_lat: Optional[Union[StrictFloat, StrictInt]] = None,
         eff_stor_c: Optional[Union[StrictFloat, StrictInt]] = None,
         name_nrld_: Optional[StrictStr] = None,
         powerhouse: Optional[StrictInt] = None,
@@ -384,30 +384,30 @@ class DamLocationsInWashimMaharashtraApi:
         :type offset: int
         :param stcode:
         :type stcode: str
-        :param spillway_l:
-        :type spillway_l: str
         :param operating_:
         :type operating_: str
+        :param spillway_l:
+        :type spillway_l: str
         :param river_name:
         :type river_name: str
         :param spillway_1:
         :type spillway_1: str
         :param spillway_3:
         :type spillway_3: int
-        :param res_area_s:
-        :type res_area_s: float
         :param dam_perlia:
         :type dam_perlia: str
+        :param res_area_s:
+        :type res_area_s: float
         :param spillway_2:
         :type spillway_2: str
         :param canal_gate:
         :type canal_gate: int
         :param dtcode:
         :type dtcode: str
-        :param dam_length:
-        :type dam_length: str
         :param spillway_4:
         :type spillway_4: float
+        :param dam_length:
+        :type dam_length: str
         :param spillway_t:
         :type spillway_t: str
         :param max_height:
@@ -442,12 +442,12 @@ class DamLocationsInWashimMaharashtraApi:
         :type sbcode: str
         :param nearest_ci:
         :type nearest_ci: str
+        :param struct_typ:
+        :type struct_typ: str
         :param grs_stor_c:
         :type grs_stor_c: float
         :param dm_long:
         :type dm_long: float
-        :param struct_typ:
-        :type struct_typ: str
         :param dam_volume:
         :type dam_volume: float
         :param strucode:
@@ -456,10 +456,10 @@ class DamLocationsInWashimMaharashtraApi:
         :type nrld_no: str
         :param district:
         :type district: str
-        :param dm_lat:
-        :type dm_lat: float
         :param name:
         :type name: str
+        :param dm_lat:
+        :type dm_lat: float
         :param eff_stor_c:
         :type eff_stor_c: float
         :param name_nrld_:
@@ -498,18 +498,18 @@ class DamLocationsInWashimMaharashtraApi:
             limit=limit,
             offset=offset,
             stcode=stcode,
-            spillway_l=spillway_l,
             operating_=operating_,
+            spillway_l=spillway_l,
             river_name=river_name,
             spillway_1=spillway_1,
             spillway_3=spillway_3,
-            res_area_s=res_area_s,
             dam_perlia=dam_perlia,
+            res_area_s=res_area_s,
             spillway_2=spillway_2,
             canal_gate=canal_gate,
             dtcode=dtcode,
-            dam_length=dam_length,
             spillway_4=spillway_4,
+            dam_length=dam_length,
             spillway_t=spillway_t,
             max_height=max_height,
             type=type,
@@ -527,15 +527,15 @@ class DamLocationsInWashimMaharashtraApi:
             bacode=bacode,
             sbcode=sbcode,
             nearest_ci=nearest_ci,
+            struct_typ=struct_typ,
             grs_stor_c=grs_stor_c,
             dm_long=dm_long,
-            struct_typ=struct_typ,
             dam_volume=dam_volume,
             strucode=strucode,
             nrld_no=nrld_no,
             district=district,
-            dm_lat=dm_lat,
             name=name,
+            dm_lat=dm_lat,
             eff_stor_c=eff_stor_c,
             name_nrld_=name_nrld_,
             powerhouse=powerhouse,
@@ -572,18 +572,18 @@ class DamLocationsInWashimMaharashtraApi:
         limit: Optional[Annotated[int, Field(le=5000, strict=True, ge=1)]] = None,
         offset: Annotated[Optional[Annotated[int, Field(le=2000000, strict=True, ge=1)]], Field(description="OGC Resource server also offers way to paginate the result for queries.  If a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records  to be returned.  Minimum = 0. Maximum = 1000. Default = 10.")] = None,
         stcode: Optional[StrictStr] = None,
-        spillway_l: Optional[StrictStr] = None,
         operating_: Optional[StrictStr] = None,
+        spillway_l: Optional[StrictStr] = None,
         river_name: Optional[StrictStr] = None,
         spillway_1: Optional[StrictStr] = None,
         spillway_3: Optional[StrictInt] = None,
-        res_area_s: Optional[Union[StrictFloat, StrictInt]] = None,
         dam_perlia: Optional[StrictStr] = None,
+        res_area_s: Optional[Union[StrictFloat, StrictInt]] = None,
         spillway_2: Optional[StrictStr] = None,
         canal_gate: Optional[StrictInt] = None,
         dtcode: Optional[StrictStr] = None,
-        dam_length: Optional[StrictStr] = None,
         spillway_4: Optional[Union[StrictFloat, StrictInt]] = None,
+        dam_length: Optional[StrictStr] = None,
         spillway_t: Optional[StrictStr] = None,
         max_height: Optional[StrictStr] = None,
         type: Optional[StrictStr] = None,
@@ -601,15 +601,15 @@ class DamLocationsInWashimMaharashtraApi:
         bacode: Optional[StrictStr] = None,
         sbcode: Optional[StrictStr] = None,
         nearest_ci: Optional[StrictStr] = None,
+        struct_typ: Optional[StrictStr] = None,
         grs_stor_c: Optional[Union[StrictFloat, StrictInt]] = None,
         dm_long: Optional[Union[StrictFloat, StrictInt]] = None,
-        struct_typ: Optional[StrictStr] = None,
         dam_volume: Optional[Union[StrictFloat, StrictInt]] = None,
         strucode: Optional[StrictStr] = None,
         nrld_no: Optional[StrictStr] = None,
         district: Optional[StrictStr] = None,
-        dm_lat: Optional[Union[StrictFloat, StrictInt]] = None,
         name: Optional[StrictStr] = None,
+        dm_lat: Optional[Union[StrictFloat, StrictInt]] = None,
         eff_stor_c: Optional[Union[StrictFloat, StrictInt]] = None,
         name_nrld_: Optional[StrictStr] = None,
         powerhouse: Optional[StrictInt] = None,
@@ -644,30 +644,30 @@ class DamLocationsInWashimMaharashtraApi:
         :type offset: int
         :param stcode:
         :type stcode: str
-        :param spillway_l:
-        :type spillway_l: str
         :param operating_:
         :type operating_: str
+        :param spillway_l:
+        :type spillway_l: str
         :param river_name:
         :type river_name: str
         :param spillway_1:
         :type spillway_1: str
         :param spillway_3:
         :type spillway_3: int
-        :param res_area_s:
-        :type res_area_s: float
         :param dam_perlia:
         :type dam_perlia: str
+        :param res_area_s:
+        :type res_area_s: float
         :param spillway_2:
         :type spillway_2: str
         :param canal_gate:
         :type canal_gate: int
         :param dtcode:
         :type dtcode: str
-        :param dam_length:
-        :type dam_length: str
         :param spillway_4:
         :type spillway_4: float
+        :param dam_length:
+        :type dam_length: str
         :param spillway_t:
         :type spillway_t: str
         :param max_height:
@@ -702,12 +702,12 @@ class DamLocationsInWashimMaharashtraApi:
         :type sbcode: str
         :param nearest_ci:
         :type nearest_ci: str
+        :param struct_typ:
+        :type struct_typ: str
         :param grs_stor_c:
         :type grs_stor_c: float
         :param dm_long:
         :type dm_long: float
-        :param struct_typ:
-        :type struct_typ: str
         :param dam_volume:
         :type dam_volume: float
         :param strucode:
@@ -716,10 +716,10 @@ class DamLocationsInWashimMaharashtraApi:
         :type nrld_no: str
         :param district:
         :type district: str
-        :param dm_lat:
-        :type dm_lat: float
         :param name:
         :type name: str
+        :param dm_lat:
+        :type dm_lat: float
         :param eff_stor_c:
         :type eff_stor_c: float
         :param name_nrld_:
@@ -758,18 +758,18 @@ class DamLocationsInWashimMaharashtraApi:
             limit=limit,
             offset=offset,
             stcode=stcode,
-            spillway_l=spillway_l,
             operating_=operating_,
+            spillway_l=spillway_l,
             river_name=river_name,
             spillway_1=spillway_1,
             spillway_3=spillway_3,
-            res_area_s=res_area_s,
             dam_perlia=dam_perlia,
+            res_area_s=res_area_s,
             spillway_2=spillway_2,
             canal_gate=canal_gate,
             dtcode=dtcode,
-            dam_length=dam_length,
             spillway_4=spillway_4,
+            dam_length=dam_length,
             spillway_t=spillway_t,
             max_height=max_height,
             type=type,
@@ -787,15 +787,15 @@ class DamLocationsInWashimMaharashtraApi:
             bacode=bacode,
             sbcode=sbcode,
             nearest_ci=nearest_ci,
+            struct_typ=struct_typ,
             grs_stor_c=grs_stor_c,
             dm_long=dm_long,
-            struct_typ=struct_typ,
             dam_volume=dam_volume,
             strucode=strucode,
             nrld_no=nrld_no,
             district=district,
-            dm_lat=dm_lat,
             name=name,
+            dm_lat=dm_lat,
             eff_stor_c=eff_stor_c,
             name_nrld_=name_nrld_,
             powerhouse=powerhouse,
@@ -827,18 +827,18 @@ class DamLocationsInWashimMaharashtraApi:
         limit,
         offset,
         stcode,
-        spillway_l,
         operating_,
+        spillway_l,
         river_name,
         spillway_1,
         spillway_3,
-        res_area_s,
         dam_perlia,
+        res_area_s,
         spillway_2,
         canal_gate,
         dtcode,
-        dam_length,
         spillway_4,
+        dam_length,
         spillway_t,
         max_height,
         type,
@@ -856,15 +856,15 @@ class DamLocationsInWashimMaharashtraApi:
         bacode,
         sbcode,
         nearest_ci,
+        struct_typ,
         grs_stor_c,
         dm_long,
-        struct_typ,
         dam_volume,
         strucode,
         nrld_no,
         district,
-        dm_lat,
         name,
+        dm_lat,
         eff_stor_c,
         name_nrld_,
         powerhouse,
@@ -918,13 +918,13 @@ class DamLocationsInWashimMaharashtraApi:
             
             _query_params.append(('stcode', stcode))
             
-        if spillway_l is not None:
-            
-            _query_params.append(('spillway_l', spillway_l))
-            
         if operating_ is not None:
             
             _query_params.append(('operating_', operating_))
+            
+        if spillway_l is not None:
+            
+            _query_params.append(('spillway_l', spillway_l))
             
         if river_name is not None:
             
@@ -938,13 +938,13 @@ class DamLocationsInWashimMaharashtraApi:
             
             _query_params.append(('spillway_3', spillway_3))
             
-        if res_area_s is not None:
-            
-            _query_params.append(('res_area_s', res_area_s))
-            
         if dam_perlia is not None:
             
             _query_params.append(('dam_perlia', dam_perlia))
+            
+        if res_area_s is not None:
+            
+            _query_params.append(('res_area_s', res_area_s))
             
         if spillway_2 is not None:
             
@@ -958,13 +958,13 @@ class DamLocationsInWashimMaharashtraApi:
             
             _query_params.append(('dtcode', dtcode))
             
-        if dam_length is not None:
-            
-            _query_params.append(('dam_length', dam_length))
-            
         if spillway_4 is not None:
             
             _query_params.append(('spillway_4', spillway_4))
+            
+        if dam_length is not None:
+            
+            _query_params.append(('dam_length', dam_length))
             
         if spillway_t is not None:
             
@@ -1034,6 +1034,10 @@ class DamLocationsInWashimMaharashtraApi:
             
             _query_params.append(('nearest_ci', nearest_ci))
             
+        if struct_typ is not None:
+            
+            _query_params.append(('Struct_Typ', struct_typ))
+            
         if grs_stor_c is not None:
             
             _query_params.append(('grs_stor_c', grs_stor_c))
@@ -1041,10 +1045,6 @@ class DamLocationsInWashimMaharashtraApi:
         if dm_long is not None:
             
             _query_params.append(('dm_long', dm_long))
-            
-        if struct_typ is not None:
-            
-            _query_params.append(('Struct_Typ', struct_typ))
             
         if dam_volume is not None:
             
@@ -1062,13 +1062,13 @@ class DamLocationsInWashimMaharashtraApi:
             
             _query_params.append(('district', district))
             
-        if dm_lat is not None:
-            
-            _query_params.append(('dm_lat', dm_lat))
-            
         if name is not None:
             
             _query_params.append(('name', name))
+            
+        if dm_lat is not None:
+            
+            _query_params.append(('dm_lat', dm_lat))
             
         if eff_stor_c is not None:
             

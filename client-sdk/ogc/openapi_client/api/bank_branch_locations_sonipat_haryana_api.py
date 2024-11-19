@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -59,8 +59,8 @@ class BankBranchLocationsSonipatHaryanaApi:
         bank_cd: Optional[StrictStr] = None,
         br_city: Optional[StrictStr] = None,
         br_bsr_cod: Optional[StrictStr] = None,
-        br_long: Optional[Union[StrictFloat, StrictInt]] = None,
         br_micr_co: Optional[StrictStr] = None,
+        br_long: Optional[Union[StrictFloat, StrictInt]] = None,
         state_name: Optional[StrictStr] = None,
         bank_name: Optional[StrictStr] = None,
         br_add: Optional[StrictStr] = None,
@@ -109,10 +109,10 @@ class BankBranchLocationsSonipatHaryanaApi:
         :type br_city: str
         :param br_bsr_cod:
         :type br_bsr_cod: str
-        :param br_long:
-        :type br_long: float
         :param br_micr_co:
         :type br_micr_co: str
+        :param br_long:
+        :type br_long: float
         :param state_name:
         :type state_name: str
         :param bank_name:
@@ -158,8 +158,8 @@ class BankBranchLocationsSonipatHaryanaApi:
             bank_cd=bank_cd,
             br_city=br_city,
             br_bsr_cod=br_bsr_cod,
-            br_long=br_long,
             br_micr_co=br_micr_co,
+            br_long=br_long,
             state_name=state_name,
             bank_name=bank_name,
             br_add=br_add,
@@ -203,8 +203,8 @@ class BankBranchLocationsSonipatHaryanaApi:
         bank_cd: Optional[StrictStr] = None,
         br_city: Optional[StrictStr] = None,
         br_bsr_cod: Optional[StrictStr] = None,
-        br_long: Optional[Union[StrictFloat, StrictInt]] = None,
         br_micr_co: Optional[StrictStr] = None,
+        br_long: Optional[Union[StrictFloat, StrictInt]] = None,
         state_name: Optional[StrictStr] = None,
         bank_name: Optional[StrictStr] = None,
         br_add: Optional[StrictStr] = None,
@@ -253,10 +253,10 @@ class BankBranchLocationsSonipatHaryanaApi:
         :type br_city: str
         :param br_bsr_cod:
         :type br_bsr_cod: str
-        :param br_long:
-        :type br_long: float
         :param br_micr_co:
         :type br_micr_co: str
+        :param br_long:
+        :type br_long: float
         :param state_name:
         :type state_name: str
         :param bank_name:
@@ -302,8 +302,8 @@ class BankBranchLocationsSonipatHaryanaApi:
             bank_cd=bank_cd,
             br_city=br_city,
             br_bsr_cod=br_bsr_cod,
-            br_long=br_long,
             br_micr_co=br_micr_co,
+            br_long=br_long,
             state_name=state_name,
             bank_name=bank_name,
             br_add=br_add,
@@ -347,8 +347,8 @@ class BankBranchLocationsSonipatHaryanaApi:
         bank_cd: Optional[StrictStr] = None,
         br_city: Optional[StrictStr] = None,
         br_bsr_cod: Optional[StrictStr] = None,
-        br_long: Optional[Union[StrictFloat, StrictInt]] = None,
         br_micr_co: Optional[StrictStr] = None,
+        br_long: Optional[Union[StrictFloat, StrictInt]] = None,
         state_name: Optional[StrictStr] = None,
         bank_name: Optional[StrictStr] = None,
         br_add: Optional[StrictStr] = None,
@@ -397,10 +397,10 @@ class BankBranchLocationsSonipatHaryanaApi:
         :type br_city: str
         :param br_bsr_cod:
         :type br_bsr_cod: str
-        :param br_long:
-        :type br_long: float
         :param br_micr_co:
         :type br_micr_co: str
+        :param br_long:
+        :type br_long: float
         :param state_name:
         :type state_name: str
         :param bank_name:
@@ -446,8 +446,8 @@ class BankBranchLocationsSonipatHaryanaApi:
             bank_cd=bank_cd,
             br_city=br_city,
             br_bsr_cod=br_bsr_cod,
-            br_long=br_long,
             br_micr_co=br_micr_co,
+            br_long=br_long,
             state_name=state_name,
             bank_name=bank_name,
             br_add=br_add,
@@ -486,8 +486,8 @@ class BankBranchLocationsSonipatHaryanaApi:
         bank_cd,
         br_city,
         br_bsr_cod,
-        br_long,
         br_micr_co,
+        br_long,
         state_name,
         bank_name,
         br_add,
@@ -569,13 +569,13 @@ class BankBranchLocationsSonipatHaryanaApi:
             
             _query_params.append(('br_bsr_cod', br_bsr_cod))
             
-        if br_long is not None:
-            
-            _query_params.append(('br_long', br_long))
-            
         if br_micr_co is not None:
             
             _query_params.append(('br_micr_co', br_micr_co))
+            
+        if br_long is not None:
+            
+            _query_params.append(('br_long', br_long))
             
         if state_name is not None:
             

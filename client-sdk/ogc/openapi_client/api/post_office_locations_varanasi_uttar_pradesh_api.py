@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -59,8 +59,8 @@ class PostOfficeLocationsVaranasiUttarPradeshApi:
         po_name: Optional[StrictStr] = None,
         latitude: Optional[StrictStr] = None,
         division: Optional[StrictStr] = None,
-        circle: Optional[StrictStr] = None,
         region: Optional[StrictStr] = None,
+        circle: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -105,10 +105,10 @@ class PostOfficeLocationsVaranasiUttarPradeshApi:
         :type latitude: str
         :param division:
         :type division: str
-        :param circle:
-        :type circle: str
         :param region:
         :type region: str
+        :param circle:
+        :type circle: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -146,8 +146,8 @@ class PostOfficeLocationsVaranasiUttarPradeshApi:
             po_name=po_name,
             latitude=latitude,
             division=division,
-            circle=circle,
             region=region,
+            circle=circle,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -187,8 +187,8 @@ class PostOfficeLocationsVaranasiUttarPradeshApi:
         po_name: Optional[StrictStr] = None,
         latitude: Optional[StrictStr] = None,
         division: Optional[StrictStr] = None,
-        circle: Optional[StrictStr] = None,
         region: Optional[StrictStr] = None,
+        circle: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -233,10 +233,10 @@ class PostOfficeLocationsVaranasiUttarPradeshApi:
         :type latitude: str
         :param division:
         :type division: str
-        :param circle:
-        :type circle: str
         :param region:
         :type region: str
+        :param circle:
+        :type circle: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -274,8 +274,8 @@ class PostOfficeLocationsVaranasiUttarPradeshApi:
             po_name=po_name,
             latitude=latitude,
             division=division,
-            circle=circle,
             region=region,
+            circle=circle,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -315,8 +315,8 @@ class PostOfficeLocationsVaranasiUttarPradeshApi:
         po_name: Optional[StrictStr] = None,
         latitude: Optional[StrictStr] = None,
         division: Optional[StrictStr] = None,
-        circle: Optional[StrictStr] = None,
         region: Optional[StrictStr] = None,
+        circle: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -361,10 +361,10 @@ class PostOfficeLocationsVaranasiUttarPradeshApi:
         :type latitude: str
         :param division:
         :type division: str
-        :param circle:
-        :type circle: str
         :param region:
         :type region: str
+        :param circle:
+        :type circle: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -402,8 +402,8 @@ class PostOfficeLocationsVaranasiUttarPradeshApi:
             po_name=po_name,
             latitude=latitude,
             division=division,
-            circle=circle,
             region=region,
+            circle=circle,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -438,8 +438,8 @@ class PostOfficeLocationsVaranasiUttarPradeshApi:
         po_name,
         latitude,
         division,
-        circle,
         region,
+        circle,
         _request_auth,
         _content_type,
         _headers,
@@ -517,13 +517,13 @@ class PostOfficeLocationsVaranasiUttarPradeshApi:
             
             _query_params.append(('DIVISION', division))
             
-        if circle is not None:
-            
-            _query_params.append(('CIRCLE', circle))
-            
         if region is not None:
             
             _query_params.append(('REGION', region))
+            
+        if circle is not None:
+            
+            _query_params.append(('CIRCLE', circle))
             
         # process the header parameters
         # process the form parameters
