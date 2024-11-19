@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    STAC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    STAC compliant Features and Common API definitions. Includes Schema and Response Objects.
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -34,18 +34,18 @@ REQUIRES = [
 setup(
     name=NAME,
     version=VERSION,
-    description="OGC Compliant IUDX Resource Server",
-    author="India Urban Data eXchange (IUDX)",
+    description="STAC Compliant DX Resource Server",
+    author="Geospatial Data eXchange (GSX)",
     author_email="info@iudx.org.in",
     url="",
-    keywords=["OpenAPI", "OpenAPI-Generator", "OGC Compliant IUDX Resource Server"],
+    keywords=["OpenAPI", "OpenAPI-Generator", "STAC Compliant DX Resource Server"],
     install_requires=REQUIRES,
     packages=find_packages(exclude=["test", "tests"]),
     include_package_data=True,
     license="Apache 2.0",
     long_description_content_type='text/markdown',
     long_description="""\
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    STAC compliant Features and Common API definitions. Includes Schema and Response Objects.
     """,  # noqa: E501
     package_data={"openapi_client": ["py.typed"]},
 )
