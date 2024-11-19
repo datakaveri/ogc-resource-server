@@ -142,16 +142,49 @@ export LOG_LEVEL=INFO
 
 ## Client SDK
 
-A client SDK generated using [OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator) is located at [client-sdk](./client-sdk). To generate a version of the SDK derived from the latest version of the OpenAPI spec at https://geoserver.dx.ugix.org.in, download the [OpenAPI Generator JAR file](https://github.com/OpenAPITools/openapi-generator?tab=readme-ov-file#13---download-jar) and run:
+Client SDKs for OGC, STAC and DX Metering APIs generated using [OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator) is located at [client-sdk](./client-sdk). To generate a version of the SDK derived from the latest version of the OpenAPI spec at https://geoserver.dx.ugix.org.in, download the [OpenAPI Generator JAR file](https://github.com/OpenAPITools/openapi-generator?tab=readme-ov-file#13---download-jar) and run:
 
 ```
 java -jar openapi-generator-cli.jar generate -i <URL> -g python --additional-properties removeOperationIdPrefix=true,removeOperationIdPrefixDelimiter=-,removeOperationIdPrefixCount=6 -o client-sdk --global-property models,modelTests=false,apis,apiTests=false,supportingFiles=README.md:requirements.txt:setup.py:setup.cfg:openapi_client:api_client.py:api_response.py:exceptions.py:__init__.py:configuration.py:py.types:rest.py
 ```
 
 where `<URL>` can be:
-- `https://geoserver.dx.ugix.org.in/api` for OGC APIs
-- `https://geoserver.dx.ugix.org.in/stac/api` for STAC APIs
-- `https://geoserver.dx.ugix.org.in/metering/api` for metering/auditing APIs
+- `https://geoserver.dx.ugix.org.in/api?f=json` for OGC APIs
+- `https://geoserver.dx.ugix.org.in/stac/api?f=json` for STAC APIs
+- `https://geoserver.dx.ugix.org.in/metering/api?f=json` for metering/auditing APIs
+
+### Importing and using the OGC client SDK
+
+The OGC client SDK can be imported using `pip` with the command:
+
+```
+pip install git+https://github.com/datakaveri/ogc-resource-server/@main#subdirectory=client-sdk/ogc
+```
+
+Once imported, the SDK can be used to fetch data with the help of the `DxUtils` class.
+
+```python
+from dx_utils import DxUtils
+import openapi_client
+
+# add your client ID and client secret 
+DX_CLIENT_ID = ''
+DX_CLIENT_SECRET = ''
+
+# Initialize the DX Utils class using the OGC server URL, COS URL, client ID and client secret respectively
+dx_util = DxUtils('geoserver.dx.ugix.org.in','dx.ugix.org.in', DX_CLIENT_ID, DX_CLIENT_SECRET)
+
+api_client = openapi_client.ApiClient()
+
+# choose the appropriate collection from the 
+major_towns = openapi_client.MajorTownsApi(api_client)
+
+# Fetch the correct DX token for accessing the collection 
+dx_util.set_dx_token(major_towns)
+
+# get all data as a JSON array containing GeoJSON features
+output = dx_util.get_all_features_as_geojson(major_towns)
+```
 
 ## Logging 
 ### Log4j 2

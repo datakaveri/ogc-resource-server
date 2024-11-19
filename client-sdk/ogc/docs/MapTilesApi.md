@@ -18,6 +18,7 @@ Retrieve a map tile from the specified collection
 
 ### Example
 
+* Bearer (JWT) Authentication (DX-AAA-Token):
 
 ```python
 import openapi_client
@@ -31,6 +32,15 @@ configuration = openapi_client.Configuration(
     host = "https://geoserver.dx.ugix.org.in"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): DX-AAA-Token
+configuration = openapi_client.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
 
 # Enter a context with an instance of the API client
 with openapi_client.ApiClient(configuration) as api_client:
@@ -72,7 +82,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[DX-AAA-Token](../README.md#DX-AAA-Token)
 
 ### HTTP request headers
 

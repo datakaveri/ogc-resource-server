@@ -42,7 +42,7 @@ setup(
     install_requires=REQUIRES,
     packages=find_packages(exclude=["test", "tests"]),
     include_package_data=True,
-    license="MIT",
+    license="Apache 2.0",
     long_description_content_type='text/markdown',
     long_description="""\
     OGC compliant Features and Common API definitions. Includes Schema and Response Objects.

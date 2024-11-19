@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    STAC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    STAC compliant Features and Common API definitions. Includes Schema and Response Objects.
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -45,7 +45,6 @@ class FeaturesApi:
     def get_asset(
         self,
         asset_id: Annotated[StrictStr, Field(description="local identifier of an asset")],
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -57,7 +56,7 @@ class FeaturesApi:
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=1)] = 0,
     ) -> None:
         """gets the assets links that can be used to download assets
 
@@ -65,8 +64,6 @@ class FeaturesApi:
 
         :param asset_id: local identifier of an asset (required)
         :type asset_id: str
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -91,7 +88,6 @@ class FeaturesApi:
 
         _param = self._get_asset_serialize(
             asset_id=asset_id,
-            token=token,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -118,7 +114,6 @@ class FeaturesApi:
     def get_asset_with_http_info(
         self,
         asset_id: Annotated[StrictStr, Field(description="local identifier of an asset")],
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -130,7 +125,7 @@ class FeaturesApi:
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=1)] = 0,
     ) -> ApiResponse[None]:
         """gets the assets links that can be used to download assets
 
@@ -138,8 +133,6 @@ class FeaturesApi:
 
         :param asset_id: local identifier of an asset (required)
         :type asset_id: str
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -164,7 +157,6 @@ class FeaturesApi:
 
         _param = self._get_asset_serialize(
             asset_id=asset_id,
-            token=token,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -191,7 +183,6 @@ class FeaturesApi:
     def get_asset_without_preload_content(
         self,
         asset_id: Annotated[StrictStr, Field(description="local identifier of an asset")],
-        token: Annotated[StrictStr, Field(description="A <b> valid Auth token </b> to process the request.")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -203,7 +194,7 @@ class FeaturesApi:
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=1)] = 0,
     ) -> RESTResponseType:
         """gets the assets links that can be used to download assets
 
@@ -211,8 +202,6 @@ class FeaturesApi:
 
         :param asset_id: local identifier of an asset (required)
         :type asset_id: str
-        :param token: A <b> valid Auth token </b> to process the request. (required)
-        :type token: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -237,7 +226,6 @@ class FeaturesApi:
 
         _param = self._get_asset_serialize(
             asset_id=asset_id,
-            token=token,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -259,14 +247,16 @@ class FeaturesApi:
     def _get_asset_serialize(
         self,
         asset_id,
-        token,
         _request_auth,
         _content_type,
         _headers,
         _host_index,
     ) -> RequestSerialized:
 
-        _host = None
+        _hosts = [
+            'https://geoserver.dx.ugix.org.in'
+        ]
+        _host = _hosts[_host_index]
 
         _collection_formats: Dict[str, str] = {
         }
@@ -283,8 +273,6 @@ class FeaturesApi:
             _path_params['assetId'] = asset_id
         # process the query parameters
         # process the header parameters
-        if token is not None:
-            _header_params['token'] = token
         # process the form parameters
         # process the body parameter
 
@@ -299,6 +287,7 @@ class FeaturesApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'DX-AAA-Token'
         ]
 
         return self.api_client.param_serialize(
@@ -333,7 +322,7 @@ class FeaturesApi:
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=1)] = 0,
     ) -> ConfClasses:
         """information about specifications that this API conforms to
 
@@ -397,7 +386,7 @@ class FeaturesApi:
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=1)] = 0,
     ) -> ApiResponse[ConfClasses]:
         """information about specifications that this API conforms to
 
@@ -461,7 +450,7 @@ class FeaturesApi:
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=1)] = 0,
     ) -> RESTResponseType:
         """information about specifications that this API conforms to
 
@@ -515,7 +504,10 @@ class FeaturesApi:
         _host_index,
     ) -> RequestSerialized:
 
-        _host = None
+        _hosts = [
+            'https://geoserver.dx.ugix.org.in'
+        ]
+        _host = _hosts[_host_index]
 
         _collection_formats: Dict[str, str] = {
         }
@@ -578,7 +570,7 @@ class FeaturesApi:
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=1)] = 0,
     ) -> StacCollections:
         """the feature collections in the dataset
 
@@ -643,7 +635,7 @@ class FeaturesApi:
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=1)] = 0,
     ) -> ApiResponse[StacCollections]:
         """the feature collections in the dataset
 
@@ -708,7 +700,7 @@ class FeaturesApi:
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=1)] = 0,
     ) -> RESTResponseType:
         """the feature collections in the dataset
 
@@ -763,7 +755,10 @@ class FeaturesApi:
         _host_index,
     ) -> RequestSerialized:
 
-        _host = None
+        _hosts = [
+            'https://geoserver.dx.ugix.org.in'
+        ]
+        _host = _hosts[_host_index]
 
         _collection_formats: Dict[str, str] = {
         }
@@ -826,7 +821,7 @@ class FeaturesApi:
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=1)] = 0,
     ) -> CatalogLandingPage:
         """Landing Page
 
@@ -891,7 +886,7 @@ class FeaturesApi:
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=1)] = 0,
     ) -> ApiResponse[CatalogLandingPage]:
         """Landing Page
 
@@ -956,7 +951,7 @@ class FeaturesApi:
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=1)] = 0,
     ) -> RESTResponseType:
         """Landing Page
 
@@ -1011,7 +1006,10 @@ class FeaturesApi:
         _host_index,
     ) -> RequestSerialized:
 
-        _host = None
+        _hosts = [
+            'https://geoserver.dx.ugix.org.in'
+        ]
+        _host = _hosts[_host_index]
 
         _collection_formats: Dict[str, str] = {
         }
