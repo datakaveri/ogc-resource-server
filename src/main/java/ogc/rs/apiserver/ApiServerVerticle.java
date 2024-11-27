@@ -1502,20 +1502,20 @@ public class ApiServerVerticle extends AbstractVerticle {
     dbService.stacItemSearch(searchParams).compose(stacItemsObject -> {
       JsonArray stacItems = stacItemsObject.getJsonArray("features");
       
-    if(stacItems.isEmpty()) {
-      stacItemsObject.put("links", commonLinksInFeature
-          .add(new JsonObject()
-              .put("rel", "self")
-              .put("type", "application/json")
-              .put("href", stacMetaJson.getString("hostname")
-                  + "/stac/search")));
-
-      return Future.succeededFuture(stacItemsObject);
-    }
-
-      String nextLink = "";
       String currentUrl = routingContext.request().absoluteURI();
+      String firstLink = currentUrl.replaceFirst("offset=\\d+", "offset=1");
+      String nextLink = "";
       
+      if(stacItems.isEmpty()) {
+        stacItemsObject.put("links", commonLinksInFeature
+            .add(new JsonObject()
+                .put("rel", "self")
+                .put("type", "application/json")
+                .put("href", currentUrl)));
+
+        return Future.succeededFuture(stacItemsObject);
+      }
+
       int offset = (stacItems.getJsonObject(stacItems.size() - 1).getInteger("p_id") + 1);
         
       if (currentUrl.contains("offset=")) {
@@ -1568,6 +1568,16 @@ public class ApiServerVerticle extends AbstractVerticle {
               .put("type", "application/geo+json")
               .put("method", "GET")
               .put("href", nextLink)));
+      
+      // if not at the first page, add first link
+      if (!firstLink.equals(currentUrl)) {
+        stacItemsObject.getJsonArray("links")  
+          .add(new JsonObject()
+              .put("rel", "first")
+              .put("type", "application/geo+json")
+              .put("method", "GET")
+              .put("href", firstLink));
+      }
       
       return Future.succeededFuture(stacItemsObject);
     })
