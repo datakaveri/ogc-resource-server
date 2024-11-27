@@ -1,4 +1,4 @@
--- Child tables must have the same kind of geometry columns as the parent, hence changing
+-- Partitioned tables must have the same kind of geometry columns as the parent, hence changing
 -- existing STAC tables to have the generic geometry type of Geometry
 
 CREATE OR REPLACE FUNCTION update_geom_cols_for_existing_stac_table(tablename text) RETURNS VOID

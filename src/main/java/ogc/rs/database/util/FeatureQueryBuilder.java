@@ -235,8 +235,8 @@ public class FeatureQueryBuilder {
    * parameter. Query params are added to tuple when a safe-query string formed by appending cannot
    * be created. The returned query must be executed with the tuple.
    * 
-   * STAC Item Search uses PostgreSQL table inheritance. A parent table called
-   * <em>stac_collection_parent</em> is queried instead of querying individual STAC collection
+   * STAC Item Search uses PostgreSQL table partitioning. A partitioned table called
+   * <em>stac_collections_part</em> is queried instead of querying individual STAC collection
    * tables.
    * 
    * @param tup empty tuple to which query params can be added
@@ -244,33 +244,32 @@ public class FeatureQueryBuilder {
    */
   public String buildItemSearchSqlString(Tuple tup) {
 
-    StringBuilder stacParentTableQuery = new StringBuilder();
+    StringBuilder stacPartitionTableQuery = new StringBuilder();
 
-    stacParentTableQuery.append(
-        "SELECT scp.id AS id, 'Feature' AS type, trim(scp.tableoid::regclass::text, '\"') AS collection, "
-            + this.geoColumn
-            + " AS geometry, properties, p_id FROM stac_collection_parent scp WHERE 1=1");
+    stacPartitionTableQuery.append(
+        "SELECT scp.id AS id, 'Feature' AS type, collection_id AS collection, " + this.geoColumn
+            + " AS geometry, properties, p_id FROM stac_collections_part scp WHERE 1=1");
 
     // integer that stores the parameter index as params are added to the tuple
     int parameterIndex = 0;
 
     if (!bbox.isEmpty()) {
-      stacParentTableQuery.append(" AND ").append(this.bbox);
+      stacPartitionTableQuery.append(" AND ").append(this.bbox);
     }
 
     if (!datetime.isEmpty()) {
-      stacParentTableQuery.append(" AND ").append(this.datetime);
+      stacPartitionTableQuery.append(" AND ").append(this.datetime);
     }
 
     if (!stacIntersectsGeom.isEmpty()) {
-      stacParentTableQuery.append(" AND ").append(this.stacIntersectsGeom);
+      stacPartitionTableQuery.append(" AND ").append(this.stacIntersectsGeom);
     }
 
     // need to use tuple here otherwise need to do a lot of work to create the collection ID string
     if (stacCollectionIds.length != 0) {
       parameterIndex++;
-      stacParentTableQuery
-          .append(" AND trim(tableoid::regclass::text, '\"') = ANY($" + parameterIndex + ")");
+      stacPartitionTableQuery
+          .append(" AND collection_id::text = ANY($" + parameterIndex + ")");
       tup.addArrayOfString(stacCollectionIds);
     }
 
@@ -278,25 +277,25 @@ public class FeatureQueryBuilder {
     // (?)
     if (stacItemIds.length != 0) {
       parameterIndex++;
-      stacParentTableQuery.append(" AND id = ANY($" + parameterIndex + ")");
+      stacPartitionTableQuery.append(" AND id = ANY($" + parameterIndex + ")");
       tup.addArrayOfString(stacItemIds);
     }
 
     if (offset != 0) {
-      stacParentTableQuery.append(" AND p_id > ").append(offset);
+      stacPartitionTableQuery.append(" AND p_id > ").append(offset);
     }
     
     // limit always added
-    stacParentTableQuery.append(" LIMIT ").append(this.limit);
+    stacPartitionTableQuery.append(" LIMIT ").append(this.limit);
 
-    // forming CTE with the stac_collection_parent query to get required data from stac_items_assets
+    // forming CTE with the stac_collections_part query to get required data from stac_items_assets
     // and then joining the result
     StringBuilder finalCteQuery = new StringBuilder().append("WITH items AS (")
-        .append(stacParentTableQuery.toString())
-        .append("), assets AS (SELECT collection_id::text AS collection_id, item_id,"
+        .append(stacPartitionTableQuery.toString())
+        .append("), assets AS (SELECT collection_id, item_id,"
             + " jsonb_agg((row_to_json(stac_items_assets.*)::jsonb - 'item_id'))"
             + " AS assetobjects FROM stac_items_assets"
-            + " JOIN items ON item_id = items.id AND collection_id::text = items.collection"
+            + " JOIN items ON item_id = items.id AND collection_id = items.collection"
             + " GROUP BY collection_id, item_id)"
             + " SELECT items.*, assets.assetobjects FROM assets"
             + " JOIN items ON items.collection = assets.collection_id AND assets.item_id = items.id"
