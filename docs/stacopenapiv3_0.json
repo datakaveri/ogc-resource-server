@@ -404,14 +404,14 @@
       "limit": {
         "name": "limit",
         "in": "query",
-        "description": "The optional limit parameter limits the number of items that are presented in the response document.\n\nOnly items are counted that are on the first level of the collection in the response document.\nNested objects contained within the explicitly requested items shall not be counted.\n\nMinimum = 1. Maximum = 10000. Default = 10.",
+        "description": "The optional limit parameter limits the number of items that are presented in the response document.\n\nOnly items are counted that are on the first level of the collection in the response document.\nNested objects contained within the explicitly requested items shall not be counted.\n\nMinimum = 1. Maximum = 10. Default = 10.",
         "required": false,
         "style": "form",
         "explode": false,
         "schema": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 10000,
+          "maximum": 12,
           "default": 10
         }
       },
