@@ -17,6 +17,7 @@ import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.tilesMetaDataOnboarding.TilesMetaDataOnboardingProcess;
 import ogc.rs.processes.s3PreSignedURLGeneration.S3PreSignedURLGenerationProcess;
+import ogc.rs.processes.tilesOnboardingFromExistingFeature.TilesOnboardingFromExistingFeatureProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.logging.log4j.LogManager;
@@ -114,6 +115,9 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
             break;
           case "TilesMetaDataOnboarding":
             processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, getS3Object(config), vertx);
+            break;
+          case "TilesOnboardingFromExistingFeature":
+            processService = new TilesOnboardingFromExistingFeatureProcess(pgPool, webClient, config, getS3Object(config), vertx);
             break;
           default:
             LOGGER.error("No method specified for process {}", processName);
