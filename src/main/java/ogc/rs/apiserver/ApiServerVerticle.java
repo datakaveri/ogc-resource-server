@@ -1492,6 +1492,10 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     RequestParameters paramsFromOasValidation = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
     StacItemSearchParams searchParams = StacItemSearchParams.createFromGetRequest(paramsFromOasValidation);
+    
+    // increment limit by 1 to check if more data is present for next link
+    int incrementedLimit = searchParams.getLimit() + 1;
+    searchParams.setLimit(incrementedLimit);
       
     JsonArray commonLinksInFeature = new JsonArray()
         .add(new JsonObject()
@@ -1504,7 +1508,6 @@ public class ApiServerVerticle extends AbstractVerticle {
       
       String currentUrl = routingContext.request().absoluteURI();
       String firstLink = currentUrl.replaceFirst("offset=\\d+", "offset=1");
-      String nextLink = "";
       
       if(stacItems.isEmpty()) {
         stacItemsObject.put("links", commonLinksInFeature
@@ -1515,14 +1518,51 @@ public class ApiServerVerticle extends AbstractVerticle {
 
         return Future.succeededFuture(stacItemsObject);
       }
+      
+      JsonArray rootRespLinks = new JsonArray()
+          .add(new JsonObject()
+              .put("rel", "self")
+              .put("type", "application/json")
+              .put("href", currentUrl));
+      
+      int returnedSize = stacItems.size();
 
-      int offset = (stacItems.getJsonObject(stacItems.size() - 1).getInteger("p_id") + 1);
+      /*
+       * if the no. of items returned is equal to the incremented limit, then at least 1 more
+       * element is present for pagination and the next link can be added
+       */
+      if (returnedSize == incrementedLimit) {
+        // calculate offset from the 2nd-last item returned
+        int offset = (stacItems.getJsonObject(returnedSize - 2).getInteger("p_id") + 1);
         
-      if (currentUrl.contains("offset=")) {
-        nextLink = currentUrl.replaceFirst("offset=\\d+", "offset=" + offset);
-      } else {
-        nextLink = currentUrl + "&offset=" + offset;
+        String nextLink;
+
+        if (currentUrl.contains("offset=")) {
+          nextLink = currentUrl.replaceFirst("offset=\\d+", "offset=" + offset);
+        } else {
+          nextLink = currentUrl + "&offset=" + offset;
+        }
+
+        // remove the last item returned since it's extra  
+        stacItems.remove(returnedSize - 1);
+        
+        rootRespLinks.add(new JsonObject()
+              .put("rel", "next")
+              .put("type", "application/geo+json")
+              .put("method", "GET")
+              .put("href", nextLink));
       }
+
+      // if not at the first page, add first link
+      if (!firstLink.equals(currentUrl)) {
+          rootRespLinks.add(new JsonObject()
+              .put("rel", "first")
+              .put("type", "application/geo+json")
+              .put("method", "GET")
+              .put("href", firstLink));
+      }
+
+      stacItemsObject.put("links", commonLinksInFeature.addAll(rootRespLinks));
 
       stacItems.forEach(stacItem -> {
         JsonObject stacItemJson = (JsonObject) stacItem;
@@ -1557,27 +1597,6 @@ public class ApiServerVerticle extends AbstractVerticle {
 
         stacItemJson.put("links", allLinksInFeature);
       });
-
-      stacItemsObject.put("links", commonLinksInFeature
-          .add(new JsonObject()
-              .put("rel", "self")
-              .put("type", "application/json")
-              .put("href", currentUrl))
-          .add(new JsonObject()
-              .put("rel", "next")
-              .put("type", "application/geo+json")
-              .put("method", "GET")
-              .put("href", nextLink)));
-      
-      // if not at the first page, add first link
-      if (!firstLink.equals(currentUrl)) {
-        stacItemsObject.getJsonArray("links")  
-          .add(new JsonObject()
-              .put("rel", "first")
-              .put("type", "application/geo+json")
-              .put("method", "GET")
-              .put("href", firstLink));
-      }
       
       return Future.succeededFuture(stacItemsObject);
     })
