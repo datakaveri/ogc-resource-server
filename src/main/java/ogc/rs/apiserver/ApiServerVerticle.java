@@ -1131,6 +1131,13 @@ public class ApiServerVerticle extends AbstractVerticle {
                       .put("type", "application/geo+json"))
               .add(
                   new JsonObject()
+                      .put("rel", "search")
+                      .put("href", hostName + ogcBasePath + "stac/search")
+                      .put("method", "POST")
+                      .put("title", "STAC Search")
+                      .put("type", "application/geo+json"))
+              .add(
+                  new JsonObject()
                       .put("rel", "conformance")
                       .put("href", hostName + ogcBasePath + "stac/conformance")
                       .put("type", "application/json")
@@ -1608,10 +1615,153 @@ public class ApiServerVerticle extends AbstractVerticle {
     .onFailure(failed -> routingContext.fail(failed));
   }
 
-  // /search for item_search, rel = search, href = /search, mediaType = application/geo+json, method = POST
-//  public void postStacItemByItemSearch(RoutingContext routingContext){
-//
-//  }
+  /**
+   * POST STAC Item Search.
+   * 
+   * @param routingContext
+   */
+  public void postStacItemByItemSearch(RoutingContext routingContext){
+
+    final JsonObject DEFAULT_POST_BODY_IF_NONE_SUPPLIED =
+        new JsonObject().put("limit", 10).put("offset", 1);
+
+    RequestParameters paramsFromOasValidation =
+        routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+
+    JsonObject currentBody;
+    
+    /*
+     * if the request body is not sent or not JSON, then default to a body with some limit and
+     * offset = 1
+     */
+    if (paramsFromOasValidation.body() == null || !paramsFromOasValidation.body().isJsonObject()) {
+      currentBody = DEFAULT_POST_BODY_IF_NONE_SUPPLIED.copy();
+    } else {
+      currentBody = paramsFromOasValidation.body().getJsonObject();
+    }
+
+    StacItemSearchParams searchParams =
+        StacItemSearchParams.createFromPostRequest(currentBody);
+    
+    // increment limit by 1 to check if more data is present for next link
+    int incrementedLimit = searchParams.getLimit() + 1;
+    searchParams.setLimit(incrementedLimit);
+      
+    JsonArray commonLinksInFeature = new JsonArray()
+        .add(new JsonObject()
+            .put("rel", "root")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac"));
+
+    dbService.stacItemSearch(searchParams).compose(stacItemsObject -> {
+      JsonArray stacItems = stacItemsObject.getJsonArray("features");
+      
+      String currentUrl = routingContext.request().absoluteURI();
+      
+      if(stacItems.isEmpty()) {
+        stacItemsObject.put("links", commonLinksInFeature
+            .add(new JsonObject()
+                .put("rel", "self")
+                .put("type", "application/json")
+                .put("href", currentUrl)
+                .put("body", currentBody)));
+
+        return Future.succeededFuture(stacItemsObject);
+      }
+      
+      JsonArray rootRespLinks = new JsonArray()
+          .add(new JsonObject()
+              .put("rel", "self")
+              .put("type", "application/json")
+              .put("href", currentUrl)
+              .put("body", currentBody));
+      
+      int returnedSize = stacItems.size();
+
+      /*
+       * if the no. of items returned is equal to the incremented limit, then at least 1 more
+       * element is present for pagination and the next link can be added
+       */
+      if (returnedSize == incrementedLimit) {
+        // calculate offset from the 2nd-last item returned
+        int offset = (stacItems.getJsonObject(returnedSize - 2).getInteger("p_id") + 1);
+        
+        JsonObject nextBody = currentBody.copy();
+        nextBody.put("offset", offset);
+
+        // remove the last item returned since it's extra and modify number returned count
+        stacItems.remove(returnedSize - 1);
+        stacItemsObject.put("numberReturned", incrementedLimit - 1);
+        
+        rootRespLinks.add(new JsonObject()
+              .put("rel", "next")
+              .put("type", "application/geo+json")
+              .put("method", "POST")
+              .put("href", currentUrl)
+              .put("body", nextBody));
+      }
+
+      /*
+       * if not at the first page, add first link. The default value of offset is 1 in the OpenAPI
+       * spec, it will be present in the request body even if the user does not add it.
+       */      
+      if (currentBody.getInteger("offset") != 1) {
+        JsonObject firstBody = currentBody.copy().put("offset", 1);
+      
+          rootRespLinks.add(new JsonObject()
+              .put("rel", "first")
+              .put("type", "application/geo+json")
+              .put("method", "POST")
+              .put("href", currentUrl)
+              .put("body", firstBody));
+      }
+
+      stacItemsObject.put("links", commonLinksInFeature.copy().addAll(rootRespLinks));
+
+      stacItems.forEach(stacItem -> {
+        JsonObject stacItemJson = (JsonObject) stacItem;
+        stacItemJson.remove("p_id");
+
+        String collectionId = stacItemJson.getString("collection");
+
+        JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
+        
+        allLinksInFeature
+            .add(new JsonObject()
+                .put("rel", "collection")
+                .put("type", "application/json")
+                .put("href", stacMetaJson.getString("hostname")
+                    + "/stac/collections/"+ collectionId))
+            .add(new JsonObject()
+                .put("rel", "parent")
+                .put("type", "application/json")
+                .put("href", stacMetaJson.getString("hostname")
+                    + "/stac/collections/"+ collectionId))
+            .add(new JsonObject()
+                .put("rel", "self")
+                .put("type", "application/json")
+                .put("href", stacMetaJson.getString("hostname")
+                    + "/stac/collections/"+ collectionId +"/items/" + stacItemJson.getString("id")));
+
+        JsonObject assets = new JsonObject();
+        assets = formatAssetObjectsAsPerStacSchema(stacItemJson.getJsonArray("assetobjects"));
+        
+        stacItemJson.put("assets", assets);
+        stacItemJson.remove("assetobjects");
+
+        stacItemJson.put("links", allLinksInFeature);
+      });
+      
+      return Future.succeededFuture(stacItemsObject);
+    })
+    .onSuccess(result -> {
+      routingContext.put("response", result.toString());
+      routingContext.put("statusCode", 200);
+      routingContext.next();
+    })
+    .onFailure(failed -> routingContext.fail(failed));
+  }
+  
   public void getAssets(RoutingContext routingContext) {
     String assetId = routingContext.pathParam("assetId");
 

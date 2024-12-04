@@ -134,7 +134,7 @@ public class FeatureQueryBuilder {
   public void setStacIntersectsGeom(JsonObject geometry) {
     // this is a geojson geometry
     this.stacIntersectsGeom =
-        "st_intersects(geom, st_geomfromgeojson(" + geometry.toString() + "))";
+        "st_intersects(geom, st_geomfromgeojson('" + geometry.toString() + "'))";
   }
 
   public String buildSqlString() {

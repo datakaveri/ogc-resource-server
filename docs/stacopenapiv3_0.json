@@ -1265,6 +1265,9 @@
           },
           {
             "$ref": "#/components/schemas/limitFilter"
+          },
+          {
+            "$ref": "#/components/schemas/offsetFilter"
           }
         ]
       },
@@ -1322,10 +1325,25 @@
       "limit": {
         "type": "integer",
         "minimum": 1,
-        "example": 10,
         "default": 10,
-        "maximum": 10000,
+        "maximum": 12,
         "description": "The maximum number of results to return (page size). Defaults to 10"
+      },
+      "offsetFilter": {
+        "type": "object",
+        "description": "Offset for pagination",
+        "properties": {
+          "offset": {
+            "$ref": "#/components/schemas/offset"
+          }
+        }
+      },
+      "offset": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 1000,
+        "default": 1,
+        "description": "Offset for pagination"
       },
       "idsFilter": {
         "type": "object",

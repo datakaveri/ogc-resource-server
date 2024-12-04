@@ -148,4 +148,26 @@ public class StacItemSearchParams {
     StacItemSearchParamsConverter.toJson(this, json);
     return json;
   }
+
+  /**
+   * Create {@link StacItemSearchParams} object from JSON body.
+   * 
+   * @param params
+   * @return {@link StacItemSearchParams}
+   * @throws OgcException in case of expected errors like both {@link StacItemSearchParams#bbox} and
+   *         {@link StacItemSearchParams#intersects} supplied
+   */
+  public static StacItemSearchParams createFromPostRequest(JsonObject body) {
+    
+    if (body.getString("datetime") != null) {
+      validateDatetime(body.getString("datetime"));
+    }
+
+    if (body.containsKey("intersects") && body.containsKey("bbox")) {
+      throw new OgcException(400, "Bad Request",
+          "Cannot have both bbox and intersects in STAC Item Search");
+    }
+
+    return new StacItemSearchParams(body);
+  }
 }
