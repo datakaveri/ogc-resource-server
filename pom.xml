@@ -8,8 +8,8 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <vertx.version>4.5.11</vertx.version>
         <junit-jupiter-engine.version>5.11.3</junit-jupiter-engine.version>
         <apache-log4j2.version>2.24.2</apache-log4j2.version>
@@ -28,7 +28,7 @@
         <awssdk-s3.version>2.29.24</awssdk-s3.version>
         <rest-assured.version>5.5.0</rest-assured.version>
         <postgresql.version>42.7.4</postgresql.version>
-        <openjdk.version>11</openjdk.version>
+        <openjdk.version>21</openjdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <exec.mainClass>ogc.rs.deploy.Deployer</exec.mainClass>
 		<skipUnitTests>false</skipUnitTests>
