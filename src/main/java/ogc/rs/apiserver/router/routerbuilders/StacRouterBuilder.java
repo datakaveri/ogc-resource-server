@@ -104,14 +104,20 @@ public class StacRouterBuilder extends EntityRouterBuilder {
         .handler(apiServerVerticle::buildResponse)
         .failureHandler(failureHandler);
 
-/*    
     routerBuilder
-        .operation(STAC_ITEM_SEARCH_API)
+        .operation(STAC_ITEM_SEARCH_GET_API)
         .handler(apiServerVerticle::getStacItemByItemSearch)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)
         .failureHandler(failureHandler);
-*/
+    
+    routerBuilder
+        .operation(STAC_ITEM_SEARCH_POST_API)
+        .handler(apiServerVerticle::postStacItemByItemSearch)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
+
     /**
      *  For all implementers of GisEntityInterface, add the STAC routes to the RouterBuilder.
      */
