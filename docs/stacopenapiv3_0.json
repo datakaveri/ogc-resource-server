@@ -434,11 +434,13 @@
           "in": "query",
           "description": "The optional intersects parameter filters the result Items in the same was as bbox, only with\na GeoJSON Geometry rather than a bbox.",
           "required": false,
-          "schema": {
-              "$ref": "#/components/schemas/geometryGeoJSON"
-          },
-          "style": "form",
-          "explode": false
+          "content": {
+              "application/json": {
+                "schema": {
+                    "$ref": "#/components/schemas/geometryGeoJSON"
+                }
+              }
+          }
       },
       "collectionId": {
         "name": "collectionId",

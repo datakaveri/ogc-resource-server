@@ -1550,8 +1550,9 @@ public class ApiServerVerticle extends AbstractVerticle {
           nextLink = currentUrl + "&offset=" + offset;
         }
 
-        // remove the last item returned since it's extra  
+        // remove the last item returned since it's extra and modify number returned count
         stacItems.remove(returnedSize - 1);
+        stacItemsObject.put("numberReturned", incrementedLimit - 1);
         
         rootRespLinks.add(new JsonObject()
               .put("rel", "next")
@@ -1569,7 +1570,7 @@ public class ApiServerVerticle extends AbstractVerticle {
               .put("href", firstLink));
       }
 
-      stacItemsObject.put("links", commonLinksInFeature.addAll(rootRespLinks));
+      stacItemsObject.put("links", commonLinksInFeature.copy().addAll(rootRespLinks));
 
       stacItems.forEach(stacItem -> {
         JsonObject stacItemJson = (JsonObject) stacItem;
