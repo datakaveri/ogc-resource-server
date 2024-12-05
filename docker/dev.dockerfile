@@ -1,7 +1,7 @@
 ARG VERSION="0.0.1-SNAPSHOT"
 
 # Using maven base image in builder stage to build Java code.
-FROM maven:3-eclipse-temurin-11-focal as builder
+FROM maven:3-eclipse-temurin-21-jammy as builder
 
 WORKDIR /usr/share/app
 COPY pom.xml .
@@ -14,7 +14,7 @@ RUN mvn clean package -Dmaven.test.skip=true
 # Getting GDAL latest image
 FROM ghcr.io/osgeo/gdal:ubuntu-small-3.8.5 as gdal-latest
 # Java Runtime as the base for final image
-FROM eclipse-temurin:11-jre-focal
+FROM eclipse-temurin:21.0.5_11-jre-jammy
 
 ARG VERSION
 ENV JAR="ogc-resource-server-dev-${VERSION}-fat.jar"
