@@ -7,6 +7,9 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
+
+import ogc.rs.common.DataFromS3;
+import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.util.Status;
 import ogc.rs.apiserver.util.OgcException;
@@ -16,10 +19,13 @@ import org.apache.logging.log4j.Logger;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+
+import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
 import static ogc.rs.processes.s3PreSignedURLGeneration.Constants.*;
@@ -33,8 +39,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
     private final UtilClass utilClass;
     private final WebClient webClient;
     private final PgPool pgPool;
-    private String accessKey;
-    private String secretKey;
+    private S3Config s3conf;
     private String catServerHost;
     private String catRequestUri;
     private int catServerPort;
@@ -59,8 +64,16 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
      * @param config The configuration object containing the AWS credentials and CAT API details.
      */
     private void initializeConfig(JsonObject config) {
-        this.accessKey = config.getString("awsAccessKey");
-        this.secretKey = config.getString("awsSecretKey");
+
+        this.s3conf = new S3Config.Builder()
+            .endpoint(config.getString(S3Config.ENDPOINT_CONF_OP))
+            .bucket(config.getString(S3Config.BUCKET_CONF_OP))
+            .region(config.getString(S3Config.REGION_CONF_OP))
+            .accessKey(config.getString(S3Config.ACCESS_KEY_CONF_OP))
+            .secretKey(config.getString(S3Config.SECRET_KEY_CONF_OP))
+            .pathBasedAccess(config.getBoolean(S3Config.PATH_BASED_ACC_CONF_OP))
+            .build();
+
         this.catRequestUri = config.getString("catRequestItemsUri");
         this.catServerHost = config.getString("catServerHost");
         this.catServerPort = config.getInteger("catServerPort");
@@ -267,11 +280,15 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
         try {
             // Create AWS credentials and presigner
             Region region = Region.of(requestInput.getString("region"));
-            AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKey, secretKey);
+            AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(s3conf.getAccessKey(), s3conf.getSecretKey());
 
             try (S3Presigner preSigner = S3Presigner.builder()
                     .region(region)
                     .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                    .endpointOverride(URI.create(s3conf.getEndpoint()))
+                    .serviceConfiguration(S3Configuration.builder()
+                        .pathStyleAccessEnabled(s3conf.isPathBasedAccess())
+                        .build())
                     .build()) {
 
                 // Create the S3 PutObjectRequest
