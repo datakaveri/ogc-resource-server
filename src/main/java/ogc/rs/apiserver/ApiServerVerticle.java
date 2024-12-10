@@ -1488,7 +1488,7 @@ public class ApiServerVerticle extends AbstractVerticle {
       }
 
       assetObj.remove("id");
-      assetObj.put("file:size", assetObj.getInteger("size"));
+      assetObj.put("file:size", assetObj.getLong("size"));
       assetObj.remove("size");
       if (assetObj.getString("title") == null)
         assetObj.remove("title");
