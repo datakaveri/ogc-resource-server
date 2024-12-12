@@ -26,7 +26,8 @@ import ogc.rs.metering.MeteringService;
 import ogc.rs.processes.ProcessesRunnerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -1474,9 +1475,28 @@ public class ApiServerVerticle extends AbstractVerticle {
     assetArray.forEach(asset -> {
       JsonObject assetObj = (JsonObject) asset;
       String assetId = assetObj.getString("id");
+      
+      String href = assetObj.getString("href");
+
+      try {
+        URI hrefUri = new URI(href);
+        /*
+         * If the href URI is not absolute, replace it with the /assets/<asset-id> endpoint. If it
+         * is absolute, do nothing and leave the href as is in the asset object.
+         */
+        if (!hrefUri.isAbsolute()) {
+          assetObj.put("href", hostName + ogcBasePath + "assets/" + assetId);
+        }
+      } catch (URISyntaxException exp) {
+        /*
+         * don't error out here, just create the /assets/<asset-id> endpoint. Let the error happen
+         * during asset download
+         */
+        assetObj.put("href", hostName + ogcBasePath + "assets/" + assetId);
+      }
+
       assetObj.remove("id");
-      assetObj.put("href", hostName + ogcBasePath + "assets/" + assetId);
-      assetObj.put("file:size", assetObj.getInteger("size"));
+      assetObj.put("file:size", assetObj.getLong("size"));
       assetObj.remove("size");
       if (assetObj.getString("title") == null)
         assetObj.remove("title");
