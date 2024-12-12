@@ -175,7 +175,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      * @param requestInput Input JSON object containing tile matrix set details.
      * @return A {@link Future<JsonObject>} containing the updated JSON object with 'id' and 'crs' values if the tile matrix set exists.
      */
-    private Future<JsonObject> checkTileMatrixSet(JsonObject requestInput) {
+    public Future<JsonObject> checkTileMatrixSet(JsonObject requestInput) {
         Promise<JsonObject> promise = Promise.promise();
         String tmsTitle = requestInput.getString("tileMatrixSet");
 
@@ -339,7 +339,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      * @param requestInput JSON object containing tile metadata information and other details.
      * @return A {@link Future<Void>} indicating the success or failure of the onboarding process.
      */
-    private Future<Void> onboardTileMetadata(JsonObject requestInput) {
+    public Future<Void> onboardTileMetadata(JsonObject requestInput) {
         return pgPool.withTransaction(sqlClient -> {
             Promise<Void> promise = Promise.promise();
             LOGGER.debug("Starting the onboarding process for tile metadata.");
