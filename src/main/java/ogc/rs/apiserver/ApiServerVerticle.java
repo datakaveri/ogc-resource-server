@@ -96,6 +96,7 @@ public class ApiServerVerticle extends AbstractVerticle {
   String tileMatrixSetUrl = "https://raw.githubusercontent.com/opengeospatial/2D-Tile-Matrix-Set/master/registry" +
       "/json/$.json";
   JsonArray allCrsSupported = new JsonArray();
+  private static final int ROUTER_CREATION_WAIT_TIME_SEC = 60;
 
   /**
    * This method is used to start the Verticle. It deploys a verticle in a cluster/single instance, reads the
@@ -150,9 +151,10 @@ public class ApiServerVerticle extends AbstractVerticle {
      * Start server only once router has at least one route (it will have only one, '/' since both
      * the OGC and STAC sub-routers are bound to that path).
      *
-     * Check every second for 20 seconds if router has been created. If it has, start server.
+     * Check every second for ROUTER_CREATION_WAIT_TIME_SEC seconds if router has been created. If
+     * it has, start server.
      */
-    AtomicInteger waitForRouterCounter = new AtomicInteger(20);
+    AtomicInteger waitForRouterCounter = new AtomicInteger(ROUTER_CREATION_WAIT_TIME_SEC);
     vertx.setPeriodic(1000, wait -> {
 
       if (!router.getRoutes().isEmpty()) {
