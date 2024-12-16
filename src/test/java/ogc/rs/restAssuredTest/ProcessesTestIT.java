@@ -6,12 +6,13 @@ import io.restassured.specification.RequestSpecification;
 import jdk.jfr.Description;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import static junit.framework.Assert.assertEquals;
 import static ogc.rs.common.Constants.DESCRIPTION_KEY;
 import static ogc.rs.common.Constants.INVALID_ENDPOINT_ERROR;
 import static ogc.rs.common.Constants.NOT_FOUND;
 import static ogc.rs.common.Constants.TYPE_KEY;
+
 
 /** Integration tests for the Processes endpoint. */
 @ExtendWith(RestAssuredConfigExtension.class)
