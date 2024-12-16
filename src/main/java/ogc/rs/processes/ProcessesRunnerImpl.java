@@ -11,8 +11,10 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
+import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
+import ogc.rs.common.S3ConfigsHolder;
 import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.s3MultiPartUploadForStacOnboarding.S3CompleteMultiPartUploadProcess;
@@ -24,6 +26,7 @@ import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import static ogc.rs.common.Constants.processException404;
@@ -42,6 +45,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
   private final UtilClass utilClass;
   private final JsonObject config;
   private final Vertx vertx;
+  private final S3ConfigsHolder s3conf;
   Logger LOGGER = LogManager.getLogger(ProcessesRunnerImpl.class);
 
   /**
@@ -58,26 +62,26 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
     this.utilClass = new UtilClass(pgPool);
     this.config = config;
     this.vertx = vertx;
+    this.s3conf = S3ConfigsHolder.createFromServerConfig(config.getJsonObject(S3ConfigsHolder.S3_CONFIGS_BLOCK_KEY_NAME));
   }
 
   /**
    * Returns an instance of {@link DataFromS3} for interacting with S3.
+   * 
+   * <b>Note: </b> This design only allows for one bucket to be used. It does not allow choosing a
+   * bucket <i>inside</i> the process. The processes need refactor to support the latter.
    *
    * @param config the configuration object containing S3 settings
    * @return a {@code DataFromS3} instance
    */
   private DataFromS3 getS3Object(JsonObject config) {
-    S3Config s3conf = new S3Config.Builder()
-        .endpoint(config.getString(S3Config.ENDPOINT_CONF_OP))
-        .bucket(config.getString(S3Config.BUCKET_CONF_OP))
-        .region(config.getString(S3Config.REGION_CONF_OP))
-        .accessKey(config.getString(S3Config.ACCESS_KEY_CONF_OP))
-        .secretKey(config.getString(S3Config.SECRET_KEY_CONF_OP))
-        .pathBasedAccess(config.getBoolean(S3Config.PATH_BASED_ACC_CONF_OP))
-        .build();
-
-    HttpClient httpClient = vertx.createHttpClient();
-    return new DataFromS3(httpClient, s3conf);
+    Optional<S3Config> conf = s3conf.getConfigByIdentifier("default");
+    
+    if (conf.isEmpty()) {
+      throw new OgcException(403, "Bucket not registered", "Please contact OGC server RS Admin");
+    }
+    
+    return new DataFromS3(vertx.createHttpClient(), conf.get());
   }
 
   /**
