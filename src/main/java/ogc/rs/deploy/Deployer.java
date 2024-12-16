@@ -21,6 +21,7 @@ import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
 import ogc.rs.apiserver.ApiServerVerticle;
 import ogc.rs.apiserver.router.RouterManager;
+import ogc.rs.common.S3ConfigsHolder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.nio.file.Files;
@@ -100,7 +101,8 @@ public class Deployer {
     private static JsonObject getConfigForModule(int moduleIndex, JsonObject configurations) {
         JsonObject commonConfigs=configurations.getJsonObject("commonConfig");
         JsonObject config = configurations.getJsonArray("modules").getJsonObject(moduleIndex);
-        return config.mergeIn(commonConfigs, true);
+        JsonObject s3Config = configurations.getJsonObject(S3ConfigsHolder.S3_CONFIGS_BLOCK_KEY_NAME);
+        return config.mergeIn(commonConfigs, true).mergeIn(s3Config);
     }
 
     /**
