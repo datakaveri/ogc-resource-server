@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -370,6 +370,7 @@ class MapTilesApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'DX-AAA-Token'
         ]
 
         return self.api_client.param_serialize(

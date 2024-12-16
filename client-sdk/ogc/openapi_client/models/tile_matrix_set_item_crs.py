@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -20,7 +20,6 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
-from openapi_client.models.object import object
 from typing import Optional, Set
 from typing_extensions import Self
 
