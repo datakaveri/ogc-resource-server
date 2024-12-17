@@ -331,7 +331,11 @@ public class DatabaseServiceImpl implements DatabaseService{
     client.withConnection(
         conn ->
             conn.preparedQuery(
-                    "Select id, title, description, bbox, temporal,license from collections_details")
+                            "SELECT collections_details.id, title, description,"
+                 + " bbox, temporal, license FROM collections_details JOIN collection_type "
+                 + "ON collections_details.id = collection_type.collection_id WHERE "
+                 + "collection_type.type = 'STAC' GROUP BY collections_details.id, title, "
+                 + "description, bbox, temporal, license")
                 .collecting(collector)
                 .execute()
                 .map(SqlResult::value)
@@ -421,7 +425,11 @@ public class DatabaseServiceImpl implements DatabaseService{
     client.withConnection(
         conn ->
             conn.preparedQuery(
-                    "SELECT id, title, description, bbox, temporal, license FROM collections_details where id = $1::uuid")
+                            "SELECT collections_details.id, title, "
+                + "description, bbox, temporal, license FROM collections_details "
+                + "JOIN collection_type ON collections_details.id = collection_type.collection_id "
+                + "WHERE collection_type.type = 'STAC' AND collections_details.id = $1::uuid GROUP "
+                + "BY collections_details.id, title, description, bbox, temporal, license")
                 .collecting(collector)
                 .execute(Tuple.of(UUID.fromString(collectionId)))
                 .map(SqlResult::value)
