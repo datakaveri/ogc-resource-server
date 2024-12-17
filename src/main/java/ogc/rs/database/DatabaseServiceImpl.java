@@ -41,6 +41,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         LOGGER.info("getCollection");
         Promise<List<JsonObject>> result = Promise.promise();
         Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+        Collector<Row, ? , List<JsonObject>> enclosureCollector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
            conn.preparedQuery("select collections_details.id, title, array_agg(distinct crs_to_srid.crs) as crs" +
                    ", collections_details.crs as \"storageCrs\", description, datetime_key, bbox, temporal," +
@@ -48,18 +49,35 @@ public class DatabaseServiceImpl implements DatabaseService{
                    " from collections_details join collection_supported_crs" +
                    " on collections_details.id = collection_supported_crs.collection_id join crs_to_srid" +
                    " on crs_to_srid.id = collection_supported_crs.crs_id join collection_type" +
-                   " on collections_details.id=collection_type.collection_id group by collections_details.id" +
+                   " on collections_details.id=collection_type.collection_id  where collection_type.type != 'STAC' group by collections_details.id" +
                    " having collections_details.id = $1::uuid")
                .collecting(collector)
-               .execute(Tuple.of(UUID.fromString( collectionId))).map(SqlResult::value))
-            .onSuccess(success -> {
-                LOGGER.debug("Built OGC Collection Response - {}", success);
-                result.complete(success);
+               .execute(Tuple.of(UUID.fromString( collectionId))).map(SqlResult::value)
+            .onSuccess(success ->  {
+                String query =
+                        "SELECT * from collections_enclosure where collections_id = $1::uuid";
+                conn.preparedQuery(query)
+                        .collecting(enclosureCollector)
+                        .execute(Tuple.of(UUID.fromString(collectionId)))
+                        .map(SqlResult::value)
+                        .onSuccess(
+                                enclosureResult-> {
+                                    if (!enclosureResult.isEmpty()) {
+                                        success.get(0).put("enclosure", enclosureResult);
+                                    }
+                                    result.complete(success);
+                                })
+                        .onFailure(
+                                failed -> {
+                                    LOGGER.error("Failed at getFeature- {}", failed.getMessage());
+                                    result.fail("Error!");
+                                });
+
             })
             .onFailure(fail -> {
                 LOGGER.error("Failed at getCollection- {}",fail.getMessage());
                 result.fail("Error!");
-            });
+            }));
         return result.future();
     }
 
@@ -74,18 +92,53 @@ public class DatabaseServiceImpl implements DatabaseService{
                         " from collections_details join collection_supported_crs" +
                         " on collections_details.id = collection_supported_crs.collection_id join crs_to_srid" +
                         " on crs_to_srid.id = collection_supported_crs.crs_id join collection_type" +
-                        " on collections_details.id = collection_type.collection_id group by collections_details.id")
+                        " on collections_details.id = collection_type.collection_id where collection_type.type!= 'STAC' group by collections_details.id")
                     .collecting(collector)
                     .execute()
-                    .map(SqlResult::value))
+                    .map(SqlResult::value)
             .onSuccess(success -> {
-                LOGGER.debug("Collections Result: {}", success.toString());
-                result.complete(success);
+                if (success.isEmpty()) {
+                    LOGGER.error("Collections table is empty!");
+                    result.fail(
+                            new OgcException(404, "Not found", "Collection table is Empty!"));
+                } else {
+                    conn.preparedQuery("SELECT * FROM COLLECTIONS_ENCLOSURE")
+                            .collecting(collector)
+                            .execute()
+                            .map(SqlResult::value)
+                            .onSuccess(
+                                    enclosureResult -> {
+                                        if (enclosureResult.isEmpty()) {
+                                            LOGGER.warn("Assets table is empty!");
+                                            result.complete(success);
+                                        } else {
+                                            for (JsonObject enclosure : enclosureResult) {
+                                                for (JsonObject successItem : success) {
+                                                    if (successItem
+                                                            .getString("id")
+                                                            .equals(enclosure.getString("collections_id"))) {
+                                                        if (successItem.containsKey("enclosure")) {
+                                                            successItem.getJsonArray("enclosure").add(enclosure);
+                                                        } else {
+                                                            successItem.put("enclosure", new JsonArray().add(enclosure));
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            result.complete(success);
+                                        }
+                                    })
+                            .onFailure(
+                                    fail -> {
+                                        LOGGER.error("Failed to get enclosure links! - {}", fail.getMessage());
+                                        result.fail("Error!");
+                                    });
+                }
             })
             .onFailure(fail -> {
                 LOGGER.error("Failed to getCollections! - {}", fail.getMessage());
                 result.fail("Error!");
-            });
+            }));
         return result.future();
     }
     @Override
