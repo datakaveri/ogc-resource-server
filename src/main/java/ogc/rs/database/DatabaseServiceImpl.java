@@ -981,7 +981,9 @@ public class DatabaseServiceImpl implements DatabaseService{
         Collectors.mapping(Row::toJson, Collectors.toList());
 
     final String GET_COLLECTION_INFO =
-        " SELECT id, title, description FROM collections_details WHERE id != ALL($1::UUID[])";
+        "SELECT collections_details.id, title, description FROM collections_details "
+      + "JOIN collection_type ON collections_details.id = collection_type.collection_id "
+      + "WHERE collections_details.id != ALL($1::UUID[]) AND collection_type.type != 'STAC'";
 
     Future<List<JsonObject>> newCollectionsJson =
         client.withConnection(
@@ -1003,4 +1005,42 @@ public class DatabaseServiceImpl implements DatabaseService{
 
     return result.future();
   }
+
+    @Override
+    public Future<List<JsonObject>> getStacCollectionMetadataForOasSpec(
+            List<String> existingCollectionUuidIds) {
+
+        Promise<List<JsonObject>> result = Promise.promise();
+
+        UUID[] existingCollectionIdsArr =
+                existingCollectionUuidIds.stream().map(i -> UUID.fromString(i)).toArray(UUID[]::new);
+
+        Collector<Row, ?, List<JsonObject>> collector =
+                Collectors.mapping(Row::toJson, Collectors.toList());
+
+        final String GET_STAC_COLLECTION_INFO =
+                "SELECT collections_details.id, title, description FROM collections_details JOIN "
+              + "collection_type ON collections_details.id = collection_type.collection_id WHERE "
+              + "collections_details.id != ALL($1::UUID[]) AND collection_type.type = 'STAC'";
+
+        Future<List<JsonObject>> newCollectionsJson =
+                client.withConnection(
+                        conn ->
+                                conn.preparedQuery(GET_STAC_COLLECTION_INFO)
+                                        .collecting(collector)
+                                        .execute(Tuple.of(existingCollectionIdsArr))
+                                        .map(res -> res.value()));
+
+        newCollectionsJson
+                .onSuccess(succ -> result.complete(succ))
+                .onFailure(
+                        fail -> {
+                            LOGGER.error(
+                                    "Something went wrong when querying DB for new OGC collections {}",
+                                    fail.getMessage());
+                            result.fail(fail);
+                        });
+
+        return result.future();
+    }
 }
