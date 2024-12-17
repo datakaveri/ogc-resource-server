@@ -436,7 +436,8 @@ public class DatabaseServiceImpl implements DatabaseService{
                 .onSuccess(
                     success -> {
                       LOGGER.debug("DB result - {}", success);
-                      if (success.equals(0)) {
+                      if (success.isEmpty()) {
+                        LOGGER.debug("Stac Collection of id {} Not Found!", collectionId);
                         result.fail(new OgcException(404, "Not found", "Collection not found"));
                       }
                       JsonObject collection = success.get(0);
