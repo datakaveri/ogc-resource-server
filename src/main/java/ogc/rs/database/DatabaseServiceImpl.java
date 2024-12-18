@@ -86,59 +86,25 @@ public class DatabaseServiceImpl implements DatabaseService{
         Promise<List<JsonObject>> result = Promise.promise();
         Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
-                conn.preparedQuery("select collections_details.id, title, array_agg(distinct crs_to_srid.crs) as crs" +
-                        ", collections_details.crs as \"storageCrs\", description, datetime_key, bbox, temporal" +
-                        ", array_agg(distinct collection_type.type) as type" +
-                        " from collections_details join collection_supported_crs" +
-                        " on collections_details.id = collection_supported_crs.collection_id join crs_to_srid" +
-                        " on crs_to_srid.id = collection_supported_crs.crs_id join collection_type" +
-                        " on collections_details.id = collection_type.collection_id where collection_type.type!= 'STAC' group by collections_details.id")
+                conn.preparedQuery("select collections_details.id, collections_details.title, array_agg(DISTINCT crs_to_srid.crs) as crs" +
+                        " , collections_details.crs as \"storageCrs\", collections_details.description, collections_details.datetime_key, " +
+                        "   collections_details.bbox, collections_details.temporal, jsonb_agg(distinct(row_to_json(collections_enclosure.*)::jsonb " +
+                        "   - 'collections_id')) AS enclosure, ARRAY_AGG(DISTINCT collection_type.type) AS type FROM collections_details LEFT " +
+                        "   JOIN collections_enclosure ON collections_details.id = collections_enclosure.collections_id JOIN collection_supported_crs ON " +
+                        "   collections_details.id = collection_supported_crs.collection_id JOIN crs_to_srid ON crs_to_srid.id = " +
+                        "   collection_supported_crs.crs_id JOIN collection_type ON collections_details.id = collection_type.collection_id " +
+                        "   WHERE collection_type.type != 'STAC' GROUP BY collections_details.id;")
                     .collecting(collector)
                     .execute()
-                    .map(SqlResult::value)
+                    .map(SqlResult::value))
             .onSuccess(success -> {
-                if (success.isEmpty()) {
-                    LOGGER.error("Collections table is empty!");
-                    result.fail(
-                            new OgcException(404, "Not found", "Collection table is Empty!"));
-                } else {
-                    conn.preparedQuery("SELECT * FROM COLLECTIONS_ENCLOSURE")
-                            .collecting(collector)
-                            .execute()
-                            .map(SqlResult::value)
-                            .onSuccess(
-                                    enclosureResult -> {
-                                        if (enclosureResult.isEmpty()) {
-                                            LOGGER.warn("Assets table is empty!");
-                                            result.complete(success);
-                                        } else {
-                                            for (JsonObject enclosure : enclosureResult) {
-                                                for (JsonObject successItem : success) {
-                                                    if (successItem
-                                                            .getString("id")
-                                                            .equals(enclosure.getString("collections_id"))) {
-                                                        if (successItem.containsKey("enclosure")) {
-                                                            successItem.getJsonArray("enclosure").add(enclosure);
-                                                        } else {
-                                                            successItem.put("enclosure", new JsonArray().add(enclosure));
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            result.complete(success);
-                                        }
-                                    })
-                            .onFailure(
-                                    fail -> {
-                                        LOGGER.error("Failed to get enclosure links! - {}", fail.getMessage());
-                                        result.fail("Error!");
-                                    });
-                }
+                LOGGER.debug("Collections Result: {}", success.toString());
+                result.complete(success);
             })
             .onFailure(fail -> {
                 LOGGER.error("Failed to getCollections! - {}", fail.getMessage());
                 result.fail("Error!");
-            }));
+            });
         return result.future();
     }
     @Override
@@ -331,11 +297,10 @@ public class DatabaseServiceImpl implements DatabaseService{
     client.withConnection(
         conn ->
             conn.preparedQuery(
-                            "SELECT collections_details.id, title, description,"
+                    "Select collections_details.id, title, description,"
                  + " bbox, temporal, license FROM collections_details JOIN collection_type "
                  + "ON collections_details.id = collection_type.collection_id WHERE "
-                 + "collection_type.type = 'STAC' GROUP BY collections_details.id, title, "
-                 + "description, bbox, temporal, license")
+                 + "collection_type.type = 'STAC' ")
                 .collecting(collector)
                 .execute()
                 .map(SqlResult::value)
@@ -428,8 +393,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                             "SELECT collections_details.id, title, "
                 + "description, bbox, temporal, license FROM collections_details "
                 + "JOIN collection_type ON collections_details.id = collection_type.collection_id "
-                + "WHERE collection_type.type = 'STAC' AND collections_details.id = $1::uuid GROUP "
-                + "BY collections_details.id, title, description, bbox, temporal, license")
+                + "WHERE collection_type.type = 'STAC' AND collections_details.id = $1::uuid ")
                 .collecting(collector)
                 .execute(Tuple.of(UUID.fromString(collectionId)))
                 .map(SqlResult::value)

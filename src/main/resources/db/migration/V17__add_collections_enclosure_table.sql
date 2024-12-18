@@ -16,3 +16,7 @@ CREATE INDEX idx_collections_enclosure_collections_id
 ON collections_enclosure (collections_id);
 
 GRANT SELECT, INSERT, DELETE ON collections_enclosure TO  ${ogcUser}
+
+-- TRUNCATE table stac_collections_assets as the data has been shifted to collections_enclosure
+TRUNCATE TABLE stac_collections_assets;
+
