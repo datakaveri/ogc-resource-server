@@ -72,30 +72,4 @@ public class OgcCollectionMetadata {
     return block;
   }
 
-  /**
-   * 
-   * Generate OpenAPI JSON block for all STAC routes that this collection can have.
-   * 
-   * @return JSON object containing OpenAPI paths for all STAC routes for this collection.
-   */
-  public JsonObject generateStacOasBlock() {
-    JsonObject block = new JsonObject();
-
-    /* GET /stac/collections/<collection-ID> */
-    JsonObject collectionSpecific = new JsonObject();
-
-    collectionSpecific.put("tags", new JsonArray().add(title));
-    collectionSpecific.put("summary", STAC_GET_SPECIFIC_ITEMLESS_COLLECTION_SUMMARY.get());
-    collectionSpecific.put("operationId", STAC_GET_SPECIFIC_ITEMLESS_COLLECTION_OPERATION_ID.get());
-    collectionSpecific.put("responses",
-        new JsonObject()
-            .put("200", new JsonObject().put("$ref", "#/components/responses/stacCollection"))
-            .put("404", new JsonObject().put("$ref", "#/components/responses/NotFound"))
-            .put("500", new JsonObject().put("$ref", "#/components/responses/ServerError")));
-
-    block.put(STAC_GET_SPECIFIC_ITEMLESS_COLLECTION_ENDPOINT.get(),
-        new JsonObject().put("get", collectionSpecific));
-
-    return block;
-  }
 }
