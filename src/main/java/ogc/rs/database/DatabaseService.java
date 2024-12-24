@@ -6,7 +6,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-
+import ogc.rs.apiserver.util.StacItemSearchParams;
 import java.util.List;
 import java.util.Map;
 
@@ -40,8 +40,6 @@ public interface DatabaseService {
     Future<List<JsonObject>> getStacItems(String collectionId, int limit, int offset);
 
     Future<JsonObject> getStacItemById(String collectionId, String stacItemId);
-
-    Future<JsonObject> stacItemSearch(Map<String, String> queryParams);
 
     Future<List<JsonObject>> getTileMatrixSetMetaData(String tileMatrixSet);
 
@@ -81,4 +79,13 @@ public interface DatabaseService {
      * @return list of {@link JsonObject}, which is cast to the required type by the caller.
      */
     Future<List<JsonObject>> getCollectionMetadataForOasSpec(List<String> existingCollectionUuidIds);
+    
+    
+    /**
+     * Run STAC Item Search query given query params in {@link StacItemSearchParams} object.
+     * 
+     * @param params contains all the query params for STAC Item Search
+     * @return JSON response data
+     */
+    Future<JsonObject> stacItemSearch(StacItemSearchParams params);
 }
