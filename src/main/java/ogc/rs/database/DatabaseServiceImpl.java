@@ -19,6 +19,7 @@ import java.util.UUID;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.apiserver.util.StacItemSearchParams;
 import ogc.rs.database.util.FeatureQueryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -443,7 +444,7 @@ public class DatabaseServiceImpl implements DatabaseService{
             ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb - 'item_id')) as assetobjects" +
             ", 'Feature' as type, '%1$s' as collection from \"%1$s\" as item_table join stac_items_assets" +
             " on item_table.id=stac_items_assets.item_id" +
-            " group by item_table.id, item_table.geom, item_table.bbox" +
+            " group by item_table.id, item_table.geom, item_table.bbox, item_table.p_id" +
             ", item_table.properties having p_id >= %2$d order by p_id limit %3$d"
         , collectionId, offset, limit);
     client.withConnection(
@@ -501,36 +502,52 @@ public class DatabaseServiceImpl implements DatabaseService{
   }
 
   @Override
-  public Future<JsonObject> stacItemSearch(Map<String, String> queryParams) {
+  public Future<JsonObject> stacItemSearch(StacItemSearchParams params) {
     LOGGER.debug("stacItemSearch");
+    
     Promise<JsonObject> result = Promise.promise();
-    Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
-    String[] collectionIds = queryParams.get("collections").split(",");
-    FeatureQueryBuilder featureQuery = new FeatureQueryBuilder(collectionIds);
-    featureQuery.setLimit(Integer.parseInt(queryParams.getOrDefault("limit","10")));
-    featureQuery.setOffset(Integer.parseInt(queryParams.getOrDefault("offset", "0")));
+    final String STAC_ITEMS_DATETIME_KEY = "properties ->> 'datetime'";
 
-    if (queryParams.containsKey("bbox")){
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+
+    FeatureQueryBuilder featureQuery = new FeatureQueryBuilder();
+
+    featureQuery.setLimit(params.getLimit());
+    featureQuery.setOffset(params.getOffset());
+
+    if (!params.getBbox().isEmpty()) {
       featureQuery.setBboxCrsSrid(String.valueOf(DEFAULT_CRS_SRID));
-      featureQuery.setBbox(queryParams.get("bbox"), String.valueOf(DEFAULT_CRS_SRID));
-    }
-    //TODO: convert individual DB calls to a transaction
-    if (queryParams.containsKey("datetime")) {
-      featureQuery.setDatetime(queryParams.get("datetime"));
+      featureQuery.setBbox(
+          params.getBbox().stream().map(i -> i.toString()).collect(Collectors.joining(",")),
+          String.valueOf(DEFAULT_CRS_SRID));
     }
 
-    if (queryParams.containsKey("ids")) {
-      featureQuery.setItemIds(queryParams.get("ids"));
+    if (params.getDatetime() != null) {
+      featureQuery.setDatetimeKey(STAC_ITEMS_DATETIME_KEY);
+      featureQuery.setDatetime(params.getDatetime());
     }
 
-    if (queryParams.containsKey("intersects")) {
-      featureQuery.setGeometryIntersects(queryParams.get("geometry"));
+    if (!params.getCollections().isEmpty()) {
+      featureQuery.setStacCollectionIds(params.getCollections().toArray(String[]::new));
     }
+
+    if (!params.getIds().isEmpty()) {
+      featureQuery.setStacItemIds(params.getIds().toArray(String[]::new));
+    }
+
+    if (params.getIntersects() != null) {
+      featureQuery.setStacIntersectsGeom(params.getIntersects());
+    }
+    
+    Tuple tuple = Tuple.tuple();
+    String builtQuery = featureQuery.buildItemSearchSqlString(tuple);
 
     JsonObject resultJson = new JsonObject();
+    
     client.withConnection(conn ->
-        conn.preparedQuery(featureQuery.buildItemSearchSqlString())
-          .collecting(collector).execute().map(SqlResult::value)
+        conn.preparedQuery(builtQuery)
+          .collecting(collector).execute(tuple).map(SqlResult::value)
           .onSuccess(success -> {
             if (!success.isEmpty())
               resultJson
@@ -670,9 +687,27 @@ public class DatabaseServiceImpl implements DatabaseService{
                       .onSuccess(successAsset -> {
                         if (successAsset.isEmpty()) {
                           LOGGER.error("Given asset is not present in either stac_collections_assets or " +
-                              "stac_items_assets table");
-                          result.fail(new OgcException(404, "Not found", "Asset not found"));
-                        }
+                              "stac_items_assets table. Trying collections_enclosure table.");
+                          client.withConnection(conn2 ->
+                            conn2.preparedQuery("select * from collections_enclosure where id = $1::uuid")
+                                    .collecting(collector)
+                                    .execute(Tuple.of(UUID.fromString(assetId)))
+                                    .map(SqlResult::value)
+                                    .onSuccess(successAssetEnclosure -> {
+                                      if (successAssetEnclosure.isEmpty()) {
+                                        LOGGER.error(" Given asset is not present in either stac_collection_assets, " +
+                                                        "stac_items_assets table or collections_enclosure");
+                                        result.fail(new OgcException(404, "Not found", "Asset not found"));
+                                      } else {
+                                        LOGGER.debug("Asset Result: {}", successAsset.get(0));
+                                        result.complete(successAsset.get(0));
+                                      }
+                                    })
+                                    .onFailure(failedAssetEnclosure -> {
+                                      LOGGER.error("Failed to get assets! - {}", failedAssetEnclosure.getMessage());
+                                      result.fail("Error!");
+                                    }));
+                                                  }
                         else {
                           LOGGER.debug("Asset Result: {}", successAsset.get(0));
                           result.complete(successAsset.get(0));
