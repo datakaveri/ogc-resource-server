@@ -60,22 +60,6 @@ public class OgcCollectionsEntity implements GisEntityInterface {
   @Override
   public void giveStacRoutes(StacRouterBuilder stacRouterBuilder) {
 
-    RouterBuilder builder = stacRouterBuilder.routerBuilder;
-    ApiServerVerticle apiServerVerticle = stacRouterBuilder.apiServerVerticle;
-    FailureHandler failureHandler = stacRouterBuilder.failureHandler;
-    
-    List<String> collectionSpecificOpIds = builder.operations().stream()
-        .filter(op -> op.getOperationId().matches(OgcCollectionMetadata.STAC_OP_ID_PREFIX_REGEX))
-        .map(op -> op.getOperationId()).collect(Collectors.toList());
-
-    collectionSpecificOpIds.forEach(opId -> {
-      if (opId.matches(OgcCollectionMetadata.STAC_GET_SPECIFIC_ITEMLESS_COLLECTION_OP_ID_REGEX)) {
-        builder.operation(opId).handler(apiServerVerticle::getStacCollection)
-            .handler(apiServerVerticle::putCommonResponseHeaders)
-            .handler(apiServerVerticle::buildResponse)
-            .failureHandler(failureHandler);
-      }
-    });
   }
 
   @Override
@@ -108,16 +92,13 @@ public class OgcCollectionsEntity implements GisEntityInterface {
 
     Future<OasFragments> result = metadataObjList.compose(list -> {
       List<JsonObject> ogcFrags = new ArrayList<JsonObject>();
-      List<JsonObject> stacFrags = new ArrayList<JsonObject>();
 
       list.forEach(obj -> {
         ogcFrags.add(obj.generateOgcOasBlock());
-        stacFrags.add(obj.generateStacOasBlock());
       });
 
       OasFragments fragments = new OasFragments();
       fragments.setOgc(ogcFrags);
-      fragments.setStac(stacFrags);
 
       return Future.succeededFuture(fragments);
     });

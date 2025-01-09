@@ -898,6 +898,28 @@ public class ApiServerVerticle extends AbstractVerticle {
                 .put("templated","true")))
         .put("itemType", "feature")
         .put("crs", collection.getJsonArray("crs"));
+    if (collection.getJsonArray("enclosure") != null && !collection.getJsonArray("enclosure").isEmpty()) {
+      collection.getJsonArray("enclosure")
+              .forEach(enclosureJson -> {
+                // Ensure the enclosure is not null
+                if (enclosureJson != null) {
+                  JsonObject enclosure = new JsonObject();
+                  enclosure.mergeIn((JsonObject) enclosureJson);
+                  String href =
+                          hostName + ogcBasePath + "assets/" + enclosure.getString("id");
+                  enclosure.put("href", href);
+                  enclosure.put("rel", "enclosure");
+                  enclosure.put("length", enclosure.getInteger("size"));
+                  enclosure.remove("size");
+                  enclosure.remove("id");
+                  enclosure.remove("collections_id");
+                  // enclosure.remove("role");
+                  collection.getJsonArray("links").add(enclosure);
+                }
+              });
+      collection.remove("enclosure");
+    }
+
     if (success.get(0).getJsonArray("type").contains("COVERAGE")) {
       collection
           .getJsonArray("links")

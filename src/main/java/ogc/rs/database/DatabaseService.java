@@ -79,8 +79,16 @@ public interface DatabaseService {
      * @return list of {@link JsonObject}, which is cast to the required type by the caller.
      */
     Future<List<JsonObject>> getCollectionMetadataForOasSpec(List<String> existingCollectionUuidIds);
-    
-    
+
+    /**
+     * Get all STAC collections metadata to be used for OpenAPI spec generation.
+     *
+     * @param existingCollectionUuidIds UUID IDs of collections that are already part of the spec.
+     * @return list of {@link JsonObject}, which is cast to the required type by the caller.
+     */
+    Future<List<JsonObject>> getStacCollectionMetadataForOasSpec(List<String> existingCollectionUuidIds);
+
+
     /**
      * Run STAC Item Search query given query params in {@link StacItemSearchParams} object.
      * 

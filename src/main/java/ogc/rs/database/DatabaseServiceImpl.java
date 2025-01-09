@@ -42,6 +42,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         LOGGER.info("getCollection");
         Promise<List<JsonObject>> result = Promise.promise();
         Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+        Collector<Row, ? , List<JsonObject>> enclosureCollector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
            conn.preparedQuery("select collections_details.id, title, array_agg(distinct crs_to_srid.crs) as crs" +
                    ", collections_details.crs as \"storageCrs\", description, datetime_key, bbox, temporal," +
@@ -49,18 +50,35 @@ public class DatabaseServiceImpl implements DatabaseService{
                    " from collections_details join collection_supported_crs" +
                    " on collections_details.id = collection_supported_crs.collection_id join crs_to_srid" +
                    " on crs_to_srid.id = collection_supported_crs.crs_id join collection_type" +
-                   " on collections_details.id=collection_type.collection_id group by collections_details.id" +
+                   " on collections_details.id=collection_type.collection_id  where collection_type.type != 'STAC' group by collections_details.id" +
                    " having collections_details.id = $1::uuid")
                .collecting(collector)
-               .execute(Tuple.of(UUID.fromString( collectionId))).map(SqlResult::value))
-            .onSuccess(success -> {
-                LOGGER.debug("Built OGC Collection Response - {}", success);
-                result.complete(success);
+               .execute(Tuple.of(UUID.fromString( collectionId))).map(SqlResult::value)
+            .onSuccess(success ->  {
+                String query =
+                        "SELECT * from collections_enclosure where collections_id = $1::uuid";
+                conn.preparedQuery(query)
+                        .collecting(enclosureCollector)
+                        .execute(Tuple.of(UUID.fromString(collectionId)))
+                        .map(SqlResult::value)
+                        .onSuccess(
+                                enclosureResult-> {
+                                    if (!enclosureResult.isEmpty()) {
+                                        success.get(0).put("enclosure", enclosureResult);
+                                    }
+                                    result.complete(success);
+                                })
+                        .onFailure(
+                                failed -> {
+                                    LOGGER.error("Failed at getFeature- {}", failed.getMessage());
+                                    result.fail("Error!");
+                                });
+
             })
             .onFailure(fail -> {
                 LOGGER.error("Failed at getCollection- {}",fail.getMessage());
                 result.fail("Error!");
-            });
+            }));
         return result.future();
     }
 
@@ -69,13 +87,14 @@ public class DatabaseServiceImpl implements DatabaseService{
         Promise<List<JsonObject>> result = Promise.promise();
         Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         client.withConnection(conn ->
-                conn.preparedQuery("select collections_details.id, title, array_agg(distinct crs_to_srid.crs) as crs" +
-                        ", collections_details.crs as \"storageCrs\", description, datetime_key, bbox, temporal" +
-                        ", array_agg(distinct collection_type.type) as type" +
-                        " from collections_details join collection_supported_crs" +
-                        " on collections_details.id = collection_supported_crs.collection_id join crs_to_srid" +
-                        " on crs_to_srid.id = collection_supported_crs.crs_id join collection_type" +
-                        " on collections_details.id = collection_type.collection_id group by collections_details.id")
+                conn.preparedQuery("select collections_details.id, collections_details.title, array_agg(DISTINCT crs_to_srid.crs) as crs" +
+                        " , collections_details.crs as \"storageCrs\", collections_details.description, collections_details.datetime_key, " +
+                        "   collections_details.bbox, collections_details.temporal, jsonb_agg(distinct(row_to_json(collections_enclosure.*)::jsonb " +
+                        "   - 'collections_id')) AS enclosure, ARRAY_AGG(DISTINCT collection_type.type) AS type FROM collections_details LEFT " +
+                        "   JOIN collections_enclosure ON collections_details.id = collections_enclosure.collections_id JOIN collection_supported_crs ON " +
+                        "   collections_details.id = collection_supported_crs.collection_id JOIN crs_to_srid ON crs_to_srid.id = " +
+                        "   collection_supported_crs.crs_id JOIN collection_type ON collections_details.id = collection_type.collection_id " +
+                        "   WHERE collection_type.type != 'STAC' GROUP BY collections_details.id;")
                     .collecting(collector)
                     .execute()
                     .map(SqlResult::value))
@@ -279,7 +298,10 @@ public class DatabaseServiceImpl implements DatabaseService{
     client.withConnection(
         conn ->
             conn.preparedQuery(
-                    "Select id, title, description, bbox, temporal,license from collections_details")
+                    "Select collections_details.id, title, description,"
+                 + " bbox, temporal, license FROM collections_details JOIN collection_type "
+                 + "ON collections_details.id = collection_type.collection_id WHERE "
+                 + "collection_type.type = 'STAC' ")
                 .collecting(collector)
                 .execute()
                 .map(SqlResult::value)
@@ -369,14 +391,18 @@ public class DatabaseServiceImpl implements DatabaseService{
     client.withConnection(
         conn ->
             conn.preparedQuery(
-                    "SELECT id, title, description, bbox, temporal, license FROM collections_details where id = $1::uuid")
+                            "SELECT collections_details.id, title, "
+                + "description, bbox, temporal, license FROM collections_details "
+                + "JOIN collection_type ON collections_details.id = collection_type.collection_id "
+                + "WHERE collection_type.type = 'STAC' AND collections_details.id = $1::uuid ")
                 .collecting(collector)
                 .execute(Tuple.of(UUID.fromString(collectionId)))
                 .map(SqlResult::value)
                 .onSuccess(
                     success -> {
                       LOGGER.debug("DB result - {}", success);
-                      if (success.equals(0)) {
+                      if (success.isEmpty()) {
+                        LOGGER.debug("Stac Collection of id {} Not Found!", collectionId);
                         result.fail(new OgcException(404, "Not found", "Collection not found"));
                       }
                       JsonObject collection = success.get(0);
@@ -661,9 +687,27 @@ public class DatabaseServiceImpl implements DatabaseService{
                       .onSuccess(successAsset -> {
                         if (successAsset.isEmpty()) {
                           LOGGER.error("Given asset is not present in either stac_collections_assets or " +
-                              "stac_items_assets table");
-                          result.fail(new OgcException(404, "Not found", "Asset not found"));
-                        }
+                              "stac_items_assets table. Trying collections_enclosure table.");
+                          client.withConnection(conn2 ->
+                            conn2.preparedQuery("select * from collections_enclosure where id = $1::uuid")
+                                    .collecting(collector)
+                                    .execute(Tuple.of(UUID.fromString(assetId)))
+                                    .map(SqlResult::value)
+                                    .onSuccess(successAssetEnclosure -> {
+                                      if (successAssetEnclosure.isEmpty()) {
+                                        LOGGER.error(" Given asset is not present in either stac_collection_assets, " +
+                                                        "stac_items_assets table or collections_enclosure");
+                                        result.fail(new OgcException(404, "Not found", "Asset not found"));
+                                      } else {
+                                        LOGGER.debug("Asset Result: {}", successAsset.get(0));
+                                        result.complete(successAsset.get(0));
+                                      }
+                                    })
+                                    .onFailure(failedAssetEnclosure -> {
+                                      LOGGER.error("Failed to get assets! - {}", failedAssetEnclosure.getMessage());
+                                      result.fail("Error!");
+                                    }));
+                                                  }
                         else {
                           LOGGER.debug("Asset Result: {}", successAsset.get(0));
                           result.complete(successAsset.get(0));
@@ -936,7 +980,9 @@ public class DatabaseServiceImpl implements DatabaseService{
         Collectors.mapping(Row::toJson, Collectors.toList());
 
     final String GET_COLLECTION_INFO =
-        " SELECT id, title, description FROM collections_details WHERE id != ALL($1::UUID[])";
+        "SELECT collections_details.id, title, description FROM collections_details "
+      + "JOIN collection_type ON collections_details.id = collection_type.collection_id "
+      + "WHERE collections_details.id != ALL($1::UUID[]) AND collection_type.type != 'STAC'";
 
     Future<List<JsonObject>> newCollectionsJson =
         client.withConnection(
@@ -958,4 +1004,42 @@ public class DatabaseServiceImpl implements DatabaseService{
 
     return result.future();
   }
+
+    @Override
+    public Future<List<JsonObject>> getStacCollectionMetadataForOasSpec(
+            List<String> existingCollectionUuidIds) {
+
+        Promise<List<JsonObject>> result = Promise.promise();
+
+        UUID[] existingCollectionIdsArr =
+                existingCollectionUuidIds.stream().map(i -> UUID.fromString(i)).toArray(UUID[]::new);
+
+        Collector<Row, ?, List<JsonObject>> collector =
+                Collectors.mapping(Row::toJson, Collectors.toList());
+
+        final String GET_STAC_COLLECTION_INFO =
+                "SELECT collections_details.id, title, description FROM collections_details JOIN "
+              + "collection_type ON collections_details.id = collection_type.collection_id WHERE "
+              + "collections_details.id != ALL($1::UUID[]) AND collection_type.type = 'STAC'";
+
+        Future<List<JsonObject>> newCollectionsJson =
+                client.withConnection(
+                        conn ->
+                                conn.preparedQuery(GET_STAC_COLLECTION_INFO)
+                                        .collecting(collector)
+                                        .execute(Tuple.of(existingCollectionIdsArr))
+                                        .map(res -> res.value()));
+
+        newCollectionsJson
+                .onSuccess(succ -> result.complete(succ))
+                .onFailure(
+                        fail -> {
+                            LOGGER.error(
+                                    "Something went wrong when querying DB for new OGC collections {}",
+                                    fail.getMessage());
+                            result.fail(fail);
+                        });
+
+        return result.future();
+    }
 }
