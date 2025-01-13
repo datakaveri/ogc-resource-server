@@ -1348,7 +1348,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   // /items for stac_collection
   public void getStacItems(RoutingContext routingContext){
-    String stacCollectionId = routingContext.pathParam("collectionId");
+    String stacCollectionId = routingContext.normalizedPath().split("/")[3];
     int limit = routingContext.queryParams().contains("limit")
         ? Integer.parseInt(routingContext.queryParams().get("limit")):10;
     int offset = routingContext.queryParams().contains("offset")
