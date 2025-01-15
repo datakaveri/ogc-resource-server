@@ -6,7 +6,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
@@ -16,6 +15,7 @@ import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
+import ogc.rs.processes.postPresignedUrlForStacOnboarding.S3PresignedPostUrlGenerationProcess;
 import ogc.rs.processes.tilesMetaDataOnboarding.TilesMetaDataOnboardingProcess;
 import ogc.rs.processes.s3PreSignedURLGeneration.S3PreSignedURLGenerationProcess;
 import ogc.rs.processes.util.Status;
@@ -111,6 +111,9 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
             break;
           case "S3PreSignedURLGeneration":
             processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, config);
+            break;
+          case "S3PresignedPostUrlGeneration":
+            processService = new S3PresignedPostUrlGenerationProcess(pgPool, webClient, config, getS3Object(config), vertx);
             break;
           case "TilesMetaDataOnboarding":
             processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, getS3Object(config), vertx);
