@@ -6,7 +6,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
@@ -16,6 +15,7 @@ import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
+import ogc.rs.processes.presignedPostUrlForStacOnboarding.S3PresignedPostUrlGenerationProcess;
 import ogc.rs.processes.tilesMetaDataOnboarding.TilesMetaDataOnboardingProcess;
 import ogc.rs.processes.s3PreSignedURLGeneration.S3PreSignedURLGenerationProcess;
 import ogc.rs.processes.util.Status;
@@ -66,13 +66,13 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
    */
   private DataFromS3 getS3Object(JsonObject config) {
     S3Config s3conf = new S3Config.Builder()
-        .endpoint(config.getString(S3Config.ENDPOINT_CONF_OP))
-        .bucket(config.getString(S3Config.BUCKET_CONF_OP))
-        .region(config.getString(S3Config.REGION_CONF_OP))
-        .accessKey(config.getString(S3Config.ACCESS_KEY_CONF_OP))
-        .secretKey(config.getString(S3Config.SECRET_KEY_CONF_OP))
-        .pathBasedAccess(config.getBoolean(S3Config.PATH_BASED_ACC_CONF_OP))
-        .build();
+            .endpoint(config.getString(S3Config.ENDPOINT_CONF_OP))
+            .bucket(config.getString(S3Config.BUCKET_CONF_OP))
+            .region(config.getString(S3Config.REGION_CONF_OP))
+            .accessKey(config.getString(S3Config.ACCESS_KEY_CONF_OP))
+            .secretKey(config.getString(S3Config.SECRET_KEY_CONF_OP))
+            .pathBasedAccess(config.getBoolean(S3Config.PATH_BASED_ACC_CONF_OP))
+            .build();
 
     HttpClient httpClient = vertx.createHttpClient();
     return new DataFromS3(httpClient, s3conf);
@@ -111,6 +111,9 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
             break;
           case "S3PreSignedURLGeneration":
             processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, config);
+            break;
+          case "S3PresignedPostUrlGeneration":
+            processService = new S3PresignedPostUrlGenerationProcess(pgPool, webClient, config, getS3Object(config), vertx);
             break;
           case "TilesMetaDataOnboarding":
             processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, getS3Object(config), vertx);
