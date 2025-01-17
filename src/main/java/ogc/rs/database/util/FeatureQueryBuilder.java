@@ -93,9 +93,9 @@ public class FeatureQueryBuilder {
     
     String datetimeFormat = "'yyyy-mm-dd\"T\"HH24:MI:SS\"Z\"'";
     
-    // to_timestamp('datetimeKey', 'datetimeFormat') 'operator' 'datetime' (from request);
+    // to_timestamp("datetimeKey", 'datetimeFormat') 'operator' 'datetime' (from request);
     String concatString =
-        " to_timestamp(" .concat(datetimeKey).concat(",").concat(datetimeFormat).concat(") ");
+        " to_timestamp(\"" .concat(datetimeKey).concat("\",").concat(datetimeFormat).concat(") ");
     
     if (!datetime.contains("/")) {
       this.datetime = concatString.concat("= '").concat(datetime).concat("'");
