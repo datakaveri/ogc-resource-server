@@ -22,6 +22,8 @@ public class Constants {
             "The specified item does not exist for the given resource.";
     public static final String SKIP_ITEM_EXISTENCE_CHECK_MESSAGE =
             "No item ID provided. Skipping item existence verification.";
+    public static final String S3_PRE_SIGNED_POST_URL_GENERATOR_FAILURE_MESSAGE =
+            "Failed to generate pre-signed URL";
     public static final String PROCESS_COMPLETE_MESSAGE =
             "Pre-Signed POST URL generation process completed successfully.";
     public static final String PROCESS_FAILURE_MESSAGE =

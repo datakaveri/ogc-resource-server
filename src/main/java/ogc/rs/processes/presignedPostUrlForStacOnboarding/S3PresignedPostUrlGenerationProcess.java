@@ -9,6 +9,7 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
+import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
@@ -85,7 +86,7 @@ public class S3PresignedPostUrlGenerationProcess implements ProcessService {
         Promise<JsonObject> promise = Promise.promise();
         String resourceId = requestInput.getString("collectionId");
         requestInput.put("resourceId", resourceId);
-        String s3KeyName = resourceId + "/" + requestInput.getString("itemId");
+        String s3KeyName = resourceId + "/" + requestInput.getString("itemId") + "/";
         requestInput.put("s3KeyName", s3KeyName);
         requestInput.put("progress", calculateProgress(1));
 
@@ -128,15 +129,15 @@ public class S3PresignedPostUrlGenerationProcess implements ProcessService {
                     if (ar.succeeded()) {
                         RowSet<Row> rows = ar.result();
                         if (rows.iterator().next().getInteger(0) > 0) {
-                            LOGGER.info("Resource {} is already onboarded as STAC.", resourceId);
+                            LOGGER.info("Resource {} is onboarded as a STAC item.", resourceId);
                             promise.complete();
                         } else {
                             LOGGER.error(RESOURCE_NOT_ONBOARDED_MESSAGE);
-                            promise.fail(RESOURCE_NOT_ONBOARDED_MESSAGE);
+                            promise.fail(new OgcException(404, "Not Found", RESOURCE_NOT_ONBOARDED_MESSAGE));
                         }
                     } else {
                         LOGGER.error("Failed to query collection_type table: {}", ar.cause().getMessage());
-                        promise.fail(ar.cause());
+                        promise.fail(new OgcException(500, "Internal Server Error", "Error checking collection_type table."));
                     }
                 });
 
@@ -171,11 +172,11 @@ public class S3PresignedPostUrlGenerationProcess implements ProcessService {
                             promise.complete();
                         } else {
                             LOGGER.error("No item with ID {} is associated with resource {}", itemId, resourceId);
-                            promise.fail(ITEM_NOT_EXISTS_MESSAGE);
+                            promise.fail(new OgcException(404, "Not Found", ITEM_NOT_EXISTS_MESSAGE));
                         }
                     } else {
                         LOGGER.error("Failed to query stac_collections_part: {}", ar.cause().getMessage());
-                        promise.fail(ar.cause());
+                        promise.fail(new OgcException(500, "Internal Server Error", "Error checking stac_collections_part."));
                     }
                 });
 
@@ -222,8 +223,8 @@ public class S3PresignedPostUrlGenerationProcess implements ProcessService {
 
             promise.complete(response);
         } catch (Exception e) {
-            LOGGER.error("Error during Pre-Signed URL generation: {}", e.getMessage());
-            promise.fail(e);
+            LOGGER.error(S3_PRE_SIGNED_POST_URL_GENERATOR_FAILURE_MESSAGE +  e.getMessage());
+            promise.fail(new OgcException(500, "Internal Server Error", S3_PRE_SIGNED_POST_URL_GENERATOR_FAILURE_MESSAGE));
         }
         return promise.future();
     }
