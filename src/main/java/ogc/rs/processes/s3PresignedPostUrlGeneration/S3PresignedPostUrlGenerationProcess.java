@@ -1,4 +1,4 @@
-package ogc.rs.processes.presignedPostUrlForStacOnboarding;
+package ogc.rs.processes.s3PresignedPostUrlGeneration;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -29,7 +29,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-import static ogc.rs.processes.presignedPostUrlForStacOnboarding.Constants.*;
+import static ogc.rs.processes.s3PresignedPostUrlGeneration.Constants.*;
 
 /**
  * The S3PresignedPostUrlGenerationProcess class handles the generation of
@@ -86,7 +86,7 @@ public class S3PresignedPostUrlGenerationProcess implements ProcessService {
         Promise<JsonObject> promise = Promise.promise();
         String resourceId = requestInput.getString("collectionId");
         requestInput.put("resourceId", resourceId);
-        String s3KeyName = resourceId + "/" + requestInput.getString("itemId") + "/";
+        String s3KeyName = resourceId + "/" + requestInput.getString("itemId");
         requestInput.put("s3KeyName", s3KeyName);
         requestInput.put("progress", calculateProgress(1));
 
@@ -240,7 +240,7 @@ public class S3PresignedPostUrlGenerationProcess implements ProcessService {
         String expiration = DateTimeFormatter.ISO_INSTANT.format(Instant.now().plusSeconds(600));  // Expire in 10 minutes
         String policyDoc = "{ \"expiration\": \"" + expiration + "\", \"conditions\": ["
                 + "{\"bucket\": \"" + s3conf.getBucket() + "\"},"
-                + "[\"starts-with\", \"$key\", \"" + s3KeyName + "/\"],"
+                + "[\"starts-with\", \"$key\", \"" + s3KeyName + "\"],"
                 + "{\"x-amz-algorithm\": \"AWS4-HMAC-SHA256\"},"
                 + "{\"x-amz-credential\": \"" + fields.get("X-Amz-Credential") + "\"},"
                 + "{\"x-amz-date\": \"" + fields.get("X-Amz-Date") + "\"}"

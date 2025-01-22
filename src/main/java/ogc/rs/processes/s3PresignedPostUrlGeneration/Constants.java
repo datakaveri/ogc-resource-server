@@ -1,4 +1,4 @@
-package ogc.rs.processes.presignedPostUrlForStacOnboarding;
+package ogc.rs.processes.s3PresignedPostUrlGeneration;
 
 public class Constants {
     // SQL query to check if the resource is already onboarded as stac

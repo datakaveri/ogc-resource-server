@@ -15,7 +15,7 @@ import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
-import ogc.rs.processes.presignedPostUrlForStacOnboarding.S3PresignedPostUrlGenerationProcess;
+import ogc.rs.processes.s3PresignedPostUrlGeneration.S3PresignedPostUrlGenerationProcess;
 import ogc.rs.processes.tilesMetaDataOnboarding.TilesMetaDataOnboardingProcess;
 import ogc.rs.processes.s3PreSignedURLGeneration.S3PreSignedURLGenerationProcess;
 import ogc.rs.processes.util.Status;
