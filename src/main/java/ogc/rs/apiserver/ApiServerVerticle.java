@@ -44,6 +44,7 @@ import ogc.rs.apiserver.util.AuthInfo;
 import ogc.rs.apiserver.util.AuthInfo.RoleEnum;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
+import ogc.rs.common.S3ConfigsHolder;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.ProcessException;
 import ogc.rs.catalogue.CatalogueService;
@@ -81,7 +82,7 @@ import static ogc.rs.metering.util.MeteringConstant.*;
  */
 public class ApiServerVerticle extends AbstractVerticle {
   private static final Logger LOGGER = LogManager.getLogger(ApiServerVerticle.class);
-  private S3Config s3conf;
+  private S3ConfigsHolder s3conf;
   CatalogueService catalogueService;
   MeteringService meteringService;
   private Router router;
@@ -126,14 +127,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     stacMetaJson.put("hostname", hostName);
 
     /* Initialize S3-related things */
-    s3conf = new S3Config.Builder()
-        .endpoint(config().getString(S3Config.ENDPOINT_CONF_OP))
-        .bucket(config().getString(S3Config.BUCKET_CONF_OP))
-        .region(config().getString(S3Config.REGION_CONF_OP))
-        .accessKey(config().getString(S3Config.ACCESS_KEY_CONF_OP))
-        .secretKey(config().getString(S3Config.SECRET_KEY_CONF_OP))
-        .pathBasedAccess(config().getBoolean(S3Config.PATH_BASED_ACC_CONF_OP))
-        .build();
+    s3conf = S3ConfigsHolder.createFromServerConfig(config().getJsonObject(S3ConfigsHolder.S3_CONFIGS_BLOCK_KEY_NAME));
 
     processService = ProcessesRunnerService.createProxy(vertx,PROCESSING_SERVICE_ADDRESS);
     dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
@@ -664,8 +658,15 @@ public class ApiServerVerticle extends AbstractVerticle {
     // need to set chunked for streaming response because Content-Length cannot be determined
     // beforehand.
     response.setChunked(true);
+    
+    Optional<S3Config> conf = s3conf.getConfigByIdentifier("default");
+    
+    if (conf.isEmpty()) {
+      throw new OgcException(403, "Bucket not registered", "Please contact OGC server RS Admin");
+    }
+    
     DataFromS3 dataFromS3 =
-        new DataFromS3(httpClient, s3conf);
+        new DataFromS3(httpClient, conf.get());
 
     // determine tile format if it is a map (PNG image) or vector (MVT tile) using request header.
     String encodingType = getEncodingFromRequest(routingContext.request().getHeader("Accept"));
@@ -1825,8 +1826,15 @@ public class ApiServerVerticle extends AbstractVerticle {
         .onSuccess(
             handler -> {
               response.putHeader("Content-Type", handler.getString("type"));
+
+    Optional<S3Config> conf = s3conf.getConfigByIdentifier("default");
+    
+    if (conf.isEmpty()) {
+      throw new OgcException(403, "Bucket not registered", "Please contact OGC server RS Admin");
+    }
+    
               DataFromS3 dataFromS3 =
-                  new DataFromS3(httpClient, s3conf);
+                  new DataFromS3(httpClient, conf.get());
               String urlString =
                   dataFromS3.getFullyQualifiedUrlString(handler.getString("href"));
               dataFromS3.setUrlFromString(urlString);
@@ -2279,8 +2287,15 @@ public class ApiServerVerticle extends AbstractVerticle {
         .onSuccess(
             handler -> {
               response.putHeader(CONTENT_TYPE, COLLECTION_COVERAGE_TYPE);
-              DataFromS3 dataFromS3 =
-                  new DataFromS3(httpClient, s3conf);
+
+    Optional<S3Config> conf = s3conf.getConfigByIdentifier("default");
+    
+    if (conf.isEmpty()) {
+      throw new OgcException(403, "Bucket not registered", "Please contact OGC server RS Admin");
+    }
+    
+    DataFromS3 dataFromS3 =
+        new DataFromS3(httpClient, conf.get());
               String urlString = dataFromS3.getFullyQualifiedUrlString(handler.getString("href"));
               dataFromS3.setUrlFromString(urlString);
               dataFromS3.setSignatureHeader(HttpMethod.GET);
