@@ -171,7 +171,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
     }
 
     /**
-     * Handles the process of making catalogue API requests, checking resource ownership,
+     * Handles the process of making catalogue API request, checking resource ownership,
      * and constructing the object key name.
      *
      * @param requestInput The input JSON object containing details like resourceId, userId, and fileType.
@@ -180,10 +180,10 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
     public Future<JsonObject> checkResourceOwnershipAndBuildS3ObjectKey(JsonObject requestInput) {
         Promise<JsonObject> promise = Promise.promise();
 
-        // Call catalogue API to get resource info
+        // Call catalogue API to get resource info (resourceGroup and other details)
         makeCatApiRequest(requestInput.getString("resourceId"))
                 .compose(resourceInfo -> {
-                    // Check resource ownership using resourceId
+                    // Check resource ownership using ownerUserId
                     String ownerUserId = resourceInfo.getString("ownerUserId");
                     if (!ownerUserId.equals(requestInput.getString("userId"))) {
                         // Ownership check failed
@@ -191,13 +191,9 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                         return Future.failedFuture(new OgcException(403, "Forbidden", RESOURCE_OWNERSHIP_ERROR));
                     }
 
-                    // Extract resourceId name (riName) and call CAT API to get resourceGroup ID info
-                    requestInput.put("riName", resourceInfo.getString("name"));
-                    return makeCatApiRequest(resourceInfo.getString("resourceGroup"));
-                })
-                .compose(groupInfo -> {
-                    // Extract resource group name and construct object key name
-                    requestInput.put("rgName", groupInfo.getString("name"));
+                    // Extract resourceGroup and set it in requestInput
+                    String resourceGroup = resourceInfo.getString("resourceGroup");
+                    requestInput.put("resourceGroup", resourceGroup);
 
                     // Determine file extension based on file type
                     String fileType = requestInput.getString("fileType").toLowerCase();
@@ -207,9 +203,10 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                         return Future.failedFuture(new OgcException(415, "Unsupported Media Type", UNSUPPORTED_FILE_TYPE_ERROR));
                     }
 
-                    // Construct the object key name and update requestInput
-                    String objectKeyName = requestInput.getString("rgName") + "/" +
-                            requestInput.getString("riName") + fileExtension;
+                    // Construct object key name using resourceId, resourceGroup, and file extension
+                    String resourceId = requestInput.getString("resourceId");
+                    String objectKeyName = resourceGroup + "/" + resourceId + fileExtension;
+
                     LOGGER.debug("Object key name is: {}", objectKeyName);
                     requestInput.put("objectKeyName", objectKeyName);
 
