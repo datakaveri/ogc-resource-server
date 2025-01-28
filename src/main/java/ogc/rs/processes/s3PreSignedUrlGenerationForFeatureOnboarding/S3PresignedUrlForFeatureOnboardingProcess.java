@@ -1,4 +1,4 @@
-package ogc.rs.processes.s3PreSignedURLGeneration;
+package ogc.rs.processes.s3PreSignedUrlGenerationForFeatureOnboarding;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -22,20 +22,18 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
-
 import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
-
 import static ogc.rs.processes.s3MultiPartUploadForStacOnboarding.Constants.HANDLE_FAILURE_MESSAGE;
-import static ogc.rs.processes.s3PreSignedURLGeneration.Constants.*;
+import static ogc.rs.processes.s3PreSignedUrlGenerationForFeatureOnboarding.Constants.*;
 
 /**
  * This class handles the process of generating an S3 Pre-Signed URL and updating the job status
  * of the process in a PostgreSQL database.
  */
-public class S3PreSignedURLGenerationProcess implements ProcessService {
-    private static final Logger LOGGER = LogManager.getLogger(S3PreSignedURLGenerationProcess.class);
+public class S3PresignedUrlForFeatureOnboardingProcess implements ProcessService {
+    private static final Logger LOGGER = LogManager.getLogger(S3PresignedUrlForFeatureOnboardingProcess.class);
     private final UtilClass utilClass;
     private final WebClient webClient;
     private final PgPool pgPool;
@@ -45,13 +43,13 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
     private int catServerPort;
 
     /**
-     * Constructor to initialize the S3PreSignedURLGenerationProcess with PostgreSQL pool, WebClient and configuration.
+     * Constructor to initialize the S3PresignedUrlForFeatureOnboardingProcess with PostgreSQL pool, WebClient and configuration.
      *
      * @param pgPool  The PostgreSQL connection pool.
      * @param webClient  The WebClient instance for making HTTP requests.
      * @param config  The configuration containing AWS and database details.
      */
-    public S3PreSignedURLGenerationProcess(PgPool pgPool, WebClient webClient,  JsonObject config) {
+    public S3PresignedUrlForFeatureOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config) {
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.webClient = webClient;
@@ -272,7 +270,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
      * @param requestInput The input JSON object containing AWS details such as bucket name, region, and object key.
      * @return A Future containing a JSON object with the generated Pre-Signed URL.
      */
-    private Future<JsonObject> generatePreSignedUrl(JsonObject requestInput) {
+    public Future<JsonObject> generatePreSignedUrl(JsonObject requestInput) {
         Promise<JsonObject> promise = Promise.promise();
         try {
             // Create AWS credentials and presigner

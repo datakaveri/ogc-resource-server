@@ -17,8 +17,9 @@ import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.s3MultiPartUploadForStacOnboarding.S3CompleteMultiPartUploadProcess;
 import ogc.rs.processes.s3MultiPartUploadForStacOnboarding.S3InitiateMultiPartUploadProcess;
+import ogc.rs.processes.s3PreSignedUrlGenerationForStaconboarding.S3PresignedUrlForStacOnboardingProcess;
+import ogc.rs.processes.s3PreSignedUrlGenerationForFeatureOnboarding.S3PresignedUrlForFeatureOnboardingProcess;
 import ogc.rs.processes.tilesMetaDataOnboarding.TilesMetaDataOnboardingProcess;
-import ogc.rs.processes.s3PreSignedURLGeneration.S3PreSignedURLGenerationProcess;
 import ogc.rs.processes.tilesOnboardingFromExistingFeature.TilesOnboardingFromExistingFeatureProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
@@ -112,7 +113,10 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
             processService = new CollectionAppendingProcess(pgPool, webClient, config, getS3Object(config), vertx);
             break;
           case "S3PreSignedURLGeneration":
-            processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, config);
+            processService = new S3PresignedUrlForFeatureOnboardingProcess(pgPool, webClient, config);
+            break;
+          case "S3PresignedUrlForStacOnboarding":
+            processService = new S3PresignedUrlForStacOnboardingProcess(pgPool, webClient, config, getS3Object(config), vertx);
             break;
           case "S3InitiateMultipartUpload":
             processService = new S3InitiateMultiPartUploadProcess(pgPool, webClient, config, getS3Object(config), vertx);
