@@ -2,7 +2,7 @@
 
 ARG VERSION="0.0.1-SNAPSHOT"
 # Getting GDAL latest image
-FROM ghcr.io/osgeo/gdal:ubuntu-small-3.8.5 as gdal-latest
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.7.3 as gdal-latest
 
 FROM maven:3-eclipse-temurin-11-focal
 
