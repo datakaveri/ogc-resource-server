@@ -40,6 +40,8 @@ import static ogc.rs.processes.util.Constants.PROCESS_EXIST_CHECK_QUERY;
  */
 public class ProcessesRunnerImpl implements ProcessesRunnerService {
 
+  public static final String S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY = "s3BucketIdentifier";
+  
   private final PgPool pgPool;
   private final WebClient webClient;
   private final UtilClass utilClass;
@@ -66,22 +68,39 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
   }
 
   /**
-   * Returns an instance of {@link DataFromS3} for interacting with S3.
+   * Returns an instance of {@link S3Config} for interacting with a particular S3 bucket. Checks if
+   * process input has key {@value #S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY}, if value maps to an S3
+   * bucket identifier present in {@link ProcessesRunnerImpl#s3conf}, returns the {@link S3Config}
+   * object for that bucket, else throws an {@link OgcException}.
    * 
-   * <b>Note: </b> This design only allows for one bucket to be used. It does not allow choosing a
-   * bucket <i>inside</i> the process. The processes need refactor to support the latter.
-   *
-   * @param config the configuration object containing S3 settings
-   * @return a {@code DataFromS3} instance
+   * @param input the process input
+   * @return a {@link S3Config} instance or <code>null</code> if the process input does not have the
+   *         {@value #S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY} key
+   * @throws OgcException
    */
-  private DataFromS3 getS3Object(JsonObject config) {
-    Optional<S3Config> conf = s3conf.getConfigByIdentifier("default");
-    
-    if (conf.isEmpty()) {
-      throw new OgcException(403, "Bucket not registered", "Please contact OGC server RS Admin");
+  private S3Config getS3Config(JsonObject input) throws OgcException {
+    /*
+     * TODO: Once processes are modified to have bucket identifier, uncomment this
+     * out. This will check if the particular process has a particular bucket identifier key.
+     * Also delete the DEFAULT_BUCKET_IDENTIFIER line.
+     * 
+    if(!input.containsKey(S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY)) {
+      return null;
     }
     
-    return new DataFromS3(vertx.createHttpClient(), conf.get());
+    String s3BucketIdentifier = input.getString(S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY);
+     * 
+     */
+    String s3BucketIdentifier = input.getString(S3ConfigsHolder.DEFAULT_BUCKET_IDENTIFIER);
+    
+    Optional<S3Config> conf = s3conf.getConfigByIdentifier(s3BucketIdentifier);
+    
+    if (conf.isEmpty()) {
+      throw new OgcException(403, "Failed to start the process",
+          "No bucket exists for identifier : " + s3BucketIdentifier);
+    }
+    
+    return conf.get();
   }
 
   /**
@@ -96,13 +115,15 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
   public ProcessesRunnerService run(JsonObject input, Handler<AsyncResult<JsonObject>> handler) {
 
     Future<JsonObject> checkForProcess = processExistCheck(input);
-
+    
     checkForProcess.onSuccess(processExist -> {
       String processName = processExist.getString("title");
       boolean isAsync = processExist.getJsonArray("response")
               .stream()
               .anyMatch(item -> item.toString().equalsIgnoreCase("ASYNC"));
       boolean validateInput = validateInput(input, processExist);
+      
+      S3Config processSpecificS3Conf = getS3Config(input);
 
       if (validateInput) {
         ProcessService processService;
@@ -110,13 +131,13 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
         // Switch case to handle different processes
         switch (processName) {
           case "CollectionOnboarding":
-            processService = new CollectionOnboardingProcess(pgPool, webClient, config, getS3Object(config), vertx);
+            processService = new CollectionOnboardingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
             break;
           case "CollectionAppending":
-            processService = new CollectionAppendingProcess(pgPool, webClient, config, getS3Object(config), vertx);
+            processService = new CollectionAppendingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
             break;
           case "S3PreSignedURLGeneration":
-            processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, config);
+            processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, config, processSpecificS3Conf);
             break;
           case "S3InitiateMultipartUpload":
             processService = new S3InitiateMultiPartUploadProcess(pgPool, webClient, config, getS3Object(config), vertx);
@@ -125,10 +146,10 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
             processService = new S3CompleteMultiPartUploadProcess(pgPool,config);
             break;
           case "TilesMetaDataOnboarding":
-            processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, getS3Object(config), vertx);
+            processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
             break;
           case "TilesOnboardingFromExistingFeature":
-            processService = new TilesOnboardingFromExistingFeatureProcess(pgPool, webClient, config, getS3Object(config), vertx);
+            processService = new TilesOnboardingFromExistingFeatureProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
             break;
           default:
             LOGGER.error("No method specified for process {}", processName);
