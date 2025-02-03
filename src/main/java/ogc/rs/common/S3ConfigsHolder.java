@@ -19,6 +19,8 @@ import io.vertx.core.json.JsonObject;
 public class S3ConfigsHolder {
 
   public static final String S3_CONFIGS_BLOCK_KEY_NAME = "s3BucketsConfig";
+  public static final String DEFAULT_BUCKET_IDENTIFIER = "default";
+
 
   private static final String BUCKET_CONF_OP = "bucket";
   private static final String REGION_CONF_OP = "region";
