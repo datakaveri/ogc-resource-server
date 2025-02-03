@@ -19,7 +19,7 @@
           "accessKey": "<accessKey>",
           "secretKey": "<secretKey>",
           "pathBasedAccess": false,
-          "readAccess" : "open"
+          "readAccess" : "OPEN"
       }
   },
   "modules": [
