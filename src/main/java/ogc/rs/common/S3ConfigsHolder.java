@@ -2,10 +2,8 @@ package ogc.rs.common;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -45,8 +43,6 @@ public class S3ConfigsHolder {
   public static S3ConfigsHolder createFromServerConfig(JsonObject configsObj)
       throws IllegalArgumentException {
 
-    Map<String, S3Config> map = new HashMap<String, S3Config>();
-
     if (configsObj.isEmpty()) {
       throw new IllegalArgumentException("S3 config object is empty");
     }
@@ -62,7 +58,6 @@ public class S3ConfigsHolder {
 
       JsonObject obj = (JsonObject) etr.getValue();
       validate(etr.getKey(), obj);
-      map.put(etr.getKey(), new S3Config(obj));
     }
 
     return new S3ConfigsHolder(configsObj);

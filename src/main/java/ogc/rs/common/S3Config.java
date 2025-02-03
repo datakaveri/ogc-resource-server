@@ -15,8 +15,6 @@ import io.vertx.core.json.JsonObject;
 @JsonGen
 public class S3Config {
   
-  private static final Boolean DEFAULT_IS_PATH_BASED_ACCESS = false;
-
   private String bucket;
   private String region;
 
@@ -28,7 +26,6 @@ public class S3Config {
   private S3BucketReadAccess readAccess;
 
   private Boolean pathBasedAccess;
-  private Boolean https;
   
   /**
    * Returns the configured bucket name.
@@ -95,7 +92,7 @@ public class S3Config {
    * @return if S3 instance works over HTTPS
    */
   public Boolean isHttps() {
-    return https;
+    return endpoint.startsWith("https://");
   }
 
   public Boolean getPathBasedAccess() {
@@ -104,14 +101,6 @@ public class S3Config {
 
   public void setPathBasedAccess(Boolean pathBasedAccess) {
     this.pathBasedAccess = pathBasedAccess;
-  }
-
-  public Boolean getHttps() {
-    return https;
-  }
-
-  public void setHttps(Boolean https) {
-    this.https = https;
   }
 
   public void setBucket(String bucket) {

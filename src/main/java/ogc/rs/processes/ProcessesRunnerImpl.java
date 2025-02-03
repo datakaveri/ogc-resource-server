@@ -5,14 +5,12 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
-import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.common.S3ConfigsHolder;
 import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
@@ -91,7 +89,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
     String s3BucketIdentifier = input.getString(S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY);
      * 
      */
-    String s3BucketIdentifier = input.getString(S3ConfigsHolder.DEFAULT_BUCKET_IDENTIFIER);
+    String s3BucketIdentifier = S3ConfigsHolder.DEFAULT_BUCKET_IDENTIFIER;
     
     Optional<S3Config> conf = s3conf.getConfigByIdentifier(s3BucketIdentifier);
     
