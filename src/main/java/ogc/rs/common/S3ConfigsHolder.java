@@ -133,16 +133,16 @@ public class S3ConfigsHolder {
           + "' : atleast one of bucket, region, endpoint, access key, secret key is empty/null");
     }
 
-    if (obj.getValue(PATH_BASED_ACC_CONF_OP) instanceof Boolean) {
+    if (!(obj.getValue(PATH_BASED_ACC_CONF_OP) instanceof Boolean)) {
       throw new IllegalArgumentException("Failed to initialize S3 config for identifier '"
           + identifier + "' : " + PATH_BASED_ACC_CONF_OP + " is not a boolean");
     }
 
     try {
-      S3BucketReadAccess.valueOf(obj.getString(READ_ACCESS_CONF_OP).toUpperCase());
+      S3BucketReadAccess.valueOf(obj.getString(READ_ACCESS_CONF_OP));
     } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException("Failed to initialize S3 config for identifier '"
-          + identifier + "' : " + "read access should be either open, secure");
+          + identifier + "' : " + "read access should be either OPEN, SECURE");
     }
 
     try {
