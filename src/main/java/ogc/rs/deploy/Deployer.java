@@ -91,6 +91,14 @@ public class Deployer {
             return;
         }
         JsonObject configuration = new JsonObject(config);
+        
+        if (configuration.getJsonObject(S3ConfigsHolder.S3_CONFIGS_BLOCK_KEY_NAME, new JsonObject())
+            .isEmpty()) {
+          LOGGER.fatal("{} JSON object not present or empty in config",
+              S3ConfigsHolder.S3_CONFIGS_BLOCK_KEY_NAME);
+          return;
+        }
+        
         Vertx vertx = Vertx.vertx(options);
 
         setJvmMetrics();  // Bind JVM metrics to registry
@@ -102,7 +110,7 @@ public class Deployer {
         JsonObject commonConfigs=configurations.getJsonObject("commonConfig");
         JsonObject config = configurations.getJsonArray("modules").getJsonObject(moduleIndex);
         JsonObject s3Config = configurations.getJsonObject(S3ConfigsHolder.S3_CONFIGS_BLOCK_KEY_NAME);
-        return config.mergeIn(commonConfigs, true).mergeIn(s3Config);
+        return config.mergeIn(commonConfigs, true).put(S3ConfigsHolder.S3_CONFIGS_BLOCK_KEY_NAME, s3Config);
     }
 
     /**
