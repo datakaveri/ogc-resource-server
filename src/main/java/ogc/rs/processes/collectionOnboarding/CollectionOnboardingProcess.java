@@ -420,8 +420,7 @@ public class CollectionOnboardingProcess implements ProcessService {
         rgDetailsResult -> sqlClient.preparedQuery(RI_DETAILS_INSERT_QUERY)
           .execute(Tuple.of(resourceId, userId, accessPolicy))).compose(
         riDetailsResult -> sqlClient.preparedQuery(STAC_COLLECTION_ASSETS_INSERT_QUERY).execute(
-          Tuple.of(collectionsDetailsTableName, title, fileName, COLLECTION_TYPE, fileSize,
-            COLLECTION_ROLE))).compose(stacCollectionResult -> ogr2ogrCmd(input))
+          Tuple.of(collectionsDetailsTableName, title, fileName, COLLECTION_TYPE, fileSize))).compose(stacCollectionResult -> ogr2ogrCmd(input))
       .compose(onBoardingSuccess -> sqlClient.query(grantQuery).execute())
       .onSuccess(grantQueryResult -> {
         LOGGER.debug("Collection onboarded successfully ");
