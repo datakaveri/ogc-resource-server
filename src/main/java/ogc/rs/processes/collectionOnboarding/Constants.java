@@ -7,7 +7,7 @@ public class Constants {
   public static final String COLLECTION_TYPE = "application/geopackage+sqlite3";
   public static final String GRANT_QUERY =
       "GRANT SELECT, INSERT ON  \"collections_details_id\" TO databaseUser";
-  public static final String STAC_COLLECTION_ASSETS_INSERT_QUERY =
+  public static final String STAC_COLLECTION_ENCLOSURE_INSERT_QUERY =
       "INSERT INTO collections_enclosure (collections_id,title,href,type,size) VALUES ($1::UUID, $2, $3, $4, $5) returning id;";
 
   public static final String COLLECTIONS_DETAILS_INSERT_QUERY =
