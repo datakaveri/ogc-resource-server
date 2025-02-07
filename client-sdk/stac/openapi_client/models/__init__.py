@@ -2,9 +2,9 @@
 
 # flake8: noqa
 """
-    OGC Compliant IUDX Resource Server
+    STAC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    STAC compliant Features and Common API definitions. Includes Schema and Response Objects.
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in

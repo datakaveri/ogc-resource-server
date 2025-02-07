@@ -426,6 +426,7 @@ class MeteringApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'DX-AAA-Token'
         ]
 
         return self.api_client.param_serialize(
@@ -726,6 +727,7 @@ class MeteringApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'DX-AAA-Token'
         ]
 
         return self.api_client.param_serialize(
@@ -1163,6 +1165,7 @@ class MeteringApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'DX-AAA-Token'
         ]
 
         return self.api_client.param_serialize(
@@ -1466,6 +1469,7 @@ class MeteringApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'DX-AAA-Token'
         ]
 
         return self.api_client.param_serialize(

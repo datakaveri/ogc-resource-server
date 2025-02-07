@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+    OGC Compliant DX Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.   <a href='/stac/api'>STAC API Documentation</a>    <a href='/metering/api'>DX Metering API Documentation</a>
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in
@@ -23,7 +23,7 @@ from pydantic import StrictStr, Field
 from typing import Union, List, Set, Optional, Dict
 from typing_extensions import Literal, Self
 
-EXECUTEINPUTSVALUE_ONE_OF_SCHEMAS = ["InlineOrRefData", "List[InlineOrRefData]"]
+EXECUTEINPUTSVALUE_ONE_OF_SCHEMAS = ["InlineOrRefData"]
 
 class ExecuteInputsValue(BaseModel):
     """
@@ -31,10 +31,8 @@ class ExecuteInputsValue(BaseModel):
     """
     # data type: InlineOrRefData
     oneof_schema_1_validator: Optional[InlineOrRefData] = None
-    # data type: List[InlineOrRefData]
-    oneof_schema_2_validator: Optional[List[InlineOrRefData]] = None
-    actual_instance: Optional[Union[InlineOrRefData, List[InlineOrRefData]]] = None
-    one_of_schemas: Set[str] = { "InlineOrRefData", "List[InlineOrRefData]" }
+    actual_instance: Optional[Union[InlineOrRefData]] = None
+    one_of_schemas: Set[str] = { "InlineOrRefData" }
 
     model_config = ConfigDict(
         validate_assignment=True,
@@ -62,18 +60,12 @@ class ExecuteInputsValue(BaseModel):
             error_messages.append(f"Error! Input type `{type(v)}` is not `InlineOrRefData`")
         else:
             match += 1
-        # validate data type: List[InlineOrRefData]
-        try:
-            instance.oneof_schema_2_validator = v
-            match += 1
-        except (ValidationError, ValueError) as e:
-            error_messages.append(str(e))
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when setting `actual_instance` in ExecuteInputsValue with oneOf schemas: InlineOrRefData, List[InlineOrRefData]. Details: " + ", ".join(error_messages))
+            raise ValueError("Multiple matches found when setting `actual_instance` in ExecuteInputsValue with oneOf schemas: InlineOrRefData. Details: " + ", ".join(error_messages))
         elif match == 0:
             # no match
-            raise ValueError("No match found when setting `actual_instance` in ExecuteInputsValue with oneOf schemas: InlineOrRefData, List[InlineOrRefData]. Details: " + ", ".join(error_messages))
+            raise ValueError("No match found when setting `actual_instance` in ExecuteInputsValue with oneOf schemas: InlineOrRefData. Details: " + ", ".join(error_messages))
         else:
             return v
 
@@ -94,22 +86,13 @@ class ExecuteInputsValue(BaseModel):
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
-        # deserialize data into List[InlineOrRefData]
-        try:
-            # validation
-            instance.oneof_schema_2_validator = json.loads(json_str)
-            # assign value to actual_instance
-            instance.actual_instance = instance.oneof_schema_2_validator
-            match += 1
-        except (ValidationError, ValueError) as e:
-            error_messages.append(str(e))
 
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when deserializing the JSON string into ExecuteInputsValue with oneOf schemas: InlineOrRefData, List[InlineOrRefData]. Details: " + ", ".join(error_messages))
+            raise ValueError("Multiple matches found when deserializing the JSON string into ExecuteInputsValue with oneOf schemas: InlineOrRefData. Details: " + ", ".join(error_messages))
         elif match == 0:
             # no match
-            raise ValueError("No match found when deserializing the JSON string into ExecuteInputsValue with oneOf schemas: InlineOrRefData, List[InlineOrRefData]. Details: " + ", ".join(error_messages))
+            raise ValueError("No match found when deserializing the JSON string into ExecuteInputsValue with oneOf schemas: InlineOrRefData. Details: " + ", ".join(error_messages))
         else:
             return instance
 
@@ -123,7 +106,7 @@ class ExecuteInputsValue(BaseModel):
         else:
             return json.dumps(self.actual_instance)
 
-    def to_dict(self) -> Optional[Union[Dict[str, Any], InlineOrRefData, List[InlineOrRefData]]]:
+    def to_dict(self) -> Optional[Union[Dict[str, Any], InlineOrRefData]]:
         """Returns the dict representation of the actual instance"""
         if self.actual_instance is None:
             return None
