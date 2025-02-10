@@ -395,6 +395,65 @@
             "description": "OGC-Resource-Server"
           }
         ]
+      },
+      "post": {
+        "summary": "add a new STAC Item or Items in an ItemCollection to a collection",
+        "description": "create a new STAC Item r Items in an ItemCollection in a specific collection",
+        "operationId": "postFeature",
+        "tags": [
+          "Transaction"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/postOrPutItemCollection"
+                  },
+                  {
+                    "$ref": "#/components/schemas/postOrPutItem"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Status of the create request.",
+            "headers": {
+              "Location": {
+                "description": "The URL of the newly added resource (i.e. path of the resource end point)",
+                "schema": {
+                  "type": "string",
+                  "format": "url"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/item"
+              }
+            }
+          },
+          "202": {
+            "description": "The item was accepted for asynchronous action"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+           "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
       }
     },
     "/stac/collections/{collectionId}/items/{itemId}": {
@@ -440,6 +499,133 @@
             "description": "OGC-Resource-Server"
           }
         ]
+      },
+      "put": {
+        "summary": "update an existing feature by Id with a complete item definition",
+        "description": "Use this method to update an existing feature. Requires the entire GeoJSON  description be submitted.",
+        "operationId": "updateFeature",
+        "tags": [
+          "Transaction"
+        ],
+        "requestBody": {
+          "description": "The request body must contain a representation of the replacement item.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/postOrPutItem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The item was replaced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/item"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "The item was accepted for asynchronous action"
+          },
+          "204": {
+            "description": "The item was replaced"
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+        "default": {
+          "$ref": "#/components/responses/Error"
+        }
+      },
+      "patch": {
+        "summary": "update an existing feature by Id with a partial item definition",
+        "description": "Use this method to update an existing feature. Requires a GeoJSON fragment (containing the fields to be updated) be submitted.",
+        "operationId": "patchFeature",
+        "tags": [
+          "Transaction"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/patchItem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The item was replaced"
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/item"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "The item was accepted for asynchronous action"
+          },
+          "204": {
+            "description": "Status of the update request."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete an existing feature by Id",
+        "description": "Use this method to delete an existing feature.",
+        "operationId": "deleteFeature",
+        "tags": [
+          "Transaction"
+        ],
+        "responses": {
+          "200": {
+            "description": "The resource was deleted."
+          },
+          "202": {
+            "description": "The operation was accepted for asynchronous execution."
+          },
+          "204": {
+            "description": "The resource was deleted."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
       }
     },
     "/stac/search": {
@@ -1950,6 +2136,10 @@
           }
         }
       },
+      "itemId": {
+        "type": "string",
+        "description": "Provider identifier, a unique ID."
+      },
       "link": {
         "type": "object",
         "properties": {
@@ -2021,6 +2211,55 @@
         "minimum": 0,
         "example": 10
       },
+      "itemType":{
+        "type": "string",
+        "description": "The GeoJSON type",
+        "enum": [
+          "Feature"
+        ]
+      },
+      "assets": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "required": [
+            "href"
+          ],
+          "properties": {
+            "href": {
+              "type": "string",
+              "format": "url",
+              "description": "Link to the asset object",
+              "example": "http://cool-sat.com/catalog/collections/cs/items/CS3-20160503_132130_04/thumb.png"
+            },
+            "title": {
+              "type": "string",
+              "description": "Displayed title",
+              "example": "Thumbnail"
+            },
+            "description": {
+              "type": "string",
+              "description": "Multi-line description to explain the asset.\n\n[CommonMark 0.29](http://commonmark.org/) syntax MAY be used for rich text representation.",
+              "example": "Small 256x256px PNG thumbnail for a preview."
+            },
+            "type": {
+              "type": "string",
+              "description": "Media type of the asset",
+              "example": "image/png"
+            },
+            "roles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Purposes of the asset",
+              "example": [
+                "thumbnail"
+              ]
+            }
+          }
+        }
+      },
       "exception400": {
         "type": "object",
         "properties": {
@@ -2057,6 +2296,117 @@
         "example": {
           "code": "Internal Server Error",
           "description": "Internal Server Error"
+        }
+      },
+      "patchItem": {
+        "description": "An object that contains at least a subset of the fields for a STAC Item.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/itemId"
+          },
+          "bbox": {
+            "$ref": "#/components/schemas/schemas-bbox"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/geometryGeoJSON"
+          },
+          "type": {
+            "$ref": "#/components/schemas/itemType"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/patchItemProperties"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/link"
+            }
+          },
+          "assets": {
+            "$ref": "#/components/schemas/assets"
+          }
+        }
+      },
+      "patchItemProperties": {
+        "description": "An object that contains at least a subset of a valid STAC Item Properties object.",
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "datetime": {
+            "$ref": "#/components/schemas/datetime-interval"
+          }
+        }
+      },
+      "postOrPutItemCollection": {
+        "description": "A GeoJSON FeatureCollection augmented with foreign members that contain values relevant to a STAC entity",
+        "type": "object",
+        "required": [
+          "features",
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "FeatureCollection"
+            ]
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/postOrPutItem"
+            }
+          },
+          "links": {
+            "description": "An array of links. Can be used for pagination, e.g. by providing a link with the `next` relation type.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/link"
+            },
+            "example": [
+              {
+                "rel": "next",
+                "href": "http://api.cool-sat.com/search?next=ANsXtp9mrqN0yrKWhf-y2PUpHRLQb1GT-mtxNcXou8TwkXhi1Jbk"
+              }
+            ]
+          }
+        }
+      },
+      "postOrPutItem": {
+        "description": "An object that is a valid GeoJSON Feature, but not necessarily a valid STAC Item.",
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "geometry",
+          "properties"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/itemId"
+          },
+          "bbox": {
+            "$ref": "#/components/schemas/schemas-bbox"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/geometryGeoJSON"
+          },
+          "type": {
+            "$ref": "#/components/schemas/itemType"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/properties"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/link"
+            }
+          },
+          "assets": {
+            "$ref": "#/components/schemas/assets"
+          }
         }
       }
     }
