@@ -1,4 +1,4 @@
-package ogc.rs.processes.s3PreSignedURLGeneration;
+package ogc.rs.processes.s3PreSignedUrlGenerationForFeatureOnboarding;
 
 public class Constants {
     // SQL query to check if the resource is already onboarded
