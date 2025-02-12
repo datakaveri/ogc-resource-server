@@ -96,4 +96,8 @@ public interface DatabaseService {
      * @return JSON response data
      */
     Future<JsonObject> stacItemSearch(StacItemSearchParams params);
+
+    Future<JsonObject> insertStacItems(JsonObject requestBody);
+
+    Future<JsonObject> insertStacItem(JsonObject requestBody);
 }
