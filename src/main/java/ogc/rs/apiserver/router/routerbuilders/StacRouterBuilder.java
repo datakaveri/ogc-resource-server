@@ -97,13 +97,42 @@ public class StacRouterBuilder extends EntityRouterBuilder {
         .handler(apiServerVerticle::buildResponse)
         .failureHandler(failureHandler);
 
-      routerBuilder
-              .operation(STAC_ITEM_BY_ID_API)
-              .handler(stacItemByIdAuthZHandler)
-              .handler(apiServerVerticle::getStacItemById)
-              .handler(apiServerVerticle::putCommonResponseHeaders)
-              .handler(apiServerVerticle::buildResponse)
-              .failureHandler(failureHandler);
+    routerBuilder
+        .operation(STAC_ITEM_BY_ID_API)
+        .handler(stacItemByIdAuthZHandler)
+        .handler(apiServerVerticle::getStacItemById)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
+
+    routerBuilder
+        .operation(STAC_ITEMS_POST_API)
+        .handler(apiServerVerticle::createStacItems)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
+
+    routerBuilder
+        .operation(STAC_ITEMS_PUT_API)
+        .handler(apiServerVerticle::updateStacItem)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
+
+    routerBuilder
+        .operation(STAC_ITEMS_PATCH_API)
+        .handler(apiServerVerticle::patchStacItem)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
+
+    routerBuilder
+        .operation(STAC_ITEMS_DELETE_API)
+        .handler(apiServerVerticle::deleteStacItem)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse)
+        .failureHandler(failureHandler);
+
 
     routerBuilder
         .operation(STAC_ITEM_SEARCH_GET_API)

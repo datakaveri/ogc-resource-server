@@ -97,6 +97,7 @@ public interface DatabaseService {
      */
     Future<JsonObject> stacItemSearch(StacItemSearchParams params);
 
+
     /**
      * Create STAC collection by inserting the items in following order.
      * 1)insert into collection_details table
@@ -119,4 +120,9 @@ public interface DatabaseService {
      * @return JSON response data
      */
     Future<JsonObject> updateStacCollection(JsonObject jsonObject);
+
+    Future<JsonObject> insertStacItems(JsonObject requestBody);
+
+    Future<JsonObject> insertStacItem(JsonObject requestBody);
+
 }

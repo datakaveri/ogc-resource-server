@@ -399,7 +399,7 @@
       "post": {
         "summary": "add a new STAC Item or Items in an ItemCollection to a collection",
         "description": "create a new STAC Item r Items in an ItemCollection in a specific collection",
-        "operationId": "postFeature",
+        "operationId": "postStacItem",
         "tags": [
           "Transaction"
         ],
@@ -503,7 +503,7 @@
       "put": {
         "summary": "update an existing feature by Id with a complete item definition",
         "description": "Use this method to update an existing feature. Requires the entire GeoJSON  description be submitted.",
-        "operationId": "updateFeature",
+        "operationId": "updateStacItem",
         "tags": [
           "Transaction"
         ],
@@ -551,7 +551,7 @@
       "patch": {
         "summary": "update an existing feature by Id with a partial item definition",
         "description": "Use this method to update an existing feature. Requires a GeoJSON fragment (containing the fields to be updated) be submitted.",
-        "operationId": "patchFeature",
+        "operationId": "patchStacItem",
         "tags": [
           "Transaction"
         ],
@@ -599,7 +599,7 @@
       "delete": {
         "summary": "delete an existing feature by Id",
         "description": "Use this method to delete an existing feature.",
-        "operationId": "deleteFeature",
+        "operationId": "deleteStacItem",
         "tags": [
           "Transaction"
         ],

@@ -11,6 +11,8 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
+
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -698,6 +700,65 @@ public class DatabaseServiceImpl implements DatabaseService{
 
         return result.future();
     }
+
+  @Override
+  public Future<JsonObject> insertStacItems(JsonObject requestBody) {
+      LOGGER.debug("Inside insertStacItems");
+    Promise<JsonObject> result = Promise.promise();
+    return result.future();
+  }
+
+  @Override
+  public Future<JsonObject> insertStacItem(JsonObject requestBody) {
+      LOGGER.debug("Inside insertStacItem");
+      Promise<JsonObject> result = Promise.promise();
+      String itemId = requestBody.getString("id");
+      String collectionId = requestBody.getString("collectionId");
+      JsonArray bbox = requestBody.getJsonArray("bbox");
+      JsonObject geometry = requestBody.getJsonObject("geometry");
+      JsonObject properties = requestBody.getJsonObject("properties");
+      JsonObject assets = requestBody.getJsonObject("assets");
+
+      client.withConnection(conn ->
+          conn.preparedQuery("INSERT INTO stac_collection_part(id, collection_id, bbox, geometry, properties) VALUES " +
+              "($1, $2::uuid, $3, st_geomfromgeojson(%4), $5::jsonb)")
+              .execute(Tuple.of(itemId, UUID.fromString(collectionId), bbox, geometry, properties))
+              .compose(sql -> {
+                LOGGER.debug("Inserted into stac_collection_part");
+                List<Tuple> batchInserts = new ArrayList<>();
+                assets.stream().forEach(asset -> {
+                  JsonObject assetJsonObj = (JsonObject) asset;
+                  String title = assetJsonObj.containsKey("description") ? assetJsonObj.getString("title") : "";
+                  String description = assetJsonObj.containsKey("description") ?
+                      assetJsonObj.getString("description") : "";
+                  String href = assetJsonObj.getString("href");
+                  String type = assetJsonObj.containsKey("type") ? assetJsonObj.getString("type") : "";
+                  long size = assetJsonObj.containsKey("size") ? assetJsonObj.getLong("size") : 0;
+                  JsonArray rolesJsonArr = assetJsonObj.containsKey("roles") ?
+                      assetJsonObj.getJsonArray("roles") : new JsonArray();
+                  String[] roles = (rolesJsonArr != null) ? rolesJsonArr.stream()
+                      .map(Object::toString)
+                      .toArray(String[]::new) : new String[0];
+                  batchInserts.add(Tuple.of(title, description, href, type, size, roles));
+                });
+                conn.preparedQuery("INSERT INTO stac_items_assets (title, description, href, type, size, roles)" +
+                    " VALUES ($1, $2, $3, $4, $5, $6)")
+                    .executeBatch(batchInserts)
+                    .compose(insert -> getStacItemById(collectionId, itemId))
+                    .onSuccess(result::complete)
+                    .onFailure(failed -> {
+                      LOGGER.error("Failed at getting stac item- {}",failed.getMessage());
+                      result.fail("Error!");
+                    });
+                    return result.future();
+                })
+              .onSuccess(result::complete)
+              .onFailure(failed -> {
+                LOGGER.error("Failed at creating a stac item- {}",failed.getMessage());
+                result.fail("Error!");
+              }));
+    return result.future();
+  }
 
   @Override
   public Future<List<JsonObject>> getTileMatrixSetMetaData(String tileMatrixSet) {
