@@ -1172,6 +1172,28 @@ public class DatabaseServiceImpl implements DatabaseService{
   }
 
   @Override
+  public Future<String> getTileS3BucketId(String collectionId, String tileMatrixSetId) {
+    Promise<String> result = Promise.promise();
+    client.withConnection(conn ->
+              conn.preparedQuery("SELECT s3_bucket_id FROM tilematrixsets_relation AS tmsr join tms_metadata AS tms_meta" +
+                      " ON tmsr.tms_id = tms_meta.id WHERE collection_id = $1::uuid AND tms_meta.title = $2::text")
+                .execute(Tuple.of(collectionId, tileMatrixSetId))
+                .map(SqlResult::value))
+        .onSuccess(success -> {
+          if (success.rowCount() == 0) {
+            result.fail(new OgcException(404, "Failed to get tile", "Could not get S3 bucket id for collection + TMS"));
+          } else {
+            result.complete(success.iterator().next().getString("s3_bucket_id"));
+          }
+        })
+        .onFailure(fail -> {
+          LOGGER.error("Failed S3 bucket id for collection + TMS! - {}", fail.getMessage());
+          result.fail("Error!");
+        });
+    return result.future();
+  }
+
+  @Override
   public Future<JsonObject> getAssets(String assetId) {
     LOGGER.info("get details of assets");
     Promise<JsonObject> result = Promise.promise();
@@ -1514,7 +1536,7 @@ public class DatabaseServiceImpl implements DatabaseService{
   public Future<JsonObject> getCoverageDetails(String id) {
     Promise<JsonObject> promise = Promise.promise();
     String sqlString =
-        "select schema, href from collection_coverage where collection_id = $1::uuid";
+        "select schema, href, s3_bucket_id from collection_coverage where collection_id = $1::uuid";
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());
 

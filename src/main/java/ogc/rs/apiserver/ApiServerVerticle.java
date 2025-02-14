@@ -667,20 +667,12 @@ public class ApiServerVerticle extends AbstractVerticle {
     String tileRow = routingContext.pathParam("tileRow");
     String tileCol = routingContext.pathParam("tileCol");
     HttpServerResponse response = routingContext.response();
-    String tilesUrlString = collectionId + "/" + tileMatrixSetId + "/" + tileMatrixId + "/" + tileCol + "/" + tileRow;
+    StringBuilder tilesUrlString = new StringBuilder(
+        collectionId + "/" + tileMatrixSetId + "/" + tileMatrixId + "/" + tileCol + "/" + tileRow);
     // need to set chunked for streaming response because Content-Length cannot be determined
     // beforehand.
     response.setChunked(true);
     
-    Optional<S3Config> conf = s3conf.getConfigByIdentifier("default");
-    
-    if (conf.isEmpty()) {
-      throw new OgcException(403, "Bucket not registered", "Please contact OGC server RS Admin");
-    }
-    
-    DataFromS3 dataFromS3 =
-        new DataFromS3(httpClient, conf.get());
-
     // determine tile format if it is a map (PNG image) or vector (MVT tile) using request header.
     String encodingType = getEncodingFromRequest(routingContext.request().getHeader("Accept"));
     LOGGER.debug("Accept Headers- {}", routingContext.request().getHeader("Accept"));
@@ -695,22 +687,35 @@ public class ApiServerVerticle extends AbstractVerticle {
       return;
     }
     if (encodingType.equalsIgnoreCase("image/png") || encodingType.equalsIgnoreCase("*/*")) {
-      tilesUrlString = tilesUrlString.concat(".png");
+      tilesUrlString.append(".png");
       response.putHeader("Content-Type", "image/png");
     }
     else if (encodingType.equalsIgnoreCase("application/vnd.mapbox-vector-tile")) {
-      tilesUrlString = tilesUrlString.concat(".pbf");
+      tilesUrlString.append(".pbf");
       response.putHeader("Content-Type", "application/vnd.mapbox-vector-tile");
     }
 
     //TODO: determine tile format using 'f' query parameter
 
+    // TODO : maybe cache the bucket ID for particular collection ID + TMS, because querying DB everytime may not be great
+    // for performance
+    dbService.getTileS3BucketId(collectionId, tileMatrixSetId).compose(s3BucketId -> {
+    Optional<S3Config> conf = s3conf.getConfigByIdentifier(s3BucketId);
+    
+    if (conf.isEmpty()) {
+      throw new OgcException(403, "Bucket not registered", "Please contact OGC server RS Admin");
+    }
+    
+    DataFromS3 dataFromS3 =
+        new DataFromS3(httpClient, conf.get());
+
     String urlString =
-        dataFromS3.getFullyQualifiedUrlString(tilesUrlString);
+        dataFromS3.getFullyQualifiedUrlString(tilesUrlString.toString());
     dataFromS3.setUrlFromString(urlString);
     dataFromS3.setSignatureHeader(HttpMethod.GET);
-    dataFromS3
-        .getDataFromS3(HttpMethod.GET)
+    return dataFromS3
+        .getDataFromS3(HttpMethod.GET);
+    })    
         .onSuccess(success -> success.pipeTo(response))
         .onFailure(
             failed -> {
@@ -1905,12 +1910,17 @@ public class ApiServerVerticle extends AbstractVerticle {
         .onSuccess(
             handler -> {
               response.putHeader("Content-Type", handler.getString("type"));
+              
+              String s3BucketId = handler.getString("s3_bucket_id");
 
-    Optional<S3Config> conf = s3conf.getConfigByIdentifier("default");
-    
-    if (conf.isEmpty()) {
-      throw new OgcException(403, "Bucket not registered", "Please contact OGC server RS Admin");
-    }
+              Optional<S3Config> conf = s3conf.getConfigByIdentifier(s3BucketId);
+              
+              if (conf.isEmpty()) {
+                LOGGER.error("Failed to get S3 config details - No S3Config object found for %", s3BucketId);
+                throw new OgcException(403,
+                    "Cannot download asset - failed to get details of bucket ID " + s3BucketId,
+                    "Please contact OGC server RS Admin");
+              }
     
               DataFromS3 dataFromS3 =
                   new DataFromS3(httpClient, conf.get());
@@ -2605,11 +2615,16 @@ public class ApiServerVerticle extends AbstractVerticle {
             handler -> {
               response.putHeader(CONTENT_TYPE, COLLECTION_COVERAGE_TYPE);
 
-    Optional<S3Config> conf = s3conf.getConfigByIdentifier("default");
-    
-    if (conf.isEmpty()) {
-      throw new OgcException(403, "Bucket not registered", "Please contact OGC server RS Admin");
-    }
+              String s3BucketId = handler.getString("s3_bucket_id");
+
+              Optional<S3Config> conf = s3conf.getConfigByIdentifier(s3BucketId);
+              
+              if (conf.isEmpty()) {
+                LOGGER.error("Failed to get S3 config details - No S3Config object found for %", s3BucketId);
+                throw new OgcException(403,
+                    "Cannot download asset - failed to get details of bucket ID " + s3BucketId,
+                    "Please contact OGC server RS Admin");
+              }
     
     DataFromS3 dataFromS3 =
         new DataFromS3(httpClient, conf.get());
