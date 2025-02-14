@@ -1627,6 +1627,7 @@ public class ApiServerVerticle extends AbstractVerticle {
       stacItems.forEach(stacItem -> {
         JsonObject stacItemJson = (JsonObject) stacItem;
         stacItemJson.remove("p_id");
+        stacItemJson.put("stac_version", stacMetaJson.getString("stacVersion"));
 
         String collectionId = stacItemJson.getString("collection");
 
