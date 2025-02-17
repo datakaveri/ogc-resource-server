@@ -5,6 +5,7 @@ import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import ogc.rs.apiserver.util.StacItemSearchParams;
 import java.util.List;
@@ -97,7 +98,7 @@ public interface DatabaseService {
      */
     Future<JsonObject> stacItemSearch(StacItemSearchParams params);
 
-    Future<JsonObject> insertStacItems(JsonObject requestBody);
+    Future<JsonObject> insertStacItems(JsonArray requestBody);
 
     Future<JsonObject> insertStacItem(JsonObject requestBody);
 }
