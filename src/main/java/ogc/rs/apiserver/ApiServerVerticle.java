@@ -2518,6 +2518,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     RequestParameters paramsFromOasValidation =
         routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
     String collectionId = routingContext.request().path().split("/")[3];
+    String url = routingContext.request().absoluteURI();
 
     if (paramsFromOasValidation.body() == null)
       routingContext.fail(new OgcException(400, "Bad Request", "Empty body"));
@@ -2527,10 +2528,11 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     JsonObject requestBody = paramsFromOasValidation.body().getJsonObject();
     requestBody.put("collectionId", collectionId);
+
     Future<JsonObject> result = null;
     if (requestBody.getString("type").equalsIgnoreCase(FEATURE_COLLECTION)) {
       // call bulk insert
-      result = dbService.insertStacItems(requestBody);
+      result = dbService.insertStacItems(requestBody.getJsonArray("features"));
     }
     else if (requestBody.getString("type").equalsIgnoreCase(FEATURE)) {
       //
@@ -2541,6 +2543,8 @@ public class ApiServerVerticle extends AbstractVerticle {
         .onSuccess(success -> {
           routingContext.put("response", success.toString());
           routingContext.put("statusCode", 200);
+          if (requestBody.getString("type").equalsIgnoreCase(FEATURE))
+            routingContext.response().putHeader("LOCATION", url + "/" + requestBody.getString("id"));
           routingContext.next();
         })
         .onFailure(routingContext::fail);
@@ -2549,9 +2553,7 @@ public class ApiServerVerticle extends AbstractVerticle {
   public void updateStacItem(RoutingContext routingContext) {
   }
 
-  public void patchStacItem(RoutingContext routingContext) {
-  }
-
+  //TODO: delete logic
   public void deleteStacItem(RoutingContext routingContext) {
   }
 }
