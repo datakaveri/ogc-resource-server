@@ -725,8 +725,8 @@ public class DatabaseServiceImpl implements DatabaseService{
               .execute(Tuple.of(collectionId))
               .compose(collection -> {
                 if (collection.rowCount() > 0){
-                  conn.preparedQuery("SELECT 1 FROM stac_collection_part WHERE id = $1")
-                      .execute(Tuple.of(itemId))
+                  conn.preparedQuery("SELECT 1 FROM stac_collection_part WHERE id = $1 and collection_id = $2")
+                      .execute(Tuple.of(itemId, collectionId))
                       .compose(item -> {
                         if (item.rowCount() > 0) {
                           LOGGER.error("Error: One or more item(s) exist");
