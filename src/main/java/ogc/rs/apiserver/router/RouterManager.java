@@ -40,6 +40,8 @@ import static ogc.rs.common.Constants.*;
 public class RouterManager {
 
   private static final String SPEC_AND_ROUTER_UPDATE_PG_CHANNEL = "update_spec_and_routes_now";
+  private static final int PG_CHANNEL_CONN_RETRIES_COUNT = 360;
+  private static final long PG_CHANNEL_CONN_INTERVAL_MS = 5000;
 
   /**
    * Get an SQL query to force a spec update and router. param can be any string for now.
@@ -227,6 +229,20 @@ public class RouterManager {
       LOGGER.fatal(
           "Failed to connect to Postgres channel '{}'. RouterManager will not be able to trigger spec updates",
           SPEC_AND_ROUTER_UPDATE_PG_CHANNEL);
+    });
+    
+    // if lost LISTEN/NOTIFY connection, try reconnecting every 5 seconds for 30 mins. If it fails
+    // to reconnect in that time, stop trying.
+    subl.reconnectPolicy(retries -> {
+      if (retries < PG_CHANNEL_CONN_INTERVAL_MS) {
+        LOGGER.warn("Lost connection to Postgres channel '{}', trying to reconnect...",
+            SPEC_AND_ROUTER_UPDATE_PG_CHANNEL);
+        return PG_CHANNEL_CONN_INTERVAL_MS;
+      } else {
+        LOGGER.fatal("Failed to reconnect to Postgres channel '{}', spec updates will not be triggered",
+            SPEC_AND_ROUTER_UPDATE_PG_CHANNEL);
+        return -1L;
+      }
     });
   }
 
