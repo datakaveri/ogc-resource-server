@@ -25,7 +25,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import static ogc.rs.common.Constants.*;
-
+import static ogc.rs.database.util.Constants.*;
+import static ogc.rs.database.util.Constants.UPDATE_COLLECTIONS_DETAILS;
 
 
 public class DatabaseServiceImpl implements DatabaseService{
@@ -504,7 +505,7 @@ public class DatabaseServiceImpl implements DatabaseService{
   @Override
   public Future<JsonObject> stacItemSearch(StacItemSearchParams params) {
     LOGGER.debug("stacItemSearch");
-    
+
     Promise<JsonObject> result = Promise.promise();
     final String STAC_ITEMS_DATETIME_KEY = "properties ->> 'datetime'";
 
@@ -539,12 +540,12 @@ public class DatabaseServiceImpl implements DatabaseService{
     if (params.getIntersects() != null) {
       featureQuery.setStacIntersectsGeom(params.getIntersects());
     }
-    
+
     Tuple tuple = Tuple.tuple();
     String builtQuery = featureQuery.buildItemSearchSqlString(tuple);
 
     JsonObject resultJson = new JsonObject();
-    
+
     client.withConnection(conn ->
         conn.preparedQuery(builtQuery)
           .collecting(collector).execute(tuple).map(SqlResult::value)
@@ -565,7 +566,130 @@ public class DatabaseServiceImpl implements DatabaseService{
             result.fail("Error!");
           }));
     return result.future();
-  }
+    }
+
+    @Override
+    public Future<JsonObject> postStacCollection(JsonObject jsonObject) {
+        LOGGER.debug("Inserting a new collection");
+        Promise<JsonObject> result = Promise.promise();
+
+        // Extract values
+        String id = jsonObject.getString("id");
+        String title = jsonObject.getString("title");
+        String description = jsonObject.getString("description");
+        String datetimeKey = jsonObject.getString("datetimeKey");
+        String crs = jsonObject.getString("crs");
+        String license = jsonObject.getString("license");
+        String accessPolicy = jsonObject.getString("accessPolicy");
+        String ownerUserId = jsonObject.getString("ownerUserId");
+        String role = jsonObject.getString("role").toUpperCase();
+
+        JsonArray bboxJsonArray = jsonObject.getJsonObject("extent").getJsonObject("spatial").getJsonArray("bbox").getJsonArray(0);
+        Number[] bboxArray = bboxJsonArray.stream().map(num -> ((Number) num)).toArray(Number[]::new);
+
+        JsonArray temporalJsonArray = jsonObject.getJsonObject("extent").getJsonObject("temporal").getJsonArray("interval").getJsonArray(0);
+        String[] temporalArray = temporalJsonArray.stream().map(Object::toString).toArray(String[]::new);
+
+        LOGGER.debug("id: {}, title: {}, description: {}, datetimeKey: {}, crs: {}, bboxArray: {}, temporalArray: {}, license: {}",
+                id, title, description, datetimeKey, crs, bboxArray, temporalArray, license);
+
+        client.withTransaction(
+                conn ->
+                        conn.preparedQuery(INSERT_COLLECTIONS_DETAILS)
+                                .execute(
+                                        Tuple.of(
+                                                id,
+                                                title,
+                                                description,
+                                                datetimeKey,
+                                                crs,
+                                                bboxArray,
+                                                temporalArray,
+                                                license))
+                                .compose(
+                                        res -> {
+                                            LOGGER.debug("Item inserted in collections_details Table");
+                                            return conn.preparedQuery(INSERT_COLLECTION_TYPE).execute(Tuple.of(id));
+                                        })
+                                .compose(
+                                        insertRoles -> {
+                                            LOGGER.debug("Item inserted in collection_type table");
+                                            return conn.preparedQuery(INSERT_ROLES).execute(Tuple.of(ownerUserId, role));
+                                        })
+                                .compose(
+                                        insertRiDetails -> {
+                                            LOGGER.debug("Item inserted in roles table");
+                                            return conn.preparedQuery(INSERT_RI_DETAILS)
+                                                    .execute(Tuple.of(id, ownerUserId, accessPolicy));
+                                        })
+                                .compose(
+                                        res -> {
+                                            LOGGER.debug("Item inserted in ri_details table");
+                                            return conn.query(CREATE_TABLE_BY_ID.replace("$1", id)).execute();
+                                        })
+                                .compose(
+                                        res -> {
+                                            LOGGER.debug("Table created by id name");
+                                            return conn.query(ATTACH_PARTITION.replace("$1", id)).execute();
+                                        })
+                                .compose(
+                                        res -> {
+                                            LOGGER.debug("Partition attached, granting permissions...");
+                                            return conn.query(
+                                                            GRANT_PRIVILEGES.replace("$1", id).replace("$2", config.getString(DATABASE_USER)))
+                                                    .execute();
+                                        })
+                                .onSuccess(
+                                        res -> {
+                                            LOGGER.debug("All queries executed successfully!");
+                                            JsonObject response = new JsonObject().put("id", id);
+                                            result.complete(response);
+                                        })
+                                .onFailure(
+                                        failRes -> {
+                                            LOGGER.error("Failed to execute queries: {}", failRes.getMessage());
+                                            result.fail(failRes.getMessage());
+                                        }));
+
+        return result.future();
+    }
+
+    @Override
+    public Future<JsonObject> updateStacCollection(JsonObject requestBody) {
+        LOGGER.debug("Updating the Collection!");
+        Promise<JsonObject> result = Promise.promise();
+        String id = requestBody.getString("id");
+        String title = requestBody.getString("title");
+        String description = requestBody.getString("description");
+        String datetimeKey = requestBody.getString("datetimeKey");
+        String crs = requestBody.getString("crs");
+        String license = requestBody.getString("license");
+
+        JsonArray bboxJsonArray = requestBody.getJsonObject("extent").getJsonObject("spatial").getJsonArray("bbox").getJsonArray(0);
+        Number[] bboxArray = bboxJsonArray.stream().map(num -> ((Number) num)).toArray(Number[]::new);
+
+        JsonArray temporalJsonArray = requestBody.getJsonObject("extent").getJsonObject("temporal").getJsonArray("interval").getJsonArray(0);
+        String[] temporalArray = temporalJsonArray.stream().map(Object::toString).toArray(String[]::new);
+
+        LOGGER.debug("id: {}, title: {}, description: {}, datetimeKey: {}, crs: {}, bboxArray: {}, temporalArray: {}, license: {}",
+                id, title, description, datetimeKey, crs, bboxArray, temporalArray, license);
+
+        client.preparedQuery(UPDATE_COLLECTIONS_DETAILS)
+                .execute(Tuple.of(id, title, description, datetimeKey, crs, bboxArray, temporalArray, license))
+                .onSuccess(res ->
+                {
+                    LOGGER.debug("Update in collections_Details successful!");
+                    result.complete();
+                })
+                .onFailure(err ->
+                {
+                    LOGGER.error("Failed to update collections_Details: {}", err.getMessage());
+                    result.fail("Collection update failed");
+                });
+
+
+        return result.future();
+    }
 
   @Override
   public Future<List<JsonObject>> getTileMatrixSetMetaData(String tileMatrixSet) {
