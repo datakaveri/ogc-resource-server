@@ -1,0 +1,1 @@
+UPDATE processes_table SET input = jsonb_set(input, '{inputs}', input -> 'inputs' || '{"s3BucketIdentifier" : "Identifier of the S3 bucket that the process will operate upon"}') where title = ANY('{CollectionOnboarding,CollectionAppending,TilesMetaDataOnboarding,S3PreSignedURLGeneration,TilesOnboardingFromExistingFeature}');

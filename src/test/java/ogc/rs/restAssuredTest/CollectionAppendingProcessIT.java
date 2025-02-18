@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
 import jdk.jfr.Description;
+import ogc.rs.common.S3ConfigsHolder;
 import ogc.rs.util.FakeTokenBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -73,6 +74,7 @@ public class CollectionAppendingProcessIT {
         inputs.put("description", "Valid file for appending test.");
         inputs.put("resourceId", "61f2187e-affe-4f28-be0e-fe1cd37dbd4e");
         inputs.put("version", "1.0.0");
+        inputs.put(S3ConfigsHolder.S3_CONFIGS_BLOCK_KEY_NAME, "default");
 
         requestBody.put("inputs", inputs);
 

@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
 import jdk.jfr.Description;
+import ogc.rs.common.S3ConfigsHolder;
 import ogc.rs.util.FakeTokenBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -79,6 +80,7 @@ public class CollectionOnboardingProcessIT {
         inputs.put("description", "Invalid file for testing.");
         inputs.put("resourceId", "2cfc08b8-a43d-40d4-ba98-c6fdfa76a0c1");
         inputs.put("version", "1.0.0");
+        inputs.put(S3ConfigsHolder.S3_CONFIGS_BLOCK_KEY_NAME, "default");
 
         requestBody.put("inputs", inputs);
         requestBody.put("response", "raw");
