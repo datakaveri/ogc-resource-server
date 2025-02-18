@@ -96,5 +96,30 @@ public class UtilClass {
     return promise.future();
   }
 
+  /**
+   * Updates the output column in the jobs_table for sync processes.
+   *
+   * @param jobId  the job ID for which output needs to be updated
+   * @param output the JSON object containing the process output
+   * @return a Future indicating success or failure of the update
+   */
+  public Future<Void> updateJobTableOutput(String jobId, JsonObject output) {
+    Promise<Void> promise = Promise.promise();
+    UUID jobUUID = UUID.fromString(jobId);
+
+    pgPool.withConnection(
+                    sqlConnection -> sqlConnection.preparedQuery(UPDATE_JOB_TABLE_OUTPUT)
+                            .execute(Tuple.of(output, jobUUID)))
+            .onSuccess(successResult -> {
+              LOGGER.debug("Job output updated successfully for jobId {}", jobId);
+              promise.complete();
+            })
+            .onFailure(failureHandler -> {
+              LOGGER.error("Failed to update job output: {}", failureHandler.getMessage());
+              promise.fail("Failed to update job output: " + failureHandler.getMessage());
+            });
+
+    return promise.future();
+  }
 
 }

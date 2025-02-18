@@ -6,7 +6,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
@@ -16,6 +15,8 @@ import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
+import ogc.rs.processes.s3MultiPartUploadForStacOnboarding.S3CompleteMultiPartUploadProcess;
+import ogc.rs.processes.s3MultiPartUploadForStacOnboarding.S3InitiateMultiPartUploadProcess;
 import ogc.rs.processes.tilesMetaDataOnboarding.TilesMetaDataOnboardingProcess;
 import ogc.rs.processes.s3PreSignedURLGeneration.S3PreSignedURLGenerationProcess;
 import ogc.rs.processes.tilesOnboardingFromExistingFeature.TilesOnboardingFromExistingFeatureProcess;
@@ -113,6 +114,12 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
           case "S3PreSignedURLGeneration":
             processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, config);
             break;
+          case "S3InitiateMultipartUpload":
+            processService = new S3InitiateMultiPartUploadProcess(pgPool, webClient, config, getS3Object(config), vertx);
+            break;
+          case "S3CompleteMultipartUpload":
+            processService = new S3CompleteMultiPartUploadProcess(pgPool,config);
+            break;
           case "TilesMetaDataOnboarding":
             processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, getS3Object(config), vertx);
             break;
@@ -152,11 +159,19 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
             finalProcessService.execute(input).onSuccess(result -> {
               JsonObject response = result.copy();
               response.put("sync", "true");
+              response.put("jobId", jobStarted.getValue("jobId"));
+              response.put("processId", input.getString("processId"));
+              response.put("type", "PROCESS");
               response.put("status", Status.SUCCESSFUL);
               response.put("location",
                       config.getString("hostName")
                               .concat("/jobs/")
                               .concat(jobStarted.getString("jobId")));
+              // Update output column in jobs_table
+              utilClass.updateJobTableOutput(jobStarted.getString("jobId"), response)
+                      .onSuccess(updated -> handler.handle(Future.succeededFuture(response)))
+                      .onFailure(failure -> handler.handle(Future.failedFuture(failure)));
+
               handler.handle(Future.succeededFuture(response));
             }).onFailure(failureHandler -> handler.handle(Future.failedFuture(failureHandler)));
           }
@@ -167,6 +182,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
         handler.handle(Future.failedFuture(processException500));
       }
     }).onFailure(processNotExist -> handler.handle(Future.failedFuture(processNotExist)));
+
     return this;
   }
 
