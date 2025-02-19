@@ -703,8 +703,11 @@ public class ApiServerVerticle extends AbstractVerticle {
     Optional<S3Config> conf = s3conf.getConfigByIdentifier(s3BucketId);
     
     if (conf.isEmpty()) {
-      throw new OgcException(403, "Bucket not registered", "Please contact OGC server RS Admin");
-    }
+      LOGGER.error("Failed to get S3 config details - No S3Config object found for {}", s3BucketId);
+        return Future.failedFuture(new OgcException(403,
+            "Cannot fetch tile - failed to get details of bucket ID " + s3BucketId,
+            "Please contact OGC server RS Admin"));
+      }
     
     DataFromS3 dataFromS3 =
         new DataFromS3(httpClient, conf.get());
@@ -717,21 +720,7 @@ public class ApiServerVerticle extends AbstractVerticle {
         .getDataFromS3(HttpMethod.GET);
     })    
         .onSuccess(success -> success.pipeTo(response))
-        .onFailure(
-            failed -> {
-              if (failed instanceof OgcException) {
-                routingContext.put("response", ((OgcException) failed).getJson().toString());
-                routingContext.put("statusCode", 404);
-              } else {
-                routingContext.put(
-                    "response",
-                    new OgcException(500, "Internal Server Error", "Internal Server Error")
-                        .getJson()
-                        .toString());
-                routingContext.put("statusCode", 500);
-              }
-              routingContext.next();
-            });
+        .onFailure(routingContext::fail);
   }
 
   public String getEncodingFromRequest(String acceptRequestHeaders) {
@@ -1907,7 +1896,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     response.setChunked(true);
     dbService
         .getAssets(assetId)
-        .onSuccess(
+        .compose(
             handler -> {
               response.putHeader("Content-Type", handler.getString("type"));
               
@@ -1916,10 +1905,10 @@ public class ApiServerVerticle extends AbstractVerticle {
               Optional<S3Config> conf = s3conf.getConfigByIdentifier(s3BucketId);
               
               if (conf.isEmpty()) {
-                LOGGER.error("Failed to get S3 config details - No S3Config object found for %", s3BucketId);
-                throw new OgcException(403,
+                LOGGER.error("Failed to get S3 config details - No S3Config object found for {}", s3BucketId);
+                return Future.failedFuture(new OgcException(403,
                     "Cannot download asset - failed to get details of bucket ID " + s3BucketId,
-                    "Please contact OGC server RS Admin");
+                    "Please contact OGC server RS Admin"));
               }
     
               DataFromS3 dataFromS3 =
@@ -1928,40 +1917,10 @@ public class ApiServerVerticle extends AbstractVerticle {
                   dataFromS3.getFullyQualifiedUrlString(handler.getString("href"));
               dataFromS3.setUrlFromString(urlString);
               dataFromS3.setSignatureHeader(HttpMethod.GET);
-              dataFromS3
-                  .getDataFromS3(HttpMethod.GET)
-                  .onSuccess(success -> success.pipeTo(response))
-                  .onFailure(
-                      failed -> {
-                        if (failed instanceof OgcException) {
-                          routingContext.put(
-                              "response", ((OgcException) failed).getJson().toString());
-                          routingContext.put("statusCode", 404);
-                        } else {
-                          routingContext.put(
-                              "response",
-                              new OgcException(
-                                      500, "Internal Server Error", "Internal Server Error")
-                                  .getJson()
-                                  .toString());
-                          routingContext.put("statusCode", 500);
-                        }
-                        routingContext.next();
-                      });
-            })
-        .onFailure(
-            failed -> {
-              if (failed instanceof OgcException) {
-                routingContext.put("response", ((OgcException) failed).getJson().toString());
-                routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
-              } else {
-                OgcException ogcException =
-                    new OgcException(500, "Internal Server Error", "Internal Server Error");
-                routingContext.put("response", ogcException.getJson().toString());
-                routingContext.put("statusCode", ogcException.getStatusCode());
-              }
-              routingContext.next();
-            });
+              return dataFromS3
+                  .getDataFromS3(HttpMethod.GET);
+            }).onSuccess(success -> success.pipeTo(response))
+                  .onFailure(routingContext::fail);
   }
 
 
@@ -2611,7 +2570,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     response.setChunked(true);
     dbService
         .getCoverageDetails(collectionId)
-        .onSuccess(
+        .compose(
             handler -> {
               response.putHeader(CONTENT_TYPE, COLLECTION_COVERAGE_TYPE);
 
@@ -2620,51 +2579,22 @@ public class ApiServerVerticle extends AbstractVerticle {
               Optional<S3Config> conf = s3conf.getConfigByIdentifier(s3BucketId);
               
               if (conf.isEmpty()) {
-                LOGGER.error("Failed to get S3 config details - No S3Config object found for %", s3BucketId);
-                throw new OgcException(403,
+                LOGGER.error("Failed to get S3 config details - No S3Config object found for {}", s3BucketId);
+                return Future.failedFuture(new OgcException(403,
                     "Cannot download asset - failed to get details of bucket ID " + s3BucketId,
-                    "Please contact OGC server RS Admin");
+                    "Please contact OGC server RS Admin"));
               }
     
-    DataFromS3 dataFromS3 =
-        new DataFromS3(httpClient, conf.get());
+              DataFromS3 dataFromS3 =
+                  new DataFromS3(httpClient, conf.get());
+    
               String urlString = dataFromS3.getFullyQualifiedUrlString(handler.getString("href"));
               dataFromS3.setUrlFromString(urlString);
               dataFromS3.setSignatureHeader(HttpMethod.GET);
-              dataFromS3
-                  .getDataFromS3(HttpMethod.GET)
-                  .onSuccess(success -> success.pipeTo(response))
-                  .onFailure(
-                      failed -> {
-                        if (failed instanceof OgcException) {
-                          routingContext.put(
-                              "response", ((OgcException) failed).getJson().toString());
-                          routingContext.put("statusCode", 404);
-                        } else {
-                          routingContext.put(
-                              "response",
-                              new OgcException(
-                                      500, "Internal Server Error", "Internal Server Error")
-                                  .getJson()
-                                  .toString());
-                          routingContext.put("statusCode", 500);
-                        }
-                        routingContext.next();
-                      });
-            })
-        .onFailure(
-            failed -> {
-              if (failed instanceof OgcException) {
-                routingContext.put("response", ((OgcException) failed).getJson().toString());
-                routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
-              } else {
-                OgcException ogcException =
-                    new OgcException(500, "Internal Server Error", "Internal Server Error");
-                routingContext.put("response", ogcException.getJson().toString());
-                routingContext.put("statusCode", ogcException.getStatusCode());
-              }
-              routingContext.next();
-            });
+              return dataFromS3
+                  .getDataFromS3(HttpMethod.GET);
+              }).onSuccess(success -> success.pipeTo(response))
+                  .onFailure(routingContext::fail);
   }
 
   public void createStacItems(RoutingContext routingContext) {
