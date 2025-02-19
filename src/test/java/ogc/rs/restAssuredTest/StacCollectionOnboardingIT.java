@@ -91,7 +91,7 @@ public class StacCollectionOnboardingIT {
                         .withCons(new JsonObject())
                         .build();
         String endpoint = "/stac/collections/ac14db94-4e9a-4336-9bec-072d37c0360e";
-        String endpointt = "/stac/collections";
+        String collectionsEndpoint = "/stac/collections";
 
         System.out.println(token);
         JsonObject extent = new JsonObject()
@@ -128,7 +128,7 @@ public class StacCollectionOnboardingIT {
                 .header("Accept", "application/json")
                 .auth().oauth2(token)
                 .when()
-                .get(endpointt)
+                .get(collectionsEndpoint)
                 .then()
                 .log().all()
                 .statusCode(200)
@@ -214,7 +214,7 @@ public class StacCollectionOnboardingIT {
                         .withCons(new JsonObject())
                         .build();
         String endpoint = "/stac/collections/0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd";
-        String endpointt = "/stac/collections";
+        String collectionsEndpoint = "/stac/collections";
 
         System.out.println(token);
         JsonObject extent = new JsonObject()
@@ -251,7 +251,7 @@ public class StacCollectionOnboardingIT {
                 .header("Accept", "application/json")
                 .auth().oauth2(token)
                 .when()
-                .get(endpointt)
+                .get(collectionsEndpoint)
                 .then()
                 .log().all()
                 .statusCode(200)
