@@ -1836,7 +1836,7 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
     public void postStacCollection(RoutingContext routingContext) {
-        LOGGER.debug("post stac collection" + routingContext.data());
+        LOGGER.debug("Post STAC collection");
         JsonObject requestBody = routingContext.body().asJsonObject();
         requestBody.put("accessPolicy", routingContext.data().get("accessPolicy"));
         requestBody.put("ownerUserId", routingContext.data().get("ownerUserId"));
@@ -1848,71 +1848,52 @@ public class ApiServerVerticle extends AbstractVerticle {
             routingContext.put("statusCode", ogcException.getStatusCode());
             routingContext.next();
         } else {
-            catalogueService
-                    .getCatItemOwnerUserId(requestBody.getString("id"))
+            dbService
+                    .postStacCollection(requestBody)
                     .onSuccess(
-                            catalogueId -> {
-                                LOGGER.debug("request successful");
-                                dbService
-                                        .postStacCollection(requestBody)
-                                        .onSuccess(
-                                                dbRequest -> {
-                                                    LOGGER.debug("request successfully posted ");
-                                                    JsonArray jsonArray =
-                                                            requestBody
-                                                                    .getJsonObject("extent")
-                                                                    .getJsonObject("temporal")
-                                                                    .getJsonArray("interval")
-                                                                    .getJsonArray(0);
-                                                    requestBody.put("temporal", jsonArray);
-                                                    requestBody.put(
-                                                            "bbox",
-                                                            requestBody
-                                                                    .getJsonObject("extent")
-                                                                    .getJsonObject("spatial")
-                                                                    .getJsonArray("bbox")
-                                                                    .getJsonArray(0));
-                                                    JsonObject response = handleStacCollectionResponse(requestBody);
-                                                    routingContext.put("response", response.toString());
-                                                    routingContext.put("statusCode", 201);
-                                                    routingContext.next();
-                                                })
-                                        .onFailure(
-                                                failure -> {
-                                                    LOGGER.debug("request not successfully posted"+failure.getMessage());
-                                                    if (failure instanceof OgcException) {
-                                                        routingContext.put(
-                                                                "response", ((OgcException) failure).getJson().toString());
-                                                        routingContext.put(
-                                                                "statusCode", ((OgcException) failure).getStatusCode());
-                                                    } else {
-                                                      if (failure.getMessage().contains("duplicate key value")) {
-                                                        OgcException ogcException =
-                                                                new OgcException(
-                                                                        409, "Conflict", "STAC Collection Already Exists");
-                                                        routingContext.put("response", ogcException.getJson().toString());
-                                                        routingContext.put("statusCode", ogcException.getStatusCode());
-                                                      } else {
-                                                        OgcException ogcException =
-                                                                new OgcException(
-                                                                        500, "Internal Server Error", "Internal Server Error");
-                                                        routingContext.put("response", ogcException.getJson().toString());
-                                                        routingContext.put("statusCode", ogcException.getStatusCode());
-                                                      }
-                                                    }
-                                                    routingContext.next();
-                                                });
+                            dbRequest -> {
+                                LOGGER.debug("request successfully posted ");
+                                JsonArray jsonArray =
+                                        requestBody
+                                                .getJsonObject("extent")
+                                                .getJsonObject("temporal")
+                                                .getJsonArray("interval")
+                                                .getJsonArray(0);
+                                requestBody.put("temporal", jsonArray);
+                                requestBody.put(
+                                        "bbox",
+                                        requestBody
+                                                .getJsonObject("extent")
+                                                .getJsonObject("spatial")
+                                                .getJsonArray("bbox")
+                                                .getJsonArray(0));
+                                JsonObject response = handleStacCollectionResponse(requestBody);
+                                routingContext.put("response", response.toString());
+                                routingContext.put("statusCode", 201);
+                                routingContext.next();
                             })
                     .onFailure(
-                            failed -> {
-                                if (failed instanceof OgcException) {
-                                    routingContext.put("response", ((OgcException) failed).getJson().toString());
-                                    routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+                            failure -> {
+                                LOGGER.debug("request not successfully posted" + failure.getMessage());
+                                if (failure instanceof OgcException) {
+                                    routingContext.put(
+                                            "response", ((OgcException) failure).getJson().toString());
+                                    routingContext.put(
+                                            "statusCode", ((OgcException) failure).getStatusCode());
                                 } else {
-                                    OgcException ogcException =
-                                            new OgcException(500, "Internal Server Error", "Internal Server Error");
-                                    routingContext.put("response", ogcException.getJson().toString());
-                                    routingContext.put("statusCode", ogcException.getStatusCode());
+                                    if (failure.getMessage().contains("duplicate key value")) {
+                                        OgcException ogcException =
+                                                new OgcException(
+                                                        409, "Conflict", "STAC Collection Already Exists");
+                                        routingContext.put("response", ogcException.getJson().toString());
+                                        routingContext.put("statusCode", ogcException.getStatusCode());
+                                    } else {
+                                        OgcException ogcException =
+                                                new OgcException(
+                                                        500, "Internal Server Error", "Internal Server Error");
+                                        routingContext.put("response", ogcException.getJson().toString());
+                                        routingContext.put("statusCode", ogcException.getStatusCode());
+                                    }
                                 }
                                 routingContext.next();
                             });
@@ -1920,84 +1901,78 @@ public class ApiServerVerticle extends AbstractVerticle {
     }
 
     public void updateStacCollection(RoutingContext routingContext) {
-        LOGGER.debug("update post collection");
+        LOGGER.debug("Update the Item in db");
         JsonObject requestBody = routingContext.body().asJsonObject();
+
         if (!requestBody.containsKey("id")) {
-            OgcException ogcException =
-                    new OgcException(400, "Id not found", "Id not found");
-            routingContext.put("response", ogcException.getJson().toString());
-            routingContext.put("statusCode", ogcException.getStatusCode());
-            routingContext.next();
-        } else {
-            dbService.getStacCollection(requestBody.getString("id"))
-                    .onSuccess(success -> {
-                        LOGGER.debug("Stac collection present " + success);
-                        if (requestBody.containsKey("title"))
-                            success.put("title", requestBody.getString("title"));
-
-                        if (requestBody.containsKey("description"))
-                            success.put("description", requestBody.getString("description"));
-                        if (requestBody.containsKey("crs"))
-                            success.put("crs", requestBody.getString("crs"));
-                        if (requestBody.containsKey("datetimeKey"))
-                            success.put("datetimeKey", requestBody.getString("datetimeKey"));
-                        if (requestBody.containsKey("license"))
-                            success.put("license", requestBody.getString("license"));
-                        if (requestBody.containsKey("extent"))
-                            success.put("extent", requestBody.getJsonObject("extent"));
-                        dbService
-                                .updateStacCollection(success)
-                                .onSuccess(
-                                        dbRequest -> {
-                                            LOGGER.debug("request successfully posted ");
-                                            JsonArray jsonArray =
-                                                    success
-                                                            .getJsonObject("extent")
-                                                            .getJsonObject("temporal")
-                                                            .getJsonArray("interval")
-                                                            .getJsonArray(0);
-                                            success.put("temporal", jsonArray);
-                                            success.put(
-                                                    "bbox",
-                                                    success
-                                                            .getJsonObject("extent")
-                                                            .getJsonObject("spatial")
-                                                            .getJsonArray("bbox")
-                                                            .getJsonArray(0));
-                                            JsonObject response = handleStacCollectionResponse(success);
-                                            routingContext.put("response", response.toString());
-                                            routingContext.put("statusCode", 200);
-                                            routingContext.next();
-                                        })
-                                .onFailure(
-                                        failure -> {
-                                            LOGGER.debug("request not successfully posted");
-                                            if (failure instanceof OgcException) {
-                                                routingContext.put("response", ((OgcException) failure).getJson().toString());
-                                                routingContext.put("statusCode", ((OgcException) failure).getStatusCode());
-                                            } else {
-                                                OgcException ogcException =
-                                                        new OgcException(500, "Internal Server Error", "Internal Server Error");
-                                                routingContext.put("response", ogcException.getJson().toString());
-                                                routingContext.put("statusCode", ogcException.getStatusCode());
-                                            }
-                                            routingContext.next();
-                                        });
-                    }).onFailure(deleteFailure -> {
-                        LOGGER.debug("Stac coolection not present -----");
-                        if (deleteFailure instanceof OgcException) {
-                            routingContext.put("response", ((OgcException) deleteFailure).getJson().toString());
-                            routingContext.put("statusCode", ((OgcException) deleteFailure).getStatusCode());
-                        } else {
-                            OgcException ogcException =
-                                    new OgcException(500, "Internal Server Error", "Internal Server Error");
-                            routingContext.put("response", ogcException.getJson().toString());
-                            routingContext.put("statusCode", ogcException.getStatusCode());
-                        }
-                        routingContext.next();
-
-                    });
+            OgcException ogcException = new OgcException(400, "Id not found", "Id not found");
+            routingContext.put("response", ogcException.getJson().toString())
+                    .put("statusCode", ogcException.getStatusCode())
+                    .next();
+            return;
         }
+
+        dbService.getStacCollection(requestBody.getString("id"))
+                .compose(existingCollection -> {
+                    LOGGER.debug("STAC collection present: {}", existingCollection);
+
+                    if (requestBody.containsKey("title")) {
+                        existingCollection.put("title", requestBody.getString("title"));
+                    }
+                    if (requestBody.containsKey("description")) {
+                        existingCollection.put("description", requestBody.getString("description"));
+                    }
+                    if (requestBody.containsKey("crs")) {
+                        existingCollection.put("crs", requestBody.getString("crs"));
+                    }
+                    if (requestBody.containsKey("datetimeKey")) {
+                        existingCollection.put("datetimeKey", requestBody.getString("datetimeKey"));
+                    }
+                    if (requestBody.containsKey("license")) {
+                        existingCollection.put("license", requestBody.getString("license"));
+                    }
+                    if (requestBody.containsKey("extent")) {
+                        existingCollection.put("extent", requestBody.getJsonObject("extent"));
+                    }
+
+                    return dbService.updateStacCollection(existingCollection)
+                            .map(updatedCollection -> {
+                                JsonArray temporalInterval = existingCollection
+                                        .getJsonObject("extent")
+                                        .getJsonObject("temporal")
+                                        .getJsonArray("interval")
+                                        .getJsonArray(0);
+
+                                JsonArray bbox = existingCollection
+                                        .getJsonObject("extent")
+                                        .getJsonObject("spatial")
+                                        .getJsonArray("bbox")
+                                        .getJsonArray(0);
+
+                                existingCollection.put("temporal", temporalInterval)
+                                        .put("bbox", bbox);
+
+                                return existingCollection;
+                            });
+                })
+                .onSuccess(updatedCollection -> {
+                    LOGGER.debug("Request successfully updated");
+                    JsonObject response = handleStacCollectionResponse(updatedCollection);
+                    routingContext.put("response", response.toString())
+                            .put("statusCode", 200)
+                            .next();
+                })
+                .onFailure(failure -> {
+                    LOGGER.debug("Request not successfully updated: {}", failure.getMessage());
+
+                    OgcException ogcException = (failure instanceof OgcException)
+                            ? (OgcException) failure
+                            : new OgcException(500, "Internal Server Error", "Internal Server Error");
+
+                    routingContext.put("response", ogcException.getJson().toString())
+                            .put("statusCode", ogcException.getStatusCode())
+                            .next();
+                });
     }
 
   private JsonObject createLink(String rel, String href, String title) {

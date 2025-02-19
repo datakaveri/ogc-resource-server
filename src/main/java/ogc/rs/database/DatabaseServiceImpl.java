@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import ogc.rs.apiserver.router.RouterManager;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.StacItemSearchParams;
 import ogc.rs.database.util.FeatureQueryBuilder;
@@ -639,6 +640,13 @@ public class DatabaseServiceImpl implements DatabaseService{
                                                             GRANT_PRIVILEGES.replace("$1", id).replace("$2", config.getString(DATABASE_USER)))
                                                     .execute();
                                         })
+                                .compose(res -> {
+                                    LOGGER.debug("All queries executed successfully! Notifying listeners...");
+                                    return conn.preparedQuery(
+                                                    RouterManager
+                                                            .TRIGGER_SPEC_UPDATE_AND_ROUTER_REGEN_SQL
+                                                            .apply("demo")).execute();
+                                })
                                 .onSuccess(
                                         res -> {
                                             LOGGER.debug("All queries executed successfully!");

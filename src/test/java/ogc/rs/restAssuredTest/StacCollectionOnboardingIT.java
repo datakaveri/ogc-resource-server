@@ -61,19 +61,21 @@ public class StacCollectionOnboardingIT {
                 .post(endpoint)
                 .then()
                 .statusCode(201);
+        Thread.sleep(2000);
+
 
         given()
                 .header("Accept", "application/json")
                 .auth().oauth2(token)
                 .when()
-                .get(endpoint)
+                .get(endpoint+"/ac14db94-4e9a-4336-9bec-072d37c0360e")
                 .then()
                 .statusCode(200)
-                .body("collections.find { it.id == 'ac14db94-4e9a-4336-9bec-072d37c0360e' }.title", equalTo("IT Test Suite"))
-                .body("collections.find { it.id == 'ac14db94-4e9a-4336-9bec-072d37c0360e' }.description", equalTo("IT Test Suite"))
-                .body("collections.find { it.id == 'ac14db94-4e9a-4336-9bec-072d37c0360e' }.license", equalTo("proprietary"))
-                .body("collections.find { it.id == 'ac14db94-4e9a-4336-9bec-072d37c0360e' }.extent.spatial.bbox[0]", contains(-180, -56, 180, 83))
-                .body("collections.find { it.id == 'ac14db94-4e9a-4336-9bec-072d37c0360e' }.extent.temporal.interval[0]", hasItems("2015-06-23T00:00:00Z", "2019-07-10T13:44:56Z"));
+                .body("title", equalTo("IT Test Suite"))
+                .body("description", equalTo("IT Test Suite"))
+                .body("license", equalTo("proprietary"))
+                .body("extent.spatial.bbox[0]", contains(-180, -56, 180, 83))
+                .body("extent.temporal.interval[0]", hasItems("2015-06-23T00:00:00Z", "2019-07-10T13:44:56Z"));
         Thread.sleep(2000);
 
 
@@ -91,9 +93,7 @@ public class StacCollectionOnboardingIT {
                         .withCons(new JsonObject())
                         .build();
         String endpoint = "/stac/collections/ac14db94-4e9a-4336-9bec-072d37c0360e";
-        String collectionsEndpoint = "/stac/collections";
 
-        System.out.println(token);
         JsonObject extent = new JsonObject()
                 .put("spatial", new JsonObject()
                         .put("bbox", new JsonArray()
@@ -128,15 +128,15 @@ public class StacCollectionOnboardingIT {
                 .header("Accept", "application/json")
                 .auth().oauth2(token)
                 .when()
-                .get(collectionsEndpoint)
+                .get(endpoint)
                 .then()
                 .log().all()
                 .statusCode(200)
-                .body("collections.find { it.id == 'ac14db94-4e9a-4336-9bec-072d37c0360e' }.title", equalTo("IT test Suite Updated"))
-                .body("collections.find { it.id == 'ac14db94-4e9a-4336-9bec-072d37c0360e' }.description", equalTo("IT test Suite Updated"))
-                .body("collections.find { it.id == 'ac14db94-4e9a-4336-9bec-072d37c0360e' }.license", equalTo("proprietary"))
-                .body("collections.find { it.id == 'ac14db94-4e9a-4336-9bec-072d37c0360e' }.extent.spatial.bbox[0]", contains(-181, -50, 181, 82))
-                .body("collections.find { it.id == 'ac14db94-4e9a-4336-9bec-072d37c0360e' }.extent.temporal.interval[0]", hasItems("2015-07-23T00:00:00Z", "2019-08-10T13:44:56Z"));
+                .body("title", equalTo("IT test Suite Updated"))
+                .body("description", equalTo("IT test Suite Updated"))
+                .body("license", equalTo("proprietary"))
+                .body("extent.spatial.bbox[0]", contains(-181, -50, 181, 82))
+                .body("extent.temporal.interval[0]", hasItems("2015-07-23T00:00:00Z", "2019-08-10T13:44:56Z"));
         Thread.sleep(2000);
 
 
@@ -154,7 +154,6 @@ public class StacCollectionOnboardingIT {
                         .withCons(new JsonObject())
                         .build();
         String endpoint = "/stac/collections";
-        System.out.println(token);
         JsonObject extent = new JsonObject()
                 .put("spatial", new JsonObject()
                         .put("bbox", new JsonArray()
@@ -184,20 +183,22 @@ public class StacCollectionOnboardingIT {
                 .post(endpoint)
                 .then()
                 .statusCode(201);
+        Thread.sleep(2000);
+
 
         given()
                 .header("Accept", "application/json")
                 .auth().oauth2(token)
                 .when()
-                .get(endpoint)
+                .get(endpoint+"/0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd")
                 .then()
                 .log().all()
                 .statusCode(200)
-                .body("collections.find { it.id == '0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd' }.title", equalTo("IT Test Suite"))
-                .body("collections.find { it.id == '0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd' }.description", equalTo("IT Test Suite"))
-                .body("collections.find { it.id == '0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd' }.license", equalTo("proprietary"))
-                .body("collections.find { it.id == '0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd' }.extent.spatial.bbox[0]", contains(-180, -56, 180, 83))
-                .body("collections.find { it.id == '0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd' }.extent.temporal.interval[0]", hasItems("2015-06-23T00:00:00Z", "2019-07-10T13:44:56Z"));
+                .body("title", equalTo("IT Test Suite"))
+                .body("description", equalTo("IT Test Suite"))
+                .body("license", equalTo("proprietary"))
+                .body("extent.spatial.bbox[0]", contains(-180, -56, 180, 83))
+                .body("extent.temporal.interval[0]", hasItems("2015-06-23T00:00:00Z", "2019-07-10T13:44:56Z"));
         Thread.sleep(2000);
     }
 
@@ -214,9 +215,7 @@ public class StacCollectionOnboardingIT {
                         .withCons(new JsonObject())
                         .build();
         String endpoint = "/stac/collections/0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd";
-        String collectionsEndpoint = "/stac/collections";
 
-        System.out.println(token);
         JsonObject extent = new JsonObject()
                 .put("spatial", new JsonObject()
                         .put("bbox", new JsonArray()
@@ -251,15 +250,15 @@ public class StacCollectionOnboardingIT {
                 .header("Accept", "application/json")
                 .auth().oauth2(token)
                 .when()
-                .get(collectionsEndpoint)
+                .get(endpoint)
                 .then()
                 .log().all()
                 .statusCode(200)
-                .body("collections.find { it.id == '0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd' }.title", equalTo("IT test Suite Updated"))
-                .body("collections.find { it.id == '0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd' }.description", equalTo("IT test Suite Updated"))
-                .body("collections.find { it.id == '0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd' }.license", equalTo("proprietary"))
-                .body("collections.find { it.id == '0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd' }.extent.spatial.bbox[0]", contains(-180, -56, 180, 83))
-                .body("collections.find { it.id == '0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd' }.extent.temporal.interval[0]", hasItems("2015-07-23T00:00:00Z", "2019-08-10T13:44:56Z"));
+                .body("title", equalTo("IT test Suite Updated"))
+                .body("description", equalTo("IT test Suite Updated"))
+                .body("license", equalTo("proprietary"))
+                .body("extent.spatial.bbox[0]", contains(-180, -56, 180, 83))
+                .body("extent.temporal.interval[0]", hasItems("2015-07-23T00:00:00Z", "2019-08-10T13:44:56Z"));
         Thread.sleep(2000);
 
 
@@ -288,7 +287,6 @@ public class StacCollectionOnboardingIT {
                                 .add(new JsonArray().add("2015-06-23T00:00:00Z").add("2019-07-10T13:44:56Z"))
                         )
                 );
-        System.out.println(token);
         JsonObject requestBody =
                 new JsonObject()
                         .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84")
@@ -334,7 +332,6 @@ public class StacCollectionOnboardingIT {
                                 .add(new JsonArray().add("2015-06-23T00:00:00Z").add("2019-07-10T13:44:56Z"))
                         )
                 );
-        System.out.println(token);
         JsonObject requestBody =
                 new JsonObject()
                         .put("id", 123)
