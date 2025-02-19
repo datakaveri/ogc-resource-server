@@ -4,7 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
 import jdk.jfr.Description;
-import ogc.rs.common.S3ConfigsHolder;
+import ogc.rs.processes.ProcessesRunnerImpl;
 import ogc.rs.util.FakeTokenBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -107,7 +107,7 @@ public class TilesMetaDataOnboardingProcessIT {
         inputs.put("pointOfOrigin", new Double[]{-20037508.3427892, 20037508.3427892});
         inputs.put("bbox", new Double[]{68.17751186879357,6.752782631992987,97.41289651394189,37.08834177335088});
         inputs.put("temporal", new String[]{"2023-01-01T00:00:00Z","2023-12-31T23:59:59Z"});
-        inputs.put(S3ConfigsHolder.S3_CONFIGS_BLOCK_KEY_NAME, "default");
+        inputs.put(ProcessesRunnerImpl.S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY, "default");
 
         requestBody.put("inputs", inputs);
 
