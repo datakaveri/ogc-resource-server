@@ -545,6 +545,7 @@
                                 <srcFile>src/test/resources/integ-db/teardown/deleteCollectionOnboarding.sql</srcFile>
                                 <srcFile>src/test/resources/integ-db/teardown/deleteCollectionAppending.sql</srcFile>
                                 <srcFile>src/test/resources/integ-db/teardown/deleteTilesMetaDataOnboarding.sql</srcFile>
+                                <srcFile>src/test/resources/integ-db/teardown/deleteStacCollectionOnboarding.sql</srcFile>
                             </srcFiles>
                         </configuration>
                     </execution>

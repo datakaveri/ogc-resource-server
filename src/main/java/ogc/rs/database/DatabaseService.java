@@ -55,7 +55,7 @@ public interface DatabaseService {
 
     /**
      * Get OGC Feature Collection metadata to be used for OpenAPI spec generation.
-     * 
+     *
      * @param existingCollectionUuidIds UUID IDs of collections that are already part of the spec.
      * @return list of {@link JsonObject}, which is cast to the required type by the caller.
      */
@@ -74,7 +74,7 @@ public interface DatabaseService {
 
     /**
      * Get all collections metadata to be used for OpenAPI spec generation.
-     * 
+     *
      * @param existingCollectionUuidIds UUID IDs of collections that are already part of the spec.
      * @return list of {@link JsonObject}, which is cast to the required type by the caller.
      */
@@ -91,9 +91,32 @@ public interface DatabaseService {
 
     /**
      * Run STAC Item Search query given query params in {@link StacItemSearchParams} object.
-     * 
+     *
      * @param params contains all the query params for STAC Item Search
      * @return JSON response data
      */
     Future<JsonObject> stacItemSearch(StacItemSearchParams params);
+
+    /**
+     * Create STAC collection by inserting the items in following order.
+     * 1)insert into collection_details table
+     * 2)insert into collections_type
+     * 3)insert into roles table
+     * 4)insert into ri_details table
+     * 5)table cretaed by the id
+     * 6)table partition created in stac_collections_part and newly created table attached
+     * 7)Privileges granted to newly created table
+     *
+     * @param jsonObject is the request body
+     * @return JSON response data
+     */
+    Future<JsonObject> postStacCollection(JsonObject jsonObject);
+
+    /**
+     * Udation of the object by id. Fields present in the request body are updated.
+     *
+     * @param jsonObject contains the fields that need to be updated
+     * @return JSON response data
+     */
+    Future<JsonObject> updateStacCollection(JsonObject jsonObject);
 }

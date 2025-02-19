@@ -110,7 +110,7 @@ public class StacRouterBuilder extends EntityRouterBuilder {
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)
         .failureHandler(failureHandler);
-    
+
     routerBuilder
         .operation(STAC_ITEM_SEARCH_POST_API)
         .handler(apiServerVerticle::postStacItemByItemSearch)
@@ -118,12 +118,27 @@ public class StacRouterBuilder extends EntityRouterBuilder {
         .handler(apiServerVerticle::buildResponse)
         .failureHandler(failureHandler);
 
-    /**
-     *  For all implementers of GisEntityInterface, add the STAC routes to the RouterBuilder.
-     */
-    ServiceLoader<GisEntityInterface> loader = ServiceLoader.load(GisEntityInterface.class);
-    loader.forEach(i -> i.giveStacRoutes(this));
+        routerBuilder
+                .operation(STAC_POST_COLLECTION_API)
+                .handler(stacCollectionOnboardingAuthZHandler)
+                .handler(apiServerVerticle::postStacCollection)
+                .handler(apiServerVerticle::putCommonResponseHeaders)
+                .handler(apiServerVerticle::buildResponse)
+                .failureHandler(failureHandler);
+        routerBuilder
+                .operation(STAC_UPDATE_COLLECTION_API)
+                .handler(stacCollectionOnboardingAuthZHandler)
+                .handler(apiServerVerticle::updateStacCollection)
+                .handler(apiServerVerticle::putCommonResponseHeaders)
+                .handler(apiServerVerticle::buildResponse)
+                .failureHandler(failureHandler);
 
-    return;
-  }
+        /**
+         *  For all implementers of GisEntityInterface, add the STAC routes to the RouterBuilder.
+         */
+        ServiceLoader<GisEntityInterface> loader = ServiceLoader.load(GisEntityInterface.class);
+        loader.forEach(i -> i.giveStacRoutes(this));
+
+        return;
+    }
 }
