@@ -699,8 +699,8 @@ public class DatabaseServiceImpl implements DatabaseService{
                                                         "stac_items_assets table or collections_enclosure");
                                         result.fail(new OgcException(404, "Not found", "Asset not found"));
                                       } else {
-                                        LOGGER.debug("Asset Result: {}", successAsset.get(0));
-                                        result.complete(successAsset.get(0));
+                                        LOGGER.debug("Asset Result: {}", successAssetEnclosure.get(0));
+                                        result.complete(successAssetEnclosure.get(0));
                                       }
                                     })
                                     .onFailure(failedAssetEnclosure -> {
