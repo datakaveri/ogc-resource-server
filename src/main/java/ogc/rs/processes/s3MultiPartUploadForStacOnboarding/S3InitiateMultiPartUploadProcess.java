@@ -24,9 +24,12 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedUploadPartRequest;
+
+import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,16 +69,24 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
         // Initialize S3 Client & S3 Presigner
         this.s3Client = S3Client.builder()
                 .region(Region.of(s3conf.getRegion()))
+                .endpointOverride(URI.create(s3conf.getEndpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(
                         AwsBasicCredentials.create(s3conf.getAccessKey(), s3conf.getSecretKey())
                 ))
+                .serviceConfiguration(S3Configuration.builder()
+                        .pathStyleAccessEnabled(s3conf.isPathBasedAccess())
+                        .build())
                 .build();
 
         this.s3Presigner = S3Presigner.builder()
                 .region(Region.of(s3conf.getRegion()))
+                .endpointOverride(URI.create(s3conf.getEndpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(
                         AwsBasicCredentials.create(s3conf.getAccessKey(), s3conf.getSecretKey())
                 ))
+                .serviceConfiguration(S3Configuration.builder()
+                        .pathStyleAccessEnabled(s3conf.isPathBasedAccess())
+                        .build())
                 .build();
 
     }
@@ -154,8 +165,8 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
                     promise.complete(result);
                 })
                 .onFailure(failureHandler -> {
-                    LOGGER.error(INITIATE_MULTIPART_UPLOAD_PROCESS_FAILURE_MESSAGE, failureHandler);
-                    promise.fail(failureHandler);
+                    LOGGER.error(INITIATE_MULTIPART_UPLOAD_PROCESS_FAILURE_MESSAGE);
+                    handleFailure(requestInput, failureHandler, promise);
                 });
 
         return promise.future();
@@ -324,8 +335,8 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
             LOGGER.info("Multipart upload initiated: Upload ID = {}", uploadId);
             promise.complete(uploadId);
         } catch (Exception e) {
-            LOGGER.error(INITIATE_MULTIPART_UPLOAD_FAILURE_MESSAGE, e);
-            promise.fail(e);
+            LOGGER.error("Failed to initiate S3 multipart upload: {}", e.getMessage(), e);
+            promise.fail(new OgcException(500, "Internal Server Error", INITIATE_MULTIPART_UPLOAD_FAILURE_MESSAGE));
         }
 
         return promise.future();
@@ -336,38 +347,64 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
      *
      * @return A future containing the JSON response with pre-signed URLs.
      */
-    private Future<JsonObject> generatePresignedUrls(String bucket, String key, final String uploadId, int totalParts,long chunkSize) {
+    private Future<JsonObject> generatePresignedUrls(String bucket, String key, final String uploadId, int totalParts, long chunkSize) {
         Promise<JsonObject> promise = Promise.promise();
         List<JsonObject> presignedUrls = new ArrayList<>();
 
-        for (int i = 1; i <= totalParts; i++) {
-            final int partNumber = i;
+        try {
+            for (int i = 1; i <= totalParts; i++) {
+                final int partNumber = i;
 
-            PresignedUploadPartRequest presignedRequest = s3Presigner.presignUploadPart(r -> r
-                    .signatureDuration(Duration.ofMinutes(15)) //
-                    .uploadPartRequest(UploadPartRequest.builder()
-                            .bucket(bucket)
-                            .key(key)
-                            .uploadId(uploadId)
-                            .partNumber(partNumber)
-                            .build()));
+                PresignedUploadPartRequest presignedRequest = s3Presigner.presignUploadPart(r -> r
+                        .signatureDuration(Duration.ofMinutes(15))
+                        .uploadPartRequest(UploadPartRequest.builder()
+                                .bucket(bucket)
+                                .key(key)
+                                .uploadId(uploadId)
+                                .partNumber(partNumber)
+                                .build()));
 
-            presignedUrls.add(new JsonObject()
-                    .put("partNumber", partNumber)
-                    .put("url", presignedRequest.url().toString()));
+                presignedUrls.add(new JsonObject()
+                        .put("partNumber", partNumber)
+                        .put("url", presignedRequest.url().toString()));
+            }
+
+            JsonObject response = new JsonObject()
+                    .put("uploadId", uploadId)
+                    .put("chunkSize", chunkSize)
+                    .put("totalParts", totalParts)
+                    .put("presignedUrls", new JsonArray(presignedUrls));
+
+            LOGGER.info("Generated presigned URLs for {} parts.", totalParts);
+            LOGGER.info("Response of multipart upload initiation: {}", response);
+
+            promise.complete(response);
+        } catch (Exception e) {
+            LOGGER.error("Failed to generate presigned URLs for multipart upload: {}", e.getMessage(), e);
+            promise.fail(new OgcException(500, "Internal Server Error", GENERATE_PRESIGNED_URLS_FAILURE_MESSAGE));
         }
 
-        JsonObject response = new JsonObject()
-                .put("uploadId", uploadId)
-                .put("chunkSize", chunkSize)
-                .put("totalParts", totalParts)
-                .put("presignedUrls", new JsonArray(presignedUrls));
-
-        LOGGER.info("Generated presigned URLs for {} parts.", totalParts);
-        LOGGER.info("Response of multipart upload initiation: {}", response);
-
-        promise.complete(response);
         return promise.future();
+    }
+
+    /**
+     * Handles failure by updating the job status to "FAILED" in the jobs_table and logging the error.
+     *
+     * @param requestInput   The JSON object containing request details.
+     * @param failureHandler The exception that caused the failure.
+     * @param promise        The promise to complete with the failure.
+     */
+    private void handleFailure(JsonObject requestInput, Throwable failureHandler, Promise<JsonObject> promise) {
+
+        utilClass.updateJobTableStatus(requestInput, Status.FAILED, failureHandler.getMessage())
+                .onSuccess(successHandler -> {
+                    LOGGER.error("Process failed: {}", failureHandler.getMessage());
+                    promise.fail(failureHandler);
+                })
+                .onFailure(jobStatusFailureHandler -> {
+                    LOGGER.error(HANDLE_FAILURE_MESSAGE + ": {}", jobStatusFailureHandler.getMessage());
+                    promise.fail(jobStatusFailureHandler);
+                });
     }
 
     /**

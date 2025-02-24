@@ -30,6 +30,8 @@ public class Constants {
             "S3 multipart upload initiated. Upload ID generated successfully.";
     public static final String INITIATE_MULTIPART_UPLOAD_FAILURE_MESSAGE =
             "Failed to initiate S3 multipart upload.";
+    public static final String GENERATE_PRESIGNED_URLS_FAILURE_MESSAGE =
+            "Failed to generate presigned URLs for multipart upload";
     public static final String INITIATE_MULTIPART_UPLOAD_PROCESS_COMPLETE_MESSAGE =
             "Successfully initiated S3 Multipart upload and presigned URLs generated for all parts.";
     public static final String INITIATE_MULTIPART_UPLOAD_PROCESS_FAILURE_MESSAGE =
@@ -41,7 +43,8 @@ public class Constants {
             "The request contains an invalid part format.";
     public static final String COMPLETE_MULTIPART_UPLOAD_PROCESS_SUCCESS_MESSAGE =
             "Successfully completed S3 Multipart upload completion process.";
-    public static final String COMPLETE_MULTIPART_UPLOAD_FAIL_MESSAGE =
+    public static final String COMPLETE_MULTIPART_UPLOAD_FAILURE_MESSAGE =
             "Failed to complete S3 multipart upload completion process.";
-
+    public static final String HANDLE_FAILURE_MESSAGE =
+            "Failed to update job table status to FAILED after handler failure";
 }

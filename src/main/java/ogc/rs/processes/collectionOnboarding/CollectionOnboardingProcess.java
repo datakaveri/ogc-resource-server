@@ -12,6 +12,7 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.router.RouterManager;
+import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
@@ -148,7 +149,7 @@ public class CollectionOnboardingProcess implements ProcessService {
               .getString("ownerUserId"));
           if (!(requestInput.getValue("owner").toString().equals(requestInput.getValue("userId").toString()))) {
             LOGGER.error(RESOURCE_OWNERSHIP_ERROR);
-            promise.fail(RESOURCE_OWNERSHIP_ERROR);
+            promise.fail(new OgcException(403, "Forbidden", RESOURCE_OWNERSHIP_ERROR));
             return;
           }
           requestInput.put("accessPolicy",
@@ -157,7 +158,7 @@ public class CollectionOnboardingProcess implements ProcessService {
           promise.complete(requestInput);
         } else {
           LOGGER.error(ITEM_NOT_PRESENT_ERROR);
-          promise.fail(ITEM_NOT_PRESENT_ERROR);
+          promise.fail(new OgcException(404, "Not Found", ITEM_NOT_PRESENT_ERROR));
         }
       }).onFailure(failureResponseFromCat -> {
         LOGGER.error(CAT_RESPONSE_FAILURE + failureResponseFromCat.getMessage());

@@ -5,6 +5,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
+import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.util.Status;
@@ -15,7 +16,10 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.*;
+
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,9 +46,13 @@ public class S3CompleteMultiPartUploadProcess implements ProcessService {
         this.utilClass = new UtilClass(pgPool);
         this.s3Client = S3Client.builder()
                 .region(Region.of(s3conf.getRegion()))
+                .endpointOverride(URI.create(s3conf.getEndpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(
                         AwsBasicCredentials.create(s3conf.getAccessKey(), s3conf.getSecretKey())
                 ))
+                .serviceConfiguration(S3Configuration.builder()
+                        .pathStyleAccessEnabled(s3conf.isPathBasedAccess())
+                        .build())
                 .build();
     }
 
@@ -83,8 +91,8 @@ public class S3CompleteMultiPartUploadProcess implements ProcessService {
                     promise.complete(result);
                 })
                 .onFailure(failureHandler -> {
-                    LOGGER.error(COMPLETE_MULTIPART_UPLOAD_FAIL_MESSAGE, failureHandler);
-                    promise.fail(failureHandler);
+                    LOGGER.error(COMPLETE_MULTIPART_UPLOAD_FAILURE_MESSAGE);
+                    handleFailure(requestInput, failureHandler, promise);
                 });
 
         return promise.future();
@@ -124,7 +132,7 @@ public class S3CompleteMultiPartUploadProcess implements ProcessService {
                         .build());
             } else {
                 LOGGER.error("Invalid part format: {}", partString);
-                promise.fail(INVALID_PART_FORMAT_MESSAGE);
+                promise.fail(new OgcException(400, "Bad Request", INVALID_PART_FORMAT_MESSAGE));
                 return promise.future();
             }
         }
@@ -141,13 +149,33 @@ public class S3CompleteMultiPartUploadProcess implements ProcessService {
             CompleteMultipartUploadResponse response = s3Client.completeMultipartUpload(completeRequest);
             LOGGER.info("Multipart upload completed successfully: {}", response.location());
             promise.complete(new JsonObject()
-                    .put("message", "Upload Completed")
+                    .put("message", COMPLETE_MULTIPART_UPLOAD_PROCESS_SUCCESS_MESSAGE)
                     .put("location", response.location()));
         } catch (Exception e) {
-            LOGGER.error(COMPLETE_MULTIPART_UPLOAD_FAIL_MESSAGE, e);
-            promise.fail(COMPLETE_MULTIPART_UPLOAD_FAIL_MESSAGE);
+            LOGGER.error("Failed to complete S3 multipart upload completion: {}", e.getMessage(), e);
+            promise.fail(new OgcException(500, "Internal Server Error", COMPLETE_MULTIPART_UPLOAD_FAILURE_MESSAGE));
         }
 
         return promise.future();
+    }
+
+    /**
+     * Handles failure by updating the job status to "FAILED" in the jobs_table and logging the error.
+     *
+     * @param requestInput   The JSON object containing request details.
+     * @param failureHandler The exception that caused the failure.
+     * @param promise        The promise to complete with the failure.
+     */
+    private void handleFailure(JsonObject requestInput, Throwable failureHandler, Promise<JsonObject> promise) {
+
+        utilClass.updateJobTableStatus(requestInput, Status.FAILED, failureHandler.getMessage())
+                .onSuccess(successHandler -> {
+                    LOGGER.error("Process failed: {}", failureHandler.getMessage());
+                    promise.fail(failureHandler);
+                })
+                .onFailure(jobStatusFailureHandler -> {
+                    LOGGER.error(HANDLE_FAILURE_MESSAGE + ": {}", jobStatusFailureHandler.getMessage());
+                    promise.fail(jobStatusFailureHandler);
+                });
     }
 }
