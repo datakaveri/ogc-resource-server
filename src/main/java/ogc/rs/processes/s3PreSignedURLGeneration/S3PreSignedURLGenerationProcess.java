@@ -269,7 +269,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
         Promise<JsonObject> promise = Promise.promise();
         try {
             // Create AWS credentials and presigner
-            Region region = Region.of(requestInput.getString("region"));
+            Region region = Region.of(s3conf.getRegion());
             AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(s3conf.getAccessKey(), s3conf.getSecretKey());
 
             try (S3Presigner preSigner = S3Presigner.builder()
@@ -283,7 +283,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
 
                 // Create the S3 PutObjectRequest
                 PutObjectRequest objectRequest = PutObjectRequest.builder()
-                        .bucket(requestInput.getString("bucketName"))
+                        .bucket(s3conf.getBucket())
                         .key(requestInput.getString("objectKeyName"))
                         .build();
 
