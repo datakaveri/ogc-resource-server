@@ -439,13 +439,13 @@ public class S3MultiPartUploadForStacOnboardingIT {
 
     @Test
     @Order(16)
-    @Description("Failure: Multipart Upload Completion due to invalid S3 credentials (invalid bucket)")
-    public void testExecuteMultipartUploadCompletionInvalidBucketFail() {
-        LOGGER.debug("Testing Failure: Multipart Upload Completion due to invalid S3 credentials (invalid bucket)");
+    @Description("Failure: Multipart Upload Completion due to invalid S3 Key Name")
+    public void testExecuteMultipartUploadCompletionInvalidKeyNameFail() {
+        LOGGER.debug("Testing Failure: Multipart Upload Completion due to invalid S3 Key Name");
 
         String token = getToken();
         JsonObject requestBody = completeUploadRequestBody();
-        requestBody.getJsonObject("inputs").put("bucketName", "invalidBucket");
+        requestBody.getJsonObject("inputs").put("filePath", "04be4cc1-39f9-4441-b32d-1e5767fa8f10/C3_PAN_20211108_2485193221/InvalidTestFile.gpkg");
 
         Response sendExecutionRequest = sendExecutionRequest(completeUploadProcessId, token, requestBody);
         //LOGGER.debug("16th Execution Response: {}" , sendExecutionRequest.getBody().asString());
@@ -455,6 +455,22 @@ public class S3MultiPartUploadForStacOnboardingIT {
 
     @Test
     @Order(17)
+    @Description("Failure: Multipart Upload Completion due to invalid S3 credentials (invalid bucket)")
+    public void testExecuteMultipartUploadCompletionInvalidBucketFail() {
+        LOGGER.debug("Testing Failure: Multipart Upload Completion due to invalid S3 credentials (invalid bucket)");
+
+        String token = getToken();
+        JsonObject requestBody = completeUploadRequestBody();
+        requestBody.getJsonObject("inputs").put("bucketName", "invalidBucket");
+
+        Response sendExecutionRequest = sendExecutionRequest(completeUploadProcessId, token, requestBody);
+        //LOGGER.debug("17th Execution Response: {}" , sendExecutionRequest.getBody().asString());
+
+        sendExecutionRequest.then().statusCode(500).body(DESCRIPTION_KEY,is(COMPLETE_MULTIPART_UPLOAD_FAILURE_MESSAGE));
+    }
+
+    @Test
+    @Order(18)
     @Description("Failure: Multipart Upload Completion due to invalid S3 credentials (invalid upload Id)")
     public void testExecuteMultipartUploadCompletionInvalidUploadIdFail() {
         LOGGER.debug("Testing Failure: Multipart Upload Completion due to invalid S3 credentials (invalid upload Id)");
@@ -464,7 +480,7 @@ public class S3MultiPartUploadForStacOnboardingIT {
         requestBody.getJsonObject("inputs").put("uploadId", UUID.randomUUID().toString());
 
         Response sendExecutionRequest = sendExecutionRequest(completeUploadProcessId, token, requestBody);
-        //LOGGER.debug("17th Execution Response: {}" , sendExecutionRequest.getBody().asString());
+        //LOGGER.debug("18th Execution Response: {}" , sendExecutionRequest.getBody().asString());
 
         sendExecutionRequest.then().statusCode(500).body(DESCRIPTION_KEY,is(COMPLETE_MULTIPART_UPLOAD_FAILURE_MESSAGE));
     }
