@@ -500,4 +500,46 @@ public class StacAssetsIT {
         .statusCode(401)
         .body("description", equalTo(RESOURCE_OPEN_TOKEN_SECURE));
   }
+
+  @Test
+  @Description("Success: Provider token with secure resource accessing collections_enclosure table")
+  public void testGetEnclosureForSecureProviderSuccess() {
+    String token =
+        new FakeTokenBuilder()
+            .withSub(UUID.randomUUID())
+            .withResourceAndRg(
+                UUID.fromString("6dbcd15f-b497-42cd-8468-e3ecdf2daf7d"), UUID.randomUUID())
+            .withRoleProvider()
+            .withCons(new JsonObject())
+            .build();
+    String endpoint = "/assets/d11145f5-dea0-4b40-af93-bef45f726b66";
+    given()
+            .header("Accept", "application/json")
+            .auth().oauth2(token)
+            .when()
+            .get(endpoint)
+            .then()
+            .statusCode(200);
+  }
+
+  @Test
+  @Description("Success: Consumer token with secure resource in collections_enclosure")
+  public void testGetEnclosureForSecureConsumerSuccess() {
+    String token =
+            new FakeTokenBuilder()
+                    .withSub(UUID.randomUUID())
+                    .withResourceAndRg(UUID.fromString("6dbcd15f-b497-42cd-8468-e3ecdf2daf7d"),
+                            UUID.randomUUID())
+                    .withRoleConsumer()
+                    .withCons(new JsonObject().put("access", new JsonArray().add("api")))
+                    .build();
+    String endpoint = "/assets/d11145f5-dea0-4b40-af93-bef45f726b66";
+    given()
+            .header("Accept", "application/json")
+            .auth().oauth2(token)
+            .when()
+            .get(endpoint)
+            .then()
+            .statusCode(200);
+  }
 }
