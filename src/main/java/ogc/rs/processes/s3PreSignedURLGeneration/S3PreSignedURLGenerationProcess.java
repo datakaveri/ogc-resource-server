@@ -7,8 +7,6 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
-
-import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.util.Status;
@@ -28,6 +26,8 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
+
+import static ogc.rs.processes.s3MultiPartUploadForStacOnboarding.Constants.HANDLE_FAILURE_MESSAGE;
 import static ogc.rs.processes.s3PreSignedURLGeneration.Constants.*;
 
 /**
@@ -137,7 +137,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
                 })
                 .onFailure(failureHandler -> {
                     LOGGER.error(S3_PRE_SIGNED_URL_PROCESS_FAILURE_MESSAGE);
-                    objectPromise.fail(failureHandler);
+                    handleFailure(requestInput, failureHandler, objectPromise);
                 });
 
         return objectPromise.future();
@@ -314,6 +314,26 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
             promise.fail(new OgcException(500, "Internal Server Error", S3_PRE_SIGNED_URL_GENERATOR_FAILURE_MESSAGE));
         }
         return promise.future();
+    }
+
+    /**
+     * Handles failure by updating the job status to "FAILED" in the jobs_table and logging the error.
+     *
+     * @param requestInput   The JSON object containing request details.
+     * @param failureHandler The exception that caused the failure.
+     * @param promise        The promise to complete with the failure.
+     */
+    private void handleFailure(JsonObject requestInput, Throwable failureHandler, Promise<JsonObject> promise) {
+
+        utilClass.updateJobTableStatus(requestInput, Status.FAILED, failureHandler.getMessage())
+                .onSuccess(successHandler -> {
+                    LOGGER.error("Process failed: {}", failureHandler.getMessage());
+                    promise.fail(failureHandler);
+                })
+                .onFailure(jobStatusFailureHandler -> {
+                    LOGGER.error(HANDLE_FAILURE_MESSAGE + ": {}", jobStatusFailureHandler.getMessage());
+                    promise.fail(jobStatusFailureHandler);
+                });
     }
 
     /**
