@@ -50,7 +50,10 @@ public class StacAssetsAuthZHandler implements Handler<RoutingContext> {
               LOGGER.debug("Asset found: {}", asset);
             try {
                 String collectionId = asset.containsKey("stac_collections_id")
-                  ? asset.getString("stac_collections_id") : asset.getString("collection_id");
+                        ? asset.getString("stac_collections_id")
+                        : asset.containsKey("collection_id")
+                        ? asset.getString("collection_id")
+                        : asset.getString("collections_id");
                 if (!user.isRsToken()
                     && !collectionId.equals(resourceId.toString())) {
                   LOGGER.error("Collection associated with asset is not the same as in token.");
