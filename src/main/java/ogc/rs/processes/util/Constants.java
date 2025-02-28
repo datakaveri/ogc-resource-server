@@ -15,4 +15,5 @@ public class Constants {
       "SELECT * FROM PROCESSES_TABLE WHERE ID=$1";
   public static final String PROCESS_ACCEPTED_RESPONSE =
       "Process accepted. Starting the execution..";
+  public static final String NO_S3_CONF_FOUND_FOR_BUCKET_ID = "No S3 config exists for bucket identifier : ";
 }
