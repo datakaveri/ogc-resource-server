@@ -7,8 +7,8 @@ This section provides an extensive explanation of the various services exposed b
 
 Additionally, anyone can verify if the server conforms to OGC standards by visiting the following links:
 
-- [OGC Conformance](https://geoserver.dx.ugix.org.in/conformance)
-- [STAC Conformance](https://geoserver.dx.ugix.org.in/stac/conformance)
+- [OGC Conformance](https://geoserver.dx.gsx.org.in/conformance)
+- [STAC Conformance](https://geoserver.dx.gsx.org.in/stac/conformance)
 
 
 ## 1. Feature Services
