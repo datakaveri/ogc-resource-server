@@ -2319,4 +2319,50 @@ public class ApiServerVerticle extends AbstractVerticle {
               routingContext.next();
             });
   }
+
+  public void createStacItems(RoutingContext routingContext) {
+
+    String FEATURE_COLLECTION = "FeatureCollection";
+    String FEATURE = "Feature";
+    RequestParameters paramsFromOasValidation =
+        routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+    String collectionId = routingContext.request().path().split("/")[3];
+    String url = routingContext.request().absoluteURI();
+
+    if (paramsFromOasValidation.body() == null)
+      routingContext.fail(new OgcException(400, "Bad Request", "Empty body"));
+
+    if (!paramsFromOasValidation.body().isJsonObject())
+      routingContext.fail(new OgcException(400, "Bad Request", "Post body not in JSON"));
+
+    JsonObject requestBody = paramsFromOasValidation.body().getJsonObject();
+    requestBody.put("collectionId", collectionId);
+
+    Future<JsonObject> result = null;
+    if (requestBody.getString("type").equalsIgnoreCase(FEATURE_COLLECTION)) {
+      // call bulk insert
+      result = dbService.insertStacItems(requestBody.getJsonArray("features"));
+    }
+    else if (requestBody.getString("type").equalsIgnoreCase(FEATURE)) {
+      //
+      result = dbService.insertStacItem(requestBody);
+    }
+    assert result != null;
+    result
+        .onSuccess(success -> {
+          routingContext.put("response", success.toString());
+          routingContext.put("statusCode", 200);
+          if (requestBody.getString("type").equalsIgnoreCase(FEATURE))
+            routingContext.response().putHeader("LOCATION", url + "/" + requestBody.getString("id"));
+          routingContext.next();
+        })
+        .onFailure(routingContext::fail);
+  }
+
+  public void updateStacItem(RoutingContext routingContext) {
+  }
+
+  //TODO: delete logic
+  public void deleteStacItem(RoutingContext routingContext) {
+  }
 }
