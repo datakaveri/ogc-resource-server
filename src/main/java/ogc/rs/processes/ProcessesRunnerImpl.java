@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import static ogc.rs.common.Constants.processException404;
 import static ogc.rs.common.Constants.processException500;
 import static ogc.rs.processes.util.Constants.PROCESS_EXIST_CHECK_QUERY;
+import static ogc.rs.processes.util.Constants.NO_S3_CONF_FOUND_FOR_BUCKET_ID;
 
 /**
  * The {@code ProcessesRunnerImpl} class implements the {@link ProcessesRunnerService} interface
@@ -89,7 +90,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
     
     if (conf.isEmpty()) {
       throw new OgcException(403, "Failed to start the process",
-          "No bucket exists for identifier : " + s3BucketIdentifier);
+          NO_S3_CONF_FOUND_FOR_BUCKET_ID + s3BucketIdentifier);
     }
     
     return conf.get();

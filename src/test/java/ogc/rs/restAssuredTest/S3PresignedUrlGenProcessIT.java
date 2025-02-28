@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
@@ -19,6 +18,7 @@ import static io.restassured.RestAssured.*;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.processes.s3PreSignedURLGeneration.Constants.*;
 import static ogc.rs.processes.util.Status.*;
+import static ogc.rs.processes.util.Constants.NO_S3_CONF_FOUND_FOR_BUCKET_ID;
 import static ogc.rs.restAssuredTest.Constant.*;
 import static org.hamcrest.Matchers.*;
 
@@ -41,7 +41,7 @@ public class S3PresignedUrlGenProcessIT {
   public static void setup() throws IOException {
 
     processId = given().get("/processes").then().statusCode(200).extract().jsonPath()
-        .get("find{ processes.title == S3PreSignedURLGeneration }.id");
+        .getString("processes.find{ it.title == 'S3PreSignedURLGeneration' }.id");
   }
 
   private JsonObject requestBody() {
@@ -105,7 +105,7 @@ public class S3PresignedUrlGenProcessIT {
         .withCons(new JsonObject()).build();
 
     sendExecutionRequest(processId, invalidToken, requestBody()).then().statusCode(403).and()
-        .body("message", equalTo(RESOURCE_OWNERSHIP_ERROR)).body("status", equalTo(FAILED));
+        .body("description", equalTo(RESOURCE_OWNERSHIP_ERROR));
   }
 
   @Test
@@ -114,14 +114,17 @@ public class S3PresignedUrlGenProcessIT {
   public void testExecuteWithProviderDelegateUser() {
     LOGGER.debug("Testing Success: Provider Delegate User");
     String token = new FakeTokenBuilder()
-        .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97")).withResourceServer()
-        .withDelegate(UUID.fromString("9304cb99-7125-47f1-8686-a070bb6c3eaf"), "provider")
+        .withSub(UUID.fromString("9304cb99-7125-47f1-8686-a070bb6c3eaf")).withResourceServer()
+        .withDelegate(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"), "provider")
         .withCons(new JsonObject()).build();
 
-    String url = sendExecutionRequest(processId, token, requestBody()).then().statusCode(201)
-        .body("status", equalTo(SUCCESSFUL))
+    String url = sendExecutionRequest(processId, token, requestBody()).then().statusCode(200)
+        .body("status", equalTo(SUCCESSFUL.toString()))
         .body("message", equalTo(S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE))
-        .extract().jsonPath().get("s3PreSignedUrl");
+        .extract().jsonPath().get("S3PreSignedUrl");
+    
+    // replace s3.aws-region.amazonaws.com in URL with localhost, since former is not routable outside the docker-compose network
+    url = url.replace("s3.aws-region.amazonaws.com", "localhost");
     
     File file = new File("src/test/resources/assets/AssetSample.txt");
     given().baseUri(url).multiPart("file", file).when().put().then().statusCode(200);
@@ -135,13 +138,16 @@ public class S3PresignedUrlGenProcessIT {
   public void testExecuteWithProviderFlow() {
     LOGGER.debug("Testing Success: Provider User");
     String token = new FakeTokenBuilder()
-        .withSub(UUID.fromString("9304cb99-7125-47f1-8686-a070bb6c3eaf")).withResourceServer()
+        .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97")).withRoleProvider().withResourceServer()
         .withCons(new JsonObject()).build();
 
-    String url = sendExecutionRequest(processId, token, requestBody()).then().statusCode(201)
-        .body("status", equalTo(SUCCESSFUL))
+    String url = sendExecutionRequest(processId, token, requestBody()).then().statusCode(200)
+        .body("status", equalTo(SUCCESSFUL.toString()))
         .body("message", equalTo(S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE))
-        .extract().jsonPath().get("s3PreSignedUrl");
+        .extract().jsonPath().get("S3PreSignedUrl");
+    
+    // replace s3.aws-region.amazonaws.com in URL with localhost, since former is not routable outside the docker-compose network
+    url = url.replace("s3.aws-region.amazonaws.com", "localhost");
     
     File file = new File("src/test/resources/assets/AssetSample.txt");
     given().baseUri(url).multiPart("file", file).when().put().then().statusCode(200);
@@ -180,7 +186,7 @@ public class S3PresignedUrlGenProcessIT {
         .withRoleProvider().withCons(new JsonObject()).build();
     
     sendExecutionRequest(processId, token, requestBody()).then().statusCode(403).and()
-        .body("message", equalTo(RESOURCE_OWNERSHIP_ERROR)).body("status", equalTo(FAILED));
+        .body("description", equalTo(RESOURCE_OWNERSHIP_ERROR));
   }
 
   @Test
@@ -192,8 +198,23 @@ public class S3PresignedUrlGenProcessIT {
     JsonObject requestBody = requestBody();
     requestBody.getJsonObject("inputs").put("resourceId", RESOURCE_ID_ALREADY_IN_DB);
     
+    sendExecutionRequest(processId, token, requestBody).then().statusCode(409).and()
+        .body("description", equalTo(RESOURCE_ALREADY_EXISTS_MESSAGE));
+  }
+  
+  @Test
+  @Order(10)
+  @Description("Failure: No S3 config found for bucket ID")
+  public void testFailNoS3ConfigFoundForBucketId() {
+
+    String randBucketId =  UUID.randomUUID().toString();
+    String token = getToken();
+    
+    JsonObject requestBody = requestBody();
+    requestBody.getJsonObject("inputs").put(ProcessesRunnerImpl.S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY, randBucketId);
+    
     sendExecutionRequest(processId, token, requestBody).then().statusCode(403).and()
-        .body("message", equalTo(RESOURCE_ALREADY_EXISTS_MESSAGE)).body("status", equalTo(FAILED));
+        .body("description", equalTo(NO_S3_CONF_FOUND_FOR_BUCKET_ID + randBucketId));
   }
 
 }
