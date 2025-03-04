@@ -553,6 +553,7 @@
                                 <srcFile>src/test/resources/integ-db/teardown/tempRemoveS3BucketIdentifierFromProcInputs.sql</srcFile>
                                 <srcFile>src/test/resources/integ-db/teardown/tempAddBackRegionAndBucketFromS3PresignedProcess.sql
                             </srcFile>
+                                <srcFile>src/test/resources/integ-db/teardown/deleteTilesFromExistingFeature.sql</srcFile>
                             </srcFiles>
                         </configuration>
                     </execution>

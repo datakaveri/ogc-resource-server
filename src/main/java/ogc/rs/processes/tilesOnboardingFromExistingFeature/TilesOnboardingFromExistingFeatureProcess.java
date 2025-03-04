@@ -156,7 +156,8 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
     }
 
     /**
-     * Onboards tiles from an existing feature collection using ogr2ogr.
+     * Onboards tiles from an existing feature collection using ogr2ogr. Note, if tiles are present
+     * in S3 at the exact location, <code>ogr2ogr<code> will not overwrite the tiles and will fail.
      *
      * @param requestInput the input JSON object containing process parameters
      * @return a Future containing the result of the onboarding operation
@@ -246,6 +247,7 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
         cmdLine.addArgument("-sql");
         cmdLine.addArgument(sqlQuery, false);
         // Configure AWS credentials and endpoint
+        cmdLine.addArgument("--config");
         cmdLine.addArgument("AWS_S3_ENDPOINT");
         cmdLine.addArgument(s3conf.getEndpoint().replaceFirst("https?://", "")); // GDAL needs endpoint without protocol
         cmdLine.addArgument("--config");
