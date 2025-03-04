@@ -154,10 +154,10 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
           processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, config, processSpecificS3Conf);
           break;
         case "S3InitiateMultipartUpload":
-          processService = new S3InitiateMultiPartUploadProcess(pgPool, webClient, config, getS3Object(config), vertx);
+          processService = new S3InitiateMultiPartUploadProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
           break;
         case "S3CompleteMultipartUpload":
-          processService = new S3CompleteMultiPartUploadProcess(pgPool,config);
+          processService = new S3CompleteMultiPartUploadProcess(pgPool, processSpecificS3Conf);
           break;
         case "TilesMetaDataOnboarding":
           processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);

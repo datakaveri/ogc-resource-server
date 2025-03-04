@@ -39,11 +39,11 @@ public class S3CompleteMultiPartUploadProcess implements ProcessService {
      * Initializes the S3CompleteMultiPartUploadProcess with S3 client and configuration.
      *
      * @param pgPool  PgPool instance for database interactions.
-     * @param config  JSON containing S3 settings such as access key, secret key, and region.
+     * @param s3conf  S3 config of the bucket to be operated upon.
      */
-    public S3CompleteMultiPartUploadProcess(PgPool pgPool, JsonObject config) {
-        initializeConfig(config);
+    public S3CompleteMultiPartUploadProcess(PgPool pgPool, S3Config s3conf) {
         this.utilClass = new UtilClass(pgPool);
+        this.s3conf = s3conf;
         this.s3Client = S3Client.builder()
                 .region(Region.of(s3conf.getRegion()))
                 .endpointOverride(URI.create(s3conf.getEndpoint()))
@@ -53,22 +53,6 @@ public class S3CompleteMultiPartUploadProcess implements ProcessService {
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(s3conf.isPathBasedAccess())
                         .build())
-                .build();
-    }
-
-    /**
-     * Initializes S3 configuration from the provided JSON configuration.
-     *
-     * @param config JSON object containing S3 endpoint, bucket, region, and credentials.
-     */
-    private void initializeConfig(JsonObject config) {
-        this.s3conf = new S3Config.Builder()
-                .endpoint(config.getString(S3Config.ENDPOINT_CONF_OP))
-                .bucket(config.getString(S3Config.BUCKET_CONF_OP))
-                .region(config.getString(S3Config.REGION_CONF_OP))
-                .accessKey(config.getString(S3Config.ACCESS_KEY_CONF_OP))
-                .secretKey(config.getString(S3Config.SECRET_KEY_CONF_OP))
-                .pathBasedAccess(config.getBoolean(S3Config.PATH_BASED_ACC_CONF_OP))
                 .build();
     }
 
@@ -101,19 +85,18 @@ public class S3CompleteMultiPartUploadProcess implements ProcessService {
     /**
      * Completes a multipart upload by assembling uploaded parts.
      *
-     * @param requestInput JSON object containing uploadId, bucketName, filePath, and parts.
+     * @param requestInput JSON object containing uploadId, filePath, and parts.
      * @return Future with success or failure result of the multipart upload completion.
      */
     public Future<JsonObject> completeMultipartUpload(JsonObject requestInput) {
         Promise<JsonObject> promise = Promise.promise();
         String uploadId = requestInput.getString("uploadId");
-        String bucket = requestInput.getString("bucketName");
         String key = requestInput.getString("filePath");
 
         List<CompletedPart> completedParts = new ArrayList<>();
         JsonArray parts = requestInput.getJsonArray("parts");
         LOGGER.info("Upload ID: {}", uploadId);
-        LOGGER.info("Bucket: {}", bucket);
+        LOGGER.info("Bucket: {}", s3conf.getBucket());
         LOGGER.info("Key (filePath): {}", key);
         LOGGER.info("Parts Received for Completion: {}", parts);
 
@@ -139,7 +122,7 @@ public class S3CompleteMultiPartUploadProcess implements ProcessService {
 
         // Creating the complete multipart upload request
         CompleteMultipartUploadRequest completeRequest = CompleteMultipartUploadRequest.builder()
-                .bucket(bucket)
+                .bucket(s3conf.getBucket())
                 .key(key)
                 .uploadId(uploadId)
                 .multipartUpload(CompletedMultipartUpload.builder().parts(completedParts).build())
