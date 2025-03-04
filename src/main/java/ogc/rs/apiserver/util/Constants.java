@@ -48,6 +48,8 @@ public class Constants {
     public static final String STAC_ITEM_SEARCH_GET_API = "getItemSearch";
     public static final String STAC_ITEM_SEARCH_POST_API = "postItemSearch";
     public static final String ASSET_API = "getAsset";
+    public static final String STAC_POST_COLLECTION_API = "postStacCollection";
+    public static final String STAC_UPDATE_COLLECTION_API = "updateStacCollection";
     public static final String STAC_CONFORMANCE_CLASSES = "getConformanceDeclaration";
     public static final String PROCESS_EXECUTION_REGEX = "/processes/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/execution";
     public static final String STATUS_API = "getStatus";

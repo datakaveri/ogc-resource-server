@@ -1239,112 +1239,80 @@ public class ApiServerVerticle extends AbstractVerticle {
     }
   }
 
-  public void getStacCollection(RoutingContext routingContext) {
-    String collectionId = routingContext.normalizedPath().split("/")[3];
-    LOGGER.debug("collectionId- {}", collectionId);
-    dbService
-        .getStacCollection(collectionId)
-        .onSuccess(
-            collection -> {
-              LOGGER.debug("Success! - {}", collection.toString());
-              try {
-//                String jsonFilePath = "docs/getStacLandingPage.json";
-//                FileSystem fileSystem = vertx.fileSystem();
-//                Buffer buffer = fileSystem.readFileBlocking(jsonFilePath);
-//                JsonObject stacMetadata = new JsonObject(buffer.toString());
+    public void getStacCollection(RoutingContext routingContext) {
+        String collectionId = routingContext.normalizedPath().split("/")[3];
+        LOGGER.debug("collectionId- {}", collectionId);
+        dbService
+                .getStacCollection(collectionId)
+                .onSuccess(
+                        collection -> {
+                            JsonObject response = handleStacCollectionResponse(collection);
+                            routingContext.put("response", response.toString());
+                            routingContext.put("statusCode", 200);
+                            routingContext.next();
+                        })
+                .onFailure(failed -> {
+                    if (failed instanceof OgcException) {
+                        routingContext.put("response", ((OgcException) failed).getJson().toString());
+                        routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+                    } else {
+                        OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
+                        routingContext.put("response", ogcException.getJson().toString());
+                        routingContext.put("statusCode", ogcException.getStatusCode());
+                    }
+                    routingContext.next();
+                });
+    }
 
-                if (collection.getJsonArray("temporal") == null
-                    || collection.getJsonArray("temporal").isEmpty()) {
-                  collection.put("temporal", new JsonArray().add(null).add(null));
-                }
-                if (collection.getString("license") == null
-                    || collection.getString("license").isEmpty()) {
-                  collection.put("license", stacMetaJson.getString("stacLicense"));
-                }
-                String stacVersion = stacMetaJson.getString("stacVersion");
-                collection
+    private JsonObject handleStacCollectionResponse(JsonObject collection) {
+        LOGGER.debug("Processing collection - {}", collection.toString());
+
+        try {
+            if (collection.getJsonArray("temporal") == null || collection.getJsonArray("temporal").isEmpty()) {
+                collection.put("temporal", new JsonArray().add(null).add(null));
+            }
+            if (collection.getString("license") == null || collection.getString("license").isEmpty()) {
+                collection.put("license", stacMetaJson.getString("stacLicense"));
+            }
+
+            collection
                     .put("type", "Collection")
-                    .put(
-                        "links",
-                        new JsonArray()
+                    .put("stac_version", stacMetaJson.getString("stacVersion"))
+                    .put("links", new JsonArray()
                             .add(createLink("root", STAC + "/", null))
                             .add(createLink("parent", STAC + "/", null))
-                            .add(
-                                createLink(
-                                    "self",
-                                    STAC + "/" + COLLECTIONS + "/" + collection.getString("id"),
-                                    collection.getString("title")))
-                            .add(createLink(
-                              "items",
-                              STAC + "/" + COLLECTIONS + "/" + collection.getString("id") + "/items",
-                              "Items API link to fetch Items for the collection")))
-                    .put("stac_version", stacVersion)
-                    .put(
-                        "extent",
-                        new JsonObject()
-                            .put(
-                                "spatial",
-                                new JsonObject()
-                                    .put(
-                                        "bbox",
-                                        new JsonArray().add(collection.getJsonArray("bbox"))))
-                            .put(
-                                "temporal",
-                                new JsonObject()
-                                    .put(
-                                        "interval",
-                                        new JsonArray().add(collection.getJsonArray("temporal")))));
-                if (collection.containsKey("assets")) {
-                  JsonObject assets = new JsonObject();
+                            .add(createLink("self", STAC + "/" + COLLECTIONS + "/" + collection.getString("id"), collection.getString("title")))
+                            .add(createLink("items", STAC + "/" + COLLECTIONS + "/" + collection.getString("id") + "/items", "Items API link")))
+                    .put("extent", new JsonObject()
+                            .put("spatial", new JsonObject().put("bbox", new JsonArray().add(collection.getJsonArray("bbox"))))
+                            .put("temporal", new JsonObject().put("interval", new JsonArray().add(collection.getJsonArray("temporal")))));
 
-                  collection
-                      .getJsonArray("assets")
-                      .forEach(
-                          assetJson -> {
-                            JsonObject asset = new JsonObject();
-                            asset.mergeIn((JsonObject) assetJson);
-                            String href =
-                                hostName + ogcBasePath + "assets/" + asset.getString("id");
-                            asset.put("href", href);
-                            asset.put("file:size", asset.getInteger("size"));
-                            asset.remove("size");
-                            asset.remove("id");
-                            asset.remove("stac_collections_id");
-                            assets.put(((JsonObject) assetJson).getString("id"), asset);
-                          });
-                  collection.put("assets", assets);
-                }
+            if (collection.containsKey("assets")) {
+                JsonObject assets = new JsonObject();
+                collection.getJsonArray("assets").forEach(assetJson -> {
+                    JsonObject asset = new JsonObject();
+                    asset.mergeIn((JsonObject) assetJson);
+                    String href = hostName + ogcBasePath + "assets/" + asset.getString("id");
+                    asset.put("href", href);
+                    asset.put("file:size", asset.getInteger("size"));
+                    asset.remove("size");
+                    asset.remove("id");
+                    asset.remove("stac_collections_id");
+                    assets.put(((JsonObject) assetJson).getString("id"), asset);
+                });
+                collection.put("assets", assets);
+            }
 
-                collection.remove("bbox");
-                collection.remove("temporal");
-              } catch (Exception e) {
-                LOGGER.error("Something went wrong here: {}", e.getMessage());
-                routingContext.put(
-                    "response",
-                    new OgcException(500, "Internal Server Error", "Something " + "broke")
-                        .getJson()
-                        .toString());
-                routingContext.put("statusCode", 500);
-                routingContext.next();
-              }
-              routingContext.put("response", collection.toString());
-              routingContext.put("statusCode", 200);
-              routingContext.next();
-            })
-        .onFailure(
-            failed -> {
-              if (failed instanceof OgcException) {
-                routingContext.put("response", ((OgcException) failed).getJson().toString());
-                routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
-              } else {
-                OgcException ogcException =
-                    new OgcException(500, "Internal Server Error", "Internal Server Error");
-                routingContext.put("response", ogcException.getJson().toString());
-                routingContext.put("statusCode", ogcException.getStatusCode());
-              }
-              routingContext.next();
-            });
-  }
+            collection.remove("bbox");
+            collection.remove("temporal");
+
+        } catch (Exception e) {
+            LOGGER.error("Error processing collection: {}", e.getMessage());
+            return new OgcException(500, "Internal Server Error", "Something broke").getJson();
+        }
+
+        return collection;
+    }
 
   // /items for stac_collection
   public void getStacItems(RoutingContext routingContext){
@@ -1514,7 +1482,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     assetArray.forEach(asset -> {
       JsonObject assetObj = (JsonObject) asset;
       String assetId = assetObj.getString("id");
-      
+
       String href = assetObj.getString("href");
 
       try {
@@ -1551,11 +1519,11 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     RequestParameters paramsFromOasValidation = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
     StacItemSearchParams searchParams = StacItemSearchParams.createFromGetRequest(paramsFromOasValidation);
-    
+
     // increment limit by 1 to check if more data is present for next link
     int incrementedLimit = searchParams.getLimit() + 1;
     searchParams.setLimit(incrementedLimit);
-      
+
     JsonArray commonLinksInFeature = new JsonArray()
         .add(new JsonObject()
             .put("rel", "root")
@@ -1564,10 +1532,10 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     dbService.stacItemSearch(searchParams).compose(stacItemsObject -> {
       JsonArray stacItems = stacItemsObject.getJsonArray("features");
-      
+
       String currentUrl = routingContext.request().absoluteURI();
       String firstLink = currentUrl.replaceFirst("offset=\\d+", "offset=1");
-      
+
       if(stacItems.isEmpty()) {
         stacItemsObject.put("links", commonLinksInFeature
             .add(new JsonObject()
@@ -1577,13 +1545,13 @@ public class ApiServerVerticle extends AbstractVerticle {
 
         return Future.succeededFuture(stacItemsObject);
       }
-      
+
       JsonArray rootRespLinks = new JsonArray()
           .add(new JsonObject()
               .put("rel", "self")
               .put("type", "application/json")
               .put("href", currentUrl));
-      
+
       int returnedSize = stacItems.size();
 
       /*
@@ -1593,7 +1561,7 @@ public class ApiServerVerticle extends AbstractVerticle {
       if (returnedSize == incrementedLimit) {
         // calculate offset from the 2nd-last item returned
         int offset = (stacItems.getJsonObject(returnedSize - 2).getInteger("p_id") + 1);
-        
+
         String nextLink;
 
         if (currentUrl.contains("offset=")) {
@@ -1605,7 +1573,7 @@ public class ApiServerVerticle extends AbstractVerticle {
         // remove the last item returned since it's extra and modify number returned count
         stacItems.remove(returnedSize - 1);
         stacItemsObject.put("numberReturned", incrementedLimit - 1);
-        
+
         rootRespLinks.add(new JsonObject()
               .put("rel", "next")
               .put("type", "application/geo+json")
@@ -1631,7 +1599,7 @@ public class ApiServerVerticle extends AbstractVerticle {
         String collectionId = stacItemJson.getString("collection");
 
         JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
-        
+
         allLinksInFeature
             .add(new JsonObject()
                 .put("rel", "collection")
@@ -1651,13 +1619,13 @@ public class ApiServerVerticle extends AbstractVerticle {
 
         JsonObject assets = new JsonObject();
         assets = formatAssetObjectsAsPerStacSchema(stacItemJson.getJsonArray("assetobjects"));
-        
+
         stacItemJson.put("assets", assets);
         stacItemJson.remove("assetobjects");
 
         stacItemJson.put("links", allLinksInFeature);
       });
-      
+
       return Future.succeededFuture(stacItemsObject);
     })
     .onSuccess(result -> {
@@ -1670,7 +1638,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   /**
    * POST STAC Item Search.
-   * 
+   *
    * @param routingContext
    */
   public void postStacItemByItemSearch(RoutingContext routingContext){
@@ -1682,7 +1650,7 @@ public class ApiServerVerticle extends AbstractVerticle {
         routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
 
     JsonObject currentBody;
-    
+
     /*
      * if the request body is not sent or not JSON, then default to a body with some limit and
      * offset = 1
@@ -1695,11 +1663,11 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     StacItemSearchParams searchParams =
         StacItemSearchParams.createFromPostRequest(currentBody);
-    
+
     // increment limit by 1 to check if more data is present for next link
     int incrementedLimit = searchParams.getLimit() + 1;
     searchParams.setLimit(incrementedLimit);
-      
+
     JsonArray commonLinksInFeature = new JsonArray()
         .add(new JsonObject()
             .put("rel", "root")
@@ -1708,9 +1676,9 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     dbService.stacItemSearch(searchParams).compose(stacItemsObject -> {
       JsonArray stacItems = stacItemsObject.getJsonArray("features");
-      
+
       String currentUrl = routingContext.request().absoluteURI();
-      
+
       if(stacItems.isEmpty()) {
         stacItemsObject.put("links", commonLinksInFeature
             .add(new JsonObject()
@@ -1721,14 +1689,14 @@ public class ApiServerVerticle extends AbstractVerticle {
 
         return Future.succeededFuture(stacItemsObject);
       }
-      
+
       JsonArray rootRespLinks = new JsonArray()
           .add(new JsonObject()
               .put("rel", "self")
               .put("type", "application/json")
               .put("href", currentUrl)
               .put("body", currentBody));
-      
+
       int returnedSize = stacItems.size();
 
       /*
@@ -1738,14 +1706,14 @@ public class ApiServerVerticle extends AbstractVerticle {
       if (returnedSize == incrementedLimit) {
         // calculate offset from the 2nd-last item returned
         int offset = (stacItems.getJsonObject(returnedSize - 2).getInteger("p_id") + 1);
-        
+
         JsonObject nextBody = currentBody.copy();
         nextBody.put("offset", offset);
 
         // remove the last item returned since it's extra and modify number returned count
         stacItems.remove(returnedSize - 1);
         stacItemsObject.put("numberReturned", incrementedLimit - 1);
-        
+
         rootRespLinks.add(new JsonObject()
               .put("rel", "next")
               .put("type", "application/geo+json")
@@ -1757,10 +1725,10 @@ public class ApiServerVerticle extends AbstractVerticle {
       /*
        * if not at the first page, add first link. The default value of offset is 1 in the OpenAPI
        * spec, it will be present in the request body even if the user does not add it.
-       */      
+       */
       if (currentBody.getInteger("offset") != 1) {
         JsonObject firstBody = currentBody.copy().put("offset", 1);
-      
+
           rootRespLinks.add(new JsonObject()
               .put("rel", "first")
               .put("type", "application/geo+json")
@@ -1778,7 +1746,7 @@ public class ApiServerVerticle extends AbstractVerticle {
         String collectionId = stacItemJson.getString("collection");
 
         JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
-        
+
         allLinksInFeature
             .add(new JsonObject()
                 .put("rel", "collection")
@@ -1798,13 +1766,13 @@ public class ApiServerVerticle extends AbstractVerticle {
 
         JsonObject assets = new JsonObject();
         assets = formatAssetObjectsAsPerStacSchema(stacItemJson.getJsonArray("assetobjects"));
-        
+
         stacItemJson.put("assets", assets);
         stacItemJson.remove("assetobjects");
 
         stacItemJson.put("links", allLinksInFeature);
       });
-      
+
       return Future.succeededFuture(stacItemsObject);
     })
     .onSuccess(result -> {
@@ -1814,7 +1782,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     })
     .onFailure(failed -> routingContext.fail(failed));
   }
-  
+
   public void getAssets(RoutingContext routingContext) {
     String assetId = routingContext.pathParam("assetId");
 
@@ -1866,6 +1834,146 @@ public class ApiServerVerticle extends AbstractVerticle {
               routingContext.next();
             });
   }
+
+    public void postStacCollection(RoutingContext routingContext) {
+        LOGGER.debug("Post STAC collection");
+        JsonObject requestBody = routingContext.body().asJsonObject();
+        requestBody.put("accessPolicy", routingContext.data().get("accessPolicy"));
+        requestBody.put("ownerUserId", routingContext.data().get("ownerUserId"));
+        requestBody.put("role", routingContext.data().get("role"));
+        if (!requestBody.containsKey("id")) {
+            OgcException ogcException =
+                    new OgcException(400, "Id not found", "Id not found");
+            routingContext.put("response", ogcException.getJson().toString());
+            routingContext.put("statusCode", ogcException.getStatusCode());
+            routingContext.next();
+        } else {
+            dbService
+                    .postStacCollection(requestBody)
+                    .onSuccess(
+                            dbRequest -> {
+                                LOGGER.debug("request successfully posted ");
+                                JsonArray jsonArray =
+                                        requestBody
+                                                .getJsonObject("extent")
+                                                .getJsonObject("temporal")
+                                                .getJsonArray("interval")
+                                                .getJsonArray(0);
+                                requestBody.put("temporal", jsonArray);
+                                requestBody.put(
+                                        "bbox",
+                                        requestBody
+                                                .getJsonObject("extent")
+                                                .getJsonObject("spatial")
+                                                .getJsonArray("bbox")
+                                                .getJsonArray(0));
+                                JsonObject response = handleStacCollectionResponse(requestBody);
+                                routingContext.put("response", response.toString());
+                                routingContext.put("statusCode", 201);
+                                routingContext.next();
+                            })
+                    .onFailure(
+                            failure -> {
+                                LOGGER.debug("request not successfully posted" + failure.getMessage());
+                                if (failure instanceof OgcException) {
+                                    routingContext.put(
+                                            "response", ((OgcException) failure).getJson().toString());
+                                    routingContext.put(
+                                            "statusCode", ((OgcException) failure).getStatusCode());
+                                } else {
+                                    if (failure.getMessage().contains("duplicate key value")) {
+                                        OgcException ogcException =
+                                                new OgcException(
+                                                        409, "Conflict", "STAC Collection Already Exists");
+                                        routingContext.put("response", ogcException.getJson().toString());
+                                        routingContext.put("statusCode", ogcException.getStatusCode());
+                                    } else {
+                                        OgcException ogcException =
+                                                new OgcException(
+                                                        500, "Internal Server Error", "Internal Server Error");
+                                        routingContext.put("response", ogcException.getJson().toString());
+                                        routingContext.put("statusCode", ogcException.getStatusCode());
+                                    }
+                                }
+                                routingContext.next();
+                            });
+        }
+    }
+
+    public void updateStacCollection(RoutingContext routingContext) {
+        LOGGER.debug("Update the Item in db");
+        JsonObject requestBody = routingContext.body().asJsonObject();
+
+        if (!requestBody.containsKey("id")) {
+            OgcException ogcException = new OgcException(400, "Id not found", "Id not found");
+            routingContext.put("response", ogcException.getJson().toString())
+                    .put("statusCode", ogcException.getStatusCode())
+                    .next();
+            return;
+        }
+
+        dbService.getStacCollection(requestBody.getString("id"))
+                .compose(existingCollection -> {
+                    LOGGER.debug("STAC collection present: {}", existingCollection);
+
+                    if (requestBody.containsKey("title")) {
+                        existingCollection.put("title", requestBody.getString("title"));
+                    }
+                    if (requestBody.containsKey("description")) {
+                        existingCollection.put("description", requestBody.getString("description"));
+                    }
+                    if (requestBody.containsKey("crs")) {
+                        existingCollection.put("crs", requestBody.getString("crs"));
+                    }
+                    if (requestBody.containsKey("datetimeKey")) {
+                        existingCollection.put("datetimeKey", requestBody.getString("datetimeKey"));
+                    }
+                    if (requestBody.containsKey("license")) {
+                        existingCollection.put("license", requestBody.getString("license"));
+                    }
+                    if (requestBody.containsKey("extent")) {
+                        existingCollection.put("extent", requestBody.getJsonObject("extent"));
+                    }
+
+                    return dbService.updateStacCollection(existingCollection)
+                            .map(updatedCollection -> {
+                                JsonArray temporalInterval = existingCollection
+                                        .getJsonObject("extent")
+                                        .getJsonObject("temporal")
+                                        .getJsonArray("interval")
+                                        .getJsonArray(0);
+
+                                JsonArray bbox = existingCollection
+                                        .getJsonObject("extent")
+                                        .getJsonObject("spatial")
+                                        .getJsonArray("bbox")
+                                        .getJsonArray(0);
+
+                                existingCollection.put("temporal", temporalInterval)
+                                        .put("bbox", bbox);
+
+                                return existingCollection;
+                            });
+                })
+                .onSuccess(updatedCollection -> {
+                    LOGGER.debug("Request successfully updated");
+                    JsonObject response = handleStacCollectionResponse(updatedCollection);
+                    routingContext.put("response", response.toString())
+                            .put("statusCode", 200)
+                            .next();
+                })
+                .onFailure(failure -> {
+                    LOGGER.debug("Request not successfully updated: {}", failure.getMessage());
+
+                    OgcException ogcException = (failure instanceof OgcException)
+                            ? (OgcException) failure
+                            : new OgcException(500, "Internal Server Error", "Internal Server Error");
+
+                    routingContext.put("response", ogcException.getJson().toString())
+                            .put("statusCode", ogcException.getStatusCode())
+                            .next();
+                });
+    }
 
   private JsonObject createLink(String rel, String href, String title) {
     JsonObject link =
