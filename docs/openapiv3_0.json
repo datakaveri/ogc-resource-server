@@ -949,6 +949,58 @@
           }
         ]
       }
+    },
+    "/listConfiguredS3Buckets": {
+      "get": {
+        "tags": [
+          "Miscellaneous"
+        ],
+        "summary": "List configured S3 buckets",
+        "description": "List information about S3 buckets configured to work with the server. Bucket identifiers along with the read access of the bucket (open or secure) is given. The bucket identifier can then be used as input for executing processes that operate with S3 buckets",
+        "operationId": "listConfiguredS3Buckets",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "s3BucketIdentifier": {
+                                "type": "string",
+                                "description": "The bucket ID that can be used in process inputs"
+                            },
+                            "readAccess": {
+                                "type": "string",
+                                "enum": [
+                                    "PRIVATE",
+                                    "PUBLIC"
+                                ],
+                                "description": "Whether the bucket has public or private read access"
+                            }
+                        }
+                      }
+                  },
+                "example": [
+                    {
+                        "s3BucketIdentifier": "default",
+                        "readAccess": "PRIVATE"
+                    },
+                    {
+                        "s3BucketIdentifier": "stacThumbnailsAndOverviews",
+                        "readAccess": "PUBLIC"
+                    }
+                ]
+                }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
     }
   }
 ,

@@ -5,6 +5,6 @@ package ogc.rs.common;
  */
 public enum S3BucketReadAccess {
 
-  OPEN, SECURE;
+  PUBLIC, PRIVATE;
 
 }
