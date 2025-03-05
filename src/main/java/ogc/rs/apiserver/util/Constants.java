@@ -67,7 +67,7 @@ public class Constants {
     public static final String NOT_FOUND = "Not Found";
     public static final String NOT_AUTHORIZED = "Not Authorized";
     public static final String INVALID_COLLECTION_ID = "Invalid collection id";
-    public static final String USER_NOT_AUTHORIZED =  "User is not authorised. Please contact IUDX AAA ";
+    public static final String USER_NOT_AUTHORIZED =  "User is not authorised. Please contact DX AAA ";
     public static final String NOT_PROVIDER_OR_CONSUMER_TOKEN = "Not a provider or consumer token. It is of role ";
     public static final String RESOURCE_OPEN_TOKEN_SECURE = "Resource is OPEN. Token is SECURE of role ";
     public static final String COVERAGE_SCHEMA ="getCoverageSchema";

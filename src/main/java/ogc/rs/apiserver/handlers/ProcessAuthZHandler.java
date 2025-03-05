@@ -30,7 +30,7 @@ public class ProcessAuthZHandler implements Handler<RoutingContext> {
       LOGGER.error("Resource Ids don't match!");
       routingContext.fail(
           new OgcException(
-              401, "Not Authorized", "User is not authorised. Please contact IUDX AAA "));
+              401, "Not Authorized", "User is not authorised. Please contact DX AAA "));
       return;
     } else if ((user.getRole() == AuthInfo.RoleEnum.provider)) {
       JsonObject results = new JsonObject();
@@ -52,7 +52,7 @@ public class ProcessAuthZHandler implements Handler<RoutingContext> {
       LOGGER.debug("Not a provider or a provider delegate token. It is of role {} ", user.getRole());
       routingContext.fail(
           new OgcException(
-              401, "Not Authorized", "User is not authorised. Please contact IUDX AAA "));
+              401, "Not Authorized", "User is not authorised. Please contact DX AAA "));
     }
   }
 }
