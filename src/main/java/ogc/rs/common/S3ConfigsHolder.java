@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 @DataObject
@@ -29,7 +30,10 @@ public class S3ConfigsHolder {
   private static final String PATH_BASED_ACC_CONF_OP = "pathBasedAccess";
 
   private JsonObject configs;
-  private JsonObject identifierAndReadAccess;
+  /**
+   * Contains bucket identifiers and read access for each bucket as objects.
+   */
+  private JsonArray identifierAndReadAccess;
 
   /**
    * Form {@link S3ConfigsHolder} object from JSON object. Each key in the object would represent a
@@ -65,9 +69,13 @@ public class S3ConfigsHolder {
 
   public S3ConfigsHolder(JsonObject obj) {
     this.configs = obj;
-    this.identifierAndReadAccess = new JsonObject();
-    obj.stream().map(i -> identifierAndReadAccess.put(i.getKey(),
-        ((JsonObject) i.getValue()).getBoolean(READ_ACCESS_CONF_OP)));
+    this.identifierAndReadAccess = new JsonArray();
+
+    obj.forEach(i -> {
+      identifierAndReadAccess.add(new JsonObject().put("s3BucketIdentifier", i.getKey())
+          .put("readAccess", ((JsonObject) i.getValue()).getString(READ_ACCESS_CONF_OP)));
+    });
+
   }
 
   public JsonObject toJson() {
@@ -75,11 +83,11 @@ public class S3ConfigsHolder {
   }
 
   /**
-   * Returns all bucket identifiers and the read access for each in a JSON object.
+   * Returns all bucket identifiers and the read access for each in a JSON array.
    * 
    * @return
    */
-  public JsonObject listAllIdentifiers() {
+  public JsonArray listAllIdentifiers() {
     return identifierAndReadAccess;
   }
 
@@ -137,7 +145,7 @@ public class S3ConfigsHolder {
       S3BucketReadAccess.valueOf(obj.getString(READ_ACCESS_CONF_OP));
     } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException("Failed to initialize S3 config for identifier '"
-          + identifier + "' : " + "read access should be either OPEN, SECURE");
+          + identifier + "' : " + "read access should be either PUBLIC, PRIVATE");
     }
 
     try {

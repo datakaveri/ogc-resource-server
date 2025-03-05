@@ -2741,4 +2741,15 @@ public class ApiServerVerticle extends AbstractVerticle {
         });
   }
 
+  /**
+   * List all configured S3 buckets by bucket ID and read access. Gets data from
+   * {@link S3ConfigsHolder#listAllIdentifiers()}.
+   * 
+   * @param context RoutingContext
+   */
+  public void listConfiguredS3Buckets(RoutingContext context) {
+        context.put("response", s3conf.listAllIdentifiers().toString());
+        context.put("statusCode", 200);
+        context.next();
+  }
 }
