@@ -50,11 +50,13 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
      * @param pgPool  The PostgreSQL connection pool.
      * @param webClient  The WebClient instance for making HTTP requests.
      * @param config  The configuration containing AWS and database details.
+     * @param s3conf  The S3Config instance i.e. config to access bucket requested in process input.
      */
-    public S3PreSignedURLGenerationProcess(PgPool pgPool, WebClient webClient,  JsonObject config) {
+    public S3PreSignedURLGenerationProcess(PgPool pgPool, WebClient webClient,  JsonObject config, S3Config s3conf) {
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.webClient = webClient;
+        this.s3conf = s3conf;
         initializeConfig(config);
     }
 
@@ -64,15 +66,6 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
      * @param config The configuration object containing the AWS credentials and CAT API details.
      */
     private void initializeConfig(JsonObject config) {
-
-        this.s3conf = new S3Config.Builder()
-            .endpoint(config.getString(S3Config.ENDPOINT_CONF_OP))
-            .bucket(config.getString(S3Config.BUCKET_CONF_OP))
-            .region(config.getString(S3Config.REGION_CONF_OP))
-            .accessKey(config.getString(S3Config.ACCESS_KEY_CONF_OP))
-            .secretKey(config.getString(S3Config.SECRET_KEY_CONF_OP))
-            .pathBasedAccess(config.getBoolean(S3Config.PATH_BASED_ACC_CONF_OP))
-            .build();
 
         this.catRequestUri = config.getString("catRequestItemsUri");
         this.catServerHost = config.getString("catServerHost");
@@ -276,7 +269,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
         Promise<JsonObject> promise = Promise.promise();
         try {
             // Create AWS credentials and presigner
-            Region region = Region.of(requestInput.getString("region"));
+            Region region = Region.of(s3conf.getRegion());
             AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(s3conf.getAccessKey(), s3conf.getSecretKey());
 
             try (S3Presigner preSigner = S3Presigner.builder()
@@ -290,7 +283,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
 
                 // Create the S3 PutObjectRequest
                 PutObjectRequest objectRequest = PutObjectRequest.builder()
-                        .bucket(requestInput.getString("bucketName"))
+                        .bucket(s3conf.getBucket())
                         .key(requestInput.getString("objectKeyName"))
                         .build();
 

@@ -7,7 +7,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Tuple;
-import ogc.rs.common.DataFromS3;
+import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
 import ogc.rs.processes.tilesMetaDataOnboarding.TilesMetaDataOnboardingProcess;
@@ -36,10 +36,7 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
     private final UtilClass utilClass;
     private final CollectionOnboardingProcess featureCollectionOnboarding;
     private final TilesMetaDataOnboardingProcess tilesMetaDataOnboarding;
-    private String awsEndPoint;
-    private String accessKey;
-    private String secretKey;
-    private String awsBucketUrl;
+    private final S3Config s3conf;
     private String databaseName;
     private String databaseHost;
     private String databasePassword;
@@ -55,12 +52,13 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
      * @param dataFromS3             the DataFromS3 instance for handling S3-related operations
      * @param vertx                  the Vertx instance for asynchronous operations
      */
-    public TilesOnboardingFromExistingFeatureProcess(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx){
+    public TilesOnboardingFromExistingFeatureProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx){
         this.vertx = vertx;
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
-        this.featureCollectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, dataFromS3, vertx);
-        this.tilesMetaDataOnboarding = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, dataFromS3, vertx);
+        this.s3conf = s3conf;
+        this.featureCollectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
+        this.tilesMetaDataOnboarding = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
         initializeConfig(config);
     }
 
@@ -70,10 +68,6 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
      * @param config the configuration object
      */
     private void initializeConfig(JsonObject config){
-        this.awsEndPoint = config.getString("awsEndPoint");
-        this.accessKey = config.getString("awsAccessKey");
-        this.secretKey = config.getString("awsSecretKey");
-        this.awsBucketUrl = config.getString("s3BucketUrl");
         this.databaseName = config.getString("databaseName");
         this.databaseHost = config.getString("databaseHost");
         this.databasePassword = config.getString("databasePassword");
@@ -162,7 +156,8 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
     }
 
     /**
-     * Onboards tiles from an existing feature collection using ogr2ogr.
+     * Onboards tiles from an existing feature collection using ogr2ogr. Note, if tiles are present
+     * in S3 at the exact location, <code>ogr2ogr<code> will not overwrite the tiles and will fail.
      *
      * @param requestInput the input JSON object containing process parameters
      * @return a Future containing the result of the onboarding operation
@@ -197,6 +192,26 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
     }
 
     /**
+     * Configures S3 options for HTTP access and path-based access.
+     *
+     * @param cmd the {@link CommandLine} object to be configured with S3 options.
+     */
+
+    private void setS3Options(CommandLine cmd){
+        if (!s3conf.isHttps()) {
+              cmd.addArgument("--config");
+              cmd.addArgument("AWS_HTTPS");
+              cmd.addArgument("NO");
+        }
+        
+        if (s3conf.isPathBasedAccess()) {
+              cmd.addArgument("--config");
+              cmd.addArgument("AWS_VIRTUAL_HOSTING");
+              cmd.addArgument("FALSE");
+        }
+    }
+
+    /**
      * Constructs the ogr2ogr command for converting features to tiles.
      *
      * @param requestInput the input JSON object containing process parameters
@@ -209,7 +224,7 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
         int maxZoomLevel = requestInput.getInteger("maxZoomLevel");
 
         // Construct the S3 output path dynamically using resourceId and tileMatrixSet
-        String s3OutputPath = String.format("/vsis3/%s/%s/%s", awsBucketUrl, collectionId, tileMatrixSet);
+        String s3OutputPath = String.format("/vsis3/%s/%s/%s", s3conf.getBucket(), collectionId, tileMatrixSet);
 
         // SQL query to select tiles from the feature collection
         String sqlQuery = String.format("SELECT * FROM \"%s\"", collectionId);
@@ -234,13 +249,13 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
         // Configure AWS credentials and endpoint
         cmdLine.addArgument("--config");
         cmdLine.addArgument("AWS_S3_ENDPOINT");
-        cmdLine.addArgument(awsEndPoint);
+        cmdLine.addArgument(s3conf.getEndpoint().replaceFirst("https?://", "")); // GDAL needs endpoint without protocol
         cmdLine.addArgument("--config");
         cmdLine.addArgument("AWS_ACCESS_KEY_ID");
-        cmdLine.addArgument(accessKey);
+        cmdLine.addArgument(s3conf.getAccessKey());
         cmdLine.addArgument("--config");
         cmdLine.addArgument("AWS_SECRET_ACCESS_KEY");
-        cmdLine.addArgument(secretKey);
+        cmdLine.addArgument(s3conf.getSecretKey());
         // Set dataset creation options (TILING_SCHEME, MINZOOM, MAXZOOM, COMPRESS)
         cmdLine.addArgument("-dsco");
         cmdLine.addArgument("TILING_SCHEME=EPSG:4326,-180,90,180");
@@ -254,6 +269,8 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
         cmdLine.addArgument("-progress");
         cmdLine.addArgument("--debug");
         cmdLine.addArgument("ON");
+        
+        setS3Options(cmdLine);
 
         LOGGER.debug("Generated ogr2ogr command: {}", cmdLine);
 
