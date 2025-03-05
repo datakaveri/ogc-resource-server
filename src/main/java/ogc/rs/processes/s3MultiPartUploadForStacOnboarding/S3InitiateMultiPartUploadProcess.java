@@ -28,7 +28,6 @@ import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedUploadPartRequest;
-
 import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -130,7 +129,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
         int totalParts = (int) Math.ceil((double) fileSize / chunkSize);
 
         String s3KeyName = resourceId + "/" + itemId + "/" + fileName;
-        requestInput.put("s3KeyName", s3KeyName);
+        requestInput.put("objectKeyName", s3KeyName);
         requestInput.put("progress", calculateProgress(1));
 
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, INITIATE_MULTIPART_UPLOAD_PROCESS_START_MESSAGE)
@@ -144,17 +143,11 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
                 .compose(itemCheckHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(4)).put(MESSAGE, ITEM_EXISTS_MESSAGE)))
                 .compose(progressUpdateHandler -> checkIfObjectExistsInS3(requestInput))
-                .compose(objectDoesNotExist -> {
-                    if (objectDoesNotExist) {
-                        LOGGER.info(OBJECT_DOES_NOT_EXIST_MESSAGE);
-                        return initiateMultipartUpload(bucketName, s3KeyName,fileName,fileType);
-                    } else {
-                        LOGGER.error(OBJECT_ALREADY_EXISTS_MESSAGE);
-                        return Future.failedFuture(new OgcException(409, "Conflict", OBJECT_ALREADY_EXISTS_MESSAGE));
-                    }
-                })
+                .compose(objectDoesNotExistHandler -> utilClass.updateJobTableProgress(
+                        requestInput.put("progress", calculateProgress(5)).put(MESSAGE, OBJECT_DOES_NOT_EXIST_MESSAGE)))
+                .compose(progressUpdateHandler -> initiateMultipartUpload(bucketName, s3KeyName,fileName,fileType))
                 .compose(uploadIdHandler -> utilClass.updateJobTableProgress(
-                        requestInput.put("progress",calculateProgress(5)).put(MESSAGE, INITIATE_MULTIPART_UPLOAD_MESSAGE)
+                        requestInput.put("progress",calculateProgress(6)).put(MESSAGE, INITIATE_MULTIPART_UPLOAD_MESSAGE)
                 ).map(uploadIdHandler))
                 .compose(uploadId -> generatePresignedUrls(bucketName, s3KeyName, uploadId, totalParts,chunkSize))
                 .compose(result -> utilClass.updateJobTableStatus(
@@ -195,7 +188,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
      * @param requestInput JSON object containing request details.
      * @return A future indicating the success or failure of the check.
      */
-    private Future<Void> checkResourceOnboardedAsStac(JsonObject requestInput) {
+    public Future<Void> checkResourceOnboardedAsStac(JsonObject requestInput) {
         Promise<Void> promise = Promise.promise();
         String resourceId = requestInput.getString("resourceId");
 
@@ -225,7 +218,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
      * @param requestInput JSON object containing request details.
      * @return A future indicating the success or failure of the check.
      */
-    private Future<Void> checkItemExists(JsonObject requestInput) {
+    public Future<Void> checkItemExists(JsonObject requestInput) {
         Promise<Void> promise = Promise.promise();
         String resourceId = requestInput.getString("resourceId");
         String itemId = requestInput.getString("itemId");
@@ -263,13 +256,12 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
      * If the object exists, fail the process. If not, proceed with initiating multipart upload process.
      *
      * @param requestInput The input JSON object containing the key of the object in S3.
-     * @return A {@link Future<Boolean>} that completes with {@code true} if the object does not exist,
-     *         or {@code false} if the object exists.
+     * @return A {@code Future<Void>} that fails if the object exists (409 Conflict) or completes if it doesn't.
      */
-    private Future<Boolean> checkIfObjectExistsInS3(JsonObject requestInput) {
-        Promise<Boolean> promise = Promise.promise();
+    public Future<Void> checkIfObjectExistsInS3(JsonObject requestInput) {
+        Promise<Void> promise = Promise.promise();
 
-        String objectKeyName = requestInput.getString("s3KeyName");
+        String objectKeyName = requestInput.getString("objectKeyName");
         LOGGER.debug("Checking existence of object: {}", objectKeyName);
 
         // Construct the URL for the object
@@ -284,7 +276,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
                     if (responseFromS3.statusCode() == 200) {
                         // Object already exists in S3
                         LOGGER.error("Object already exists in S3: {}", objectKeyName);
-                        promise.complete(false);
+                        promise.fail(new OgcException(409, "Conflict", OBJECT_ALREADY_EXISTS_MESSAGE));
                     }
                 })
                 .onFailure(failure -> {
@@ -293,7 +285,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
                         if (ogcEx.getStatusCode() == 404) {
                             // Object does not exist in S3
                             LOGGER.debug("Object does not exist in S3: {}", objectKeyName);
-                            promise.complete(true);
+                            promise.complete();
                         } else {
                             LOGGER.error("Failed to check S3 object existence: {}", ogcEx.getMessage());
                             promise.fail(failure);
@@ -301,7 +293,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
                     } else {
                         // General failure case
                         LOGGER.error("Error while checking object existence in S3: {}", failure.getMessage());
-                        promise.fail(failure);
+                        promise.fail(new OgcException(500, "Internal Server Error", "while checking object existence in S3."));
                     }
                 });
 
@@ -411,6 +403,6 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
      * Calculates the progress percentage based on steps completed.
      */
     private float calculateProgress(int step) {
-        return (float) (step * 100) / 6;
+        return (float) (step * 100) / 7;
     }
 }
