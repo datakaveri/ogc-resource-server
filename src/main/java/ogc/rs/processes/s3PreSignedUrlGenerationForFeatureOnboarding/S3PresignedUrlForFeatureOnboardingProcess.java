@@ -25,12 +25,11 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
-import static ogc.rs.processes.s3MultiPartUploadForStacOnboarding.Constants.HANDLE_FAILURE_MESSAGE;
 import static ogc.rs.processes.s3PreSignedUrlGenerationForFeatureOnboarding.Constants.*;
 
 /**
- * This class handles the process of generating an S3 Pre-Signed URL and updating the job status
- * of the process in a PostgreSQL database.
+ * This class handles the process of generating an S3 Pre-Signed URL for features onboarding
+ * and updating the job status of the process in a PostgreSQL database.
  */
 public class S3PresignedUrlForFeatureOnboardingProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(S3PresignedUrlForFeatureOnboardingProcess.class);
@@ -161,7 +160,7 @@ public class S3PresignedUrlForFeatureOnboardingProcess implements ProcessService
                     }
                 })
                 .onFailure(failureResponseFromCat -> {
-                    LOGGER.error(CAT_RESPONSE_FAILURE + failureResponseFromCat.getMessage());
+                    LOGGER.error(CAT_RESPONSE_FAILURE + "{}", failureResponseFromCat.getMessage());
                     promise.fail(new OgcException(500, "Internal Server Error", CAT_RESPONSE_FAILURE));
                 });
 

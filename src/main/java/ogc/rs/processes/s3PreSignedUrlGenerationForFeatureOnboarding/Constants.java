@@ -23,4 +23,6 @@ public class Constants {
             "Pre-Signed URL generation process completed successfully.";
     public static final String S3_PRE_SIGNED_URL_PROCESS_FAILURE_MESSAGE =
             "Pre-Signed URL generation process failed.";
+    public static final String HANDLE_FAILURE_MESSAGE =
+            "Failed to update job table status to FAILED after handler failure";
 }

@@ -6,19 +6,15 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
-import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
-import io.vertx.sqlclient.Tuple;
-import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
+import ogc.rs.processes.s3MultiPartUploadForStacOnboarding.S3InitiateMultiPartUploadProcess;
 import ogc.rs.processes.s3PreSignedUrlGenerationForFeatureOnboarding.S3PresignedUrlForFeatureOnboardingProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 
 import static ogc.rs.processes.s3PreSignedUrlGenerationForStaconboarding.Constants.*;
 
@@ -33,7 +29,7 @@ public class S3PresignedUrlForStacOnboardingProcess implements ProcessService {
     private final UtilClass utilClass;
     private final CollectionOnboardingProcess collectionOnboarding;
     private final S3PresignedUrlForFeatureOnboardingProcess s3PresignedURL;
-    private final PgPool pgPool;
+    private final S3InitiateMultiPartUploadProcess stacOnboardingChecks;
 
     /**
      * Constructor to initialize S3PresignedUrlForStacOnboardingProcess.
@@ -45,14 +41,14 @@ public class S3PresignedUrlForStacOnboardingProcess implements ProcessService {
      * @param vertx          Vertx instance.
      */
     public S3PresignedUrlForStacOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx) {
-        this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, dataFromS3, vertx);
         this.s3PresignedURL = new S3PresignedUrlForFeatureOnboardingProcess(pgPool, webClient, config);
+        this.stacOnboardingChecks = new S3InitiateMultiPartUploadProcess(pgPool,webClient, config, dataFromS3, vertx);
     }
 
     /**
-     * Executes the process for generating a pre-signed URL for S3.
+     * Executes the process for generating an S3 pre-signed URL for stac assets onboarding.
      *
      * @param requestInput JSON object containing request details like collectionId and itemId.
      * @return A future containing the result of the process.
@@ -67,19 +63,22 @@ public class S3PresignedUrlForStacOnboardingProcess implements ProcessService {
         requestInput.put("objectKeyName", objectKeyName);
         requestInput.put("progress", calculateProgress(1));
 
-        utilClass.updateJobTableStatus(requestInput, Status.RUNNING, PROCESS_START_MESSAGE)
+        utilClass.updateJobTableStatus(requestInput, Status.RUNNING, S3_PRESIGNED_URL_PROCESS_START_MESSAGE)
                 .compose(progressUpdate -> collectionOnboarding.makeCatApiRequest(requestInput))
                 .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2)).put(MESSAGE, RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
-                .compose(progressUpdate -> checkResourceOnboardedAsStac(requestInput))
+                .compose(progressUpdate -> stacOnboardingChecks.checkResourceOnboardedAsStac(requestInput))
                 .compose(checkResourceOnboardedAsStacHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(3)).put(MESSAGE, STAC_RESOURCE_ONBOARDED_MESSAGE)))
-                .compose(progressUpdate -> checkItemExists(requestInput))
+                .compose(progressUpdate -> stacOnboardingChecks.checkItemExists(requestInput))
                 .compose(checkItemExistsHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(4)).put(MESSAGE, ITEM_EXISTS_MESSAGE)))
+                .compose(progressUpdate ->stacOnboardingChecks.checkIfObjectExistsInS3(requestInput))
+                .compose(objectDoesNotExistHandler -> utilClass.updateJobTableProgress(
+                        requestInput.put("progress", calculateProgress(5)).put(MESSAGE, OBJECT_DOES_NOT_EXIST_MESSAGE)))
                 .compose(progressUpdate -> s3PresignedURL.generatePreSignedUrl(requestInput))
                 .onSuccess(preSignedUrlResult -> {
-                    LOGGER.info(PROCESS_COMPLETE_MESSAGE);
+                    LOGGER.info(S3_PRESIGNED_URL_PROCESS_SUCCESS_MESSAGE);
 
                     JsonObject result = new JsonObject()
                             .put("S3PreSignedUrl", preSignedUrlResult.getString("preSignedUrl"))
@@ -87,84 +86,35 @@ public class S3PresignedUrlForStacOnboardingProcess implements ProcessService {
                             .put("message", "Pre-Signed URL generation process for stac onboarding completed successfully.")
                             .put("status", "SUCCESSFUL");
 
-                    utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL, PROCESS_COMPLETE_MESSAGE);
+                    utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL, S3_PRESIGNED_URL_PROCESS_SUCCESS_MESSAGE);
                     promise.complete(result);
                 })
                 .onFailure(failureHandler -> {
-                    LOGGER.error(PROCESS_FAILURE_MESSAGE);
+                    LOGGER.error(S3_PRESIGNED_URL_PROCESS_FAILURE_MESSAGE);
+                    handleFailure(requestInput, failureHandler, promise);
+                });
+
+        return promise.future();
+    }
+
+    /**
+     * Handles failure by updating the job status to "FAILED" in the jobs_table and logging the error.
+     *
+     * @param requestInput   The JSON object containing request details.
+     * @param failureHandler The exception that caused the failure.
+     * @param promise        The promise to complete with the failure.
+     */
+    private void handleFailure(JsonObject requestInput, Throwable failureHandler, Promise<JsonObject> promise) {
+
+        utilClass.updateJobTableStatus(requestInput, Status.FAILED, failureHandler.getMessage())
+                .onSuccess(successHandler -> {
+                    LOGGER.error("Process failed: {}", failureHandler.getMessage());
                     promise.fail(failureHandler);
+                })
+                .onFailure(jobStatusFailureHandler -> {
+                    LOGGER.error(HANDLE_FAILURE_MESSAGE + ": {}", jobStatusFailureHandler.getMessage());
+                    promise.fail(jobStatusFailureHandler);
                 });
-
-        return promise.future();
-    }
-
-    /**
-     * Checks if the resource is already onboarded as STAC.
-     *
-     * @param requestInput JSON object containing request details.
-     * @return A future indicating the success or failure of the check.
-     */
-    private Future<Void> checkResourceOnboardedAsStac(JsonObject requestInput) {
-        Promise<Void> promise = Promise.promise();
-        String resourceId = requestInput.getString("resourceId");
-
-        pgPool.preparedQuery(COLLECTION_TYPE_QUERY)
-                .execute(Tuple.of(resourceId), ar -> {
-                    if (ar.succeeded()) {
-                        RowSet<Row> rows = ar.result();
-                        if (rows.iterator().next().getInteger(0) > 0) {
-                            LOGGER.info("Resource {} is onboarded as a STAC item.", resourceId);
-                            promise.complete();
-                        } else {
-                            LOGGER.error(RESOURCE_NOT_ONBOARDED_MESSAGE);
-                            promise.fail(new OgcException(404, "Not Found", RESOURCE_NOT_ONBOARDED_MESSAGE));
-                        }
-                    } else {
-                        LOGGER.error("Failed to query collection_type table: {}", ar.cause().getMessage());
-                        promise.fail(new OgcException(500, "Internal Server Error", "Error checking collection_type table."));
-                    }
-                });
-
-        return promise.future();
-    }
-
-    /**
-     * Checks if the item exists within the resource.
-     *
-     * @param requestInput JSON object containing request details.
-     * @return A future indicating the success or failure of the check.
-     */
-    private Future<Void> checkItemExists(JsonObject requestInput) {
-        Promise<Void> promise = Promise.promise();
-        String resourceId = requestInput.getString("resourceId");
-        String itemId = requestInput.getString("itemId");
-
-        // Skip the check if itemId is null or empty
-        if (itemId == null || itemId.isEmpty()) {
-            LOGGER.info(SKIP_ITEM_EXISTENCE_CHECK_MESSAGE);
-            promise.complete();
-            return promise.future();
-        }
-
-        pgPool.preparedQuery(ITEM_EXISTENCE_CHECK_QUERY)
-                .execute(Tuple.of(resourceId, itemId), ar -> {
-                    if (ar.succeeded()) {
-                        RowSet<Row> rows = ar.result();
-                        int count = rows.iterator().next().getInteger(0);
-                        if (count > 0) {
-                            LOGGER.info("Item {} is associated with resource {}. Proceeding with the process.", itemId, resourceId);
-                            promise.complete();
-                        } else {
-                            LOGGER.error("No item with ID {} is associated with resource {}", itemId, resourceId);
-                            promise.fail(new OgcException(404, "Not Found", ITEM_NOT_EXISTS_MESSAGE));
-                        }
-                    } else {
-                        LOGGER.error("Failed to query stac_collections_part: {}", ar.cause().getMessage());
-                        promise.fail(new OgcException(500, "Internal Server Error", "Error checking stac_collections_part."));
-                    }
-                });
-
-        return promise.future();
     }
 
     /**
@@ -174,6 +124,7 @@ public class S3PresignedUrlForStacOnboardingProcess implements ProcessService {
      * @return The progress percentage as a float.
      */
     private float calculateProgress(int currentStep) {
-        return (float) (currentStep * 100) / 5;
+        return (float) (currentStep * 100) / 6;
     }
+
 }

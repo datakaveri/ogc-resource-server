@@ -8,7 +8,7 @@ public class Constants {
 
     //Message Constants
     public static final String MESSAGE = "message";
-    public static final String PROCESS_START_MESSAGE =
+    public static final String S3_PRESIGNED_URL_PROCESS_START_MESSAGE =
             "Initiating the pre-signed URL generation process for stac onboarding.";
     public static final String RESOURCE_OWNERSHIP_CHECK_MESSAGE =
             "Resource ownership verification successful.";
@@ -20,11 +20,13 @@ public class Constants {
             "The specified item exists and is associated with the resource.";
     public static final String ITEM_NOT_EXISTS_MESSAGE =
             "The specified item does not exist for the given resource.";
-    public static final String SKIP_ITEM_EXISTENCE_CHECK_MESSAGE =
-            "No item ID provided. Skipping item existence verification.";
-    public static final String PROCESS_COMPLETE_MESSAGE =
+    public static final String OBJECT_DOES_NOT_EXIST_MESSAGE =
+            "Object not found in S3. Proceeding with S3 Presigned Url Generation.";
+    public static final String S3_PRESIGNED_URL_PROCESS_SUCCESS_MESSAGE =
             "Pre-Signed URL generation process for stac onboarding completed successfully.";
-    public static final String PROCESS_FAILURE_MESSAGE =
+    public static final String S3_PRESIGNED_URL_PROCESS_FAILURE_MESSAGE =
             "Pre-Signed URL generation process for stac onboarding failed.";
+    public static final String HANDLE_FAILURE_MESSAGE =
+            "Failed to update job table status to FAILED after handler failure";
 
 }
