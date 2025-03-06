@@ -50,6 +50,13 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
 
+    private static final long MB = 1024L * 1024L;
+    private static final long GB = 1024L * MB;
+    private static final long CHUNK_SIZE_100GB = 500L * MB;  // 500MB
+    private static final long CHUNK_SIZE_50GB = 350L * MB;   // 350MB
+    private static final long CHUNK_SIZE_10GB = 200L * MB;   // 200MB
+    private static final long CHUNK_SIZE_DEFAULT = 100L * MB; // 100MB
+
     /**
      * Constructor to initialize the S3 multipart upload process.
      *
@@ -178,16 +185,17 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
      * @return The determined chunk size in bytes.
      */
     private long determineChunkSize(long fileSize) {
-        if (fileSize > 100L * 1024 * 1024 * 1024) {  // > 100GB
-            return 500L * 1024 * 1024; // 500MB
-        } else if (fileSize > 50L * 1024 * 1024 * 1024) {  // > 50GB
-            return 200L * 1024 * 1024; // 200MB
-        } else if (fileSize > 10L * 1024 * 1024 * 1024) {  // > 10GB
-            return 100L * 1024 * 1024; // 100MB
-        } else {  // <= 10GB
-            return 50L * 1024 * 1024; // 50MB
+        if (fileSize >= 100L * GB) {
+            return CHUNK_SIZE_100GB;
+        } else if (fileSize >= 50L * GB) {
+            return CHUNK_SIZE_50GB;
+        } else if (fileSize >= 10L * GB) {
+            return CHUNK_SIZE_10GB;
+        } else {
+            return CHUNK_SIZE_DEFAULT;
         }
     }
+
 
     /**
      * Checks if the resource is already onboarded as STAC.
