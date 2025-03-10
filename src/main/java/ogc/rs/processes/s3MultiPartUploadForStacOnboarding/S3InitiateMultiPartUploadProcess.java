@@ -364,7 +364,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
                 final int partNumber = i;
 
                 PresignedUploadPartRequest presignedRequest = s3Presigner.presignUploadPart(r -> r
-                        .signatureDuration(Duration.ofMinutes(15))
+                        .signatureDuration(Duration.ofMinutes(150))
                         .uploadPartRequest(UploadPartRequest.builder()
                                 .bucket(bucket)
                                 .key(key)
