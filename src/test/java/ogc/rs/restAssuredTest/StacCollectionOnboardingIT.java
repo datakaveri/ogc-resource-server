@@ -306,7 +306,7 @@ public class StacCollectionOnboardingIT {
                 .statusCode(400)
                 .body("code", equalTo("Bad Request"))
                 .body("description", containsString("Validation error for body application/json"))
-                .body("description", containsString("should contain property id"));
+                .body("description", containsString("[Bad Request] Validation error for body application/json: No schema matches"));
     }
 
     @Order(6)
