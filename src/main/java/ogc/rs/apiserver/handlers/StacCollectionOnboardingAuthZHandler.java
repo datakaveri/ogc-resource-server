@@ -59,7 +59,7 @@ public class StacCollectionOnboardingAuthZHandler implements Handler<RoutingCont
       if (user.getRole() != AuthInfo.RoleEnum.provider
           && user.getRole() != AuthInfo.RoleEnum.delegate) {
         routingContext.fail(
-            new OgcException(401, NOT_AUTHORIZED, "Role Not Provider or Delegate"));
+            new OgcException(401, NOT_AUTHORIZED, "Role Not Provider or delegate"));
         return;
       }
 
@@ -81,7 +81,7 @@ public class StacCollectionOnboardingAuthZHandler implements Handler<RoutingCont
         if (user.getRole() != AuthInfo.RoleEnum.provider
             && user.getRole() != AuthInfo.RoleEnum.delegate) {
           routingContext.fail(
-              new OgcException(401, NOT_AUTHORIZED, "Role Not Provider or Delegate"));
+              new OgcException(401, NOT_AUTHORIZED, "Role Not Provider or delegate"));
           return;
         }
           checkCollectionOwnership(collectionId, user, routingContext, validatedCollectionId, collections.size());
