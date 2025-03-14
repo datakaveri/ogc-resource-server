@@ -3,6 +3,7 @@ package ogc.rs.apiserver.util;
 import io.vertx.core.json.JsonObject;
 
 import java.util.UUID;
+import java.util.logging.Logger;
 
 public class AuthInfo {
 
@@ -13,6 +14,7 @@ public class AuthInfo {
   private UUID delegatorUserId;
   private UUID resourceId;
   private boolean isRsToken;
+  private long expiry;
 
   public enum RoleEnum {
     provider,
@@ -22,10 +24,12 @@ public class AuthInfo {
   }
 
   public static AuthInfo createUser(JsonObject tokenDetails) throws OgcException {
+    System.out.println("Token Details are:{}"+ tokenDetails.encodePrettily());
     AuthInfo user = new AuthInfo();
     user.userId = UUID.fromString(tokenDetails.getString("sub"));
     user.role = RoleEnum.valueOf(tokenDetails.getString("role"));
     user.constraints = tokenDetails.getJsonObject("cons");
+    user.expiry = tokenDetails.containsKey("exp") ? tokenDetails.getLong("exp", 0L) : 0L;
     if (tokenDetails.getString("role").equals("delegate")) {
       user.delegatorRole = RoleEnum.valueOf(tokenDetails.getString("drl"));
       user.delegatorUserId = UUID.fromString(tokenDetails.getString("did"));
@@ -79,6 +83,10 @@ public class AuthInfo {
     return isRsToken;
   }
 
+  public long getExpiry() {
+    return expiry;
+  }
+
   @Override
   public String toString() {
     return "{"
@@ -96,6 +104,8 @@ public class AuthInfo {
         + resourceId
         + ", isRsToken="
         + isRsToken
-        + '}';
+            + ", expiry="
+            + expiry +
+            '}';
   }
 }

@@ -97,12 +97,13 @@ public class StacRouterBuilder extends EntityRouterBuilder {
         .handler(apiServerVerticle::buildResponse)
         .failureHandler(failureHandler);
 
-    routerBuilder
-        .operation(STAC_ITEM_BY_ID_API)
-        .handler(apiServerVerticle::getStacItemById)
-        .handler(apiServerVerticle::putCommonResponseHeaders)
-        .handler(apiServerVerticle::buildResponse)
-        .failureHandler(failureHandler);
+      routerBuilder
+              .operation(STAC_ITEM_BY_ID_API)
+              .handler(stacItemByIdAuthZHandler)
+              .handler(apiServerVerticle::getStacItemById)
+              .handler(apiServerVerticle::putCommonResponseHeaders)
+              .handler(apiServerVerticle::buildResponse)
+              .failureHandler(failureHandler);
 
     routerBuilder
         .operation(STAC_ITEM_SEARCH_GET_API)
