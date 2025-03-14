@@ -29,6 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -39,20 +40,16 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
-import ogc.rs.apiserver.util.AuthInfo;
-import ogc.rs.apiserver.util.AuthInfo.RoleEnum;
-import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
-import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.ProcessException;
-import ogc.rs.catalogue.CatalogueService;
-import ogc.rs.database.DatabaseService;
-import ogc.rs.jobs.JobsService;
-import ogc.rs.metering.MeteringService;
-import ogc.rs.processes.ProcessesRunnerService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.apiserver.util.Constants.NOT_FOUND;
@@ -1433,16 +1430,27 @@ public class ApiServerVerticle extends AbstractVerticle {
     dbService
         .getStacItemById(stacCollectionId, stacItemId)
         .onSuccess(stacItem -> {
-              JsonObject assets = new JsonObject();
               try {
-                    JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
+                // Retrieve user authentication info
+                AuthInfo userKey = routingContext.get(USER_KEY);
+                long expiry = (userKey != null) ? userKey.getExpiry() : 0;
+
+                // Check if token is expired
+                boolean isExpired = Instant.now().getEpochSecond() >= expiry;
+                boolean shouldCreate = routingContext.get("shouldCreate");
+                shouldCreate = !isExpired && shouldCreate;
+
+                if (isExpired) {
+                  LOGGER.warn("Token expired. Disabling pre-signed URL generation.");
+                }
+                JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
                     allLinksInFeature
                         .add(new JsonObject()
                             .put("rel", "self")
                             .put("type", "application/json")
                             .put("href", stacMetaJson.getString("hostname")
                                 + "/stac/collections/" + stacCollectionId + "/items/" + stacItem.getString("id")));
-                    assets = formatAssetObjectsAsPerStacSchema(stacItem.getJsonArray("assetobjects"));
+                JsonObject assets = formatAssetObjectsForStacItemById(stacItem.getJsonArray("assetobjects"), shouldCreate, expiry);
                     stacItem.put("assets", assets);
                     stacItem.remove("assetobjects");
                     stacItem.put("links", allLinksInFeature);
@@ -1475,6 +1483,91 @@ public class ApiServerVerticle extends AbstractVerticle {
               routingContext.next();
             });
 
+  }
+
+  private String getPresignedUrlSupportForStacItemById(String objectKeyName, long expiry) {
+    try {
+      // Create AWS credentials and presigner
+      Region region = Region.of(s3conf.getRegion());
+      AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(s3conf.getAccessKey(), s3conf.getSecretKey());
+
+      try (S3Presigner preSigner = S3Presigner.builder()
+              .region(region)
+              .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+              .endpointOverride(URI.create(s3conf.getEndpoint()))
+              .serviceConfiguration(S3Configuration.builder()
+                      .pathStyleAccessEnabled(s3conf.isPathBasedAccess())
+                      .build())
+              .build()) {
+
+        // Create the S3 GetObjectRequest
+        GetObjectRequest objectRequest = GetObjectRequest.builder()
+                .bucket(s3conf.getBucket())
+                .key(objectKeyName)
+                .build();
+
+        // Calculate expiry duration (seconds)
+        long expiryDuration = expiry - Instant.now().getEpochSecond();
+        if (expiryDuration <= 0) {
+          LOGGER.warn("Token expiry is in the past. Defaulting to 5 minutes.");
+          expiryDuration = 300; // Default to 5 minutes
+        }
+
+        // Create the S3 Pre-Signed URL request
+        GetObjectPresignRequest preSignRequest = GetObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofSeconds(expiryDuration))
+                .getObjectRequest(objectRequest)
+                .build();
+
+        // Generate the Pre-Signed URL
+        PresignedGetObjectRequest preSignedRequest = preSigner.presignGetObject(preSignRequest);
+        return preSignedRequest.url().toString();
+      }
+    } catch (Exception e) {
+      LOGGER.error("Failed to generate pre-signed URL: {}", e.getMessage());
+      throw new RuntimeException("Failed to generate pre-signed URL", e);
+    }
+  }
+
+  private JsonObject formatAssetObjectsForStacItemById(JsonArray assetArray, boolean shouldCreate, long expiry) {
+    JsonObject assets = new JsonObject();
+
+    assetArray.forEach(asset -> {
+      JsonObject assetObj = (JsonObject) asset;
+      String assetId = assetObj.getString("id");
+      String href = assetObj.getString("href");
+
+        try {
+          URI hrefUri = new URI(href);
+          if (!shouldCreate && !hrefUri.isAbsolute()) {
+            assetObj.put("href", "#");
+          }
+          else{
+          // If the href is NOT absolute, generate a pre-signed URL
+            if (!hrefUri.isAbsolute()) {
+            String preSignedUrl = getPresignedUrlSupportForStacItemById(href, expiry);
+            assetObj.put("href", preSignedUrl);
+            }
+          }
+        } catch (URISyntaxException e) {
+          LOGGER.error("Invalid URI in asset: {}", assetObj, e);
+        }
+
+      assetObj.remove("id");
+      assetObj.put("file:size", assetObj.getLong("size"));
+      assetObj.remove("size");
+
+      if (assetObj.getString("title") == null) {
+        assetObj.remove("title");
+      }
+      if (assetObj.getString("description") == null) {
+        assetObj.remove("description");
+      }
+
+      assets.put(assetId, assetObj);
+    });
+
+    return assets;
   }
 
   private JsonObject formatAssetObjectsAsPerStacSchema(JsonArray assetArray) {
