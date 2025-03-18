@@ -52,6 +52,7 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
+import static ogc.rs.apiserver.handlers.StacItemByIdAuthZHandler.SHOULD_CREATE_KEY;
 import static ogc.rs.apiserver.util.Constants.NOT_FOUND;
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.*;
@@ -1434,15 +1435,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                 // Retrieve user authentication info
                 AuthInfo userKey = routingContext.get(USER_KEY);
                 long expiry = (userKey != null) ? userKey.getExpiry() : 0;
-
-                // Check if token is expired
-                boolean isExpired = Instant.now().getEpochSecond() >= expiry;
-                boolean shouldCreate = routingContext.get("shouldCreate");
-                shouldCreate = !isExpired && shouldCreate;
-
-                if (isExpired) {
-                  LOGGER.warn("Token expired. Disabling pre-signed URL generation.");
-                }
+                boolean shouldCreate = routingContext.get(SHOULD_CREATE_KEY);
                 JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
                     allLinksInFeature
                         .add(new JsonObject()
@@ -1508,10 +1501,6 @@ public class ApiServerVerticle extends AbstractVerticle {
 
         // Calculate expiry duration (seconds)
         long expiryDuration = expiry - Instant.now().getEpochSecond();
-        if (expiryDuration <= 0) {
-          LOGGER.warn("Token expiry is in the past. Defaulting to 5 minutes.");
-          expiryDuration = 300; // Default to 5 minutes
-        }
 
         // Create the S3 Pre-Signed URL request
         GetObjectPresignRequest preSignRequest = GetObjectPresignRequest.builder()

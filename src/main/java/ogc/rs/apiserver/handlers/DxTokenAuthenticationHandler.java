@@ -18,8 +18,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
 
-import static ogc.rs.apiserver.util.Constants.HEADER_AUTHORIZATION;
-import static ogc.rs.apiserver.util.Constants.AUTH_CERTIFICATE_PATH;
+import static ogc.rs.apiserver.util.Constants.*;
 
 public class DxTokenAuthenticationHandler implements AuthenticationHandler {
   private static final Logger LOGGER = LogManager.getLogger(DxTokenAuthenticationHandler.class);
@@ -112,22 +111,20 @@ public class DxTokenAuthenticationHandler implements AuthenticationHandler {
     }
     
     String authZHeader = routingContext.request().headers().get(HEADER_AUTHORIZATION);
-
-      String path = routingContext.normalizedPath();
+    String path = routingContext.normalizedPath();
+    boolean isStacItemEndpoint = path.matches(STAC_ASSETS_BY_ID_REGEX);
 
       if (authZHeader == null) {
-          if (!path.matches("^/stac/collections/[^/]+/items/[^/]+$")) {
+          if (isStacItemEndpoint) {
+              routingContext.next();
+          } else {
               routingContext.fail(new OgcException(401, "Authorization header not found", "Authorization header not found"));
-              return;
           }
-          // If the path matches, continue without authentication
-          routingContext.next();
           return;
       }
 
-
     String[] parts = authZHeader.split(" ");
-    
+
     if (parts.length < 2 || !"Bearer".equals(parts[0])) {
       routingContext.fail(
           new OgcException(401, "Invalid Authorization header", "Invalid Authorization header"));
@@ -148,9 +145,16 @@ public class DxTokenAuthenticationHandler implements AuthenticationHandler {
                       routingContext.put(USER_KEY, user);
                       LOGGER.debug("the user key: " + routingContext.get(USER_KEY).toString());
                       routingContext.next();
-                  } else {
-                      LOGGER.debug("Authentication not successful: " + res.cause());
-                      routingContext.fail(new OgcException(401, "Invalid Token", res.cause().getMessage()));
+                  }
+                  else {
+                      if (isStacItemEndpoint && res.cause().getMessage().contains("token expired")) {
+                          LOGGER.debug("Ignoring token expiry for STAC item by ID endpoint.");
+                          routingContext.next();
+                      }
+                      else {
+                          LOGGER.debug("Authentication not successful: " + res.cause());
+                          routingContext.fail(new OgcException(401, "Invalid Token", res.cause().getMessage()));
+                      }
                   }
               });
 

@@ -24,7 +24,6 @@ public class AuthInfo {
   }
 
   public static AuthInfo createUser(JsonObject tokenDetails) throws OgcException {
-    System.out.println("Token Details are:{}"+ tokenDetails.encodePrettily());
     AuthInfo user = new AuthInfo();
     user.userId = UUID.fromString(tokenDetails.getString("sub"));
     user.role = RoleEnum.valueOf(tokenDetails.getString("role"));
