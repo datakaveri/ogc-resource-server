@@ -145,16 +145,9 @@ public class DxTokenAuthenticationHandler implements AuthenticationHandler {
                       routingContext.put(USER_KEY, user);
                       LOGGER.debug("the user key: " + routingContext.get(USER_KEY).toString());
                       routingContext.next();
-                  }
-                  else {
-                      if (isStacItemEndpoint && res.cause().getMessage().contains("token expired")) {
-                          LOGGER.debug("Ignoring token expiry for STAC item by ID endpoint.");
-                          routingContext.next();
-                      }
-                      else {
-                          LOGGER.debug("Authentication not successful: " + res.cause());
-                          routingContext.fail(new OgcException(401, "Invalid Token", res.cause().getMessage()));
-                      }
+                  } else {
+                      LOGGER.debug("Authentication not successful: " + res.cause());
+                      routingContext.fail(new OgcException(401, "Invalid Token", res.cause().getMessage()));
                   }
               });
 

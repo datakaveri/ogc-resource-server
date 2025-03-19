@@ -22,8 +22,8 @@ import static ogc.rs.common.Constants.UUID_REGEX;
 public class StacItemByIdAuthZHandler implements Handler<RoutingContext> {
 
     Vertx vertx;
-    // Key used to store authorization result in the RoutingContext.
-    public static final String SHOULD_CREATE_KEY = "shouldCreate";
+    public static final String SHOULD_CREATE_KEY = "shouldCreate"; // Key used to store authorization result in the RoutingContext
+    private static final int TOKEN_EXPIRY_THRESHOLD_SECONDS = 10; // token expiry threshold
     private final DatabaseService databaseService;
     private static final Logger LOGGER = LogManager.getLogger(StacItemByIdAuthZHandler.class);
 
@@ -73,8 +73,8 @@ public class StacItemByIdAuthZHandler implements Handler<RoutingContext> {
         // Token Expiry Check
         long expiry = user.getExpiry();
         long currentTime = Instant.now().getEpochSecond();
-        if (expiry - currentTime <= 10) {
-            LOGGER.warn("Token expiry is less than 10 seconds away. Disabling pre-signed URL generation.");
+        if (expiry - currentTime <= TOKEN_EXPIRY_THRESHOLD_SECONDS) {
+            LOGGER.warn("Token expiry is less than {} seconds away. Disabling pre-signed URL generation.", TOKEN_EXPIRY_THRESHOLD_SECONDS);
             routingContext.put(SHOULD_CREATE_KEY, false);
             routingContext.next();
             return;
