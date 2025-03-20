@@ -666,7 +666,7 @@ public class StacCollectionOnboardingIT {
                 );
         JsonObject colletonOne = new JsonObject();
         colletonOne
-                .put("id", "0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd")
+                .put("id", "1830d6dc-df9f-4520-96b4-6108238c0f86")
                 .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84")
                 .put("license", "proprietary")
                 .put("title", "IT Test Suite")
