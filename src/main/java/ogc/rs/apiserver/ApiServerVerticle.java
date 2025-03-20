@@ -1835,70 +1835,144 @@ public class ApiServerVerticle extends AbstractVerticle {
             });
   }
 
-    public void postStacCollection(RoutingContext routingContext) {
-        LOGGER.debug("Post STAC collection");
-        JsonObject requestBody = routingContext.body().asJsonObject();
-        requestBody.put("accessPolicy", routingContext.data().get("accessPolicy"));
-        requestBody.put("ownerUserId", routingContext.data().get("ownerUserId"));
-        requestBody.put("role", routingContext.data().get("role"));
-        if (!requestBody.containsKey("id")) {
-            OgcException ogcException =
-                    new OgcException(400, "Id not found", "Id not found");
-            routingContext.put("response", ogcException.getJson().toString());
-            routingContext.put("statusCode", ogcException.getStatusCode());
-            routingContext.next();
-        } else {
-            dbService
-                    .postStacCollection(requestBody)
-                    .onSuccess(
-                            dbRequest -> {
-                                LOGGER.debug("request successfully posted ");
-                                JsonArray jsonArray =
-                                        requestBody
-                                                .getJsonObject("extent")
-                                                .getJsonObject("temporal")
-                                                .getJsonArray("interval")
-                                                .getJsonArray(0);
-                                requestBody.put("temporal", jsonArray);
-                                requestBody.put(
-                                        "bbox",
-                                        requestBody
-                                                .getJsonObject("extent")
-                                                .getJsonObject("spatial")
-                                                .getJsonArray("bbox")
-                                                .getJsonArray(0));
-                                JsonObject response = handleStacCollectionResponse(requestBody);
-                                routingContext.put("response", response.toString());
-                                routingContext.put("statusCode", 201);
-                                routingContext.next();
-                            })
-                    .onFailure(
-                            failure -> {
-                                LOGGER.debug("request not successfully posted" + failure.getMessage());
-                                if (failure instanceof OgcException) {
-                                    routingContext.put(
-                                            "response", ((OgcException) failure).getJson().toString());
-                                    routingContext.put(
-                                            "statusCode", ((OgcException) failure).getStatusCode());
-                                } else {
-                                    if (failure.getMessage().contains("duplicate key value")) {
-                                        OgcException ogcException =
-                                                new OgcException(
-                                                        409, "Conflict", "STAC Collection Already Exists");
-                                        routingContext.put("response", ogcException.getJson().toString());
-                                        routingContext.put("statusCode", ogcException.getStatusCode());
-                                    } else {
-                                        OgcException ogcException =
-                                                new OgcException(
-                                                        500, "Internal Server Error", "Internal Server Error");
-                                        routingContext.put("response", ogcException.getJson().toString());
-                                        routingContext.put("statusCode", ogcException.getStatusCode());
-                                    }
-                                }
-                                routingContext.next();
-                            });
+  public void postStacCollection(RoutingContext routingContext) {
+    LOGGER.debug("Post STAC collection" + routingContext.body().asJsonObject());
+    JsonObject requestBody = routingContext.body().asJsonObject();
+    boolean hasCollections = requestBody.containsKey("collections");
+
+    if (hasCollections) {
+      JsonArray collections = requestBody.getJsonArray("collections");
+      Set<String> idSet = new HashSet<>();
+      JsonArray collectionNew = new JsonArray();
+
+      for (Object obj : collections) {
+        JsonObject collection = (JsonObject) obj;
+        String id = collection.getString("id");
+
+        if (!idSet.add(id)) {
+          OgcException ogcException =
+              new OgcException(400, "Bad Request", "Duplicate Ids present in request body.");
+          routingContext.put("response", ogcException.getJson().toString());
+          routingContext.put("statusCode", ogcException.getStatusCode());
+          routingContext.next();
+          return;
         }
+
+        collection
+            .put("accessPolicy", routingContext.data().get("accessPolicy"))
+            .put("ownerUserId", routingContext.data().get("ownerUserId"))
+            .put("role", routingContext.data().get("role"));
+
+        collectionNew.add(collection);
+      }
+
+      dbService
+          .postStacCollections(collectionNew)
+          .onSuccess(
+              dbRequest -> {
+                JsonArray responseBody = new JsonArray();
+                collections.forEach(
+                    obj -> responseBody.add(processStacCollection((JsonObject) obj)));
+
+                routingContext.put("response", responseBody.toString()).put("statusCode", 201);
+                routingContext.next();
+              })
+          .onFailure(
+              failed -> {
+                String errorMessage = failed.getMessage();
+                JsonObject errorJson;
+
+                try {
+                  errorJson = new JsonObject(errorMessage);
+                  JsonArray failedId = errorJson.getJsonArray("failedIds", new JsonArray());
+                  LOGGER.error(
+                      "STAC Collection Onboarding Failed for id: "
+                          + failedId
+                          + " due to "
+                          + errorJson.getString("description"));
+
+                  int statusCode = 400;
+                  if (errorJson
+                      .getString("description")
+                      .contains("duplicate key value violates unique constraint")) {
+                    statusCode = 409;
+                  }
+                  OgcException ogcException =
+                      new OgcException(
+                          statusCode,
+                          "failed id " + failedId.getString(0),
+                          errorJson.getString("description"));
+                  routingContext.put("response", ogcException.getJson().toString());
+                  routingContext.put("statusCode", ogcException.getStatusCode());
+                  routingContext.next();
+                } catch (Exception e) {
+                  LOGGER.debug("Failed to parse error JSON. Using plain error message.");
+                  OgcException ogcException =
+                      new OgcException(500, "Internal Server Error ", errorMessage);
+                  routingContext.put("response", ogcException.getJson().toString());
+                  routingContext.put("statusCode", ogcException.getStatusCode());
+                  routingContext.next();
+                }
+              });
+
+    } else {
+      requestBody.put("accessPolicy", routingContext.data().get("accessPolicy"));
+      requestBody.put("ownerUserId", routingContext.data().get("ownerUserId"));
+      requestBody.put("role", routingContext.data().get("role"));
+
+      dbService
+          .postStacCollection(requestBody)
+          .onSuccess(
+              dbRequest -> {
+                LOGGER.debug("Request successfully posted");
+                JsonObject response = processStacCollection(requestBody);
+                routingContext.put("response", response.toString());
+                routingContext.put("statusCode", 201);
+                routingContext.next();
+              })
+          .onFailure(
+              failure -> {
+                LOGGER.debug("Request not successfully posted" + failure.getMessage());
+                if (failure instanceof OgcException) {
+                  routingContext.put("response", ((OgcException) failure).getJson().toString());
+                  routingContext.put("statusCode", ((OgcException) failure).getStatusCode());
+                } else {
+                  if (failure.getMessage().contains("duplicate key value")) {
+                    OgcException ogcException =
+                        new OgcException(409, "Conflict", "STAC Collection Already Exists");
+                    routingContext.put("response", ogcException.getJson().toString());
+                    routingContext.put("statusCode", ogcException.getStatusCode());
+                  } else {
+                    OgcException ogcException =
+                        new OgcException(500, "Internal Server Error", "Internal Server Error");
+                    routingContext.put("response", ogcException.getJson().toString());
+                    routingContext.put("statusCode", ogcException.getStatusCode());
+                  }
+                }
+                routingContext.next();
+              });
     }
+  }
+
+  private JsonObject processStacCollection(JsonObject collection) {
+    JsonArray temporalArray =
+        collection
+            .getJsonObject("extent")
+            .getJsonObject("temporal")
+            .getJsonArray("interval")
+            .getJsonArray(0);
+    collection.put("temporal", temporalArray);
+
+    JsonArray bboxArray =
+        collection
+            .getJsonObject("extent")
+            .getJsonObject("spatial")
+            .getJsonArray("bbox")
+            .getJsonArray(0);
+    collection.put("bbox", bboxArray);
+
+    return handleStacCollectionResponse(collection);
+  }
 
     public void updateStacCollection(RoutingContext routingContext) {
         LOGGER.debug("Update the Item in db");
