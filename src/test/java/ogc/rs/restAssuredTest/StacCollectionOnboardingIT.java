@@ -582,5 +582,124 @@ public class StacCollectionOnboardingIT {
                 .body("description", containsString("[Bad Request] Validation error for body"));
     }
 
+    @Order(12)
+    @Test
+    @Description("Success: Multiple Stac collections onboarding with duplicate id")
+    public void testCreateMultipleStacCollectionDuplicateId() throws InterruptedException {
+        String token =
+                new FakeTokenBuilder()
+                        .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
+                        .withResourceServer()
+                        .withRoleProvider()
+                        .withCons(new JsonObject())
+                        .build();
+        String endpoint = "/stac/collections";
+        JsonObject extent = new JsonObject()
+                .put("spatial", new JsonObject()
+                        .put("bbox", new JsonArray()
+                                .add(new JsonArray().add(-180).add(-56).add(180).add(83))
+                        )
+                )
+                .put("temporal", new JsonObject()
+                        .put("interval", new JsonArray()
+                                .add(new JsonArray().add("2015-06-23T00:00:00Z").add("2019-07-10T13:44:56Z"))
+                        )
+                );
+        JsonObject colletonOne = new JsonObject();
+        colletonOne
+                .put("id", "ac14db94-4e9a-4336-9bec-072d37c0360e")
+                .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84")
+                .put("license", "proprietary")
+                .put("title", "IT Test Suite")
+                .put("description", "IT Test Suite")
+                .put("extent", extent)
+                .put("datetimeKey", "2023-11-10T14:30:00Z");
+        JsonObject collectionTwo = new JsonObject();
+        collectionTwo
+                .put("id", "ac14db94-4e9a-4336-9bec-072d37c0360e")
+                .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84")
+                .put("license", "proprietary")
+                .put("title", "IT Test Suite")
+                .put("description", "IT Test Suite")
+                .put("extent", extent)
+                .put("datetimeKey", "2023-11-10T14:30:00Z");
+        JsonArray collections = new JsonArray().add(colletonOne).add(collectionTwo);
+        JsonObject requestBody =
+                new JsonObject().put("collections", collections);
+        given()
+                .header("Accept", "application/json")
+                .header("Content-Type", "application/json") // Add this
+                .auth().oauth2(token)
+                .body(requestBody.encode())
+                .when()
+                .post(endpoint)
+                .then()
+                .statusCode(400)
+                .body("code", equalTo("Bad Request"))
+                .body("description", containsString("Duplicate Ids present in request body."));
+
+
+    }
+
+    @Order(13)
+    @Test
+    @Description("Success: Multiple Stac collections onboarding with Bad Request Body")
+    public void testCreateMultipleStacCollectionInvalidRequest() throws InterruptedException {
+        String token =
+                new FakeTokenBuilder()
+                        .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
+                        .withResourceServer()
+                        .withRoleProvider()
+                        .withCons(new JsonObject())
+                        .build();
+        String endpoint = "/stac/collections";
+        JsonObject extent = new JsonObject()
+                .put("spatial", new JsonObject()
+                        .put("bbox", new JsonArray()
+                                .add(new JsonArray().add(-180).add(-56).add(180).add(83))
+                        )
+                )
+                .put("temporal", new JsonObject()
+                        .put("interval", new JsonArray()
+                                .add(new JsonArray().add("2015-06-23T00:00:00Z").add("2019-07-10T13:44:56Z"))
+                        )
+                );
+        JsonObject colletonOne = new JsonObject();
+        colletonOne
+                .put("id", "0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd")
+                .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84")
+                .put("license", "proprietary")
+                .put("title", "IT Test Suite")
+                .put("description", "IT Test Suite")
+                .put("extent", extent)
+                .put("datetimeKey", "2023-11-10T14:30:00Z");
+        JsonObject collectionTwo = new JsonObject();
+        collectionTwo
+                .put("id", "ac14db94-4e9a-4336-9bec-072d37c0360e")
+                .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CR")
+                .put("license", "proprietary")
+                .put("title", "IT Test Suite")
+                .put("description", "IT Test Suite")
+                .put("extent", extent)
+                .put("datetimeKey", "2023-11-10T14:30:00Z");
+        JsonArray collections = new JsonArray().add(colletonOne).add(collectionTwo);
+        JsonObject requestBody =
+                new JsonObject().put("collections", collections);
+        given()
+                .header("Accept", "application/json")
+                .header("Content-Type", "application/json") // Add this
+                .auth().oauth2(token)
+                .body(requestBody.encode())
+                .when()
+                .post(endpoint)
+                .then()
+                .statusCode(400)
+                .body("code", equalTo("failed id ac14db94-4e9a-4336-9bec-072d37c0360e"))
+                .body("description", containsString("ERROR: insert or update on table \"collections_details\" violates foreign key constraint \"crs_fk\" (23503)"));
+
+
+    }
+
+
 
 }
