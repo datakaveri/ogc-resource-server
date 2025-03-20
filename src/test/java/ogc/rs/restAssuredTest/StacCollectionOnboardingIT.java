@@ -607,7 +607,7 @@ public class StacCollectionOnboardingIT {
                 );
         JsonObject colletonOne = new JsonObject();
         colletonOne
-                .put("id", "ac14db94-4e9a-4336-9bec-072d37c0360e")
+                .put("id", "0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd")
                 .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84")
                 .put("license", "proprietary")
                 .put("title", "IT Test Suite")
@@ -616,7 +616,7 @@ public class StacCollectionOnboardingIT {
                 .put("datetimeKey", "2023-11-10T14:30:00Z");
         JsonObject collectionTwo = new JsonObject();
         collectionTwo
-                .put("id", "ac14db94-4e9a-4336-9bec-072d37c0360e")
+                .put("id", "0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd")
                 .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84")
                 .put("license", "proprietary")
                 .put("title", "IT Test Suite")
@@ -675,7 +675,7 @@ public class StacCollectionOnboardingIT {
                 .put("datetimeKey", "2023-11-10T14:30:00Z");
         JsonObject collectionTwo = new JsonObject();
         collectionTwo
-                .put("id", "ac14db94-4e9a-4336-9bec-072d37c0360e")
+                .put("id", "03cee7f4-d470-4d1d-b41b-c4dfcbf4ff50")
                 .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CR")
                 .put("license", "proprietary")
                 .put("title", "IT Test Suite")
@@ -694,7 +694,7 @@ public class StacCollectionOnboardingIT {
                 .post(endpoint)
                 .then()
                 .statusCode(400)
-                .body("code", equalTo("failed id ac14db94-4e9a-4336-9bec-072d37c0360e"))
+                .body("code", equalTo("failed id 03cee7f4-d470-4d1d-b41b-c4dfcbf4ff50"))
                 .body("description", containsString("ERROR: insert or update on table \"collections_details\" violates foreign key constraint \"crs_fk\" (23503)"));
 
 
