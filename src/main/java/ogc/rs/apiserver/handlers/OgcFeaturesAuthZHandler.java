@@ -54,7 +54,7 @@ public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
       LOGGER.error("Resource Ids don't match! id- {}, jwtId- {}", collectionId, iid);
       routingContext.fail(
           new OgcException(
-              401, "Not Authorized", "User is not authorised. Please contact IUDX AAA "));
+              401, "Not Authorized", "User is not authorised. Please contact DX AAA "));
       return;
     }
     databaseService
@@ -94,7 +94,7 @@ public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
       LOGGER.debug("invalid constraints value");
       routingContext.fail(
           new OgcException(
-              401, "Not Authorized", "User is not authorised. Please contact IUDX AAA "));
+              401, "Not Authorized", "User is not authorised. Please contact DX AAA "));
 
     } else {
       authorizeUser(routingContext);

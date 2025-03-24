@@ -46,7 +46,7 @@ Setup and Installation guide is available [here](./docs/SETUP-and-Installation.m
 
 # Reference
 ## API Docs
-API docs are available [here](https://geoserver.dx.gsx.org.in/api)
+API docs are available [here](https://geoserver.dx.geospatial.org.in/api)
 
 ## FAQ
 FAQs are available [here](./docs/FAQ.md)
