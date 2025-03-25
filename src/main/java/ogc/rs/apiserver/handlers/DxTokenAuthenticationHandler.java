@@ -18,8 +18,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
 
-import static ogc.rs.apiserver.util.Constants.HEADER_AUTHORIZATION;
-import static ogc.rs.apiserver.util.Constants.AUTH_CERTIFICATE_PATH;
+import static ogc.rs.apiserver.util.Constants.*;
 
 public class DxTokenAuthenticationHandler implements AuthenticationHandler {
   private static final Logger LOGGER = LogManager.getLogger(DxTokenAuthenticationHandler.class);
@@ -112,14 +111,20 @@ public class DxTokenAuthenticationHandler implements AuthenticationHandler {
     }
     
     String authZHeader = routingContext.request().headers().get(HEADER_AUTHORIZATION);
+    String path = routingContext.normalizedPath();
+    boolean isStacItemEndpoint = path.matches(STAC_ASSETS_BY_ID_REGEX);
 
-    if (authZHeader == null) {
-      routingContext.fail(new OgcException(401, "Authorization header not found", "Authorization header not found"));
-      return;
-    }
+      if (authZHeader == null) {
+          if (isStacItemEndpoint) {
+              routingContext.next();
+          } else {
+              routingContext.fail(new OgcException(401, "Authorization header not found", "Authorization header not found"));
+          }
+          return;
+      }
 
     String[] parts = authZHeader.split(" ");
-    
+
     if (parts.length < 2 || !"Bearer".equals(parts[0])) {
       routingContext.fail(
           new OgcException(401, "Invalid Authorization header", "Invalid Authorization header"));
@@ -128,20 +133,23 @@ public class DxTokenAuthenticationHandler implements AuthenticationHandler {
     
     String token = parts[1];
 
-    jwtAuth.authenticate(
-        new JsonObject().put("token", token),
-        res -> {
-          if (res.succeeded()) {
-            LOGGER.debug("Authentication Successful");
-            JsonObject tokenDetails = res.result().principal();
-            AuthInfo user = AuthInfo.createUser(tokenDetails);
-            routingContext.put(USER_KEY, user);
-            LOGGER.debug("the user key: " + routingContext.get(USER_KEY).toString());
-            routingContext.next();
-          } else {
-            LOGGER.debug("Authentication not successful" + res.cause());
-            routingContext.fail(new OgcException(401, "Invalid Token", res.cause().getMessage()));
-          }
-        });
+      jwtAuth.authenticate(
+              new JsonObject().put("token", token),
+              res -> {
+                  if (res.succeeded()) {
+                      LOGGER.debug("Authentication Successful");
+                      JsonObject tokenDetails = res.result().attributes().getJsonObject("accessToken");
+                      String accessToken = res.result().principal().getString("access_token");
+                      tokenDetails.put("access_token", accessToken);
+                      AuthInfo user = AuthInfo.createUser(tokenDetails);
+                      routingContext.put(USER_KEY, user);
+                      LOGGER.debug("the user key: " + routingContext.get(USER_KEY).toString());
+                      routingContext.next();
+                  } else {
+                      LOGGER.debug("Authentication not successful: " + res.cause());
+                      routingContext.fail(new OgcException(401, "Invalid Token", res.cause().getMessage()));
+                  }
+              });
+
   }
 }
