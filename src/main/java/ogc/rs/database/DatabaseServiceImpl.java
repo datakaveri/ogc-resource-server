@@ -2,8 +2,10 @@ package ogc.rs.database;
 
 import static ogc.rs.database.util.Constants.PROCESSES_TABLE_NAME;
 
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
@@ -12,13 +14,7 @@ import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import ogc.rs.apiserver.router.RouterManager;
@@ -703,10 +699,36 @@ public class DatabaseServiceImpl implements DatabaseService{
     }
 
   @Override
-  public Future<JsonObject> insertStacItems(JsonArray features) {
+  public Future<JsonObject> insertStacItems(JsonObject requestBody) {
       LOGGER.debug("Inside insertStacItems");
-    Promise<JsonObject> result = Promise.promise();
-    return result.future();
+      Promise<JsonObject> result = Promise.promise();
+      String collectionId = requestBody.getString("collectionId");
+      String[] itemIds = requestBody.getJsonArray("features").stream()
+          .map(obj -> {
+            JsonObject feature = (JsonObject) obj;
+            return feature.getString("id");
+          }).toArray(String[]::new);
+      List<Future<Void>> insertFut = new ArrayList<>();
+
+      checkIfCollectionExist(collectionId)
+          .compose(collection -> checkIfItemsExist(itemIds, collectionId))
+          .compose(items -> {
+            requestBody.getJsonArray("features")
+                .forEach(feature -> {
+                  JsonObject featureJson = (JsonObject) feature;
+                  featureJson.put("collectionId", collectionId);
+                  insertFut.add(insertItemIntoDb(featureJson));
+                });
+            return Future.join(insertFut);
+          })
+          .onSuccess(success -> {
+            LOGGER.info("STAC items have been created.");
+            result.complete(new JsonObject().put("code", "Items are created."));
+          }).onFailure(failed -> {
+            LOGGER.error("Something went wrong! Error: {}", failed.getMessage());
+            result.fail(failed);
+          });
+      return result.future();
   }
 
   @Override
@@ -715,107 +737,160 @@ public class DatabaseServiceImpl implements DatabaseService{
       Promise<JsonObject> result = Promise.promise();
       String itemId = feature.getString("id");
       String collectionId = feature.getString("collectionId");
-      JsonArray bbox = feature.getJsonArray("bbox");
-      JsonObject geometry = feature.getJsonObject("geometry");
-      JsonObject properties = feature.getJsonObject("properties");
-      JsonObject assets = feature.getJsonObject("assets");
-
-      return client.withConnection(conn ->
-          conn.preparedQuery("SELECT 1 FROM collection_details WHERE id = $1")
-              .execute(Tuple.of(collectionId))
-              .compose(collection -> {
-                if (collection.rowCount() > 0){
-                  conn.preparedQuery("SELECT 1 FROM stac_collection_part WHERE id = $1 and collection_id = $2")
-                      .execute(Tuple.of(itemId, collectionId))
-                      .compose(item -> {
-                        if (item.rowCount() > 0) {
-                          LOGGER.error("Error: One or more item(s) exist");
-                          result.fail(new OgcException(409, "Conflict", "One or more item(s) already exist."));
-                        }
-                        else {
-                          conn.preparedQuery(
-                              "INSERT INTO stac_collection_part(id, collection_id, bbox, geometry, properties) VALUES"
-                                  + " ($1, $2::uuid, $3, st_geomfromgeojson(%4), $5::jsonb)")
-                              .execute(Tuple.of(itemId, UUID.fromString(collectionId), bbox, geometry, properties))
-                              .compose(sql -> {
-                                LOGGER.debug("Inserted into stac_collection_part");
-                                List<Tuple> batchInserts = new ArrayList<>();
-                                assets.stream().forEach(asset -> {
-                                  JsonObject assetJsonObj = (JsonObject) asset;
-                                  String title = assetJsonObj.containsKey("description")
-                                      ? assetJsonObj.getString("title") : "";
-                                  String description = assetJsonObj.containsKey("description") ?
-                                  assetJsonObj.getString("description") : "";
-                                  String href = assetJsonObj.getString("href");
-                                  String type = assetJsonObj.containsKey("type")
-                                      ? assetJsonObj.getString("type") : "";
-                                  long size = assetJsonObj.containsKey("size") ? assetJsonObj.getLong("size") : 0;
-                                  JsonArray rolesJsonArr = assetJsonObj.containsKey("roles")
-                                      ? assetJsonObj.getJsonArray("roles") : new JsonArray();
-                                  String[] roles = (rolesJsonArr != null) ? rolesJsonArr.stream()
-                                  .map(Object::toString).toArray(String[]::new) : new String[0];
-                                  batchInserts.add(Tuple.of(title, description, href, type, size, roles));
-                                });
-                                conn.preparedQuery("INSERT INTO stac_items_assets" +
-                                        " (title, description, href, type, size, roles) VALUES ($1, $2, $3, $4, $5, $6)")
-                                .executeBatch(batchInserts)
-                                .compose(insert -> getStacItemById(collectionId, itemId))
-                                .onSuccess(result::complete)
-                                .onFailure(failed -> {
-                                  LOGGER.error("Failed at getting stac item- {}",failed.getMessage());
-                                  result.fail("Error!");
-                                });
-                                return result.future();
-                              });
-                        }
-                        return result.future();
-                      });
-                } else {
-                  LOGGER.error("Error: Collection not found!");
-                  result.fail(new OgcException(404, "Not Found", "Collection not found."));
-                }
-                return result.future();
-              }));
-
-//          conn.preparedQuery("INSERT INTO stac_collection_part(id, collection_id, bbox, geometry, properties) VALUES " +
-//              "($1, $2::uuid, $3, st_geomfromgeojson(%4), $5::jsonb)")
-//              .execute(Tuple.of(itemId, UUID.fromString(collectionId), bbox, geometry, properties))
-//              .compose(sql -> {
-//                LOGGER.debug("Inserted into stac_collection_part");
-//                List<Tuple> batchInserts = new ArrayList<>();
-//                assets.stream().forEach(asset -> {
-//                  JsonObject assetJsonObj = (JsonObject) asset;
-//                  String title = assetJsonObj.containsKey("description") ? assetJsonObj.getString("title") : "";
-//                  String description = assetJsonObj.containsKey("description") ?
-//                      assetJsonObj.getString("description") : "";
-//                  String href = assetJsonObj.getString("href");
-//                  String type = assetJsonObj.containsKey("type") ? assetJsonObj.getString("type") : "";
-//                  long size = assetJsonObj.containsKey("size") ? assetJsonObj.getLong("size") : 0;
-//                  JsonArray rolesJsonArr = assetJsonObj.containsKey("roles") ?
-//                      assetJsonObj.getJsonArray("roles") : new JsonArray();
-//                  String[] roles = (rolesJsonArr != null) ? rolesJsonArr.stream()
-//                      .map(Object::toString)
-//                      .toArray(String[]::new) : new String[0];
-//                  batchInserts.add(Tuple.of(title, description, href, type, size, roles));
-//                });
-//                conn.preparedQuery("INSERT INTO stac_items_assets (title, description, href, type, size, roles)" +
-//                    " VALUES ($1, $2, $3, $4, $5, $6)")
-//                    .executeBatch(batchInserts)
-//                    .compose(insert -> getStacItemById(collectionId, itemId))
-//                    .onSuccess(result::complete)
-//                    .onFailure(failed -> {
-//                      LOGGER.error("Failed at getting stac item- {}",failed.getMessage());
-//                      result.fail("Error!");
-//                    });
-//                    return result.future();
-//                })
-//              .onSuccess(result::complete)
-//              .onFailure(failed -> {
-//                LOGGER.error("Failed at creating a stac item- {}",failed.getMessage());
-//                result.fail("Error!");
-//              }));
+      checkIfCollectionExist(collectionId)
+        .compose(collection -> checkIfItemExist(itemId,collectionId))
+        .compose(item -> insertItemIntoDb(feature))
+        .compose(insert -> getStacItemWithoutAssets(collectionId,itemId))
+        .onSuccess(result::complete)
+        .onFailure(failed -> {
+          LOGGER.error("Failed at getting stac item- {}",failed.getMessage());
+          result.fail(failed);
+        });
+    return result.future();
   }
 
+  private  Future<JsonObject> getStacItemWithoutAssets(String collectionId, String itemId) {
+    Promise<JsonObject> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+    String getItemQuery = String.format("select id, cast(st_asgeojson(geom) as json) as geometry, bbox, " +
+        " properties, 'Feature' as type,  '%1$s' as collection from \"%1$s\" where id = $1::text", collectionId);
+    client.withConnection(
+        conn ->
+            conn.preparedQuery(getItemQuery)
+                .collecting(collector)
+                .execute(Tuple.of(itemId))
+                .map(SqlResult::value)
+                .onSuccess(success -> {
+                  if (success.isEmpty())
+                    result.fail(new OgcException(404, "Not Found", "Item " + itemId + " not found in " +
+                        "collection " + collectionId));
+                  else
+                    result.complete(success.get(0));
+                })
+                .onFailure(failed -> {
+                  LOGGER.error("Failed at STAC Item retrieval- {}", failed.getMessage());
+                  result.fail("Error!");
+                }));
+    return result.future();
+  }
+
+  private Future<Void> checkIfCollectionExist(String collectionId) {
+    Promise<Void> promise = Promise.promise();
+    client.withConnection(conn -> conn.preparedQuery("SELECT 1 FROM collections_details WHERE id = $1")
+          .execute(Tuple.of(collectionId))
+          .onSuccess(collection -> {
+            if (collection.rowCount() > 0)
+              promise.complete();
+            else {
+              LOGGER.error("Error: Collection not found in db!");
+              promise.fail(new OgcException(404, "Not Found", "Collection not found."));
+            }
+          })
+          .onFailure(failed -> {
+            LOGGER.error("Something went wrong. {}", failed.getMessage());
+            promise.fail(failed);
+          }));
+      return promise.future();
+  }
+
+  private Future<Void> checkIfItemExist(String itemId, String collectionId) {
+    Promise<Void> promise = Promise.promise();
+      client.withConnection(conn ->
+          conn.preparedQuery("SELECT 1 FROM stac_collections_part WHERE id = $1 and collection_id = $2::uuid")
+          .execute(Tuple.of(itemId, UUID.fromString(collectionId)))
+              .onSuccess(item -> {
+                if (item.rowCount() > 0) {
+                  LOGGER.error("One or more STAC item(s) exist!");
+                  promise.fail(new OgcException(409, "Conflict", "One ore more STAC item(s) exist!"));
+                }
+                else
+                  promise.complete();
+              })
+              .onFailure(failed -> {
+                  LOGGER.error("Something went wrong. {}", failed.getMessage());
+                  promise.fail("Error!");
+              }));
+      return promise.future();
+  }
+
+  private Future<Void> checkIfItemsExist(String[] itemIds, String collectionId) {
+    Promise<Void> promise = Promise.promise();
+    Collector<Row, ?, List<String>> collector = Collectors.mapping(row -> row.getString("id"), Collectors.toList());
+    client.withConnection(conn ->
+        conn.preparedQuery("SELECT id FROM stac_collections_part WHERE id = ANY($1::text[]) and collection_id = " +
+                "$2::uuid")
+            .collecting(collector)
+            .execute(Tuple.of(itemIds, UUID.fromString(collectionId)))
+            .map(SqlResult::value)
+            .onSuccess(ids -> {
+              if (!ids.isEmpty()) {
+                LOGGER.error("One or more STAC item(s) exist!");
+                promise.fail(new OgcException(409, "Conflict", "The following items are already present - "+ ids +
+                    ". Please remove them and try again "));
+              }
+              else
+                promise.complete();
+            })
+            .onFailure(failed -> {
+              LOGGER.error("Something went wrong. {}", failed.getMessage());
+              promise.fail(failed.getMessage());
+            }));
+    return promise.future();
+  }
+  private Future<Void> insertItemIntoDb (JsonObject stacItem) {
+      Promise<Void> result = Promise.promise();
+      String itemId = stacItem.getString("id");
+      String collectionId = stacItem.getString("collectionId");
+      JsonArray bbox = stacItem.containsKey("bbox") ? stacItem.getJsonArray("bbox") : new JsonArray();
+      Double[] bboxArray = (bbox != null) ? bbox.stream()
+        .map(obj -> obj instanceof Number ? ((Number) obj).doubleValue() : 0.0)
+        .toArray(Double[]::new) : new Double[0];
+      JsonObject geometry = stacItem.containsKey("geometry") ? stacItem.getJsonObject("geometry") : new JsonObject();
+      JsonObject properties = stacItem.containsKey("properties") ? stacItem.getJsonObject("properties") : new JsonObject();
+      client.withTransaction(conn ->
+          conn.preparedQuery("INSERT INTO stac_collections_part(id, collection_id, bbox, geom, properties)" +
+                  " VALUES ($1, $2::uuid, $3, st_geomfromgeojson($4), $5::jsonb)")
+              .execute(Tuple.of(itemId, UUID.fromString(collectionId), bboxArray, geometry.toString(), properties))
+              .compose(sql -> {
+                if (!stacItem.containsKey("assets"))
+                  return Future.succeededFuture();
+                else {
+                  JsonObject assets = stacItem.getJsonObject("assets");
+                  LOGGER.debug("Inserted into stac_collection_part");
+                  List<Tuple> batchInserts = new ArrayList<>();
+                  assets.stream().forEach(asset -> {
+                    JsonObject assetJsonObj = (JsonObject) asset;
+                    String title = assetJsonObj.containsKey("description")
+                        ? assetJsonObj.getString("title") : "";
+                    String description = assetJsonObj.containsKey("description") ?
+                        assetJsonObj.getString("description") : "";
+                    String href = assetJsonObj.getString("href");
+                    String type = assetJsonObj.containsKey("type")
+                        ? assetJsonObj.getString("type") : "";
+                    long size = assetJsonObj.containsKey("size") ? assetJsonObj.getLong("size") : 0;
+                    JsonArray rolesJsonArr = assetJsonObj.containsKey("roles")
+                        ? assetJsonObj.getJsonArray("roles") : new JsonArray();
+                    String[] roles = (rolesJsonArr != null) ? rolesJsonArr.stream()
+                        .map(Object::toString).toArray(String[]::new) : new String[0];
+                    batchInserts.add(Tuple.of(title, description, href, type, size, roles));
+                  });
+                  return conn.preparedQuery("INSERT INTO stac_items_assets" +
+                          " (title, description, href, type, size, roles) VALUES ($1, $2, $3, $4, $5, $6)")
+                      .executeBatch(batchInserts);
+                }
+              }))
+          .onSuccess(success -> {
+            LOGGER.info("Stac Item created.");
+            result.complete();
+          })
+          .onFailure(failed -> {
+            LOGGER.error("Failed to create Stac Item. \nError: {}", failed.getMessage());
+            failed.printStackTrace();
+            result.fail(failed);
+          });
+      return result.future();
+  }
   @Override
   public Future<List<JsonObject>> getTileMatrixSetMetaData(String tileMatrixSet) {
     LOGGER.info("getTileMatrixSetMetaData");

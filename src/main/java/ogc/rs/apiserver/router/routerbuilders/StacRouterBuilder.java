@@ -120,14 +120,6 @@ public class StacRouterBuilder extends EntityRouterBuilder {
         .failureHandler(failureHandler);
 
     routerBuilder
-        .operation(STAC_ITEMS_DELETE_API)
-        .handler(apiServerVerticle::deleteStacItem)
-        .handler(apiServerVerticle::putCommonResponseHeaders)
-        .handler(apiServerVerticle::buildResponse)
-        .failureHandler(failureHandler);
-
-
-    routerBuilder
         .operation(STAC_ITEM_SEARCH_GET_API)
         .handler(apiServerVerticle::getStacItemByItemSearch)
         .handler(apiServerVerticle::putCommonResponseHeaders)

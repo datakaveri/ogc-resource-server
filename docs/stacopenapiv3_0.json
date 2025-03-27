@@ -400,6 +400,14 @@
         "summary": "add a new STAC Item or Items in an ItemCollection to a collection",
         "description": "create a new STAC Item r Items in an ItemCollection in a specific collection",
         "operationId": "postStacItem",
+        "parameters": [{
+          "name": "collectionId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }],
         "tags": [
           "Transaction"
         ],
@@ -410,6 +418,7 @@
                 "oneOf": [
                   {
                     "$ref": "#/components/schemas/postOrPutItemCollection"
+
                   },
                   {
                     "$ref": "#/components/schemas/postOrPutItem"
@@ -427,7 +436,7 @@
                 "description": "The URL of the newly added resource (i.e. path of the resource end point)",
                 "schema": {
                   "type": "string",
-                  "format": "url"
+                  "format": "uri"
                 }
               }
             },
@@ -437,6 +446,7 @@
                   "$ref": "#/components/schemas/item"
               }
             }
+          }
           },
           "202": {
             "description": "The item was accepted for asynchronous action"
@@ -452,8 +462,8 @@
           },
           "default": {
             "$ref": "#/components/responses/Error"
+            }
           }
-        }
       }
     },
     "/stac/collections/{collectionId}/items/{itemId}": {
@@ -504,6 +514,26 @@
         "summary": "update an existing feature by Id with a complete item definition",
         "description": "Use this method to update an existing feature. Requires the entire GeoJSON  description be submitted.",
         "operationId": "updateStacItem",
+        "parameters": [
+          {
+            "name": "collectionId",
+            "in": "path",
+            "description": "local identifier of a collection",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "description": "local identifier of an item",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "tags": [
           "Transaction"
         ],
@@ -533,8 +563,7 @@
           },
           "204": {
             "description": "The item was replaced"
-            }
-          },
+            },
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
@@ -547,11 +576,32 @@
         "default": {
           "$ref": "#/components/responses/Error"
         }
+        }
       },
       "patch": {
         "summary": "update an existing feature by Id with a partial item definition",
         "description": "Use this method to update an existing feature. Requires a GeoJSON fragment (containing the fields to be updated) be submitted.",
         "operationId": "patchStacItem",
+        "parameters": [
+          {
+            "name": "collectionId",
+            "in": "path",
+            "description": "local identifier of a collection",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "description": "local identifier of an item",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "tags": [
           "Transaction"
         ],
@@ -566,8 +616,7 @@
         },
         "responses": {
           "200": {
-            "description": "The item was replaced"
-            },
+            "description": "The item was replaced",
             "content": {
               "application/json": {
                 "schema": {
@@ -593,39 +642,7 @@
           },
           "default": {
             "$ref": "#/components/responses/Error"
-          }
-        }
-      },
-      "delete": {
-        "summary": "delete an existing feature by Id",
-        "description": "Use this method to delete an existing feature.",
-        "operationId": "deleteStacItem",
-        "tags": [
-          "Transaction"
-        ],
-        "responses": {
-          "200": {
-            "description": "The resource was deleted."
-          },
-          "202": {
-            "description": "The operation was accepted for asynchronous execution."
-          },
-          "204": {
-            "description": "The resource was deleted."
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/Error"
-          },
-          "default": {
-            "$ref": "#/components/responses/Error"
-          }
-        }
+          }}
       }
     },
     "/stac/search": {
@@ -1861,6 +1878,21 @@
         "description": "Either a date-time or an interval, open or closed. Date and time expressions\nadhere to RFC 3339. Open intervals are expressed using double-dots.\n\nExamples:\n\n* A date-time: \"2018-02-12T23:20:50Z\"\n* A closed interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\"\n* Open intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"\n\nOnly features that have a temporal property that intersects the value of\n`datetime` are selected.\n\nIf a feature has multiple temporal properties, it is the decision of the\nserver whether only a single temporal property is used to determine\nthe extent or all relevant temporal properties.",
         "example": "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
       },
+      "properties": {
+        "type": "object",
+        "required": [
+          "datetime"
+        ],
+        "description": "provides the core metadata fields plus extensions",
+        "properties": {
+          "datetime": {
+            "$ref": "#/components/schemas/datetime_interval"
+          }
+        },
+        "additionalProperties": {
+          "description": "Any additional properties added in via Item specification or extensions."
+        }
+      },
       "geometryGeoJSON": {
         "oneOf": [
           {
@@ -2228,7 +2260,7 @@
           "properties": {
             "href": {
               "type": "string",
-              "format": "url",
+              "format": "uri",
               "description": "Link to the asset object",
               "example": "http://cool-sat.com/catalog/collections/cs/items/CS3-20160503_132130_04/thumb.png"
             },
@@ -2334,7 +2366,7 @@
         "additionalProperties": true,
         "properties": {
           "datetime": {
-            "$ref": "#/components/schemas/datetime-interval"
+            "$ref": "#/components/schemas/datetime_interval"
           }
         }
       },
