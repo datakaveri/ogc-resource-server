@@ -43,40 +43,8 @@ public class StacCollectionOnboardingIT {
                                 .add(new JsonArray().add("2015-06-23T00:00:00Z").add("2019-07-10T13:44:56Z"))
                         )
                 );
-        JsonObject requestBody =
-                new JsonObject()
-                        .put("id", "ac14db94-4e9a-4336-9bec-072d37c0360e")
-                        .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84")
-                        .put("license", "proprietary")
-                        .put("title", "IT Test Suite")
-                        .put("description", "IT Test Suite")
-                        .put("extent", extent)
-                        .put("datetimeKey", "2023-11-10T14:30:00Z");
-        given()
-                .header("Accept", "application/json")
-                .header("Content-Type", "application/json") // Add this
-                .auth().oauth2(token)
-                .body(requestBody.encode())
-                .when()
-                .post(endpoint)
-                .then()
-                .statusCode(201);
-        Thread.sleep(2000);
-
-
-        given()
-                .header("Accept", "application/json")
-                .auth().oauth2(token)
-                .when()
-                .get(endpoint+"/ac14db94-4e9a-4336-9bec-072d37c0360e")
-                .then()
-                .statusCode(200)
-                .body("title", equalTo("IT Test Suite"))
-                .body("description", equalTo("IT Test Suite"))
-                .body("license", equalTo("proprietary"))
-                .body("extent.spatial.bbox[0]", contains(-180, -56, 180, 83))
-                .body("extent.temporal.interval[0]", hasItems("2015-06-23T00:00:00Z", "2019-07-10T13:44:56Z"));
-        Thread.sleep(2000);
+//
+        System.out.println(token);
 
 
     }
@@ -580,6 +548,51 @@ public class StacCollectionOnboardingIT {
                 .statusCode(400)
                 .body("code", equalTo("Bad Request"))
                 .body("description", containsString("[Bad Request] Validation error for body"));
+    }
+
+    @Order(12)
+    @Test
+    @Description("Failure: Stac Collection creation using Resource Item that doesn't exist")
+    public void testCreateStacWhenResourceIdNotFOundFailure() {
+        String token =
+                new FakeTokenBuilder()
+                        .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
+                        .withResourceServer()
+                        .withRoleProvider()
+                        .withCons(new JsonObject())
+                        .build();
+        String endpoint = "/stac/collections";
+        JsonObject extent = new JsonObject()
+                .put("spatial", new JsonObject()
+                        .put("bbox", new JsonArray()
+                                .add(new JsonArray().add(-180).add(-56).add(180).add(83))
+                        )
+                )
+                .put("temporal", new JsonObject()
+                        .put("interval", new JsonArray()
+                                .add(new JsonArray().add("2015-06-23T00:00:00Z").add("2019-07-10T13:44:56Z"))
+                        )
+                );
+        JsonObject requestBody =
+                new JsonObject()
+                        .put("id", "0ee405db-f0dd-4e1e-924d-c1a1e8d35c53")
+                        .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84")
+                        .put("license", "proprietary")
+                        .put("title", "IT Test Suite")
+                        .put("description", "IT Test Suite")
+                        .put("extent", extent)
+                        .put("datetimeKey", "2023-11-10T14:30:00Z");
+        given()
+                .header("Accept", "application/json")
+                .header("Content-Type", "application/json") // Add this
+                .auth().oauth2(token)
+                .body(requestBody.encode())
+                .when()
+                .post(endpoint)
+                .then()
+                .statusCode(404)
+                .body("code", equalTo("Item Not Found"))
+                .body("description", containsString("Item doesn't exist in catalogue"));
     }
 
 

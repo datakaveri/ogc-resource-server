@@ -55,6 +55,7 @@ public class CatalogueService {
                     relHandler.result().bodyAsJsonObject().getJsonArray("results");
                 JsonObject response = resultArray.getJsonObject(0);
                 promise.complete(response);
+                return;
               } else {
                 LOGGER.debug("catalogue call search api failed: " + relHandler.cause());
                 promise.fail("catalogue call search api failed");
