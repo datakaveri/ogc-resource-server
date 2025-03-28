@@ -87,7 +87,7 @@ public class StacCollectionOnboardingAuthZHandler implements Handler<RoutingCont
                         routingContext.put("response", ogcException.getJson().toString());
                         routingContext.put("statusCode", ogcException.getStatusCode());
                     }
-                    routingContext.next();
+                    routingContext.fail(failed);
                 });
 
     }
