@@ -1,11 +1,14 @@
 package ogc.rs.database;
 
 import static ogc.rs.database.util.Constants.PROCESSES_TABLE_NAME;
+import static ogc.rs.database.util.Constants.MULTICORN_PG_ERROR_HINT_STRING;
+import static ogc.rs.database.util.Constants.MULTICORN_ERROR_MESSAGE;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.pgclient.PgException;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
@@ -142,6 +145,8 @@ public class DatabaseServiceImpl implements DatabaseService{
       String[] key = keys.toArray(new String[keys.size()]);
       if (!keys.isEmpty())
           featureQuery.setFilter(key[0], queryParams.get(key[0]));
+      
+      JsonObject resultJson = new JsonObject();
 
       sridOfStorageCrs.compose(srid ->
       client.withConnection(conn ->
@@ -149,7 +154,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         conn.preparedQuery("select datetime_key from collections_details where id = $1::uuid")
                 .collecting(collector)
                 .execute(Tuple.of(UUID.fromString(collectionId)))
-                .onSuccess(conn1 -> {
+                .compose(conn1 -> {
                   if (conn1.value().get(0).getString("datetime_key") != null && datetimeValue != null ){
                     LOGGER.debug("datetimeKey: {}, datetimeValue: {}"
                         ,conn1.value().get(0).getString("datetime_key"), datetimeValue);
@@ -159,22 +164,17 @@ public class DatabaseServiceImpl implements DatabaseService{
                   LOGGER.debug("datetime_key: {}",conn1.value().get(0).getString("datetime_key"));
                   LOGGER.debug("<DBService> Sql query- {} ",  featureQuery.buildSqlString());
                   LOGGER.debug("Count Query- {}", featureQuery.buildSqlString("count"));
-                  JsonObject resultJson = new JsonObject();
-                  conn.preparedQuery(featureQuery.buildSqlString("count"))
-                      .collecting(collectorT).execute()
-                      .onSuccess(count -> {
+
+                  return conn.preparedQuery(featureQuery.buildSqlString("count"))
+                      .collecting(collectorT).execute(); 
+                }).compose(count -> {
                         LOGGER.debug("Feature Count- {}",count.value().get("count"));
                         int totalCount = count.value().get("count");
                         resultJson.put("numberMatched", totalCount);
-                      })
-                      .onFailure(countFail -> {
-                        LOGGER.error("Failed to get the count of number of features!");
-                        result.fail("Error!");
-                      })
-                      .compose(sql -> {
-                        conn.preparedQuery(featureQuery.buildSqlString())
-                            .collecting(collector).execute().map(SqlResult::value)
-                            .onSuccess(success -> {
+
+                    return conn.preparedQuery(featureQuery.buildSqlString())
+                            .collecting(collector).execute().map(SqlResult::value);
+                }).onSuccess(success -> {
                               if (!success.isEmpty())
                                 resultJson
                                     .put("features", new JsonArray(success))
@@ -186,17 +186,26 @@ public class DatabaseServiceImpl implements DatabaseService{
                               resultJson.put("type", "FeatureCollection");
                               result.complete(resultJson);
                             })
-                            .onFailure(failed -> {
+                .onFailure(failed -> {
                               LOGGER.error("Failed at getFeatures- {}",failed.getMessage());
-                              result.fail("Error!");
-                            });
-                        return result.future();
-                      });
-                })
-                .onFailure(fail -> {
-                  LOGGER.error("Failed at find_collection- {}",fail.getMessage());
-                  result.fail("Error!");
-                })));
+                              /**
+                               * If an error is thrown from a Multicorn script and the Postgres error object has a
+                               * hint with MULTICORN_PG_ERROR_HINT_STRING, we catch the error and handle it as an
+                               * OgcException.
+                               */
+                              if (failed instanceof PgException) {
+                                PgException pgExp = (PgException) failed;
+
+                                if (pgExp.getHint().equals(MULTICORN_PG_ERROR_HINT_STRING)) {
+                                  result.fail(new OgcException(403, MULTICORN_ERROR_MESSAGE, pgExp.getMessage()));
+                                }
+                                else {
+                                  result.fail("Error!");
+                                }
+                                return;
+                              }
+                                result.fail("Error!");
+                            })));
         return result.future();
     }
 
@@ -286,6 +295,22 @@ public class DatabaseServiceImpl implements DatabaseService{
           })
           .onFailure(failed -> {
             LOGGER.error("Failed at getFeature- {}",failed.getMessage());
+              /**
+               * If an error is thrown from a Multicorn script and the Postgres error object has a
+               * hint with MULTICORN_PG_ERROR_HINT_STRING, we catch the error and handle it as an
+               * OgcException.
+               */
+              if (failed instanceof PgException) {
+              PgException pgExp = (PgException) failed;
+
+              if (pgExp.getHint().equals(MULTICORN_PG_ERROR_HINT_STRING)) {
+                result.fail(new OgcException(403, MULTICORN_ERROR_MESSAGE, pgExp.getMessage()));
+              }
+              else {
+                result.fail("Error!");
+              }
+              return;
+            }
             result.fail("Error!");
           }));
       return result.future();
