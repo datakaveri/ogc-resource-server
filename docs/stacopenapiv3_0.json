@@ -429,6 +429,11 @@
             "$ref": "#/components/responses/ServerError"
           }
         },
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
         "servers": [
           {
             "url": "${HOSTNAME}",
