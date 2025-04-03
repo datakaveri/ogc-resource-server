@@ -105,10 +105,11 @@ pipeline {
         always{
           node('built-in') {
             script{
-              sh """
+              sh '''
                 sed -i '1s/^/<!DOCTYPE html><html>/g' stacOutput.html
+                sed -i 's|$|</br></br>|g' stacOutput.html
                 echo '</html>' >> stacOutput.html
-              """
+              '''
               if (!fileExists('stac-compliance-reports')) {
                 sh 'mkdir stac-compliance-reports'
               } else {
