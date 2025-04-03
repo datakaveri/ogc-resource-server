@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Tuple;
 import static ogc.rs.common.Constants.DEFAULT_CRS_SRID;
+import static ogc.rs.database.util.Constants.STAC_ITEMS_DATETIME_KEY;
 
 public class FeatureQueryBuilder {
   private static final Logger LOGGER = LogManager.getLogger(FeatureQueryBuilder.class);
@@ -93,9 +94,9 @@ public class FeatureQueryBuilder {
     
     String datetimeFormat = "'yyyy-mm-dd\"T\"HH24:MI:SS\"Z\"'";
     
-    // to_timestamp("datetimeKey", 'datetimeFormat') 'operator' 'datetime' (from request);
+    // to_timestamp(datetimeKey, 'datetimeFormat') 'operator' 'datetime' (from request);
     String concatString =
-        " to_timestamp(\"" .concat(datetimeKey).concat("\",").concat(datetimeFormat).concat(") ");
+        " to_timestamp(" .concat(datetimeKey).concat(",").concat(datetimeFormat).concat(") ");
     
     if (!datetime.contains("/")) {
       this.datetime = concatString.concat("= '").concat(datetime).concat("'");
@@ -121,6 +122,16 @@ public class FeatureQueryBuilder {
 
   public void setDatetimeKey(String datetimeKey) {
     this.datetimeKey = datetimeKey;
+
+    // if the datetime key is not the STAC datetime key (when used with OGC features), then
+    // add double-quotes around the key. Double-quotes are needed as the column can have hypens or
+    // caps in it. The STAC datetime key is a JSONB expression, so no double-quotes are required.
+    if (STAC_ITEMS_DATETIME_KEY.equals(datetimeKey)) {
+      this.datetimeKey = datetimeKey; 
+    }
+    else {
+      this.datetimeKey = "\"" + datetimeKey + "\"";
+    }
   }
 
   public void setStacItemIds(String[] itemIds) {

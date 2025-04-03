@@ -858,6 +858,14 @@ public class ApiServerVerticle extends AbstractVerticle {
         .putHeader("Pragma", "no-cache")
         .putHeader("Expires", "0")
         .putHeader("X-Content-Type-Options", "nosniff");
+    
+    // if API is /stac/search, /stac/collections/{collectionId}/items,
+    // /stac/collections/{collectionId}/items/{itemId}, then set Content-type to
+    // `application/geo+json`
+    if (routingContext.request().path().matches("^\\/stac\\/.*(search|items|items\\/.*)$")) {
+      routingContext.response().putHeader(HEADER_CONTENT_TYPE, MIME_APPLICATION_GEOJSON);
+    }
+    
     // include crs when features - /items api is accessed
     if (routingContext.data().containsKey("crs"))
       routingContext.response().putHeader("Content-Crs", (String) routingContext.get("crs"));
@@ -1321,6 +1329,7 @@ public class ApiServerVerticle extends AbstractVerticle {
         ? Integer.parseInt(routingContext.queryParams().get("offset")):1;
     LOGGER.debug("collectionId- {}", stacCollectionId);
     JsonObject featureCollections = new JsonObject();
+    featureCollections.put("type", "FeatureCollection");
     JsonArray commonLinksInFeature = new JsonArray()
         .add(new JsonObject()
             .put("rel", "collection")
@@ -1362,7 +1371,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                   featureCollections.put("links", commonLinksInFeature
                       .add(new JsonObject()
                           .put("rel", "self")
-                          .put("type", "application/json")
+                          .put("type", "application/geo+json")
                           .put("href", stacMetaJson.getString("hostname")
                               + "/stac/collections/" + stacCollectionId + "/items"))
                       .add(new JsonObject()
@@ -1385,7 +1394,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             featureCollections.put("links", commonLinksInFeature
                 .add(new JsonObject()
                     .put("rel", "self")
-                    .put("type", "application/json")
+                    .put("type", "application/geo+json")
                     .put("href", stacMetaJson.getString("hostname")
                         + "/stac/collections/" + stacCollectionId + "/items")));
           }
@@ -1440,7 +1449,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                     allLinksInFeature
                         .add(new JsonObject()
                             .put("rel", "self")
-                            .put("type", "application/json")
+                            .put("type", "application/geo+json")
                             .put("href", stacMetaJson.getString("hostname")
                                 + "/stac/collections/" + stacCollectionId + "/items/" + stacItem.getString("id")));
                 JsonObject assets = formatAssetObjectsForStacItemById(stacItem.getJsonArray("assetobjects"), shouldCreate, expiry);
