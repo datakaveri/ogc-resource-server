@@ -1366,6 +1366,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                     stacItem.put("assets", assets);
                     stacItem.remove("assetobjects");
                     stacItem.put("links", allLinksInFeature);
+                    stacItem.put("stac_version", stacMetaJson.getString("stacVersion"));
                   });
                   featureCollections.put("features", stacItems);
                   featureCollections.put("links", commonLinksInFeature
