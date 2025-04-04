@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.json.annotations.JsonGen;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.validation.RequestParameters;
 
@@ -40,6 +41,10 @@ public class StacItemSearchParams {
 
     if (params.queryParameter("datetime") != null) {
       validateDatetime(params.queryParameter("datetime").getString());
+    }
+    
+    if (params.queryParameter("bbox") != null) {
+      validateBbox(params.queryParameter("bbox").getJsonArray());
     }
 
     if (params.queryParameter("intersects") != null && params.queryParameter("bbox") != null) {
@@ -137,6 +142,30 @@ public class StacItemSearchParams {
       throw new OgcException(400, "Bad Request", "Time parameter not in ISO format");
     }
   }
+  
+  /**
+   * Validate bbox parameter.
+   * 
+   * @param bbox
+   */
+  private static void validateBbox(JsonArray bbox) {
+    if (bbox.size() != 4 && bbox.size() != 6) {
+      throw new OgcException(400, "Bad Request", "bbox size must be either 4 or 6");
+    }
+
+    if (bbox.size() == 4) {
+      if (bbox.getFloat(0) > bbox.getFloat(2) || bbox.getFloat(1) > bbox.getFloat(3)) {
+        throw new OgcException(400, "Bad Request",
+            "Invalid bbox, not in format of [xmin, ymin, xmax, ymax]");
+      }
+    } else {
+      if (bbox.getFloat(0) > bbox.getFloat(3) || bbox.getFloat(1) > bbox.getFloat(4)
+          || bbox.getFloat(2) > bbox.getFloat(5)) {
+        throw new OgcException(400, "Bad Request",
+            "Invalid bbox, not in format of [xmin, ymin, zmin, xmax, ymax, zmax]");
+      }
+    }
+  }
 
   public StacItemSearchParams(JsonObject json) {
     StacItemSearchParamsConverter.fromJson(json, this);
@@ -161,6 +190,10 @@ public class StacItemSearchParams {
     
     if (body.getString("datetime") != null) {
       validateDatetime(body.getString("datetime"));
+    }
+
+    if (body.getJsonArray("bbox") != null) {
+      validateBbox(body.getJsonArray("bbox"));
     }
 
     if (body.containsKey("intersects") && body.containsKey("bbox")) {
