@@ -2572,7 +2572,4 @@ public class ApiServerVerticle extends AbstractVerticle {
   public void updateStacItem(RoutingContext routingContext) {
   }
 
-  //TODO: delete logic
-  public void deleteStacItem(RoutingContext routingContext) {
-  }
 }

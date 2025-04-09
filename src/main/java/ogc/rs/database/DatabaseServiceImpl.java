@@ -749,6 +749,32 @@ public class DatabaseServiceImpl implements DatabaseService{
     return result.future();
   }
 
+  @Override
+  public Future<JsonObject> getAccessDetails(String collectionId) {
+    Promise<JsonObject> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+    String getAccessDetailsQuery = "select id, role_id from ri_details where id = $1::uuid";
+    client.withConnection(conn ->
+        conn.preparedQuery(getAccessDetailsQuery)
+            .collecting(collector)
+            .execute(Tuple.of(UUID.fromString(collectionId)))
+            .map(SqlResult::value)
+            .onSuccess(success -> {
+              if(success.isEmpty()) {
+                LOGGER.error("Collection not found in ri_details!");
+                result.fail(new OgcException(404, "Not Found", "Collection not found"));
+                return;
+              }
+              result.complete(success.get(0));
+            })
+            .onFailure(failed -> {
+              LOGGER.error("Failed to get access details for collectionId {}, E- {}",collectionId, failed.getMessage());
+              result.fail("Error!");
+            }));
+    return result.future();
+  }
+
   private  Future<JsonObject> getStacItemWithoutAssets(String collectionId, String itemId) {
     Promise<JsonObject> result = Promise.promise();
     Collector<Row, ?, List<JsonObject>> collector =
@@ -856,6 +882,8 @@ public class DatabaseServiceImpl implements DatabaseService{
                 if (!stacItem.containsKey("assets"))
                   return Future.succeededFuture();
                 else {
+                  if (stacItem.getJsonObject("assets").isEmpty())
+                    return Future.succeededFuture();
                   JsonObject assets = stacItem.getJsonObject("assets");
                   LOGGER.debug("Inserted into stac_collection_part");
                   List<Tuple> batchInserts = new ArrayList<>();
@@ -1366,4 +1394,6 @@ public class DatabaseServiceImpl implements DatabaseService{
 
         return result.future();
     }
+
+
 }

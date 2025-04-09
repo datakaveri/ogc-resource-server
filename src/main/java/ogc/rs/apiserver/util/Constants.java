@@ -46,9 +46,7 @@ public class Constants {
     public static final String STAC_ITEMS_API = "getStacItems";
     public static final String STAC_ITEMS_POST_API = "postStacItem";
     public static final String STAC_ITEM_BY_ID_API = "getStacItemById";
-    public static final String STAC_ITEMS_PUT_API = "updateStacItem";
-    public static final String STAC_ITEMS_PATCH_API = "patchStacItem";
-    public static final String STAC_ITEMS_DELETE_API = "deleteStacItem";
+    public static final String STAC_ITEMS_PATCH_API = "updateStacItem";
     public static final String STAC_ITEM_SEARCH_GET_API = "getItemSearch";
     public static final String STAC_ITEM_SEARCH_POST_API = "postItemSearch";
     public static final String ASSET_API = "getAsset";

@@ -463,7 +463,12 @@
           "default": {
             "$ref": "#/components/responses/Error"
             }
+          },
+        "security": [
+          {
+            "DX-AAA-Token": []
           }
+        ]
       }
     },
     "/stac/collections/{collectionId}/items/{itemId}": {
@@ -510,78 +515,10 @@
           }
         ]
       },
-      "put": {
-        "summary": "update an existing feature by Id with a complete item definition",
-        "description": "Use this method to update an existing feature. Requires the entire GeoJSON  description be submitted.",
-        "operationId": "updateStacItem",
-        "parameters": [
-          {
-            "name": "collectionId",
-            "in": "path",
-            "description": "local identifier of a collection",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "itemId",
-            "in": "path",
-            "description": "local identifier of an item",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "tags": [
-          "Transaction"
-        ],
-        "requestBody": {
-          "description": "The request body must contain a representation of the replacement item.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/postOrPutItem"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The item was replaced",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/item"
-                }
-              }
-            }
-          },
-          "202": {
-            "description": "The item was accepted for asynchronous action"
-          },
-          "204": {
-            "description": "The item was replaced"
-            },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/Error"
-          },
-        "default": {
-          "$ref": "#/components/responses/Error"
-        }
-        }
-      },
       "patch": {
         "summary": "update an existing feature by Id with a partial item definition",
         "description": "Use this method to update an existing feature. Requires a GeoJSON fragment (containing the fields to be updated) be submitted.",
-        "operationId": "patchStacItem",
+        "operationId": "updateStacItem",
         "parameters": [
           {
             "name": "collectionId",
@@ -642,7 +579,12 @@
           },
           "default": {
             "$ref": "#/components/responses/Error"
-          }}
+          }},
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ]
       }
     },
     "/stac/search": {
