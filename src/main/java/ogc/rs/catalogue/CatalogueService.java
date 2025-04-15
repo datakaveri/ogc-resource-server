@@ -55,7 +55,6 @@ public class CatalogueService {
                     relHandler.result().bodyAsJsonObject().getJsonArray("results");
                 JsonObject response = resultArray.getJsonObject(0);
                 promise.complete(response);
-                return;
               } else {
                 LOGGER.debug("catalogue call search api failed: " + relHandler.cause());
                 promise.fail("catalogue call search api failed");
@@ -86,6 +85,7 @@ public class CatalogueService {
                                 if (relHandler.result().bodyAsJsonObject().getInteger("totalHits") == 0) {
                                     LOGGER.debug("Item doesn't exist in catalogue");
                                     promise.fail(new OgcException(404, "Item Not Found", "Item doesn't exist in catalogue"));
+                                    return;
                                 }
                                 JsonArray resultArray =
                                         relHandler.result().bodyAsJsonObject().getJsonArray("results");
