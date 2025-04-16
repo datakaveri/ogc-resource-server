@@ -579,7 +579,10 @@ public class DatabaseServiceImpl implements DatabaseService{
         String title = jsonObject.getString("title");
         String description = jsonObject.getString("description");
         String datetimeKey = jsonObject.getString("datetimeKey");
-        String crs = jsonObject.getString("crs");
+        String crs = jsonObject
+                .getJsonObject("extent")
+                .getJsonObject("spatial")
+                .getString("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84");
         String license = jsonObject.getString("license");
         String accessPolicy = jsonObject.getString("accessPolicy");
         String ownerUserId = jsonObject.getString("ownerUserId");
@@ -656,7 +659,15 @@ public class DatabaseServiceImpl implements DatabaseService{
                                 .onFailure(
                                         failRes -> {
                                             LOGGER.error("Failed to execute queries: {}", failRes.getMessage());
-                                            result.fail(failRes.getMessage());
+                                            if(failRes.getMessage().contains("duplicate key value"))
+                                            {
+                                                OgcException ogcException =
+                                                        new OgcException(
+                                                                409, "Conflict", "STAC Collection Already Exists");
+                                                result.fail(ogcException);
+                                            } else {
+                                                result.fail(failRes.getMessage());
+                                            }
                                         }));
 
         return result.future();

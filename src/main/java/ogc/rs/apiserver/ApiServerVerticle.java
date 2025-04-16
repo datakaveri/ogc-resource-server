@@ -1964,20 +1964,12 @@ public class ApiServerVerticle extends AbstractVerticle {
                                     routingContext.put(
                                             "statusCode", ((OgcException) failure).getStatusCode());
                                 } else {
-                                    if (failure.getMessage().contains("duplicate key value")) {
-                                        OgcException ogcException =
-                                                new OgcException(
-                                                        409, "Conflict", "STAC Collection Already Exists");
-                                        routingContext.put("response", ogcException.getJson().toString());
-                                        routingContext.put("statusCode", ogcException.getStatusCode());
-                                    } else {
                                         OgcException ogcException =
                                                 new OgcException(
                                                         500, "Internal Server Error", "Internal Server Error");
                                         routingContext.put("response", ogcException.getJson().toString());
                                         routingContext.put("statusCode", ogcException.getStatusCode());
                                     }
-                                }
                                 routingContext.next();
                             });
         }
