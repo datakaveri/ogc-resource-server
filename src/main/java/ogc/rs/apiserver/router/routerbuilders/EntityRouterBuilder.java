@@ -60,6 +60,7 @@ public abstract class EntityRouterBuilder {
   public TilesMeteringHandler tilesMeteringHandler;
   public StacCollectionOnboardingAuthZHandler stacCollectionOnboardingAuthZHandler;
   public StacItemByIdAuthZHandler stacItemByIdAuthZHandler;
+  public StacItemOnboardingAuthZHandler stacItemOnboardingAuthZHandler;
 
 
   EntityRouterBuilder(ApiServerVerticle apiServerVerticle, Vertx vertx, RouterBuilder routerBuilder,
@@ -74,7 +75,7 @@ public abstract class EntityRouterBuilder {
     tilesMeteringHandler = new TilesMeteringHandler(vertx, config);
     stacCollectionOnboardingAuthZHandler = new StacCollectionOnboardingAuthZHandler(vertx, config);
     stacItemByIdAuthZHandler = new StacItemByIdAuthZHandler(vertx);
-
+    stacItemOnboardingAuthZHandler = new StacItemOnboardingAuthZHandler(vertx);
   }
 
   /**
