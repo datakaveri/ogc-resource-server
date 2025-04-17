@@ -378,6 +378,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
             }
 
             JsonObject response = new JsonObject()
+                    .put("s3KeyName", key)
                     .put("uploadId", uploadId)
                     .put("chunkSize", chunkSize)
                     .put("totalParts", totalParts)
