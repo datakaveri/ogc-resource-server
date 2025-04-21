@@ -2,7 +2,6 @@ package ogc.rs.apiserver;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.MultiMap;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
@@ -21,14 +20,26 @@ import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.StacItemSearchParams;
 import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.common.DataFromS3;
+import ogc.rs.common.S3Config;
 import ogc.rs.database.DatabaseService;
 import ogc.rs.jobs.JobsService;
 import ogc.rs.metering.MeteringService;
 import ogc.rs.processes.ProcessesRunnerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
+
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -40,16 +51,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import ogc.rs.common.S3Config;
-import ogc.rs.apiserver.util.ProcessException;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Configuration;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.apiserver.handlers.StacItemByIdAuthZHandler.SHOULD_CREATE_KEY;
@@ -2502,4 +2503,142 @@ public class ApiServerVerticle extends AbstractVerticle {
               routingContext.next();
             });
   }
+
+  public void createStacItems(RoutingContext routingContext) {
+
+    String FEATURE_COLLECTION = "FeatureCollection";
+    String FEATURE = "Feature";
+    RequestParameters paramsFromOasValidation =
+        routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+    String collectionId = routingContext.request().path().split("/")[3];
+    String url = routingContext.request().absoluteURI();
+
+    if (paramsFromOasValidation.body() == null)
+      routingContext.fail(new OgcException(400, "Bad Request", "Empty body"));
+
+    if (!paramsFromOasValidation.body().isJsonObject())
+      routingContext.fail(new OgcException(400, "Bad Request", "Post body not in JSON"));
+
+    JsonObject requestBody = paramsFromOasValidation.body().getJsonObject();
+    requestBody.put("collectionId", collectionId);
+    LOGGER.debug("POST Body- {}", requestBody);
+    Future<JsonObject> result = null;
+    if (requestBody.getString("type").equalsIgnoreCase(FEATURE_COLLECTION)) {
+      HashSet<String> hashId = new HashSet<>();
+      requestBody.getJsonArray("features").forEach(feature -> {
+        JsonObject json = (JsonObject) feature;
+        if(!hashId.add(json.getString("id")))
+          routingContext.fail(new OgcException(400, "Bad Request", "Duplicate Item Ids are in the request"));
+      });
+      result = dbService.insertStacItems(requestBody);
+    }
+    else if (requestBody.getString("type").equalsIgnoreCase(FEATURE)) {
+      result = dbService.insertStacItem(requestBody);
+    }
+    assert result != null;
+    result
+        .onSuccess(success -> {
+          success.put("stac_version", stacMetaJson.getString("stacVersion"));
+          routingContext.put("response", success.toString());
+          routingContext.put("statusCode", 201);
+          if (requestBody.getString("type").equalsIgnoreCase(FEATURE)) {
+            routingContext.response().putHeader("LOCATION", url + "/" + URLEncoder.encode(requestBody.getString("id"),
+                StandardCharsets.UTF_8));
+          }
+          routingContext.next();
+        })
+        .onFailure(failed -> {
+          if (failed instanceof OgcException) {
+            routingContext.put("response", ((OgcException) failed).getJson().toString());
+            routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+          } else {
+            OgcException ogcException =
+                new OgcException(500, "Internal Server Error", "Internal Server Error");
+            routingContext.put("response", ogcException.getJson().toString());
+            routingContext.put("statusCode", ogcException.getStatusCode());
+          }
+          routingContext.next();
+        });
+  }
+
+  public void updateStacItem(RoutingContext routingContext) {
+
+    RequestParameters paramsFromOasValidation =
+        routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+    String collectionId = routingContext.request().path().split("/")[3];
+    String itemId = routingContext.request().path().split("/")[5];
+    String url = routingContext.request().absoluteURI();
+
+    if (paramsFromOasValidation.body() == null) {
+      routingContext.fail(new OgcException(400, "Bad Request", "Empty body"));
+      return;
+    }
+
+    if (!paramsFromOasValidation.body().isJsonObject()) {
+      routingContext.fail(new OgcException(400, "Bad Request", "Post body not in JSON"));
+      return;
+    }
+
+    JsonObject requestBody = paramsFromOasValidation.body().getJsonObject();
+
+    if (!requestBody.getString("id").equalsIgnoreCase(itemId)) {
+      routingContext.fail(new OgcException(400, "Bad Request", "Item id in request body does not match with id in " +
+          "URI"));
+      return;
+    }
+    if (!requestBody.getString("type").equalsIgnoreCase("FEATURE")) {
+      routingContext.fail(new OgcException(400, "Bad Request", "Item type should be Feature"));
+      return;
+    }
+
+    requestBody.put("collectionId", collectionId);
+    requestBody.put("itemId", itemId);
+    LOGGER.debug("PATCH Body- {}", requestBody);
+    JsonArray commonLinksInFeature = new JsonArray()
+        .add(new JsonObject()
+            .put("rel", "collection")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac/collections/" + collectionId))
+        .add(new JsonObject()
+            .put("rel", "parent")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac/collections/" + collectionId))
+        .add(new JsonObject()
+            .put("rel", "root")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac"));
+
+    dbService.updateStacItem(requestBody).onSuccess(stacItem -> {
+          stacItem.put("stac_version", stacMetaJson.getString("stacVersion"));
+          JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
+          allLinksInFeature
+              .add(new JsonObject()
+                  .put("rel", "self")
+                  .put("type", "application/json")
+                  .put("href", stacMetaJson.getString("hostname")
+                      + "/stac/collections/" + collectionId + "/items/" + itemId));
+          JsonObject assets = formatAssetObjectsAsPerStacSchema(stacItem.getJsonArray("assetobjects"));
+          stacItem.put("assets", assets);
+          stacItem.remove("assetobjects");
+          stacItem.put("links", allLinksInFeature);
+          routingContext.put("response", stacItem.toString());
+          routingContext.put("statusCode", 201);
+          routingContext.response().putHeader("LOCATION", url + "/" + URLEncoder.encode(requestBody.getString("id"),
+                StandardCharsets.UTF_8));
+          routingContext.next();
+        })
+        .onFailure(failed -> {
+          if (failed instanceof OgcException) {
+            routingContext.put("response", ((OgcException) failed).getJson().toString());
+            routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+          } else {
+            OgcException ogcException =
+                new OgcException(500, "Internal Server Error", "Internal Server Error");
+            routingContext.put("response", ogcException.getJson().toString());
+            routingContext.put("statusCode", ogcException.getStatusCode());
+          }
+          routingContext.next();
+        });
+  }
+
 }
