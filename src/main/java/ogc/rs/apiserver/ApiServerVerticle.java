@@ -2570,6 +2570,83 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   public void updateStacItem(RoutingContext routingContext) {
+
+    RequestParameters paramsFromOasValidation =
+        routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
+    String collectionId = routingContext.request().path().split("/")[3];
+    String itemId = routingContext.request().path().split("/")[5];
+    String url = routingContext.request().absoluteURI();
+
+    if (paramsFromOasValidation.body() == null) {
+      routingContext.fail(new OgcException(400, "Bad Request", "Empty body"));
+      return;
+    }
+
+    if (!paramsFromOasValidation.body().isJsonObject()) {
+      routingContext.fail(new OgcException(400, "Bad Request", "Post body not in JSON"));
+      return;
+    }
+
+    JsonObject requestBody = paramsFromOasValidation.body().getJsonObject();
+
+    if (!requestBody.getString("id").equalsIgnoreCase(itemId)) {
+      routingContext.fail(new OgcException(400, "Bad Request", "Item id in request body does not match with id in " +
+          "URI"));
+      return;
+    }
+    if (!requestBody.getString("type").equalsIgnoreCase("FEATURE")) {
+      routingContext.fail(new OgcException(400, "Bad Request", "Item type should be Feature"));
+      return;
+    }
+
+    requestBody.put("collectionId", collectionId);
+    requestBody.put("itemId", itemId);
+    LOGGER.debug("PATCH Body- {}", requestBody);
+    JsonArray commonLinksInFeature = new JsonArray()
+        .add(new JsonObject()
+            .put("rel", "collection")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac/collections/" + collectionId))
+        .add(new JsonObject()
+            .put("rel", "parent")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac/collections/" + collectionId))
+        .add(new JsonObject()
+            .put("rel", "root")
+            .put("type", "application/json")
+            .put("href", stacMetaJson.getString("hostname") + "/stac"));
+
+    dbService.updateStacItem(requestBody).onSuccess(stacItem -> {
+          stacItem.put("stac_version", stacMetaJson.getString("stacVersion"));
+          JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
+          allLinksInFeature
+              .add(new JsonObject()
+                  .put("rel", "self")
+                  .put("type", "application/json")
+                  .put("href", stacMetaJson.getString("hostname")
+                      + "/stac/collections/" + collectionId + "/items/" + itemId));
+          JsonObject assets = formatAssetObjectsAsPerStacSchema(stacItem.getJsonArray("assetobjects"));
+          stacItem.put("assets", assets);
+          stacItem.remove("assetobjects");
+          stacItem.put("links", allLinksInFeature);
+          routingContext.put("response", stacItem.toString());
+          routingContext.put("statusCode", 201);
+          routingContext.response().putHeader("LOCATION", url + "/" + URLEncoder.encode(requestBody.getString("id"),
+                StandardCharsets.UTF_8));
+          routingContext.next();
+        })
+        .onFailure(failed -> {
+          if (failed instanceof OgcException) {
+            routingContext.put("response", ((OgcException) failed).getJson().toString());
+            routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+          } else {
+            OgcException ogcException =
+                new OgcException(500, "Internal Server Error", "Internal Server Error");
+            routingContext.put("response", ogcException.getJson().toString());
+            routingContext.put("statusCode", ogcException.getStatusCode());
+          }
+          routingContext.next();
+        });
   }
 
 }

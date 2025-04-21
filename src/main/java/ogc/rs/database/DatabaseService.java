@@ -127,4 +127,5 @@ public interface DatabaseService {
 
     Future<JsonObject> getAccessDetails(String collectionId);
 
+   Future<JsonObject> updateStacItem(JsonObject requestBody);
 }

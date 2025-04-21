@@ -775,6 +775,86 @@ public class DatabaseServiceImpl implements DatabaseService{
     return result.future();
   }
 
+  @Override
+  public Future<JsonObject> updateStacItem(JsonObject stacItem) {
+    Promise<JsonObject> result = Promise.promise();
+    String itemId = stacItem.getString("itemId");
+    String collectionId = stacItem.getString("collectionId");
+    Double[] bboxArray = stacItem.containsKey("bbox") ? stacItem.getJsonArray("bbox").stream()
+        .map(obj -> obj instanceof Number ? ((Number) obj).doubleValue() : 0.0)
+        .toArray(Double[]::new) : null;
+    String geometry = stacItem.containsKey("geometry") ? stacItem.getJsonObject("geometry").toString() : null;
+    JsonObject properties = stacItem.containsKey("properties") ? stacItem.getJsonObject("properties") : null;
+    String updateItemQuery = "UPDATE stac_collections_part SET bbox = COALESCE($3, bbox)," +
+        " geom = COALESCE(st_geomfromgeojson($4), geom), properties = COALESCE($5::jsonb, properties)" +
+        " WHERE id = $1 and collection_id = $2";
+
+    checkIfCollectionExist(collectionId)
+        .compose(collection -> checkIfItemExistForUpdate(itemId, collectionId))
+        .compose(item -> client.withTransaction(conn ->
+            conn.preparedQuery(updateItemQuery)
+                .execute(Tuple.of(itemId,collectionId,bboxArray, geometry, properties))
+                .compose(updateItem -> {
+                  if (!stacItem.containsKey("assets"))
+                    return Future.succeededFuture();
+                  else {
+                    if (stacItem.getJsonObject("assets").isEmpty())
+                      return Future.succeededFuture();
+                    JsonObject assets = stacItem.getJsonObject("assets");
+                    LOGGER.debug("Updated Item in stac_collection_part");
+                    List<Tuple> batchInserts = new ArrayList<>();
+                    assets.stream().forEach(asset -> {
+                      String assetId = asset.getKey();
+                      JsonObject assetJsonObj = (JsonObject) asset.getValue();
+                      String title = assetJsonObj.containsKey("title")
+                          ? assetJsonObj.getString("title") : null;
+                      String description = assetJsonObj.containsKey("description") ?
+                          assetJsonObj.getString("description") : null;
+                      String href = assetJsonObj.containsKey("href") ? assetJsonObj.getString("href") : null;
+                      String type = assetJsonObj.containsKey("type")
+                          ? assetJsonObj.getString("type") : null;
+                      Long size = assetJsonObj.containsKey("size") ? assetJsonObj.getLong("size") : null;
+                      JsonArray rolesJsonArr = assetJsonObj.containsKey("roles")
+                          ? assetJsonObj.getJsonArray("roles") : null;
+                      String[] roles = (rolesJsonArr != null) ? rolesJsonArr.stream()
+                          .map(Object::toString).toArray(String[]::new) : null;
+                      JsonObject assetProperties =
+                          assetJsonObj.containsKey("properties") ? assetJsonObj.getJsonObject("properties") : null;
+                      batchInserts.add(
+                          Tuple.of(UUID.fromString(assetId), collectionId, itemId, title, description, href, type, size,
+                          roles, assetProperties));
+                    });
+                    return conn.preparedQuery("INSERT INTO stac_items_assets as asset_table" +
+                            " (id, collection_id, item_id, title, description, href, type, size, roles, properties)" +
+                            " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb) " +
+                            " ON CONFLICT (id) DO UPDATE SET title = COALESCE (EXCLUDED.title, asset_table.title)" +
+                            ", description = COALESCE(EXCLUDED.description, asset_table.description)" +
+                            ", href = COALESCE(EXCLUDED.href, asset_table.href)" +
+                            ", type= COALESCE(EXCLUDED.type, asset_table.type)" +
+                            ", size = COALESCE(EXCLUDED.size, asset_table.size)" +
+                            ", roles = COALESCE(EXCLUDED.roles, asset_table.roles)" +
+                            ", properties = COALESCE(EXCLUDED.properties, asset_table.properties)")
+                        .executeBatch(batchInserts);
+                  }
+                })
+      ))
+        .compose(assetInsert -> getStacItemById(collectionId,itemId))
+        .onSuccess(success -> {
+            LOGGER.info("Stac Item updated.");
+            result.complete(success);
+          })
+          .onFailure(failed -> {
+            LOGGER.error("Failed to update Stac Item. \nError: {}", failed.getMessage());
+            failed.printStackTrace();
+            if (failed.getMessage().contains("violates not-null constraint")) {
+              result.fail(new OgcException(400, "Bad Request", "either [id, collection_id, item_id, size, roles, " +
+                  "href, type is empty/null on updating]"));
+            } else
+                result.fail(failed);
+          });
+    return result.future();
+  }
+
   private  Future<JsonObject> getStacItemWithoutAssets(String collectionId, String itemId) {
     Promise<JsonObject> result = Promise.promise();
     Collector<Row, ?, List<JsonObject>> collector =
@@ -840,6 +920,26 @@ public class DatabaseServiceImpl implements DatabaseService{
       return promise.future();
   }
 
+  private Future<Void> checkIfItemExistForUpdate(String itemId, String collectionId) {
+    Promise<Void> promise = Promise.promise();
+    client.withConnection(conn ->
+        conn.preparedQuery("SELECT 1 FROM stac_collections_part WHERE id = $1 and collection_id = $2::uuid")
+            .execute(Tuple.of(itemId, UUID.fromString(collectionId)))
+            .onSuccess(item -> {
+              if (item.rowCount() == 0) {
+                LOGGER.error("No STAC Item exists to update!");
+                promise.fail(new OgcException(404, "Not found", "No STAC Item exists to update"));
+              }
+              else
+                promise.complete();
+            })
+            .onFailure(failed -> {
+              LOGGER.error("Something went wrong. {}", failed.getMessage());
+              promise.fail("Error!");
+            }));
+    return promise.future();
+  }
+
   private Future<Void> checkIfItemsExist(String[] itemIds, String collectionId) {
     Promise<Void> promise = Promise.promise();
     Collector<Row, ?, List<String>> collector = Collectors.mapping(row -> row.getString("id"), Collectors.toList());
@@ -888,8 +988,9 @@ public class DatabaseServiceImpl implements DatabaseService{
                   LOGGER.debug("Inserted into stac_collection_part");
                   List<Tuple> batchInserts = new ArrayList<>();
                   assets.stream().forEach(asset -> {
-                    JsonObject assetJsonObj = (JsonObject) asset;
-                    String title = assetJsonObj.containsKey("description")
+                    String assetId = asset.getKey();
+                    JsonObject assetJsonObj = (JsonObject) asset.getValue();
+                    String title = assetJsonObj.containsKey("title")
                         ? assetJsonObj.getString("title") : "";
                     String description = assetJsonObj.containsKey("description") ?
                         assetJsonObj.getString("description") : "";
@@ -901,10 +1002,14 @@ public class DatabaseServiceImpl implements DatabaseService{
                         ? assetJsonObj.getJsonArray("roles") : new JsonArray();
                     String[] roles = (rolesJsonArr != null) ? rolesJsonArr.stream()
                         .map(Object::toString).toArray(String[]::new) : new String[0];
-                    batchInserts.add(Tuple.of(title, description, href, type, size, roles));
+                    JsonObject assetProperties = assetJsonObj.containsKey("properties")
+                        ? assetJsonObj.getJsonObject("properties") : new JsonObject();
+                    batchInserts.add(Tuple.of(UUID.fromString(assetId), collectionId, itemId, title, description, href,
+                        type, size, roles, assetProperties));
                   });
                   return conn.preparedQuery("INSERT INTO stac_items_assets" +
-                          " (title, description, href, type, size, roles) VALUES ($1, $2, $3, $4, $5, $6)")
+                          " (id, collection_id, item_id, title, description, href, type, size, roles, properties)" +
+                          " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb)")
                       .executeBatch(batchInserts);
                 }
               }))

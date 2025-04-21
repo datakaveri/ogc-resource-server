@@ -38,6 +38,12 @@ public class StacItemOnboardingAuthZHandler implements Handler<RoutingContext> {
   @Override
   public void handle(RoutingContext routingContext) {
     String collectionId;
+
+    if(System.getProperty("disable.auth") != null) {
+      routingContext.next();
+      return;
+    }
+
     AuthInfo user = routingContext.get(USER_KEY);
 
     LOGGER.debug("STAC Item Onboarding Authorization" + routingContext.data());
