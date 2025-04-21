@@ -44,13 +44,16 @@ public class Constants {
     public static final String STAC_COLLECTIONS_API = "getStacCollections";
     public static final String STAC_COLLECTION_API = "describeStacCollection";
     public static final String STAC_ITEMS_API = "getStacItems";
+    public static final String STAC_ITEMS_POST_API = "postStacItem";
     public static final String STAC_ITEM_BY_ID_API = "getStacItemById";
+    public static final String STAC_ITEMS_PATCH_API = "updateStacItem";
     public static final String STAC_ITEM_SEARCH_GET_API = "getItemSearch";
     public static final String STAC_ITEM_SEARCH_POST_API = "postItemSearch";
     public static final String ASSET_API = "getAsset";
     public static final String STAC_POST_COLLECTION_API = "postStacCollection";
     public static final String STAC_UPDATE_COLLECTION_API = "updateStacCollection";
     public static final String STAC_CONFORMANCE_CLASSES = "getConformanceDeclaration";
+    public static final String STAC_ASSETS_BY_ID_REGEX = "^/stac/collections/[^/]+/items/[^/]+$";
     public static final String PROCESS_EXECUTION_REGEX = "/processes/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/execution";
     public static final String STATUS_API = "getStatus";
     public static final String LIST_JOBS_API = "listAllJobs";
@@ -67,7 +70,7 @@ public class Constants {
     public static final String NOT_FOUND = "Not Found";
     public static final String NOT_AUTHORIZED = "Not Authorized";
     public static final String INVALID_COLLECTION_ID = "Invalid collection id";
-    public static final String USER_NOT_AUTHORIZED =  "User is not authorised. Please contact IUDX AAA ";
+    public static final String USER_NOT_AUTHORIZED =  "User is not authorised. Please contact DX AAA ";
     public static final String NOT_PROVIDER_OR_CONSUMER_TOKEN = "Not a provider or consumer token. It is of role ";
     public static final String RESOURCE_OPEN_TOKEN_SECURE = "Resource is OPEN. Token is SECURE of role ";
     public static final String COVERAGE_SCHEMA ="getCoverageSchema";

@@ -135,7 +135,7 @@ public class Deployer {
     }
 
     public static void main(String[] args) {
-        CLI cli = CLI.create("IUDX OGC").setSummary("A CLI to deploy the OGC resource server")
+        CLI cli = CLI.create("DX OGC").setSummary("A CLI to deploy the OGC resource server")
                 .addOption(new Option().setLongName("help").setShortName("h").setFlag(true)
                         .setDescription("display help"))
                 .addOption(new Option().setLongName("config").setShortName("c")

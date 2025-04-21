@@ -584,8 +584,10 @@ public class StacCollectionOnboardingIT {
 
     @Order(12)
     @Test
-    @Description("Success: Multiple Stac collections onboarding with duplicate id")
+
+    @Description("Failure: Multiple Stac collections onboarding with duplicate id")
     public void testCreateMultipleStacCollectionDuplicateId() throws InterruptedException {
+
         String token =
                 new FakeTokenBuilder()
                         .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
@@ -605,6 +607,7 @@ public class StacCollectionOnboardingIT {
                                 .add(new JsonArray().add("2015-06-23T00:00:00Z").add("2019-07-10T13:44:56Z"))
                         )
                 );
+
         JsonObject colletonOne = new JsonObject();
         colletonOne
                 .put("id", "0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd")
@@ -626,6 +629,7 @@ public class StacCollectionOnboardingIT {
         JsonArray collections = new JsonArray().add(colletonOne).add(collectionTwo);
         JsonObject requestBody =
                 new JsonObject().put("collections", collections);
+
         given()
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json") // Add this
@@ -643,7 +647,7 @@ public class StacCollectionOnboardingIT {
 
     @Order(13)
     @Test
-    @Description("Success: Multiple Stac collections onboarding with Bad Request Body")
+    @Description("Failure: Multiple Stac collections onboarding with Bad Request Body")
     public void testCreateMultipleStacCollectionInvalidRequest() throws InterruptedException {
         String token =
                 new FakeTokenBuilder()
@@ -699,7 +703,5 @@ public class StacCollectionOnboardingIT {
 
 
     }
-
-
 
 }

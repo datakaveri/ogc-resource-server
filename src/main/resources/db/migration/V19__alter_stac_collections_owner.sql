@@ -1,1 +1,1 @@
-ALTER TABLE stac_collections_part OWNER TO {ogcUser}
+ALTER TABLE stac_collections_part OWNER TO ${ogcUser}
