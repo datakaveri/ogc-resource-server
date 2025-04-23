@@ -56,7 +56,7 @@ public class StacItemOnboardingAuthZHandler implements Handler<RoutingContext> {
       return;
     }
     if (user.getRole() != AuthInfo.RoleEnum.provider
-        && user.getRole() != AuthInfo.RoleEnum.delegate || user.getDelegatorRole() != AuthInfo.RoleEnum.provider) {
+        && (user.getRole() != AuthInfo.RoleEnum.delegate || user.getDelegatorRole() != AuthInfo.RoleEnum.provider)) {
           routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "Only provider or provider delegate is authorized" +
               " to perform this action."));
           return;
