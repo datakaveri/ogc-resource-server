@@ -9,6 +9,7 @@ import io.vertx.core.json.JsonObject;
 import ogc.rs.apiserver.util.StacItemSearchParams;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @VertxGen
 @ProxyGen
@@ -52,6 +53,11 @@ public interface DatabaseService {
     Future<JsonObject> getProcesses(int limit);
     Future<JsonObject> getProcess(String processId);
 
+    // Get API hits count based on user_id, api_path, and collection_id within the time window
+    Future<Long> getTotalApiHits(String userId, String apiPath, String collectionId, long policyIssuedAt);
+
+    // Get data usage (sum of resp_size) based on user_id, api_path, and collection_id within the time window
+    Future<Long> getTotalDataUsage(String userId, String apiPath, String collectionId, long policyIssuedAt);
 
     /**
      * Get OGC Feature Collection metadata to be used for OpenAPI spec generation.

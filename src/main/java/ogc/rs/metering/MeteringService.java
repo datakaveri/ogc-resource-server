@@ -20,6 +20,8 @@ public interface MeteringService {
 
     Future<JsonObject> executeReadQuery(JsonObject request);
 
+    Future<Void> insertIntoPostgresAuditTable(JsonObject request);
+
     Future<JsonObject> insertMeteringValuesInRmq(JsonObject request);
 
     Future<JsonObject> monthlyOverview(JsonObject request);

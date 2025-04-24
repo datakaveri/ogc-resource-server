@@ -2,10 +2,8 @@ package ogc.rs.database;
 
 import static ogc.rs.database.util.Constants.PROCESSES_TABLE_NAME;
 
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
@@ -1270,6 +1268,72 @@ public class DatabaseServiceImpl implements DatabaseService{
     LOGGER.error("Failed to get processes- {}", fail.getMessage());
     promise.fail(processException500);
   }
+
+    /**
+     * Retrieves the total number of API hits made by a specific user to a given API path and collection
+     * since the specified policyIssuedAt timestamp.
+     *
+     * @param userId         The UUID of the user as a string.
+     * @param apiPath        The path of the API being accessed.
+     * @param collectionId   The UUID of the collection as a string.
+     * @param policyIssuedAt The epoch time (in seconds) representing when the policy started.
+     * @return A {@link Future} containing the count of API hits.
+     */
+    @Override
+    public Future<Long> getTotalApiHits(String userId, String apiPath, String collectionId, long policyIssuedAt) {
+        Promise<Long> result = Promise.promise();
+
+        // Query to count API hits for the given user, api_path, and collection_id within the time window
+        String query = "SELECT COUNT(*) FROM metering WHERE user_id = $1 AND api_path = $2 AND collection_id = $3 " +
+                "AND timestamp > to_timestamp($4) AND resp_size > 0";
+
+        client.preparedQuery(query)
+                .execute(Tuple.of(userId, apiPath, collectionId, policyIssuedAt))
+                .onSuccess(success -> {
+                    Row row = success.iterator().next();
+                    long apiHits = row.getLong(0);
+                    result.complete(apiHits);
+                })
+                .onFailure(fail -> {
+                    LOGGER.error("Failed to check API hits: {} - {}", fail.getMessage(), fail);
+                    result.fail(new OgcException(500, "Internal Server Error", "Failed to check API hits: " + fail.getMessage()));
+                });
+
+        return result.future();
+    }
+
+    /**
+     * Retrieves the total data usage (sum of response sizes in bytes) made by a specific user to a given
+     * API path and collection since the specified policyIssuedAt timestamp.
+     *
+     * @param userId         The UUID of the user as a string.
+     * @param apiPath        The path of the API being accessed.
+     * @param collectionId   The UUID of the collection as a string.
+     * @param policyIssuedAt The epoch time (in seconds) representing when the policy started.
+     * @return A {@link Future} containing the total data usage in bytes.
+     */
+    @Override
+    public Future<Long> getTotalDataUsage(String userId, String apiPath, String collectionId, long policyIssuedAt) {
+        Promise<Long> result = Promise.promise();
+
+        // Query to sum the data usage (resp_size) for the given user, api_path, and collection_id within the time window
+        String query = "SELECT SUM(resp_size) FROM metering WHERE user_id = $1 AND api_path = $2 AND collection_id = $3 " +
+                "AND timestamp > to_timestamp($4)";
+
+        client.preparedQuery(query)
+                .execute(Tuple.of(userId, apiPath, collectionId, policyIssuedAt))
+                .onSuccess(success -> {
+                    Row row = success.iterator().next();
+                    long dataUsage = row.getLong(0);
+                    result.complete(dataUsage);
+                })
+                .onFailure(fail -> {
+                    LOGGER.error("Failed to check data usage: {} - {}", fail.getMessage(), fail);
+                    result.fail(new OgcException(500, "Internal Server Error", "Failed to check data usage: " + fail.getMessage()));
+                });
+
+        return result.future();
+    }
 
   @Override
   public Future<List<JsonObject>> getOgcFeatureCollectionMetadataForOasSpec(

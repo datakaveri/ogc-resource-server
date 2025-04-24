@@ -68,6 +68,9 @@ public class Constants {
     public static final String AUTH_CERTIFICATE_PATH = "/cert";
     public static final String ASSET_NOT_FOUND = "Asset not found";
     public static final String NOT_FOUND = "Not Found";
+    public static final String TOO_MANY_REQUESTS = "Too many requests";
+    public static final String API_CALLS_LIMIT_EXCEEDED = "API calls limit exceeded";
+    public static final String DATA_USAGE_LIMIT_EXCEEDED = "Data usage limit exceeded";
     public static final String NOT_AUTHORIZED = "Not Authorized";
     public static final String INVALID_COLLECTION_ID = "Invalid collection id";
     public static final String USER_NOT_AUTHORIZED =  "User is not authorised. Please contact DX AAA ";
