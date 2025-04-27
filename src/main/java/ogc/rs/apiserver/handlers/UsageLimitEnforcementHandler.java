@@ -10,12 +10,14 @@ import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.UUID;
+
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
 
 /**
- * This HTTP request handler enforces API usage limits per user and collection.
+ * This HTTP request handler enforces data and API usage limits per user and collection.
  * <p>
  * Limits are extracted from the user's JWT token and can include either:
  * - Data usage limit (e.g., "100:mb")
@@ -49,7 +51,9 @@ public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
         LOGGER.debug("Usage Limit Enforcement Handler invoked");
 
         AuthInfo user = routingContext.get(USER_KEY);
-        String userId = user.getUserId().toString();
+        String userId = user.getRole() == AuthInfo.RoleEnum.delegate
+                ? user.getDelegatorUserId().toString()
+                : user.getUserId().toString();
         String collectionId = user.getResourceId().toString();
         String apiPath = routingContext.normalizedPath();
 
@@ -62,44 +66,63 @@ public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
         long policyIssuedAt = limits.getLong("iat", 0L);
         LOGGER.info("policyIssuedAt: {}: ", policyIssuedAt);
 
-        if (limits.containsKey("dataUsage")) {
-            String dataUsageLimit = limits.getString("dataUsage");
-            long limitInBytes = convertToBytes(dataUsageLimit);
+        boolean constraintHandled = false;
 
-            databaseService.getTotalDataUsage(userId, apiPath, collectionId, policyIssuedAt)
-                    .onSuccess(dataUsage -> {
-                        if (dataUsage > limitInBytes) {
-                            routingContext.fail(new OgcException(429, TOO_MANY_REQUESTS, DATA_USAGE_LIMIT_EXCEEDED)); // Too much data usage in the given time frame
-                        } else {
-                            routingContext.next();
-                        }
-                    }).onFailure(fail -> {
-                        LOGGER.error("Error checking data usage: {}", fail.getMessage());
-                        routingContext.fail(fail);
-                    });
+        for (String key : limits.fieldNames()) {
+            switch (key) {
+                case "dataUsage":
+                    String dataUsageLimit = limits.getString("dataUsage");
+                    long limitInBytes = convertToBytes(dataUsageLimit);
 
-        } else if (limits.containsKey("apiHits")) {
-            long apiHitsLimit = limits.getLong("apiHits");
+                    databaseService.getTotalDataUsage(userId, apiPath, collectionId, policyIssuedAt)
+                            .onSuccess(dataUsage -> {
+                                if (dataUsage > limitInBytes) {
+                                    routingContext.fail(new OgcException(429, TOO_MANY_REQUESTS, DATA_USAGE_LIMIT_EXCEEDED));
+                                } else {
+                                    routingContext.next();
+                                }
+                            }).onFailure(fail -> {
+                                LOGGER.error("Error checking data usage: {}", fail.getMessage());
+                                routingContext.fail(fail);
+                            });
 
-            databaseService.getTotalApiHits(userId, apiPath, collectionId, policyIssuedAt)
-                    .onSuccess(apiHits -> {
-                        if (apiHits > apiHitsLimit) {
-                            routingContext.fail(new OgcException(429, TOO_MANY_REQUESTS, API_CALLS_LIMIT_EXCEEDED)); // Too many API calls in the given time frame
-                        } else {
-                            routingContext.next();
-                        }
-                    }).onFailure(fail -> {
-                        LOGGER.error("Error checking API hits: {}", fail.getMessage());
-                        routingContext.fail(fail);
-                    });
+                    constraintHandled = true;
+                    break;
 
-        } else {
-            // No limits applied
-            routingContext.next();
+                case "apiHits":
+                    long apiHitsLimit = limits.getLong("apiHits");
+
+                    databaseService.getTotalApiHits(userId, apiPath, collectionId, policyIssuedAt)
+                            .onSuccess(apiHits -> {
+                                if (apiHits > apiHitsLimit) {
+                                    routingContext.fail(new OgcException(429, TOO_MANY_REQUESTS, API_CALLS_LIMIT_EXCEEDED));
+                                } else {
+                                    routingContext.next();
+                                }
+                            }).onFailure(fail -> {
+                                LOGGER.error("Error checking API hits: {}", fail.getMessage());
+                                routingContext.fail(fail);
+                            });
+
+                    constraintHandled = true;
+                    break;
+
+                default:
+                    LOGGER.warn("Unknown usage constraint key: {}", key);
+                    break;
+            }
+
+            if (constraintHandled) {
+                // Stop after handling the first supported constraint.
+                return;
+            }
         }
+
+        // If no known constraint keys were handled
+        routingContext.next();
     }
 
-   /**
+    /**
     * Converts a human-readable data limit string (e.g., "100:mb") into bytes.
     *
     * @param limit A string in the format "<value>:<unit>", e.g., "500:mb"

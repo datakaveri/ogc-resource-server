@@ -1291,8 +1291,8 @@ public class DatabaseServiceImpl implements DatabaseService{
                 .execute(Tuple.of(userId, apiPath, collectionId, policyIssuedAt))
                 .onSuccess(success -> {
                     Row row = success.iterator().next();
-                    long apiHits = row.getLong(0);
-                    result.complete(apiHits);
+                    Long apiHits = row.getLong(0);
+                    result.complete(apiHits != null ? apiHits : 0L);
                 })
                 .onFailure(fail -> {
                     LOGGER.error("Failed to check API hits: {} - {}", fail.getMessage(), fail);
@@ -1324,8 +1324,8 @@ public class DatabaseServiceImpl implements DatabaseService{
                 .execute(Tuple.of(userId, apiPath, collectionId, policyIssuedAt))
                 .onSuccess(success -> {
                     Row row = success.iterator().next();
-                    long dataUsage = row.getLong(0);
-                    result.complete(dataUsage);
+                    Long dataUsage = row.getLong(0);
+                    result.complete(dataUsage != null ? dataUsage : 0L);
                 })
                 .onFailure(fail -> {
                     LOGGER.error("Failed to check data usage: {} - {}", fail.getMessage(), fail);
