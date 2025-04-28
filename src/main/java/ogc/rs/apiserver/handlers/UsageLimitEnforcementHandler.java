@@ -5,13 +5,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import ogc.rs.apiserver.util.AuthInfo;
+import ogc.rs.apiserver.util.Limits;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.UUID;
-
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
@@ -57,23 +55,23 @@ public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
         String collectionId = user.getResourceId().toString();
         String apiPath = routingContext.normalizedPath();
 
-        JsonObject limits = user.getConstraints().getJsonObject("limits");
+        // Parse limits
+        JsonObject limitsJson = user.getConstraints().getJsonObject("limits");
+        Limits limits = Limits.fromJson(limitsJson);
         if (limits == null) {
             routingContext.next();
             return;
         }
 
-        long policyIssuedAt = limits.getLong("iat", 0L);
-        LOGGER.info("policyIssuedAt: {}: ", policyIssuedAt);
+        long policyIssuedAt = limits.getPolicyIssuedAt();
+        LOGGER.info("policyIssuedAt: {}", policyIssuedAt);
 
         boolean constraintHandled = false;
 
-        for (String key : limits.fieldNames()) {
+        for (String key : limitsJson.fieldNames()) {
             switch (key) {
                 case "dataUsage":
-                    String dataUsageLimit = limits.getString("dataUsage");
-                    long limitInBytes = convertToBytes(dataUsageLimit);
-
+                    long limitInBytes = limits.getDataUsageLimitInBytes();
                     databaseService.getTotalDataUsage(userId, apiPath, collectionId, policyIssuedAt)
                             .onSuccess(dataUsage -> {
                                 if (dataUsage > limitInBytes) {
@@ -90,8 +88,7 @@ public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
                     break;
 
                 case "apiHits":
-                    long apiHitsLimit = limits.getLong("apiHits");
-
+                    long apiHitsLimit = limits.getApiHitsLimit();
                     databaseService.getTotalApiHits(userId, apiPath, collectionId, policyIssuedAt)
                             .onSuccess(apiHits -> {
                                 if (apiHits > apiHitsLimit) {
@@ -113,38 +110,12 @@ public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
             }
 
             if (constraintHandled) {
-                // Stop after handling the first supported constraint.
                 return;
             }
         }
 
-        // If no known constraint keys were handled
+        // If no known constraint keys handled, proceed
         routingContext.next();
-    }
 
-    /**
-    * Converts a human-readable data limit string (e.g., "100:mb") into bytes.
-    *
-    * @param limit A string in the format "<value>:<unit>", e.g., "500:mb"
-    * @return Limit in bytes
-    * @throws OgcException if the unit is invalid or unsupported
-    */
-    private long convertToBytes(String limit) {
-        String[] parts = limit.split(":");
-        long value = Long.parseLong(parts[0]);
-        String unit = parts[1].toLowerCase();
-
-        switch (unit) {
-            case "kb":
-                return value * 1024L;
-            case "mb":
-                return value * 1024L * 1024;
-            case "gb":
-                return value * 1024L * 1024 * 1024;
-            case "tb":
-                return value * 1024L * 1024 * 1024 * 1024;
-            default:
-                throw new OgcException(400, "Bad Request", "Invalid data usage unit: " + unit);
-        }
     }
 }

@@ -65,9 +65,41 @@ public class UsageLimitEnforcementHandlerIT {
     }
 
     @Test
-    @Description("Test if no usage limit is enforced when no limits are set for a token")
+    @Description("Test if API hit limit is properly enforced for a provider delegate token")
+    public void testApiHitLimitEnforcedTokenWithDelegateRole() {
+        LOGGER.info("Testing if API hit limit is enforced for a provider delegate token with a valid limit.");
+        String token = new FakeTokenBuilder()
+                .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
+                .withResourceAndRg(UUID.fromString(collectionId), UUID.randomUUID())
+                .withDelegate(UUID.fromString("9304cb99-7125-47f1-8686-a070bb6c3eaf"), "provider")
+                .withCons(new JsonObject().put("limits", new JsonObject()
+                        .put("apiHits", 5000)
+                        .put("iat", sixMonthsAgo.getEpochSecond())))
+                .build();
+        Response response = sendRequest(collectionId, token);
+        response.then().statusCode(200);
+    }
+
+    @Test
+    @Description("Test if data usage limit is properly enforced for a provider delegate token")
+    public void testDataUsageLimitEnforcedWithDelegateRole() {
+        LOGGER.info("Testing if data usage limit is enforced for a provider delegate token with a valid limit.");
+        String token = new FakeTokenBuilder()
+                .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
+                .withResourceAndRg(UUID.fromString(collectionId), UUID.randomUUID())
+                .withDelegate(UUID.fromString("9304cb99-7125-47f1-8686-a070bb6c3eaf"), "provider")
+                .withCons(new JsonObject().put("limits", new JsonObject()
+                        .put("dataUsage", "100:gb")
+                        .put("iat", sixMonthsAgo.getEpochSecond())))
+                .build();
+        Response response = sendRequest(collectionId, token);
+        response.then().statusCode(200);
+    }
+
+    @Test
+    @Description("Test the flow when no limits are set for a token")
     public void testNoUsageLimitEnforced() {
-        LOGGER.info("Testing if no usage limit is enforced for a token without limits.");
+        LOGGER.info("Testing the flow if no usage limit is enforced for a token");
         String token = new FakeTokenBuilder()
                 .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
                 .withResourceAndRg(UUID.fromString(collectionId), UUID.randomUUID())
