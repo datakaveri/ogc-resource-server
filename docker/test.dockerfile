@@ -4,7 +4,7 @@ ARG VERSION="0.0.1-SNAPSHOT"
 # Getting GDAL latest image
 FROM ghcr.io/osgeo/gdal:ubuntu-small-3.7.3 as gdal-latest
 
-FROM maven:3-eclipse-temurin-11-focal
+FROM maven:3-eclipse-temurin-21-jammy
 
 WORKDIR /usr/share/app
 COPY pom.xml .
@@ -26,7 +26,7 @@ RUN mv target/${JAR} ./fatjar.jar
 RUN cp -r target/classes/ ./built-classes
 
 # downloading JaCoCo JAR to run with the server JAR in javaagent mode
-RUN wget https://repo1.maven.org/maven2/org/jacoco/jacoco/0.8.11/jacoco-0.8.11.zip -O /tmp/jacoco.zip
+RUN wget https://repo1.maven.org/maven2/org/jacoco/jacoco/0.8.12/jacoco-0.8.12.zip -O /tmp/jacoco.zip
 RUN apt update && apt install -y unzip && rm -rf /var/lib/apt/lists/*
 RUN unzip /tmp/jacoco.zip -d /tmp/jacoco
 RUN apt remove -y unzip && rm /tmp/jacoco.zip
