@@ -1986,8 +1986,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                   OgcException ogcException =
                       new OgcException(
                           statusCode,
-                          "failed id " + failedId.getString(0),
-                          errorJson.getString("description"));
+                          "Conflict",
+                          "One or more Collection-id(s) already exists!");
                   routingContext.put("response", ogcException.getJson().toString());
                   routingContext.put("statusCode", ogcException.getStatusCode());
                   routingContext.next();

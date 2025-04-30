@@ -698,8 +698,8 @@ public class StacCollectionOnboardingIT {
                 .post(endpoint)
                 .then()
                 .statusCode(400)
-                .body("code", equalTo("failed id 03cee7f4-d470-4d1d-b41b-c4dfcbf4ff50"))
-                .body("description", containsString("ERROR: insert or update on table \"collections_details\" violates foreign key constraint \"crs_fk\" (23503)"));
+                .body("code", equalTo("Conflict"))
+                .body("description", containsString( "One or more Collection-id(s) already exists!"));
 
 
     }
