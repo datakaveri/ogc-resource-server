@@ -1498,24 +1498,24 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   }
 
-  private String getPresignedUrlSupportForStacItemById(String objectKeyName, long expiry) {
+  private String getPresignedUrlSupportForStacItemById(String objectKeyName, long expiry, S3Config conf) {
     try {
       // Create AWS credentials and presigner
-      Region region = Region.of(s3conf.getRegion());
-      AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(s3conf.getAccessKey(), s3conf.getSecretKey());
+      Region region = Region.of(conf.getRegion());
+      AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(conf.getAccessKey(), conf.getSecretKey());
 
       try (S3Presigner preSigner = S3Presigner.builder()
               .region(region)
               .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
-              .endpointOverride(URI.create(s3conf.getEndpoint()))
+              .endpointOverride(URI.create(conf.getEndpoint()))
               .serviceConfiguration(S3Configuration.builder()
-                      .pathStyleAccessEnabled(s3conf.isPathBasedAccess())
+                      .pathStyleAccessEnabled(conf.isPathBasedAccess())
                       .build())
               .build()) {
 
         // Create the S3 GetObjectRequest
         GetObjectRequest objectRequest = GetObjectRequest.builder()
-                .bucket(s3conf.getBucket())
+                .bucket(conf.getBucket())
                 .key(objectKeyName)
                 .build();
 
@@ -1546,7 +1546,8 @@ public class ApiServerVerticle extends AbstractVerticle {
       JsonObject assetObj = (JsonObject) asset;
       String assetId = assetObj.getString("id");
       String href = assetObj.getString("href");
-
+      String s3BucketId = assetObj.getString("s3_bucket_id");
+      
         try {
           URI hrefUri = new URI(href);
           if (!shouldCreate && !hrefUri.isAbsolute()) {
@@ -1555,8 +1556,16 @@ public class ApiServerVerticle extends AbstractVerticle {
           else{
           // If the href is NOT absolute, generate a pre-signed URL
             if (!hrefUri.isAbsolute()) {
-            String preSignedUrl = getPresignedUrlSupportForStacItemById(href, expiry);
-            assetObj.put("href", preSignedUrl);
+              Optional<S3Config> conf = s3conf.getConfigByIdentifier(s3BucketId);
+
+              if (conf.isEmpty()) {
+                LOGGER.warn("Cound not find bucket config for STAC asset {}", assetId);
+                assetObj.put("href", "#");
+                return;
+              }
+
+              String preSignedUrl = getPresignedUrlSupportForStacItemById(href, expiry, conf.get());
+              assetObj.put("href", preSignedUrl);
             }
           }
         } catch (URISyntaxException e) {
