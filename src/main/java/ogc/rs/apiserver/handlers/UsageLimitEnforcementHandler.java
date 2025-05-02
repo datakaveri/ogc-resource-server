@@ -46,6 +46,12 @@ public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
      */
     @Override
     public void handle(RoutingContext routingContext) {
+
+        if(System.getProperty("disable.auth") != null) {
+            routingContext.next();
+            return;
+        }
+
         LOGGER.debug("Usage Limit Enforcement Handler invoked");
 
         AuthInfo user = routingContext.get(USER_KEY);
