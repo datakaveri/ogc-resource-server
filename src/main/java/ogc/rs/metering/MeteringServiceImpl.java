@@ -7,12 +7,15 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
+import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.metering.util.DateValidation;
@@ -163,8 +166,44 @@ public class MeteringServiceImpl implements MeteringService {
         });
     return promise.future();
   }
+    /**
+     * Inserts an audit entry into the PostgreSQL metering table.
+     *
+     * @param request JsonObject containing metering information to be inserted.
+     * @return A {@link Future<Void>} which completes when the record is inserted or fails with the corresponding error.
+     */
+    @Override
+    public Future<Void> insertIntoPostgresAuditTable(JsonObject request) {
+        Promise<Void> promise = Promise.promise();
 
-  @Override
+        String sql = "INSERT INTO metering (user_id, collection_id, api_path, timestamp, resp_size) " +
+                "VALUES ($1, $2, $3, $4, $5)";
+
+        //LOGGER.debug("Metering payload: {}", request.encodePrettily());
+
+        UUID userId = UUID.fromString(request.getString("user_id"));
+        UUID collectionId = UUID.fromString(request.getString("collection_id"));
+        String apiPath = request.getString("api_path");
+        String timestampStr = request.getString("timestamp");
+        long respSize = request.getLong("resp_size");
+
+        LocalDateTime timestamp = ZonedDateTime.parse(timestampStr).toLocalDateTime();
+
+        meteringpgClient.preparedQuery(sql)
+                .execute(Tuple.of(userId, collectionId, apiPath, timestamp, respSize))
+                .onSuccess(res -> {
+                    LOGGER.debug("Inserted into Postgres metering table");
+                    promise.complete();
+                })
+                .onFailure(err -> {
+                    LOGGER.error("Failed to insert into Postgres metering table", err);
+                    promise.fail(err);
+                });
+
+        return promise.future();
+    }
+
+    @Override
   public Future<JsonObject> insertMeteringValuesInRmq(JsonObject request) {
     Promise<JsonObject> promise = Promise.promise();
     JsonObject writeMessage = queryBuilder.buildMessageForRmq(request);

@@ -3,7 +3,6 @@ package ogc.rs.apiserver.util;
 import io.vertx.core.json.JsonObject;
 
 import java.util.UUID;
-import java.util.logging.Logger;
 
 public class AuthInfo {
 

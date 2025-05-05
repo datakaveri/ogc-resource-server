@@ -61,6 +61,7 @@ public abstract class EntityRouterBuilder {
   public StacCollectionOnboardingAuthZHandler stacCollectionOnboardingAuthZHandler;
   public StacItemByIdAuthZHandler stacItemByIdAuthZHandler;
   public StacItemOnboardingAuthZHandler stacItemOnboardingAuthZHandler;
+  public UsageLimitEnforcementHandler usageLimitEnforcementHandler;
 
 
   EntityRouterBuilder(ApiServerVerticle apiServerVerticle, Vertx vertx, RouterBuilder routerBuilder,
@@ -76,6 +77,7 @@ public abstract class EntityRouterBuilder {
     stacCollectionOnboardingAuthZHandler = new StacCollectionOnboardingAuthZHandler(vertx, config);
     stacItemByIdAuthZHandler = new StacItemByIdAuthZHandler(vertx);
     stacItemOnboardingAuthZHandler = new StacItemOnboardingAuthZHandler(vertx);
+    usageLimitEnforcementHandler = new UsageLimitEnforcementHandler(vertx);
   }
 
   /**

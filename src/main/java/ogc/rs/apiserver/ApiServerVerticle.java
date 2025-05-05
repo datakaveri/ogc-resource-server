@@ -2141,6 +2141,7 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   private Future<Void> updateAuditTable(RoutingContext context) {
+    LOGGER.debug("Audit logging initiated for incoming request...");
     final List<Integer> STATUS_CODES_TO_AUDIT = List.of(200, 201);
 
     if(!STATUS_CODES_TO_AUDIT.contains(context.response().getStatusCode())) {
@@ -2170,7 +2171,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                     cacheResult.containsKey(RESOURCE_GROUP)
                         ? cacheResult.getString(RESOURCE_GROUP)
                         : cacheResult.getString(ID);
-                ZonedDateTime zst = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
+                String providerId = cacheResult.getString("provider");
                 RoleEnum role = authInfo.getRole();
                 RoleEnum drl = authInfo.getDelegatorRole();
                 if (RoleEnum.delegate.equals(role) && drl != null) {
@@ -2178,34 +2179,55 @@ public class ApiServerVerticle extends AbstractVerticle {
                 } else {
                   request.put(DELEGATOR_ID, authInfo.getUserId().toString());
                 }
-                String providerId = cacheResult.getString("provider");
-                long time = zst.toInstant().toEpochMilli();
+
+                ZonedDateTime zst = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
+                long epochTime = zst.toInstant().toEpochMilli();
                 String isoTime = zst.truncatedTo(ChronoUnit.SECONDS).toString();
+                long responseSize = context.response().bytesWritten();
+                String apiPath = context.request().path();
 
                 request.put(RESOURCE_GROUP, resourceGroup);
                 /*request.put(TYPE_KEY, type);*/
                 // Comment here , if we need type (item_type) then we can use this
-                request.put(EPOCH_TIME, time);
+                request.put(EPOCH_TIME, epochTime);
                 request.put(ISO_TIME, isoTime);
                 request.put(USER_ID, authInfo.getUserId().toString());
                 request.put(ID, authInfo.getResourceId().toString());
-                request.put(API, context.request().path());
-                request.put(RESPONSE_SIZE, context.response().bytesWritten());
+                request.put(API, apiPath);
+                request.put(RESPONSE_SIZE, responseSize);
                 request.put(PROVIDER_ID, providerId);
-                meteringService
-                    .insertMeteringValuesInRmq(request)
-                    .onComplete(
-                        handler -> {
-                          if (handler.succeeded()) {
-                            LOGGER.debug("message published in RMQ.");
-                            promise.complete();
+
+                // Insert into PostgreSQL metering table
+                JsonObject postgresAuditPayload = new JsonObject()
+                        .put("user_id", authInfo.getUserId().toString())
+                        .put("collection_id", authInfo.getResourceId().toString())
+                        .put("api_path", apiPath)
+                        .put("timestamp", isoTime)
+                        .put("resp_size", responseSize);
+
+                meteringService.insertIntoPostgresAuditTable(postgresAuditPayload)
+                        .onComplete(pgHandler -> {
+                          if (pgHandler.failed()) {
+                            LOGGER.error("Failed to insert into Postgres metering table: ", pgHandler.cause());
                           } else {
-                            LOGGER.error("failed to publish message in RMQ.");
-                            promise.complete();
+                            LOGGER.debug("Inserted audit record into Postgres metering table.");
                           }
+
+                          // Publish to RabbitMQ
+                          meteringService.insertMeteringValuesInRmq(request)
+                                  .onComplete(rmqHandler -> {
+                                    if (rmqHandler.succeeded()) {
+                                      LOGGER.debug("Message published in RMQ.");
+                                    } else {
+                                      LOGGER.error("Failed to publish message in RMQ.");
+                                    }
+                                    promise.complete();
+                                  });
                         });
+
               } else {
                 LOGGER.debug("Item not found and failed to call metering service");
+                promise.complete();
               }
             });
 

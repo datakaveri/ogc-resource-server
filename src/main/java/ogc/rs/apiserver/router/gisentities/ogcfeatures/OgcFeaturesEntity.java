@@ -54,6 +54,7 @@ public class OgcFeaturesEntity implements GisEntityInterface {
       if (opId.matches(OgcFeaturesMetadata.OGC_GET_COLLECTION_ITEMS_OP_ID_REGEX)) {
         builder.operation(opId)
                 .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
+                .handler(ogcRouterBuilder.usageLimitEnforcementHandler)
                 .handler(apiServerVerticle::auditAfterApiEnded)
                 .handler(apiServerVerticle::validateQueryParams)
                 .handler(apiServerVerticle::getFeatures)
@@ -64,6 +65,7 @@ public class OgcFeaturesEntity implements GisEntityInterface {
       } else if (opId.matches(OgcFeaturesMetadata.OGC_GET_SPECIFIC_FEATURE_OP_ID_REGEX)) {
             builder.operation(opId)
                     .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
+                    .handler(ogcRouterBuilder.usageLimitEnforcementHandler)
                     .handler(apiServerVerticle::auditAfterApiEnded)
                     .handler(apiServerVerticle::validateQueryParams)
                     .handler(apiServerVerticle::getFeature)

@@ -46,32 +46,42 @@ public class TilesMeteringHandler implements Handler<Void> {
     this.meteringDataMap = vertx.sharedData().getLocalMap("MeteringDataMap");
 
     // Set up a periodic task to clean up the shared data map
-    vertx.setPeriodic(
-        METERING_UPDATE_PERIOD,
-        id -> {
-          meteringDataMap
-              .keySet()
-              .forEach(
-                  key -> {
-                    Integer value = meteringDataMap.remove(key);
-                    if (value != null) {
-                      LOGGER.debug(this + " removed " + key.toJson(value) + " " + value);
-                      meteringService
-                          .insertMeteringValuesInRmq(key.toJson(value))
-                          .onComplete(
-                              handler -> {
-                                if (handler.succeeded()) {
-                                  LOGGER.debug("message published in RMQ.");
-                                } else {
-                                  LOGGER.error("failed to publish message in RMQ.");
-                                }
-                              });
+      vertx.setPeriodic(
+              METERING_UPDATE_PERIOD,
+              id -> {
+                  meteringDataMap
+                          .keySet()
+                          .forEach(key -> {
+                              Integer value = meteringDataMap.remove(key);
+                              if (value != null) {
+                                  JsonObject meteringJson = key.toJson(value);
+                                  LOGGER.debug(this + " removed " + meteringJson + " " + value);
 
-                    } else {
-                      LOGGER.error(this + " NOT removed " + key);
-                    }
-                  });
-        });
+                                  // Reformat the JSON to insert into postgres metering table
+                                  JsonObject formattedJson = new JsonObject()
+                                          .put("user_id", meteringJson.getString("delegatorId"))
+                                          .put("collection_id", meteringJson.getString("id"))
+                                          .put("api_path", meteringJson.getString("api"))
+                                          .put("timestamp", meteringJson.getString("isoTime"))
+                                          .put("resp_size", meteringJson.getLong("response_size"));
+
+                                  // First insert into Postgres
+                                  meteringService
+                                          .insertIntoPostgresAuditTable(formattedJson)
+                                          .onSuccess(r -> LOGGER.debug("Inserted into Postgres metering table"))
+                                          .onFailure(e -> LOGGER.error("Failed to insert into Postgres metering table", e));
+
+                                  // Then publish to RMQ
+                                  meteringService
+                                          .insertMeteringValuesInRmq(meteringJson)
+                                          .onSuccess(r -> LOGGER.debug("Message published in RMQ"))
+                                          .onFailure(e -> LOGGER.error("Failed to publish message in RMQ", e));
+
+                              } else {
+                                  LOGGER.error(this + " NOT removed " + key);
+                              }
+                          });
+              });
   }
 
   /**
