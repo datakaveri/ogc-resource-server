@@ -20,4 +20,4 @@ CREATE INDEX IF NOT EXISTS idx_metering_user_collection_time
     ON metering(user_id, collection_id, timestamp);
 
 ALTER TABLE metering OWNER TO ${flyway:user};
-GRANT SELECT,INSERT,UPDATE,DELETE ON TABLE metering TO ${rsUser};
+GRANT SELECT,INSERT,UPDATE,DELETE ON TABLE metering TO ${ogcUser};
