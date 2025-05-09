@@ -126,9 +126,9 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
         LOGGER.info("collection-id fetched from UI:{}",requestInput.getString("collectionId"));
         String resourceId = requestInput.getString("collectionId");
         requestInput.put("resourceId", resourceId);
-        String itemId = requestInput.getString("itemId");
+        String itemId = requestInput.getString("itemId").replaceAll("[^a-zA-Z0-9_.-]", "_");
         String bucketName = requestInput.getString("bucketName");
-        String fileName = requestInput.getString("fileName");
+        String fileName = requestInput.getString("fileName").replaceAll("[^a-zA-Z0-9_.-]", "_");
         String fileType = requestInput.getString("fileType");
         long fileSize = requestInput.getLong("fileSize");
 
