@@ -2547,12 +2547,19 @@ public class ApiServerVerticle extends AbstractVerticle {
     Future<JsonObject> result = null;
     if (requestBody.getString("type").equalsIgnoreCase(FEATURE_COLLECTION)) {
       HashSet<String> hashId = new HashSet<>();
+      AtomicReference<Boolean> duplicateIds = new AtomicReference<>(false);
       requestBody.getJsonArray("features").forEach(feature -> {
         JsonObject json = (JsonObject) feature;
-        if(!hashId.add(json.getString("id")))
-          routingContext.fail(new OgcException(400, "Bad Request", "Duplicate Item Ids are in the request"));
+        if(!hashId.add(json.getString("id"))) {
+          duplicateIds.set(true);
+        }
       });
-      result = dbService.insertStacItems(requestBody);
+      if (duplicateIds.get()) {
+        routingContext.fail(new OgcException(400, "Bad Request", "Duplicate Item Ids present in the request"));
+        return;
+      }
+      else
+        result = dbService.insertStacItems(requestBody);
     }
     else if (requestBody.getString("type").equalsIgnoreCase(FEATURE)) {
       result = dbService.insertStacItem(requestBody);
@@ -2644,7 +2651,7 @@ public class ApiServerVerticle extends AbstractVerticle {
           stacItem.remove("assetobjects");
           stacItem.put("links", allLinksInFeature);
           routingContext.put("response", stacItem.toString());
-          routingContext.put("statusCode", 201);
+          routingContext.put("statusCode", 200);
           routingContext.response().putHeader("LOCATION", url + "/" + URLEncoder.encode(requestBody.getString("id"),
                 StandardCharsets.UTF_8));
           routingContext.next();

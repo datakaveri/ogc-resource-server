@@ -441,7 +441,7 @@ public class DatabaseServiceImpl implements DatabaseService{
     String getItemsQuery = String.format("select item_table.id, cast(st_asgeojson(item_table.geom) as json) as" +
             " geometry, item_table.bbox, item_table.properties, item_table.p_id" +
             ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb - 'item_id')) as assetobjects" +
-            ", 'Feature' as type, '%1$s' as collection from \"%1$s\" as item_table join stac_items_assets" +
+            ", 'Feature' as type, '%1$s' as collection from \"%1$s\" as item_table left join stac_items_assets" +
             " on item_table.id=stac_items_assets.item_id" +
             " group by item_table.id, item_table.geom, item_table.bbox, item_table.p_id" +
             ", item_table.properties having p_id >= %2$d order by p_id limit %3$d"
@@ -476,7 +476,7 @@ public class DatabaseServiceImpl implements DatabaseService{
     String getItemQuery = String.format("select item_table.id, cast(st_asgeojson(item_table.geom) as json) as" +
         " geometry, item_table.bbox, item_table.properties" +
         ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb-'item_id')) as assetobjects, 'Feature' as type" +
-        ", '%1$s' as collection from \"%1$s\" as item_table join stac_items_assets" +
+        ", '%1$s' as collection from \"%1$s\" as item_table left join stac_items_assets" +
         " on item_table.id=stac_items_assets.item_id" +
         " group by item_table.id, item_table.geom, item_table.bbox, item_table.properties" +
         " having item_table.id = $1::text", collectionId);
@@ -749,7 +749,7 @@ public class DatabaseServiceImpl implements DatabaseService{
       checkIfCollectionExist(collectionId)
         .compose(collection -> checkIfItemExist(itemId,collectionId))
         .compose(item -> insertItemIntoDb(feature))
-        .compose(insert -> getStacItemWithoutAssets(collectionId,itemId))
+        .compose(insert -> getStacItemById(collectionId,itemId))
         .onSuccess(result::complete)
         .onFailure(failed -> {
           LOGGER.error("Failed at getting stac item- {}",failed.getMessage());
@@ -861,32 +861,6 @@ public class DatabaseServiceImpl implements DatabaseService{
             } else
                 result.fail(failed);
           });
-    return result.future();
-  }
-
-  private  Future<JsonObject> getStacItemWithoutAssets(String collectionId, String itemId) {
-    Promise<JsonObject> result = Promise.promise();
-    Collector<Row, ?, List<JsonObject>> collector =
-        Collectors.mapping(Row::toJson, Collectors.toList());
-    String getItemQuery = String.format("select id, cast(st_asgeojson(geom) as json) as geometry, bbox, " +
-        " properties, 'Feature' as type,  '%1$s' as collection from \"%1$s\" where id = $1::text", collectionId);
-    client.withConnection(
-        conn ->
-            conn.preparedQuery(getItemQuery)
-                .collecting(collector)
-                .execute(Tuple.of(itemId))
-                .map(SqlResult::value)
-                .onSuccess(success -> {
-                  if (success.isEmpty())
-                    result.fail(new OgcException(404, "Not Found", "Item " + itemId + " not found in " +
-                        "collection " + collectionId));
-                  else
-                    result.complete(success.get(0));
-                })
-                .onFailure(failed -> {
-                  LOGGER.error("Failed at STAC Item retrieval- {}", failed.getMessage());
-                  result.fail("Error!");
-                }));
     return result.future();
   }
 
