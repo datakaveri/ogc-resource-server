@@ -19,6 +19,7 @@ public class Constants {
     public static final String HEADER_PUBLIC_KEY = "publicKey";
     public static final String HEADER_RESPONSE_FILE_FORMAT = "format";
     public static final String MIME_APPLICATION_JSON = "application/json";
+    public static final String MIME_APPLICATION_GEOJSON = "application/geo+json";
     public static final String LANDING_PAGE = "getLandingPage";
     public static final String CONFORMANCE_CLASSES = "getConformanceClasses";
     public static final String OPENAPI_SPEC = "/api";
