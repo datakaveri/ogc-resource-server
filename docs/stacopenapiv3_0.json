@@ -132,9 +132,12 @@
           "content": {
             "application/json": {
               "schema": {
-                "allOf": [
+                "oneOf": [
                   {
                     "$ref": "#/components/schemas/stacCollectionRequestBody"
+                  },
+                  {
+                    "$ref": "#/components/schemas/postOrPutCollectionCollection"
                   }
                 ]
               }
@@ -1245,6 +1248,21 @@
           "links",
           "collections"
         ]
+      },
+      "postOrPutCollectionCollection": {
+        "description": "A list of Collections augmented with foreign members that contain values relevant to a STAC entity",
+        "type": "object",
+        "required": [
+          "collections"
+        ],
+        "properties": {
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/stacCollectionRequestBody"
+            }
+          }
+        }
       },
       "stacCollection": {
         "type": "object",

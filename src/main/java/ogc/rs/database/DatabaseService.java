@@ -5,6 +5,7 @@ import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import ogc.rs.apiserver.util.StacItemSearchParams;
 import java.util.List;
@@ -118,6 +119,24 @@ public interface DatabaseService {
      * @return JSON response data
      */
     Future<JsonObject> postStacCollection(JsonObject jsonObject);
+
+  /**
+   * Onboards multiple STAC collection by inserting the items in following order.
+   * 1)insert into collection_details table
+   * 2)insert into collections_type
+   * 3)insert into roles table
+   * 4)insert into ri_details table
+   * 5)table cretaed by the id
+   * 6)table partition created in stac_collections_part and newly created table attached
+   * 7)Privileges granted to newly created table
+   *
+   * If any of the collection onboarding fails then all the previously onboarded collections are
+   * rolled back and the id which caused it is returned along with the error message.
+   *
+   * @param jsonArray is the request body
+   * @return json Object with multiple collections inserted
+   */
+  Future<JsonObject> postStacCollections(JsonArray jsonArray);
 
     /**
      * Udation of the object by id. Fields present in the request body are updated.

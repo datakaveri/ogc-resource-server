@@ -7,11 +7,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
-import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
-import io.vertx.sqlclient.SqlResult;
-import io.vertx.sqlclient.Tuple;
-
+import io.vertx.sqlclient.*;
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -668,6 +664,70 @@ public class DatabaseServiceImpl implements DatabaseService{
                                         }));
 
         return result.future();
+    }
+
+    @Override
+    public Future<JsonObject> postStacCollections(JsonArray collectionDataList) {
+        LOGGER.debug("posting the data in the db for multiple collections");
+        List<UUID> failedIds = Collections.synchronizedList(new ArrayList<>()); // Thread-safe list
+
+        return client.withTransaction(conn -> {
+            List<Future<Object>> futures = collectionDataList.stream()
+                    .map(obj -> {
+                        JsonObject collectionData = (JsonObject) obj;
+                        UUID id = UUID.fromString(collectionData.getString("id"));
+                        String title = collectionData.getString("title");
+                        String description =  collectionData.getString("description");
+                        String dateTimeKey = collectionData.getString("datetimeKey");
+                        String crs =   collectionData.getString("crs");
+                        String license =   collectionData.getString("license");
+                        String ownerUserId =  collectionData.getString("ownerUserId");
+                        String role =  collectionData.getString("role").toUpperCase();
+                        String accessPolicy = collectionData.getString("accessPolicy");
+
+                        JsonArray bboxJsonArray = collectionData.getJsonObject("extent").getJsonObject("spatial").getJsonArray("bbox").getJsonArray(0);
+                        Number[] bboxArray = bboxJsonArray.stream().map(num -> ((Number) num)).toArray(Number[]::new);
+
+                        JsonArray temporalJsonArray = collectionData.getJsonObject("extent").getJsonObject("temporal").getJsonArray("interval").getJsonArray(0);
+                        String[] temporalArray = temporalJsonArray.stream().map(Object::toString).toArray(String[]::new);
+
+                        LOGGER.debug("Processing collection ID: {}", id);
+
+                        return conn.preparedQuery(INSERT_COLLECTIONS_DETAILS)
+                                .execute(Tuple.of(id,title, description,dateTimeKey, crs,bboxArray,temporalArray,license))
+                                .mapEmpty()
+                                .compose(res -> conn.preparedQuery(INSERT_COLLECTION_TYPE).execute(Tuple.of(id)).mapEmpty())
+                                .compose(res -> conn.preparedQuery(INSERT_ROLES).execute(Tuple.of(ownerUserId, role)).mapEmpty())
+                                .compose(res -> conn.preparedQuery(INSERT_RI_DETAILS).execute(Tuple.of(
+                                        id,
+                                      ownerUserId,accessPolicy
+                                        )).mapEmpty())
+                                .compose(res -> conn.query(CREATE_TABLE_BY_ID.replace("$1", id.toString())).execute().mapEmpty())
+                                .compose(res -> conn.query(ATTACH_PARTITION.replace("$1", id.toString())).execute().mapEmpty())
+                                .compose(res -> conn.query(GRANT_PRIVILEGES.replace("$1", id.toString())
+                                        .replace("$2", config.getString(DATABASE_USER))).execute().mapEmpty())
+                                .compose(res -> conn.preparedQuery(RouterManager.TRIGGER_SPEC_UPDATE_AND_ROUTER_REGEN_SQL.apply("demo")).execute().mapEmpty())
+                                .onFailure(err -> {
+                                    LOGGER.error("Insert failed for ID {}: {}", id, err.getMessage());
+                                    failedIds.add(id);
+                                });
+                    })
+                    .collect(Collectors.toList());
+
+            return CompositeFuture.all(futures.stream().map(f -> (Future<?>) f).collect(Collectors.toList()))
+                    .map(v -> {
+                        LOGGER.info("All collections have been successfully onboarded!");
+                        return new JsonObject().put("status", "success");
+                    })
+                    .recover(err -> {
+                        JsonObject jsonError = new JsonObject()
+                                .put("failedIds", new JsonArray(failedIds))
+                                .put("description", err.getMessage());
+
+                        LOGGER.error("Transaction failed, rolling back: {}", jsonError);
+                        return Future.failedFuture(jsonError.encode());
+                    });
+        });
     }
 
     @Override

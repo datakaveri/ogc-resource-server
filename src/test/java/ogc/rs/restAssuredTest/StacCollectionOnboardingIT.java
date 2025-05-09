@@ -306,7 +306,7 @@ public class StacCollectionOnboardingIT {
                 .statusCode(400)
                 .body("code", equalTo("Bad Request"))
                 .body("description", containsString("Validation error for body application/json"))
-                .body("description", containsString("should contain property id"));
+                .body("description", containsString("[Bad Request] Validation error for body application/json: No schema matches"));
     }
 
     @Order(6)
@@ -584,8 +584,10 @@ public class StacCollectionOnboardingIT {
 
     @Order(12)
     @Test
-    @Description("Failure: Stac Collection creation using Resource Item that doesn't exist")
-    public void testCreateStacWhenResourceIdNotFOundFailure() {
+
+    @Description("Failure: Multiple Stac collections onboarding with duplicate id")
+    public void testCreateMultipleStacCollectionDuplicateId() throws InterruptedException {
+
         String token =
                 new FakeTokenBuilder()
                         .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
@@ -605,15 +607,29 @@ public class StacCollectionOnboardingIT {
                                 .add(new JsonArray().add("2015-06-23T00:00:00Z").add("2019-07-10T13:44:56Z"))
                         )
                 );
+
+        JsonObject colletonOne = new JsonObject();
+        colletonOne
+                .put("id", "0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd")
+                .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84")
+                .put("license", "proprietary")
+                .put("title", "IT Test Suite")
+                .put("description", "IT Test Suite")
+                .put("extent", extent)
+                .put("datetimeKey", "2023-11-10T14:30:00Z");
+        JsonObject collectionTwo = new JsonObject();
+        collectionTwo
+                .put("id", "0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd")
+                .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84")
+                .put("license", "proprietary")
+                .put("title", "IT Test Suite")
+                .put("description", "IT Test Suite")
+                .put("extent", extent)
+                .put("datetimeKey", "2023-11-10T14:30:00Z");
+        JsonArray collections = new JsonArray().add(colletonOne).add(collectionTwo);
         JsonObject requestBody =
-                new JsonObject()
-                        .put("id", "0ee405db-f0dd-4e1e-924d-c1a1e8d35c53")
-                        .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84")
-                        .put("license", "proprietary")
-                        .put("title", "IT Test Suite")
-                        .put("description", "IT Test Suite")
-                        .put("extent", extent)
-                        .put("datetimeKey", "2023-11-10T14:30:00Z");
+                new JsonObject().put("collections", collections);
+
         given()
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json") // Add this
@@ -622,10 +638,70 @@ public class StacCollectionOnboardingIT {
                 .when()
                 .post(endpoint)
                 .then()
-                .statusCode(404)
-                .body("code", equalTo("Item Not Found"))
-                .body("description", containsString("Item doesn't exist in catalogue"));
+                .statusCode(400)
+                .body("code", equalTo("Bad Request"))
+                .body("description", containsString("Duplicate Ids present in request body."));
+
+
     }
 
+    @Order(13)
+    @Test
+    @Description("Failure: Multiple Stac collections onboarding with Bad Request Body")
+    public void testCreateMultipleStacCollectionInvalidRequest() throws InterruptedException {
+        String token =
+                new FakeTokenBuilder()
+                        .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
+                        .withResourceServer()
+                        .withRoleProvider()
+                        .withCons(new JsonObject())
+                        .build();
+        String endpoint = "/stac/collections";
+        JsonObject extent = new JsonObject()
+                .put("spatial", new JsonObject()
+                        .put("bbox", new JsonArray()
+                                .add(new JsonArray().add(-180).add(-56).add(180).add(83))
+                        )
+                )
+                .put("temporal", new JsonObject()
+                        .put("interval", new JsonArray()
+                                .add(new JsonArray().add("2015-06-23T00:00:00Z").add("2019-07-10T13:44:56Z"))
+                        )
+                );
+        JsonObject colletonOne = new JsonObject();
+        colletonOne
+                .put("id", "1830d6dc-df9f-4520-96b4-6108238c0f86")
+                .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84")
+                .put("license", "proprietary")
+                .put("title", "IT Test Suite")
+                .put("description", "IT Test Suite")
+                .put("extent", extent)
+                .put("datetimeKey", "2023-11-10T14:30:00Z");
+        JsonObject collectionTwo = new JsonObject();
+        collectionTwo
+                .put("id", "03cee7f4-d470-4d1d-b41b-c4dfcbf4ff50")
+                .put("crs", "http://www.opengis.net/def/crs/OGC/1.3/CR")
+                .put("license", "proprietary")
+                .put("title", "IT Test Suite")
+                .put("description", "IT Test Suite")
+                .put("extent", extent)
+                .put("datetimeKey", "2023-11-10T14:30:00Z");
+        JsonArray collections = new JsonArray().add(colletonOne).add(collectionTwo);
+        JsonObject requestBody =
+                new JsonObject().put("collections", collections);
+        given()
+                .header("Accept", "application/json")
+                .header("Content-Type", "application/json") // Add this
+                .auth().oauth2(token)
+                .body(requestBody.encode())
+                .when()
+                .post(endpoint)
+                .then()
+                .statusCode(400)
+                .body("code", equalTo("Conflict"))
+                .body("description", containsString( "One or more Collection-id(s) already exists!"));
+
+
+    }
 
 }

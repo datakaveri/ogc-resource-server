@@ -83,7 +83,7 @@ public class CatalogueService {
                                         "catalogue call search api succeeded "
                                                 + relHandler.result().bodyAsJsonObject().getInteger("totalHits"));
                                 if (relHandler.result().bodyAsJsonObject().getInteger("totalHits") == 0) {
-                                    LOGGER.debug("Item doesn't exist in catalogue");
+                                    LOGGER.debug("Item " +id+" doesn't exist in catalogue");
                                     promise.fail(new OgcException(404, "Item Not Found", "Item doesn't exist in catalogue"));
                                     return;
                                 }
@@ -93,7 +93,7 @@ public class CatalogueService {
                                 promise.complete(response);
                             } else {
                                 LOGGER.debug(
-                                        "catalogue call search api failed: " + relHandler.result().bodyAsJsonObject());
+                                        "catalogue call search api failed: " + relHandler.toString());
                                 promise.fail("catalogue call search api failed");
 
                             }
