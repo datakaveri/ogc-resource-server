@@ -501,7 +501,6 @@ public class DatabaseServiceImpl implements DatabaseService{
     LOGGER.debug("stacItemSearch");
 
     Promise<JsonObject> result = Promise.promise();
-    final String STAC_ITEMS_DATETIME_KEY = "properties ->> 'datetime'";
 
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());

@@ -92,7 +92,10 @@ pipeline {
             --root-url http://jenkins-slave1:8443/stac/ \
             --conformance core \
             --conformance collections \
-            --collection a5a6e26f-d252-446d-b7dd-4d50ea945102 > stacOutput.html
+            --conformance features \
+            --conformance item-search \
+            --geometry '{"type":"Polygon","coordinates":[[[75.777833,23.447842],[75.777833,30.184513],[87.335451,30.184513],[87.335451,23.447842],[75.777833,23.447842]]]}' \
+            --collection 44da9cda-b00c-4481-be78-73b36038a7be > stacOutput.html
             '''
             }
           }
@@ -102,10 +105,11 @@ pipeline {
         always{
           node('built-in') {
             script{
-              sh """
+              sh '''
                 sed -i '1s/^/<!DOCTYPE html><html>/g' stacOutput.html
+                sed -i 's|$|</br></br>|g' stacOutput.html
                 echo '</html>' >> stacOutput.html
-              """
+              '''
               if (!fileExists('stac-compliance-reports')) {
                 sh 'mkdir stac-compliance-reports'
               } else {

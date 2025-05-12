@@ -16,5 +16,6 @@ public class Constants {
             "description = COALESCE($3, description), datetime_key = COALESCE($4, datetime_key), " +
             "crs = COALESCE($5, crs), bbox = COALESCE($6, bbox), temporal = COALESCE($7, temporal), " +
             "license = COALESCE($8, license) WHERE id = $1";
+    public static final String STAC_ITEMS_DATETIME_KEY = "properties ->> 'datetime'";
 }
 
