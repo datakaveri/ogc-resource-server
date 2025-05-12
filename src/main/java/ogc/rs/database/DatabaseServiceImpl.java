@@ -1,7 +1,7 @@
 package ogc.rs.database;
 
 import static ogc.rs.database.util.Constants.PROCESSES_TABLE_NAME;
-
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
