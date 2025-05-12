@@ -20,6 +20,7 @@ import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.StacItemSearchParams;
 import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.common.DataFromS3;
+import ogc.rs.common.S3BucketReadAccess;
 import ogc.rs.common.S3Config;
 import ogc.rs.database.DatabaseService;
 import ogc.rs.jobs.JobsService;
@@ -48,6 +49,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -2634,14 +2636,53 @@ public class ApiServerVerticle extends AbstractVerticle {
           duplicateIds.set(true);
         }
       });
+
       if (duplicateIds.get()) {
         routingContext.fail(new OgcException(400, "Bad Request", "Duplicate Item Ids present in the request"));
         return;
       }
-      else
-        result = dbService.insertStacItems(requestBody);
+
+      List<JsonObject> stacItems = requestBody.getJsonArray("features").stream()
+          .map(i -> ((JsonObject) i)).collect(Collectors.toList());
+      
+      List<JsonObject> modifiedStacItems = new ArrayList<JsonObject>();
+
+      // process and validate individual assets in items
+      for (int i = 0; i < stacItems.size(); i++) {
+        JsonObject item = stacItems.get(i);
+
+        if (!item.containsKey(STAC_ITEM_TRAN_ASSETS)) {
+          // skip
+        } else {
+          try {
+            item.put(STAC_ITEM_TRAN_ASSETS,
+                validateAndProcessStacAssets(item.getJsonObject(STAC_ITEM_TRAN_ASSETS)));
+          } catch (OgcException e) {
+              routingContext.fail(e);
+              return;
+          }
+          modifiedStacItems.add(item);
+        }
+      }
+
+      // replace modified items in the request body
+      requestBody.put("features", new JsonArray(modifiedStacItems));
+      
+      result = dbService.insertStacItems(requestBody);
     }
     else if (requestBody.getString("type").equalsIgnoreCase(FEATURE)) {
+      
+      if (requestBody.containsKey(STAC_ITEM_TRAN_ASSETS)) {
+        JsonObject assets = requestBody.getJsonObject(STAC_ITEM_TRAN_ASSETS);
+
+        try {
+          requestBody.put(STAC_ITEM_TRAN_ASSETS, validateAndProcessStacAssets(assets));
+        } catch (OgcException e) {
+          routingContext.fail(e);
+          return;
+        }
+      }
+      
       result = dbService.insertStacItem(requestBody);
     }
     assert result != null;
@@ -2698,6 +2739,23 @@ public class ApiServerVerticle extends AbstractVerticle {
     if (!requestBody.getString("type").equalsIgnoreCase("FEATURE")) {
       routingContext.fail(new OgcException(400, "Bad Request", "Item type should be Feature"));
       return;
+    }
+
+    if (requestBody.containsKey(STAC_ITEM_TRAN_ASSETS)) {
+      JsonObject assets = requestBody.getJsonObject(STAC_ITEM_TRAN_ASSETS);
+
+      Set<String> s3BucketIds =
+          assets.stream().map(i -> ((JsonObject) i.getValue()).getString(STAC_ITEM_TRAN_S3_BUCKET_ID))
+          .collect(Collectors.toSet());
+
+      List<String> invalidBucketIds = s3BucketIds.stream()
+          .filter(id -> s3conf.getConfigByIdentifier(id).isEmpty()).collect(Collectors.toList());
+
+      if (!invalidBucketIds.isEmpty()) {
+        routingContext.fail(new OgcException(400, STAC_ITEM_TRAN_INVALID_S3_BUCKET_IDS_ERR,
+            STAC_ITEM_TRAN_INVALID_S3_BUCKET_IDS_DESC + invalidBucketIds.toString()));
+        return;
+      }
     }
 
     requestBody.put("collectionId", collectionId);
@@ -2761,4 +2819,68 @@ public class ApiServerVerticle extends AbstractVerticle {
         context.put("statusCode", 200);
         context.next();
   }
+
+  /**
+   * Validate and pre-process a STAC Assets object containing multiple assets. Check if the S3
+   * bucket ID is configured/recognised by the server. In case the chosen bucket for a particular
+   * asset is an open read bucket ({@link S3BucketReadAccess#PUBLIC}), then modify the asset href to
+   * be an absolute URI using the configured endpoint and bucket name.
+   * 
+   * @param assetObject JSON representation of STAC Asset object containing multiple assets
+   * @return asset JSON object with modified href (if applicable)
+   * @throws OgcException in case the S3 bucket ID does not exist
+   */
+  private JsonObject validateAndProcessStacAssets(JsonObject assetObject) throws OgcException {
+
+    Iterator<Entry<String, Object>> iterator = assetObject.iterator();
+    JsonObject modifiedAssets = new JsonObject();
+
+    while (iterator.hasNext()) {
+
+      Entry<String, Object> assetEntry = iterator.next();
+      JsonObject asset = (JsonObject) assetEntry.getValue();
+
+      String href = asset.getString("href");
+
+      // check if bucket ID in request exists
+      String s3BucketId = asset.getString(STAC_ITEM_TRAN_S3_BUCKET_ID);
+
+      Optional<S3Config> s3ConfOpt = s3conf.getConfigByIdentifier(s3BucketId);
+
+      if (s3ConfOpt.isEmpty()) {
+        throw new OgcException(400, STAC_ITEM_TRAN_INVALID_S3_BUCKET_IDS_ERR,
+            STAC_ITEM_TRAN_INVALID_S3_BUCKET_IDS_DESC + s3BucketId);
+      }
+
+      S3Config s3Config = s3ConfOpt.get();
+
+      // if the bucket is read-private, don't change the href and continue
+      if (S3BucketReadAccess.PRIVATE.equals(s3Config.getReadAccess())) {
+        continue;
+      }
+      
+      // if public read bucket, then form absolute URI for href
+      String absoluteHref;
+      
+      // if path-based access, form href as "bucket endpoint + / + bucket name + / + href"
+      if (s3Config.getPathBasedAccess()) {
+        absoluteHref =
+            s3Config.getEndpoint() + "/" + s3Config.getBucket() + "/" + asset.getString("href");
+      } else { // if virtual-hosting-based access, form href as "http/https://" + bucket name +
+               // bucket endpoint (without protocol) + / + href
+        String[] endpointParts = s3Config.getEndpoint().split("://");
+
+        absoluteHref =
+            endpointParts[0] + "://" + s3Config.getBucket() + "." + endpointParts[1] + "/" + href;
+      }
+
+      // update the href and add the modified asset into modifiedAssets 
+      asset.put("href", absoluteHref);
+      modifiedAssets.put(assetEntry.getKey(), asset);
+    }
+    
+    // merge modifiedAssets into original assetObject
+    return assetObject.mergeIn(modifiedAssets);
+  }
+    
 }

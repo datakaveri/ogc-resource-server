@@ -899,20 +899,22 @@ public class DatabaseServiceImpl implements DatabaseService{
                           .map(Object::toString).toArray(String[]::new) : null;
                       JsonObject assetProperties =
                           assetJsonObj.containsKey("properties") ? assetJsonObj.getJsonObject("properties") : null;
+                      String s3BucketId = assetJsonObj.getString("s3BucketId");
                       batchInserts.add(
                           Tuple.of(UUID.fromString(assetId), collectionId, itemId, title, description, href, type, size,
-                          roles, assetProperties));
+                          roles, assetProperties, s3BucketId));
                     });
                     return conn.preparedQuery("INSERT INTO stac_items_assets as asset_table" +
-                            " (id, collection_id, item_id, title, description, href, type, size, roles, properties)" +
-                            " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb) " +
+                            " (id, collection_id, item_id, title, description, href, type, size, roles, properties, s3_bucket_id)" +
+                            " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11) " +
                             " ON CONFLICT (id) DO UPDATE SET title = COALESCE (EXCLUDED.title, asset_table.title)" +
                             ", description = COALESCE(EXCLUDED.description, asset_table.description)" +
                             ", href = COALESCE(EXCLUDED.href, asset_table.href)" +
                             ", type= COALESCE(EXCLUDED.type, asset_table.type)" +
                             ", size = COALESCE(EXCLUDED.size, asset_table.size)" +
                             ", roles = COALESCE(EXCLUDED.roles, asset_table.roles)" +
-                            ", properties = COALESCE(EXCLUDED.properties, asset_table.properties)")
+                            ", properties = COALESCE(EXCLUDED.properties, asset_table.properties)" +
+                            ", s3_bucket_id = COALESCE(EXCLUDED.s3_bucket_id, asset_table.s3_bucket_id)")
                         .executeBatch(batchInserts);
                   }
                 })
@@ -1057,12 +1059,13 @@ public class DatabaseServiceImpl implements DatabaseService{
                         .map(Object::toString).toArray(String[]::new) : new String[0];
                     JsonObject assetProperties = assetJsonObj.containsKey("properties")
                         ? assetJsonObj.getJsonObject("properties") : new JsonObject();
+                    String s3BucketId = assetJsonObj.getString("s3BucketId");
                     batchInserts.add(Tuple.of(UUID.fromString(assetId), collectionId, itemId, title, description, href,
-                        type, size, roles, assetProperties));
+                        type, size, roles, assetProperties, s3BucketId));
                   });
                   return conn.preparedQuery("INSERT INTO stac_items_assets" +
-                          " (id, collection_id, item_id, title, description, href, type, size, roles, properties)" +
-                          " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb)")
+                          " (id, collection_id, item_id, title, description, href, type, size, roles, properties, s3_bucket_id)" +
+                          " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11)")
                       .executeBatch(batchInserts);
                 }
               }))
