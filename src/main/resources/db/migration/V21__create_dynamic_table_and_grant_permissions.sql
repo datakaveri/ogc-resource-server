@@ -1,3 +1,13 @@
+CREATE OR REPLACE FUNCTION set_geometry_from_bbox()
+RETURNS trigger AS $$
+BEGIN
+  IF NEW.bbox IS NOT NULL AND array_length(NEW.bbox, 1) = 4 THEN
+    NEW.geometry := ST_MakeEnvelope(NEW.bbox[1], NEW.bbox[2], NEW.bbox[3], NEW.bbox[4], 4326);
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 DO $$
 DECLARE
     new_id UUID;
