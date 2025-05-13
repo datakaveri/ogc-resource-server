@@ -1521,7 +1521,8 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   private JsonObject formatAssetObjectsForStacItemById(JsonArray assetArray, boolean shouldCreate, long expiry) {
     JsonObject assets = new JsonObject();
-
+    if(assetArray.contains(null))
+      return assets;
     assetArray.forEach(asset -> {
       JsonObject assetObj = (JsonObject) asset;
       String assetId = assetObj.getString("id");
@@ -1562,6 +1563,8 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   private JsonObject formatAssetObjectsAsPerStacSchema(JsonArray assetArray) {
     JsonObject assets = new JsonObject();
+    if (assetArray.contains(null))
+      return assets;
     assetArray.forEach(asset -> {
       JsonObject assetObj = (JsonObject) asset;
       String assetId = assetObj.getString("id");

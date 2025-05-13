@@ -443,28 +443,36 @@ public class DatabaseServiceImpl implements DatabaseService{
             ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb - 'item_id')) as assetobjects" +
             ", 'Feature' as type, '%1$s' as collection from \"%1$s\" as item_table left join stac_items_assets" +
             " on item_table.id=stac_items_assets.item_id" +
-            " group by item_table.id, item_table.geom, item_table.bbox, item_table.p_id" +
-            ", item_table.properties having p_id >= %2$d order by p_id limit %3$d"
+            " group by item_table.id, item_table.geom, item_table.bbox, item_table.p_id, item_table.collection_id" +
+            ", item_table.properties having p_id >= %2$d and item_table.collection_id = $1::uuid order by p_id limit " +
+            "%3$d"
         , collectionId, offset, limit);
-    client.withConnection(
-        conn ->
-            conn.preparedQuery(getItemsQuery)
-                .collecting(collector)
-                .execute()
-                .map(SqlResult::value)
-                .onSuccess(success -> {
-                  if(success.isEmpty()) {
-                    LOGGER.debug("No STAC items found!");
-                    result.complete(new ArrayList<>());
-                  } else {
-                    LOGGER.debug("STAC Items query successful.");
-                    result.complete(success);
-                  }
-                })
-                .onFailure(failed -> {
-                  LOGGER.error("Failed to retrieve STAC items- {}", failed.getMessage());
-                  result.fail("Error!");
-                }));
+
+    checkIfCollectionExist(collectionId)
+        .compose(collectionExist ->
+            client.withConnection(
+                conn -> conn.preparedQuery(getItemsQuery)
+                    .collecting(collector)
+                    .execute(Tuple.of(UUID.fromString(collectionId)))
+                    .map(SqlResult::value))
+        )
+        .onSuccess(success -> {
+          if(success.isEmpty()) {
+            LOGGER.debug("No STAC items found!");
+            result.complete(new ArrayList<>());
+          } else {
+            LOGGER.debug("STAC Items query successful.");
+            LOGGER.debug(success);
+            result.complete(success);
+          }
+        })
+        .onFailure(failed -> {
+          LOGGER.error("Failed to retrieve STAC items- {}", failed.getMessage());
+          if (failed instanceof OgcException)
+            result.fail(failed);
+          else
+            result.fail("Error!");
+        });
     return result.future();
   }
 
@@ -478,25 +486,28 @@ public class DatabaseServiceImpl implements DatabaseService{
         ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb-'item_id')) as assetobjects, 'Feature' as type" +
         ", '%1$s' as collection from \"%1$s\" as item_table left join stac_items_assets" +
         " on item_table.id=stac_items_assets.item_id" +
-        " group by item_table.id, item_table.geom, item_table.bbox, item_table.properties" +
-        " having item_table.id = $1::text", collectionId);
-    client.withConnection(
-        conn ->
-            conn.preparedQuery(getItemQuery)
-                .collecting(collector)
-                .execute(Tuple.of(stacItemId))
-                .map(SqlResult::value)
-                .onSuccess(success -> {
-                  if (success.isEmpty())
-                    result.fail(new OgcException(404, "NotFoundError", "Item " + stacItemId + " not found in " +
-                        "collection " + collectionId));
-                  else
-                    result.complete(success.get(0));
-                })
-                .onFailure(failed -> {
-                  LOGGER.error("Failed at stac_item_retrieval- {}", failed.getMessage());
-                  result.fail("Error!");
-                }));
+        " group by item_table.id, item_table.geom, item_table.bbox, item_table.properties, item_table.collection_id" +
+        " having item_table.id = $1::text and item_table.collection_id = $2::uuid", collectionId);
+    checkIfCollectionExist(collectionId)
+        .compose(collectionExist -> client.withConnection(
+            conn -> conn.preparedQuery(getItemQuery)
+                    .collecting(collector)
+                    .execute(Tuple.of(stacItemId, UUID.fromString(collectionId)))
+                    .map(SqlResult::value)))
+        .onSuccess(success -> {
+          if (success.isEmpty())
+            result.fail(new OgcException(404, "NotFoundError", "Item " + stacItemId + " not found in " +
+                "collection " + collectionId));
+          else
+            result.complete(success.get(0));
+        })
+        .onFailure(failed -> {
+          LOGGER.error("Failed at stac_item_retrieval- {}", failed.getMessage());
+          if (failed instanceof OgcException)
+            result.fail(failed);
+          else
+            result.fail("Error!");
+        });
     return result.future();
   }
 

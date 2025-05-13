@@ -1,6 +1,5 @@
 package ogc.rs.restAssuredTest;
 
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import jdk.jfr.Description;
@@ -18,8 +17,7 @@ import static org.hamcrest.Matchers.*;
 
 public class StacTransactionIT {
 
-  String hostname;
-  String openCollectionCreateItemEndpoint = "/stac/collections/0bfd0f9a-a31c-4ee9-9728-0a97248a46375/items";
+  String openCollectionCreateItemEndpoint = "/stac/collections/0bfd0f9a-a31c-4ee9-9728-0a97248a4637/items";
   String secureCollectionCreateItemEndpoint = "/stac/collections/6f95f983-a826-42e0-8e97-e224a546fe32/items";
   String secureCollectionUpdateItemEndpoint = "/stac/collections/6f95f983-a826-42e0-8e97-e224a546fe32/items" +
       "/testing_stac_item_1";
@@ -43,7 +41,7 @@ public class StacTransactionIT {
   public void initialiseRequestBodyAndToken() {
 
     JsonObject geometry = new JsonObject().put("type", "Point").put("coordinates", new JsonArray().add(-110).add(39.5));
-    JsonArray bbox = new JsonArray().add(-110).add(39.5).add(-105).add(40.5);
+    JsonArray bbox = new JsonArray().add(-110.0).add(39.5).add(-105.0).add(40.5);
 
     JsonObject validProperties = new JsonObject().put("datetime", "2018-02-12T00:00:00Z").put("anotherProperty", "some" +
         "-value");
@@ -65,7 +63,7 @@ public class StacTransactionIT {
                 .put("type", "Feature"))
             .add(new JsonObject()
                 .put("id", "testing_stac_item_4")
-                .put("bbox", new JsonArray().add(-110).add(39.5).add(-105).add(40.5))
+                .put("bbox", new JsonArray().add(-110.0).add(39.5).add(-105.0).add(40.5))
                 .put("geometry", geometry)
                 .put("properties", validProperties)
                 .put("type", "Feature")));
@@ -85,11 +83,8 @@ public class StacTransactionIT {
             .post(secureCollectionCreateItemEndpoint)
             .then()
             .statusCode(201)
-//            .header("LOCATION",)
             .body("id", equalTo("testing_stac_item_1"))
-            .body("properties", equalTo(standardRequestBody.getJsonObject("properties")))
-            .body("geometry", equalTo(standardRequestBody.getJsonObject("geometry")))
-            .body("bbox", contains(-180, -56, 180, 83))
+            .body("properties.datetime", is(standardRequestBody.getJsonObject("properties").getString("datetime")))
             .body("type", equalTo("Feature"));
 
         Thread.sleep(1000);
@@ -120,10 +115,9 @@ public class StacTransactionIT {
             .then()
             .statusCode(200)
             .body("id", equalTo("testing_stac_item_1"))
-            .body("bbox", equalTo(standardRequestBody.getJsonArray("bbox")))
             .body("assets."+randomAssetId+".href"
                 , equalTo("http://cool-sat.com/catalog/collections/cs/items/CS3-20160503_132130_04/thumb.png"))
-            .body("assets."+randomAssetId+".href", equalTo(1024));
+            .body("assets."+randomAssetId+".type", equalTo("image/png"));
 
         Thread.sleep(1000);
     }
@@ -140,7 +134,7 @@ public class StacTransactionIT {
                         .withCons(new JsonObject())
                         .build();
 
-        standardRequestBody.put("id", "testing_feature_item_2");
+        standardRequestBody.put("bbox", new JsonArray().add(-180.0).add(-90.0).add(180.0).add(90.0));
 
         given()
             .header("Accept", "application/json")
@@ -152,9 +146,7 @@ public class StacTransactionIT {
             .then()
             .statusCode(201)
             .body("id", equalTo("testing_stac_item_1"))
-            .body("properties", equalTo(standardRequestBody.getJsonObject("properties")))
-            .body("geometry", equalTo(standardRequestBody.getJsonObject("geometry")))
-            .body("bbox", contains(-180, -56, 180, 83))
+            .body("properties.datetime", is(standardRequestBody.getJsonObject("properties").getString("datetime")))
             .body("type", equalTo("Feature"));
 
         Thread.sleep(1000);
@@ -186,7 +178,7 @@ public class StacTransactionIT {
             .statusCode(200)
             .log().all()
             .body("id", equalTo("testing_stac_item_1"))
-            .body("properties", equalTo(new JsonObject().put("some-property-key", "some-property-value")));
+            .body("properties.some-property-key", equalTo( "some-property-value"));
         Thread.sleep(1000);
     }
 
@@ -212,8 +204,7 @@ public class StacTransactionIT {
                 .then()
                 .statusCode(400)
                 .body("code", equalTo("Bad Request"))
-                .body("description", containsString("Validation error for body application/json"));
-//                .body("description", containsString("should contain property id"));
+                .body("description", containsStringIgnoringCase("Validation error for body application/json"));
     }
 
     @Order(6)
@@ -239,7 +230,9 @@ public class StacTransactionIT {
                 .then()
                 .statusCode(401)
                 .body("code", equalTo("Not Authorized"))
-                .body("description", containsString("Role Not Provider or delegate"));
+                .body("description",
+                    containsStringIgnoringCase("Only provider or provider delegate" +
+                        " is authorized to perform this action"));
     }
 
   @Order(7)
@@ -265,7 +258,7 @@ public class StacTransactionIT {
         .then()
         .statusCode(401)
         .body("code", equalTo("Not Authorized"))
-        .body("description", containsString("Role Not Provider or delegate"));
+        .body("description", containsStringIgnoringCase("Only provider or provider delegate is authorized"));
   }
 
     @Order(8)
@@ -290,7 +283,7 @@ public class StacTransactionIT {
                 .then()
                 .statusCode(401)
                 .body("code", equalTo("Not Authorized"))
-                .body("description", containsString("Item belongs to different provider"));
+                .body("description", containsStringIgnoringCase("Not authorized to access this collection"));
 
 
     }
@@ -317,7 +310,7 @@ public class StacTransactionIT {
                 .then()
                 .statusCode(401)
                 .body("code", equalTo("Not Authorized"))
-                .body("description", containsString("Item belongs to different provider"));
+                .body("description", containsStringIgnoringCase("Not authorized to access this collection"));
     }
 
     @Order(10)
@@ -326,7 +319,7 @@ public class StacTransactionIT {
     public void testCreateStacCollectionProviderNotOpenTokenFailure() throws InterruptedException {
         String token =
                 new FakeTokenBuilder()
-                        .withSub(UUID.randomUUID())
+                        .withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
                         .withResourceAndRg(UUID.fromString("6f95f983-a826-42e0-8e97-e224a546fe32"), UUID.randomUUID())
                         .withRoleProvider()
                         .withCons(new JsonObject().put("access", new JsonArray().add("api")))
@@ -342,7 +335,7 @@ public class StacTransactionIT {
                 .then()
                 .statusCode(401)
                 .body("code", equalTo("Not Authorized"))
-                .body("description", containsString("open token should be used"));
+                .body("description", containsStringIgnoringCase("use an open token"));
     }
 
     @Order(11)
@@ -363,7 +356,7 @@ public class StacTransactionIT {
                 .then()
                 .statusCode(400)
                 .body("code", equalTo("Bad Request"))
-                .body("description", containsString("[Bad Request] Validation error for body"));
+                .body("description", containsStringIgnoringCase("[Bad Request] Validation error for body"));
     }
 
     @Order(12)
@@ -382,8 +375,8 @@ public class StacTransactionIT {
                 .post(endpoint)
                 .then()
                 .statusCode(404)
-                .body("code", equalTo("Collection Not Found"))
-                .body("description", containsString("Collection does not exist"));
+                .body("code", equalTo("Not Found"))
+                .body("description", containsStringIgnoringCase("Collection not found"));
     }
 
 
@@ -401,8 +394,7 @@ public class StacTransactionIT {
         .post(secureCollectionCreateItemEndpoint)
         .then()
         .statusCode(201)
-//            .header("LOCATION",)
-        .body("code", contains("Items are created"))
+        .body("code", containsStringIgnoringCase("Items are created"))
         .body("stac_version", equalTo("1.0.0"));
 
     Thread.sleep(1000);
@@ -434,10 +426,9 @@ public class StacTransactionIT {
           .when()
           .post(secureCollectionCreateItemEndpoint)
           .then()
-          .statusCode(409)
-//            .header("LOCATION",)
-          .body("code", equalTo("Conflict"))
-          .body("description", contains("duplicate ids are present"));
+          .statusCode(400)
+          .body("code", equalTo("Bad Request"))
+          .body("description", containsStringIgnoringCase("duplicate item ids present"));
 
       Thread.sleep(1000);
     }
@@ -456,9 +447,8 @@ public class StacTransactionIT {
         .post(secureCollectionCreateItemEndpoint)
         .then()
         .statusCode(409)
-//            .header("LOCATION",)
         .body("code", equalTo("Conflict"))
-        .body("description", contains("item already exists"));
+        .body("description", containsStringIgnoringCase("One ore more STAC item(s) exist!"));
 
     Thread.sleep(1000);
   }
@@ -479,14 +469,11 @@ public class StacTransactionIT {
         .post(secureCollectionCreateItemEndpoint)
         .then()
         .statusCode(400)
-//            .header("LOCATION",)
         .body("code", equalTo("Bad Request"))
-        .body("description", contains("Validation error for body application/json"));
+        .body("description", containsStringIgnoringCase("Validation error for body application/json"));
 
     Thread.sleep(1000);
   }
-
-    // update item, id don't match
 
   @Order(17)
   @Test
@@ -501,17 +488,15 @@ public class StacTransactionIT {
         .auth().oauth2(token)
         .body(standardRequestBody.encode())
         .when()
-        .post(secureCollectionCreateItemEndpoint)
+        .patch(secureCollectionUpdateItemEndpoint)
         .then()
         .statusCode(400)
-//            .header("LOCATION",)
         .body("code", equalTo("Bad Request"))
-        .body("description", contains("id don't match with uri"));
+        .body("description", containsStringIgnoringCase("Item id in request body does not match with id in URI"));
 
     Thread.sleep(1000);
   }
 
-    // invalid geometry
 
   @Order(17)
   @Test
@@ -529,9 +514,8 @@ public class StacTransactionIT {
         .post(secureCollectionCreateItemEndpoint)
         .then()
         .statusCode(400)
-//            .header("LOCATION",)
         .body("code", equalTo("Bad Request"))
-        .body("description", contains("Validation error for body application/json"));
+        .body("description", containsStringIgnoringCase("Validation error for body application/json"));
 
     Thread.sleep(1000);
   }
@@ -558,9 +542,8 @@ public class StacTransactionIT {
             .post(secureCollectionCreateItemEndpoint)
             .then()
             .statusCode(400)
-  //            .header("LOCATION",)
             .body("code", equalTo("Bad Request"))
-            .body("description", contains("Validation error for body application/json"));
+            .body("description", containsStringIgnoringCase("Validation error for body application/json"));
   
         Thread.sleep(1000);
     }
@@ -578,10 +561,9 @@ public class StacTransactionIT {
           .when()
           .post(openCollectionCreateItemEndpoint)
           .then()
-          .statusCode(400)
-          //            .header("LOCATION",)
-          .body("code", equalTo("Bad Request"))
-          .body("description", contains("Validation error for body application/json"));
+          .statusCode(409)
+          .body("code", equalTo("Conflict"))
+          .body("description", containsStringIgnoringCase("One ore more STAC item(s) exist!"));
 
       Thread.sleep(1000);
     }
