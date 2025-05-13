@@ -1085,6 +1085,15 @@
           "type": "string"
         }
       },
+      "recordId": {
+        "name": "recordId",
+        "in": "path",
+        "description": "local identifier of a record item",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
       "tileMatrixSetId": {
         "name": "tileMatrixSetId",
         "in": "path",
@@ -1303,6 +1312,41 @@
           }
         }
       },
+      "RecordCatalog": {
+        "description": "The response consists of information regarding the REcord catalog.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/recordCatalog"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "id": "fd6ef7c5-b18c-48e6-94e3-81037706763d",
+                  "created": "2024-04-01T08:06:37+0530",
+                  "conformsTo": "https://www.opengis.net/spec/ogcapi-records-1/1.0/req/core",
+                  "itemType": "record",
+                  "type": "Collection",
+                  "links": [
+                    {
+                      "href": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items",
+                      "rel": "items",
+                      "type": "application/geo+json",
+                      "title": "Districts in India"
+                    },
+                    {
+                      "href": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d",
+                      "rel": "self",
+                      "type": "application/geo+json",
+                      "title": "Districts in India"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
       "Features": {
         "description": "The response is a document consisting of features in the collection.\nThe features included in the response are determined by the server\nbased on the query parameters of the request. To support access to\nlarger collections without overloading the client, the API supports\npaged access using `limit` and `offset` paramters.",
         "content": {
@@ -1362,6 +1406,106 @@
                         "state": "TELENGANA",
                         "timestamp": "2023-07-25 07:22:36 UTC"
                       }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "RecordItem": {
+        "description": "fetch the record item from the given recordId",
+        "content": {
+          "application/geo+json": {
+            "schema": {
+              "$ref": "#/components/schemas/recordItem"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "id": "f2310f35-8834-4ab8-a5d5-a8cddd3bb975",
+                  "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                      [
+                        [
+                          -7.557159807,
+                          49.766807235
+                        ],
+                        [
+                          -7.557159807,
+                          57.704883568
+                        ],
+                        [
+                          1.112473832,
+                          57.704883568
+                        ],
+                        [
+                          1.112473832,
+                          49.766807235
+                        ],
+                        [
+                          -7.557159807,
+                          49.766807235
+                        ]
+                      ]
+                    ]
+                  },
+                  "type": "Feature",
+                  "links": [
+                    {
+                      "href": "http://127.0.0.1:5000/collections/1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a/items/f2310f35-8834-4ab8-a5d5-a8cddd3bb975",
+                      "rel": "self",
+                      "title": "Code-Point Open",
+                      "description": "Contains postcode units from Britain"
+                    }
+                  ],
+                  "properties": {
+                    "title": "Code-Point Open",
+                    "description": "Contains postcode units from Britain",
+                    "keywords": [
+                      "test"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "RecordItems":  {
+        "description": "The feature collections shared by this API.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/recordItems"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "links": [
+                    {
+                      "href": "${HOSTNAME}/collections",
+                      "rel": "self",
+                      "type": "application/json",
+                      "title": "this document"
+                    }
+                  ],
+                  "FeatureCollections": [
+                    {
+                      "id": "fd6ef7c5-b18c-48e6-94e3-81037702863d",
+                      "itemType": "feature",
+                      "title": "Districts in India",
+                      "description": "Information about districts in India",
+                      "links": [
+                        {
+                          "href": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037702863d",
+                          "rel": "self",
+                          "type": "application/geo+json",
+                          "title": "Districts in India"
+                        }
+                      ]
                     }
                   ]
                 }
@@ -1681,6 +1825,133 @@
           "links",
           "collections"
         ]
+      },
+      "recordCatalog":{
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "itemType": {
+            "type": "string"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "rel": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+
+        }
+      },
+      "recordItem": {
+        "type": "object",
+        "required": ["id", "type", "geometry", "properties"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uri",
+            "description": "A unique identifier of the catalogue record."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["Feature"]
+          },
+          "geometry": {
+            "type": "object",
+            "description": "GeoJSON geometry object.",
+            "required": ["type", "coordinates"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "Point",
+                  "LineString",
+                  "Polygon",
+                  "MultiPoint",
+                  "MultiLineString",
+                  "MultiPolygon",
+                  "GeometryCollection"
+                ]
+              },
+              "coordinates": {
+                "type": "array",
+                "description": "Coordinates as per the geometry type.",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "geometries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/geometryGeoJSON"
+                }
+              }
+            }
+          },
+          "properties": {
+            "type": "object",
+            "description": "Additional record properties.",
+            "additionalProperties": true
+          },
+          "links": {
+            "type": "array",
+            "description": "Optional array of links related to the record.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "rel": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "recordItems": {
+        "type": "object",
+        "properties": {
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/link"
+            }
+
+          },
+          "FeatureCollection": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/recordItem"
+            }
+          }
+        }
       },
       "link": {
         "type": "object",

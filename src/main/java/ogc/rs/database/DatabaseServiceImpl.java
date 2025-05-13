@@ -89,7 +89,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                         "   JOIN collections_enclosure ON collections_details.id = collections_enclosure.collections_id JOIN collection_supported_crs ON " +
                         "   collections_details.id = collection_supported_crs.collection_id JOIN crs_to_srid ON crs_to_srid.id = " +
                         "   collection_supported_crs.crs_id JOIN collection_type ON collections_details.id = collection_type.collection_id " +
-                        "   WHERE collection_type.type != 'STAC' GROUP BY collections_details.id;")
+                        "   WHERE collection_type.type NOT IN ('STAC', 'COLLECTION') GROUP BY collections_details.id;")
                     .collecting(collector)
                     .execute()
                     .map(SqlResult::value))
@@ -923,7 +923,59 @@ public class DatabaseServiceImpl implements DatabaseService{
     return result.future();
   }
 
-  private  Future<JsonObject> getStacItemWithoutAssets(String collectionId, String itemId) {
+    @Override
+    public Future<List<JsonObject>> getOgcRecords(String catalogId) {
+        Promise <List<JsonObject>> result = Promise.promise();
+        Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+        String tableName = "public.\"" + catalogId + "\"";
+        String query = String.format(
+                "SELECT id, ST_AsGeoJSON(geometry)::json AS geometry, created, title, description, keywords, externalids, bbox, temporal, collection_id FROM %s",
+                tableName
+        );
+        client.withConnection(conn ->
+                        conn.query(query)
+                                .collecting(collector)
+                                .execute()
+                                .map(SqlResult::value))
+                .onSuccess(success -> {
+                    LOGGER.debug("Record Items Result: {}", success.toString());
+                    result.complete(success);
+                })
+                .onFailure(fail -> {
+                    LOGGER.error("Failed to getOgcRecords! - {}", fail.getMessage());
+                    result.fail("Error!");
+                });
+
+        return result.future();
+    }
+
+    @Override
+    public Future<JsonObject> getOgcRecordItem(String catalogId, String recordId) {
+        Promise <JsonObject> result = Promise.promise();
+        Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+        String tableName = "public.\"" + catalogId + "\"";
+        String query = String.format(
+                "SELECT id, ST_AsGeoJSON(geometry)::json AS geometry, created, title, description, keywords, externalids, bbox, temporal, collection_id FROM %s WHERE id = $1::uuid",
+                tableName
+        );
+        client.withConnection(conn ->
+                        conn.preparedQuery(query)
+                                .collecting(collector)
+                                .execute(Tuple.of(recordId))
+                                .map(SqlResult::value))
+                .onSuccess(success -> {
+                    LOGGER.debug("Record Item Result: {}", success.toString());
+                    result.complete(success.get(0));
+                })
+                .onFailure(fail -> {
+                    LOGGER.error("Failed to getOgcRecords! - {}", fail.getMessage());
+                    result.fail("Error!");
+                });
+
+        return result.future();
+    }
+
+    private  Future<JsonObject> getStacItemWithoutAssets(String collectionId, String itemId) {
     Promise<JsonObject> result = Promise.promise();
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());
@@ -1482,7 +1534,44 @@ public class DatabaseServiceImpl implements DatabaseService{
     return result.future();
   }
 
-  /**
+    @Override
+    public Future<List<JsonObject>> getOgcRecordMetadataForOasSpec(List<String> existingCollectionUuidIds) {
+        Promise<List<JsonObject>> result = Promise.promise();
+
+        UUID[] existingCollectionIdsArr =
+                existingCollectionUuidIds.stream().map(i-> UUID.fromString(i)).toArray(UUID[]::new);
+
+        Collector<Row, ?, List<JsonObject>> collector =
+                Collectors.mapping(Row::toJson, Collectors.toList());
+
+        final String GET_RECORD_CATALOG_INFO =
+                "SELECT collections_details.id, title, description FROM collections_details JOIN "
+                        + "collection_type ON collections_details.id = collection_type.collection_id WHERE "
+                        + "collections_details.id != ALL($1::UUID[]) AND collection_type.type = 'COLLECTION'";
+
+        Future<List<JsonObject>> newCollectionJson =
+                client.withConnection(
+                        conn->
+                                conn.preparedQuery(GET_RECORD_CATALOG_INFO)
+                                        .collecting(collector)
+                                        .execute(Tuple.of(existingCollectionIdsArr))
+                                        .map(res-> res.value()));
+
+        newCollectionJson
+                .onSuccess(succ -> result.complete(succ))
+                .onFailure(
+                        fail-> {
+                            LOGGER.error(
+                                    "Something went wrong when querying DB for new OGC collections {}",
+                                    fail.getMessage());
+                            result.fail(fail);
+                        });
+
+        return  result.future();
+    }
+
+
+    /**
    * This method queries the database to determine if a resource identified by the given
    * ID is accessible as "open" or "secure". The access status is retrieved from the
    * "ri_details" table where the ID matches the provided UUID.
@@ -1573,7 +1662,7 @@ public class DatabaseServiceImpl implements DatabaseService{
     final String GET_COLLECTION_INFO =
         "SELECT collections_details.id, title, description FROM collections_details "
       + "JOIN collection_type ON collections_details.id = collection_type.collection_id "
-      + "WHERE collections_details.id != ALL($1::UUID[]) AND collection_type.type != 'STAC'";
+      + "WHERE collections_details.id != ALL($1::UUID[]) AND collection_type.type NOT IN ('STAC', 'COLLECTION')";
 
     Future<List<JsonObject>> newCollectionsJson =
         client.withConnection(

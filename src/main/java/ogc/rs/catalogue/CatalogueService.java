@@ -64,7 +64,7 @@ public class CatalogueService {
         return promise.future();
     }
 
-    public Future<JsonObject> getCatItemOwnerUserId(String id) {
+    public Future<JsonObject> getCatItemUsingFilter(String id, String filter) {
         LOGGER.debug("get item for id: {} ", id);
         Promise<JsonObject> promise = Promise.promise();
 
@@ -74,7 +74,7 @@ public class CatalogueService {
                 .addQueryParam("value", "[[" + id + "]]")
                 .addQueryParam(
                         "filter",
-                        "[id,provider,accessPolicy,type,iudxResourceAPIs,resourceGroup,ownerUserId]")
+                        filter)
                 .expect(ResponsePredicate.JSON)
                 .send(
                         relHandler -> {

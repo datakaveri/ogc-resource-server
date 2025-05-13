@@ -91,8 +91,9 @@ public class StacCollectionOnboardingAuthZHandler implements Handler<RoutingCont
 
 
     private void validateCollectionOwnership(String collectionId, AuthInfo user, RoutingContext routingContext) {
+        String filter = "[id,provider,accessPolicy,type,iudxResourceAPIs,resourceGroup,ownerUserId]";
         catalogueService
-                .getCatItemOwnerUserId(collectionId)
+                .getCatItemUsingFilter(collectionId, filter)
                 .onSuccess(
                         success -> {
                             if (user.getRole() == AuthInfo.RoleEnum.provider && !user.isRsToken()) {
@@ -129,7 +130,8 @@ public class StacCollectionOnboardingAuthZHandler implements Handler<RoutingCont
     }
 
     private void checkCollectionOwnership(String collectionId, AuthInfo user, RoutingContext routingContext,ArrayList<String> validatedcollecrionId ,int totalCollections) {
-        catalogueService.getCatItemOwnerUserId(collectionId)
+        String filter = "[id,provider,accessPolicy,type,iudxResourceAPIs,resourceGroup,ownerUserId]";
+        catalogueService.getCatItemUsingFilter(collectionId, filter)
                 .onSuccess(success -> {
                     if (user.getRole() == AuthInfo.RoleEnum.provider && !user.isRsToken()) {
                         routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "Open token should be used"));
