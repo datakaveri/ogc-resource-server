@@ -28,7 +28,7 @@ BEGIN
     VALUES (new_id, 'COLLECTION');
 
     INSERT INTO ri_details (id, role_id, access)
-    VALUES (new_id, '0ff3d306-9402-4430-8e18-6f95e4c03c97', 'OPEN');
+    VALUES (new_id, '00000000-0000-0000-0000-000000000000', 'OPEN');
 
     -- Create table with UUID as the table name and SERIAL ID for auto-increment
     EXECUTE format($f$
