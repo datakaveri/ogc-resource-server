@@ -87,7 +87,6 @@ public class StacTransactionIT {
             .body("properties.datetime", is(standardRequestBody.getJsonObject("properties").getString("datetime")))
             .body("type", equalTo("Feature"));
 
-        Thread.sleep(1000);
     }
 
     @Order(2)
@@ -97,9 +96,10 @@ public class StacTransactionIT {
         UUID randomAssetId = UUID.randomUUID();
         JsonObject assets = new JsonObject()
             .put(String.valueOf(randomAssetId), new JsonObject()
-                .put("href","http://cool-sat.com/catalog/collections/cs/items/CS3-20160503_132130_04/thumb.png")
+                .put("href","CS3-20160503_132130_04/thumb.png")
                 .put("title", "Asset title")
                 .put("type", "image/png")
+                .put("s3BucketId", "default")
                 .put("roles", new JsonArray().add("thumbnail"))
                 .put("size", 1024));
 
@@ -116,10 +116,9 @@ public class StacTransactionIT {
             .statusCode(200)
             .body("id", equalTo("testing_stac_item_1"))
             .body("assets."+randomAssetId+".href"
-                , equalTo("http://cool-sat.com/catalog/collections/cs/items/CS3-20160503_132130_04/thumb.png"))
+                , endsWith("assets/" + randomAssetId))
             .body("assets."+randomAssetId+".type", equalTo("image/png"));
 
-        Thread.sleep(1000);
     }
 
     @Order(3)
@@ -149,7 +148,6 @@ public class StacTransactionIT {
             .body("properties.datetime", is(standardRequestBody.getJsonObject("properties").getString("datetime")))
             .body("type", equalTo("Feature"));
 
-        Thread.sleep(1000);
     }
 
 
@@ -179,7 +177,6 @@ public class StacTransactionIT {
             .log().all()
             .body("id", equalTo("testing_stac_item_1"))
             .body("properties.some-property-key", equalTo( "some-property-value"));
-        Thread.sleep(1000);
     }
 
     @Order(5)
@@ -397,7 +394,6 @@ public class StacTransactionIT {
         .body("code", containsStringIgnoringCase("Items are created"))
         .body("stac_version", equalTo("1.0.0"));
 
-    Thread.sleep(1000);
 
 
   }
@@ -430,7 +426,6 @@ public class StacTransactionIT {
           .body("code", equalTo("Bad Request"))
           .body("description", containsStringIgnoringCase("duplicate item ids present"));
 
-      Thread.sleep(1000);
     }
 
   @Order(15)
@@ -450,7 +445,6 @@ public class StacTransactionIT {
         .body("code", equalTo("Conflict"))
         .body("description", containsStringIgnoringCase("One ore more STAC item(s) exist!"));
 
-    Thread.sleep(1000);
   }
 
   @Order(16)
@@ -472,7 +466,6 @@ public class StacTransactionIT {
         .body("code", equalTo("Bad Request"))
         .body("description", containsStringIgnoringCase("Validation error for body application/json"));
 
-    Thread.sleep(1000);
   }
 
   @Order(17)
@@ -494,7 +487,6 @@ public class StacTransactionIT {
         .body("code", equalTo("Bad Request"))
         .body("description", containsStringIgnoringCase("Item id in request body does not match with id in URI"));
 
-    Thread.sleep(1000);
   }
 
 
@@ -517,7 +509,6 @@ public class StacTransactionIT {
         .body("code", equalTo("Bad Request"))
         .body("description", containsStringIgnoringCase("Validation error for body application/json"));
 
-    Thread.sleep(1000);
   }
 
     @Order(18)
@@ -527,6 +518,7 @@ public class StacTransactionIT {
       JsonObject assets = new JsonObject()
             .put(String.valueOf(UUID.randomUUID()), new JsonObject()
                 .put("title", "Asset title")
+                .put("s3BucketId", "default")
                 .put("type", "image/png")
                 .put("roles", new JsonArray().add("thumbnail"))
                 .put("size", 1024));
@@ -545,7 +537,6 @@ public class StacTransactionIT {
             .body("code", equalTo("Bad Request"))
             .body("description", containsStringIgnoringCase("Validation error for body application/json"));
   
-        Thread.sleep(1000);
     }
 
     @Order(19)
@@ -565,6 +556,5 @@ public class StacTransactionIT {
           .body("code", equalTo("Conflict"))
           .body("description", containsStringIgnoringCase("One ore more STAC item(s) exist!"));
 
-      Thread.sleep(1000);
     }
 }
