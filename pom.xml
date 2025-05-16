@@ -548,6 +548,7 @@
                                 <srcFile>src/test/resources/integ-db/teardown/deleteTilesMetaDataOnboarding.sql</srcFile>
                                 <srcFile>src/test/resources/integ-db/teardown/deleteStacCollectionOnboarding.sql</srcFile>
                                 <srcFile>src/test/resources/integ-db/teardown/deleteStacTransactionData.sql</srcFile>
+                                <srcFile>src/test/resources/integ-db/teardown/deleteTilesFromExistingFeature.sql</srcFile>
                             </srcFiles>
                         </configuration>
                     </execution>

@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
 import jdk.jfr.Description;
+import ogc.rs.processes.ProcessesRunnerImpl;
 import ogc.rs.util.FakeTokenBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -79,6 +80,7 @@ public class CollectionOnboardingProcessIT {
         inputs.put("description", "Invalid file for testing.");
         inputs.put("resourceId", "2cfc08b8-a43d-40d4-ba98-c6fdfa76a0c1");
         inputs.put("version", "1.0.0");
+        inputs.put(ProcessesRunnerImpl.S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY, "default");
 
         requestBody.put("inputs", inputs);
         requestBody.put("response", "raw");

@@ -21,5 +21,5 @@ public class SqlConstants {
             "INSERT INTO collection_type (collection_id, type) VALUES ($1::UUID, $2)";
     // Query to insert required values into tilematrixsets_relation table
     public static final String INSERT_TILE_MATRIX_SET_RELATION_QUERY =
-            "INSERT INTO tilematrixsets_relation (collection_id, tms_id, pointoforigin) VALUES ($1, $2, $3)";
+            "INSERT INTO tilematrixsets_relation (collection_id, tms_id, pointoforigin, s3_bucket_id) VALUES ($1, $2, $3, $4)";
 }

@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -16,6 +17,7 @@ import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
+import ogc.rs.processes.ProcessesRunnerImpl;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.commons.exec.CommandLine;
@@ -56,12 +58,13 @@ public class CollectionOnboardingProcess implements ProcessService {
   private DataFromS3 dataFromS3;
   private Vertx vertx;
 
-  public CollectionOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config,DataFromS3 dataFromS3,Vertx vertx) {
+  public CollectionOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf,Vertx vertx) {
     this.pgPool = pgPool;
     this.webClient = webClient;
     this.utilClass = new UtilClass(pgPool);
     this.vertx=vertx;
-    this.dataFromS3=dataFromS3;
+    this.s3conf = s3conf;
+    this.dataFromS3= new DataFromS3(vertx.createHttpClient(new HttpClientOptions().setShared(true)), s3conf);
     initializeConfig(config);
   }
 
@@ -71,15 +74,6 @@ public class CollectionOnboardingProcess implements ProcessService {
    * @param config the JSON object containing the configuration parameters
    */
   private void initializeConfig(JsonObject config) {
-
-    this.s3conf = new S3Config.Builder()
-        .endpoint(config.getString(S3Config.ENDPOINT_CONF_OP))
-        .bucket(config.getString(S3Config.BUCKET_CONF_OP))
-        .region(config.getString(S3Config.REGION_CONF_OP))
-        .accessKey(config.getString(S3Config.ACCESS_KEY_CONF_OP))
-        .secretKey(config.getString(S3Config.SECRET_KEY_CONF_OP))
-        .pathBasedAccess(config.getBoolean(S3Config.PATH_BASED_ACC_CONF_OP))
-        .build();
 
     this.catRequestUri = config.getString("catRequestItemsUri");
     this.catServerHost = config.getString("catServerHost");
@@ -421,8 +415,10 @@ public class CollectionOnboardingProcess implements ProcessService {
         rgDetailsResult -> sqlClient.preparedQuery(RI_DETAILS_INSERT_QUERY)
           .execute(Tuple.of(resourceId, userId, accessPolicy))).compose(
         riDetailsResult -> sqlClient.preparedQuery(STAC_COLLECTION_ENCLOSURE_INSERT_QUERY).execute(
-          Tuple.of(collectionsDetailsTableName, title, fileName, COLLECTION_TYPE, fileSize))).compose(stacCollectionResult -> ogr2ogrCmd(input))
-      .compose(onBoardingSuccess -> sqlClient.query(grantQuery).execute())
+                Tuple.of(collectionsDetailsTableName, title, fileName, COLLECTION_TYPE, fileSize,
+                    input.getString(ProcessesRunnerImpl.S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY))))
+        .compose(stacCollectionResult -> ogr2ogrCmd(input))
+        .compose(onBoardingSuccess -> sqlClient.query(grantQuery).execute())
       .onSuccess(grantQueryResult -> {
         LOGGER.debug("Collection onboarded successfully ");
         promise.complete();

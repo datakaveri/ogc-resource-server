@@ -899,20 +899,22 @@ public class DatabaseServiceImpl implements DatabaseService{
                           .map(Object::toString).toArray(String[]::new) : null;
                       JsonObject assetProperties =
                           assetJsonObj.containsKey("properties") ? assetJsonObj.getJsonObject("properties") : null;
+                      String s3BucketId = assetJsonObj.getString("s3BucketId");
                       batchInserts.add(
                           Tuple.of(UUID.fromString(assetId), collectionId, itemId, title, description, href, type, size,
-                          roles, assetProperties));
+                          roles, assetProperties, s3BucketId));
                     });
                     return conn.preparedQuery("INSERT INTO stac_items_assets as asset_table" +
-                            " (id, collection_id, item_id, title, description, href, type, size, roles, properties)" +
-                            " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb) " +
+                            " (id, collection_id, item_id, title, description, href, type, size, roles, properties, s3_bucket_id)" +
+                            " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11) " +
                             " ON CONFLICT (id) DO UPDATE SET title = COALESCE (EXCLUDED.title, asset_table.title)" +
                             ", description = COALESCE(EXCLUDED.description, asset_table.description)" +
                             ", href = COALESCE(EXCLUDED.href, asset_table.href)" +
                             ", type= COALESCE(EXCLUDED.type, asset_table.type)" +
                             ", size = COALESCE(EXCLUDED.size, asset_table.size)" +
                             ", roles = COALESCE(EXCLUDED.roles, asset_table.roles)" +
-                            ", properties = COALESCE(EXCLUDED.properties, asset_table.properties)")
+                            ", properties = COALESCE(EXCLUDED.properties, asset_table.properties)" +
+                            ", s3_bucket_id = COALESCE(EXCLUDED.s3_bucket_id, asset_table.s3_bucket_id)")
                         .executeBatch(batchInserts);
                   }
                 })
@@ -1057,12 +1059,13 @@ public class DatabaseServiceImpl implements DatabaseService{
                         .map(Object::toString).toArray(String[]::new) : new String[0];
                     JsonObject assetProperties = assetJsonObj.containsKey("properties")
                         ? assetJsonObj.getJsonObject("properties") : new JsonObject();
+                    String s3BucketId = assetJsonObj.getString("s3BucketId");
                     batchInserts.add(Tuple.of(UUID.fromString(assetId), collectionId, itemId, title, description, href,
-                        type, size, roles, assetProperties));
+                        type, size, roles, assetProperties, s3BucketId));
                   });
                   return conn.preparedQuery("INSERT INTO stac_items_assets" +
-                          " (id, collection_id, item_id, title, description, href, type, size, roles, properties)" +
-                          " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb)")
+                          " (id, collection_id, item_id, title, description, href, type, size, roles, properties, s3_bucket_id)" +
+                          " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11)")
                       .executeBatch(batchInserts);
                 }
               }))
@@ -1166,6 +1169,28 @@ public class DatabaseServiceImpl implements DatabaseService{
         })
         .onFailure(fail -> {
           LOGGER.error("Failed to getTileSetList! - {}", fail.getMessage());
+          result.fail("Error!");
+        });
+    return result.future();
+  }
+
+  @Override
+  public Future<String> getTileS3BucketId(String collectionId, String tileMatrixSetId) {
+    Promise<String> result = Promise.promise();
+    client.withConnection(conn ->
+              conn.preparedQuery("SELECT s3_bucket_id FROM tilematrixsets_relation AS tmsr join tms_metadata AS tms_meta" +
+                      " ON tmsr.tms_id = tms_meta.id WHERE collection_id = $1::uuid AND tms_meta.title = $2::text")
+                .execute(Tuple.of(collectionId, tileMatrixSetId))
+                .map(SqlResult::value))
+        .onSuccess(success -> {
+          if (success.rowCount() == 0) {
+            result.fail(new OgcException(404, "Failed to get tile", "Could not get S3 bucket id for collection + TMS"));
+          } else {
+            result.complete(success.iterator().next().getString("s3_bucket_id"));
+          }
+        })
+        .onFailure(fail -> {
+          LOGGER.error("Failed S3 bucket id for collection + TMS! - {}", fail.getMessage());
           result.fail("Error!");
         });
     return result.future();
@@ -1514,7 +1539,7 @@ public class DatabaseServiceImpl implements DatabaseService{
   public Future<JsonObject> getCoverageDetails(String id) {
     Promise<JsonObject> promise = Promise.promise();
     String sqlString =
-        "select schema, href from collection_coverage where collection_id = $1::uuid";
+        "select schema, href, s3_bucket_id from collection_coverage where collection_id = $1::uuid";
     Collector<Row, ?, List<JsonObject>> collector =
         Collectors.mapping(Row::toJson, Collectors.toList());
 

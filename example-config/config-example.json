@@ -11,6 +11,17 @@
     "hostName": "https://server.url.com",
     "catalogId": "stac"
   },
+  "s3BucketsConfig" : {
+      "default" : {
+          "bucket": "bucketName",
+          "endpoint": "https://s3.ap-north-1.amazonaws.com",
+          "region": "ap-north-1",
+          "accessKey": "<accessKey>",
+          "secretKey": "<secretKey>",
+          "pathBasedAccess": false,
+          "readAccess" : "OPEN"
+      }
+  },
   "modules": [
     {
       "id": "ogc.rs.database.DatabaseVerticle",
@@ -58,12 +69,6 @@
       "verticleInstances": 8,
       "catServerHost": "",
       "catServerPort": 123,
-      "s3Endpoint": "https://s3.region.amazonaws.com",
-      "s3PathBasedAccess": false,
-      "s3Bucket": "bucket-name",
-      "s3Region": "aws-region",
-      "s3AccessKey": "",
-      "s3SecretKey": "",
       "databaseIP": "",
       "databasePort": 1234,
       "dbUser": "",
@@ -108,12 +113,6 @@
     {
       "id": "ogc.rs.processes.ProcessVerticle",
       "verticleInstances": 1,
-      "s3Bucket": "",
-      "s3AccessKey": "",
-      "s3SecretKey": "",
-      "s3Endpoint": "",
-      "s3PathBasedAccess": false,
-      "s3Region": "",
       "catServerHost": "",
       "catServerPort": 123,
       "catRequestItemsUri": "/iudx/cat/v1/item",

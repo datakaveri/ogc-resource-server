@@ -5,6 +5,8 @@ import static ogc.rs.common.Constants.PROCESSING_SERVICE_ADDRESS;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
@@ -29,6 +31,8 @@ public class ProcessVerticle extends AbstractVerticle {
   private String databasePassword;
   private int poolSize;
   private ProcessesRunnerService processService;
+  private HttpClient httpClient;
+
   static WebClient createWebClient(Vertx vertx) {
     return createWebClient(vertx, false);
   }
@@ -64,6 +68,7 @@ public class ProcessVerticle extends AbstractVerticle {
 
     this.poolOptions = new PoolOptions().setMaxSize(poolSize);
     this.pool = PgPool.pool(vertx, connectOptions, poolOptions);
+    this.httpClient = vertx.createHttpClient(new HttpClientOptions().setShared(true));
 
     processService = new ProcessesRunnerImpl(pool,createWebClient(vertx),config(),vertx);
 

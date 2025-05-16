@@ -3,6 +3,7 @@ package ogc.rs.processes.tilesMetaDataOnboarding;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -18,7 +19,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import ogc.rs.common.DataFromS3;
+import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
+import ogc.rs.processes.ProcessesRunnerImpl;
 import static ogc.rs.processes.tilesMetaDataOnboarding.MessageConstants.*;
 import static ogc.rs.processes.tilesMetaDataOnboarding.SqlConstants.*;
 
@@ -50,14 +53,14 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      * @param pgPool       Postgresql database connection pool
      * @param webClient    Vert.x web client for making HTTP requests
      * @param config       Configuration JSON object containing database and other settings
-     * @param dataFromS3   DataFromS3 instance for interacting with AWS S3
+     * @param s3conf       The S3Config instance i.e. config to access bucket requested in process input.
      * @param vertx        Vert.x instance for asynchronous event-driven programming
      */
-    public TilesMetaDataOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx){
+    public TilesMetaDataOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx){
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
-        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, dataFromS3, vertx);
-        this.dataFromS3 = dataFromS3;
+        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
+        this.dataFromS3 = new DataFromS3(vertx.createHttpClient(new HttpClientOptions().setShared(true)), s3conf);
 
     }
     /**
@@ -356,6 +359,8 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
             String collectionType = requestInput.getString("collectionType");
             String tmsId = requestInput.getString("tms_id");
             JsonArray pointOfOrigin = requestInput.getJsonArray("pointOfOrigin");
+            String s3BucketId =
+                requestInput.getString(ProcessesRunnerImpl.S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY);
 
             // Convert JsonArray to Double[] for bbox and pointOfOrigin
             Double[] bboxArray = (bbox != null) ? bbox.stream()
@@ -399,7 +404,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                     .compose(v -> {
                         LOGGER.debug("Inserting tile matrix set relation for collectionId: {}", collectionId);
                         return sqlClient.preparedQuery(INSERT_TILE_MATRIX_SET_RELATION_QUERY)
-                                .execute(Tuple.of(collectionId, tmsId, pointOfOriginArray))
+                                .execute(Tuple.of(collectionId, tmsId, pointOfOriginArray, s3BucketId))
                                 .mapEmpty();
                     })
                     .onSuccess(v -> {

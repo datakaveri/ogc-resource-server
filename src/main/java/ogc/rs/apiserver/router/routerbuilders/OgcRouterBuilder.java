@@ -68,6 +68,11 @@ public class OgcRouterBuilder extends EntityRouterBuilder {
     routerBuilder.operation(COLLECTIONS_API).handler(apiServerVerticle::getCollections)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse).failureHandler(failureHandler);
+    
+    routerBuilder.operation(LIST_CONFIGURED_S3_BUCKETS_API)
+        .handler(apiServerVerticle::listConfiguredS3Buckets)
+        .handler(apiServerVerticle::putCommonResponseHeaders)
+        .handler(apiServerVerticle::buildResponse).failureHandler(failureHandler);
 
     /**
      * For all implementers of GisEntityInterface, add the OGC routes to the RouterBuilder.

@@ -25,6 +25,7 @@ public class Constants {
     public static final String OPENAPI_SPEC = "/api";
     public static final String COLLECTIONS_API = "getCollections";
     public static final String COLLECTION_API = "describeCollection";
+    public static final String LIST_CONFIGURED_S3_BUCKETS_API = "listConfiguredS3Buckets";
     public static final String FEATURES_API = "getFeatures";
     public static final String FEATURE_API = "getFeature";
     public static final String EXECUTE_API = "execute";
@@ -80,6 +81,11 @@ public class Constants {
     public static final String COVERAGE_SCHEMA ="getCoverageSchema";
     public static final String COLLECTION_COVERAGE = "getCollectionCoverage";
     public static final String COLLECTION_COVERAGE_TYPE = "application/vnd.cov+json";
+    public static final String STAC_ITEM_TRAN_ASSETS = "assets";
+    public static final String STAC_ITEM_TRAN_S3_BUCKET_ID = "s3BucketId";
+    public static final String STAC_ITEM_TRAN_INVALID_S3_BUCKET_IDS_ERR =
+        "Failed to create STAC Items - some S3 bucket IDs for assets do not exist";
+    public static final String STAC_ITEM_TRAN_INVALID_S3_BUCKET_IDS_DESC = "Following S3 bucket IDs in assets do not exist : ";
 
 
 }

@@ -3,6 +3,7 @@ package ogc.rs.processes.s3MultiPartUploadForStacOnboarding;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -45,8 +46,8 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
     private final UtilClass utilClass;
     private final CollectionOnboardingProcess collectionOnboarding;
     private final DataFromS3 dataFromS3;
+    private final S3Config s3conf;
     private final PgPool pgPool;
-    private S3Config s3conf;
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
 
@@ -63,15 +64,15 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
      * @param pgPool          The PostgreSQL connection pool for database interactions.
      * @param webClient       The WebClient for making HTTP requests.
      * @param config          The configuration object containing S3 credentials and settings.
-     * @param dataFromS3      Utility class for interacting with S3.
+     * @param s3conf          S3 config of the bucket to be operated upon.
      * @param vertx           The Vertx instance for asynchronous operations.
      */
-    public S3InitiateMultiPartUploadProcess(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx) {
+    public S3InitiateMultiPartUploadProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx) {
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
-        this.dataFromS3 = dataFromS3;
-        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, dataFromS3, vertx);
-        initializeConfig(config);
+        this.s3conf = s3conf;
+        this.dataFromS3 = new DataFromS3(vertx.createHttpClient(new HttpClientOptions().setShared(true)), s3conf);
+        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
 
         // Initialize S3 Client & S3 Presigner
         this.s3Client = S3Client.builder()
@@ -99,22 +100,6 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
     }
 
     /**
-     * Initializes S3 configuration from the provided JSON configuration.
-     *
-     * @param config JSON object containing S3 credentials, region, bucket, and endpoint details.
-     */
-    private void initializeConfig(JsonObject config) {
-        this.s3conf = new S3Config.Builder()
-                .endpoint(config.getString(S3Config.ENDPOINT_CONF_OP))
-                .bucket(config.getString(S3Config.BUCKET_CONF_OP))
-                .region(config.getString(S3Config.REGION_CONF_OP))
-                .accessKey(config.getString(S3Config.ACCESS_KEY_CONF_OP))
-                .secretKey(config.getString(S3Config.SECRET_KEY_CONF_OP))
-                .pathBasedAccess(config.getBoolean(S3Config.PATH_BASED_ACC_CONF_OP))
-                .build();
-    }
-
-    /**
      * Executes the initiating multipart upload process, validating resource ownership,
      * checking item existence, verifying S3 object existence, and generating presigned URLs.
      *
@@ -127,7 +112,6 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
         String resourceId = requestInput.getString("collectionId");
         requestInput.put("resourceId", resourceId);
         String itemId = requestInput.getString("itemId").replaceAll("[^a-zA-Z0-9_.-]", "_");
-        String bucketName = requestInput.getString("bucketName");
         String fileName = requestInput.getString("fileName").replaceAll("[^a-zA-Z0-9_.-]", "_");
         String fileType = requestInput.getString("fileType");
         long fileSize = requestInput.getLong("fileSize");
@@ -154,7 +138,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
                 .compose(objectDoesNotExist -> {
                     if (objectDoesNotExist) {
                         LOGGER.info(OBJECT_DOES_NOT_EXIST_MESSAGE);
-                        return initiateMultipartUpload(bucketName, s3KeyName,fileName,fileType);
+                        return initiateMultipartUpload(s3KeyName,fileName,fileType);
                     } else {
                         LOGGER.error(OBJECT_ALREADY_EXISTS_MESSAGE);
                         return Future.failedFuture(new OgcException(409, "Conflict", OBJECT_ALREADY_EXISTS_MESSAGE));
@@ -163,7 +147,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
                 .compose(uploadIdHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress",calculateProgress(5)).put(MESSAGE, INITIATE_MULTIPART_UPLOAD_MESSAGE)
                 ).map(uploadIdHandler))
-                .compose(uploadId -> generatePresignedUrls(bucketName, s3KeyName, uploadId, totalParts,chunkSize))
+                .compose(uploadId -> generatePresignedUrls(s3KeyName, uploadId, totalParts,chunkSize))
                 .compose(result -> utilClass.updateJobTableStatus(
                         requestInput, Status.SUCCESSFUL, INITIATE_MULTIPART_UPLOAD_PROCESS_COMPLETE_MESSAGE
                 ).map(result))
@@ -319,17 +303,16 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
     /**
      * Initiates a multipart upload on S3.
      *
-     * @param bucket   The S3 bucket name.
      * @param key      The S3 object key.
      * @param filename The original file name.
      * @param filetype The content type of the file.
      * @return A future that resolves with the upload ID.
      */
-    private Future<String> initiateMultipartUpload(String bucket, String key, String filename, String filetype) {
+    private Future<String> initiateMultipartUpload(String key, String filename, String filetype) {
         Promise<String> promise = Promise.promise();
 
         CreateMultipartUploadRequest createRequest = CreateMultipartUploadRequest.builder()
-                .bucket(bucket)
+                .bucket(s3conf.getBucket())
                 .key(key)
                 .contentType(filetype)
                 .metadata(Map.of(
@@ -355,7 +338,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
      *
      * @return A future containing the JSON response with pre-signed URLs.
      */
-    private Future<JsonObject> generatePresignedUrls(String bucket, String key, final String uploadId, int totalParts, long chunkSize) {
+    private Future<JsonObject> generatePresignedUrls(String key, final String uploadId, int totalParts, long chunkSize) {
         Promise<JsonObject> promise = Promise.promise();
         List<JsonObject> presignedUrls = new ArrayList<>();
 
@@ -366,7 +349,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
                 PresignedUploadPartRequest presignedRequest = s3Presigner.presignUploadPart(r -> r
                         .signatureDuration(Duration.ofMinutes(150))
                         .uploadPartRequest(UploadPartRequest.builder()
-                                .bucket(bucket)
+                                .bucket(s3conf.getBucket())
                                 .key(key)
                                 .uploadId(uploadId)
                                 .partNumber(partNumber)
