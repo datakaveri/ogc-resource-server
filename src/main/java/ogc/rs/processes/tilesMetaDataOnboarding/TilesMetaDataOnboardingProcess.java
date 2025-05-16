@@ -21,6 +21,7 @@ import java.util.List;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
+import ogc.rs.processes.ProcessesRunnerImpl;
 import static ogc.rs.processes.tilesMetaDataOnboarding.MessageConstants.*;
 import static ogc.rs.processes.tilesMetaDataOnboarding.SqlConstants.*;
 
@@ -358,6 +359,8 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
             String collectionType = requestInput.getString("collectionType");
             String tmsId = requestInput.getString("tms_id");
             JsonArray pointOfOrigin = requestInput.getJsonArray("pointOfOrigin");
+            String s3BucketId =
+                requestInput.getString(ProcessesRunnerImpl.S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY);
 
             // Convert JsonArray to Double[] for bbox and pointOfOrigin
             Double[] bboxArray = (bbox != null) ? bbox.stream()
@@ -401,7 +404,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                     .compose(v -> {
                         LOGGER.debug("Inserting tile matrix set relation for collectionId: {}", collectionId);
                         return sqlClient.preparedQuery(INSERT_TILE_MATRIX_SET_RELATION_QUERY)
-                                .execute(Tuple.of(collectionId, tmsId, pointOfOriginArray))
+                                .execute(Tuple.of(collectionId, tmsId, pointOfOriginArray, s3BucketId))
                                 .mapEmpty();
                     })
                     .onSuccess(v -> {
