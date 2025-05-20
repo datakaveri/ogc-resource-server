@@ -2744,16 +2744,10 @@ public class ApiServerVerticle extends AbstractVerticle {
     if (requestBody.containsKey(STAC_ITEM_TRAN_ASSETS)) {
       JsonObject assets = requestBody.getJsonObject(STAC_ITEM_TRAN_ASSETS);
 
-      Set<String> s3BucketIds =
-          assets.stream().map(i -> ((JsonObject) i.getValue()).getString(STAC_ITEM_TRAN_S3_BUCKET_ID))
-          .collect(Collectors.toSet());
-
-      List<String> invalidBucketIds = s3BucketIds.stream()
-          .filter(id -> s3conf.getConfigByIdentifier(id).isEmpty()).collect(Collectors.toList());
-
-      if (!invalidBucketIds.isEmpty()) {
-        routingContext.fail(new OgcException(400, STAC_ITEM_TRAN_INVALID_S3_BUCKET_IDS_ERR,
-            STAC_ITEM_TRAN_INVALID_S3_BUCKET_IDS_DESC + invalidBucketIds.toString()));
+      try {
+        requestBody.put(STAC_ITEM_TRAN_ASSETS, validateAndProcessStacAssets(assets));
+      } catch (OgcException e) {
+        routingContext.fail(e);
         return;
       }
     }
