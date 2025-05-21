@@ -1,26 +1,34 @@
 package ogc.rs.apiserver.util;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static ogc.rs.apiserver.util.Constants.*;
+
 /**
- * Represents API usage and data usage limits extracted from a user's token.
+ * Represents API usage, data usage, and spatial (bbox) limits extracted from a user's token.
  */
 public class Limits {
 
     private final Long policyIssuedAt;
     private final Long dataUsageLimitInBytes;
     private final Long apiHitsLimit;
+    private final List<Double> bboxLimit;
 
-    private Limits(Long policyIssuedAt, Long dataUsageLimitInBytes, Long apiHitsLimit) {
+    private Limits(Long policyIssuedAt, Long dataUsageLimitInBytes, Long apiHitsLimit, List<Double> bboxLimit) {
         this.policyIssuedAt = policyIssuedAt;
         this.dataUsageLimitInBytes = dataUsageLimitInBytes;
         this.apiHitsLimit = apiHitsLimit;
+        this.bboxLimit = bboxLimit;
     }
 
     /**
      * Parses the JsonObject representing limits and constructs a Limits instance.
      *
-     * @param limitsJson JsonObject with fields like "iat", "dataUsage", "apiHits"
+     * @param limitsJson JsonObject with fields like "iat", "dataUsage", "apiHits", "bbox"
      * @return Limits object, or null if limitsJson is null
      */
     public static Limits fromJson(JsonObject limitsJson) {
@@ -41,7 +49,12 @@ public class Limits {
             apiHits = limitsJson.getLong("apiHits");
         }
 
-        return new Limits(iat, dataUsageBytes, apiHits);
+        List<Double> bbox = null;
+        if (limitsJson.containsKey("bbox")) {
+            bbox = parseBboxLimit(limitsJson.getJsonArray("bbox"));
+        }
+
+        return new Limits(iat, dataUsageBytes, apiHits, bbox);
     }
 
     /**
@@ -78,6 +91,66 @@ public class Limits {
         }
     }
 
+    /**
+     * Parses a JSON array representing a 2D bounding box into a List<Double>.
+     * The expected format is:
+     *   bbox = [minLon, minLat, maxLon, maxLat] or: [west, south, east, north]
+     * where:
+     *   - minLon (west) ∈ [-180, 180]
+     *   - maxLon (east) ∈ [-180, 180]
+     *   - minLat (south) ∈ [-90, 90]
+     *   - maxLat (north) ∈ [-90, 90]
+     *   - minLon < maxLon i,e west < east
+     *   - minLat < maxLat i,e south < north
+     *
+     * @param bboxArray JsonArray containing exactly 4 numeric values
+     * @return List<Double> representation of the bounding box
+     * @throws OgcException if the format, type, range, or ordering is invalid
+     */
+    private static List<Double> parseBboxLimit(JsonArray bboxArray) {
+        if (bboxArray == null || bboxArray.isEmpty()) {
+            return null;
+        }
+
+        if (bboxArray.size() != 4) {
+            throw new OgcException(400, "Bad Request", INVALID_BBOX_FORMAT);
+        }
+
+        List<Double> bbox = new ArrayList<>();
+        for (int i = 0; i < bboxArray.size(); i++) {
+            Object val = bboxArray.getValue(i);
+            if (!(val instanceof Number)) {
+                throw new OgcException(400, "Bad Request", ERR_BBOX_NON_NUMERIC);
+            }
+
+            double value = ((Number) val).doubleValue();
+            if (Double.isNaN(value) || Double.isInfinite(value)) {
+                throw new OgcException(400, "Bad Request", ERR_BBOX_NON_FINITE);
+            }
+
+            bbox.add(value);
+        }
+
+        double minLon = bbox.get(0);
+        double minLat = bbox.get(1);
+        double maxLon = bbox.get(2);
+        double maxLat = bbox.get(3);
+
+        if (minLon < -180 || minLon > 180 || maxLon < -180 || maxLon > 180) {
+            throw new OgcException(400, "Bad Request", ERR_BBOX_LONGITUDE_RANGE);
+        }
+
+        if (minLat < -90 || minLat > 90 || maxLat < -90 || maxLat > 90) {
+            throw new OgcException(400, "Bad Request", ERR_BBOX_LATITUDE_RANGE);
+        }
+
+        if (minLon >= maxLon || minLat >= maxLat) {
+            throw new OgcException(400, "Bad Request", ERR_BBOX_MIN_MAX_ORDER);
+        }
+
+        return bbox;
+    }
+
     public Long getPolicyIssuedAt() {
         return policyIssuedAt;
     }
@@ -88,5 +161,9 @@ public class Limits {
 
     public Long getApiHitsLimit() {
         return apiHitsLimit;
+    }
+
+    public List<Double> getBboxLimit() {
+        return bboxLimit;
     }
 }
