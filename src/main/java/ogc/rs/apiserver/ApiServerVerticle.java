@@ -609,7 +609,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                       JsonObject json = new JsonObject();
                       List<JsonObject> tempArray = new ArrayList<>();
                       tempArray.add(collection);
-                      if (collection.getJsonArray("type").contains("FEATURE"))
+                      if (collection.getJsonArray("type").contains("FEATURE")
+                              || collection.getJsonArray("type").contains("COLLECTION"))
                         json = buildCollectionFeatureResult(tempArray);
                       else if (collection.getJsonArray("type").contains("MAP"))
                         json = buildCollectionTileResult(tempArray);
@@ -903,8 +904,11 @@ public class ApiServerVerticle extends AbstractVerticle {
                 .put("rel", "item")
                 .put("title", "Link template for " + collection.getString("id") + " features")
                 .put("templated","true")))
-        .put("itemType", "feature")
         .put("crs", collection.getJsonArray("crs"));
+    if(collection.getJsonArray("type").getString(0).equals("FEATURE"))
+      collection.put("itemType", "feature");
+    else
+      collection.put("itemType", "record");
     if (collection.getJsonArray("enclosure") != null && !collection.getJsonArray("enclosure").isEmpty()) {
       collection.getJsonArray("enclosure")
               .forEach(enclosureJson -> {
@@ -2841,7 +2845,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     JsonArray recordItemCollection = new JsonArray();
     dbService.getOgcRecords(catalogId)
             .onSuccess(success->{
-              LOGGER.debug("Record Item Results: "+success);
+              LOGGER.debug("Building Record Items Response");
               for(JsonObject recordItem : success)
               {
                 JsonObject recordItemBuilt = buildRecordItemResponse(recordItem, catalogId);
@@ -2878,8 +2882,7 @@ public class ApiServerVerticle extends AbstractVerticle {
             .put("conformsTo",
                     new JsonArray()
                             .add("http://www.opengis.net/spec/ogcapi-records-1/1.0/conf/record-core")
-                            .add("http://www.opengis.net/spec/ogcapi-records-1/1.0/conf/record-collection")
-                            .add("http://www.opengis.net/spec/ogcapi-records-1/1.0/conf/record-core-query-parameters"))
+                            .add("http://www.opengis.net/spec/ogcapi-records-1/1.0/conf/record-collection"))
             .put( "links",
                     new JsonArray()
                             .add(
@@ -2910,17 +2913,33 @@ public class ApiServerVerticle extends AbstractVerticle {
                                     .put("description", recordItem.getString("description"))))
             .put("properties", new JsonObject().put("title",recordItem.getString("title") )
                     .put("description",  recordItem.getString("description"))
-                    .put("keywords", recordItem.getJsonArray("keywords")));
+                    .put("keywords", recordItem.getJsonArray("keywords"))
+                    .put("created", recordItem.getString("created")));
 
-    if(recordItem.getJsonArray("externalids")!=null)
-    {
-      JsonArray externalIdsArray = new JsonArray();
-      JsonObject externalIds = new JsonObject();
-      externalIds.put("value", recordItem.getJsonArray("externalids").getString(0));
-      externalIdsArray.add(externalIds);
-      builtRecordItem.getJsonObject("properties").put( "externalIds", externalIdsArray);
+    String providerName = recordItem.getString("provider_name");
+    String providerContacts = recordItem.getString("provider_contacts");
 
+
+    if (providerName != null && !providerName.isEmpty()
+            && providerContacts != null && !providerContacts.isEmpty()) {
+      builtRecordItem.getJsonObject("properties").put(
+              "contacts",
+              new JsonArray()
+                      .add(
+                              new JsonObject()
+                                      .put("name", providerName)
+                                      .put("contactInstructions", providerContacts)
+                                      .put("roles", new JsonArray().add("producer"))
+                                      .put("links", new JsonArray()
+                                              .add(new JsonObject()
+                                                      .put("href", providerContacts)
+                                                      .put("rel", "about")
+                                                      .put("type", "text/html")))));
     }
+
+    builtRecordItem
+        .getJsonObject("properties")
+        .put("formats", new JsonArray().add(new JsonObject().put("name", "GeoJSON").put("mediaType", "application/geo+json")));
 
     JsonObject extent = new JsonObject();
     if (recordItem.getJsonArray("bbox") != null)
@@ -2945,7 +2964,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     dbService.getOgcRecordItem(catalogId, recordId)
             .onSuccess(success->{
-              LOGGER.debug("Record Item Result: "+success);
+              LOGGER.debug("Building Record Item Response");
               JsonObject recordItemBuilt = buildRecordItemResponse(success, catalogId);
               routingContext.put("response", recordItemBuilt.toString());
               routingContext.put("statusCode", 200);

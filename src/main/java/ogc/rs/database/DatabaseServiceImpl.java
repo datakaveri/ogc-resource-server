@@ -89,7 +89,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                         "   JOIN collections_enclosure ON collections_details.id = collections_enclosure.collections_id JOIN collection_supported_crs ON " +
                         "   collections_details.id = collection_supported_crs.collection_id JOIN crs_to_srid ON crs_to_srid.id = " +
                         "   collection_supported_crs.crs_id JOIN collection_type ON collections_details.id = collection_type.collection_id " +
-                        "   WHERE collection_type.type NOT IN ('STAC', 'COLLECTION') GROUP BY collections_details.id;")
+                        "   WHERE collection_type.type != 'STAC' GROUP BY collections_details.id;")
                     .collecting(collector)
                     .execute()
                     .map(SqlResult::value))
@@ -929,7 +929,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         String tableName = "public.\"" + catalogId + "\"";
         String query = String.format(
-                "SELECT id, ST_AsGeoJSON(geometry)::json AS geometry, created, title, description, keywords, externalids, bbox, temporal, collection_id FROM %s",
+                "SELECT id, ST_AsGeoJSON(geometry)::json AS geometry, created, title, description, keywords, bbox, temporal, collection_id, provider_name, provider_contacts FROM %s",
                 tableName
         );
         client.withConnection(conn ->
@@ -938,7 +938,13 @@ public class DatabaseServiceImpl implements DatabaseService{
                                 .execute()
                                 .map(SqlResult::value))
                 .onSuccess(success -> {
-                    LOGGER.debug("Record Items Result: {}", success.toString());
+                    LOGGER.debug("Record Items Successfully fetched!");
+                    if (success.isEmpty()) {
+                        LOGGER.error("Records table is empty!");
+                        result.fail(
+                                new OgcException(404, "Not found", "Record table is Empty!"));
+                        return;
+                    }
                     result.complete(success);
                 })
                 .onFailure(fail -> {
@@ -951,20 +957,30 @@ public class DatabaseServiceImpl implements DatabaseService{
 
     @Override
     public Future<JsonObject> getOgcRecordItem(String catalogId, String recordId) {
+
         Promise <JsonObject> result = Promise.promise();
         Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
         String tableName = "public.\"" + catalogId + "\"";
         String query = String.format(
-                "SELECT id, ST_AsGeoJSON(geometry)::json AS geometry, created, title, description, keywords, externalids, bbox, temporal, collection_id FROM %s WHERE id = $1::uuid",
+                "SELECT id, ST_AsGeoJSON(geometry)::json AS geometry, created, title, description, keywords, bbox, temporal, collection_id, provider_name, provider_contacts FROM %s WHERE id = $1::int",
                 tableName
         );
         client.withConnection(conn ->
                         conn.preparedQuery(query)
                                 .collecting(collector)
-                                .execute(Tuple.of(recordId))
+                                .execute(Tuple.of(Integer.parseInt(recordId)))
                                 .map(SqlResult::value))
                 .onSuccess(success -> {
-                    LOGGER.debug("Record Item Result: {}", success.toString());
+                    LOGGER.debug("Record Item Successfully fetched");
+                    if(success.isEmpty())
+                    {
+                        LOGGER.debug("handleeee");
+                        LOGGER.error("Record is not present!");
+                        result.fail(
+                                new OgcException(404, "Not found", "Record Not Found!"));
+                        return;
+
+                    }
                     result.complete(success.get(0));
                 })
                 .onFailure(fail -> {

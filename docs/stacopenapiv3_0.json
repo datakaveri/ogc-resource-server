@@ -123,7 +123,7 @@
       },
       "post": {
         "tags": [
-          "CollectionTransaction"
+          "STAC Collection Transaction"
         ],
         "summary": "Add a new Collection",
         "description": "add a new STAC Collection or multiple collections",
@@ -196,7 +196,7 @@
     "/stac/collections/{collectionId}": {
       "put": {
         "tags": [
-          "CollectionTransaction"
+          "STAC Collection Transaction"
         ],
         "summary": "Updates the field of the collection",
         "description": "Use this method to update an existing Collection. Requires the values to be changed included in request body.",
@@ -272,13 +272,13 @@
           }
         ]
       },
-      "delete": {
-        "summary": "Delete a Collection",
-        "description": "Use this method to delete an existing Collection.",
-        "operationId": "deleteStacCollection",
+      "get": {
         "tags": [
-          "CollectionTransaction"
+          "STAC Collection Transaction"
         ],
+        "summary": "Fetches a specific collection",
+        "description": "This method is used to fetch a specific collection",
+        "operationId": "getStacCollection",
         "parameters": [
           {
             "name": "collectionId",
@@ -289,32 +289,24 @@
             }
           }
         ],
-        "responses": {
-          "200": {
-            "description": "The resource was deleted."
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
-        },
-        "security": [
-          {
-            "DX-AAA-Token": []
-          }
-        ],
-        "servers": [
-          {
-            "url": "${HOSTNAME}",
-            "description": "OGC-Resource-Server"
-          }
-        ]
-      }
+       "responses": {
+         "200": {
+           "$ref": "#/components/responses/stacCollection"
+         },
+         "404": {
+           "$ref": "#/components/responses/NotFound"
+         },
+         "500": {
+           "$ref": "#/components/responses/ServerError"
+         }
+       }
+      },
+      "servers": [
+        {
+          "url": "${HOSTNAME}",
+          "description": "OGC-Resource-Server"
+        }
+      ]
     },
     "/assets/{assetId}": {
       "get": {
@@ -412,7 +404,7 @@
           }
         }],
         "tags": [
-          "Transaction"
+          "STAC Item Transaction"
         ],
         "requestBody": {
           "content": {
@@ -543,7 +535,7 @@
           }
         ],
         "tags": [
-          "Transaction"
+          "STAC Item Transaction"
         ],
         "requestBody": {
           "content": {

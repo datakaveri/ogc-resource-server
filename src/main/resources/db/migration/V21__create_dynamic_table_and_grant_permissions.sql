@@ -1,12 +1,3 @@
-CREATE OR REPLACE FUNCTION set_geometry_from_bbox()
-RETURNS trigger AS $$
-BEGIN
-  IF NEW.bbox IS NOT NULL AND array_length(NEW.bbox, 1) = 4 THEN
-    NEW.geometry := ST_MakeEnvelope(NEW.bbox[1], NEW.bbox[2], NEW.bbox[3], NEW.bbox[4], 4326);
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
 
 DO $$
 DECLARE
@@ -38,7 +29,8 @@ BEGIN
     VALUES (new_id, 'COLLECTION');
 
     INSERT INTO ri_details (id, role_id, access)
-    VALUES (new_id, '00000000-0000-0000-0000-000000000000', 'OPEN');
+    VALUES (new_id, '00000000-0000-0000-0000-000000000000', 'OPEN')
+    ON CONFLICT (id) DO NOTHING;
 
     -- Create table with UUID as the table name and SERIAL ID for auto-increment
     EXECUTE format($f$
@@ -48,7 +40,8 @@ BEGIN
             title character varying(50) DEFAULT ''::character varying,
             description character varying(100) DEFAULT ''::character varying,
             keywords TEXT[],
-            externalids UUID[],
+            provider_name character varying(100),
+            provider_contacts character varying(100),
             bbox NUMERIC[],
             temporal TEXT[],
             geometry GEOMETRY,
@@ -60,17 +53,7 @@ BEGIN
         )
     $f$, new_id);
 
-    -- Create trigger
-    trigger_name := 'trg_set_geometry_from_bbox_' || replace(new_id::TEXT, '-', '_');
-
-    EXECUTE format($f$
-        CREATE TRIGGER %I
-        BEFORE INSERT OR UPDATE ON public.%I
-        FOR EACH ROW
-        EXECUTE FUNCTION set_geometry_from_bbox()
-    $f$, trigger_name, new_id);
-
-   EXECUTE format($f$
+  EXECUTE format($f$
     GRANT SELECT, INSERT, UPDATE, DELETE ON public.%I TO %s
 $f$, new_id, ${ogcUser});
 END $$ LANGUAGE plpgsql;

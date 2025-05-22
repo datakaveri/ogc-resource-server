@@ -117,8 +117,6 @@ public class OgcRecordsEntity implements GisEntityInterface{
 
                             list.forEach(
                                     obj->{
-                                        JsonObject oasBlock = obj.generateRecordOasBlock();
-                                        LOGGER.debug("Generated OAS block:@@@@@@@@@@\n{}", oasBlock.encodePrettily());
                                         ogcRecordFrags.add(obj.generateRecordOasBlock());
                                     });
                             OasFragments fragments = new OasFragments();
