@@ -530,6 +530,7 @@
                             <srcFiles>
                                 <srcFile>src/test/resources/integ-db/setup/createEmptyCollectionForAppending.sql</srcFile>
                                 <srcFile>src/test/resources/integ-db/setup/createEmptyCollectionForTestingExistingFeatureFlow.sql</srcFile>
+                                <srcFile>src/test/resources/integ-db/setup/createStacCollectionForStacTransaction.sql</srcFile>
                             </srcFiles>
                         </configuration>
                     </execution>
@@ -546,6 +547,8 @@
                                 <srcFile>src/test/resources/integ-db/teardown/deleteCollectionAppending.sql</srcFile>
                                 <srcFile>src/test/resources/integ-db/teardown/deleteTilesMetaDataOnboarding.sql</srcFile>
                                 <srcFile>src/test/resources/integ-db/teardown/deleteStacCollectionOnboarding.sql</srcFile>
+                                <srcFile>src/test/resources/integ-db/teardown/deleteStacTransactionData.sql</srcFile>
+                                <srcFile>src/test/resources/integ-db/teardown/deleteTilesFromExistingFeature.sql</srcFile>
                             </srcFiles>
                         </configuration>
                     </execution>

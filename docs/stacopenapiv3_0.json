@@ -2248,7 +2248,8 @@
         "additionalProperties": {
           "type": "object",
           "required": [
-            "href"
+            "href",
+            "s3BucketId"
           ],
           "properties": {
             "href": {
@@ -2270,6 +2271,11 @@
               "type": "string",
               "description": "Media type of the asset",
               "example": "image/png"
+            },
+            "s3BucketId": {
+              "type": "string",
+              "description": "The identifier of the S3 bucket that will contain the asset. A list of bucket identifiers can be obtained using the `GET /listConfiguredS3Buckets` API",
+              "example": "thumbnailsAndOverviewsBucket"
             },
             "roles": {
               "type": "array",

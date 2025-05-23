@@ -64,15 +64,16 @@ public class CollectionAppendingProcess implements ProcessService {
      * @param pgPool             The PostgreSQL connection pool used for database operations.
      * @param webClient          The WebClient used for making HTTP requests.
      * @param config             The configuration details as a JsonObject.
-     * @param dataFromS3         The DataFromS3 instance for accessing data from AWS S3.
+     * @param s3conf             The S3Config instance i.e. config to access bucket requested in process input.
      * @param vertx              The Vert.x instance for executing asynchronous and event-driven tasks.
      */
 
-    public CollectionAppendingProcess(PgPool pgPool, WebClient webClient, JsonObject config, DataFromS3 dataFromS3, Vertx vertx) {
+    public CollectionAppendingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx) {
 
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
-        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, dataFromS3, vertx);
+        this.s3conf = s3conf;
+        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
         this.vertx = vertx;
         initializeConfig(config);
     }
@@ -85,15 +86,6 @@ public class CollectionAppendingProcess implements ProcessService {
 
     private void initializeConfig(JsonObject config) {
 
-        this.s3conf = new S3Config.Builder()
-            .endpoint(config.getString(S3Config.ENDPOINT_CONF_OP))
-            .bucket(config.getString(S3Config.BUCKET_CONF_OP))
-            .region(config.getString(S3Config.REGION_CONF_OP))
-            .accessKey(config.getString(S3Config.ACCESS_KEY_CONF_OP))
-            .secretKey(config.getString(S3Config.SECRET_KEY_CONF_OP))
-            .pathBasedAccess(config.getBoolean(S3Config.PATH_BASED_ACC_CONF_OP))
-            .build();
-        
         this.databaseName = config.getString("databaseName");
         this.databaseHost = config.getString("databaseHost");
         this.databasePassword = config.getString("databasePassword");

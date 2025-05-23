@@ -36,7 +36,7 @@ public abstract class EntityRouterBuilder {
       Set.of(HEADER_AUTHORIZATION, HEADER_CONTENT_LENGTH, HEADER_CONTENT_TYPE, HEADER_HOST, HEADER_ORIGIN,
           HEADER_REFERER, HEADER_ACCEPT, HEADER_ALLOW_ORIGIN);
 
-  private static final Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS);
+  private static final Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
   public static final String API_DOC_FILE_PATH = "docs/apidoc.html";
   private static final String OPENAPI_V3_JSON_CONTENT_TYPE = "application/vnd.oai.openapi+json;version=3.0";
   private static final String HTML_CONTENT_TYPE = "text/html";

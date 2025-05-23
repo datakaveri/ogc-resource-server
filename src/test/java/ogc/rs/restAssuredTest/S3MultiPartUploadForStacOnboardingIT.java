@@ -5,14 +5,13 @@ import io.restassured.response.Response;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import jdk.jfr.Description;
+import ogc.rs.processes.ProcessesRunnerImpl;
 import ogc.rs.util.FakeTokenBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.awaitility.core.ConditionTimeoutException;
 
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.processes.collectionOnboarding.Constants.RESOURCE_OWNERSHIP_ERROR;
-import static org.awaitility.Awaitility.await;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -23,12 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static io.restassured.RestAssured.given;
 import static ogc.rs.processes.s3MultiPartUploadForStacOnboarding.Constants.*;
+import static ogc.rs.processes.util.Constants.NO_S3_CONF_FOUND_FOR_BUCKET_ID;
 import static ogc.rs.restAssuredTest.Constant.*;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(RestAssuredConfigExtension.class)
@@ -73,6 +72,20 @@ public class S3MultiPartUploadForStacOnboardingIT {
                 .then().statusCode(204);
 
     }
+    
+    /**
+     * Since result of {@link #testExecuteInitiateMultipartUploadSuccess()} is used for the complete
+     * upload tests, if that test fails, rest of tests will fail with NPE since uploadId, chunkSize
+     * and presignedUrls will be null. Hence this method checks if any of those are null and fails
+     * the test if they are.
+     */
+    private void checkIfInitiateTestPassed() {
+      if (uploadId == null || chunkSize == 0 || presignedUrls == null) {
+        fail(
+            "uploadId, chunkSize or presignedUrls is null, multipart initiate test may have failed");
+      }
+      return;
+    }
 
     private JsonObject initiateUploadRequestBody() {
         JsonObject requestBody = new JsonObject();
@@ -80,7 +93,7 @@ public class S3MultiPartUploadForStacOnboardingIT {
 
         inputs.put("collectionId", RESOURCE_ID_STAC_TEST);
         inputs.put("itemId", ITEM_ID_STAC_TEST);
-        inputs.put("bucketName", "bucket1");
+        inputs.put(ProcessesRunnerImpl.S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY, "default");
         inputs.put("fileName", "TestFile.gpkg");
         inputs.put("fileType", "application/octet-stream");
         inputs.put("fileSize", 106496L);
@@ -95,7 +108,7 @@ public class S3MultiPartUploadForStacOnboardingIT {
         JsonObject inputs = new JsonObject();
 
         inputs.put("uploadId", uploadId);
-        inputs.put("bucketName", "bucket1");
+        inputs.put(ProcessesRunnerImpl.S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY, "default");
         inputs.put("filePath", "04be4cc1-39f9-4441-b32d-1e5767fa8f10/C3_PAN_20211108_2485193221/TestFile.gpkg");
         inputs.put("parts", new JsonArray(formattedParts));
 
@@ -112,11 +125,6 @@ public class S3MultiPartUploadForStacOnboardingIT {
     private Response sendExecutionRequest(String processId, String token, JsonObject requestBody) {
         return RestAssured.given().pathParam("processId", processId).auth().oauth2(token)
                 .contentType("application/json").body(requestBody.toString()).when().post(uploadEndpoint);
-    }
-
-    private Response sendJobStatusRequest(String jobId, String token) {
-        return RestAssured.given().pathParam("jobId", jobId).auth().oauth2(token)
-                .get(jobStatusEndpoint);
     }
 
     private void uploadFileParts(File file) {
@@ -252,7 +260,7 @@ public class S3MultiPartUploadForStacOnboardingIT {
     public void testExecuteFailInvalidInput() {
         LOGGER.debug("Testing Failure: Invalid input");
         JsonObject invalidRequest = new JsonObject()
-                .put("inputs", initiateUploadRequestBody().getJsonObject("inputs").remove("bucketName"));
+                .put("inputs", initiateUploadRequestBody().getJsonObject("inputs").remove("collectionId"));
         Response response = sendExecutionRequest(initiateUploadProcessId, getToken(), invalidRequest);
         response.then().statusCode(400).body(CODE_KEY, is("Bad Request"));
     }
@@ -318,17 +326,17 @@ public class S3MultiPartUploadForStacOnboardingIT {
 
     @Test
     @Order(10)
-    @Description("Failure: Multipart Upload Initiation")
-    public void testExecuteMultipartUploadInitiationFail() {
-        LOGGER.debug("Testing Failure: Multipart Upload Initiation");
+    @Description("Failure: Multipart Upload Initiation - bucket config not found")
+    public void testExecuteMultipartUploadInitiationFailBucketNotfound() {
+        LOGGER.debug("Testing Failure: Multipart Upload Initiation - bucket config not found");
 
         String token = getToken();
         JsonObject requestBody = initiateUploadRequestBody();
-        requestBody.getJsonObject("inputs").put("bucketName", "invalidBucket");
+        requestBody.getJsonObject("inputs").put(ProcessesRunnerImpl.S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY, "something");
 
         Response sendExecutionRequest = sendExecutionRequest(initiateUploadProcessId, token, requestBody);
         //LOGGER.debug("10th Execution Response: {}" , sendExecutionRequest.getBody().asString());
-        sendExecutionRequest.then().statusCode(500).body(DESCRIPTION_KEY,is(INITIATE_MULTIPART_UPLOAD_FAILURE_MESSAGE));
+        sendExecutionRequest.then().statusCode(403).body(DESCRIPTION_KEY,is(NO_S3_CONF_FOUND_FOR_BUCKET_ID + "something"));
     }
 
     @Test
@@ -340,28 +348,27 @@ public class S3MultiPartUploadForStacOnboardingIT {
         String token = getToken();
         JsonObject requestBody = initiateUploadRequestBody();
 
-        Response sendExecutionRequest = sendExecutionRequest(initiateUploadProcessId, token, requestBody);
+        Response sendExecutionRequest = sendExecutionRequest(initiateUploadProcessId, token, requestBody)
+            .then().statusCode(200)
+                .body("uploadId", not(emptyOrNullString()))
+                .body("chunkSize", is(greaterThan(0)))
+                .body("presignedUrls", not(emptyArray()))
+                .body("presignedUrls", everyItem(hasKey("partNumber")))
+                .body("presignedUrls", everyItem(hasKey("url")))
+                .extract().response();
+        
         //LOGGER.debug("11th Execution Response: {}" , sendExecutionRequest.getBody().asString());
         uploadId = sendExecutionRequest.body().path("uploadId");
         chunkSize = sendExecutionRequest.body().path("chunkSize");
         presignedUrls = sendExecutionRequest.body().path("presignedUrls");
-        String jobId = sendExecutionRequest.body().path("jobId");
-
-        try {
-            // Use Awaitility to wait for the job status response
-            await().atMost(20, TimeUnit.SECONDS).until(() -> {
-                Response getJobStatus = sendJobStatusRequest(jobId, token);
-                return getJobStatus.body().path(MESSAGE).equals(INITIATE_MULTIPART_UPLOAD_PROCESS_COMPLETE_MESSAGE);
-            });
-        } catch (ConditionTimeoutException e) {
-            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
-        }
     }
 
     @Test
     @Order(12)
     @Description("Success: Upload file parts to S3 mock")
     public void testUploadFileParts() {
+        checkIfInitiateTestPassed();
+        
         File testFile = new File("src/test/resources/processFiles/04be4cc1-39f9-4441-b32d-1e5767fa8f10/C3_PAN_20211108_2485193221/TestFile.gpkg");
         uploadFileParts(testFile);
     }
@@ -371,25 +378,15 @@ public class S3MultiPartUploadForStacOnboardingIT {
     @Description("Success: Complete Multipart Upload")
     public void testExecuteCompleteMultipartUploadSuccess() {
         LOGGER.debug("Success: Complete Multipart Upload");
+        checkIfInitiateTestPassed();
 
         String token = getToken();
         JsonObject requestBody = completeUploadRequestBody();
 
         LOGGER.debug("complete upload request: {}",requestBody);
 
-        Response sendExecutionRequest = sendExecutionRequest(completeUploadProcessId, token, requestBody);
-        //LOGGER.debug("13th Execution Response: {}" , sendExecutionRequest.getBody().asString());
-        String jobId = sendExecutionRequest.body().path("jobId");
-
-        try {
-            // Use Awaitility to wait for the job status response
-            await().atMost(35, TimeUnit.SECONDS).until(() -> {
-                Response getJobStatus = sendJobStatusRequest(jobId, token);
-                return getJobStatus.body().path(MESSAGE).equals(COMPLETE_MULTIPART_UPLOAD_PROCESS_SUCCESS_MESSAGE);
-            });
-        } catch (ConditionTimeoutException e) {
-            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
-        }
+        sendExecutionRequest(completeUploadProcessId, token, requestBody).then().statusCode(200)
+            .body("message", is(COMPLETE_MULTIPART_UPLOAD_PROCESS_SUCCESS_MESSAGE));
     }
 
     @Test
@@ -397,6 +394,7 @@ public class S3MultiPartUploadForStacOnboardingIT {
     @Description("Failure: Multipart Upload Completion failure due to invalid parts format")
     public void testExecuteMultipartUploadCompletionInvalidPartsFail() {
         LOGGER.debug("Testing Failure: Multipart Upload Completion failure due to invalid parts format");
+        checkIfInitiateTestPassed();
 
         String token = getToken();
         JsonObject requestBody = completeUploadRequestBody();
@@ -419,6 +417,7 @@ public class S3MultiPartUploadForStacOnboardingIT {
     @Description("Failure: Multipart Upload Completion failure due to invalid parts in request input that violates OAS Validation (No schema matches)")
     public void testExecuteMultipartUploadCompletionInvalidPartsInputFail() {
         LOGGER.debug("Testing Failure: Multipart Upload Completion failure due to invalid parts in request input that violates OAS Validation (No schema matches)");
+        checkIfInitiateTestPassed();
 
         String token = getToken();
         JsonObject requestBody = completeUploadRequestBody();
@@ -442,6 +441,7 @@ public class S3MultiPartUploadForStacOnboardingIT {
     @Description("Failure: Multipart Upload Completion due to invalid S3 Key Name")
     public void testExecuteMultipartUploadCompletionInvalidKeyNameFail() {
         LOGGER.debug("Testing Failure: Multipart Upload Completion due to invalid S3 Key Name");
+        checkIfInitiateTestPassed();
 
         String token = getToken();
         JsonObject requestBody = completeUploadRequestBody();
@@ -458,6 +458,7 @@ public class S3MultiPartUploadForStacOnboardingIT {
     @Description("Failure: Multipart Upload Completion due to invalid S3 credentials (invalid bucket)")
     public void testExecuteMultipartUploadCompletionInvalidBucketFail() {
         LOGGER.debug("Testing Failure: Multipart Upload Completion due to invalid S3 credentials (invalid bucket)");
+        checkIfInitiateTestPassed();
 
         String token = getToken();
         JsonObject requestBody = completeUploadRequestBody();
@@ -474,6 +475,7 @@ public class S3MultiPartUploadForStacOnboardingIT {
     @Description("Failure: Multipart Upload Completion due to invalid S3 credentials (invalid upload Id)")
     public void testExecuteMultipartUploadCompletionInvalidUploadIdFail() {
         LOGGER.debug("Testing Failure: Multipart Upload Completion due to invalid S3 credentials (invalid upload Id)");
+        checkIfInitiateTestPassed();
 
         String token = getToken();
         JsonObject requestBody = completeUploadRequestBody();

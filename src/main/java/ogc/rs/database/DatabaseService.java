@@ -166,4 +166,14 @@ public interface DatabaseService {
 
     Future<JsonObject> getOgcRecordItem (String catalogId, String recordId);
 
-}
+    /**
+     * Get S3 bucket ID for tiles for a particular collection ID and TMS. The ID can be used to find
+     * the S3 config for the particular bucket.
+     * 
+     * @param collectionId the collection ID
+     * @param tileMatrixSetId the tile matrix set ID
+     * @return String the S3 bucket ID
+     */
+    Future<String> getTileS3BucketId(String collectionId, String tileMatrixSetId);
+  }
+
