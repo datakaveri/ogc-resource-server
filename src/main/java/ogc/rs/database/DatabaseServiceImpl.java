@@ -936,6 +936,102 @@ public class DatabaseServiceImpl implements DatabaseService{
     return result.future();
   }
 
+
+    @Override
+    public Future<List<JsonObject>> getOgcRecords(String catalogId) {
+        Promise <List<JsonObject>> result = Promise.promise();
+        Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+        String tableName = "public.\"" + catalogId + "\"";
+        String query = String.format(
+                "SELECT id, ST_AsGeoJSON(geometry)::json AS geometry, created, title, description, keywords, bbox, temporal, collection_id, provider_name, provider_contacts FROM %s",
+                tableName
+        );
+        client.withConnection(conn ->
+                        conn.query(query)
+                                .collecting(collector)
+                                .execute()
+                                .map(SqlResult::value))
+                .onSuccess(success -> {
+                    LOGGER.debug("Record Items Successfully fetched!");
+                    if (success.isEmpty()) {
+                        LOGGER.error("Records table is empty!");
+                        result.fail(
+                                new OgcException(404, "Not found", "Record table is Empty!"));
+                        return;
+                    }
+                    result.complete(success);
+                })
+                .onFailure(fail -> {
+                    LOGGER.error("Failed to getOgcRecords! - {}", fail.getMessage());
+                    result.fail("Error!");
+                });
+
+        return result.future();
+    }
+
+    @Override
+    public Future<JsonObject> getOgcRecordItem(String catalogId, String recordId) {
+
+        Promise <JsonObject> result = Promise.promise();
+        Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+        String tableName = "public.\"" + catalogId + "\"";
+        String query = String.format(
+                "SELECT id, ST_AsGeoJSON(geometry)::json AS geometry, created, title, description, keywords, bbox, temporal, collection_id, provider_name, provider_contacts FROM %s WHERE id = $1::int",
+                tableName
+        );
+        client.withConnection(conn ->
+                        conn.preparedQuery(query)
+                                .collecting(collector)
+                                .execute(Tuple.of(Integer.parseInt(recordId)))
+                                .map(SqlResult::value))
+                .onSuccess(success -> {
+                    LOGGER.debug("Record Item Successfully fetched");
+                    if(success.isEmpty())
+                    {
+                        LOGGER.debug("handleeee");
+                        LOGGER.error("Record is not present!");
+                        result.fail(
+                                new OgcException(404, "Not found", "Record Not Found!"));
+                        return;
+
+                    }
+                    result.complete(success.get(0));
+                })
+                .onFailure(fail -> {
+                    LOGGER.error("Failed to getOgcRecords! - {}", fail.getMessage());
+                    result.fail("Error!");
+                });
+
+        return result.future();
+    }
+
+    private  Future<JsonObject> getStacItemWithoutAssets(String collectionId, String itemId) {
+    Promise<JsonObject> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector =
+        Collectors.mapping(Row::toJson, Collectors.toList());
+    String getItemQuery = String.format("select id, cast(st_asgeojson(geom) as json) as geometry, bbox, " +
+        " properties, 'Feature' as type,  '%1$s' as collection from \"%1$s\" where id = $1::text", collectionId);
+    client.withConnection(
+        conn ->
+            conn.preparedQuery(getItemQuery)
+                .collecting(collector)
+                .execute(Tuple.of(itemId))
+                .map(SqlResult::value)
+                .onSuccess(success -> {
+                  if (success.isEmpty())
+                    result.fail(new OgcException(404, "Not Found", "Item " + itemId + " not found in " +
+                        "collection " + collectionId));
+                  else
+                    result.complete(success.get(0));
+                })
+                .onFailure(failed -> {
+                  LOGGER.error("Failed at STAC Item retrieval- {}", failed.getMessage());
+                  result.fail("Error!");
+                }));
+    return result.future();
+  }
+
+
   private Future<Void> checkIfCollectionExist(String collectionId) {
     Promise<Void> promise = Promise.promise();
     client.withConnection(conn -> conn.preparedQuery("SELECT 1 FROM collections_details WHERE id = $1")
@@ -1492,7 +1588,44 @@ public class DatabaseServiceImpl implements DatabaseService{
     return result.future();
   }
 
-  /**
+    @Override
+    public Future<List<JsonObject>> getOgcRecordMetadataForOasSpec(List<String> existingCollectionUuidIds) {
+        Promise<List<JsonObject>> result = Promise.promise();
+
+        UUID[] existingCollectionIdsArr =
+                existingCollectionUuidIds.stream().map(i-> UUID.fromString(i)).toArray(UUID[]::new);
+
+        Collector<Row, ?, List<JsonObject>> collector =
+                Collectors.mapping(Row::toJson, Collectors.toList());
+
+        final String GET_RECORD_CATALOG_INFO =
+                "SELECT collections_details.id, title, description FROM collections_details JOIN "
+                        + "collection_type ON collections_details.id = collection_type.collection_id WHERE "
+                        + "collections_details.id != ALL($1::UUID[]) AND collection_type.type = 'COLLECTION'";
+
+        Future<List<JsonObject>> newCollectionJson =
+                client.withConnection(
+                        conn->
+                                conn.preparedQuery(GET_RECORD_CATALOG_INFO)
+                                        .collecting(collector)
+                                        .execute(Tuple.of(existingCollectionIdsArr))
+                                        .map(res-> res.value()));
+
+        newCollectionJson
+                .onSuccess(succ -> result.complete(succ))
+                .onFailure(
+                        fail-> {
+                            LOGGER.error(
+                                    "Something went wrong when querying DB for new OGC collections {}",
+                                    fail.getMessage());
+                            result.fail(fail);
+                        });
+
+        return  result.future();
+    }
+
+
+    /**
    * This method queries the database to determine if a resource identified by the given
    * ID is accessible as "open" or "secure". The access status is retrieved from the
    * "ri_details" table where the ID matches the provided UUID.
@@ -1583,7 +1716,7 @@ public class DatabaseServiceImpl implements DatabaseService{
     final String GET_COLLECTION_INFO =
         "SELECT collections_details.id, title, description FROM collections_details "
       + "JOIN collection_type ON collections_details.id = collection_type.collection_id "
-      + "WHERE collections_details.id != ALL($1::UUID[]) AND collection_type.type != 'STAC'";
+      + "WHERE collections_details.id != ALL($1::UUID[]) AND collection_type.type NOT IN ('STAC', 'COLLECTION')";
 
     Future<List<JsonObject>> newCollectionsJson =
         client.withConnection(
