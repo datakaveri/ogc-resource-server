@@ -23,8 +23,8 @@ import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
  * <p>
  * The limits are applied from the policy issued-at timestamp (iat) defined in the token.
  */
-public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
-    private static final Logger LOGGER = LogManager.getLogger(UsageLimitEnforcementHandler.class);
+public class TokenLimitsEnforcementHandler implements Handler<RoutingContext> {
+    private static final Logger LOGGER = LogManager.getLogger(TokenLimitsEnforcementHandler.class);
     Vertx vertx;
     private final DatabaseService databaseService;
 
@@ -33,7 +33,7 @@ public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
      *
      * @param vertx Vertx instance used to create service proxies.
      */
-    public UsageLimitEnforcementHandler(Vertx vertx) {
+    public TokenLimitsEnforcementHandler(Vertx vertx) {
         this.vertx = vertx;
         this.databaseService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
     }
@@ -52,7 +52,7 @@ public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
             return;
         }
 
-        LOGGER.debug("Usage Limit Enforcement Handler invoked");
+        LOGGER.debug("Token Limits Enforcement Handler invoked");
 
         AuthInfo user = routingContext.get(USER_KEY);
         String userId = user.getRole() == AuthInfo.RoleEnum.delegate
@@ -108,6 +108,10 @@ public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
                             });
 
                     constraintHandled = true;
+                    break;
+
+                case "bbox":
+                    // Known constraint, not enforced here.
                     break;
 
                 default:

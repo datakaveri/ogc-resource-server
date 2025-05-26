@@ -77,11 +77,56 @@ public class FeatureQueryBuilder {
     if (bboxCrsSrid.equalsIgnoreCase(storageCrs))
       this.bbox = "st_intersects(geom, st_makeenvelope(" + coordinates + "))";
     else
-      this.bbox = "st_intersects(geom, st_transform(st_makeenvelope(" + coordinates + "),"+ storageCrs +"))";;
+      this.bbox = "st_intersects(geom, st_transform(st_makeenvelope(" + coordinates + "),"+ storageCrs +"))";
 
     this.additionalParams = "where";
-
   }
+
+  public void setBboxWhenTokenBboxExists(String queryBbox, String tokenBbox, String storageCrs) {
+    LOGGER.debug("storage crs is : {}", storageCrs);
+    LOGGER.debug("bbox crs srid is: {}", bboxCrsSrid);
+    String queryBboxCondition = "";
+    String tokenBboxCondition = "";
+
+    // Prepare query bbox condition if provided
+    if (queryBbox != null && !queryBbox.isEmpty()) {
+      String queryCoordinates = queryBbox + "," +
+              (bboxCrsSrid != null && !bboxCrsSrid.equalsIgnoreCase(defaultCrsSrid)
+                      ? bboxCrsSrid
+                      : defaultCrsSrid);
+
+      queryBboxCondition = bboxCrsSrid != null && bboxCrsSrid.equalsIgnoreCase(storageCrs)
+              ? "ST_Intersects(geom, ST_MakeEnvelope(" + queryCoordinates + "))"
+              : "ST_Intersects(ST_Transform(geom, " + defaultCrsSrid + "), ST_Transform(ST_MakeEnvelope(" + queryCoordinates + "), " + defaultCrsSrid + "))";
+    }
+
+    LOGGER.debug("query bbox condition is : {}", queryBboxCondition);
+
+    // Prepare token bbox condition if provided
+    if (tokenBbox != null && !tokenBbox.isEmpty()) {
+      String tokenCoordinates = tokenBbox + "," + defaultCrsSrid;
+
+      tokenBboxCondition = storageCrs != null && storageCrs.equalsIgnoreCase(defaultCrsSrid)
+              ? "ST_Intersects(geom, ST_MakeEnvelope(" + tokenCoordinates + "))"
+              : "ST_Intersects(ST_Transform(geom, " + defaultCrsSrid + "), ST_MakeEnvelope(" + tokenCoordinates + "))";
+    }
+
+    LOGGER.debug("token bbox condition is: {}", tokenBboxCondition);
+
+    // Combine conditions
+    if (!queryBboxCondition.isEmpty() && !tokenBboxCondition.isEmpty()) {
+      this.bbox = "(" + queryBboxCondition + " AND " + tokenBboxCondition + ")";
+    } else if (!queryBboxCondition.isEmpty()) {
+      this.bbox = queryBboxCondition;
+    } else if (!tokenBboxCondition.isEmpty()) {
+      this.bbox = tokenBboxCondition;
+    }
+
+    if (this.bbox != null && !this.bbox.isEmpty()) {
+      this.additionalParams = "WHERE";
+    }
+  }
+
   public void setCrs (String crs) {
     // st_asgeojson(geometry, maxdecimaldigits, options); options = 0 means no extra options
     geoColumn = "cast(st_asgeojson(st_transform(geom," + crs + "), 9,0) as json)";
@@ -201,6 +246,7 @@ public class FeatureQueryBuilder {
   }
 
   public String buildSqlString(String isCountQuery) {
+
     this.sqlString = String.format("select count(id) from \"%1$s\" "
         , this.tableName);
 
