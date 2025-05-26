@@ -3,7 +3,6 @@ DO $$
 DECLARE
     new_id UUID;
     crs_id UUID;
-    trigger_name TEXT;
 BEGIN
     -- Insert collection and get ID
     INSERT INTO collections_details (
