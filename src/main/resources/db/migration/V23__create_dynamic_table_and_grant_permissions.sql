@@ -35,7 +35,7 @@ BEGIN
     -- Create table with UUID as the table name and SERIAL ID for auto-increment
     EXECUTE format($f$
         CREATE TABLE public.%I (
-            id SERIAL PRIMARY KEY,
+            id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
             created TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             title character varying(50) DEFAULT ''::character varying,
             description character varying(100) DEFAULT ''::character varying,
@@ -56,4 +56,5 @@ BEGIN
   EXECUTE format($f$
     GRANT SELECT, INSERT, UPDATE, DELETE ON public.%I TO %s
 $f$, new_id, ${ogcUser});
+
 END $$ LANGUAGE plpgsql;
