@@ -31,7 +31,9 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ogc.rs.processes.collectionOnboarding.Constants.*;
 
@@ -149,7 +151,37 @@ public class CollectionOnboardingProcess implements ProcessService {
           requestInput.put("accessPolicy",
             responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
               .getString("accessPolicy"));
-          promise.complete(requestInput);
+          String providerId = responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
+                  .getString("provider");
+          webClient.get(catServerPort, catServerHost, catRequestUri)
+                  .addQueryParam("id", providerId).send()
+                  .onSuccess(providerRes -> {
+                    if (providerRes.statusCode() == 200) {
+                      requestInput.put("created",
+                              responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
+                                      .getString("itemCreatedAt"));
+                      requestInput.put("keywords",
+                              responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
+                                      .getJsonArray("tags"));
+                      requestInput.put("providerName",
+                              providerRes.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
+                                      .getString("name"));
+                      requestInput.put("providerContact",
+                              providerRes.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
+                                      .getJsonObject( "providerOrg").getString("additionalInfoURL"));
+                      promise.complete(requestInput);
+
+                    } else {
+                      LOGGER.error(ITEM_NOT_PRESENT_ERROR);
+                      promise.fail(new OgcException(404, "Not Found", ITEM_NOT_PRESENT_ERROR));
+                    }
+
+                  }).onFailure(fail->{
+                    LOGGER.error(CAT_RESPONSE_FAILURE + fail.getMessage());
+                    promise.fail(CAT_RESPONSE_FAILURE);
+
+                  });
+
         } else {
           LOGGER.error(ITEM_NOT_PRESENT_ERROR);
           promise.fail(new OgcException(404, "Not Found", ITEM_NOT_PRESENT_ERROR));
@@ -401,6 +433,18 @@ public class CollectionOnboardingProcess implements ProcessService {
     String accessPolicy = input.getString("accessPolicy");
     String grantQuery = GRANT_QUERY.replace("collections_details_id", collectionsDetailsTableName)
       .replace("databaseUser", databaseUser);
+    JsonArray keywords = input.getJsonArray("keywords");
+    String[] keywordsArray = keywords.stream()
+            .map(Object::toString)
+            .toArray(String[]::new);
+    String providerName = input.getString("providerName");
+    String providerContacts = input.getString("providerContact");
+    String created = input.getString("created");
+    if (created.matches(".*[+-]\\d{4}$")) {
+      created = created.substring(0, created.length() - 2) + ":" + created.substring(created.length() - 2);
+    }
+
+    OffsetDateTime createdDate = OffsetDateTime.parse(created);
     pgPool.withTransaction(sqlClient -> sqlClient.preparedQuery(COLLECTIONS_DETAILS_INSERT_QUERY)
       .execute(
         Tuple.of(collectionsDetailsTableName, title, description, DEFAULT_SERVER_CRS))
@@ -419,6 +463,29 @@ public class CollectionOnboardingProcess implements ProcessService {
                     input.getString(ProcessesRunnerImpl.S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY))))
         .compose(stacCollectionResult -> ogr2ogrCmd(input))
         .compose(onBoardingSuccess -> sqlClient.query(grantQuery).execute())
+            .compose(getRecordTable->sqlClient.query(FIND_RECORD_COLLECTION).execute())
+            .compose(getRecordTableRes -> {
+              List<String> ids = new ArrayList<>();
+              getRecordTableRes.forEach(row -> ids.add(String.valueOf(row.getUUID("id"))));
+              String recordTableId = ids.get(0);
+              input.put("recordTable", recordTableId);
+
+              String insertQuery = String.format(
+                      "INSERT INTO public.\"%s\" (created, title, description, keywords, provider_name, provider_contacts, collection_id) "
+                              + "VALUES ($1, $2, $3, $4, $5, $6, $7::UUID)",
+                      recordTableId
+              );
+              return sqlClient.preparedQuery(insertQuery)
+                      .execute(Tuple.of(
+                              createdDate, // <-- Fix date parsing
+                              title,
+                              description,
+                              keywordsArray,
+                              providerName,
+                              providerContacts,
+                              UUID.fromString(collectionsDetailsTableName) // <-- fix type if needed
+                      ));
+            })
       .onSuccess(grantQueryResult -> {
         LOGGER.debug("Collection onboarded successfully ");
         promise.complete();
@@ -678,24 +745,55 @@ public class CollectionOnboardingProcess implements ProcessService {
    */
   public void updateCollectionsTableBbox(JsonObject input,Promise promise) {
     JsonArray extent = input.getJsonArray("extent");
-    List<Float> bboxArray = new ArrayList<Float>(extent.getList());
-    LOGGER.info("Trying to update the bbox ");
+    List<Float> bboxArray = extent.stream()
+            .map(o -> ((Number) o).floatValue())
+            .collect(Collectors.toList());
+    Double[] bboxDoubleArray = bboxArray.stream()
+            .map(Float::doubleValue)
+            .toArray(Double[]::new);
 
     String collectionsDetailsId = input.getString("collectionsDetailsTableId");
+    String recordTableId = input.getString("recordTable");
 
-    pgPool.withConnection(
-      sqlConnection -> sqlConnection.preparedQuery(UPDATE_COLLECTIONS_DETAILS)
-      .execute(Tuple.of(bboxArray.toArray(),collectionsDetailsId))).onSuccess(successResult -> {
-      LOGGER.debug("Bbox updated.");
-      promise.complete();
-    }).onFailure(failureHandler -> {
-      LOGGER.error("Failed to update bbox: {}", failureHandler.getMessage());
-      promise.fail("Failed to update bbox: " + failureHandler.getMessage());
-    });
+    pgPool.withTransaction(sqlClient -> sqlClient.preparedQuery(UPDATE_COLLECTIONS_DETAILS)
+            .execute(Tuple.of(bboxArray.toArray(),collectionsDetailsId))
+            .compose(updateRecord -> {
+              if (bboxArray.size() < 4) {
+                return Future.failedFuture("BBox array must contain at least 4 coordinates");
+              }
+
+              String updateQuery = String.format(
+                      "UPDATE public.\"%s\" " +
+                              "SET bbox = $1::NUMERIC[], " +
+                              "geometry = ST_MakeEnvelope($2, $3, $4, $5, 4326) " +
+                              "WHERE collection_id = $6::UUID",
+                      recordTableId
+              );
+
+              double minX = bboxArray.get(0);
+              double minY = bboxArray.get(1);
+              double maxX = bboxArray.get(2);
+              double maxY = bboxArray.get(3);
+              UUID collectionUUID = UUID.fromString(collectionsDetailsId);
+
+              return sqlClient.preparedQuery(updateQuery)
+                      .execute(Tuple.of(
+                              bboxDoubleArray,
+                              minX, minY, maxX, maxY,
+                              collectionUUID
+                      ));
+            })
+            .onSuccess(success-> {
+              LOGGER.debug("Bbox updated.");
+              promise.complete();
+            }).onFailure(failureHandler->{
+              LOGGER.error("Failed to update bbox: {}", failureHandler.getMessage());
+              promise.fail("Failed to update bbox: " + failureHandler.getMessage());
+
+            }));
   }
   private float calculateProgress(int currentStep, int totalSteps) {
     return ((float) currentStep / totalSteps) * 100;
   }
-
 
 }
