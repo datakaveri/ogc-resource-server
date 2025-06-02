@@ -117,6 +117,7 @@ public class CollectionOnboardingProcess implements ProcessService {
                     onboardingCollectionHandler -> utilClass.updateJobTableProgress(
                             requestInput.put("progress", calculateProgress(7, 8)).put(MESSAGE,VERIFYING_RESPONSE)))
             .compose(progressUpdateHandler->ogr2ogrCmdExtent(requestInput))
+            .compose(updateRecordBbox->updateRecordTableBbox(requestInput))
       .compose(checkDbHandler -> utilClass.updateJobTableStatus(requestInput, Status.SUCCESSFUL,DB_CHECK_RESPONSE))
       .onSuccess(onboardingSuccessHandler -> {
         LOGGER.debug("COLLECTION ONBOARDING DONE");
@@ -148,21 +149,20 @@ public class CollectionOnboardingProcess implements ProcessService {
             promise.fail(new OgcException(403, "Forbidden", RESOURCE_OWNERSHIP_ERROR));
             return;
           }
-          requestInput.put("accessPolicy",
-            responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
-              .getString("accessPolicy"));
-          String providerId = responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
-                  .getString("provider");
+          JsonObject result =  responseFromCat.bodyAsJsonObject()
+                  .getJsonArray("results").getJsonObject(0);
+          requestInput.put("accessPolicy", result.getString("accessPolicy"));
+
+          String providerId = result.getString("provider");
+
           webClient.get(catServerPort, catServerHost, catRequestUri)
                   .addQueryParam("id", providerId).send()
                   .onSuccess(providerRes -> {
                     if (providerRes.statusCode() == 200) {
                       requestInput.put("created",
-                              responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
-                                      .getString("itemCreatedAt"));
+                             result.getString("itemCreatedAt"));
                       requestInput.put("keywords",
-                              responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
-                                      .getJsonArray("tags"));
+                             result.getJsonArray("tags"));
                       requestInput.put("providerName",
                               providerRes.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
                                       .getString("name"));
@@ -477,13 +477,13 @@ public class CollectionOnboardingProcess implements ProcessService {
               );
               return sqlClient.preparedQuery(insertQuery)
                       .execute(Tuple.of(
-                              createdDate, // <-- Fix date parsing
+                              createdDate,
                               title,
                               description,
                               keywordsArray,
                               providerName,
                               providerContacts,
-                              UUID.fromString(collectionsDetailsTableName) // <-- fix type if needed
+                              UUID.fromString(collectionsDetailsTableName)
                       ));
             })
       .onSuccess(grantQueryResult -> {
@@ -673,7 +673,7 @@ public class CollectionOnboardingProcess implements ProcessService {
   }
   /**
    * Retrieves the bounding box (bbox) information from a PostgreSQL table using the 'ogrinfo' tool
-   * and updates the 'collections_details' table with this data.
+   * and updates the 'collections_details' table and record table with this data.
    *
    * This method executes a command line instruction to obtain bbox information from PostgreSQL
    * and updates the 'collections_details' table's 'bbox' column.
@@ -732,6 +732,58 @@ public class CollectionOnboardingProcess implements ProcessService {
             });
     return promise.future();
   }
+
+  /**
+   * Updates the bounding box of the record item and geometry value according to the Bbox
+   *
+   * @param input A JsonObject with the necessary parameters, including:
+   *                  "collectionsDetailsTableId": The name of the PostgreSQL table to query.
+   *                  "record table id": where the Bbox need to be updated according to record item.
+   *
+   * @return A Future<Void> completes with the updated input object on success, or fails with an error message on failure.
+   */
+  public Future<Void> updateRecordTableBbox(JsonObject input) {
+    LOGGER.debug("Updating the bbox in ogc-records");
+    JsonArray extent = input.getJsonArray("extent");
+    Promise<Void> promise = Promise.promise();
+    List<Float> bboxArray = extent.stream()
+            .map(o -> ((Number) o).floatValue())
+            .collect(Collectors.toList());
+    Double[] bboxDoubleArray = bboxArray.stream()
+            .map(Float::doubleValue)
+            .toArray(Double[]::new);
+    String collectionsDetailsId = input.getString("collectionsDetailsTableId");
+    String recordTableId = input.getString("recordTable");
+    String updateQuery = String.format(
+            "UPDATE public.\"%s\" " +
+                    "SET bbox = $1::NUMERIC[], " +
+                    "geometry = ST_MakeEnvelope($2, $3, $4, $5, 4326) " +
+                    "WHERE collection_id = $6::UUID",
+            recordTableId
+    );
+
+    double minX = bboxArray.get(0);
+    double minY = bboxArray.get(1);
+    double maxX = bboxArray.get(2);
+    double maxY = bboxArray.get(3);
+    UUID collectionUUID = UUID.fromString(collectionsDetailsId);
+    pgPool.withConnection(
+            sqlConnection -> sqlConnection.preparedQuery(updateQuery)
+                    .execute(Tuple.of(
+                            bboxDoubleArray,
+                            minX, minY, maxX, maxY,
+                            collectionUUID
+                    )))
+            .onSuccess(successResult -> {
+      LOGGER.debug("Bbox updated in record table.");
+      promise.complete();
+    }).onFailure(failureHandler -> {
+      LOGGER.error("Failed to update bbox in record table: {}", failureHandler.getMessage());
+      promise.fail("Failed to update bbox: " + failureHandler.getMessage());
+    });
+    return promise.future();
+  }
+
   /**
    * Updates the 'bbox' column in the 'collections_details' table.
    *
