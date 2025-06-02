@@ -745,55 +745,24 @@ public class CollectionOnboardingProcess implements ProcessService {
    */
   public void updateCollectionsTableBbox(JsonObject input,Promise promise) {
     JsonArray extent = input.getJsonArray("extent");
-    List<Float> bboxArray = extent.stream()
-            .map(o -> ((Number) o).floatValue())
-            .collect(Collectors.toList());
-    Double[] bboxDoubleArray = bboxArray.stream()
-            .map(Float::doubleValue)
-            .toArray(Double[]::new);
+    List<Float> bboxArray = new ArrayList<Float>(extent.getList());
+    LOGGER.info("Trying to update the bbox ");
 
     String collectionsDetailsId = input.getString("collectionsDetailsTableId");
-    String recordTableId = input.getString("recordTable");
 
-    pgPool.withTransaction(sqlClient -> sqlClient.preparedQuery(UPDATE_COLLECTIONS_DETAILS)
-            .execute(Tuple.of(bboxArray.toArray(),collectionsDetailsId))
-            .compose(updateRecord -> {
-              if (bboxArray.size() < 4) {
-                return Future.failedFuture("BBox array must contain at least 4 coordinates");
-              }
-
-              String updateQuery = String.format(
-                      "UPDATE public.\"%s\" " +
-                              "SET bbox = $1::NUMERIC[], " +
-                              "geometry = ST_MakeEnvelope($2, $3, $4, $5, 4326) " +
-                              "WHERE collection_id = $6::UUID",
-                      recordTableId
-              );
-
-              double minX = bboxArray.get(0);
-              double minY = bboxArray.get(1);
-              double maxX = bboxArray.get(2);
-              double maxY = bboxArray.get(3);
-              UUID collectionUUID = UUID.fromString(collectionsDetailsId);
-
-              return sqlClient.preparedQuery(updateQuery)
-                      .execute(Tuple.of(
-                              bboxDoubleArray,
-                              minX, minY, maxX, maxY,
-                              collectionUUID
-                      ));
-            })
-            .onSuccess(success-> {
-              LOGGER.debug("Bbox updated.");
-              promise.complete();
-            }).onFailure(failureHandler->{
-              LOGGER.error("Failed to update bbox: {}", failureHandler.getMessage());
-              promise.fail("Failed to update bbox: " + failureHandler.getMessage());
-
-            }));
+    pgPool.withConnection(
+      sqlConnection -> sqlConnection.preparedQuery(UPDATE_COLLECTIONS_DETAILS)
+      .execute(Tuple.of(bboxArray.toArray(),collectionsDetailsId))).onSuccess(successResult -> {
+      LOGGER.debug("Bbox updated.");
+      promise.complete();
+    }).onFailure(failureHandler -> {
+      LOGGER.error("Failed to update bbox: {}", failureHandler.getMessage());
+      promise.fail("Failed to update bbox: " + failureHandler.getMessage());
+    });
   }
   private float calculateProgress(int currentStep, int totalSteps) {
     return ((float) currentStep / totalSteps) * 100;
   }
+
 
 }
