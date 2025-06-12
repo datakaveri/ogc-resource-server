@@ -557,4 +557,113 @@ public class StacTransactionIT {
           .body("description", containsStringIgnoringCase("One ore more STAC item(s) exist!"));
 
     }
+
+  @Order(20)
+  @Test
+  @Description("Failure: Deleting a STAC Item when Collection does not exist")
+  public void testDeleteItemWhenCollectionDoesNotExist() throws InterruptedException {
+
+    String endpoint = "/stac/collections/"+UUID.randomUUID()+"/items/testing_stac_item_1";
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .delete(endpoint)
+        .then()
+        .statusCode(404)
+        .body("code", equalTo("Not Found"))
+        .body("description", containsStringIgnoringCase("Collection not found"));
+
+  }
+
+  @Order(21)
+  @Test
+  @Description("Failure: Deleting a STAC Item when Item does not exist")
+  public void testDeleteItemWhenItemDoesNotExist() throws InterruptedException {
+
+    String endpoint = "/stac/collections/0bfd0f9a-a31c-4ee9-9728-0a97248a4637/items/random_item_id";
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .delete(endpoint)
+        .then()
+        .statusCode(404)
+        .body("code", equalTo("Not Found"))
+        .body("description", containsStringIgnoringCase("No STAC Item exists!"));
+
+  }
+
+  @Order(22)
+  @Test
+  @Description("Success: Deleting a STAC Item with open provider token")
+  public void testDeleteStacItem() throws InterruptedException {
+
+    String endpoint = "/stac/collections/0bfd0f9a-a31c-4ee9-9728-0a97248a4637/items/testing_stac_item_1";
+
+    JsonObject assets = new JsonObject()
+        .put(String.valueOf(UUID.randomUUID()), new JsonObject()
+            .put("href","CS3-20160503_132130_04/thumb.png")
+            .put("title", "Asset title")
+            .put("type", "image/png")
+            .put("s3BucketId", "default")
+            .put("roles", new JsonArray().add("thumbnail"))
+            .put("size", 1024));
+
+    standardRequestBody.put("assets", assets);
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .body(standardRequestBody.encode())
+        .when()
+        .post(openCollectionCreateItemEndpoint)
+        .then()
+        .statusCode(201);
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .delete(endpoint)
+        .then()
+        .statusCode(200)
+        .body("description", equalTo("STAC Item was deleted"));
+
+  }
+
+  @Order(23)
+  @Test
+  @Description("Success: Deleting a STAC Item with no assets")
+  public void testDeleteItemWithNoAsset() throws InterruptedException {
+
+    String endpoint = "/stac/collections/0bfd0f9a-a31c-4ee9-9728-0a97248a4637/items/testing_stac_item_1";
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .body(standardRequestBody.encode())
+        .when()
+        .post(openCollectionCreateItemEndpoint)
+        .then()
+        .statusCode(201);
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .delete(endpoint)
+        .then()
+        .statusCode(200)
+        .body("description", equalTo("STAC Item was deleted"));
+
+  }
 }

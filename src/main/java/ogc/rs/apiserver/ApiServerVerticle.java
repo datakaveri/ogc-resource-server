@@ -3117,6 +3117,29 @@ public class ApiServerVerticle extends AbstractVerticle {
     // merge modifiedAssets into original assetObject
     return assetObject.mergeIn(modifiedAssets);
   }
-    
 
+  public void deleteStacItem(RoutingContext routingContext) {
+    String collectionId = routingContext.request().path().split("/")[3];
+    String itemId = routingContext.request().path().split("/")[5];
+
+    dbService.deleteStacItem(collectionId, itemId)
+        .onSuccess(success -> {
+          routingContext.put("response", new JsonObject().put("description", success));
+          routingContext.put("statusCode", 200);
+          routingContext.next();
+        })
+        .onFailure(failed -> {
+          if (failed instanceof OgcException) {
+            routingContext.put("response", ((OgcException) failed).getJson().toString());
+            routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+          } else {
+            OgcException ogcException =
+                new OgcException(500, "Internal Server Error", "Internal Server Error");
+            routingContext.put("response", ogcException.getJson().toString());
+            routingContext.put("statusCode", ogcException.getStatusCode());
+          }
+          routingContext.next();
+        });
+
+  }
 }

@@ -580,6 +580,61 @@
             "DX-AAA-Token": []
           }
         ]
+      },
+      "delete": {
+        "summary": "delete an existing feature by Id",
+        "description": "Use this method to delete an existing feature.",
+        "operationId": "deleteStacItem",
+        "parameters": [
+          {
+            "name": "collectionId",
+            "in": "path",
+            "description": "local identifier of a collection",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "description": "local identifier of an item",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "Transaction"
+        ],
+        "responses": {
+          "200": {
+            "description": "The item was deleted."
+          },
+          "202": {
+            "description": "The operation was accepted for asynchronous execution"
+          },
+          "204": {
+            "description": "The item was deleted."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }},
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ]
       }
     },
     "/stac/search": {
