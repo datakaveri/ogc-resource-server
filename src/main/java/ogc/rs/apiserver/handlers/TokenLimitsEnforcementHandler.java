@@ -10,21 +10,26 @@ import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.List;
+import java.util.Map;
+
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
 
 /**
- * This HTTP request handler enforces data and API usage limits per user and collection.
+ * This HTTP request handler enforces data, API usage, and feature limits per user and collection.
  * <p>
- * Limits are extracted from the user's JWT token and can include either:
+ * Limits are extracted from the user's JWT token and can include:
  * - Data usage limit (e.g., "100:mb")
  * - API hit limit (e.g., 100)
+ * - Feature access limits (collectionId -> featureIds mapping)
  * <p>
  * The limits are applied from the policy issued-at timestamp (iat) defined in the token.
  */
-public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
-    private static final Logger LOGGER = LogManager.getLogger(UsageLimitEnforcementHandler.class);
+public class TokenLimitsEnforcementHandler implements Handler<RoutingContext> {
+    private static final Logger LOGGER = LogManager.getLogger(TokenLimitsEnforcementHandler.class);
     Vertx vertx;
     private final DatabaseService databaseService;
 
@@ -33,7 +38,7 @@ public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
      *
      * @param vertx Vertx instance used to create service proxies.
      */
-    public UsageLimitEnforcementHandler(Vertx vertx) {
+    public TokenLimitsEnforcementHandler(Vertx vertx) {
         this.vertx = vertx;
         this.databaseService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
     }
@@ -52,7 +57,7 @@ public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
             return;
         }
 
-        LOGGER.debug("Usage Limit Enforcement Handler invoked");
+        LOGGER.debug("Token Limits Enforcement Handler invoked");
 
         AuthInfo user = routingContext.get(USER_KEY);
         String userId = user.getRole() == AuthInfo.RoleEnum.delegate
@@ -110,6 +115,40 @@ public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
                     constraintHandled = true;
                     break;
 
+                case "feat":
+                    Map<String, List<String>> featLimits = limits.getFeatLimit();
+
+                    if (featLimits != null && !featLimits.isEmpty()) {
+                        // Extract the collection ID from the feat limits
+                        String collectionIdFromToken = featLimits.keySet().iterator().next();
+                        LOGGER.debug("The collection Id from the token is: {}", collectionIdFromToken);
+
+                        List<String> allowedFeatureIds = featLimits.get(collectionIdFromToken);
+
+                        LOGGER.debug("The feature IDs in the token are: {}", allowedFeatureIds);
+
+                        databaseService.checkFeatureExists(collectionIdFromToken, allowedFeatureIds)
+                                .onSuccess(exists -> {
+                                    if (!exists) {
+                                        routingContext.fail(new OgcException(403, "Forbidden", "One or more features in the token do not exist"));
+                                    } else {
+                                        routingContext.next();
+                                    }
+                                }).onFailure(fail -> {
+                                    LOGGER.error("Error checking feature existence: {}", fail.getMessage());
+                                    routingContext.fail(fail);
+                                });
+                    } else {
+                        routingContext.next();
+                    }
+
+                    constraintHandled = true;
+                    break;
+
+                case "bbox":
+                    // Known constraint, not enforced here.
+                    break;
+
                 default:
                     LOGGER.warn("Unknown usage constraint key: {}", key);
                     break;
@@ -122,6 +161,5 @@ public class UsageLimitEnforcementHandler implements Handler<RoutingContext> {
 
         // If no known constraint keys handled, proceed
         routingContext.next();
-
     }
 }
