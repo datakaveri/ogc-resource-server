@@ -12,6 +12,24 @@ public class Constants {
 
   public static final String COLLECTIONS_DETAILS_INSERT_QUERY =
       "INSERT INTO collections_details (id, title, description, crs) VALUES ($1::UUID, $2, $3, $4)";
+   public static final String FIND_RECORD_COLLECTION =
+      "SELECT\n"
+          + "    collections_details.id\n"
+          + "FROM\n"
+          + "    collections_details\n"
+          + "LEFT JOIN\n"
+          + "    collections_enclosure ON collections_details.id = collections_enclosure.collections_id\n"
+          + "JOIN\n"
+          + "    collection_supported_crs ON collections_details.id = collection_supported_crs.collection_id\n"
+          + "JOIN\n"
+          + "    crs_to_srid ON crs_to_srid.id = collection_supported_crs.crs_id\n"
+          + "JOIN\n"
+          + "    collection_type ON collections_details.id = collection_type.collection_id\n"
+          + "WHERE\n"
+          + "    collection_type.type = 'COLLECTION'\n"
+          + "GROUP BY\n"
+          + "    collections_details.id\n"
+          + "LIMIT 1;";
   public static final String COLLECTION_SUPPORTED_CRS_INSERT_QUERY =
       "with data as (select $1::uuid,"
           + " id as crs_id from crs_to_srid where srid = 4326 or srid = $2) insert into collection_supported_crs (collection_id, crs_id) select * from data";

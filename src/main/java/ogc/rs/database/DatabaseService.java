@@ -68,6 +68,14 @@ public interface DatabaseService {
      */
     Future<List<JsonObject>> getOgcFeatureCollectionMetadataForOasSpec(List<String> existingCollectionUuidIds);
 
+    /**
+     * GET OGC REcords metadata  to be used for OPENAPI spec generation.
+     *
+     * @param existingCollectionUuidIds UUID IDs of records catalog that are already part of the spec.
+     * @return list of {@link JsonObject}, which is cast to the required type by the caller.
+     */
+    Future<List<JsonObject>> getOgcRecordMetadataForOasSpec(List<String> existingCollectionUuidIds);
+
     Future<Boolean> getAccess(String id);
 
     /**
@@ -154,6 +162,10 @@ public interface DatabaseService {
 
    Future<JsonObject> updateStacItem(JsonObject requestBody);
 
+    Future<List<JsonObject>>  getOgcRecords(String catalogId);
+
+    Future<JsonObject> getOgcRecordItem (String catalogId, String recordId);
+
     /**
      * Get S3 bucket ID for tiles for a particular collection ID and TMS. The ID can be used to find
      * the S3 config for the particular bucket.
@@ -164,3 +176,4 @@ public interface DatabaseService {
      */
     Future<String> getTileS3BucketId(String collectionId, String tileMatrixSetId);
   }
+

@@ -619,7 +619,8 @@ public class ApiServerVerticle extends AbstractVerticle {
                       JsonObject json = new JsonObject();
                       List<JsonObject> tempArray = new ArrayList<>();
                       tempArray.add(collection);
-                      if (collection.getJsonArray("type").contains("FEATURE"))
+                      if (collection.getJsonArray("type").contains("FEATURE")
+                              || collection.getJsonArray("type").contains("COLLECTION"))
                         json = buildCollectionFeatureResult(tempArray);
                       else if (collection.getJsonArray("type").contains("MAP"))
                         json = buildCollectionTileResult(tempArray);
@@ -914,8 +915,11 @@ public class ApiServerVerticle extends AbstractVerticle {
                 .put("rel", "item")
                 .put("title", "Link template for " + collection.getString("id") + " features")
                 .put("templated","true")))
-        .put("itemType", "feature")
         .put("crs", collection.getJsonArray("crs"));
+    if(collection.getJsonArray("type").getString(0).equals("FEATURE"))
+      collection.put("itemType", "feature");
+    else
+      collection.put("itemType", "record");
     if (collection.getJsonArray("enclosure") != null && !collection.getJsonArray("enclosure").isEmpty()) {
       collection.getJsonArray("enclosure")
               .forEach(enclosureJson -> {
@@ -2802,6 +2806,230 @@ public class ApiServerVerticle extends AbstractVerticle {
         });
   }
 
+
+  public void getRecordCatalog(RoutingContext routingContext) {
+    String catalogId = routingContext.request().path().split("/")[2];
+    LOGGER.debug("get record catalogId- {}", catalogId);
+    JsonObject recordCatalog = new JsonObject();
+
+    dbService.getCollection(catalogId)
+            .onSuccess(success->{
+              catalogueService
+                      .getCatItemUsingFilter(success.get(0).getString("id"), "[itemCreatedAt]")
+                      .onSuccess(
+                              res->{
+                                recordCatalog
+                                        .put("id", success.get(0).getString("id"))
+                                        .put("created", res.getString("itemCreatedAt"))
+                                        .put("conformsTo", "https://www.opengis.net/spec/ogcapi-records-1/1.0/req/core")
+                                        .put("itemType", "record")
+                                        .put("type", "Collection")
+                                        .put( "links",
+                                                new JsonArray()
+                                                        .add(
+                                                                new JsonObject()
+                                                                        .put(
+                                                                                "href",
+                                                                                hostName
+                                                                                        + ogcBasePath
+                                                                                        + COLLECTIONS
+                                                                                        + "/"
+                                                                                        + success.get(0).getString("id"))
+                                                                        .put("rel", "self")
+                                                                        .put("title", success.get(0).getString("title"))
+                                                                        .put("description", success.get(0).getString("description")))
+                                                        .add(
+                                                                new JsonObject()
+                                                                        .put(
+                                                                                "href",
+                                                                                hostName
+                                                                                        + ogcBasePath
+                                                                                        + COLLECTIONS
+                                                                                        + "/"
+                                                                                        + success.get(0).getString("id")
+                                                                                        + "/items")
+                                                                        .put("rel", "items")
+                                                                        .put("title", success.get(0).getString("title"))
+                                                                        .put("type", "application/geo+json")));
+                                routingContext.put("response", recordCatalog.toString());
+                                routingContext.put("statusCode", 200);
+                                routingContext.next();
+
+                              }).onFailure(catFailed->{
+                        if (catFailed instanceof OgcException) {
+                          routingContext.put("response", ((OgcException) catFailed).getJson().toString());
+                          routingContext.put("statusCode", ((OgcException) catFailed).getStatusCode());
+                        } else {
+                          OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
+                          routingContext.put("response", ogcException.getJson().toString());
+                          routingContext.put("statusCode", ogcException.getStatusCode());
+                        }
+                        routingContext.next();
+                      });
+
+
+
+
+            }).onFailure(failed ->{
+              if (failed instanceof OgcException) {
+                routingContext.put("response", ((OgcException) failed).getJson().toString());
+                routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+              } else {
+                OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
+                routingContext.put("response", ogcException.getJson().toString());
+                routingContext.put("statusCode", ogcException.getStatusCode());
+              }
+              routingContext.next();
+
+            });
+
+  }
+
+  public void getRecordItems(RoutingContext routingContext) {
+    LOGGER.debug("getting all the record items");
+    String catalogId = routingContext.request().path().split("/")[2];
+    JsonArray recordItemCollection = new JsonArray();
+    dbService.getOgcRecords(catalogId)
+            .onSuccess(success->{
+              LOGGER.debug("Building Record Items Response");
+              for(JsonObject recordItem : success)
+              {
+                JsonObject recordItemBuilt = buildRecordItemResponse(recordItem, catalogId);
+                recordItemCollection.add(recordItemBuilt);
+              }
+              JsonObject recordItems = new JsonObject().put("type","FeatureCollection")
+                      .put("features", recordItemCollection);
+              routingContext.put("response", recordItems.toString());
+              routingContext.put("statusCode", 200);
+              routingContext.next();
+
+            }).onFailure(failed ->{
+              if (failed instanceof OgcException) {
+                routingContext.put("response", ((OgcException) failed).getJson().toString());
+                routingContext.put("statusCode", 404);
+              } else {
+                routingContext.put("response", new OgcException(500, "Internal Server Error", "Internal Server Error")
+                        .getJson()
+                        .toString());
+                routingContext.put("statusCode", 500);
+              }
+              routingContext.next();
+            });
+
+
+
+  }
+
+  private JsonObject buildRecordItemResponse(JsonObject recordItem, String catalogId) {
+    JsonObject builtRecordItem = new JsonObject();
+    builtRecordItem.put("id", recordItem.getString("id"))
+            .put("geometry", recordItem.getJsonObject("geometry"))
+            .put("type", "Feature")
+            .put("conformsTo",
+                    new JsonArray()
+                            .add("http://www.opengis.net/spec/ogcapi-records-1/1.0/conf/record-core")
+                            .add("http://www.opengis.net/spec/ogcapi-records-1/1.0/conf/record-collection"))
+            .put( "links",
+                    new JsonArray()
+                            .add(
+                                    new JsonObject()
+                                            .put(
+                                                    "href",
+                                                    hostName
+                                                            + ogcBasePath
+                                                            + COLLECTIONS
+                                                            + "/"
+                                                            + catalogId
+                                                            + "/items/"
+                                                            + recordItem.getString("id"))
+                                            .put("rel", "self")
+                                            .put("title", recordItem.getString("title"))
+                                            .put("description", recordItem.getString("description")))
+                            .add(new JsonObject()
+                                    .put(
+                                            "href",
+                                            hostName
+                                                    + ogcBasePath
+                                                    + COLLECTIONS
+                                                    + "/"
+                                                    + recordItem.getString("collection_id")
+                                    )
+                                    .put("rel", "describes")
+                                    .put("title", recordItem.getString("title"))
+                                    .put("description", recordItem.getString("description"))))
+            .put("properties", new JsonObject().put("title",recordItem.getString("title") )
+                    .put("description",  recordItem.getString("description"))
+                    .put("keywords", recordItem.getJsonArray("keywords"))
+                    .put("created", recordItem.getString("created")));
+
+    String providerName = recordItem.getString("provider_name");
+    String providerContacts = recordItem.getString("provider_contacts");
+
+
+    if (providerName != null && !providerName.isEmpty()
+            && providerContacts != null && !providerContacts.isEmpty()) {
+      builtRecordItem.getJsonObject("properties").put(
+              "contacts",
+              new JsonArray()
+                      .add(
+                              new JsonObject()
+                                      .put("name", providerName)
+                                      .put("contactInstructions", providerContacts)
+                                      .put("roles", new JsonArray().add("producer"))
+                                      .put("links", new JsonArray()
+                                              .add(new JsonObject()
+                                                      .put("href", providerContacts)
+                                                      .put("rel", "about")
+                                                      .put("type", "text/html")))));
+    }
+
+    builtRecordItem
+        .getJsonObject("properties")
+        .put("formats", new JsonArray().add(new JsonObject().put("name", "GeoJSON").put("mediaType", "application/geo+json")));
+
+    JsonObject extent = new JsonObject();
+    if (recordItem.getJsonArray("bbox") != null)
+      extent.put("spatial", new JsonObject().put("bbox", new JsonArray().add(recordItem.getJsonArray("bbox"))));
+    if (recordItem.getJsonArray("temporal") != null)
+      extent.put("temporal", new JsonObject().put("interval",
+              new JsonArray().add(recordItem.getJsonArray("temporal"))));
+    if (!extent.isEmpty())
+    {
+      builtRecordItem.getJsonObject("properties").put("extent", extent);
+    }
+
+    return builtRecordItem;
+  }
+
+  public void getRecordItem(RoutingContext routingContext) {
+    LOGGER.debug("getting specific ogc record item");
+    String catalogId = routingContext.request().path().split("/")[2];
+    String recordId = routingContext.pathParam("recordId");
+    LOGGER.debug("Catalog Id: "+catalogId);
+    LOGGER.debug("Record Id: "+recordId);
+
+    dbService.getOgcRecordItem(catalogId, recordId)
+            .onSuccess(success->{
+              LOGGER.debug("Building Record Item Response");
+              JsonObject recordItemBuilt = buildRecordItemResponse(success, catalogId);
+              routingContext.put("response", recordItemBuilt.toString());
+              routingContext.put("statusCode", 200);
+              routingContext.next();
+            }).onFailure(failed ->{
+              if (failed instanceof OgcException) {
+                routingContext.put("response", ((OgcException) failed).getJson().toString());
+                routingContext.put("statusCode", 404);
+              } else {
+                routingContext.put("response", new OgcException(500, "Internal Server Error", "Internal Server Error")
+                        .getJson()
+                        .toString());
+                routingContext.put("statusCode", 500);
+              }
+              routingContext.next();
+            });
+  }
+
+
   /**
    * List all configured S3 buckets by bucket ID and read access. Gets data from
    * {@link S3ConfigsHolder#listAllIdentifiers()}.
@@ -2877,4 +3105,5 @@ public class ApiServerVerticle extends AbstractVerticle {
     return assetObject.mergeIn(modifiedAssets);
   }
     
+
 }
