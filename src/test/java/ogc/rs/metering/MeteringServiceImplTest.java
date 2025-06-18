@@ -44,8 +44,8 @@ import org.mockito.stubbing.Answer;
 @ExtendWith({VertxExtension.class, MockitoExtension.class})
 public class MeteringServiceImplTest {
   private static final Logger LOGGER = LogManager.getLogger(MeteringServiceImplTest.class);
-  static PgPool databaseService;
-  static PgPool ogcMeteringService;
+  static PgPool meteringDatabaseService;
+  static PgPool ogcDatabaseService;
   static JsonObject config =
       new JsonObject()
           .put("id", "ogc.rs.metering.MeteringVerticle")
@@ -112,11 +112,11 @@ public class MeteringServiceImplTest {
     request.put(API, "/ngsi-ld/v1/subscription");
     request.put(RESPONSE_SIZE, 12);
     JsonObject json = mock(JsonObject.class);
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
     JsonArray jsonArray = mock(JsonArray.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     when(databroker.publishMessage(anyString(), anyString(), any()))
         .thenReturn(Future.succeededFuture());
 
@@ -147,10 +147,10 @@ public class MeteringServiceImplTest {
     request.put(API, "/ngsi-ld/v1/subscription");
     request.put(RESPONSE_SIZE, 12);
 
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
 
     when(databroker.publishMessage(anyString(), anyString(), any()))
         .thenReturn(Future.failedFuture("failed"));
@@ -170,12 +170,12 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Testing read query with given Time Interval")
   void readFromValidTimeInterval2(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     JsonObject json = mock(JsonObject.class);
     JsonArray jsonArray = mock(JsonArray.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
 
     JsonObject request = readConsumerRequest();
     List<JsonObject> jsonObjectList = new ArrayList<>();
@@ -183,7 +183,7 @@ public class MeteringServiceImplTest {
     JsonObject jsonObject1 = new JsonObject().put("count",0);
 
     jsonObjectList.add(jsonObject1);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .executeReadQuery(request)
@@ -201,10 +201,10 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Testing read query with given Time Interval - provider")
   void readFromValidTimeInterval3(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
 
     JsonObject request = readProviderRequest().put("limit",100).put("offset",10);
     List<JsonObject> jsonObjectList = new ArrayList<>();
@@ -212,7 +212,7 @@ public class MeteringServiceImplTest {
     JsonObject jsonObject1 = new JsonObject().put("count",10);
 
     jsonObjectList.add(jsonObject1);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .executeReadQuery(request)
@@ -231,22 +231,22 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Testing read query with given Time Interval - provider")
   void readFromValidTimeInterval4(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
 
     JsonObject request = readProviderRequest().put("limit",100).put("offset",10);
     request.remove(API);
     request.remove(CONSUMER_ID);
     request.remove(RESOURCE_ID);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
 
     List<JsonObject> jsonObjectList = new ArrayList<>();
 
     JsonObject jsonObject1 = new JsonObject().put("count",10);
 
     jsonObjectList.add(jsonObject1);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .executeReadQuery(request)
@@ -265,21 +265,21 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Testing read query with given Time Interval")
   void readFromValidTimeInterval5(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
 
     JsonObject request = readConsumerRequest();
     request.remove(API);
     request.remove(RESOURCE_ID);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
 
     List<JsonObject> jsonObjectList = new ArrayList<>();
 
     JsonObject jsonObject1 = new JsonObject().put("count",0);
 
     jsonObjectList.add(jsonObject1);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .executeReadQuery(request)
@@ -297,19 +297,19 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Testing read query with given Time Interval -consumer")
   void readFromValidTimeInterval6(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     JsonObject request = readConsumerRequest().put("limit",100).put("offset",10);
     request.remove(API);
     request.remove(RESOURCE_ID);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
 
     List<JsonObject> jsonObjectList = new ArrayList<>();
 
     JsonObject jsonObject1 = new JsonObject().put("count",10);
 
     jsonObjectList.add(jsonObject1);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .executeReadQuery(request)
@@ -329,10 +329,10 @@ public class MeteringServiceImplTest {
   @DisplayName("Testing read query with invalid time interval")
   void readFromInvalidTimeInterval(VertxTestContext testContext) {
     JsonObject request = readConsumerRequest();
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     request.put(START_TIME, "2021-11-01T05:30:00+05:30");
     request.put(END_TIME, "2021-11-01T02:00:00+05:30");
     meteringService
@@ -354,10 +354,10 @@ public class MeteringServiceImplTest {
   @DisplayName("Testing read query with invalid time interval")
   void readFromInvalidTimeInterval2(VertxTestContext testContext) {
     JsonObject request = readConsumerRequest();
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     request.put(START_TIME, "2021-11-01T05:30:00+05:30");
     request.put(END_TIME, "2021-1-1T02:00:00+05:30");
     meteringService
@@ -377,10 +377,10 @@ public class MeteringServiceImplTest {
   @DisplayName("Testing read query with blank user id")
   void readFromBlankUserId(VertxTestContext testContext) {
     JsonObject request = readConsumerRequest();
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     request.put(USER_ID, "");
     meteringService
         .executeReadQuery(request)
@@ -399,21 +399,21 @@ public class MeteringServiceImplTest {
   @DisplayName("Testing read query with given Time Interval - provider")
   void countFromValidTimeInterval(VertxTestContext vertxTestContext) {
     JsonObject responseJson = new JsonObject().put("totalHits", "10");
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
 
     JsonObject request = readProviderRequest();
     request.put("options", "count");
 
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
 
     List<JsonObject> jsonObjectList = new ArrayList<>();
 
     JsonObject jsonObject1 = new JsonObject().put("count",10);
 
     jsonObjectList.add(jsonObject1);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .executeReadQuery(request)
@@ -432,21 +432,21 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Admin for overview api")
   public void testOverallMethodAdmin(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     JsonObject expected = new JsonObject().put(SUCCESS, "Success");
 
     databroker = mock(DataBrokerService.class);
     JsonObject request = readProviderRequest();
     request.put("role", "admin");
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
 
     List<JsonObject> jsonObjectList = new ArrayList<>();
     JsonObject jsonObject1 = new JsonObject().put(SUCCESS,"Success");
 
     jsonObjectList.add(jsonObject1);
     JsonArray expectedJsonArray = new JsonArray().add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
     meteringService
         .monthlyOverview(request)
         .onSuccess(
@@ -463,23 +463,23 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Admin for overview api")
   public void testOverallMethodAdmin2(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     JsonObject expected = new JsonObject().put(SUCCESS, "Success");
 
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     JsonObject request = readProviderRequest();
     request.put("role", "admin");
     request.put(STARTT, "2022-05-29T05:30:00+05:30");
     request.put(ENDT, "2022-06-29T05:30:00+05:30");
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
 
     List<JsonObject> jsonObjectList = new ArrayList<>();
     JsonObject jsonObject1 = new JsonObject().put(SUCCESS,"Success");
     jsonObjectList.add(jsonObject1);
     JsonArray expectedJsonArray = new JsonArray().add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
     meteringService
         .monthlyOverview(request)
         .onSuccess(
@@ -496,8 +496,8 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Provider for overview api")
   public void testOverallMethodProvider(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     JsonObject expected = new JsonObject().put("resourceid", "abc").put("count", 10);
     databroker = mock(DataBrokerService.class);
     JsonObject request = readProviderRequest();
@@ -512,7 +512,7 @@ public class MeteringServiceImplTest {
             .put("results", new JsonArray().add(request))
             .put("id", "5b7556b5-0779-4c47-9cf2-3f209779aa22")
             .put("resourceGroup", "dummy_resource");
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
 
     HttpRequest<Buffer> httpRequest = mock(HttpRequest.class);
     CatalogueService.catWebClient = mock(WebClient.class);
@@ -540,7 +540,7 @@ public class MeteringServiceImplTest {
 
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .monthlyOverview(request)
@@ -559,11 +559,11 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Provider for overview api")
   public void testOverallMethodProvider2(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     JsonObject expected = new JsonObject().put("resourceid", "abc").put("count", 10);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     JsonObject request = readProviderRequest();
     request.put("role", "provider");
     request.put(STARTT, "2021-11-01T05:30:00+05:30");
@@ -604,7 +604,7 @@ public class MeteringServiceImplTest {
 
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .monthlyOverview(request)
@@ -622,11 +622,11 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Delegate for overview api")
   public void testOverallMethodDelegate(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     JsonObject expected = new JsonObject().put(SUCCESS, "Success");
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     JsonObject request =
         readProviderRequest().put("provider", "8b95ab80-2aaf-4636-a65e-7f2563d0d371");
     JsonArray jsonArray1 = new JsonArray().add(expected);
@@ -663,7 +663,7 @@ public class MeteringServiceImplTest {
 
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .monthlyOverview(request)
@@ -681,11 +681,11 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Delegate for overview api")
   public void testOverallMethodDelegate2(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     JsonObject expected = new JsonObject().put(SUCCESS, "Success");
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
 
     JsonObject request =
         readProviderRequest().put("provider", "8b95ab80-2aaf-4636-a65e-7f2563d0d371");
@@ -726,7 +726,7 @@ public class MeteringServiceImplTest {
 
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .monthlyOverview(request)
@@ -744,17 +744,17 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("consumer for overview api")
   public void testOverallMethodConsumer(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     JsonObject expected = new JsonObject().put(SUCCESS, "Success");
 
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     JsonObject request = readProviderRequest();
     request.put("role", "consumer");
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .monthlyOverview(request)
@@ -772,12 +772,12 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("consumer for overview api")
   public void testOverallMethodConsumere2(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     JsonObject expected = new JsonObject().put(SUCCESS, "Success");
 
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     JsonObject request = readProviderRequest();
     request.put("role", "consumer");
     request.put(STARTT, "2022-05-29T05:30:00+05:30");
@@ -785,7 +785,7 @@ public class MeteringServiceImplTest {
 
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .monthlyOverview(request)
@@ -804,10 +804,10 @@ public class MeteringServiceImplTest {
   @DisplayName("Testing monthly api query with invalid time interval")
   void readFromInvalidTimeIntervalMonthly(VertxTestContext testContext) {
     JsonObject request = readConsumerRequest();
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     request.put(STARTT, "2021-11-01T05:30:00+05:30");
     request.put(ENDT, "2021-11-01T02:00:00+05:30");
     request.put(ROLE, "admin");
@@ -830,10 +830,10 @@ public class MeteringServiceImplTest {
   @DisplayName("Testing monthly api query with invalid time interval")
   void readFromInvalidTimeIntervalMonthly2(VertxTestContext testContext) {
     JsonObject request = readConsumerRequest();
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     request.put(STARTT, "2021-11-01T05:30:00+05:30");
     request.put(ENDT, "");
     request.put(ROLE, "admin");
@@ -854,10 +854,10 @@ public class MeteringServiceImplTest {
   @DisplayName("Testing summary api query with invalid time interval")
   void readFromInvalidTimeIntervalSummary(VertxTestContext testContext) {
     JsonObject request = readConsumerRequest();
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     request.put(STARTT, "2021-11-01T05:30:00+05:30");
     request.put(ENDT, "2021-11-01T02:00:00+05:30");
     request.put(ROLE, "admin");
@@ -880,10 +880,10 @@ public class MeteringServiceImplTest {
   @DisplayName("Testing summary api query with invalid time interval")
   void readFromInvalidTimeIntervalSummary2(VertxTestContext testContext) {
     JsonObject request = readConsumerRequest();
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     request.put(STARTT, "2021-11-01T05:30:00+05:30");
     request.put(ENDT, "");
     request.put(ROLE, "admin");
@@ -904,10 +904,10 @@ public class MeteringServiceImplTest {
   @DisplayName("Testing summary api query with invalid time interval")
   void readFromInvalidTimeIntervalSummary3(VertxTestContext testContext) {
     JsonObject request = readConsumerRequest();
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     request.put(STARTT, "");
     request.put(ENDT, "2021-11-01T05:30:00+05:30");
     request.put(ROLE, "admin");
@@ -927,10 +927,10 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("consumer for summary api")
   public void testOverallMethodConsumerSummary(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     JsonObject request = readProviderRequest();
     request.put("role", "consumer");
     JsonArray jsonArray1 =
@@ -969,7 +969,7 @@ public class MeteringServiceImplTest {
     JsonObject expected = new JsonObject().put("resourceid", "abc").put("count", 10);
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .summaryOverview(request)
@@ -987,10 +987,10 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("consumer for summary api with time")
   public void testOverallMethodConsumerSummaryWithTime(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     JsonObject request = readProviderRequest();
     request.put("role", "consumer");
     request.put(STARTT, "2021-11-01T05:30:00+05:30");
@@ -1029,7 +1029,7 @@ public class MeteringServiceImplTest {
     JsonObject expected = new JsonObject().put("resourceid", "abc").put("count", 10);
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .summaryOverview(request)
@@ -1047,10 +1047,10 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Provider for summary api with time")
   public void testOverallMethodProviderSummaryWithTime(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     JsonObject request = readProviderRequest();
     request.put(STARTT, "2021-11-01T05:30:00+05:30");
     request.put(ENDT, "2021-12-01T05:30:00+05:30");
@@ -1089,7 +1089,7 @@ public class MeteringServiceImplTest {
     JsonObject expected = new JsonObject().put("resourceid", "abc").put("count", 10);
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .summaryOverview(request)
@@ -1107,10 +1107,10 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Provider for summary api")
   public void testOverallMethodProviderSummary(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     JsonObject request = readProviderRequest();
     request.put("provider", "5b7556b5-0779-4c47-9cf2-3f209779aa22");
     JsonArray jsonArray1 =
@@ -1149,7 +1149,7 @@ public class MeteringServiceImplTest {
     JsonObject expected = new JsonObject().put("resourceid", "abc").put("count", 10);
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .summaryOverview(request)
@@ -1167,10 +1167,10 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Admin for summary api")
   public void testOverallMethodAdminSummary(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     JsonObject request = readProviderRequest();
     request.put("role", "admin");
     JsonArray jsonArray1 =
@@ -1194,7 +1194,7 @@ public class MeteringServiceImplTest {
     JsonObject expected = new JsonObject().put("resourceid", "abc").put("count", 10);
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     spyMeteringService
         .summaryOverview(request)
@@ -1213,10 +1213,10 @@ public class MeteringServiceImplTest {
   @DisplayName("Admin for summary api with time")
   public void testOverallMethodAdminSummary2(VertxTestContext vertxTestContext) {
 
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     JsonObject request = readProviderRequest();
     request.put("role", "admin");
     request.put(STARTT, "2021-11-01T05:30:00+05:30");
@@ -1243,7 +1243,7 @@ public class MeteringServiceImplTest {
     JsonObject expected = new JsonObject().put("resourceid", "abc").put("count", 10);
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
     spyMeteringService
         .summaryOverview(request)
         .onSuccess(
@@ -1260,10 +1260,10 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Delegate for summary api")
   public void testOverallMethodDelegateSummary(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     JsonObject request = readProviderRequest();
     request.put("role", "delegate");
     request.put("provider", "5b7556b5-0779-4c47-9cf2-3f209779aa22");
@@ -1303,7 +1303,7 @@ public class MeteringServiceImplTest {
     JsonObject expected = new JsonObject().put("resourceid", "abc").put("count", 10);
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .summaryOverview(request)
@@ -1321,10 +1321,10 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("Delegate for summary api with time")
   public void testOverallMethodDelegateSummaryWithTime(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     JsonObject request = readProviderRequest();
     request.put("role", "delegate");
     request.put(STARTT, "2021-11-01T05:30:00+05:30");
@@ -1366,7 +1366,7 @@ public class MeteringServiceImplTest {
     JsonObject expected = new JsonObject().put("resourceid", "abc").put("count", 10);
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .summaryOverview(request)
@@ -1385,10 +1385,10 @@ public class MeteringServiceImplTest {
   @DisplayName("Testing summary api query with invalid time interval")
   void readFromInvalidTimeIntervalSummary4(VertxTestContext testContext) {
     JsonObject request = readConsumerRequest();
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     request.put(ENDT, "2021-11-01T05:30:00+05:30");
     request.put(ROLE, "admin");
     meteringService
@@ -1408,10 +1408,10 @@ public class MeteringServiceImplTest {
   @DisplayName("Testing monthly api query with invalid time interval")
   void readFromInvalidTimeIntervalMonthly4(VertxTestContext testContext) {
     JsonObject request = readConsumerRequest();
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     request.put(ENDT, "2021-11-01T05:30:00+05:30");
     request.put(ROLE, "admin");
     meteringService
@@ -1431,10 +1431,10 @@ public class MeteringServiceImplTest {
   @DisplayName("Testing summary api query with invalid time interval")
   void readFromInvalidTimeIntervalSummary5(VertxTestContext testContext) {
     JsonObject request = readConsumerRequest();
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     request.put(STARTT, "2021-11-01T05:30:00+05:30");
     request.put(ROLE, "admin");
     meteringService
@@ -1454,10 +1454,10 @@ public class MeteringServiceImplTest {
   @DisplayName("Testing monthly api query with invalid time interval")
   void readFromInvalidTimeIntervalMonthly5(VertxTestContext testContext) {
     JsonObject request = readConsumerRequest();
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     request.put(STARTT, "2021-11-01T05:30:00+05:30");
     request.put(ROLE, "admin");
     meteringService
@@ -1476,10 +1476,10 @@ public class MeteringServiceImplTest {
   @Test
   @DisplayName("consumer for summary api -- > Catalogue fail")
   public void testOverallMethodConsumerSummary3(VertxTestContext vertxTestContext) {
-    databaseService = mock(PgPool.class);
-    ogcMeteringService = mock(PgPool.class);
+    meteringDatabaseService = mock(PgPool.class);
+    ogcDatabaseService = mock(PgPool.class);
     databroker = mock(DataBrokerService.class);
-    meteringService = new MeteringServiceImpl(vertxObj, databaseService, ogcMeteringService, config, databroker);
+    meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
     JsonObject request = readProviderRequest();
     request.put("role", "consumer");
 
@@ -1516,7 +1516,7 @@ public class MeteringServiceImplTest {
     JsonObject expected = new JsonObject().put("resourceid", "abc").put("count", 0);
     List<JsonObject> jsonObjectList = new ArrayList<>();
     jsonObjectList.add(expected);
-    when(databaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
+    when(meteringDatabaseService.withConnection(any())).thenReturn(Future.succeededFuture(jsonObjectList));
 
     meteringService
         .summaryOverview(request)

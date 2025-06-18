@@ -30,11 +30,11 @@ public class MeteringVerticle extends AbstractVerticle {
   private String meteringDatabaseName;
   private String meteringDatabaseUserName;
   private String meteringDatabasePassword;
-  private String databaseHost;
-  private int databasePort;
-  private String databaseName;
-  private String databaseUserName;
-  private String databasePassword;
+  private String ogcDatabaseHost;
+  private int ogcDatabasePort;
+  private String ogcDatabaseName;
+  private String ogcDatabaseUserName;
+  private String ogcDatabasePassword;
   private int poolSize;
 
   @Override
@@ -74,11 +74,11 @@ public class MeteringVerticle extends AbstractVerticle {
     meteringDatabaseUserName = config().getString("meteringDatabaseUser");
     meteringDatabasePassword = config().getString("meteringDatabasePassword");
 
-    databaseHost = config().getString("databaseHost");
-    databasePort = config().getInteger("databasePort");
-    databaseName = config().getString("databaseName");
-    databaseUserName = config().getString("databaseUser");
-    databasePassword = config().getString("databasePassword");
+    ogcDatabaseHost = config().getString("databaseHost");
+    ogcDatabasePort = config().getInteger("databasePort");
+    ogcDatabaseName = config().getString("databaseName");
+    ogcDatabaseUserName = config().getString("databaseUser");
+    ogcDatabasePassword = config().getString("databasePassword");
 
     poolSize = config().getInteger("poolSize");
 
@@ -94,11 +94,11 @@ public class MeteringVerticle extends AbstractVerticle {
 
     this.dbConnectOptions =
             new PgConnectOptions()
-                    .setPort(databasePort)
-                    .setHost(databaseHost)
-                    .setDatabase(databaseName)
-                    .setUser(databaseUserName)
-                    .setPassword(databasePassword)
+                    .setPort(ogcDatabasePort)
+                    .setHost(ogcDatabaseHost)
+                    .setDatabase(ogcDatabaseName)
+                    .setUser(ogcDatabaseUserName)
+                    .setPassword(ogcDatabasePassword)
                     .setReconnectAttempts(2)
                     .setReconnectInterval(1000L);
 
