@@ -27,6 +27,10 @@ BEGIN
     INSERT INTO collection_type (collection_id, type)
     VALUES (new_id, 'COLLECTION');
 
+    INSERT INTO roles (user_id, role)
+    VALUES ('00000000-0000-0000-0000-000000000000', 'PROVIDER')
+    ON CONFLICT DO NOTHING;
+
     INSERT INTO ri_details (id, role_id, access)
     VALUES (new_id, '00000000-0000-0000-0000-000000000000', 'OPEN')
     ON CONFLICT (id) DO NOTHING;
