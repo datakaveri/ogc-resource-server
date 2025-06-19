@@ -234,6 +234,12 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
         cmdLine.addArgument("--config");
         cmdLine.addArgument("CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE");
         cmdLine.addArgument("YES");
+        // set temp directory for temp file used when creating MVTs.
+        // GDAL uses working dir by default, which causes problems on non-writeable filesystems 
+        // in for e.g. a docker container
+        cmdLine.addArgument("--config");
+        cmdLine.addArgument("CPL_TMPDIR");
+        cmdLine.addArgument(System.getProperty("java.io.tmpdir"));
         // Set the output format to MVT
         cmdLine.addArgument("-f");
         cmdLine.addArgument("MVT");
