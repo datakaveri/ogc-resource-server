@@ -8,11 +8,11 @@ BEGIN
     INSERT INTO collections_details (
         title, description, datetime_key, crs, bbox, temporal, license
     ) VALUES (
-        'collection for testing records API',
-        'collection for testing records API',
+        'Catalog of Records',
+        'A collection of metadata records describing datasets',
         NULL,
         'http://www.opengis.net/def/crs/OGC/1.3/CRS84',
-        '{-79.77,40.47,-71.8,45.02}',
+        '{68.1766,7.9655,97.4025,35.4940}',
         ARRAY[NOW()::TEXT, NOW()::TEXT],
         NULL
     )
@@ -41,7 +41,7 @@ BEGIN
             bbox NUMERIC[],
             temporal TEXT[],
             geometry GEOMETRY,
-            collection_id UUID,
+            collection_id UUID UNIQUE,
             CONSTRAINT fk_collection
               FOREIGN KEY (collection_id)
               REFERENCES collections_details(id)
@@ -51,6 +51,6 @@ BEGIN
 
   EXECUTE format($f$
     GRANT SELECT, INSERT, UPDATE, DELETE ON public.%I TO %s
-$f$, new_id, ${ogcUser});
+$f$, new_id, '${ogcUser}');
 
 END $$ LANGUAGE plpgsql;
