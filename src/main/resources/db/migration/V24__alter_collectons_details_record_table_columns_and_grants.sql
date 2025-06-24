@@ -13,7 +13,7 @@ BEGIN
     GROUP BY collections_details.id
     LIMIT 1;
 
-    sql := format('ALTER TABLE %I ALTER COLUMN title TYPE VARCHAR(100)', record_table);
+    sql := format('ALTER TABLE %I ALTER COLUMN title TYPE VARCHAR(100), ALTER COLUMN description TYPE VARCHAR(200)', record_table);
 
     EXECUTE sql;
 END $$;
