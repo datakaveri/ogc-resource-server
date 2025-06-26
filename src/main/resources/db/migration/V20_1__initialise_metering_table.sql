@@ -21,6 +21,3 @@ CREATE INDEX IF NOT EXISTS idx_metering_user_collection_time
 
 ALTER TABLE metering OWNER TO ${flyway:user};
 GRANT SELECT,INSERT,UPDATE,DELETE ON TABLE metering TO ${ogcUser};
-
--- Grant usage on metering id sequence
-GRANT USAGE ON SEQUENCE metering_id_seq TO ${ogcUser};
