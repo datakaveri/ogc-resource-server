@@ -1538,19 +1538,30 @@ public class DatabaseServiceImpl implements DatabaseService{
   }
 
   @Override
-  public Future<String> deleteStacItem(String collectionId, String itemId) {
-    Promise<String> result = Promise.promise();
+  public Future<List<JsonObject>> deleteStacItem(String collectionId, String itemId) {
+    Promise<List<JsonObject>> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
     String deleteItemQuery = "DELETE from stac_collections_part where id = $1 and collection_id = $2";
-    String deleteAssetForItem = "DELETE from stac_items_assets where item_id = $1 and collection_id = $2";
+    String deleteAssetsForItem = "DELETE from stac_items_assets where item_id = $1 and collection_id = $2";
+    String getHrefsAndBucketIds = "SELECT array_agg(href) as hrefs, s3_bucket_id from stac_items_assets group by " +
+        "s3_bucket_id, item_id, collection_id having item_id = $1 and collection_id = $2";
+
+    Future<List<JsonObject>> hrefsAndIds =
+        client.withConnection(conn -> conn.preparedQuery(getHrefsAndBucketIds)
+        .collecting(collector)
+        .execute(Tuple.of(itemId, collectionId))
+        .map(SqlResult::value));
+
     checkIfCollectionExist(collectionId)
         .compose(collection -> checkIfItemExistForUpdateOrDelete(itemId, collectionId))
         .compose(item -> client.withTransaction(conn -> conn.preparedQuery(deleteItemQuery)
             .execute(Tuple.of(itemId, collectionId))
-            .compose(deleteItem -> conn.preparedQuery(deleteAssetForItem)
-                .execute(Tuple.of(itemId, collectionId)))))
+            .compose(deleteItem -> conn.preparedQuery(deleteAssetsForItem).execute(Tuple.of(itemId, collectionId))
+                )))
         .onSuccess(success -> {
           LOGGER.info("Item {} from collection-id {} has been deleted.", itemId, collectionId);
-          result.complete("STAC Item is deleted");
+          LOGGER.debug("hrefsandIds, {}", hrefsAndIds.result());
+          result.complete(hrefsAndIds.result());
         })
         .onFailure(failed -> {
           LOGGER.error("Failed to delete Stac Item. \nError: {}", failed.getMessage());

@@ -23,6 +23,7 @@ import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3BucketReadAccess;
 import ogc.rs.common.S3Config;
+import ogc.rs.common.S3ConfigsHolder;
 import ogc.rs.database.DatabaseService;
 import ogc.rs.jobs.JobsService;
 import ogc.rs.metering.MeteringService;
@@ -32,8 +33,9 @@ import org.apache.logging.log4j.Logger;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -54,24 +56,10 @@ import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
-import ogc.rs.apiserver.util.AuthInfo;
-import ogc.rs.apiserver.util.AuthInfo.RoleEnum;
-import ogc.rs.common.DataFromS3;
-import ogc.rs.common.S3Config;
-import ogc.rs.common.S3ConfigsHolder;
-import ogc.rs.apiserver.util.OgcException;
-import ogc.rs.apiserver.util.ProcessException;
-import ogc.rs.catalogue.CatalogueService;
-import ogc.rs.database.DatabaseService;
-import ogc.rs.jobs.JobsService;
-import ogc.rs.metering.MeteringService;
-import ogc.rs.processes.ProcessesRunnerService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import static ogc.rs.apiserver.handlers.TokenLimitsEnforcementHandler.getLimitsFromContext;
+
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.apiserver.handlers.StacItemByIdAuthZHandler.SHOULD_CREATE_KEY;
+import static ogc.rs.apiserver.handlers.TokenLimitsEnforcementHandler.getLimitsFromContext;
 import static ogc.rs.apiserver.util.Constants.NOT_FOUND;
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.*;
@@ -3124,9 +3112,69 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     dbService.deleteStacItem(collectionId, itemId)
         .onSuccess(success -> {
-          routingContext.put("response", new JsonObject().put("description", success));
-          routingContext.put("statusCode", 200);
-          routingContext.next();
+          success.forEach(s3Obj -> {
+            Optional<S3Config> s3Config = s3conf.getConfigByIdentifier(s3Obj.getString("s3_bucket_id"));
+            if (s3Config.isEmpty()) {
+              LOGGER.error("S3 Config is not present!");
+              return;
+            }
+            LOGGER.debug("What is returned? - {}", s3Obj);
+            LOGGER.debug("S3 creds: {}, {}", s3Config.get().getAccessKey(), s3Config.get().getSecretKey());
+            ArrayList<ObjectIdentifier> s3ObjectNames = new ArrayList<>();
+            S3Client s3Client = S3Client.builder()
+                .region(Region.of(s3Config.get().getRegion()))
+                .endpointOverride(URI.create(s3Config.get().getEndpoint()))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(s3Config.get().getAccessKey(), s3Config.get().getSecretKey())
+                ))
+                .serviceConfiguration(S3Configuration.builder()
+                    .pathStyleAccessEnabled(s3Config.get().isPathBasedAccess())
+                    .build())
+                .build();
+
+            s3Obj.getJsonArray("hrefs").forEach(href -> {
+              try {
+                URI hrefUri = new URI((String) href);
+                if (hrefUri.isAbsolute()) {
+                 String[] paths = hrefUri.getPath().split("/");
+                 String extractedPath = paths[1] + "/" + paths[2] + "/" + paths[3];
+                 ObjectIdentifier objId = ObjectIdentifier.builder().key(extractedPath).build();
+                 s3ObjectNames.add(objId);
+                } else {
+                  // add to the list as is
+                  ObjectIdentifier objId = ObjectIdentifier.builder().key((String) href).build();
+                  s3ObjectNames.add(objId);
+                }
+              } catch (URISyntaxException exp) {
+                LOGGER.debug("exception!!! {}", exp.getMessage());
+                routingContext.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
+              }
+            });
+
+            Delete del = Delete.builder()
+                .objects(s3ObjectNames)
+                .build();
+            try {
+              DeleteObjectsRequest multiObjectDeleteRequest = DeleteObjectsRequest.builder()
+                  .bucket(s3Config.get().getBucket())
+                  .delete(del)
+                  .build();
+
+              s3Client.deleteObjects(multiObjectDeleteRequest);
+            } catch (S3Exception s3e) {
+              LOGGER.error("S3 Delete Error, {}", s3e.awsErrorDetails().errorMessage());
+              OgcException ogcException =
+                  new OgcException(500, "Internal Server Error", "Internal Server Error");
+              routingContext.put("response", ogcException.getJson().toString());
+              routingContext.put("statusCode", ogcException.getStatusCode());
+              routingContext.fail(ogcException);
+            }
+          });
+          if (!routingContext.failed()) {
+            routingContext.put("response", new JsonObject().put("description", "STAC Item is deleted.").toString());
+            routingContext.put("statusCode", 200);
+            routingContext.next();
+          }
         })
         .onFailure(failed -> {
           if (failed instanceof OgcException) {
@@ -3140,6 +3188,5 @@ public class ApiServerVerticle extends AbstractVerticle {
           }
           routingContext.next();
         });
-
   }
 }

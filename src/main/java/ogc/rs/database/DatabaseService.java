@@ -183,5 +183,6 @@ public interface DatabaseService {
      */
     Future<String> getTileS3BucketId(String collectionId, String tileMatrixSetId);
 
-    Future<String> deleteStacItem(String collectionId, String itemId);
+    Future<List<JsonObject>> deleteStacItem(String collectionId, String itemId);
+
 }
