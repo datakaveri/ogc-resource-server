@@ -8,7 +8,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -40,15 +39,18 @@ public class MeteringServiceImpl implements MeteringService {
   JsonArray jsonArray;
   JsonArray resultJsonArray;
   int loopi;
-  PgPool meteringpgClient;
+  PgPool meteringPgClient;
+  PgPool ogcPgClient;
 
-  public MeteringServiceImpl(
+    public MeteringServiceImpl(
       Vertx vertx,
-      PgPool meteringpgClient,
+      PgPool meteringPgClient,
+      PgPool ogcPgClient,
       JsonObject config,
       DataBrokerService dataBrokerService) {
     this.dataBrokerService = dataBrokerService;
-    this.meteringpgClient = meteringpgClient;
+    this.meteringPgClient = meteringPgClient;
+    this.ogcPgClient = ogcPgClient;
     catalogueService = new CatalogueService(vertx, config);
   }
 
@@ -189,7 +191,7 @@ public class MeteringServiceImpl implements MeteringService {
 
         LocalDateTime timestamp = ZonedDateTime.parse(timestampStr).toLocalDateTime();
 
-        meteringpgClient.preparedQuery(sql)
+        ogcPgClient.preparedQuery(sql)
                 .execute(Tuple.of(userId, collectionId, apiPath, timestamp, respSize))
                 .onSuccess(res -> {
                     LOGGER.debug("Inserted into Postgres metering table");
@@ -452,7 +454,7 @@ public class MeteringServiceImpl implements MeteringService {
     Promise<JsonObject> promise = Promise.promise();
     Collector<Row, ?, List<JsonObject>> rowCollector =
         Collectors.mapping(row -> row.toJson(), Collectors.toList());
-    meteringpgClient
+    meteringPgClient
         .withConnection(
             connection ->
                 connection.query(query).collecting(rowCollector).execute().map(row -> row.value()))

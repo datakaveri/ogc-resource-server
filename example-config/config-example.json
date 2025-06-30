@@ -108,6 +108,11 @@
       "meteringDatabaseUser": "",
       "meteringDatabasePassword": "",
       "meteringDatabaseName": "",
+      "databaseHost": "",
+      "databasePort": 433,
+      "databaseUser": "",
+      "databasePassword": "",
+      "databaseName": "",
       "poolSize": 5
     },
     {
