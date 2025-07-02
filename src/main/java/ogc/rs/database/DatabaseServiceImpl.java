@@ -1,5 +1,6 @@
 package ogc.rs.database;
 
+import static ogc.rs.apiserver.util.Constants.BBOX_VIOLATES_CONSTRAINTS;
 import static ogc.rs.database.util.Constants.PROCESSES_TABLE_NAME;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -12,6 +13,7 @@ import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import ogc.rs.apiserver.router.RouterManager;
+import ogc.rs.apiserver.util.Limits;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.StacItemSearchParams;
 import ogc.rs.database.util.FeatureQueryBuilder;
@@ -105,95 +107,203 @@ public class DatabaseServiceImpl implements DatabaseService{
     }
     @Override
     public Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams,
-                                          Map<String, Integer> crs) {
-      LOGGER.info("getFeatures");
-      Promise<JsonObject> result = Promise.promise();
-      Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0),
-          row -> row.getInteger("count"));
-      Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
-      String datetimeValue;
-      FeatureQueryBuilder featureQuery = new FeatureQueryBuilder(collectionId);
+                                          Limits limits, Map<String, Integer> crs) {
+        LOGGER.info("getFeatures");
+        Promise<JsonObject> result = Promise.promise();
 
-      Future<String> sridOfStorageCrs = getSridOfStorageCrs(collectionId);
-      featureQuery.setLimit(Integer.parseInt(queryParams.get("limit")));
-      featureQuery.setBboxCrsSrid(String.valueOf(crs.get(queryParams.get("bbox-crs"))));
-      if (queryParams.get("bbox") != null) {
-        // find storageCrs from collections_details; remove square brackets since bbox is a string repr. of array
-        String coordinates = queryParams.get("bbox").replace("[", "").replace("]", "");
-        sridOfStorageCrs
-            .onSuccess(srid -> featureQuery.setBbox(coordinates, srid))
-            .onFailure(fail -> result.fail(fail.getMessage()));
-        if (sridOfStorageCrs.failed())
-          return result.future();
-      }
-      //TODO: convert individual DB calls to a transaction
-      datetimeValue = queryParams.getOrDefault("datetime", null);
-      featureQuery.setOffset(Integer.parseInt(queryParams.get("offset")));
-      featureQuery.setCrs(String.valueOf(crs.get(queryParams.get("crs"))));
-      Set<String> keys =  queryParams.keySet();
-      keys.removeAll(WELL_KNOWN_QUERY_PARAMETERS);
-      String[] key = keys.toArray(new String[keys.size()]);
-      if (!keys.isEmpty())
-          featureQuery.setFilter(key[0], queryParams.get(key[0]));
+        Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0),
+                row -> row.getInteger("count"));
+        Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
 
-      sridOfStorageCrs.compose(srid ->
-      client.withConnection(conn ->
-          //TODO: Remove datetime_key information when queryables api is implemented
-        conn.preparedQuery("select datetime_key from collections_details where id = $1::uuid")
-                .collecting(collector)
-                .execute(Tuple.of(UUID.fromString(collectionId)))
-                .onSuccess(conn1 -> {
-                  if (conn1.value().get(0).getString("datetime_key") != null && datetimeValue != null ){
-                    LOGGER.debug("datetimeKey: {}, datetimeValue: {}"
-                        ,conn1.value().get(0).getString("datetime_key"), datetimeValue);
-                    featureQuery.setDatetimeKey(conn1.value().get(0).getString("datetime_key"));
-                    featureQuery.setDatetime(datetimeValue);
-                  }
-                  LOGGER.debug("datetime_key: {}",conn1.value().get(0).getString("datetime_key"));
-                  LOGGER.debug("<DBService> Sql query- {} ",  featureQuery.buildSqlString());
-                  LOGGER.debug("Count Query- {}", featureQuery.buildSqlString("count"));
-                  JsonObject resultJson = new JsonObject();
-                  conn.preparedQuery(featureQuery.buildSqlString("count"))
-                      .collecting(collectorT).execute()
-                      .onSuccess(count -> {
-                        LOGGER.debug("Feature Count- {}",count.value().get("count"));
-                        int totalCount = count.value().get("count");
-                        resultJson.put("numberMatched", totalCount);
-                      })
-                      .onFailure(countFail -> {
-                        LOGGER.error("Failed to get the count of number of features!");
-                        result.fail("Error!");
-                      })
-                      .compose(sql -> {
-                        conn.preparedQuery(featureQuery.buildSqlString())
-                            .collecting(collector).execute().map(SqlResult::value)
-                            .onSuccess(success -> {
-                              if (!success.isEmpty())
-                                resultJson
-                                    .put("features", new JsonArray(success))
-                                    .put("numberReturned", success.size());
-                              else
-                                resultJson
-                                    .put("features", new JsonArray())
-                                    .put("numberReturned", 0);
-                              resultJson.put("type", "FeatureCollection");
-                              result.complete(resultJson);
+        String datetimeValue = queryParams.getOrDefault("datetime", null);
+
+        FeatureQueryBuilder featureQuery = new FeatureQueryBuilder(collectionId);
+
+        featureQuery.setLimit(Integer.parseInt(queryParams.get("limit")));
+        featureQuery.setOffset(Integer.parseInt(queryParams.get("offset")));
+        featureQuery.setCrs(String.valueOf(crs.get(queryParams.get("crs"))));
+        featureQuery.setBboxCrsSrid(String.valueOf(crs.get(queryParams.get("bbox-crs"))));
+
+        // Filter logic
+        Map<String, String> filteredParams = new HashMap<>(queryParams);
+        filteredParams.keySet().removeAll(WELL_KNOWN_QUERY_PARAMETERS);
+        if (!filteredParams.isEmpty()) {
+            String[] key = filteredParams.keySet().toArray(new String[filteredParams.size()]);
+            featureQuery.setFilter(key[0], filteredParams.get(key[0]));
+        }
+
+        Future<String> sridOfStorageCrs = getSridOfStorageCrs(collectionId);
+
+        Future<Void> bboxFuture = sridOfStorageCrs.compose(srid -> {
+            LOGGER.debug("srid is: {}", srid);
+            String queryBbox = queryParams.get("bbox");
+            // Check for bbox limits from token
+            List<Double> tokenBboxList = (limits != null && limits.getBboxLimit() != null) ? limits.getBboxLimitAsList() : null;
+            String tokenBbox = null;
+            if (tokenBboxList != null && !tokenBboxList.isEmpty()) {
+                tokenBbox = tokenBboxList.stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(","));
+                LOGGER.debug("Token bbox from limits: {}", tokenBbox);
+            }
+
+            if (queryBbox != null || tokenBbox != null) {
+                LOGGER.debug("Entered into bbox check");
+                LOGGER.debug("The token bbox is : {}", tokenBbox);
+
+                if (queryBbox != null) {
+                    queryBbox = queryBbox.replace("[", "").replace("]", "");
+                    LOGGER.debug("The query param bbox is : {}", queryBbox);
+                }
+
+                Promise<Void> bboxPromise = Promise.promise();
+
+                if (queryBbox != null && tokenBbox != null) {
+                    // Use PostGIS to check bbox intersection
+                    String sql = "SELECT ST_Intersects(" +
+                            "ST_Transform(ST_MakeEnvelope(" + queryBbox + ", " + srid + "), 4326), " +
+                            "ST_MakeEnvelope(" + tokenBbox + ", 4326)" +
+                            ")";
+                    String finalQueryBbox = queryBbox;
+                    String finalTokenBbox = tokenBbox;
+                    client.query(sql).execute()
+                            .onSuccess(rows -> {
+                                if (rows.iterator().hasNext()) {
+                                    Row row = rows.iterator().next();
+                                    boolean intersects = row.getBoolean(0);
+                                    if (intersects) {
+                                        LOGGER.debug("Both token bbox and query param bbox are getting intersected...");
+                                        featureQuery.setBboxWhenTokenBboxExists(finalQueryBbox, finalTokenBbox, srid);
+                                        bboxPromise.complete();
+                                    } else {
+                                        LOGGER.debug(BBOX_VIOLATES_CONSTRAINTS);
+                                        bboxPromise.fail(new OgcException(403, "Forbidden", BBOX_VIOLATES_CONSTRAINTS));
+                                    }
+                                } else {
+                                    bboxPromise.fail("No result from ST_Intersects check.");
+                                }
                             })
-                            .onFailure(failed -> {
-                              LOGGER.error("Failed at getFeatures- {}",failed.getMessage());
-                              result.fail("Error!");
+                            .onFailure(err -> {
+                                LOGGER.debug("PostGIS intersection check failed: {}", err.getMessage());
+                                bboxPromise.fail(err);
                             });
-                        return result.future();
-                      });
-                })
-                .onFailure(fail -> {
-                  LOGGER.error("Failed at find_collection- {}",fail.getMessage());
-                  result.fail("Error!");
-                })));
-        return result.future();
+                } else {
+                    if (queryBbox != null) {
+                        featureQuery.setBbox(queryBbox, srid);
+                    } else if (tokenBbox != null) {
+                        featureQuery.setBbox(tokenBbox, srid);
+                    }
+                    bboxPromise.complete();
+                }
+
+                return bboxPromise.future();
+            } else {
+                return Future.succeededFuture();
+            }
+        });
+
+        // Enhanced feature limits handling with intersection check
+        Future<Void> featLimitsFuture = bboxFuture.compose(v -> {
+            // Check for feature limits from token
+            if (limits != null && limits.getFeatLimit() != null && !limits.getFeatLimit().isEmpty()) {
+                Map<String, List<String>> featLimits = limits.getFeatLimitAsMap();
+                String tokenFeatCollectionId = featLimits.keySet().iterator().next();
+                List<String> tokenFeatureIds = featLimits.get(tokenFeatCollectionId);
+                String tokenFeatIds = String.join(",", tokenFeatureIds);
+
+                LOGGER.debug("Processing feature limits from token - Collection: {}, Feature IDs: {}",
+                        tokenFeatCollectionId, tokenFeatIds);
+
+                Promise<Void> featLimitsPromise = Promise.promise();
+
+                // Check if there's any intersection between request collection and token feature geometries
+                String intersectionCheckSql =
+                        "SELECT EXISTS(" +
+                                "SELECT 1 FROM \"" + collectionId + "\" request_feature " +
+                                "JOIN \"" + tokenFeatCollectionId + "\" token_feature " +
+                                "ON ST_Intersects(request_feature.geom, token_feature.geom) " +
+                                "WHERE token_feature.id IN (" + tokenFeatIds + ")" +
+                                ")";
+
+                LOGGER.debug("Feature intersection check SQL: {}", intersectionCheckSql);
+
+                client.query(intersectionCheckSql).execute()
+                        .onSuccess(rows -> {
+                            if (rows.iterator().hasNext()) {
+                                Row row = rows.iterator().next();
+                                boolean hasIntersection = row.getBoolean(0);
+                                if (hasIntersection) {
+                                    LOGGER.debug("Feature intersection found, proceeding with feature limits enforcement");
+                                    // Set feature limits in the query builder
+                                    featureQuery.setFeatLimits(tokenFeatCollectionId, tokenFeatIds);
+                                    featLimitsPromise.complete();
+                                } else {
+                                    LOGGER.debug("No intersection found between request collection and token feature boundaries");
+                                    featLimitsPromise.fail(new OgcException(403, "Forbidden",
+                                            "Feature not found within the allowed feature boundaries"));
+                                }
+                            } else {
+                                featLimitsPromise.fail("No result from feature intersection check.");
+                            }
+                        })
+                        .onFailure(err -> {
+                            LOGGER.error("Feature intersection check failed: {}", err.getMessage());
+                            featLimitsPromise.fail(err);
+                        });
+
+                return featLimitsPromise.future();
+            } else {
+                return Future.succeededFuture();
+            }
+        });
+        // Continue only after both bboxFuture and featLimitsFuture complete
+        return featLimitsFuture.compose(v -> sridOfStorageCrs.compose(srid ->
+                client.withConnection(conn ->
+                        conn.preparedQuery("select datetime_key from collections_details where id = $1::uuid")
+                                .collecting(collector)
+                                .execute(Tuple.of(UUID.fromString(collectionId)))
+                                .compose(conn1 -> {
+                                    if (conn1.value().get(0).getString("datetime_key") != null && datetimeValue != null ){
+                                        String datetimeKey = conn1.value().get(0).getString("datetime_key");
+                                        featureQuery.setDatetimeKey(datetimeKey);
+                                        featureQuery.setDatetime(datetimeValue);
+                                    }
+                                            LOGGER.debug("datetime_key: {}",conn1.value().get(0).getString("datetime_key"));
+                                            LOGGER.debug("<DBService> Sql query- {} ",  featureQuery.buildSqlString());
+                                            LOGGER.debug("Count Query- {}", featureQuery.buildSqlString("count"));
+
+                                            JsonObject resultJson = new JsonObject();
+                                            return conn.preparedQuery(featureQuery.buildSqlString("count"))
+                                                    .collecting(collectorT).execute()
+                                                    .compose(count -> {
+                                                        LOGGER.debug("Feature Count- {}", count.value().get("count"));
+                                                        int totalCount = count.value().get("count");
+                                                        resultJson.put("numberMatched", totalCount);
+
+                                                        return conn.preparedQuery(featureQuery.buildSqlString())
+                                                                .collecting(collector).execute()
+                                                                .map(SqlResult::value)
+                                                                .compose(success -> {
+                                                                    if (!success.isEmpty())
+                                                                        resultJson
+                                                                                .put("features", new JsonArray(success))
+                                                                                .put("numberReturned", success.size());
+                                                                    else
+                                                                        resultJson
+                                                                                .put("features", new JsonArray())
+                                                                                .put("numberReturned", 0);
+                                                                    resultJson.put("type", "FeatureCollection");
+                                                                    return Future.succeededFuture(resultJson);
+                                                                });
+                                                    });
+                                        })))
+                .onFailure(err -> {
+                    LOGGER.error("Failed at getFeatures - {}", err.getMessage());
+                    result.fail(err);
+                }));
     }
 
-  private Future<String> getSridOfStorageCrs(String collectionId) {
+    private Future<String> getSridOfStorageCrs(String collectionId) {
     LOGGER.info("getSridOfStorageCrs");
     Promise<String> result = Promise.promise();
     Collector<Row, ? , Map<String, Integer>> collector = Collectors.toMap(row -> row.getColumnName(0),
@@ -235,7 +345,7 @@ public class DatabaseServiceImpl implements DatabaseService{
           .collecting(crsCollector)
           .execute(Tuple.of(UUID.fromString(collectionId)))
           .onSuccess(success -> {
-            LOGGER.debug("CRS:SRID-\n{}",success.toString() );
+            LOGGER.debug("CRS:SRID-\n{}",success.value() );
             if (!success.value().containsKey(requestCrs)) {
               result.fail(new OgcException(400, "Bad Request", "Collection does not support this crs"));
             }
@@ -253,39 +363,174 @@ public class DatabaseServiceImpl implements DatabaseService{
     return result.future();
   }
 
-  @Override
-  public Future<JsonObject> getFeature(String collectionId, Integer featureId, Map<String, String> queryParams,
-                                       Map<String, Integer> crs) {
-    LOGGER.info("getFeature");
-    Promise<JsonObject> result = Promise.promise();
+    @Override
+    public Future<JsonObject> getFeature(String collectionId, Integer featureId, Map<String, String> queryParams,
+                                         Limits limits, Map<String, Integer> crs) {
+        LOGGER.info("getFeature");
+        Promise<JsonObject> result = Promise.promise();
 
-    Collector<Row, ? , List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
-    // Collector<Row, ? , Map<String, Integer>> collectorT = Collectors.toMap(row -> row.getColumnName(0)
-     // , row -> row.getInteger("count"));
-    String srid = String.valueOf(crs.get(queryParams.get("crs")));
-    String geoColumn = "cast(st_asgeojson(st_transform(geom," + srid + "),9,0) as json)";
-    String sqlQuery = "Select id, 'Feature' as type," + geoColumn + " as geometry, " +
-        " (row_to_json(\"" + collectionId + "\")::jsonb - 'id' - 'geom') as properties" +
-        " from \"" + collectionId + "\" where id=$1::int" ;
-    client.withConnection(conn ->
-        conn.preparedQuery(sqlQuery)
-          .collecting(collector).execute(Tuple.of(featureId))
-          .map(SqlResult::value)
-          .onSuccess(success -> {
-            if (success.isEmpty())
-              result.fail(new OgcException(404, "Not found", "Feature not found"));
-            else
-              result.complete(success.get(0));
-          })
-          .onFailure(failed -> {
-            LOGGER.error("Failed at getFeature- {}",failed.getMessage());
-            result.fail("Error!");
-          }));
-      return result.future();
-  }
+        Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+        String srid = String.valueOf(crs.get(queryParams.get("crs")));
+        String geoColumn = "cast(st_asgeojson(st_transform(geom," + srid + "),9,0) as json)";
 
+        // Step 1: Check if feature exists without any filters
+        String checkExistSql = "SELECT 1 FROM \"" + collectionId + "\" WHERE id = $1::int";
 
-  @Override
+        client.withConnection(conn ->
+                conn.preparedQuery(checkExistSql).execute(Tuple.of(featureId))
+                        .compose(existsResult -> {
+                            if (existsResult.rowCount() == 0) {
+                                // Feature does not exist at all
+                                return Future.failedFuture(new OgcException(404, "Not found", "Feature not found"));
+                            }
+
+                            // Feature exists, now apply filters
+                            return applySpatialFiltersAndGetFeature(conn, collectionId, featureId, limits, geoColumn, collector);
+                        })
+        ).onComplete(ar -> {
+            if (ar.succeeded()) {
+                result.complete(ar.result());
+            } else {
+                Throwable cause = ar.cause();
+                if (cause instanceof OgcException) {
+                    result.fail(cause);
+                } else {
+                    LOGGER.error("Failed at getFeature - {}", cause.getMessage(), cause);
+                    result.fail(new OgcException(500, "Internal Server Error", cause.getMessage()));
+                }
+            }
+        });
+
+        return result.future();
+    }
+
+    private Future<JsonObject> applySpatialFiltersAndGetFeature(SqlConnection conn, String collectionId, Integer featureId,
+                                                                Limits limits, String geoColumn,
+                                                                Collector<Row, ?, List<JsonObject>> collector) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("SELECT request_feature.id, 'Feature' AS type, ")
+                .append("cast(st_asgeojson(st_transform(request_feature.geom,")
+                .append(geoColumn.substring(geoColumn.indexOf(",") + 1))
+                .append(" as geometry, ")
+                .append("(row_to_json(request_feature)::jsonb - 'id' - 'geom') as properties ");
+
+        // Check if we have feature limits
+        boolean hasFeatLimit = limits != null && limits.getFeatLimitAsMap() != null && !limits.getFeatLimitAsMap().isEmpty();
+
+        // Check if we have bbox limits
+        boolean hasBboxLimit = limits != null && limits.getBboxLimitAsList() != null && !limits.getBboxLimitAsList().isEmpty();
+
+        if (hasFeatLimit) {
+            // Use spatial intersection with boundary collection
+            Map<String, List<String>> featLimits = limits.getFeatLimitAsMap();
+            String boundaryCollectionId = featLimits.keySet().iterator().next();
+            List<String> allowedFeatureIds = featLimits.get(boundaryCollectionId);
+            String featLimit = String.join(",", allowedFeatureIds);
+
+            sqlBuilder.append("FROM \"").append(collectionId).append("\" AS request_feature ")
+                    .append("JOIN \"").append(boundaryCollectionId).append("\" AS token_feature ")
+                    .append("ON ST_Intersects(request_feature.geom, token_feature.geom) ")
+                    .append("WHERE request_feature.id = $1::int ")
+                    .append("AND token_feature.id IN (").append(featLimit).append(")");
+        } else if (hasBboxLimit) {
+            // Only bbox filter
+            List<Double> bboxList = limits.getBboxLimitAsList();
+            String tokenBbox = bboxList.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(","));
+
+            sqlBuilder.append("FROM \"").append(collectionId).append("\" AS request_feature ")
+                    .append("WHERE request_feature.id = $1::int ")
+                    .append("AND ST_Intersects(ST_Transform(request_feature.geom, 4326), ST_MakeEnvelope(")
+                    .append(tokenBbox).append(", 4326))");
+        } else {
+            // No filters, just get the feature
+            sqlBuilder.append("FROM \"").append(collectionId).append("\" AS request_feature ")
+                    .append("WHERE request_feature.id = $1::int");
+        }
+
+        String finalSql = sqlBuilder.toString();
+        LOGGER.debug("Executing query: {}", finalSql);
+
+        return conn.preparedQuery(finalSql)
+                .collecting(collector)
+                .execute(Tuple.of(featureId))
+                .map(SqlResult::value)
+                .compose(features -> {
+                    if (features.isEmpty()) {
+                        if (hasFeatLimit) {
+                            return Future.failedFuture(new OgcException(403, "Forbidden",
+                                    "Feature not found within the allowed feature boundaries"));
+                        } else if (hasBboxLimit) {
+                            return Future.failedFuture(new OgcException(403, "Forbidden",
+                                    "Feature not found within the bbox limit"));
+                        } else {
+                            return Future.failedFuture(new OgcException(404, "Not found", "Feature not found"));
+                        }
+                    } else {
+                        return Future.succeededFuture(features.get(0));
+                    }
+                });
+    }
+
+    @Override
+    public Future<Boolean> checkTokenCollectionAndFeatureIdsExist(String collectionId, List<String> featureIds) {
+        LOGGER.debug("Checking if the Collection and Feature Ids in the token exist in the DB...");
+        Promise<Boolean> result = Promise.promise();
+
+        if (featureIds == null || featureIds.isEmpty()) {
+            result.complete(false);
+            return result.future();
+        }
+
+        // Step 1: Check if table (collection) exists
+        String tableCheckSql = "SELECT to_regclass($1) IS NOT NULL AS exists";
+        client.preparedQuery(tableCheckSql)
+                .execute(Tuple.of(collectionId))
+                .onSuccess(tableRows -> {
+                    boolean tableExists = tableRows.iterator().next().getBoolean("exists");
+                    if (!tableExists) {
+                        LOGGER.warn("Collection table {} does not exist", collectionId);
+                        result.fail(new OgcException(404, "Not Found", "Collection not found"));
+                        return;
+                    }
+
+                    // Step 2: Check if all feature IDs exist using array parameter
+                    String sql = "SELECT COUNT(id) as count FROM \"" + collectionId + "\" WHERE id = ANY($2::int[])";
+
+                        // Convert feature IDs from String list to integer array
+                        int[] featureIdArray = featureIds.stream()
+                                .mapToInt(Integer::parseInt)
+                                .toArray();
+
+                        // Create tuple with collection ID and feature ID array
+                        Tuple tuple = Tuple.of(UUID.fromString(collectionId), featureIdArray);
+
+                        client.withConnection(conn ->
+                                conn.preparedQuery(sql)
+                                        .execute(tuple)
+                                        .onSuccess(rows -> {
+                                            int count = rows.iterator().next().getInteger("count");
+                                            boolean allExist = count == featureIds.size();
+                                            LOGGER.debug("Feature existence check for collection {}: {} out of {} features exist",
+                                                    collectionId, count, featureIds.size());
+                                            result.complete(allExist);
+                                        })
+                                        .onFailure(throwable -> {
+                                            LOGGER.error("Error checking feature existence: {}", throwable.getMessage());
+                                            result.fail(new OgcException(500, "Internal Server Error", "Error validating feature existence"));
+                                        })
+                        );
+                })
+                .onFailure(err -> {
+                    LOGGER.error("Failed to check collection existence: {}", err.getMessage());
+                    result.fail(new OgcException(500, "Internal Server Error", "Error checking collection existence"));
+                });
+
+        return result.future();
+    }
+
+    @Override
   public Future<List<JsonObject>> getStacCollections() {
     Promise<List<JsonObject>> result = Promise.promise();
     Collector<Row, ?, List<JsonObject>> collector =
