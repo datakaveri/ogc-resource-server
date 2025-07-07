@@ -13,8 +13,6 @@ import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -226,10 +224,7 @@ public class FeatureAttributesExtractionProcess implements ProcessService {
             }
 
             JsonObject extractionResult = new JsonObject()
-                    .put("numberReturned", features.size())
-                    .put("type", "FeatureCollection")
-                    .put("features", features)
-                    .put("timeStamp", Instant.now().toString());
+                    .put("features", features);
 
             requestInput.put("extractionResult", extractionResult);
 
