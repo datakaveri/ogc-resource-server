@@ -2943,10 +2943,6 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   }
 
-  public void getRecordItemsQ(RoutingContext routingContext) {
-    LOGGER.debug("hereeeeeeeeeeeeeeeeeeeeeeee");
-  }
-
   private JsonObject buildRecordItemResponse(JsonObject recordItem, String catalogId) {
     JsonObject builtRecordItem = new JsonObject();
     builtRecordItem.put("id", recordItem.getString("id"))
