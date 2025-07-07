@@ -17,6 +17,7 @@ import ogc.rs.apiserver.util.Limits;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.StacItemSearchParams;
 import ogc.rs.database.util.FeatureQueryBuilder;
+import ogc.rs.database.util.RecordQueryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -1183,14 +1184,15 @@ public class DatabaseServiceImpl implements DatabaseService{
 
 
     @Override
-    public Future<List<JsonObject>> getOgcRecords(String catalogId) {
+    public Future<List<JsonObject>> getOgcRecords(String catalogId,  Map<String, String> queryParam ) {
         Promise <List<JsonObject>> result = Promise.promise();
+        RecordQueryBuilder recordQueryBuilder = new RecordQueryBuilder(catalogId);
+        if(queryParam.containsKey("q")) {
+            recordQueryBuilder.setQValues(queryParam.get("q"));
+        }
         Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
-        String tableName = "public.\"" + catalogId + "\"";
-        String query = String.format(
-                "SELECT id, ST_AsGeoJSON(geometry)::json AS geometry, created, title, description, keywords, bbox, temporal, collection_id, provider_name, provider_contacts FROM %s",
-                tableName
-        );
+        String query = recordQueryBuilder.buildItemSearchSqlString();
+        LOGGER.debug("Query to get the record items based on query parameters "+query);
         client.withConnection(conn ->
                         conn.query(query)
                                 .collecting(collector)

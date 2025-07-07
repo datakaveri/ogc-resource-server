@@ -169,7 +169,7 @@ public interface DatabaseService {
 
    Future<JsonObject> updateStacItem(JsonObject requestBody);
 
-    Future<List<JsonObject>>  getOgcRecords(String catalogId);
+    Future<List<JsonObject>>  getOgcRecords(String catalogId,  Map<String, String> queryParam );
 
     Future<JsonObject> getOgcRecordItem (String catalogId, String recordId);
 

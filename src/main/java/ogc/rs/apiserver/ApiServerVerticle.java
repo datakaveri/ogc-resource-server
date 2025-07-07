@@ -2901,8 +2901,18 @@ public class ApiServerVerticle extends AbstractVerticle {
   public void getRecordItems(RoutingContext routingContext) {
     LOGGER.debug("getting all the record items");
     String catalogId = routingContext.request().path().split("/")[2];
+    Map<String, String> queryParam = new HashMap<>();
+    String q = routingContext.request().getParam("q");
+    if (q != null && !q.trim().isEmpty()) {
+      queryParam.put("q", q);
+      List<String> qList = Arrays.stream(q.split("(?<!\\\\),"))
+              .map(s -> s.trim().replace("\\,", ","))
+              .filter(s -> !s.isEmpty())
+              .collect(Collectors.toList());
+      queryParam.put(q, qList.toString());
+    }
     JsonArray recordItemCollection = new JsonArray();
-    dbService.getOgcRecords(catalogId)
+    dbService.getOgcRecords(catalogId, queryParam)
             .onSuccess(success->{
               LOGGER.debug("Building Record Items Response");
               for(JsonObject recordItem : success)
@@ -2931,6 +2941,10 @@ public class ApiServerVerticle extends AbstractVerticle {
 
 
 
+  }
+
+  public void getRecordItemsQ(RoutingContext routingContext) {
+    LOGGER.debug("hereeeeeeeeeeeeeeeeeeeeeeee");
   }
 
   private JsonObject buildRecordItemResponse(JsonObject recordItem, String catalogId) {
