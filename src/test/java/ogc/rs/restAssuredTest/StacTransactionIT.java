@@ -645,6 +645,16 @@ public class StacTransactionIT {
         .statusCode(200)
         .body("description", equalTo("STAC Item is deleted."));
 
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .get(endpoint)
+        .then()
+        .statusCode(404)
+        .body("code", equalTo("NotFoundError"));
+
   }
 
   @Order(23)
@@ -674,6 +684,16 @@ public class StacTransactionIT {
         .then()
         .statusCode(200)
         .body("description", equalTo("STAC Item is deleted."));
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .get(endpoint)
+        .then()
+        .statusCode(404)
+        .body("code", equalTo("NotFoundError"));
 
   }
 
@@ -715,6 +735,16 @@ public class StacTransactionIT {
         .then()
         .statusCode(200)
         .body("description", equalTo("STAC Item is deleted."));
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .get(endpoint)
+        .then()
+        .statusCode(404)
+        .body("code", equalTo("NotFoundError"));
 
   }
 }
