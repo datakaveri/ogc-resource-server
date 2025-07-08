@@ -7,9 +7,12 @@ import ogc.rs.util.FakeTokenBuilder;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.io.File;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
+import static ogc.rs.restAssuredTest.Constant.BUCKET_PATH;
+import static ogc.rs.restAssuredTest.Constant.PORT;
 import static org.hamcrest.Matchers.*;
 
 @ExtendWith(RestAssuredConfigExtension.class)
@@ -67,6 +70,11 @@ public class StacTransactionIT {
                 .put("geometry", geometry)
                 .put("properties", validProperties)
                 .put("type", "Feature")));
+
+    File asset = new File("src/test/resources/processFiles/image__3_.png");
+    given().port(PORT).body(asset).when().put("bucket1/0ff3d306-9402-4430-8e18-6f95e4c03c97" +
+        "/testing_stac_item_delete_1" +
+            "/image__3_.png").then().statusCode(200);
   }
 
     @Order(1)
@@ -557,4 +565,186 @@ public class StacTransactionIT {
           .body("description", containsStringIgnoringCase("One ore more STAC item(s) exist!"));
 
     }
+
+  @Order(20)
+  @Test
+  @Description("Failure: Deleting a STAC Item when Collection does not exist")
+  public void testDeleteItemWhenCollectionDoesNotExist() throws InterruptedException {
+
+    String endpoint = "/stac/collections/"+UUID.randomUUID()+"/items/testing_stac_item_1";
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .delete(endpoint)
+        .then()
+        .statusCode(404)
+        .body("code", equalTo("Not Found"))
+        .body("description", containsStringIgnoringCase("Collection not found"));
+
+  }
+
+  @Order(21)
+  @Test
+  @Description("Failure: Deleting a STAC Item when Item does not exist")
+  public void testDeleteItemWhenItemDoesNotExist() throws InterruptedException {
+
+    String endpoint = "/stac/collections/0bfd0f9a-a31c-4ee9-9728-0a97248a4637/items/random_item_id";
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .delete(endpoint)
+        .then()
+        .statusCode(404)
+        .body("code", equalTo("Not found"))
+        .body("description", containsStringIgnoringCase("No STAC Item exists!"));
+
+  }
+
+  @Order(22)
+  @Test
+  @Description("Success: Deleting a STAC Item with open provider token")
+  public void testDeleteStacItem() throws InterruptedException {
+
+    String endpoint = "/stac/collections/0bfd0f9a-a31c-4ee9-9728-0a97248a4637/items/testing_stac_item_delete_1";
+
+    JsonObject assets = new JsonObject()
+        .put(String.valueOf(UUID.randomUUID()), new JsonObject()
+            .put("href","0bfd0f9a-a31c-4ee9-9728-0a97248a4637/testing_stac_item_delete_1/image__3_.png")
+            .put("title", "Asset title")
+            .put("type", "image/png")
+            .put("s3BucketId", "default")
+            .put("roles", new JsonArray().add("thumbnail"))
+            .put("size", 1024));
+
+    standardRequestBody.put("assets", assets);
+    standardRequestBody.put("id","testing_stac_item_delete_1");
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .body(standardRequestBody.encode())
+        .when()
+        .post(openCollectionCreateItemEndpoint)
+        .then()
+        .statusCode(201);
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .delete(endpoint)
+        .then()
+        .statusCode(200)
+        .body("description", equalTo("STAC Item is deleted."));
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .get(endpoint)
+        .then()
+        .statusCode(404)
+        .body("code", equalTo("NotFoundError"));
+
+  }
+
+  @Order(23)
+  @Test
+  @Description("Success: Deleting a STAC Item with no assets")
+  public void testDeleteItemWithNoAsset() throws InterruptedException {
+
+    String endpoint = "/stac/collections/0bfd0f9a-a31c-4ee9-9728-0a97248a4637/items/testing_stac_item_delete_1";
+
+    standardRequestBody.put("id", "testing_stac_item_delete_1" );
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .body(standardRequestBody.encode())
+        .when()
+        .post(openCollectionCreateItemEndpoint)
+        .then()
+        .statusCode(201);
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .delete(endpoint)
+        .then()
+        .statusCode(200)
+        .body("description", equalTo("STAC Item is deleted."));
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .get(endpoint)
+        .then()
+        .statusCode(404)
+        .body("code", equalTo("NotFoundError"));
+
+  }
+
+  @Order(24)
+  @Test
+  @Description("Success: Deleting a STAC Item with absolute URI of asset")
+  public void testDeleteItemAssetAbsoluteURI() throws InterruptedException {
+
+    String endpoint = "/stac/collections/0bfd0f9a-a31c-4ee9-9728-0a97248a4637/items/testing_stac_item_delete_1";
+
+    standardRequestBody.put("id", "testing_stac_item_delete_1" );
+    JsonObject assets = new JsonObject()
+        .put(String.valueOf(UUID.randomUUID()), new JsonObject()
+            .put("href","https://bucket-1.s3.aws-region.amazonaws" +
+                ".com:9090/bucket1/0bfd0f9a-a31c-4ee9-9728-0a97248a4637/testing_stac_item_delete_1/image__3_.png")
+            .put("title", "Asset title")
+            .put("type", "image/png")
+            .put("s3BucketId", "default")
+            .put("roles", new JsonArray().add("thumbnail"))
+            .put("size", 1024));
+    standardRequestBody.put("assets", assets);
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .body(standardRequestBody.encode())
+        .when()
+        .post(openCollectionCreateItemEndpoint)
+        .then()
+        .statusCode(201);
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .delete(endpoint)
+        .then()
+        .statusCode(200)
+        .body("description", equalTo("STAC Item is deleted."));
+
+    given()
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .auth().oauth2(token)
+        .when()
+        .get(endpoint)
+        .then()
+        .statusCode(404)
+        .body("code", equalTo("NotFoundError"));
+
+  }
 }

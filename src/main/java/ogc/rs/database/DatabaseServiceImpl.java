@@ -1122,7 +1122,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         " WHERE id = $1 and collection_id = $2";
 
     checkIfCollectionExist(collectionId)
-        .compose(collection -> checkIfItemExistForUpdate(itemId, collectionId))
+        .compose(collection -> checkIfItemExistForUpdateOrDelete(itemId, collectionId))
         .compose(item -> client.withTransaction(conn ->
             conn.preparedQuery(updateItemQuery)
                 .execute(Tuple.of(itemId,collectionId,bboxArray, geometry, properties))
@@ -1324,15 +1324,15 @@ public class DatabaseServiceImpl implements DatabaseService{
       return promise.future();
   }
 
-  private Future<Void> checkIfItemExistForUpdate(String itemId, String collectionId) {
+  private Future<Void> checkIfItemExistForUpdateOrDelete(String itemId, String collectionId) {
     Promise<Void> promise = Promise.promise();
     client.withConnection(conn ->
         conn.preparedQuery("SELECT 1 FROM stac_collections_part WHERE id = $1 and collection_id = $2::uuid")
             .execute(Tuple.of(itemId, UUID.fromString(collectionId)))
             .onSuccess(item -> {
               if (item.rowCount() == 0) {
-                LOGGER.error("No STAC Item exists to update!");
-                promise.fail(new OgcException(404, "Not found", "No STAC Item exists to update"));
+                LOGGER.error("No STAC Item exists to update/delete!");
+                promise.fail(new OgcException(404, "Not found", "No STAC Item exists!"));
               }
               else
                 promise.complete();
@@ -1541,6 +1541,39 @@ public class DatabaseServiceImpl implements DatabaseService{
         .onFailure(fail -> {
           LOGGER.error("Failed S3 bucket id for collection + TMS! - {}", fail.getMessage());
           result.fail("Error!");
+        });
+    return result.future();
+  }
+
+  @Override
+  public Future<List<JsonObject>> deleteStacItem(String collectionId, String itemId) {
+    Promise<List<JsonObject>> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+    String deleteItemQuery = "DELETE from stac_collections_part where id = $1 and collection_id = $2";
+    String deleteAssetsForItem = "DELETE from stac_items_assets where item_id = $1 and collection_id = $2";
+    String getHrefsAndBucketIds = "SELECT array_agg(href) as hrefs, s3_bucket_id from stac_items_assets group by " +
+        "s3_bucket_id, item_id, collection_id having item_id = $1 and collection_id = $2";
+
+    Future<List<JsonObject>> hrefsAndIds =
+        client.withConnection(conn -> conn.preparedQuery(getHrefsAndBucketIds)
+        .collecting(collector)
+        .execute(Tuple.of(itemId, collectionId))
+        .map(SqlResult::value));
+
+    checkIfCollectionExist(collectionId)
+        .compose(collection -> checkIfItemExistForUpdateOrDelete(itemId, collectionId))
+        .compose(item -> client.withTransaction(conn -> conn.preparedQuery(deleteItemQuery)
+            .execute(Tuple.of(itemId, collectionId))
+            .compose(deleteItem -> conn.preparedQuery(deleteAssetsForItem).execute(Tuple.of(itemId, collectionId))
+                )))
+        .onSuccess(success -> {
+          LOGGER.info("Item {} from collection-id {} has been deleted.", itemId, collectionId);
+          LOGGER.debug("hrefsandIds, {}", hrefsAndIds.result());
+          result.complete(hrefsAndIds.result());
+        })
+        .onFailure(failed -> {
+          LOGGER.error("Failed to delete Stac Item. \nError: {}", failed.getMessage());
+          result.fail(failed);
         });
     return result.future();
   }
