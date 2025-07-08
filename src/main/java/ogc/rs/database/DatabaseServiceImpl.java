@@ -105,6 +105,7 @@ public class DatabaseServiceImpl implements DatabaseService{
             });
         return result.future();
     }
+
     @Override
     public Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams,
                                           Limits limits, Map<String, Integer> crs) {
@@ -256,18 +257,19 @@ public class DatabaseServiceImpl implements DatabaseService{
                 return Future.succeededFuture();
             }
         });
+
         // Continue only after both bboxFuture and featLimitsFuture complete
-        return featLimitsFuture.compose(v -> sridOfStorageCrs.compose(srid ->
-                client.withConnection(conn ->
-                        conn.preparedQuery("select datetime_key from collections_details where id = $1::uuid")
-                                .collecting(collector)
-                                .execute(Tuple.of(UUID.fromString(collectionId)))
-                                .compose(conn1 -> {
-                                    if (conn1.value().get(0).getString("datetime_key") != null && datetimeValue != null ){
-                                        String datetimeKey = conn1.value().get(0).getString("datetime_key");
-                                        featureQuery.setDatetimeKey(datetimeKey);
-                                        featureQuery.setDatetime(datetimeValue);
-                                    }
+        featLimitsFuture.compose(v -> sridOfStorageCrs.compose(srid ->
+                        client.withConnection(conn ->
+                                conn.preparedQuery("select datetime_key from collections_details where id = $1::uuid")
+                                        .collecting(collector)
+                                        .execute(Tuple.of(UUID.fromString(collectionId)))
+                                        .compose(conn1 -> {
+                                            if (conn1.value().get(0).getString("datetime_key") != null && datetimeValue != null ){
+                                                String datetimeKey = conn1.value().get(0).getString("datetime_key");
+                                                featureQuery.setDatetimeKey(datetimeKey);
+                                                featureQuery.setDatetime(datetimeValue);
+                                            }
                                             LOGGER.debug("datetime_key: {}",conn1.value().get(0).getString("datetime_key"));
                                             LOGGER.debug("<DBService> Sql query- {} ",  featureQuery.buildSqlString());
                                             LOGGER.debug("Count Query- {}", featureQuery.buildSqlString("count"));
@@ -296,11 +298,17 @@ public class DatabaseServiceImpl implements DatabaseService{
                                                                     return Future.succeededFuture(resultJson);
                                                                 });
                                                     });
-                                        })))
+                                        }))))
+                .onSuccess(jsonResult -> {
+                    LOGGER.debug("getFeatures completed successfully");
+                    result.complete(jsonResult);
+                })
                 .onFailure(err -> {
                     LOGGER.error("Failed at getFeatures - {}", err.getMessage());
                     result.fail(err);
-                }));
+                });
+
+        return result.future();
     }
 
     private Future<String> getSridOfStorageCrs(String collectionId) {
