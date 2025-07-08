@@ -3170,11 +3170,8 @@ public class ApiServerVerticle extends AbstractVerticle {
               s3Client.deleteObjects(multiObjectDeleteRequest);
             } catch (S3Exception s3e) {
               LOGGER.error("S3 Delete Error, {}", s3e.awsErrorDetails().errorMessage());
-              OgcException ogcException =
-                  new OgcException(500, "Internal Server Error", "Internal Server Error");
-              routingContext.put("response", ogcException.getJson().toString());
-              routingContext.put("statusCode", ogcException.getStatusCode());
-              routingContext.fail(ogcException);
+              routingContext.fail(new OgcException(202, "Item deleted", "Item is deleted but actual assets are not " +
+                    "deleted."));
             }
           });
           if (!routingContext.failed()) {
