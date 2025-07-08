@@ -3112,14 +3112,20 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     dbService.deleteStacItem(collectionId, itemId)
         .onSuccess(success -> {
+          if (success.isEmpty()) {
+            routingContext.put("response", new JsonObject().put("description", "STAC Item is deleted.").toString());
+            routingContext.put("statusCode", 200);
+            routingContext.next();
+            return;
+          }
           success.forEach(s3Obj -> {
             Optional<S3Config> s3Config = s3conf.getConfigByIdentifier(s3Obj.getString("s3_bucket_id"));
             if (s3Config.isEmpty()) {
               LOGGER.error("S3 Config is not present!");
+              routingContext.fail(new OgcException(202, "Item deleted", "Item is deleted but actual assets are not " +
+                  "deleted."));
               return;
             }
-            LOGGER.debug("What is returned? - {}", s3Obj);
-            LOGGER.debug("S3 creds: {}, {}", s3Config.get().getAccessKey(), s3Config.get().getSecretKey());
             ArrayList<ObjectIdentifier> s3ObjectNames = new ArrayList<>();
             S3Client s3Client = S3Client.builder()
                 .region(Region.of(s3Config.get().getRegion()))
@@ -3146,8 +3152,9 @@ public class ApiServerVerticle extends AbstractVerticle {
                   s3ObjectNames.add(objId);
                 }
               } catch (URISyntaxException exp) {
-                LOGGER.debug("exception!!! {}", exp.getMessage());
-                routingContext.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
+                LOGGER.error("exception!!! {}", exp.getMessage());
+                routingContext.fail(new OgcException(202, "Item deleted", "Item is deleted but actual assets are not " +
+                    "deleted."));
               }
             });
 
