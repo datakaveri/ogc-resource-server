@@ -17,6 +17,7 @@ import ogc.rs.apiserver.util.Limits;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.StacItemSearchParams;
 import ogc.rs.database.util.FeatureQueryBuilder;
+import ogc.rs.database.util.MulticornErrorHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -305,7 +306,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                 })
                 .onFailure(err -> {
                     LOGGER.error("Failed at getFeatures - {}", err.getMessage());
-                    result.fail(err);
+                    result.fail(MulticornErrorHandler.handle(err));
                 });
 
         return result.future();
@@ -395,19 +396,15 @@ public class DatabaseServiceImpl implements DatabaseService{
                             // Feature exists, now apply filters
                             return applySpatialFiltersAndGetFeature(conn, collectionId, featureId, limits, geoColumn, collector);
                         })
-        ).onComplete(ar -> {
-            if (ar.succeeded()) {
-                result.complete(ar.result());
-            } else {
-                Throwable cause = ar.cause();
-                if (cause instanceof OgcException) {
-                    result.fail(cause);
+        ).onSuccess(success -> result.complete(success))
+        .onFailure(fail -> {
+                if (fail instanceof OgcException) {
+                    result.fail(fail);
                 } else {
-                    LOGGER.error("Failed at getFeature - {}", cause.getMessage(), cause);
-                    result.fail(new OgcException(500, "Internal Server Error", cause.getMessage()));
+                    LOGGER.error("Failed at getFeature - {}", fail.getMessage());
+                    result.fail(MulticornErrorHandler.handle(fail));
                 }
-            }
-        });
+            });
 
         return result.future();
     }

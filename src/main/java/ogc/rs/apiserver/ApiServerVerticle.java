@@ -333,19 +333,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                       "crs", "<" + queryParamsMap.getOrDefault("crs", DEFAULT_SERVER_CRS) + ">");
               routingContext.next();
             })
-            .onFailure(
-                    failed -> {
-                      if (failed instanceof OgcException) {
-                        routingContext.put("response", ((OgcException) failed).getJson().toString());
-                        routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
-                      } else {
-                        OgcException ogcException =
-                                new OgcException(500, "Internal Server Error", "Internal Server Error");
-                        routingContext.put("response", ogcException.getJson().toString());
-                        routingContext.put("statusCode", ogcException.getStatusCode());
-                      }
-                      routingContext.next();
-                    });
+            .onFailure(failed -> routingContext.fail(failed));
   }
 
 
@@ -450,18 +438,7 @@ public class ApiServerVerticle extends AbstractVerticle {
               routingContext.put("crs", "<" + queryParamsMap.getOrDefault("crs", DEFAULT_SERVER_CRS) + ">");
               routingContext.next();
             })
-            .onFailure(failed -> {
-              if (failed instanceof OgcException){
-                routingContext.put("response",((OgcException) failed).getJson().toString());
-                routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
-              }
-              else{
-                OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
-                routingContext.put("response", ogcException.getJson().toString());
-                routingContext.put("statusCode", ogcException.getStatusCode());
-              }
-              routingContext.next();
-            });
+            .onFailure(failed -> routingContext.fail(failed));
   }
 
   public void getProcesses(RoutingContext routingContext) {
