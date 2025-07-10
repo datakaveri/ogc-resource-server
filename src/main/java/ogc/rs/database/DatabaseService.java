@@ -7,10 +7,10 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import ogc.rs.apiserver.util.Limits;
 import ogc.rs.apiserver.util.StacItemSearchParams;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @VertxGen
 @ProxyGen
@@ -26,10 +26,9 @@ public interface DatabaseService {
 
     Future<List<JsonObject>>  getCollection(final String collectionId);
 
-    Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams, Map<String, Integer> crs);
+    Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams, Limits limits, Map<String, Integer> crs);
 
-    Future<JsonObject> getFeature(String collectionId, Integer featureId, Map<String, String> queryParams, Map<String,
-        Integer> crs);
+    Future<JsonObject> getFeature(String collectionId, Integer featureId, Map<String, String> queryParams, Limits limits, Map<String, Integer> crs);
 
     Future<Map<String, Integer>> isCrsValid(String collectionId, Map<String, String> queryParams);
 
@@ -60,6 +59,14 @@ public interface DatabaseService {
     // Get data usage (sum of resp_size) based on user_id, api_path, and collection_id within the time window
     Future<Long> getTotalDataUsage(String userId, String apiPath, String collectionId, long policyIssuedAt);
 
+    /**
+     * Checks if all specified feature IDs exist in the given collection table.
+     *
+     * @param collectionId The collection (table) ID to check
+     * @param featureIds List of feature IDs to validate
+     * @return Future<Boolean> true if all features exist, false otherwise
+     */
+    Future<Boolean> checkTokenCollectionAndFeatureIdsExist(String collectionId, List<String> featureIds);
     /**
      * Get OGC Feature Collection metadata to be used for OpenAPI spec generation.
      *
@@ -175,5 +182,7 @@ public interface DatabaseService {
      * @return String the S3 bucket ID
      */
     Future<String> getTileS3BucketId(String collectionId, String tileMatrixSetId);
-  }
 
+    Future<List<JsonObject>> deleteStacItem(String collectionId, String itemId);
+
+}

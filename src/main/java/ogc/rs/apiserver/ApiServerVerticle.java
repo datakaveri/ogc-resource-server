@@ -16,12 +16,14 @@ import io.vertx.ext.web.validation.ValidationHandler;
 import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
 import ogc.rs.apiserver.util.AuthInfo;
 import ogc.rs.apiserver.util.AuthInfo.RoleEnum;
+import ogc.rs.apiserver.util.Limits;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.StacItemSearchParams;
 import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3BucketReadAccess;
 import ogc.rs.common.S3Config;
+import ogc.rs.common.S3ConfigsHolder;
 import ogc.rs.database.DatabaseService;
 import ogc.rs.jobs.JobsService;
 import ogc.rs.metering.MeteringService;
@@ -31,8 +33,9 @@ import org.apache.logging.log4j.Logger;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -53,24 +56,10 @@ import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
-import ogc.rs.apiserver.util.AuthInfo;
-import ogc.rs.apiserver.util.AuthInfo.RoleEnum;
-import ogc.rs.common.DataFromS3;
-import ogc.rs.common.S3Config;
-import ogc.rs.common.S3ConfigsHolder;
-import ogc.rs.apiserver.util.OgcException;
-import ogc.rs.apiserver.util.ProcessException;
-import ogc.rs.catalogue.CatalogueService;
-import ogc.rs.database.DatabaseService;
-import ogc.rs.jobs.JobsService;
-import ogc.rs.metering.MeteringService;
-import ogc.rs.processes.ProcessesRunnerService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.apiserver.handlers.StacItemByIdAuthZHandler.SHOULD_CREATE_KEY;
+import static ogc.rs.apiserver.handlers.TokenLimitsEnforcementHandler.getLimitsFromContext;
 import static ogc.rs.apiserver.util.Constants.NOT_FOUND;
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.*;
@@ -310,22 +299,27 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   public void getFeature(RoutingContext routingContext) {
-
     RequestParameters requestParameters = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
     String collectionId = routingContext.request().path().split("/")[2];
     Integer featureId = requestParameters.pathParameter("featureId").getInteger();
     Map<String, Object> queryParams = requestParameters.toJson().getJsonObject("query").getMap();
     Map<String, String> queryParamsMap = queryParams.entrySet()
-        .stream()
-        .collect(Collectors.toMap(Map.Entry::getKey, e -> (String) e.getValue()));
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> (String) e.getValue()));
+
+    // Get validated limits from context (set by TokenLimitsEnforcementHandler)
+    Limits limits = getLimitsFromContext(routingContext);
+
     LOGGER.debug("<APIServer> QP- {}", queryParamsMap);
+    LOGGER.debug("<APIServer> Limits- {}", limits);
+
     Future<Map<String, Integer>> isCrsValid = dbService.isCrsValid(collectionId, queryParamsMap);
     isCrsValid
-        .compose(crs -> dbService.getFeature(collectionId, featureId, queryParamsMap, crs))
-        .onSuccess(success -> {
+            .compose(crs -> dbService.getFeature(collectionId, featureId, queryParamsMap, limits, crs))
+            .onSuccess(success -> {
               // TODO: Add base_path from config
               success.put("links", new JsonArray()
-                  .add(new JsonObject().put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items/"
+                      .add(new JsonObject().put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items/"
                                       + featureId)
                               .put("rel", "self")
                               .put("type", "application/geo+json"))
@@ -336,131 +330,115 @@ public class ApiServerVerticle extends AbstractVerticle {
               routingContext.put("response", success.toString());
               routingContext.put("statusCode", 200);
               routingContext.put(
-                  "crs", "<" + queryParamsMap.getOrDefault("crs", DEFAULT_SERVER_CRS) + ">");
+                      "crs", "<" + queryParamsMap.getOrDefault("crs", DEFAULT_SERVER_CRS) + ">");
               routingContext.next();
             })
-        .onFailure(
-            failed -> {
-              if (failed instanceof OgcException) {
-                routingContext.put("response", ((OgcException) failed).getJson().toString());
-                routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
-              } else {
-                OgcException ogcException =
-                    new OgcException(500, "Internal Server Error", "Internal Server Error");
-                routingContext.put("response", ogcException.getJson().toString());
-                routingContext.put("statusCode", ogcException.getStatusCode());
-              }
-              routingContext.next();
-            });
+            .onFailure(failed -> routingContext.fail(failed));
   }
 
-  public void getFeatures(RoutingContext routingContext) {
 
+  public void getFeatures(RoutingContext routingContext) {
     RequestParameters requestParameters = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
     String collectionId = routingContext.request().path().split("/")[2];
+
+    // Extract query parameters as a mutable map
     Map<String, Object> queryParams = requestParameters.toJson().getJsonObject("query").getMap();
     Map<String, String> queryParamsMap = queryParams.entrySet()
-        .stream()
-        .filter(i -> i.getValue() != null)
-        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+            .stream()
+            .filter(i -> i.getValue() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+
+    // Get validated limits from context (set by TokenLimitsEnforcementHandler)
+    Limits limits = getLimitsFromContext(routingContext);
+
     LOGGER.debug("<APIServer> QP- {}", queryParamsMap);
+    LOGGER.debug("<APIServer> Limits- {}", limits);
 
     Future<Map<String, Integer>> isCrsValid = dbService.isCrsValid(collectionId, queryParamsMap);
     isCrsValid
-        .compose(datetimeCheck -> {
-          try {
-            String datetime;
-            ZonedDateTime zone, zone2;
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
-            if (queryParamsMap.containsKey("datetime")) {
-              datetime = queryParamsMap.get("datetime");
-              if (!datetime.contains("/")) {
-                zone = ZonedDateTime.parse(datetime, formatter);
-              } else if (datetime.contains("/")) {
-                String[] dateTimeArr = datetime.split("/");
-                if (dateTimeArr[0].equals("..")) { // -- before
-                  zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
-                }
-                else if (dateTimeArr[1].equals("..")) { // -- after
-                  zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
-                }
-                else {
-                  zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
-                  zone2 = ZonedDateTime.parse(dateTimeArr[1], formatter);
-                  if (zone2.isBefore(zone)){
-                    OgcException ogcException = new OgcException(400, "Bad Request", "After time cannot be lesser " +
-                        "than Before time");
-                    return Future.failedFuture(ogcException);
+            .compose(datetimeCheck -> {
+              try {
+                String datetime;
+                ZonedDateTime zone, zone2;
+                DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+                if (queryParamsMap.containsKey("datetime")) {
+                  datetime = queryParamsMap.get("datetime");
+                  if (!datetime.contains("/")) {
+                    zone = ZonedDateTime.parse(datetime, formatter);
+                  } else if (datetime.contains("/")) {
+                    String[] dateTimeArr = datetime.split("/");
+                    if (dateTimeArr[0].equals("..")) { // -- before
+                      zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
+                    }
+                    else if (dateTimeArr[1].equals("..")) { // -- after
+                      zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
+                    }
+                    else {
+                      zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
+                      zone2 = ZonedDateTime.parse(dateTimeArr[1], formatter);
+                      if (zone2.isBefore(zone)){
+                        OgcException ogcException = new OgcException(400, "Bad Request", "After time cannot be lesser " +
+                                "than Before time");
+                        return Future.failedFuture(ogcException);
+                      }
+                    }
                   }
                 }
-              }
-            }
-          } catch (NullPointerException ne) {
+              } catch (NullPointerException ne) {
                 OgcException ogcException =
-                    new OgcException(500, "Internal Server Error", "Internal Server Error");
+                        new OgcException(500, "Internal Server Error", "Internal Server Error");
                 return Future.failedFuture(ogcException);
-            } catch (DateTimeParseException dtpe) {
-              OgcException ogcException =
-                  new OgcException(400, "Bad Request", "Time parameter not in ISO format");
-              return Future.failedFuture(ogcException);
-            }
-            return Future.succeededFuture();
-          })
-        .compose(dbCall -> dbService.getFeatures(collectionId, queryParamsMap, isCrsValid.result()))
-        .onSuccess(success -> {
-          success.put("links", new JsonArray());
-          int limit = Integer.parseInt(queryParamsMap.get("limit"));
-          String nextLink = "";
-          JsonArray features = success.getJsonArray("features");
-          if (!features.isEmpty()) {
-            int lastIdOffset = features.getJsonObject(features.size() - 1).getInteger("id") + 1;
-            queryParamsMap.put("offset", String.valueOf(lastIdOffset));
-            AtomicReference<String> requestPath = new AtomicReference<>(routingContext.request().path());
-            if (!queryParamsMap.isEmpty()) {
-              requestPath.set(requestPath + "?");
-              queryParamsMap.forEach((key, value) -> requestPath.set(requestPath + key + "=" + value + "&"));
-            }
-            nextLink = requestPath.toString().substring(0, requestPath.toString().length() - 1);
-            nextLink = nextLink.replace("[", "").replace("]","");
-            LOGGER.debug("**** nextLink- {}", nextLink);
-            if ( limit < success.getInteger("numberMatched")
-                && (success.getInteger("numberMatched") > success.getInteger("numberReturned"))
-                && success.getInteger("numberReturned") != 0 ) {
+              } catch (DateTimeParseException dtpe) {
+                OgcException ogcException =
+                        new OgcException(400, "Bad Request", "Time parameter not in ISO format");
+                return Future.failedFuture(ogcException);
+              }
+              return Future.succeededFuture();
+            })
+            .compose(dbCall -> dbService.getFeatures(collectionId, queryParamsMap, limits, isCrsValid.result()))
+            .onSuccess(success -> {
+              success.put("links", new JsonArray());
+              int limit = Integer.parseInt(queryParamsMap.get("limit"));
+              String nextLink = "";
+              JsonArray features = success.getJsonArray("features");
+              if (!features.isEmpty()) {
+                int lastIdOffset = features.getJsonObject(features.size() - 1).getInteger("id") + 1;
+                queryParamsMap.put("offset", String.valueOf(lastIdOffset));
+                AtomicReference<String> requestPath = new AtomicReference<>(routingContext.request().path());
+                if (!queryParamsMap.isEmpty()) {
+                  requestPath.set(requestPath + "?");
+                  queryParamsMap.forEach((key, value) -> requestPath.set(requestPath + key + "=" + value + "&"));
+                }
+                nextLink = requestPath.toString().substring(0, requestPath.toString().length() - 1);
+                nextLink = nextLink.replace("[", "").replace("]","");
+                LOGGER.debug("**** nextLink- {}", nextLink);
+                if ( limit < success.getInteger("numberMatched")
+                        && (success.getInteger("numberMatched") > success.getInteger("numberReturned"))
+                        && success.getInteger("numberReturned") != 0 ) {
+                  success.getJsonArray("links")
+                          .add(new JsonObject()
+                                  .put("href",
+                                          hostName + nextLink)
+                                  .put("rel", "next")
+                                  .put("type", "application/geo+json" ));
+                }
+              }
               success.getJsonArray("links")
-                  .add(new JsonObject()
-                      .put("href",
-                          hostName + nextLink)
-                      .put("rel", "next")
-                      .put("type", "application/geo+json" ));
-            }
-          }
-          success.getJsonArray("links")
-                  .add(new JsonObject()
-                      .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items")
-                      .put("rel", "self")
-                      .put("type", "application/geo+json"))
-                  .add(new JsonObject()
-                      .put("href", hostName + ogcBasePath  + COLLECTIONS + "/" + collectionId + "/items")
-                      .put("rel", "alternate")
-                      .put("type", "application/geo+json"));
-          success.put("timeStamp", Instant.now().toString());
-          routingContext.put("response",success.toString());
-          routingContext.put("statusCode", 200);
-          routingContext.put("crs", "<" + queryParamsMap.getOrDefault("crs", DEFAULT_SERVER_CRS) + ">");
-          routingContext.next();
-        })
-        .onFailure(failed -> {
-          if (failed instanceof OgcException){
-            routingContext.put("response",((OgcException) failed).getJson().toString());
-            routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
-          }
-          else{
-            OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
-            routingContext.put("response", ogcException.getJson().toString());
-            routingContext.put("statusCode", ogcException.getStatusCode());
-          }
-          routingContext.next();
-        });
+                      .add(new JsonObject()
+                              .put("href", hostName + ogcBasePath + COLLECTIONS + "/" + collectionId + "/items")
+                              .put("rel", "self")
+                              .put("type", "application/geo+json"))
+                      .add(new JsonObject()
+                              .put("href", hostName + ogcBasePath  + COLLECTIONS + "/" + collectionId + "/items")
+                              .put("rel", "alternate")
+                              .put("type", "application/geo+json"));
+              success.put("timeStamp", Instant.now().toString());
+              routingContext.put("response",success.toString());
+              routingContext.put("statusCode", 200);
+              routingContext.put("crs", "<" + queryParamsMap.getOrDefault("crs", DEFAULT_SERVER_CRS) + ">");
+              routingContext.next();
+            })
+            .onFailure(failed -> routingContext.fail(failed));
   }
 
   public void getProcesses(RoutingContext routingContext) {
@@ -3110,5 +3088,91 @@ public class ApiServerVerticle extends AbstractVerticle {
     return assetObject.mergeIn(modifiedAssets);
   }
 
+  public void deleteStacItem(RoutingContext routingContext) {
+    String collectionId = routingContext.request().path().split("/")[3];
+    String itemId = routingContext.request().path().split("/")[5];
 
+    dbService.deleteStacItem(collectionId, itemId)
+        .onSuccess(success -> {
+          if (success.isEmpty()) {
+            routingContext.put("response", new JsonObject().put("description", "STAC Item is deleted.").toString());
+            routingContext.put("statusCode", 200);
+            routingContext.next();
+            return;
+          }
+          success.forEach(s3Obj -> {
+            Optional<S3Config> s3Config = s3conf.getConfigByIdentifier(s3Obj.getString("s3_bucket_id"));
+            if (s3Config.isEmpty()) {
+              LOGGER.error("S3 Config is not present!");
+              routingContext.fail(new OgcException(202, "Item deleted", "Item is deleted but actual assets are not " +
+                  "deleted."));
+              return;
+            }
+            ArrayList<ObjectIdentifier> s3ObjectNames = new ArrayList<>();
+            S3Client s3Client = S3Client.builder()
+                .region(Region.of(s3Config.get().getRegion()))
+                .endpointOverride(URI.create(s3Config.get().getEndpoint()))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(s3Config.get().getAccessKey(), s3Config.get().getSecretKey())
+                ))
+                .serviceConfiguration(S3Configuration.builder()
+                    .pathStyleAccessEnabled(s3Config.get().isPathBasedAccess())
+                    .build())
+                .build();
+
+            s3Obj.getJsonArray("hrefs").forEach(href -> {
+              try {
+                URI hrefUri = new URI((String) href);
+                if (hrefUri.isAbsolute()) {
+                 String[] paths = hrefUri.getPath().split("/");
+                 String extractedPath = paths[1] + "/" + paths[2] + "/" + paths[3];
+                 ObjectIdentifier objId = ObjectIdentifier.builder().key(extractedPath).build();
+                 s3ObjectNames.add(objId);
+                } else {
+                  // add to the list as is
+                  ObjectIdentifier objId = ObjectIdentifier.builder().key((String) href).build();
+                  s3ObjectNames.add(objId);
+                }
+              } catch (URISyntaxException exp) {
+                LOGGER.error("exception!!! {}", exp.getMessage());
+                routingContext.fail(new OgcException(202, "Item deleted", "Item is deleted but actual assets are not " +
+                    "deleted."));
+              }
+            });
+
+            Delete del = Delete.builder()
+                .objects(s3ObjectNames)
+                .build();
+            try {
+              DeleteObjectsRequest multiObjectDeleteRequest = DeleteObjectsRequest.builder()
+                  .bucket(s3Config.get().getBucket())
+                  .delete(del)
+                  .build();
+
+              s3Client.deleteObjects(multiObjectDeleteRequest);
+            } catch (S3Exception s3e) {
+              LOGGER.error("S3 Delete Error, {}", s3e.awsErrorDetails().errorMessage());
+              routingContext.fail(new OgcException(202, "Item deleted", "Item is deleted but actual assets are not " +
+                    "deleted."));
+            }
+          });
+          if (!routingContext.failed()) {
+            routingContext.put("response", new JsonObject().put("description", "STAC Item is deleted.").toString());
+            routingContext.put("statusCode", 200);
+            routingContext.next();
+          }
+        })
+        .onFailure(failed -> {
+          if (failed instanceof OgcException) {
+            routingContext.put("response", ((OgcException) failed).getJson().toString());
+            routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+          } else {
+            OgcException ogcException =
+                new OgcException(500, "Internal Server Error", "Internal Server Error");
+            routingContext.put("response", ogcException.getJson().toString());
+            routingContext.put("statusCode", ogcException.getStatusCode());
+          }
+          routingContext.next();
+        });
+  }
 }
