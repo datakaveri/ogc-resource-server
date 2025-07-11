@@ -18,6 +18,7 @@ import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.StacItemSearchParams;
 import ogc.rs.database.util.FeatureQueryBuilder;
 import ogc.rs.database.util.RecordQueryBuilder;
+import ogc.rs.database.util.MulticornErrorHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -106,6 +107,7 @@ public class DatabaseServiceImpl implements DatabaseService{
             });
         return result.future();
     }
+
     @Override
     public Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams,
                                           Limits limits, Map<String, Integer> crs) {
@@ -257,18 +259,19 @@ public class DatabaseServiceImpl implements DatabaseService{
                 return Future.succeededFuture();
             }
         });
+
         // Continue only after both bboxFuture and featLimitsFuture complete
-        return featLimitsFuture.compose(v -> sridOfStorageCrs.compose(srid ->
-                client.withConnection(conn ->
-                        conn.preparedQuery("select datetime_key from collections_details where id = $1::uuid")
-                                .collecting(collector)
-                                .execute(Tuple.of(UUID.fromString(collectionId)))
-                                .compose(conn1 -> {
-                                    if (conn1.value().get(0).getString("datetime_key") != null && datetimeValue != null ){
-                                        String datetimeKey = conn1.value().get(0).getString("datetime_key");
-                                        featureQuery.setDatetimeKey(datetimeKey);
-                                        featureQuery.setDatetime(datetimeValue);
-                                    }
+        featLimitsFuture.compose(v -> sridOfStorageCrs.compose(srid ->
+                        client.withConnection(conn ->
+                                conn.preparedQuery("select datetime_key from collections_details where id = $1::uuid")
+                                        .collecting(collector)
+                                        .execute(Tuple.of(UUID.fromString(collectionId)))
+                                        .compose(conn1 -> {
+                                            if (conn1.value().get(0).getString("datetime_key") != null && datetimeValue != null ){
+                                                String datetimeKey = conn1.value().get(0).getString("datetime_key");
+                                                featureQuery.setDatetimeKey(datetimeKey);
+                                                featureQuery.setDatetime(datetimeValue);
+                                            }
                                             LOGGER.debug("datetime_key: {}",conn1.value().get(0).getString("datetime_key"));
                                             LOGGER.debug("<DBService> Sql query- {} ",  featureQuery.buildSqlString());
                                             LOGGER.debug("Count Query- {}", featureQuery.buildSqlString("count"));
@@ -297,11 +300,17 @@ public class DatabaseServiceImpl implements DatabaseService{
                                                                     return Future.succeededFuture(resultJson);
                                                                 });
                                                     });
-                                        })))
+                                        }))))
+                .onSuccess(jsonResult -> {
+                    LOGGER.debug("getFeatures completed successfully");
+                    result.complete(jsonResult);
+                })
                 .onFailure(err -> {
                     LOGGER.error("Failed at getFeatures - {}", err.getMessage());
-                    result.fail(err);
-                }));
+                    result.fail(MulticornErrorHandler.handle(err));
+                });
+
+        return result.future();
     }
 
     private Future<String> getSridOfStorageCrs(String collectionId) {
@@ -388,19 +397,15 @@ public class DatabaseServiceImpl implements DatabaseService{
                             // Feature exists, now apply filters
                             return applySpatialFiltersAndGetFeature(conn, collectionId, featureId, limits, geoColumn, collector);
                         })
-        ).onComplete(ar -> {
-            if (ar.succeeded()) {
-                result.complete(ar.result());
-            } else {
-                Throwable cause = ar.cause();
-                if (cause instanceof OgcException) {
-                    result.fail(cause);
+        ).onSuccess(success -> result.complete(success))
+        .onFailure(fail -> {
+                if (fail instanceof OgcException) {
+                    result.fail(fail);
                 } else {
-                    LOGGER.error("Failed at getFeature - {}", cause.getMessage(), cause);
-                    result.fail(new OgcException(500, "Internal Server Error", cause.getMessage()));
+                    LOGGER.error("Failed at getFeature - {}", fail.getMessage());
+                    result.fail(MulticornErrorHandler.handle(fail));
                 }
-            }
-        });
+            });
 
         return result.future();
     }
@@ -1115,7 +1120,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         " WHERE id = $1 and collection_id = $2";
 
     checkIfCollectionExist(collectionId)
-        .compose(collection -> checkIfItemExistForUpdate(itemId, collectionId))
+        .compose(collection -> checkIfItemExistForUpdateOrDelete(itemId, collectionId))
         .compose(item -> client.withTransaction(conn ->
             conn.preparedQuery(updateItemQuery)
                 .execute(Tuple.of(itemId,collectionId,bboxArray, geometry, properties))
@@ -1318,15 +1323,15 @@ public class DatabaseServiceImpl implements DatabaseService{
       return promise.future();
   }
 
-  private Future<Void> checkIfItemExistForUpdate(String itemId, String collectionId) {
+  private Future<Void> checkIfItemExistForUpdateOrDelete(String itemId, String collectionId) {
     Promise<Void> promise = Promise.promise();
     client.withConnection(conn ->
         conn.preparedQuery("SELECT 1 FROM stac_collections_part WHERE id = $1 and collection_id = $2::uuid")
             .execute(Tuple.of(itemId, UUID.fromString(collectionId)))
             .onSuccess(item -> {
               if (item.rowCount() == 0) {
-                LOGGER.error("No STAC Item exists to update!");
-                promise.fail(new OgcException(404, "Not found", "No STAC Item exists to update"));
+                LOGGER.error("No STAC Item exists to update/delete!");
+                promise.fail(new OgcException(404, "Not found", "No STAC Item exists!"));
               }
               else
                 promise.complete();
@@ -1535,6 +1540,39 @@ public class DatabaseServiceImpl implements DatabaseService{
         .onFailure(fail -> {
           LOGGER.error("Failed S3 bucket id for collection + TMS! - {}", fail.getMessage());
           result.fail("Error!");
+        });
+    return result.future();
+  }
+
+  @Override
+  public Future<List<JsonObject>> deleteStacItem(String collectionId, String itemId) {
+    Promise<List<JsonObject>> result = Promise.promise();
+    Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
+    String deleteItemQuery = "DELETE from stac_collections_part where id = $1 and collection_id = $2";
+    String deleteAssetsForItem = "DELETE from stac_items_assets where item_id = $1 and collection_id = $2";
+    String getHrefsAndBucketIds = "SELECT array_agg(href) as hrefs, s3_bucket_id from stac_items_assets group by " +
+        "s3_bucket_id, item_id, collection_id having item_id = $1 and collection_id = $2";
+
+    Future<List<JsonObject>> hrefsAndIds =
+        client.withConnection(conn -> conn.preparedQuery(getHrefsAndBucketIds)
+        .collecting(collector)
+        .execute(Tuple.of(itemId, collectionId))
+        .map(SqlResult::value));
+
+    checkIfCollectionExist(collectionId)
+        .compose(collection -> checkIfItemExistForUpdateOrDelete(itemId, collectionId))
+        .compose(item -> client.withTransaction(conn -> conn.preparedQuery(deleteItemQuery)
+            .execute(Tuple.of(itemId, collectionId))
+            .compose(deleteItem -> conn.preparedQuery(deleteAssetsForItem).execute(Tuple.of(itemId, collectionId))
+                )))
+        .onSuccess(success -> {
+          LOGGER.info("Item {} from collection-id {} has been deleted.", itemId, collectionId);
+          LOGGER.debug("hrefsandIds, {}", hrefsAndIds.result());
+          result.complete(hrefsAndIds.result());
+        })
+        .onFailure(failed -> {
+          LOGGER.error("Failed to delete Stac Item. \nError: {}", failed.getMessage());
+          result.fail(failed);
         });
     return result.future();
   }

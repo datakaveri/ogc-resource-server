@@ -23,6 +23,7 @@ import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3BucketReadAccess;
 import ogc.rs.common.S3Config;
+import ogc.rs.common.S3ConfigsHolder;
 import ogc.rs.database.DatabaseService;
 import ogc.rs.jobs.JobsService;
 import ogc.rs.metering.MeteringService;
@@ -32,8 +33,9 @@ import org.apache.logging.log4j.Logger;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -54,24 +56,10 @@ import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
-import ogc.rs.apiserver.util.AuthInfo;
-import ogc.rs.apiserver.util.AuthInfo.RoleEnum;
-import ogc.rs.common.DataFromS3;
-import ogc.rs.common.S3Config;
-import ogc.rs.common.S3ConfigsHolder;
-import ogc.rs.apiserver.util.OgcException;
-import ogc.rs.apiserver.util.ProcessException;
-import ogc.rs.catalogue.CatalogueService;
-import ogc.rs.database.DatabaseService;
-import ogc.rs.jobs.JobsService;
-import ogc.rs.metering.MeteringService;
-import ogc.rs.processes.ProcessesRunnerService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import static ogc.rs.apiserver.handlers.TokenLimitsEnforcementHandler.getLimitsFromContext;
+
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.apiserver.handlers.StacItemByIdAuthZHandler.SHOULD_CREATE_KEY;
+import static ogc.rs.apiserver.handlers.TokenLimitsEnforcementHandler.getLimitsFromContext;
 import static ogc.rs.apiserver.util.Constants.NOT_FOUND;
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.*;
@@ -345,19 +333,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                       "crs", "<" + queryParamsMap.getOrDefault("crs", DEFAULT_SERVER_CRS) + ">");
               routingContext.next();
             })
-            .onFailure(
-                    failed -> {
-                      if (failed instanceof OgcException) {
-                        routingContext.put("response", ((OgcException) failed).getJson().toString());
-                        routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
-                      } else {
-                        OgcException ogcException =
-                                new OgcException(500, "Internal Server Error", "Internal Server Error");
-                        routingContext.put("response", ogcException.getJson().toString());
-                        routingContext.put("statusCode", ogcException.getStatusCode());
-                      }
-                      routingContext.next();
-                    });
+            .onFailure(failed -> routingContext.fail(failed));
   }
 
 
@@ -462,18 +438,7 @@ public class ApiServerVerticle extends AbstractVerticle {
               routingContext.put("crs", "<" + queryParamsMap.getOrDefault("crs", DEFAULT_SERVER_CRS) + ">");
               routingContext.next();
             })
-            .onFailure(failed -> {
-              if (failed instanceof OgcException){
-                routingContext.put("response",((OgcException) failed).getJson().toString());
-                routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
-              }
-              else{
-                OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
-                routingContext.put("response", ogcException.getJson().toString());
-                routingContext.put("statusCode", ogcException.getStatusCode());
-              }
-              routingContext.next();
-            });
+            .onFailure(failed -> routingContext.fail(failed));
   }
 
   public void getProcesses(RoutingContext routingContext) {
@@ -688,7 +653,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     // need to set chunked for streaming response because Content-Length cannot be determined
     // beforehand.
     response.setChunked(true);
-    
+
     // determine tile format if it is a map (PNG image) or vector (MVT tile) using request header.
     String encodingType = getEncodingFromRequest(routingContext.request().getHeader("Accept"));
     LOGGER.debug("Accept Headers- {}", routingContext.request().getHeader("Accept"));
@@ -717,14 +682,14 @@ public class ApiServerVerticle extends AbstractVerticle {
     // for performance
     dbService.getTileS3BucketId(collectionId, tileMatrixSetId).compose(s3BucketId -> {
     Optional<S3Config> conf = s3conf.getConfigByIdentifier(s3BucketId);
-    
+
     if (conf.isEmpty()) {
       LOGGER.error("Failed to get S3 config details - No S3Config object found for {}", s3BucketId);
         return Future.failedFuture(new OgcException(403,
             "Cannot fetch tile - failed to get details of bucket ID " + s3BucketId,
             "Please contact OGC server RS Admin"));
       }
-    
+
     DataFromS3 dataFromS3 =
         new DataFromS3(httpClient, conf.get());
 
@@ -734,7 +699,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     dataFromS3.setSignatureHeader(HttpMethod.GET);
     return dataFromS3
         .getDataFromS3(HttpMethod.GET);
-    })    
+    })
         .onSuccess(success -> success.pipeTo(response))
         .onFailure(routingContext::fail);
   }
@@ -884,14 +849,14 @@ public class ApiServerVerticle extends AbstractVerticle {
         .putHeader("Pragma", "no-cache")
         .putHeader("Expires", "0")
         .putHeader("X-Content-Type-Options", "nosniff");
-    
+
     // if API is /stac/search, /stac/collections/{collectionId}/items,
     // /stac/collections/{collectionId}/items/{itemId}, then set Content-type to
     // `application/geo+json`
     if (routingContext.request().path().matches("^\\/stac\\/.*(search|items|items\\/.*)$")) {
       routingContext.response().putHeader(HEADER_CONTENT_TYPE, MIME_APPLICATION_GEOJSON);
     }
-    
+
     // include crs when features - /items api is accessed
     if (routingContext.data().containsKey("crs"))
       routingContext.response().putHeader("Content-Crs", (String) routingContext.get("crs"));
@@ -1566,7 +1531,7 @@ public class ApiServerVerticle extends AbstractVerticle {
       String assetId = assetObj.getString("id");
       String href = assetObj.getString("href");
       String s3BucketId = assetObj.getString("s3_bucket_id");
-      
+
         try {
           URI hrefUri = new URI(href);
           if (!shouldCreate && !hrefUri.isAbsolute()) {
@@ -1927,18 +1892,18 @@ public class ApiServerVerticle extends AbstractVerticle {
         .compose(
             handler -> {
               response.putHeader("Content-Type", handler.getString("type"));
-              
+
               String s3BucketId = handler.getString("s3_bucket_id");
 
               Optional<S3Config> conf = s3conf.getConfigByIdentifier(s3BucketId);
-              
+
               if (conf.isEmpty()) {
                 LOGGER.error("Failed to get S3 config details - No S3Config object found for {}", s3BucketId);
                 return Future.failedFuture(new OgcException(403,
                     "Cannot download asset - failed to get details of bucket ID " + s3BucketId,
                     "Please contact OGC server RS Admin"));
               }
-    
+
               DataFromS3 dataFromS3 =
                   new DataFromS3(httpClient, conf.get());
               String urlString =
@@ -2605,17 +2570,17 @@ public class ApiServerVerticle extends AbstractVerticle {
               String s3BucketId = handler.getString("s3_bucket_id");
 
               Optional<S3Config> conf = s3conf.getConfigByIdentifier(s3BucketId);
-              
+
               if (conf.isEmpty()) {
                 LOGGER.error("Failed to get S3 config details - No S3Config object found for {}", s3BucketId);
                 return Future.failedFuture(new OgcException(403,
                     "Cannot download asset - failed to get details of bucket ID " + s3BucketId,
                     "Please contact OGC server RS Admin"));
               }
-    
+
               DataFromS3 dataFromS3 =
                   new DataFromS3(httpClient, conf.get());
-    
+
               String urlString = dataFromS3.getFullyQualifiedUrlString(handler.getString("href"));
               dataFromS3.setUrlFromString(urlString);
               dataFromS3.setSignatureHeader(HttpMethod.GET);
@@ -2661,7 +2626,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
       List<JsonObject> stacItems = requestBody.getJsonArray("features").stream()
           .map(i -> ((JsonObject) i)).collect(Collectors.toList());
-      
+
       List<JsonObject> modifiedStacItems = new ArrayList<JsonObject>();
 
       // process and validate individual assets in items
@@ -2684,11 +2649,11 @@ public class ApiServerVerticle extends AbstractVerticle {
 
       // replace modified items in the request body
       requestBody.put("features", new JsonArray(modifiedStacItems));
-      
+
       result = dbService.insertStacItems(requestBody);
     }
     else if (requestBody.getString("type").equalsIgnoreCase(FEATURE)) {
-      
+
       if (requestBody.containsKey(STAC_ITEM_TRAN_ASSETS)) {
         JsonObject assets = requestBody.getJsonObject(STAC_ITEM_TRAN_ASSETS);
 
@@ -2699,7 +2664,7 @@ public class ApiServerVerticle extends AbstractVerticle {
           return;
         }
       }
-      
+
       result = dbService.insertStacItem(requestBody);
     }
     assert result != null;
@@ -2823,72 +2788,76 @@ public class ApiServerVerticle extends AbstractVerticle {
   public void getRecordCatalog(RoutingContext routingContext) {
     String catalogId = routingContext.request().path().split("/")[2];
     LOGGER.debug("get record catalogId- {}", catalogId);
-    JsonObject recordCatalog = new JsonObject();
 
-    dbService.getCollection(catalogId)
-            .onSuccess(success->{
-              catalogueService
-                      .getCatItemUsingFilter(success.get(0).getString("id"), "[itemCreatedAt]")
-                      .onSuccess(
-                              res->{
-                                recordCatalog
-                                        .put("id", success.get(0).getString("id"))
-                                        .put("created", res.getString("itemCreatedAt"))
-                                        .put("conformsTo", "https://www.opengis.net/spec/ogcapi-records-1/1.0/req/core")
-                                        .put("itemType", "record")
-                                        .put("type", "Collection")
-                                        .put( "links",
-                                                new JsonArray()
-                                                        .add(
-                                                                new JsonObject()
-                                                                        .put(
-                                                                                "href",
-                                                                                hostName
-                                                                                        + ogcBasePath
-                                                                                        + COLLECTIONS
-                                                                                        + "/"
-                                                                                        + success.get(0).getString("id"))
-                                                                        .put("rel", "self")
-                                                                        .put("title", success.get(0).getString("title"))
-                                                                        .put("description", success.get(0).getString("description")))
-                                                        .add(
-                                                                new JsonObject()
-                                                                        .put(
-                                                                                "href",
-                                                                                hostName
-                                                                                        + ogcBasePath
-                                                                                        + COLLECTIONS
-                                                                                        + "/"
-                                                                                        + success.get(0).getString("id")
-                                                                                        + "/items")
-                                                                        .put("rel", "items")
-                                                                        .put("title", success.get(0).getString("title"))
-                                                                        .put("type", "application/geo+json")));
-                                routingContext.put("response", recordCatalog.toString());
-                                routingContext.put("statusCode", 200);
-                                routingContext.next();
+    dbService
+        .getCollection(catalogId)
+        .onSuccess(
+            success -> {
+              JsonObject collectionRecord = success.get(0);
+              JsonObject extent = new JsonObject();
+              if (collectionRecord.getJsonArray("bbox") != null) {
+                extent.put(
+                    "spatial",
+                    new JsonObject()
+                        .put("bbox", new JsonArray().add(collectionRecord.getJsonArray("bbox"))));
+              }
+              if (collectionRecord.getJsonArray("temporal") != null)
+                extent.put(
+                    "temporal",
+                    new JsonObject()
+                        .put(
+                            "interval",
+                            new JsonArray().add(collectionRecord.getJsonArray("temporal"))));
+              JsonObject recordCatalog = new JsonObject();
 
-                              }).onFailure(catFailed->{
-                        if (catFailed instanceof OgcException) {
-                          routingContext.put("response", ((OgcException) catFailed).getJson().toString());
-                          routingContext.put("statusCode", ((OgcException) catFailed).getStatusCode());
-                        } else {
-                          OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
-                          routingContext.put("response", ogcException.getJson().toString());
-                          routingContext.put("statusCode", ogcException.getStatusCode());
-                        }
-                        routingContext.next();
-                      });
-
-
-
-
-            }).onFailure(failed ->{
+              recordCatalog
+                  .put("id", success.get(0).getString("id"))
+                  .put("conformsTo", "https://www.opengis.net/spec/ogcapi-records-1/1.0/req/core")
+                  .put("itemType", "record")
+                  .put("type", "Collection")
+                  .put("title", collectionRecord.getString("title"))
+                  .put("description", collectionRecord.getString("description"))
+                  .put(
+                      "links",
+                      new JsonArray()
+                          .add(
+                              new JsonObject()
+                                  .put(
+                                      "href",
+                                      hostName
+                                          + ogcBasePath
+                                          + COLLECTIONS
+                                          + "/"
+                                          + success.get(0).getString("id"))
+                                  .put("rel", "self")
+                                  .put("title", success.get(0).getString("title"))
+                                  .put("description", success.get(0).getString("description")))
+                          .add(
+                              new JsonObject()
+                                  .put(
+                                      "href",
+                                      hostName
+                                          + ogcBasePath
+                                          + COLLECTIONS
+                                          + "/"
+                                          + success.get(0).getString("id")
+                                          + "/items")
+                                  .put("rel", "items")
+                                  .put("title", success.get(0).getString("title"))
+                                  .put("type", "application/geo+json")));
+              if (!extent.isEmpty()) recordCatalog.put("extent", extent);
+              routingContext.put("response", recordCatalog.toString());
+              routingContext.put("statusCode", 200);
+              routingContext.next();
+            })
+        .onFailure(
+            failed -> {
               if (failed instanceof OgcException) {
                 routingContext.put("response", ((OgcException) failed).getJson().toString());
                 routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
               } else {
-                OgcException ogcException = new OgcException(500, "Internal Server Error", "Internal Server Error");
+                OgcException ogcException =
+                    new OgcException(500, "Internal Server Error", "Internal Server Error");
                 routingContext.put("response", ogcException.getJson().toString());
                 routingContext.put("statusCode", ogcException.getStatusCode());
               }
@@ -2983,7 +2952,8 @@ public class ApiServerVerticle extends AbstractVerticle {
             .put("properties", new JsonObject().put("title",recordItem.getString("title") )
                     .put("description",  recordItem.getString("description"))
                     .put("keywords", recordItem.getJsonArray("keywords"))
-                    .put("created", recordItem.getString("created")));
+                    .put("created", recordItem.getString("created"))
+                    .put("type", "dataset"));
 
     String providerName = recordItem.getString("provider_name");
     String providerContacts = recordItem.getString("provider_contacts");
@@ -3056,7 +3026,7 @@ public class ApiServerVerticle extends AbstractVerticle {
   /**
    * List all configured S3 buckets by bucket ID and read access. Gets data from
    * {@link S3ConfigsHolder#listAllIdentifiers()}.
-   * 
+   *
    * @param context RoutingContext
    */
   public void listConfiguredS3Buckets(RoutingContext context) {
@@ -3070,7 +3040,7 @@ public class ApiServerVerticle extends AbstractVerticle {
    * bucket ID is configured/recognised by the server. In case the chosen bucket for a particular
    * asset is an open read bucket ({@link S3BucketReadAccess#PUBLIC}), then modify the asset href to
    * be an absolute URI using the configured endpoint and bucket name.
-   * 
+   *
    * @param assetObject JSON representation of STAC Asset object containing multiple assets
    * @return asset JSON object with modified href (if applicable)
    * @throws OgcException in case the S3 bucket ID does not exist
@@ -3103,10 +3073,10 @@ public class ApiServerVerticle extends AbstractVerticle {
       if (S3BucketReadAccess.PRIVATE.equals(s3Config.getReadAccess())) {
         continue;
       }
-      
+
       // if public read bucket, then form absolute URI for href
       String absoluteHref;
-      
+
       // if path-based access, form href as "bucket endpoint + / + bucket name + / + href"
       if (s3Config.getPathBasedAccess()) {
         absoluteHref =
@@ -3119,14 +3089,100 @@ public class ApiServerVerticle extends AbstractVerticle {
             endpointParts[0] + "://" + s3Config.getBucket() + "." + endpointParts[1] + "/" + href;
       }
 
-      // update the href and add the modified asset into modifiedAssets 
+      // update the href and add the modified asset into modifiedAssets
       asset.put("href", absoluteHref);
       modifiedAssets.put(assetEntry.getKey(), asset);
     }
-    
+
     // merge modifiedAssets into original assetObject
     return assetObject.mergeIn(modifiedAssets);
   }
-    
 
+  public void deleteStacItem(RoutingContext routingContext) {
+    String collectionId = routingContext.request().path().split("/")[3];
+    String itemId = routingContext.request().path().split("/")[5];
+
+    dbService.deleteStacItem(collectionId, itemId)
+        .onSuccess(success -> {
+          if (success.isEmpty()) {
+            routingContext.put("response", new JsonObject().put("description", "STAC Item is deleted.").toString());
+            routingContext.put("statusCode", 200);
+            routingContext.next();
+            return;
+          }
+          success.forEach(s3Obj -> {
+            Optional<S3Config> s3Config = s3conf.getConfigByIdentifier(s3Obj.getString("s3_bucket_id"));
+            if (s3Config.isEmpty()) {
+              LOGGER.error("S3 Config is not present!");
+              routingContext.fail(new OgcException(202, "Item deleted", "Item is deleted but actual assets are not " +
+                  "deleted."));
+              return;
+            }
+            ArrayList<ObjectIdentifier> s3ObjectNames = new ArrayList<>();
+            S3Client s3Client = S3Client.builder()
+                .region(Region.of(s3Config.get().getRegion()))
+                .endpointOverride(URI.create(s3Config.get().getEndpoint()))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(s3Config.get().getAccessKey(), s3Config.get().getSecretKey())
+                ))
+                .serviceConfiguration(S3Configuration.builder()
+                    .pathStyleAccessEnabled(s3Config.get().isPathBasedAccess())
+                    .build())
+                .build();
+
+            s3Obj.getJsonArray("hrefs").forEach(href -> {
+              try {
+                URI hrefUri = new URI((String) href);
+                if (hrefUri.isAbsolute()) {
+                 String[] paths = hrefUri.getPath().split("/");
+                 String extractedPath = paths[1] + "/" + paths[2] + "/" + paths[3];
+                 ObjectIdentifier objId = ObjectIdentifier.builder().key(extractedPath).build();
+                 s3ObjectNames.add(objId);
+                } else {
+                  // add to the list as is
+                  ObjectIdentifier objId = ObjectIdentifier.builder().key((String) href).build();
+                  s3ObjectNames.add(objId);
+                }
+              } catch (URISyntaxException exp) {
+                LOGGER.error("exception!!! {}", exp.getMessage());
+                routingContext.fail(new OgcException(202, "Item deleted", "Item is deleted but actual assets are not " +
+                    "deleted."));
+              }
+            });
+
+            Delete del = Delete.builder()
+                .objects(s3ObjectNames)
+                .build();
+            try {
+              DeleteObjectsRequest multiObjectDeleteRequest = DeleteObjectsRequest.builder()
+                  .bucket(s3Config.get().getBucket())
+                  .delete(del)
+                  .build();
+
+              s3Client.deleteObjects(multiObjectDeleteRequest);
+            } catch (S3Exception s3e) {
+              LOGGER.error("S3 Delete Error, {}", s3e.awsErrorDetails().errorMessage());
+              routingContext.fail(new OgcException(202, "Item deleted", "Item is deleted but actual assets are not " +
+                    "deleted."));
+            }
+          });
+          if (!routingContext.failed()) {
+            routingContext.put("response", new JsonObject().put("description", "STAC Item is deleted.").toString());
+            routingContext.put("statusCode", 200);
+            routingContext.next();
+          }
+        })
+        .onFailure(failed -> {
+          if (failed instanceof OgcException) {
+            routingContext.put("response", ((OgcException) failed).getJson().toString());
+            routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
+          } else {
+            OgcException ogcException =
+                new OgcException(500, "Internal Server Error", "Internal Server Error");
+            routingContext.put("response", ogcException.getJson().toString());
+            routingContext.put("statusCode", ogcException.getStatusCode());
+          }
+          routingContext.next();
+        });
+  }
 }

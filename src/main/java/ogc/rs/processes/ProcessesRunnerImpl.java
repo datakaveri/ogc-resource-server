@@ -15,6 +15,7 @@ import ogc.rs.common.S3Config;
 import ogc.rs.common.S3ConfigsHolder;
 import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
+import ogc.rs.processes.featureAttributesExtraction.FeatureAttributesExtractionProcess;
 import ogc.rs.processes.s3MultiPartUploadForStacOnboarding.S3CompleteMultiPartUploadProcess;
 import ogc.rs.processes.s3MultiPartUploadForStacOnboarding.S3InitiateMultiPartUploadProcess;
 import ogc.rs.processes.tilesMetaDataOnboarding.TilesMetaDataOnboardingProcess;
@@ -42,7 +43,7 @@ import static ogc.rs.processes.util.Constants.NO_S3_CONF_FOUND_FOR_BUCKET_ID;
 public class ProcessesRunnerImpl implements ProcessesRunnerService {
 
   public static final String S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY = "s3BucketIdentifier";
-  
+
   private final PgPool pgPool;
   private final WebClient webClient;
   private final UtilClass utilClass;
@@ -73,26 +74,25 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
    * process input has key {@value #S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY}, if value maps to an S3
    * bucket identifier present in {@link ProcessesRunnerImpl#s3conf}, returns the {@link S3Config}
    * object for that bucket, else throws an {@link OgcException}.
-   * 
+   *
    * @param input the process input
    * @return a {@link S3Config} instance or <code>null</code> if the process input does not have the
    *         {@value #S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY} key
-   * @throws OgcException
    */
   private S3Config getS3Config(JsonObject input) throws OgcException {
     if(!input.containsKey(S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY)) {
       return null;
     }
-    
+
     String s3BucketIdentifier = input.getString(S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY);
-    
+
     Optional<S3Config> conf = s3conf.getConfigByIdentifier(s3BucketIdentifier);
-    
+
     if (conf.isEmpty()) {
       throw new OgcException(403, "Failed to start the process",
-          NO_S3_CONF_FOUND_FOR_BUCKET_ID + s3BucketIdentifier);
+              NO_S3_CONF_FOUND_FOR_BUCKET_ID + s3BucketIdentifier);
     }
-    
+
     return conf.get();
   }
 
@@ -108,35 +108,35 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
   public ProcessesRunnerService run(JsonObject input, Handler<AsyncResult<JsonObject>> handler) {
 
     Future<JsonObject> checkForProcess = processExistCheck(input);
-    
+
     checkForProcess.onSuccess(processExist -> {
       String processName = processExist.getString("title");
       boolean isAsync = processExist.getJsonArray("response")
               .stream()
               .anyMatch(item -> item.toString().equalsIgnoreCase("ASYNC"));
       List<String> validateInput = validateInput(input, processExist);
-      
+
       S3Config processSpecificS3Conf;
-      
+
       try {
         processSpecificS3Conf = getS3Config(input);
       } catch (OgcException e) {
         LOGGER.error(
-            "Failed to start process {}, S3 bucket identifier {} was not found in config ",
-            processName, input.getString(S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY));
+                "Failed to start process {}, S3 bucket identifier {} was not found in config ",
+                processName, input.getString(S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY));
         handler.handle(Future.failedFuture(e));
         return;
       }
 
       if (!validateInput.isEmpty()) {
         LOGGER.error(
-            "Input validation failed for process {}, following keys were missing or empty {}",
-            processName, validateInput);
+                "Input validation failed for process {}, following keys were missing or empty {}",
+                processName, validateInput);
 
         handler.handle(Future.failedFuture(new OgcException(400,
-            "Failed to start process : input validation failed",
-            "Following keys in process input were missing or empty " + validateInput.toString())));
-        
+                "Failed to start process : input validation failed",
+                "Following keys in process input were missing or empty " + validateInput.toString())));
+
         return;
       }
 
@@ -164,6 +164,9 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
           break;
         case "TilesOnboardingFromExistingFeature":
           processService = new TilesOnboardingFromExistingFeatureProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
+          break;
+        case "FeatureAttributesExtraction":
+          processService = new FeatureAttributesExtractionProcess(pgPool);
           break;
         default:
           LOGGER.error("No method specified for process {}", processName);
@@ -254,8 +257,8 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
             .getJsonObject("inputs", new JsonObject()).getMap().keySet();
 
     return processInputKeys.stream().filter(
-        inputKey -> !requestBody.containsKey(inputKey) || requestBody.getString(inputKey).isEmpty())
-        .collect(Collectors.toList());
+                    inputKey -> !requestBody.containsKey(inputKey) || requestBody.getString(inputKey).isEmpty())
+            .collect(Collectors.toList());
   }
 
 }
