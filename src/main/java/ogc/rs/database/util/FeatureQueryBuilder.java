@@ -171,11 +171,6 @@ public class FeatureQueryBuilder {
     }
   }
 
-  public void setFilter(String key, String value) {
-    this.filter = "\"" + key + "\"='" + value + "'";
-    this.additionalParams = "where";
-  }
-
   public void setFilter(Map<String, String> params) {
     Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
     while (iterator.hasNext()) {
