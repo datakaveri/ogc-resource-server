@@ -130,8 +130,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         Map<String, String> filteredParams = new HashMap<>(queryParams);
         filteredParams.keySet().removeAll(WELL_KNOWN_QUERY_PARAMETERS);
         if (!filteredParams.isEmpty()) {
-            String[] key = filteredParams.keySet().toArray(new String[filteredParams.size()]);
-            featureQuery.setFilter(key[0], filteredParams.get(key[0]));
+             featureQuery.setFilter(filteredParams);
         }
 
         Future<String> sridOfStorageCrs = getSridOfStorageCrs(collectionId);

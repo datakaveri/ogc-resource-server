@@ -1,9 +1,13 @@
 package ogc.rs.database.util;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Tuple;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Iterator;
+import java.util.Map;
+
 import static ogc.rs.common.Constants.DEFAULT_CRS_SRID;
 import static ogc.rs.database.util.Constants.STAC_ITEMS_DATETIME_KEY;
 
@@ -172,6 +176,18 @@ public class FeatureQueryBuilder {
     this.additionalParams = "where";
   }
 
+  public void setFilter(Map<String, String> params) {
+    Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
+    while (iterator.hasNext()) {
+      Map.Entry<String, String> entry = iterator.next();
+      String columnName = entry.getKey();
+      String value = entry.getValue();
+      this.filter +=  "\"" + columnName + "\"='" + value + "'";
+      if (iterator.hasNext())
+        this.filter += " and ";
+    }
+    this.additionalParams = "where";
+  }
   public void setDatetimeKey(String datetimeKey) {
     this.datetimeKey = datetimeKey;
 
