@@ -1044,6 +1044,53 @@
           }
         }
       },
+      "ids":{
+        "name": "ids",
+        "in": "query",
+        "description": "The optional ids parameter allows a specific list of records, identified\nby their identifiers, to be fetched from a catalog.  Only records whose\nidentifier matches one of the values listed for this parameter shall appear\nin the response.",
+        "required": false,
+        "schema": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer"
+          }
+        },
+        "explode": false,
+        "style": "form"
+      },
+      "keywords": {
+        "name": "keywords",
+        "in": "query",
+        "description": " The topic or topics of the resource. Typically\nrepresented using free-form keywords, tags, key\nphrases, or classification codes.",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": {
+            "type": "string"
+          }
+        }
+
+      },
+      "q":{
+        "name": "q",
+        "in": "query",
+        "description": "The optional q parameter supports keyword searching.  Only records\nwhose text fields contain one or more of the specified search terms\nare selected.  The specific set of text keys/fields/properties of a\nrecord to which the q operator is applied is up to the discretion\nof the server.   Implementations should, however, apply the q\noperator to the title, description and keywords keys/fields/properties.",
+        "required": false,
+        "schema": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "explode": false,
+        "style": "form"
+      },
       "bbox-crs": {
         "name": "bbox-crs",
         "in": "query",
@@ -1064,6 +1111,17 @@
         "schema": {
           "type": "string",
           "format": "uri"
+        }
+      },
+      "created": {
+        "name": "created",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "string",
+          "format": "date-time"
         }
       },
       "datetime": {

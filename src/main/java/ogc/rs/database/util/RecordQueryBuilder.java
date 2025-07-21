@@ -3,69 +3,208 @@ package ogc.rs.database.util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import static ogc.rs.common.Constants.DEFAULT_CRS_SRID;
+
 public class RecordQueryBuilder {
-    private static final Logger LOGGER = LogManager.getLogger(RecordQueryBuilder.class);
+  private static final Logger LOGGER = LogManager.getLogger(RecordQueryBuilder.class);
 
-    private String tableName;
-    private StringBuilder qValueSearchConditions;
-    public RecordQueryBuilder(String tableName) {
-        this.tableName = tableName;
+  private String tableName;
+  private StringBuilder qValueSearchConditions;
+  private String bboxCrsSrid;
+  private String defaultCrsSrid;
+  private String bbox;
+  private String queryParameters;
+  private String idsParameter;
+  private int limit;
+  private int offset;
+
+  public RecordQueryBuilder(String tableName) {
+
+    this.tableName = tableName;
+    bboxCrsSrid = "";
+    defaultCrsSrid = String.valueOf(DEFAULT_CRS_SRID);
+    queryParameters = "";
+    limit = 10;
+  }
+
+  public void setLimit(String limit) {
+    this.limit = Integer.parseInt(limit);
+  }
+
+  public void setOffset(String offset) {
+    this.offset = Integer.parseInt(offset) - 1;
+  }
+
+  public void setIdsParamValues(String ids) {
+    LOGGER.debug("Raw ids input: " + ids);
+
+    // Remove square brackets and whitespace
+    String cleaned = ids.replaceAll("[\\[\\]\\s]", ""); // "[2, 3, 4]" → "2,3,4"
+    String[] idArray = cleaned.split(",");
+
+    // Join into SQL-safe format
+    String idClause = "id IN (" + String.join(", ", idArray) + ")";
+
+    LOGGER.debug("Generated ID WHERE clause: " + idClause);
+
+    // Append to existing queryParameters
+    if (idsParameter == null || idsParameter.isEmpty()) {
+      idsParameter = "(" + idClause + ")";
+    } else {
+      idsParameter = idsParameter.replaceAll("\\)$", "") + " AND " + idClause + ")";
+    }
+  }
+
+  public void setQueryParamValues(Map<String, String> recordQueryMap) {
+    queryParameters =
+        "("
+            + recordQueryMap.entrySet().stream()
+                .map(
+                    entry -> {
+                      String key = entry.getKey();
+                      String value = entry.getValue().replace("'", "''"); // Escape single quotes
+
+                      if (key.equals("id")) {
+                        return key + " = " + value;
+                      } else if (key.equals("created")) {
+                        return key + " = TIMESTAMPTZ '" + value + "'";
+                      } else if (key.equals("keywords")) {
+                        String cleaned = value.replaceAll("[\\[\\]\"]", "");
+                        String[] keywordsArray = cleaned.split(",");
+
+                        String keywordArrayString =
+                            Arrays.stream(keywordsArray)
+                                .map(k -> "'" + k.trim().replace("'", "''") + "'")
+                                .collect(Collectors.joining(", "));
+
+                        return key
+                            + " @> ARRAY["
+                            + keywordArrayString
+                            + "]::text[]"; // use @> for match all and use && for match any
+                      } else {
+                        return key + " = '" + value + "'";
+                      }
+                    })
+                .collect(Collectors.joining(" AND "))
+            + ") ";
+  }
+
+  public void setQValues(String qValues) {
+    List<String> qValuesList =
+        Arrays.stream(qValues.substring(0, qValues.length()).split(","))
+            .map(String::trim)
+            .collect(Collectors.toList());
+    StringBuilder singleWord = new StringBuilder();
+    StringBuilder multiWord = new StringBuilder();
+
+    for (String word : qValuesList) {
+      if (word.contains(" ")) {
+        multiWord.append(word).append(" ");
+      } else {
+        singleWord.append(word).append(" ");
+      }
     }
 
-    public void setQValues(String qValues){
-        List<String> qValuesList = Arrays.stream(
-                        qValues.substring(0, qValues.length())
-                                .split(","))
-                .map(String::trim)
-                .collect(Collectors.toList());
-        StringBuilder singleWord = new StringBuilder();
-        StringBuilder multiWord = new StringBuilder();
+    qValueSearchConditions = new StringBuilder();
+    qValueSearchConditions.append("(");
 
-        for (String word : qValuesList) {
-            if (word.contains(" ")) {
-                multiWord.append(word).append(" ");
-            } else {
-                singleWord.append(word).append(" ");
-            }
-        }
-
-
-        qValueSearchConditions = new StringBuilder();
-
-        if (singleWord.length() > 0) {
-            qValueSearchConditions.append("search_vector @@ plainto_tsquery('english', '")
-                    .append(singleWord.toString().trim())
-                    .append("')");
-        }
-
-        if (multiWord.length() > 0) {
-            if (qValueSearchConditions.length() > 0) {
-                qValueSearchConditions.append(" OR ");
-            }
-            qValueSearchConditions.append("search_vector @@ phraseto_tsquery('english', '")
-                    .append(multiWord.toString().trim())
-                    .append("')");
-        }
-
-        LOGGER.debug("Search condition: " + qValueSearchConditions.toString());
+    if (singleWord.length() > 0) {
+      qValueSearchConditions
+          .append("search_vector @@ plainto_tsquery('english', '")
+          .append(singleWord.toString().trim())
+          .append("')");
     }
 
-    public String buildItemSearchSqlString()
-    {
+    if (multiWord.length() > 0) {
+      if (qValueSearchConditions.length() > 0) {
+        qValueSearchConditions.append(" OR ");
+      }
+      qValueSearchConditions
+          .append("search_vector @@ phraseto_tsquery('english', '")
+          .append(multiWord.toString().trim())
+          .append("')");
+    }
+    qValueSearchConditions.append(") ");
 
-        String catalogTableName = "public.\"" + tableName + "\"";
-        StringBuilder query = new StringBuilder(String.format(
+    LOGGER.debug("Search condition: " + qValueSearchConditions.toString());
+  }
+
+  public void setBbox(String coordinates, String storageCrs) {
+    LOGGER.debug("in bbox bboxCrsSrid: " + bboxCrsSrid);
+    LOGGER.debug("in bbox defaultSrid " + defaultCrsSrid);
+    if (!bboxCrsSrid.isEmpty() && !bboxCrsSrid.equalsIgnoreCase(defaultCrsSrid))
+      coordinates = coordinates.concat(",").concat(bboxCrsSrid);
+    else coordinates = coordinates.concat(",").concat(defaultCrsSrid);
+
+    LOGGER.debug("bbox coordinates " + coordinates);
+    LOGGER.debug("bbox storageCrs " + storageCrs);
+
+    if (bboxCrsSrid.equalsIgnoreCase(storageCrs))
+      this.bbox = "st_intersects(geometry, st_makeenvelope(" + coordinates + ")) ";
+    else
+      this.bbox =
+          "st_intersects(geometry, st_transform(st_makeenvelope("
+              + coordinates
+              + "),"
+              + storageCrs
+              + ")) ";
+
+    LOGGER.debug("bbox vale string bbox: " + bbox);
+  }
+
+  public String buildItemCountSqlString() {
+
+    String catalogTableName = "public.\"" + tableName + "\"";
+    StringBuilder query =
+        new StringBuilder(String.format("SELECT COUNT(id) FROM %s", catalogTableName));
+
+    List<String> conditions = new ArrayList<>();
+
+    if (qValueSearchConditions != null && qValueSearchConditions.length() > 0)
+      conditions.add(qValueSearchConditions.toString());
+
+    if (idsParameter != null && idsParameter.length() > 0) conditions.add(idsParameter.toString());
+
+    if (bbox != null && !bbox.isEmpty()) conditions.add(bbox);
+
+    if (queryParameters != null && !queryParameters.isEmpty()) conditions.add(queryParameters);
+
+    if (!conditions.isEmpty()) query.append(" WHERE ").append(String.join(" AND ", conditions));
+
+    return query.toString();
+  }
+
+  public String buildItemSearchSqlString() {
+    String catalogTableName = "public.\"" + tableName + "\"";
+    StringBuilder query =
+        new StringBuilder(
+            String.format(
                 "SELECT id, ST_AsGeoJSON(geometry)::json AS geometry, created, title, description, keywords, bbox, temporal, collection_id, provider_name, provider_contacts FROM %s",
-                catalogTableName
-        ));
+                catalogTableName));
 
-        if (qValueSearchConditions != null && qValueSearchConditions.length() > 0) {
-            query.append(" WHERE ").append(qValueSearchConditions);
-        }
-        return query.toString();
-    }
+    List<String> conditions = new ArrayList<>();
+
+    if (offset > 0) conditions.add("id > " + offset);
+
+    if (qValueSearchConditions != null && qValueSearchConditions.length() > 0)
+      conditions.add(qValueSearchConditions.toString());
+
+    if (idsParameter != null && idsParameter.length() > 0) conditions.add(idsParameter.toString());
+
+    if (bbox != null && !bbox.isEmpty()) conditions.add(bbox);
+
+    if (queryParameters != null && !queryParameters.isEmpty()) conditions.add(queryParameters);
+
+    if (!conditions.isEmpty()) query.append(" WHERE ").append(String.join(" AND ", conditions));
+
+    query.append(" LIMIT ").append(limit);
+
+    return query.toString();
+  }
 }

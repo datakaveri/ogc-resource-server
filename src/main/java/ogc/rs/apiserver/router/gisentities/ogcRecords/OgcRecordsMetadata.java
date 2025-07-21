@@ -6,6 +6,8 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import ogc.rs.apiserver.router.gisentities.ogcfeatures.OasTypes;
 
+import static ogc.rs.common.Constants.DEFAULT_SERVER_CRS;
+
 public class OgcRecordsMetadata {
 
   public static final String OGC_RECORD_OP_ID_PREFIX_REGEX = "^recordCollection-.*";
@@ -74,11 +76,58 @@ public class OgcRecordsMetadata {
             new JsonObject().put("get", recordSpecific));
 
     /*GET /collections/<collection-ID>/items */
+    JsonObject crsQueryParam = new JsonObject().put("in", "query").put("name", "crs")
+            .put("required", false).put("style", "form").put("explode", false)
+            .put("schema", new JsonObject().put("type", "string").put("format", "uri")
+                    .put("default", DEFAULT_SERVER_CRS));
+
+    JsonObject bboxCrsQueryParam = new JsonObject().put("in", "query").put("name", "bbox-crs")
+            .put("required", false).put("style", "form").put("explode", false)
+            .put("schema", new JsonObject().put("type", "string").put("format", "uri")
+                    .put("default", DEFAULT_SERVER_CRS));
+
+    JsonObject limitParam = new JsonObject().put("in", "query").put("name", "limit")
+            .put("required", false).put("style", "form").put("explode", false).put("schema",
+                    new JsonObject().put("type", "integer").put("minimum", 1)
+                            .put("maximum", 10000).put("default", 10));
+
+    JsonObject titleParam = new JsonObject().put("in", "query").put("name", "title")
+            .put("required", false).put("style", "form").put("explode", false).put("schema",
+                    new JsonObject().put("type", "string"));
+
+    JsonObject idParam = new JsonObject().put("in", "query").put("name", "id")
+            .put("required", false).put("style", "form").put("explode", false).put("schema",
+                    new JsonObject().put("type", "integer"));
+
+    JsonObject providerNameParam = new JsonObject().put("in", "query").put("name", "provider_name")
+            .put("required", false).put("style", "form").put("explode", false).put("schema",
+                    new JsonObject().put("type", "string"));
+
+    JsonObject providerContactsParam = new JsonObject().put("in", "query").put("name", "provider_contacts")
+            .put("required", false).put("style", "form").put("explode", false).put("schema",
+                    new JsonObject().put("type", "string"));
+
+
       JsonObject recordItems = new JsonObject();
       recordItems.put("tags", new JsonArray().add(title));
       recordItems.put("summary", OGC_RECORD_GET_COLLECTION_ITEMS_SUMMARY.get());
       recordItems.put("operationId", OGC_RECORD_GET_COLLECTION_ITEMS_OPERATION_ID.get());
-      recordItems.put(
+     JsonArray parameters = new JsonArray();
+     parameters
+             .add(bboxCrsQueryParam).add(crsQueryParam)
+             .add(titleParam)
+             .add(idParam)
+             .add(providerContactsParam)
+             .add(providerNameParam)
+             .add(limitParam)
+             .add(new JsonObject().put("$ref", "#/components/parameters/bbox"))
+             .add(new JsonObject().put("$ref", "#/components/parameters/keywords"))
+             .add(new JsonObject().put("$ref", "#/components/parameters/created"))
+             .add(new JsonObject().put("$ref", "#/components/parameters/q"))
+             .add(new JsonObject().put("$ref", "#/components/parameters/ids"))
+             .add(new JsonObject().put("$ref", "#/components/parameters/offset"));
+     recordItems.put("parameters", parameters);
+     recordItems.put(
               "responses",
               new JsonObject()
                       .put("200", new JsonObject().put("$ref", "#/components/responses/RecordItems"))
