@@ -76,15 +76,6 @@ public class OgcRecordsMetadata {
             new JsonObject().put("get", recordSpecific));
 
     /*GET /collections/<collection-ID>/items */
-    JsonObject crsQueryParam = new JsonObject().put("in", "query").put("name", "crs")
-            .put("required", false).put("style", "form").put("explode", false)
-            .put("schema", new JsonObject().put("type", "string").put("format", "uri")
-                    .put("default", DEFAULT_SERVER_CRS));
-
-    JsonObject bboxCrsQueryParam = new JsonObject().put("in", "query").put("name", "bbox-crs")
-            .put("required", false).put("style", "form").put("explode", false)
-            .put("schema", new JsonObject().put("type", "string").put("format", "uri")
-                    .put("default", DEFAULT_SERVER_CRS));
 
     JsonObject limitParam = new JsonObject().put("in", "query").put("name", "limit")
             .put("required", false).put("style", "form").put("explode", false).put("schema",
@@ -114,7 +105,6 @@ public class OgcRecordsMetadata {
       recordItems.put("operationId", OGC_RECORD_GET_COLLECTION_ITEMS_OPERATION_ID.get());
      JsonArray parameters = new JsonArray();
      parameters
-             .add(bboxCrsQueryParam).add(crsQueryParam)
              .add(titleParam)
              .add(idParam)
              .add(providerContactsParam)
@@ -125,8 +115,10 @@ public class OgcRecordsMetadata {
              .add(new JsonObject().put("$ref", "#/components/parameters/created"))
              .add(new JsonObject().put("$ref", "#/components/parameters/q"))
              .add(new JsonObject().put("$ref", "#/components/parameters/ids"))
-             .add(new JsonObject().put("$ref", "#/components/parameters/offset"));
-     recordItems.put("parameters", parameters);
+             .add(new JsonObject().put("$ref", "#/components/parameters/offset"))
+             .add(new JsonObject().put("$ref", "#/components/parameters/datetime"));
+
+    recordItems.put("parameters", parameters);
      recordItems.put(
               "responses",
               new JsonObject()

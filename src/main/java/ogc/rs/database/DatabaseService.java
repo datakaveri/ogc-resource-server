@@ -174,11 +174,10 @@ public interface DatabaseService {
      *
      * @param catalogId is the record collection (catalog)
      * @param queryParam is queries given while searching for record items
-     * @param crs is crs mao used for bbox
      * @param propertyQueryParam is query param related to prop=value search
      * @return the record items that satisfies the values
      */
-    Future<JsonObject>  getOgcRecords(String catalogId,  Map<String, String> queryParam, Map<String, Integer> crs, Map<String, String> propertyQueryParam );
+    Future<JsonObject>  getOgcRecords(String catalogId,  Map<String, String> queryParam, Map<String, String> propertyQueryParam );
 
     Future<JsonObject> getOgcRecordItem (String catalogId, String recordId);
 

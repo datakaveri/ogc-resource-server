@@ -10,25 +10,23 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ogc.rs.common.Constants.DEFAULT_CRS_SRID;
+import static ogc.rs.database.util.Constants.STORAGE_CRS;
 
 public class RecordQueryBuilder {
   private static final Logger LOGGER = LogManager.getLogger(RecordQueryBuilder.class);
 
   private String tableName;
   private StringBuilder qValueSearchConditions;
-  private String bboxCrsSrid;
-  private String defaultCrsSrid;
   private String bbox;
   private String queryParameters;
   private String idsParameter;
   private int limit;
   private int offset;
+  private String datetimeParameter;
 
   public RecordQueryBuilder(String tableName) {
 
     this.tableName = tableName;
-    bboxCrsSrid = "";
-    defaultCrsSrid = String.valueOf(DEFAULT_CRS_SRID);
     queryParameters = "";
     limit = 10;
   }
@@ -42,7 +40,6 @@ public class RecordQueryBuilder {
   }
 
   public void setIdsParamValues(String ids) {
-    LOGGER.debug("Raw ids input: " + ids);
 
     // Remove square brackets and whitespace
     String cleaned = ids.replaceAll("[\\[\\]\\s]", ""); // "[2, 3, 4]" → "2,3,4"
@@ -96,14 +93,19 @@ public class RecordQueryBuilder {
   }
 
   public void setQValues(String qValues) {
-    List<String> qValuesList =
-        Arrays.stream(qValues.substring(0, qValues.length()).split(","))
-            .map(String::trim)
+
+    qValues = qValues.replaceAll("[\\[\\]\"]", "");
+
+    List<String> qList = Arrays.stream(qValues.split("(?<!\\\\),"))
+            .map(s -> s.trim().replace("\\,", ","))
+            .filter(s -> !s.isEmpty())
             .collect(Collectors.toList());
+    if(qList.isEmpty())
+      return;
     StringBuilder singleWord = new StringBuilder();
     StringBuilder multiWord = new StringBuilder();
 
-    for (String word : qValuesList) {
+    for (String word : qList) {
       if (word.contains(" ")) {
         multiWord.append(word).append(" ");
       } else {
@@ -135,28 +137,49 @@ public class RecordQueryBuilder {
     LOGGER.debug("Search condition: " + qValueSearchConditions.toString());
   }
 
-  public void setBbox(String coordinates, String storageCrs) {
-    LOGGER.debug("in bbox bboxCrsSrid: " + bboxCrsSrid);
-    LOGGER.debug("in bbox defaultSrid " + defaultCrsSrid);
-    if (!bboxCrsSrid.isEmpty() && !bboxCrsSrid.equalsIgnoreCase(defaultCrsSrid))
-      coordinates = coordinates.concat(",").concat(bboxCrsSrid);
-    else coordinates = coordinates.concat(",").concat(defaultCrsSrid);
+  public void setBbox(String coordinates) {
+
+    coordinates = coordinates.concat(",").concat(STORAGE_CRS);
 
     LOGGER.debug("bbox coordinates " + coordinates);
-    LOGGER.debug("bbox storageCrs " + storageCrs);
-
-    if (bboxCrsSrid.equalsIgnoreCase(storageCrs))
-      this.bbox = "st_intersects(geometry, st_makeenvelope(" + coordinates + ")) ";
-    else
-      this.bbox =
-          "st_intersects(geometry, st_transform(st_makeenvelope("
-              + coordinates
-              + "),"
-              + storageCrs
-              + ")) ";
-
+    this.bbox = "st_intersects(geometry, st_makeenvelope(" + coordinates + ")) ";
     LOGGER.debug("bbox vale string bbox: " + bbox);
   }
+
+  public void setDatetimeParam(String datetime) {
+    String condition;
+
+    // Handle interval (contains "/")
+    if (datetime.contains("/")) {
+      String[] parts = datetime.split("/", 2);
+      String start = parts[0].trim();
+      String end = parts[1].trim();
+
+      if (start.equals("..") || start.isEmpty()) {
+        // Only end is specified → before or equal to end
+        condition = "created <= TIMESTAMPTZ '" + end + "'";
+      } else if (end.equals("..") || end.isEmpty()) {
+        // Only start is specified → after or equal to start
+        condition = "created >= TIMESTAMPTZ '" + start + "'";
+      } else {
+        // Full interval
+        condition = "created BETWEEN TIMESTAMPTZ '" + start + "' AND TIMESTAMPTZ '" + end + "'";
+      }
+    } else {
+      // Single datetime value
+      condition = "created = TIMESTAMPTZ '" + datetime + "'";
+    }
+
+    // Append to existing queryParameters
+    if (datetimeParameter == null || datetimeParameter.isEmpty()) {
+      datetimeParameter = "(" + condition + ")";
+    } else {
+      datetimeParameter = datetimeParameter.replaceAll("\\)$", "") + " AND " + condition + ")";
+    }
+
+    LOGGER.debug("Datetime condition: " + datetimeParameter);
+  }
+
 
   public String buildItemCountSqlString() {
 
@@ -170,6 +193,9 @@ public class RecordQueryBuilder {
       conditions.add(qValueSearchConditions.toString());
 
     if (idsParameter != null && idsParameter.length() > 0) conditions.add(idsParameter.toString());
+
+    if (datetimeParameter!=null && datetimeParameter.length()>0) conditions.add(datetimeParameter);
+
 
     if (bbox != null && !bbox.isEmpty()) conditions.add(bbox);
 
@@ -197,12 +223,15 @@ public class RecordQueryBuilder {
 
     if (idsParameter != null && idsParameter.length() > 0) conditions.add(idsParameter.toString());
 
+    if (datetimeParameter!=null && datetimeParameter.length()>0) conditions.add(datetimeParameter);
+
     if (bbox != null && !bbox.isEmpty()) conditions.add(bbox);
 
     if (queryParameters != null && !queryParameters.isEmpty()) conditions.add(queryParameters);
 
     if (!conditions.isEmpty()) query.append(" WHERE ").append(String.join(" AND ", conditions));
 
+    query.append(" ORDER BY id ASC");
     query.append(" LIMIT ").append(limit);
 
     return query.toString();

@@ -2868,12 +2868,10 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   public void getRecordItems(RoutingContext routingContext) {
+
     LOGGER.debug("getting all the record items");
     RequestParameters requestParameters = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
-
     String catalogId = routingContext.request().path().split("/")[2];
-
-
     Set<String> recordKeys = Set.of(
             "id", "created", "title", "description", "keywords",
             "provider_name", "provider_contacts", "collection_id"
@@ -2888,7 +2886,8 @@ public class ApiServerVerticle extends AbstractVerticle {
             .filter(e -> e.getValue() != null)
             .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
 
-    // creating map for popr=value parameter
+
+    // creating map for prop=value parameter
     Map<String, String> recordQueryMap = queryParam.entrySet()
             .stream()
             .filter(entry -> recordKeys.contains(entry.getKey()))
@@ -2900,17 +2899,8 @@ public class ApiServerVerticle extends AbstractVerticle {
     if(!queryParam.containsKey("offset"))
       queryParam.put("offset", "0");
 
-    String q = routingContext.request().getParam("q");
-    if (q != null && !q.trim().isEmpty()) {
-      queryParam.put("q", q);
-      List<String> qList = Arrays.stream(q.split("(?<!\\\\),"))
-              .map(s -> s.trim().replace("\\,", ","))
-              .filter(s -> !s.isEmpty())
-              .collect(Collectors.toList());
-      queryParam.put(q, qList.toString());
-    }
+    // forming the bbox array
     String bboxParam = routingContext.request().getParam("bbox");
-
     double[] bboxArray = null;
       if (bboxParam != null) {
         String[] parts = bboxParam.split(",");
@@ -2920,25 +2910,12 @@ public class ApiServerVerticle extends AbstractVerticle {
             bboxArray[i] = Double.parseDouble(parts[i]);
           }
         } else {
-          // handle error: invalid bbox format
           routingContext.put("response", new OgcException(400, "Bad Request", "Invalid bbox parameter. Expected 4 comma-separated values.")
                   .getJson()
                   .toString());
           routingContext.put("statusCode", 400);
-          return;
+          routingContext.next();
         }
-      }
-      String crs = routingContext.request().getParam("crs");
-      String bboxCrs = routingContext.request().getParam("bbox-crs");
-      if (crs == null || crs.trim().isEmpty()) {
-        queryParam.put("crs", DEFAULT_SERVER_CRS);
-      } else {
-        queryParam.put("crs", crs);
-      }
-      if (bboxCrs == null || bboxCrs.trim().isEmpty()) {
-        queryParam.put("bbox-crs", DEFAULT_SERVER_CRS);
-      } else {
-        queryParam.put("bbox-crs", bboxCrs);
       }
 
       if (bboxArray != null) {
@@ -2947,9 +2924,8 @@ public class ApiServerVerticle extends AbstractVerticle {
         queryParam.put("bbox", "[" + bboxString + "]");
       }
 
-      Future<Map<String, Integer>> isCrsValid = dbService.isCrsValid(catalogId, queryParam);
-      isCrsValid
-              .compose(datetimeCheck -> {
+    Future.succeededFuture()
+            .compose(datetimeCheck -> {
                 try {
                   String datetime;
                   ZonedDateTime zone, zone2;
@@ -2988,7 +2964,7 @@ public class ApiServerVerticle extends AbstractVerticle {
               }
               return Future.succeededFuture();
             })
-            .compose(dbCall -> dbService.getOgcRecords(catalogId, queryParam, isCrsValid.result(), recordQueryMap))
+            .compose(dbCall -> dbService.getOgcRecords(catalogId, queryParam, recordQueryMap))
             .onSuccess(success -> {
 
               LOGGER.debug("Building Record Items Response");
@@ -2997,6 +2973,15 @@ public class ApiServerVerticle extends AbstractVerticle {
               String nextLink = "";
               JsonArray features = success.getJsonArray("features");
               if (!features.isEmpty()) {
+                String q = routingContext.request().getParam("q");
+                if (q != null && !q.trim().isEmpty() ) {
+                  queryParam.put("q", q);
+                } else {
+                  if (queryParam.containsKey("q"))
+                  {
+                    queryParam.remove("q");
+                  }
+                }
                 int lastIdOffset = features.getJsonObject(features.size() - 1).getInteger("id")+1 ;
                 queryParam.put("offset", String.valueOf(lastIdOffset));
                 AtomicReference<String> requestPath = new AtomicReference<>(routingContext.request().path());
@@ -3044,9 +3029,6 @@ public class ApiServerVerticle extends AbstractVerticle {
               }
               routingContext.next();
             });
-
-
-
   }
 
   private JsonObject buildRecordItemResponse(JsonObject recordItem, String catalogId) {

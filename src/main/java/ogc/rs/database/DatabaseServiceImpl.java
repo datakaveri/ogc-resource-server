@@ -1191,12 +1191,10 @@ public class DatabaseServiceImpl implements DatabaseService{
     @Override
     public Future<JsonObject> getOgcRecords(String catalogId,
                                             Map<String, String> queryParam,
-                                            Map<String, Integer> crs,
                                             Map<String, String> propertyQueryParam) {
 
         LOGGER.debug("Query Parameters: {}", queryParam);
         LOGGER.debug("Property Query Parameters: {}", propertyQueryParam);
-
 
         Promise<JsonObject> result = Promise.promise();
         RecordQueryBuilder recordQueryBuilder = new RecordQueryBuilder(catalogId);
@@ -1213,7 +1211,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         if (queryBbox != null && !queryBbox.isEmpty()) {
             String cleanBbox = queryBbox.replace("[", "").replace("]", "");
             LOGGER.debug("Parsed bbox: {}", cleanBbox);
-            recordQueryBuilder.setBbox(cleanBbox, STORAGE_CRS);
+            recordQueryBuilder.setBbox(cleanBbox);
         }
 
         if(queryParam.containsKey("ids"))
@@ -1224,6 +1222,11 @@ public class DatabaseServiceImpl implements DatabaseService{
         // building queries for prop=value parameters
         if (!propertyQueryParam.isEmpty()) {
             recordQueryBuilder.setQueryParamValues(propertyQueryParam);
+        }
+
+        if(queryParam.containsKey("datetime"))
+        {
+            recordQueryBuilder.setDatetimeParam(queryParam.get("datetime"));
         }
 
         // Prepare SQL queries
