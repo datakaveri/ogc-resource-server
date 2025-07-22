@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ogc.rs.common.Constants.DEFAULT_CRS_SRID;
-import static ogc.rs.database.util.Constants.STORAGE_CRS;
 
 public class RecordQueryBuilder {
   private static final Logger LOGGER = LogManager.getLogger(RecordQueryBuilder.class);
@@ -81,7 +80,7 @@ public class RecordQueryBuilder {
                                 .collect(Collectors.joining(", "));
 
                         return key
-                            + " @> ARRAY["
+                            + " && ARRAY["
                             + keywordArrayString
                             + "]::text[]"; // use @> for match all and use && for match any
                       } else {
@@ -139,7 +138,7 @@ public class RecordQueryBuilder {
 
   public void setBbox(String coordinates) {
 
-    coordinates = coordinates.concat(",").concat(STORAGE_CRS);
+    coordinates = coordinates.concat(",").concat(DEFAULT_CRS_SRID.toString());
 
     LOGGER.debug("bbox coordinates " + coordinates);
     this.bbox = "st_intersects(geometry, st_makeenvelope(" + coordinates + ")) ";
