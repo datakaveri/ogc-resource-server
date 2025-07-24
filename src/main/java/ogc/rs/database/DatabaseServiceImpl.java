@@ -161,8 +161,8 @@ public class DatabaseServiceImpl implements DatabaseService{
                 Promise<Void> bboxPromise = Promise.promise();
 
                 if (queryBbox != null && tokenBbox != null) {
-                    // Use PostGIS to check if query bbox is within token bbox using ST_Within
-                    String sql = "SELECT ST_Within(" +
+                    // Use PostGIS to check if query bbox intersects token bbox using ST_Intersects
+                    String sql = "SELECT ST_Intersects(" +
                             "ST_Transform(ST_MakeEnvelope(" + queryBbox + ", " + srid + "), 4326), " +
                             "ST_MakeEnvelope(" + tokenBbox + ", 4326)" +
                             ")";
@@ -172,9 +172,9 @@ public class DatabaseServiceImpl implements DatabaseService{
                             .onSuccess(rows -> {
                                 if (rows.iterator().hasNext()) {
                                     Row row = rows.iterator().next();
-                                    boolean isWithin = row.getBoolean(0);
-                                    if (isWithin) {
-                                        LOGGER.debug("Query bbox is within token bbox constraints...");
+                                    boolean isIntersecting = row.getBoolean(0);
+                                    if (isIntersecting) {
+                                        LOGGER.debug("Both token bbox and query param bbox are getting intersected...");
                                         featureQuery.setBboxWhenTokenBboxExists(finalQueryBbox, finalTokenBbox, srid);
                                         bboxPromise.complete();
                                     } else {
@@ -182,11 +182,11 @@ public class DatabaseServiceImpl implements DatabaseService{
                                         bboxPromise.fail(new OgcException(403, "Forbidden", BBOX_VIOLATES_CONSTRAINTS));
                                     }
                                 } else {
-                                    bboxPromise.fail("No result from ST_Within check.");
+                                    bboxPromise.fail("No result from ST_Intersects check.");
                                 }
                             })
                             .onFailure(err -> {
-                                LOGGER.debug("PostGIS ST_Within check failed: {}", err.getMessage());
+                                LOGGER.debug("PostGIS ST_Intersects check failed: {}", err.getMessage());
                                 bboxPromise.fail(err);
                             });
                 } else {
