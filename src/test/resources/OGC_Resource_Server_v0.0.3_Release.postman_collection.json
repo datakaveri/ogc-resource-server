@@ -5678,10 +5678,6 @@
 							{
 								"key": "Accept",
 								"value": "application/geo+json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJzdWIiOiI4NTQwYzQ1Ny02NTgzLTRlODItODMwOC0wOTI4NDE3MmJhNDgiLCJhdWQiOiJvZ2Muc2VydmVyLmludGVncmF0aW9uLXRlc3QuY29tIiwicm9sZSI6InByb3ZpZGVyIiwiaWlkIjoicnM6b2djLnNlcnZlci5pbnRlZ3JhdGlvbi10ZXN0LmNvbSIsImlzcyI6ImZha2VhdXRoLnVnaXguaW8iLCJleHAiOjE3NDU3NTY1MzMsImlhdCI6MTc0NTc1MjkzMywiY29ucyI6e319.VQeFwDaTguHoToWhs0Zn3KVcTX5hPib39y17uBNoMazng4F--eWx9tkwDT79M9Dnhej_1u4k7K6KT6xajLJoOg"
 							}
 						],
 						"url": {
