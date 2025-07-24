@@ -2868,43 +2868,196 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   public void getRecordItems(RoutingContext routingContext) {
+
     LOGGER.debug("getting all the record items");
+    RequestParameters requestParameters = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
     String catalogId = routingContext.request().path().split("/")[2];
-    JsonArray recordItemCollection = new JsonArray();
-    dbService.getOgcRecords(catalogId)
-            .onSuccess(success->{
-              LOGGER.debug("Building Record Items Response");
-              for(JsonObject recordItem : success)
-              {
-                JsonObject recordItemBuilt = buildRecordItemResponse(recordItem, catalogId);
-                recordItemCollection.add(recordItemBuilt);
+    Set<String> recordKeys = Set.of(
+            "id", "created", "title", "description", "keywords",
+            "provider_name", "provider_contacts", "collection_id"
+    );
+
+    Map<String, String> queryParam = requestParameters
+            .toJson()
+            .getJsonObject("query")
+            .getMap()
+            .entrySet()
+            .stream()
+            .filter(e -> e.getValue() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+
+
+    // creating map for prop=value parameter
+    Map<String, String> recordQueryMap = queryParam.entrySet()
+            .stream()
+            .filter(entry -> recordKeys.contains(entry.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+    if(!queryParam.containsKey("limit"))
+      queryParam.put("limit", "10");
+
+    if(!queryParam.containsKey("offset"))
+      queryParam.put("offset", "0");
+
+    // forming the bbox array
+    String bboxParam = routingContext.request().getParam("bbox");
+    double[] bboxArray = null;
+      if (bboxParam != null) {
+        String[] parts = bboxParam.split(",");
+        if (parts.length == 4) {
+          bboxArray = new double[4];
+          for (int i = 0; i < 4; i++) {
+            bboxArray[i] = Double.parseDouble(parts[i]);
+          }
+        } else {
+          routingContext.put("response", new OgcException(400, "Bad Request", "Invalid bbox parameter. Expected 4 comma-separated values.")
+                  .getJson()
+                  .toString());
+          routingContext.put("statusCode", 400);
+          routingContext.next();
+        }
+      }
+
+      if (bboxArray != null) {
+        String bboxString =
+                Arrays.stream(bboxArray).mapToObj(Double::toString).collect(Collectors.joining(","));
+        queryParam.put("bbox", "[" + bboxString + "]");
+      }
+
+    Future.succeededFuture()
+        .compose(datetimeCheck -> {
+              try {
+                String datetime;
+                ZonedDateTime zone, zone2;
+                DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+                if (queryParam.containsKey("datetime")) {
+                  datetime = queryParam.get("datetime");
+                  if (!datetime.contains("/")) {
+                    zone = ZonedDateTime.parse(datetime, formatter);
+                  } else if (datetime.contains("/")) {
+                    String[] dateTimeArr = datetime.split("/");
+                    if (dateTimeArr[0].equals("..")) { // -- before
+                      // zone = ZonedDateTime.parse(dateTimeArr[1], formatter);
+                    } else if (dateTimeArr[1].equals("..")) { // -- after
+                      zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
+                    } else {
+                      zone = ZonedDateTime.parse(dateTimeArr[0], formatter);
+                      zone2 = ZonedDateTime.parse(dateTimeArr[1], formatter);
+                      if (zone2.isBefore(zone)) {
+                        OgcException ogcException =
+                            new OgcException(
+                                400,
+                                "Bad Request",
+                                "After time cannot be lesser " + "than Before time");
+                        return Future.failedFuture(ogcException);
+                      }
+                    }
+                  }
+                }
+              } catch (NullPointerException ne) {
+                OgcException ogcException =
+                    new OgcException(500, "Internal Server Error", "Internal Server Error");
+                return Future.failedFuture(ogcException);
+              } catch (DateTimeParseException dtpe) {
+                OgcException ogcException =
+                    new OgcException(400, "Bad Request", "Time parameter not in ISO format");
+                return Future.failedFuture(ogcException);
               }
-              JsonObject recordItems = new JsonObject().put("type","FeatureCollection")
-                      .put("features", recordItemCollection);
-              routingContext.put("response", recordItems.toString());
+              return Future.succeededFuture();
+            })
+        .compose(dbCall -> dbService.getOgcRecords(catalogId, queryParam, recordQueryMap))
+        .onSuccess(
+            success -> {
+              LOGGER.debug("Building Record Items Response ");
+
+              JsonArray featuresArray = success.getJsonArray("features");
+              JsonArray updatedFeaturesArray = new JsonArray();
+
+              for (int i = 0; i < featuresArray.size(); i++) {
+                JsonObject json = featuresArray.getJsonObject(i);
+                JsonObject recordItemBuilt = buildRecordItemResponse(json, catalogId);
+                updatedFeaturesArray.add(recordItemBuilt);
+              }
+
+              success.put("features", updatedFeaturesArray);
+              success.put("links", new JsonArray());
+              int limit = Integer.parseInt(queryParam.get("limit"));
+              String nextLink = "";
+              JsonArray features = success.getJsonArray("features");
+              if (!features.isEmpty()) {
+                String q = routingContext.request().getParam("q");
+                if (q != null && !q.trim().isEmpty()) {
+                  queryParam.put("q", q);
+                } else {
+                  if (queryParam.containsKey("q")) {
+                    queryParam.remove("q");
+                  }
+                }
+                int lastIdOffset = features.getJsonObject(features.size() - 1).getInteger("id") + 1;
+                queryParam.put("offset", String.valueOf(lastIdOffset));
+                AtomicReference<String> requestPath =
+                    new AtomicReference<>(routingContext.request().path());
+                if (!queryParam.isEmpty()) {
+                  requestPath.set(requestPath + "?");
+                  queryParam.forEach(
+                      (key, value) -> requestPath.set(requestPath + key + "=" + value + "&"));
+                }
+                nextLink = requestPath.toString().substring(0, requestPath.toString().length() - 1);
+                nextLink = nextLink.replace("[", "").replace("]", "");
+                LOGGER.debug("**** nextLink- {}", nextLink);
+                if (limit < success.getInteger("numberMatched")
+                    && (success.getInteger("numberMatched") > success.getInteger("numberReturned"))
+                    && success.getInteger("numberReturned") != 0) {
+                  success
+                      .getJsonArray("links")
+                      .add(
+                          new JsonObject()
+                              .put("href", hostName + nextLink)
+                              .put("rel", "next")
+                              .put("type", "application/geo+json"));
+                }
+              }
+              success
+                  .getJsonArray("links")
+                  .add(
+                      new JsonObject()
+                          .put(
+                              "href",
+                              hostName + ogcBasePath + COLLECTIONS + "/" + catalogId + "/items")
+                          .put("rel", "self")
+                          .put("type", "application/geo+json"))
+                  .add(
+                      new JsonObject()
+                          .put(
+                              "href",
+                              hostName + ogcBasePath + COLLECTIONS + "/" + catalogId + "/items")
+                          .put("rel", "alternate")
+                          .put("type", "application/geo+json"));
+              success.put("timeStamp", Instant.now().toString());
+              routingContext.put("response", success.toString());
               routingContext.put("statusCode", 200);
               routingContext.next();
-
-            }).onFailure(failed ->{
+            })
+        .onFailure(
+            failed -> {
               if (failed instanceof OgcException) {
                 routingContext.put("response", ((OgcException) failed).getJson().toString());
                 routingContext.put("statusCode", 404);
               } else {
-                routingContext.put("response", new OgcException(500, "Internal Server Error", "Internal Server Error")
+                routingContext.put(
+                    "response",
+                    new OgcException(500, "Internal Server Error", "Internal Server Error")
                         .getJson()
                         .toString());
                 routingContext.put("statusCode", 500);
               }
               routingContext.next();
             });
-
-
-
   }
 
   private JsonObject buildRecordItemResponse(JsonObject recordItem, String catalogId) {
     JsonObject builtRecordItem = new JsonObject();
-    builtRecordItem.put("id", recordItem.getString("id"))
+    builtRecordItem.put("id", recordItem.getInteger("id"))
             .put("geometry", recordItem.getJsonObject("geometry"))
             .put("type", "Feature")
             .put("conformsTo",

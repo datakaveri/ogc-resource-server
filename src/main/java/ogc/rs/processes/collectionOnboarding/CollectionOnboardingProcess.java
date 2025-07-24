@@ -470,11 +470,18 @@ public class CollectionOnboardingProcess implements ProcessService {
               String recordTableId = ids.get(0);
               input.put("recordTable", recordTableId);
 
+
+              String safeTitle = (title == null) ? "" : title;
+              String safeDescription = (description == null) ? "" : description;
+              String keywordText = (keywordsArray == null) ? "" : String.join(" ", keywordsArray);
+              String searchText = safeTitle + " " + safeDescription + " " + keywordText;
+
               String insertQuery = String.format(
-                      "INSERT INTO public.\"%s\" (created, title, description, keywords, provider_name, provider_contacts, collection_id) "
-                              + "VALUES ($1, $2, $3, $4, $5, $6, $7::UUID)",
+                      "INSERT INTO public.\"%s\" (created, title, description, keywords, provider_name, provider_contacts, collection_id, search_vector) "
+                              + "VALUES ($1, $2, $3, $4, $5, $6, $7::UUID, $8)",
                       recordTableId
               );
+
               return sqlClient.preparedQuery(insertQuery)
                       .execute(Tuple.of(
                               createdDate,
@@ -483,7 +490,8 @@ public class CollectionOnboardingProcess implements ProcessService {
                               keywordsArray,
                               providerName,
                               providerContacts,
-                              UUID.fromString(collectionsDetailsTableName)
+                              UUID.fromString(collectionsDetailsTableName),
+                              searchText
                       ));
             })
       .onSuccess(grantQueryResult -> {
