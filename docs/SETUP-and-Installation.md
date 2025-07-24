@@ -8,6 +8,15 @@ This document contains the installation and configuration information required t
 ## Configuration
 In order to connect the OGC Resource Server with AWS S3, PostgreSQL, RabbitMQ, DX Catalogue Server, DX AAA Server, DX Auditing Server etc please refer [Configurations](./Configurations.md). It contains appropriate information which shall be updated as per the deployment.
 
+### Token Constraints
+
+The OGC Resource Server enforces fine-grained access control using JWT tokens that may include spatial and usage limits. These constraints are evaluated during each request and include:
+
+- **Spatial limits** like `bbox` (bounding box) or `feat` (feature-specific access)
+- **Usage limits** such as `dataUsage` (e.g., 100\:gb) or `apiHits` (e.g., 500)
+- **Start time** from which usage limits apply, defined by `iat` (issued-at)
+
+>  **For detailed information**, see [Token Constraints](./token-constraints.md)
 ## Dependencies
 In this section we explain about the dependencies and their scope. It is expected that the dependencies are met before starting the deployment of OGC Resource Server.
 
