@@ -17,6 +17,7 @@ import ogc.rs.apiserver.util.Limits;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.StacItemSearchParams;
 import ogc.rs.database.util.FeatureQueryBuilder;
+import ogc.rs.database.util.RecordQueryBuilder;
 import ogc.rs.database.util.MulticornErrorHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -97,7 +98,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                     .execute()
                     .map(SqlResult::value))
             .onSuccess(success -> {
-                LOGGER.debug("Collections Result: {}", success.toString());
+            //    LOGGER.debug("Collections Result: {}", success.toString());
                 result.complete(success);
             })
             .onFailure(fail -> {
@@ -1187,32 +1188,86 @@ public class DatabaseServiceImpl implements DatabaseService{
 
 
     @Override
-    public Future<List<JsonObject>> getOgcRecords(String catalogId) {
-        Promise <List<JsonObject>> result = Promise.promise();
-        Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());
-        String tableName = "public.\"" + catalogId + "\"";
-        String query = String.format(
-                "SELECT id, ST_AsGeoJSON(geometry)::json AS geometry, created, title, description, keywords, bbox, temporal, collection_id, provider_name, provider_contacts FROM %s",
-                tableName
-        );
+    public Future<JsonObject> getOgcRecords(String catalogId,
+                                            Map<String, String> queryParam,
+                                            Map<String, String> propertyQueryParam) {
+
+        LOGGER.debug("Query Parameters: {}", queryParam);
+        LOGGER.debug("Property Query Parameters: {}", propertyQueryParam);
+
+        Promise<JsonObject> result = Promise.promise();
+        RecordQueryBuilder recordQueryBuilder = new RecordQueryBuilder(catalogId);
+
+        if (queryParam.containsKey("q")) {
+            recordQueryBuilder.setQValues(queryParam.get("q"));
+        }
+
+        recordQueryBuilder.setLimit(queryParam.getOrDefault("limit", "10"));
+        recordQueryBuilder.setOffset(queryParam.getOrDefault("offset", "1"));
+
+        // Parse bbox if present
+        String queryBbox = queryParam.get("bbox");
+        if (queryBbox != null && !queryBbox.isEmpty()) {
+            String cleanBbox = queryBbox.replace("[", "").replace("]", "");
+            LOGGER.debug("Parsed bbox: {}", cleanBbox);
+            recordQueryBuilder.setBbox(cleanBbox);
+        }
+
+        if(queryParam.containsKey("ids"))
+        {
+            recordQueryBuilder.setIdsParamValues(queryParam.get("ids"));
+        }
+
+        // building queries for prop=value parameters
+        if (!propertyQueryParam.isEmpty()) {
+            recordQueryBuilder.setQueryParamValues(propertyQueryParam);
+        }
+
+        if(queryParam.containsKey("datetime"))
+        {
+            recordQueryBuilder.setDatetimeParam(queryParam.get("datetime"));
+        }
+
+        // Prepare SQL queries
+        String countQuery = recordQueryBuilder.buildItemCountSqlString();
+        String dataQuery = recordQueryBuilder.buildItemSearchSqlString();
+        LOGGER.debug("Count Query: {}", countQuery);
+        LOGGER.debug("Data Query: {}", dataQuery);
+
+        JsonObject resultJson = new JsonObject();
+
+        Collector<Row, ?, Map<String, Integer>> countCollector =
+                Collectors.toMap(row -> row.getColumnName(0), row -> row.getInteger("count"));
+        Collector<Row, ?, List<JsonObject>> dataCollector =
+                Collectors.mapping(Row::toJson, Collectors.toList());
+
         client.withConnection(conn ->
-                        conn.query(query)
-                                .collecting(collector)
-                                .execute()
-                                .map(SqlResult::value))
-                .onSuccess(success -> {
-                    LOGGER.debug("Record Items Successfully fetched!");
-                    if (success.isEmpty()) {
-                        LOGGER.error("Records table is empty!");
-                        result.fail(
-                                new OgcException(404, "Not found", "Record table is Empty!"));
-                        return;
-                    }
-                    result.complete(success);
+                        conn.query(countQuery)
+                                .collecting(countCollector)
+                                .execute())
+                .onSuccess(count -> {
+                    int totalCount = count.value().getOrDefault("count", 0);
+                    resultJson.put("numberMatched", totalCount);
+
+                    client.withConnection(conn2 ->
+                                    conn2.query(dataQuery)
+                                            .collecting(dataCollector)
+                                            .execute()
+                                            .map(SqlResult::value))
+                            .onSuccess(records -> {
+                                resultJson.put("features", new JsonArray(records));
+                                resultJson.put("numberReturned", records.size());
+                                resultJson.put("type", "FeatureCollection");
+                                result.complete(resultJson);
+                            })
+                            .onFailure(dataFail -> {
+                                LOGGER.error("Failed to fetch record data: {}", dataFail.getMessage());
+                                result.fail(dataFail);
+                            });
                 })
-                .onFailure(fail -> {
-                    LOGGER.error("Failed to getOgcRecords! - {}", fail.getMessage());
-                    result.fail("Error!");
+                .onFailure(countFail -> {
+                    LOGGER.error("Failed to execute count query: {}", countFail.getMessage());
+                    result.fail(countFail);
                 });
 
         return result.future();

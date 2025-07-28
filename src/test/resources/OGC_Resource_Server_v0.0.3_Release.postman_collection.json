@@ -5412,6 +5412,297 @@
 			]
 		},
 		{
+			"name": "Records",
+			"item": [
+				{
+					"name": "Records Search API",
+					"item": [
+						{
+							"name": "bbox search",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/collections/c9e2ebfb-5178-41d1-bece-5829207ae9f1/items?bbox=-7.55,49.76,1.11,57.70",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"collections",
+										"c9e2ebfb-5178-41d1-bece-5829207ae9f1",
+										"items"
+									],
+									"query": [
+										{
+											"key": "bbox",
+											"value": "-7.55,49.76,1.11,57.70"
+										},
+										{
+											"key": "limit",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "q search",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/collections/c9e2ebfb-5178-41d1-bece-5829207ae9f1/items?q=NYC, contains postcode",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"collections",
+										"c9e2ebfb-5178-41d1-bece-5829207ae9f1",
+										"items"
+									],
+									"query": [
+										{
+											"key": "q",
+											"value": "NYC, contains postcode"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "property search",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/collections/c9e2ebfb-5178-41d1-bece-5829207ae9f1/items?provider_name=ugixprovider&provider_contacts=https://iudx.org.in&keywords=itms, vehicle",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"collections",
+										"c9e2ebfb-5178-41d1-bece-5829207ae9f1",
+										"items"
+									],
+									"query": [
+										{
+											"key": "provider_name",
+											"value": "ugixprovider"
+										},
+										{
+											"key": "provider_contacts",
+											"value": "https://iudx.org.in"
+										},
+										{
+											"key": "id",
+											"value": "4",
+											"disabled": true
+										},
+										{
+											"key": "keywords",
+											"value": "itms, vehicle"
+										},
+										{
+											"key": "title",
+											"value": "Code-Point Open",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "ids search",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/collections/c9e2ebfb-5178-41d1-bece-5829207ae9f1/items?ids=1,2,3",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"collections",
+										"c9e2ebfb-5178-41d1-bece-5829207ae9f1",
+										"items"
+									],
+									"query": [
+										{
+											"key": "ids",
+											"value": "1,2,3"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "datetime search",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/collections/c9e2ebfb-5178-41d1-bece-5829207ae9f1/items?datetime=2024-04-01T02:31:37Z/2024-04-01T02:36:38Z",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"collections",
+										"c9e2ebfb-5178-41d1-bece-5829207ae9f1",
+										"items"
+									],
+									"query": [
+										{
+											"key": "datetime",
+											"value": "2024-04-01T02:31:37Z/2024-04-01T02:36:38Z"
+										},
+										{
+											"key": "datetime",
+											"value": "../2024-04-01T02:36:38Z",
+											"disabled": true
+										},
+										{
+											"key": "datetime",
+											"value": "2024-04-01T02:31:37Z/..",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "limit search",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:5000/collections/c9e2ebfb-5178-41d1-bece-5829207ae9f1/items?limit=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"collections",
+										"c9e2ebfb-5178-41d1-bece-5829207ae9f1",
+										"items"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "bbox, datetime, q search",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/collections/c9e2ebfb-5178-41d1-bece-5829207ae9f1/items?limit=8&bbox=-7.55,49.76,1.11,57.70&datetime=2024-04-01T02:31:37Z/2024-04-01T02:36:38Z&q=postcode",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"collections",
+										"c9e2ebfb-5178-41d1-bece-5829207ae9f1",
+										"items"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "8"
+										},
+										{
+											"key": "bbox",
+											"value": "-7.55,49.76,1.11,57.70"
+										},
+										{
+											"key": "datetime",
+											"value": "2024-04-01T02:31:37Z/2024-04-01T02:36:38Z"
+										},
+										{
+											"key": "q",
+											"value": "postcode"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Record catalog",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/geo+json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/collections/:collectionId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"collections",
+								":collectionId"
+							],
+							"variable": [
+								{
+									"key": "collectionId",
+									"value": "c9e2ebfb-5178-41d1-bece-5829207ae9f1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Record Item",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/geo+json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/collections/:collectionId/items",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"collections",
+								":collectionId",
+								"items"
+							],
+							"variable": [
+								{
+									"key": "collectionId",
+									"value": "c9e2ebfb-5178-41d1-bece-5829207ae9f1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "landing page",
 			"event": [
 				{

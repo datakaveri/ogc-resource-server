@@ -59,6 +59,7 @@ public class OgcRecordsEntity implements GisEntityInterface{
                             OgcRecordsMetadata.OGC_RECORD_GET_ITEMS_COLLECTION_OP_ID_REGEX)) {
                         builder
                                 .operation(opId)
+                                .handler(apiServerVerticle::validateQueryParams)
                                 .handler(apiServerVerticle::getRecordItems)
                                 .handler(apiServerVerticle::putCommonResponseHeaders)
                                 .handler(apiServerVerticle::buildResponse)
