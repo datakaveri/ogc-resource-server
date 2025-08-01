@@ -111,9 +111,9 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
 
     checkForProcess.onSuccess(processExist -> {
       String processName = processExist.getString("title");
-      boolean isAsync = processExist.getJsonArray("response")
+      boolean isAsync = processExist.getJsonArray("mode")
               .stream()
-              .anyMatch(item -> item.toString().equalsIgnoreCase("ASYNC"));
+              .anyMatch(item -> item.toString().equalsIgnoreCase("async-execute"));
       List<String> validateInput = validateInput(input, processExist);
 
       S3Config processSpecificS3Conf;
