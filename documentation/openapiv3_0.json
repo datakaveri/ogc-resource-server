@@ -1,0 +1,4044 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.1",
+    "title": "OGC Compliant DX Resource Server",
+    "description": "OGC compliant Features and Common API definitions.\nIncludes Schema and Response Objects.\n\n <a href='/stac/api'>STAC API Documentation</a> \n\n <a href='/metering/api'>DX Metering API Documentation</a>",
+    "contact": {
+      "name": "Integrated Geospatial Data-sharing Interface (GDI)",
+      "email": "info@iudx.org.in",
+      "url": "https://geospatial.org.in"
+    },
+    "license": {
+      "url": "https://opensource.org/license/apache-2-0",
+      "name": "Apache 2.0"
+    }
+  },
+  "servers": [
+    {
+      "url": "${HOSTNAME}",
+      "description": "OGC-Resource-Server"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "Capabilities"
+        ],
+        "summary": "Landing page",
+        "description": "Landing page for the OGC compliant Resource Server.\nIt provides links to the API definition (link relations service-desc and service-doc), the Conformance declaration (path /conformance, link relation conformance), and the Feature Collections (path /collections, link relation data).\n",
+        "operationId": "getLandingPage",
+        "responses": {
+          "200": {
+            "description": "Successful query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "href": {
+                            "type": "string"
+                          },
+                          "rel": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "links"
+                  ]
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "title": "Cities in state",
+                      "description": "Information about cities in a state.",
+                      "links": [
+                        {
+                          "href": "${HOSTNAME}",
+                          "rel": "self",
+                          "type": "application/json",
+                          "title": "this document"
+                        },
+                        {
+                          "href": "${HOSTNAME}/api",
+                          "rel": "service-desc",
+                          "type": "application/vnd.oai.openapi+json;version=3.0",
+                          "title": "the API definition"
+                        },
+                        {
+                          "href": "${HOSTNAME}/conformance",
+                          "rel": "conformance",
+                          "type": "application/json",
+                          "title": "OGC API conformance classes implemented by this server"
+                        },
+                        {
+                          "href": "${HOSTNAME}/collections",
+                          "rel": "data",
+                          "type": "application/json",
+                          "title": "Information about the feature collections"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "code": "Bad Request",
+                      "description": "Missing/Invalid parameters"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conformance": {
+      "get": {
+        "tags": [
+          "Capabilities"
+        ],
+        "summary": "information about specifications that the API Server conforms to",
+        "description": "A list of all conformance classes specified as per OGC standard that the\nserver conforms to.\nTo support \"generic\" clients that want to access multiple\nOGC API Features implementations - and not \"just\" a specific\nAPI / server, the server declares the conformance classes it implements and conforms to.",
+        "operationId": "getConformanceClasses",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ConformanceDeclaration"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/collections": {
+      "get": {
+        "tags": [
+          "Capabilities"
+        ],
+        "summary": "the feature collections in the dataset",
+        "description": "It will fetch the list of feature collections to DX Data Consumers based on the required format with default limit and offset values supplied. This API provides a birds-eye-view for all avialable Feature Collections. The dataset is organized as one or more feature collections. This resource provides information about and access to the collections.\nThe response contains the list of collections. For each collection, a link to the items in the collection (path `/collections/{collectionId}/items`, link relation `items`) as well as key information about the collection. This information includes-\n* A local identifier for the collection that is unique for the dataset.\n* A list of coordinate reference systems (CRS) in which geometries may be returned by the server. The first CRS is the default coordinate reference system (the default is always WGS 84 with axis order longitude/latitude). \n* An optional title and description for the collection.\n* An optional extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data. \n* An optional indicator about the type of the items in the collection (the default value, if the indicator is not provided, is 'feature').",
+        "operationId": "getCollections",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Collections"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}": {
+      "get": {
+        "tags": [
+          "Capabilities"
+        ],
+        "summary": "describe the feature collection with id `collectionId`",
+        "description": "It will describe the feature collection to DX Data Consumers based on the required format with default limit and offset values supplied. The described collection has a link to the items in the collection (path `/collections/{collectionId}/items`, link relation `items`) as well as key information about the collection. This information includes-\n* A local identifier for the collection that is unique for the dataset.\n* A list of coordinate reference systems (CRS) in which geometries may be returned by the server. The first CRS is the default coordinate reference system (the default is always WGS 84 with axis order longitude/latitude). \n* An optional title and description for the collection.\n* An optional extent that can be used to provide an indication of the spatial and temporal extent of the collection - typically derived from the data. \n* An optional indicator about the type of the items in the collection (the default value, if the indicator is not provided, is 'feature').",
+        "operationId": "describeCollection",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/collectionId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Collection"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}/items": {
+      "get": {
+        "tags": [
+          "Features"
+        ],
+        "summary": "Fetch features of the feature collection with id collectionId.",
+        "description": "Every feature in a dataset belongs to a collection. A dataset may consist of multiple feature collections. A feature collection is often a collection of features of a similar type, based on a common schema.",
+        "operationId": "get-features",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "DX Auth token to process the request",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9\\/\\@\\.]*$",
+              "maxLength": 512
+            }
+          },
+          {
+            "name": "collectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bbox-crs",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "format": "uri",
+              "default": "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+              "enum": [
+                "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+              ]
+            }
+          },
+          {
+            "name": "crs",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "format": "uri",
+              "default": "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+              "enum": [
+                "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/bbox"
+          },
+          {
+            "$ref": "#/components/parameters/datetime"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 10000
+            }
+          },
+          {
+            "$ref": "#/components/parameters/offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Features"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameter"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}/items/{featureId}": {
+      "get": {
+        "tags": [
+          "Features"
+        ],
+        "summary": "Fetch the feature with id featureId in the feature collection with id collectionId.",
+        "operationId": "get-specific-feature",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "DX Auth token to process the request",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9\\/\\@\\.]*$",
+              "maxLength": 512
+            }
+          },
+          {
+            "name": "collectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "featureId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "crs",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "format": "uri",
+              "default": "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+              "enum": [
+                "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Feature"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/tileMatrixSets": {
+      "get": {
+        "tags": [
+          "Tiling Schemes"
+        ],
+        "summary": "Retrieve the list of available tiling schemes (tile matrix sets)",
+        "description": "Retrieve the list of available tiling schemes (tile matrix sets)",
+        "operationId": "getTileMatrixSetsList",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/TileMatrixSetsList"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/tileMatrixSets/{tileMatrixSetId}": {
+      "get": {
+        "tags": [
+          "Tiling Schemes"
+        ],
+        "summary": "Retrieve the definition of the specified tiling scheme (tile matrix set)",
+        "description": "Retrieve the definition of the specified tiling scheme (tile matrix set)",
+        "operationId": "getTileMatrixSet",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tileMatrixSetId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/TileMatrixSet"
+          },
+          "404": {
+            "description": "The requested tile matrix set id was not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception404"
+                }
+              }
+            }
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}/map/tiles": {
+      "get": {
+        "tags": [
+          "Map Tiles"
+        ],
+        "summary": "Retrieve a list of all map tilesets for specified collection.",
+        "description": "Retrieve a list of all map tilesets for specified collection.",
+        "operationId": ".collection.map.getTileSetsList",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/collectionId-all"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/TileSetsList"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}/map/tiles/{tileMatrixSetId}": {
+      "get": {
+        "tags": [
+          "Map Tiles"
+        ],
+        "summary": "Retrieve a map tile set metadata for the specified collection and tiling scheme (tile matrix set)",
+        "description": "Retrieve a map tile set metadata for the specified collection and tiling scheme (tile matrix set)",
+        "operationId": ".collection.map.getTileSet",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/collections"
+          },
+          {
+            "$ref": "#/components/parameters/collectionId-all"
+          },
+          {
+            "$ref": "#/components/parameters/tileMatrixSetId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/TileSet"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}/map/tiles/{tileMatrixSetId}/{tileMatrix}/{tileRow}/{tileCol}": {
+      "get": {
+        "tags": [
+          "Map Tiles"
+        ],
+        "summary": "Retrieve a map tile from the specified collection",
+        "description": "Retrieve a map tile from the specified collection",
+        "operationId": ".collection.map.getTile",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "DX Auth token to process the request",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9\\/\\@\\.]*$",
+              "maxLength": 512
+            }
+          },
+          {
+            "$ref": "#/components/parameters/collections"
+          },
+          {
+            "$ref": "#/components/parameters/tileMatrix"
+          },
+          {
+            "$ref": "#/components/parameters/tileRow"
+          },
+          {
+            "$ref": "#/components/parameters/tileCol"
+          },
+          {
+            "$ref": "#/components/parameters/collectionId-all"
+          },
+          {
+            "$ref": "#/components/parameters/tileMatrixSetId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MapTile"
+          },
+          "204": {
+            "$ref": "#/components/responses/EmptyTile"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/processes": {
+      "get": {
+        "tags": [
+          "ProcessList"
+        ],
+        "summary": "retrieve the list of available processes",
+        "description": "The list of processes contains a summary of each process the OGC API - Processes offers, including the link to a more detailed description of the process.",
+        "operationId": "getProcesses",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Information about the available processes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/processList"
+                },
+                "example": {
+                  "processes": [
+                    {
+                      "version": "1.0.0",
+                      "id": "cc0eb191-7f66-4663-8afa-cfd644de5839",
+                      "title": "CollectionOnboarding",
+                      "description": "Process for onboarding a collection",
+                      "jobControlOptions": [
+                        "value"
+                      ],
+                      "keywords": [
+                        "collection",
+                        "onboarding"
+                      ],
+                      "outputTransmission": [
+                        "async"
+                      ],
+                      "links": [
+                        {
+                          "href": "${HOSTNAME}/processes/cc0eb191-7f66-4663-8afa-cfd644de5839",
+                          "rel": "self",
+                          "type": "application/json",
+                          "title": "Process description as JSON"
+                        }
+                      ]
+                    },
+                    {
+                      "version": "2.0.0",
+                      "id": "550e8400-e29b-41d4-a716-446655440002",
+                      "title": "Hello World",
+                      "description": "An example process that takes a name as input, and echoes it back as output. Intended to demonstrate a simple process with a single literal input.",
+                      "jobControlOptions": [
+                        "value"
+                      ],
+                      "keywords": [
+                        "hello world",
+                        "example",
+                        "echo"
+                      ],
+                      "outputTransmission": [
+                        "sync"
+                      ],
+                      "links": [
+                        {
+                          "href": "${HOSTNAME}/processes/550e8400-e29b-41d4-a716-446655440002",
+                          "rel": "self",
+                          "type": "application/json",
+                          "title": "Process description as JSON"
+                        }
+                      ]
+                    }
+                  ],
+                  "links": [
+                    {
+                      "href": "${HOSTNAME}/processes",
+                      "rel": "self",
+                      "type": "application/json"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested URI was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/processes/{processId}": {
+      "get": {
+        "tags": [
+          "ProcessDescription"
+        ],
+        "summary": "retrieve a process description",
+        "description": "The process description contains information about inputs and outputs and a link to the execution-endpoint for the process.",
+        "operationId": "getProcessDescription",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/processId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A process description.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/process"
+                },
+                "example": {
+                  "processes": [
+                    {
+                      "version": "2.0.0",
+                      "id": "550e8400-e29b-41d4-a716-446655440002",
+                      "title": "Hello World",
+                      "description": "An example process that takes a name as input, and echoes it back as output. Intended to demonstrate a simple process with a single literal input.",
+                      "jobControlOptions": [
+                        "value"
+                      ],
+                      "keywords": [
+                        "hello world",
+                        "example",
+                        "echo"
+                      ],
+                      "outputTransmission": [
+                        "sync"
+                      ],
+                      "inputs": {
+                        "name": {
+                          "title": "Name",
+                          "schema": {
+                            "type": "string"
+                          },
+                          "keywords": [
+                            "full name",
+                            "personal"
+                          ],
+                          "metadata": null,
+                          "maxOccurs": 1,
+                          "minOccurs": 1,
+                          "description": "The name of the person or entity that you wish to be echoed back as an output"
+                        },
+                        "message": {
+                          "title": "Message",
+                          "schema": {
+                            "type": "string"
+                          },
+                          "keywords": [
+                            "message"
+                          ],
+                          "metadata": null,
+                          "maxOccurs": 1,
+                          "minOccurs": 0,
+                          "description": "An optional message to echo as well"
+                        }
+                      },
+                      "outputs": {
+                        "echo": {
+                          "title": "Hello, world",
+                          "schema": {
+                            "type": "object",
+                            "contentMediaType": "application/json"
+                          },
+                          "description": "A \"hello world\" echo with the name and (optional) message submitted for processing"
+                        }
+                      },
+                      "links": [
+                        {
+                          "type": "application/json",
+                          "rel": "self",
+                          "title": "Process description as JSON",
+                          "href": "${HOSTNAME}/processes/550e8400-e29b-41d4-a716-446655440002"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested URI was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/processes/{processId}/execution": {
+      "post": {
+        "tags": [
+          "Execute"
+        ],
+        "summary": "execute a process.",
+        "description": "Create a new job by initiating the execution of a specified process identified by the 'processId'.",
+        "operationId": "execute",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "DX Auth token to process the request",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9\\/\\@\\.]*$",
+              "maxLength": 512
+            }
+          },
+          {
+            "name": "processId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Mandatory JSON payload for the execute request.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/execute"
+              },
+              "example": {
+                "inputs": {
+                  "fileName": "FileName.gpkg",
+                  "description": "Description of the file",
+                  "title": "Title of the file",
+                  "resourceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "version": "1.0.0"
+                },
+                "response": "raw"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Started asynchronous execution. Created job.",
+            "headers": {
+              "Location": {
+                "description": "URL to check the status of the execution/job.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/statusInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested URI was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                },
+                "example": {
+                  "type": "Internal Server Error",
+                  "title": "Internal Server Error",
+                  "detail": "Internal Server Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{jobId}": {
+      "get": {
+        "tags": [
+          "Status"
+        ],
+        "summary": "retrieve the status of a job",
+        "description": "Shows the status of a job.",
+        "operationId": "getStatus",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "DX Auth token to process the request",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9\\/\\@\\.]*$",
+              "maxLength": 512
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "local identifier of a job",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The status of a job.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/statusInfo"
+                },
+                "example": {
+                  "jobID": "cc0eb191-7f66-4663-8afa-cfd644de5839",
+                  "processId": "dd0eb191-7f66-4663-8afa-cfd644de5890",
+                  "type": "PROCESS",
+                  "created": "2024-03-28T09:28:24.843Z",
+                  "started": "2024-03-28T09:28:24.843Z",
+                  "finished": "2024-03-28T09:28:24.843Z",
+                  "updated": "2024-03-28T09:28:24.843Z",
+                  "progress": 66.67,
+                  "status": "RUNNING",
+                  "message": "Process Running",
+                  "links": {
+                    "href": "${HOSTNAME}/jobs/fd6ef7c5-b18c-48e6-94e3-81037702863d",
+                    "rel": "self",
+                    "title": "Districts in India"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested URI was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                },
+                "example": {
+                  "type": "Internal Server Error",
+                  "title": "Internal Server Error",
+                  "detail": "Internal Server Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs": {
+      "get": {
+        "tags": [
+          "List All Jobs"
+        ],
+        "summary": "Retrieve all the jobs",
+        "description": "Show all the jobs with respect to a particular user.",
+        "operationId": "listAllJobs",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "DX Auth token to process the request",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9\\/\\@\\.]*$",
+              "maxLength": 512
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of all jobs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/jobList"
+                },
+                "example": {
+                  "jobs": [
+                    {
+                      "processId": "dd0eb191-7f66-4663-8afa-cfd644de5890",
+                      "jobID": "cc0eb191-7f66-4663-8afa-cfd644de5839",
+                      "type": "PROCESS",
+                      "status": "RUNNING",
+                      "message": "Process Running",
+                      "progress": 66.67,
+                      "links": {
+                        "href": "${HOSTNAME}/jobs/cc0eb191-7f66-4663-8afa-cfd644de5839",
+                        "rel": "status",
+                        "title": "Districts in India",
+                        "type": "application/json",
+                        "hreflang": "en"
+                      }
+                    },
+                    {
+                      "processId": "dd0eb191-7f66-4663-8afa-cfd644de5890",
+                      "jobID": "7853c10d-c270-4e4d-9e53-fc726d97bbd5",
+                      "type": "PROCESS",
+                      "status": "RUNNING",
+                      "message": "Process Running",
+                      "progress": 66.67,
+                      "links": {
+                        "href": "${HOSTNAME}/jobs/7853c10d-c270-4e4d-9e53-fc726d97bbd5",
+                        "rel": "status",
+                        "title": "Airports in India",
+                        "type": "application/json",
+                        "hreflang": "en"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested URI was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                },
+                "example": {
+                  "type": "Internal Server Error",
+                  "title": "Internal Server Error",
+                  "detail": "Internal Server Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{jobId}/results": {
+      "get": {
+        "tags": [
+          "Results"
+        ],
+        "summary": "Retrieves the results of a job",
+        "description": "Shows the results of a job.",
+        "operationId": "getJobResults",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "DX Auth token to process the request",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9\\/\\@\\.]*$",
+              "maxLength": 512
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "description": "local identifier of a job",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The results of a job.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/execute"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested URI was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "A server error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/exception"
+                },
+                "example": {
+                  "type": "Internal Server Error",
+                  "title": "Internal Server Error",
+                  "detail": "Internal Server Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/collections/{collectionId}/schema": {
+      "get": {
+        "tags": [
+          "Coverage"
+        ],
+        "summary": "retrieve the schema of the coverage-data",
+        "description": "Shows the schema of the coverage.",
+        "operationId": "getCoverageSchema",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/collectionId-all"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the schema of the coverage.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schema": {
+                      "type": "object",
+                      "description": "The JSON schema of the coverage."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "servers": [
+          {
+            "url": "https://ogc.iudx.io",
+            "description": "OGC-Resource-Server"
+          }
+        ]
+      }
+    },
+    "/collections/{collectionId}/coverage": {
+      "get": {
+        "tags": [
+          "Coverage"
+        ],
+        "summary": "retrieve the schema of the coverage-data",
+        "description": "Gives the coeverage of the collection",
+        "operationId": "getCollectionCoverage",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "DX Auth token to process the request",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9\\/\\@\\.]*$",
+              "maxLength": 512
+            }
+          },
+          {
+            "$ref": "#/components/parameters/collectionId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Download the coverage file associated with the collection identified by 'collection_id'."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "servers": [
+          {
+            "url": "https://ogc.iudx.io",
+            "description": "OGC-Resource-Server"
+          }
+        ]
+      }
+    },
+    "/listConfiguredS3Buckets": {
+      "get": {
+        "tags": [
+          "Miscellaneous"
+        ],
+        "summary": "List configured S3 buckets",
+        "description": "List information about S3 buckets configured to work with the server. Bucket identifiers along with the read access of the bucket (open or secure) is given. The bucket identifier can then be used as input for executing processes that operate with S3 buckets",
+        "operationId": "listConfiguredS3Buckets",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "s3BucketIdentifier": {
+                        "type": "string",
+                        "description": "The bucket ID that can be used in process inputs"
+                      },
+                      "readAccess": {
+                        "type": "string",
+                        "enum": [
+                          "PRIVATE",
+                          "PUBLIC"
+                        ],
+                        "description": "Whether the bucket has public or private read access"
+                      }
+                    }
+                  }
+                },
+                "example": [
+                  {
+                    "s3BucketIdentifier": "default",
+                    "readAccess": "PRIVATE"
+                  },
+                  {
+                    "s3BucketIdentifier": "stacThumbnailsAndOverviews",
+                    "readAccess": "PUBLIC"
+                  }
+                ]
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/collections/{catalogId}": {
+      "get": {
+        "tags": [
+          "Records"
+        ],
+        "summary": "Retrieves the collection that represents the `catalogId`",
+        "description": "Retrieves metadata information for a specific collection identified by UUID. This endpoint is part of the OGC Records API, enabling discovery and access to metadata records.",
+        "operationId": "record-catalog",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/catalogId"
+          }
+        ],
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/RecordCatalog"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/collections/{catalogId}/items": {
+      "get": {
+        "tags": [
+          "Records"
+        ],
+        "summary": "Search and retrieves the list of records specified by parameters",
+        "description": "Returns a paginated list of records from the specified collection. The response includes matching records based on query parameters such as `title`, `id`, `provider_name`, `bbox`, `datetime`, and others. This endpoint supports filtering and pagination as defined by the OGC API - Records standard.",
+        "operationId": "recordCollection-c9e2ebfb-5178-41d1-bece-5829207ae9f1-get-items",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/catalogId"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "provider_contacts",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "provider_name",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 10
+            }
+          },
+          {
+            "$ref": "#/components/parameters/bbox"
+          },
+          {
+            "$ref": "#/components/parameters/keywords"
+          },
+          {
+            "$ref": "#/components/parameters/created"
+          },
+          {
+            "$ref": "#/components/parameters/q"
+          },
+          {
+            "$ref": "#/components/parameters/ids"
+          },
+          {
+            "$ref": "#/components/parameters/offset"
+          },
+          {
+            "$ref": "#/components/parameters/datetime"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/RecordItems"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/collections/{catalogId}/items/{recordId}": {
+      "get": {
+        "tags": [
+          "Records"
+        ],
+        "summary": "Retrieve a specific record from a collection by recordId",
+        "description": "Fetches a single record from the specified collection using the unique `recordId`. The response includes the full record metadata compliant with the OGC API - Records specification.",
+        "operationId": "recordCollection-c9e2ebfb-5178-41d1-bece-5829207ae9f1-get-specific-item",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/catalogId"
+          },
+          {
+            "name": "recordId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/RecordItem"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Capabilities",
+      "description": "Essential characteristics of OGC APIs"
+    },
+    {
+      "name": "Map Tiles",
+      "description": "Map Tiles available with the server"
+    },
+    {
+      "name": "Tiling Schemes",
+      "description": "Different Tiling Schemes available with the server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "DX-AAA-Token": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "A <b> valid Auth token </b> to process the request."
+      }
+    },
+    "parameters": {
+      "bbox": {
+        "name": "bbox",
+        "in": "query",
+        "description": "Only features that have a geometry that intersects the bounding box are selected.\nThe bounding box is provided as four or six numbers, depending on whether the\ncoordinate reference system includes a vertical axis (height or depth):\n\n* Lower left corner, coordinate axis 1\n* Lower left corner, coordinate axis 2\n* Minimum value, coordinate axis 3 (optional)\n* Upper right corner, coordinate axis 1\n* Upper right corner, coordinate axis 2\n* Maximum value, coordinate axis 3 (optional)\n\nIf the value consists of four numbers, the coordinate reference system is\nWGS 84 longitude/latitude (http://www.opengis.net/def/crs/OGC/1.3/CRS84)\nunless a different coordinate reference system is specified in the parameter `bbox-crs`.\n\nIf the value consists of six numbers, the coordinate reference system is WGS 84\nlongitude/latitude/ellipsoidal height (http://www.opengis.net/def/crs/OGC/0/CRS84h)\nunless a different coordinate reference system is specified in the parameter `bbox-crs`.\n\nThe query parameter `bbox-crs` is specified in OGC API - Features - Part 2: Coordinate\nReference Systems by Reference.\n\nFor WGS 84 longitude/latitude the values are in most cases the sequence of\nminimum longitude, minimum latitude, maximum longitude and maximum latitude.\nHowever, in cases where the box spans the antimeridian the first value\n(west-most box edge) is larger than the third value (east-most box edge).\n\nIf the vertical axis is included, the third and the sixth number are\nthe bottom and the top of the 3-dimensional bounding box.\n\nIf a feature has multiple spatial geometry properties, it is the decision of the\nserver whether only a single spatial geometry property is used to determine\nthe extent or all relevant geometries.",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 6,
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "ids": {
+        "name": "ids",
+        "in": "query",
+        "description": "The optional ids parameter allows a specific list of records, identified\nby their identifiers, to be fetched from a catalog.  Only records whose\nidentifier matches one of the values listed for this parameter shall appear\nin the response.",
+        "required": false,
+        "schema": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer"
+          }
+        },
+        "explode": false,
+        "style": "form"
+      },
+      "keywords": {
+        "name": "keywords",
+        "in": "query",
+        "description": " The topic or topics of the resource. Typically\nrepresented using free-form keywords, tags, key\nphrases, or classification codes.",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "q": {
+        "name": "q",
+        "in": "query",
+        "description": "The optional q parameter supports keyword searching.  Only records\nwhose text fields contain one or more of the specified search terms\nare selected.  The specific set of text keys/fields/properties of a\nrecord to which the q operator is applied is up to the discretion\nof the server.   Implementations should, however, apply the q\noperator to the title, description and keywords keys/fields/properties.",
+        "required": false,
+        "schema": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "explode": false,
+        "style": "form"
+      },
+      "bbox-crs": {
+        "name": "bbox-crs",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "crs": {
+        "name": "crs",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "created": {
+        "name": "created",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "datetime": {
+        "name": "datetime",
+        "in": "query",
+        "description": "Either a date-time or an interval. Date and time expressions adhere to RFC 3339.\nIntervals may be bounded or half-bounded (double-dots at start or end).\n\nExamples:\n\n* A date-time: \"2018-02-12T23:20:50Z\"\n* A bounded interval: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\"\n* Half-bounded intervals: \"2018-02-12T00:00:00Z/..\" or \"../2018-03-18T12:31:12Z\"\n\nOnly features that have a temporal property that intersects the value of\n`datetime` are selected.\n\nIf a feature has multiple temporal properties, it is the decision of the\nserver whether only a single temporal property is used to determine\nthe extent or all relevant temporal properties.",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "limit": {
+        "name": "limit",
+        "in": "query",
+        "description": "The optional limit parameter limits the number of items that are presented in the response document.\n\nOnly items are counted that are on the first level of the collection in the response document.\nNested objects contained within the explicitly requested items shall not be counted.\n\nMinimum = 1. Maximum = 10000. Default = 10.",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000,
+          "default": 10
+        }
+      },
+      "offset": {
+        "name": "offset",
+        "in": "query",
+        "description": "OGC Resource server also offers way to paginate the result for queries. \nIf a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records \nto be returned.\n\nMinimum = 0. Maximum = 1000. Default = 10.",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2000000,
+          "default": 1
+        }
+      },
+      "collections": {
+        "name": "collections",
+        "in": "query",
+        "description": "The collections that should be included in the response. The parameter value is a comma-separated list of collection identifiers. If the parameters is missing, some or all collections will be included. The collection will be rendered in the order specified, with the last one showing on top, unless the priority is overridden by styling rules.",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/all-collections"
+          }
+        }
+      },
+      "collectionId": {
+        "name": "collectionId",
+        "in": "path",
+        "description": "local identifier of a collection",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "featureId": {
+        "name": "featureId",
+        "in": "path",
+        "description": "local identifier of a feature",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "recordId": {
+        "name": "recordId",
+        "in": "path",
+        "description": "local identifier of a record item",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "tileMatrixSetId": {
+        "name": "tileMatrixSetId",
+        "in": "path",
+        "description": "Identifier for a supported TileMatrixSet",
+        "required": true,
+        "allowEmptyValue": false,
+        "schema": {
+          "$ref": "#/components/schemas/tileMatrixSets"
+        }
+      },
+      "collectionId-all": {
+        "name": "collectionId",
+        "in": "path",
+        "description": "Local identifier of a collection",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/all-collections"
+        }
+      },
+      "tileMatrix": {
+        "name": "tileMatrix",
+        "in": "path",
+        "description": "Identifier selecting one of the scales defined in the TileMatrixSet and representing the scaleDenominator the tile. For example,\nIreland is fully within the Tile at WebMercatorQuad tileMatrix=5, tileRow=10 and tileCol=15.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "5"
+        },
+        "examples": {
+          "default": {
+            "value": "5"
+          }
+        }
+      },
+      "tileRow": {
+        "name": "tileRow",
+        "in": "path",
+        "description": "Row index of the tile on the selected TileMatrix. It cannot exceed the MatrixWidth-1 for the selected TileMatrix. For example, Ireland is fully within the Tile at WebMercatorQuad tileMatrix=5, tileRow=10 and tileCol=15.",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "example": 10
+        },
+        "examples": {
+          "default": {
+            "value": 10
+          }
+        }
+      },
+      "tileCol": {
+        "name": "tileCol",
+        "in": "path",
+        "description": "Column index of the tile on the selected TileMatrix. It cannot exceed the MatrixHeight-1 for the selected TileMatrix. For example, Ireland is fully within the Tile at WebMercatorQuad tileMatrix=5, tileRow=10 and tileCol=15.",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "example": 15
+        },
+        "examples": {
+          "default": {
+            "value": 15
+          }
+        }
+      },
+      "processId": {
+        "name": "processId",
+        "in": "path",
+        "description": "local identifier of a process",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "catalogId": {
+        "name": "catalogId",
+        "in": "path",
+        "description": "local identifier of a catalog",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "responses": {
+      "LandingPage": {
+        "description": "The landing page provides links to the API definition\n(link relations `service-desc` and `service-doc`),\nthe Conformance declaration (path `/conformance`,\nlink relation `conformance`), and the Feature\nCollections (path `/collections`, link relation\n`data`).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/landingPage"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "title": "OGC Compliant DX Geospatial Resource Server Landing Page",
+                  "description": "This landing page provides all the links as per the OGC compliance in JSON format",
+                  "links": [
+                    {
+                      "href": "${HOSTNAME}/",
+                      "rel": "self",
+                      "type": "application/json",
+                      "title": "this document"
+                    },
+                    {
+                      "href": "${HOSTNAME}/api",
+                      "rel": "service-desc",
+                      "type": "application/vnd.oai.openapi+json;version=3.0",
+                      "title": "the API definition"
+                    },
+                    {
+                      "href": "${HOSTNAME}/conformance",
+                      "rel": "conformance",
+                      "type": "application/json",
+                      "title": "OGC API conformance classes implemented by this server"
+                    },
+                    {
+                      "href": "${HOSTNAME}/collections",
+                      "rel": "data",
+                      "type": "application/json",
+                      "title": "Information about the feature collections"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "ConformanceDeclaration": {
+        "description": "The URIs of all conformance classes supported by the server.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/confClasses"
+            },
+            "examples": {
+              "Example 1": {
+                "value": {
+                  "conformsTo": [
+                    "http://www.opengis.net/spec/ogcapi-common-1/1.0/req/json",
+                    "http://www.opengis.net/spec/ogcapi-common-1/1.0/conf/landing-page",
+                    "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core",
+                    "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/oas30",
+                    "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "Collections": {
+        "description": "The feature collections shared by this API.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/collections"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "links": [
+                    {
+                      "href": "${HOSTNAME}/collections",
+                      "rel": "self",
+                      "type": "application/json",
+                      "title": "this document"
+                    }
+                  ],
+                  "collections": [
+                    {
+                      "id": "fd6ef7c5-b18c-48e6-94e3-81037706763d",
+                      "title": "Districts in India",
+                      "description": "Geographic information of districts in India",
+                      "links": [
+                        {
+                          "href": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items",
+                          "rel": "items",
+                          "type": "application/geo+json",
+                          "title": "Districts in India"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "Collection": {
+        "description": "Information about the feature collection with id `collectionId`.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/collection"
+            },
+            "examples": {
+              "collection": {
+                "value": {
+                  "id": "fd6ef7c5-b18c-48e6-94e3-81037706763d",
+                  "itemType": "feature",
+                  "title": "Districts in India",
+                  "description": "Geographic information of districts in India",
+                  "links": [
+                    {
+                      "href": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items",
+                      "rel": "items",
+                      "type": "application/geo+json",
+                      "title": "Districts in India"
+                    },
+                    {
+                      "href": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d",
+                      "rel": "self",
+                      "type": "application/geo+json",
+                      "title": "Districts in India"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "RecordCatalog": {
+        "description": "The response consists of information regarding the REcord catalog.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/recordCatalog"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "id": "fd6ef7c5-b18c-48e6-94e3-81037706763d",
+                  "created": "2024-04-01T08:06:37+0530",
+                  "conformsTo": "https://www.opengis.net/spec/ogcapi-records-1/1.0/req/core",
+                  "itemType": "record",
+                  "type": "Collection",
+                  "links": [
+                    {
+                      "href": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items",
+                      "rel": "items",
+                      "type": "application/geo+json",
+                      "title": "Districts in India"
+                    },
+                    {
+                      "href": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d",
+                      "rel": "self",
+                      "type": "application/geo+json",
+                      "title": "Districts in India"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "Features": {
+        "description": "The response is a document consisting of features in the collection.\nThe features included in the response are determined by the server\nbased on the query parameters of the request. To support access to\nlarger collections without overloading the client, the API supports\npaged access using `limit` and `offset` paramters.",
+        "content": {
+          "application/geo+json": {
+            "schema": {
+              "$ref": "#/components/schemas/featureCollectionGeoJSON"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "type": "FeatureCollection",
+                  "links": [
+                    {
+                      "href": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items",
+                      "rel": "self",
+                      "type": "application/geo+json",
+                      "title": "this document"
+                    },
+                    {
+                      "href": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items?offset=10&limit=2",
+                      "rel": "next",
+                      "type": "application/geo+json",
+                      "title": "next page"
+                    }
+                  ],
+                  "numberMatched": 123,
+                  "numberReturned": 2,
+                  "features": [
+                    {
+                      "type": "Feature",
+                      "id": "4f449c78-3233-4c07-824c-08f7d45cee0e",
+                      "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                          76.787052042,
+                          30.37598763
+                        ]
+                      },
+                      "properties": {
+                        "hq": "AMBALA",
+                        "state": "HARYANA",
+                        "timestamp": "2023-07-25 07:22:36 UTC"
+                      }
+                    },
+                    {
+                      "type": "Feature",
+                      "id": "3f449c78-3233-4c07-824c-08f7d45cee03",
+                      "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                          76.787052042,
+                          30.37598763
+                        ]
+                      },
+                      "properties": {
+                        "hq": "HYDERABAD",
+                        "state": "TELENGANA",
+                        "timestamp": "2023-07-25 07:22:36 UTC"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "RecordItem": {
+        "description": "fetch the record item from the given recordId",
+        "content": {
+          "application/geo+json": {
+            "schema": {
+              "$ref": "#/components/schemas/recordItem"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "id": "f2310f35-8834-4ab8-a5d5-a8cddd3bb975",
+                  "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                      [
+                        [
+                          -7.557159807,
+                          49.766807235
+                        ],
+                        [
+                          -7.557159807,
+                          57.704883568
+                        ],
+                        [
+                          1.112473832,
+                          57.704883568
+                        ],
+                        [
+                          1.112473832,
+                          49.766807235
+                        ],
+                        [
+                          -7.557159807,
+                          49.766807235
+                        ]
+                      ]
+                    ]
+                  },
+                  "type": "Feature",
+                  "links": [
+                    {
+                      "href": "http://127.0.0.1:5000/collections/1e7f3be1-5d07-4cba-9c8c-5c3a2fd5c82a/items/f2310f35-8834-4ab8-a5d5-a8cddd3bb975",
+                      "rel": "self",
+                      "title": "Code-Point Open",
+                      "description": "Contains postcode units from Britain"
+                    }
+                  ],
+                  "properties": {
+                    "title": "Code-Point Open",
+                    "description": "Contains postcode units from Britain",
+                    "keywords": [
+                      "test"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "RecordItems": {
+        "description": "The feature collections shared by this API.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/recordItems"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "links": [
+                    {
+                      "href": "${HOSTNAME}/collections",
+                      "rel": "self",
+                      "type": "application/json",
+                      "title": "this document"
+                    }
+                  ],
+                  "FeatureCollections": [
+                    {
+                      "id": "fd6ef7c5-b18c-48e6-94e3-81037702863d",
+                      "itemType": "feature",
+                      "title": "Districts in India",
+                      "description": "Information about districts in India",
+                      "links": [
+                        {
+                          "href": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037702863d",
+                          "rel": "self",
+                          "type": "application/geo+json",
+                          "title": "Districts in India"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "Feature": {
+        "description": "fetch the feature with id `featureId` in the feature collection\nwith id `collectionId`",
+        "content": {
+          "application/geo+json": {
+            "schema": {
+              "$ref": "#/components/schemas/featureGeoJSON"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "type": "Feature",
+                  "links": [
+                    {
+                      "href": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d/items/4f449c78-3233-4c07-824c-08f7d45cee0e",
+                      "rel": "self",
+                      "type": "application/geo+json",
+                      "title": "this document"
+                    },
+                    {
+                      "href": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d",
+                      "rel": "collection",
+                      "type": "application/geo+json",
+                      "title": "the collection document"
+                    }
+                  ],
+                  "id": "4f449c78-3233-4c07-824c-08f7d45cee0e",
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                      76.787052042,
+                      30.37598763
+                    ]
+                  },
+                  "properties": {
+                    "hq": "AMBALA",
+                    "state": "HARYANA",
+                    "datetime": "2023-07-25 07:22:36 UTC"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "InvalidParameter": {
+        "description": "A query parameter has an invalid value.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/exception400"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "The requested resource does not exist on the server. For example, a path parameter had an incorrect value."
+      },
+      "NotAcceptable": {
+        "description": "Content negotiation failed. For example, the `Accept` header submitted in the request did not support any of the media types supported by the server for the requested resource."
+      },
+      "ServerError": {
+        "description": "A server error occurred.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/exception500"
+            }
+          }
+        }
+      },
+      "TileMatrixSetsList": {
+        "description": "List of tile matrix sets (tiling schemes).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "tileMatrixSets": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/tileMatrixSet-item"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "TileMatrixSet": {
+        "description": "tile matrix set",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/tileMatrixSet"
+            }
+          }
+        }
+      },
+      "TileSetsList": {
+        "description": "List of available tilesets.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "links": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/link"
+                  }
+                },
+                "tilesets": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/tileSet-item"
+                  }
+                }
+              },
+              "required": [
+                "tilesets"
+              ]
+            }
+          }
+        }
+      },
+      "TileSet": {
+        "description": "Description of the tileset",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/tileSet"
+            }
+          }
+        }
+      },
+      "MapTile": {
+        "description": "A map tile image returned as a response.",
+        "content": {
+          "image/png": {
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            }
+          }
+        }
+      },
+      "EmptyTile": {
+        "description": "No data available for this tile."
+      }
+    },
+    "schemas": {
+      "exception": {
+        "title": "Exception Schema",
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "Not Found"
+          },
+          "title": {
+            "type": "string",
+            "example": "Not Found"
+          },
+          "detail": {
+            "type": "string",
+            "example": "Resource Not Found"
+          }
+        }
+      },
+      "exception404": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "description"
+        ],
+        "example": {
+          "code": "Not Found",
+          "description": "Resource not found"
+        }
+      },
+      "all-collections": {
+        "type": "string"
+      },
+      "tileMatrixSets": {
+        "enum": [
+          "WebMercatorQuad",
+          "WorldCRS84Quad",
+          "GNOSISGlobalGrid",
+          "WorldMercatorWGS84Quad"
+        ]
+      },
+      "landingPage": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "rel": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "href",
+                "rel"
+              ]
+            }
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "links"
+        ],
+        "example": {
+          "title": "OGC Compliant DX Geospatial Resource Server Landing Page",
+          "description": "This landing page provides all the links as per the OGC compliance in JSON format",
+          "links": [
+            {
+              "href": "${HOSTNAME}/",
+              "rel": "self",
+              "type": "application/json",
+              "title": "this document"
+            },
+            {
+              "href": "${HOSTNAME}/api",
+              "rel": "service-desc",
+              "type": "application/vnd.oai.openapi+json;version=3.0",
+              "title": "the API definition"
+            },
+            {
+              "href": "${HOSTNAME}/conformance",
+              "rel": "conformance",
+              "type": "application/json",
+              "title": "OGC API conformance classes implemented by this server"
+            },
+            {
+              "href": "${HOSTNAME}/collections",
+              "rel": "data",
+              "type": "application/json",
+              "title": "Information about the feature collections"
+            }
+          ]
+        }
+      },
+      "confClasses": {
+        "type": "object",
+        "properties": {
+          "conformsTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "conformsTo"
+        ],
+        "example": {
+          "conformsTo": [
+            "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core",
+            "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/oas30",
+            "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson"
+          ]
+        }
+      },
+      "collections": {
+        "type": "object",
+        "properties": {
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/link"
+            }
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/collection"
+            }
+          }
+        },
+        "required": [
+          "links",
+          "collections"
+        ]
+      },
+      "recordCatalog": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "itemType": {
+            "type": "string"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "rel": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "recordItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "geometry",
+          "properties"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uri",
+            "description": "A unique identifier of the catalogue record."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "Feature"
+            ]
+          },
+          "geometry": {
+            "type": "object",
+            "description": "GeoJSON geometry object.",
+            "required": [
+              "type",
+              "coordinates"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "Point",
+                  "LineString",
+                  "Polygon",
+                  "MultiPoint",
+                  "MultiLineString",
+                  "MultiPolygon",
+                  "GeometryCollection"
+                ]
+              },
+              "coordinates": {
+                "type": "array",
+                "description": "Coordinates as per the geometry type.",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "geometries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/geometryGeoJSON"
+                }
+              }
+            }
+          },
+          "properties": {
+            "type": "object",
+            "description": "Additional record properties.",
+            "additionalProperties": true
+          },
+          "links": {
+            "type": "array",
+            "description": "Optional array of links related to the record.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "rel": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "recordItems": {
+        "type": "object",
+        "properties": {
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/link"
+            }
+          },
+          "FeatureCollection": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/recordItem"
+            }
+          }
+        }
+      },
+      "link": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "example": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037706763d"
+          },
+          "rel": {
+            "type": "string",
+            "example": "self"
+          },
+          "type": {
+            "type": "string",
+            "example": "application/geo+json"
+          },
+          "title": {
+            "type": "string",
+            "example": "Districts in India"
+          }
+        },
+        "required": [
+          "href",
+          "rel"
+        ]
+      },
+      "collection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "itemType": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "crs": {
+            "type": "array",
+            "description": "a global list of CRS identifiers that are supported by spatial feature collections offered by the service",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "rel": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "example": {
+          "id": "fd6ef7c5-b18c-48e6-94e3-81037702863d",
+          "itemType": "feature",
+          "title": "Districts in India",
+          "description": "Information about districts in India",
+          "links": [
+            {
+              "href": "${HOSTNAME}/collections/fd6ef7c5-b18c-48e6-94e3-81037702863d",
+              "rel": "self",
+              "type": "application/geo+json",
+              "title": "Districts in India"
+            }
+          ]
+        }
+      },
+      "featureCollectionGeoJSON": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "FeatureCollection"
+            ]
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/featureGeoJSON"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/link"
+            }
+          },
+          "numberMatched": {
+            "$ref": "#/components/schemas/numberMatched"
+          },
+          "numberReturned": {
+            "$ref": "#/components/schemas/numberReturned"
+          }
+        },
+        "required": [
+          "type",
+          "features"
+        ]
+      },
+      "featureGeoJSON": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Feature"
+            ]
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/geometryGeoJSON"
+          },
+          "properties": {
+            "type": "object"
+          },
+          "id": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/link"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "geometry",
+          "properties"
+        ]
+      },
+      "geometryGeoJSON": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/pointGeoJSON"
+          },
+          {
+            "$ref": "#/components/schemas/multipointGeoJSON"
+          },
+          {
+            "$ref": "#/components/schemas/linestringGeoJSON"
+          },
+          {
+            "$ref": "#/components/schemas/multilinestringGeoJSON"
+          },
+          {
+            "$ref": "#/components/schemas/polygonGeoJSON"
+          },
+          {
+            "$ref": "#/components/schemas/multipolygonGeoJSON"
+          },
+          {
+            "$ref": "#/components/schemas/geometrycollectionGeoJSON"
+          }
+        ]
+      },
+      "pointGeoJSON": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Point"
+            ]
+          },
+          "coordinates": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ]
+      },
+      "multipointGeoJSON": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MultiPoint"
+            ]
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ]
+      },
+      "linestringGeoJSON": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "LineString"
+            ]
+          },
+          "coordinates": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ]
+      },
+      "multilinestringGeoJSON": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MultiLineString"
+            ]
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ]
+      },
+      "polygonGeoJSON": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Polygon"
+            ]
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 4,
+              "items": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ]
+      },
+      "multipolygonGeoJSON": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MultiPolygon"
+            ]
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "minItems": 4,
+                "items": {
+                  "type": "array",
+                  "minItems": 2,
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ]
+      },
+      "geometrycollectionGeoJSON": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "GeometryCollection"
+            ]
+          },
+          "geometries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/geometryGeoJSON"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "geometries"
+        ]
+      },
+      "numberMatched": {
+        "type": "integer",
+        "description": "The number of features of the feature type that match the selection\nparameters like `bbox`.",
+        "minimum": 0,
+        "example": 127
+      },
+      "numberReturned": {
+        "type": "integer",
+        "description": "The number of features in the feature collection.\n\nA server may omit this information in a response, if the information\nabout the number of features is not known or difficult to compute.\n\nIf the value is provided, the value shall be identical to the number\nof items in the \"features\" array.",
+        "minimum": 0,
+        "example": 10
+      },
+      "exception400": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "description"
+        ],
+        "example": {
+          "code": "Bad Request",
+          "description": "Missing/Invalid parameters"
+        }
+      },
+      "exception500": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "description"
+        ],
+        "example": {
+          "code": "Internal Server Error",
+          "description": "Internal Server Error"
+        }
+      },
+      "tileMatrixSet-item": {
+        "type": "object",
+        "title": "Tile Matrix Set Item",
+        "description": "A minimal tile matrix set element for use within a list of tile matrix sets linking to a full definition.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Optional local tile matrix set identifier, e.g. for use as unspecified `{tileMatrixSetId}` parameter. Implementation of 'identifier'",
+            "example": "Tile-matrix-set-id-1"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of this tile matrix set, normally used for display to a human",
+            "example": "WebMercatorQuad Tile Matrix Set"
+          },
+          "uri": {
+            "type": "string",
+            "description": "Reference to an official source for this tileMatrixSet",
+            "format": "uri",
+            "example": "http://www.opengis.net/def/tilematrixset/OGC/1.0/WebMercatorQuad"
+          },
+          "crs": {
+            "allOf": [
+              {
+                "description": "Coordinate Reference System (CRS)"
+              },
+              {
+                "$ref": "#/components/schemas/crs"
+              }
+            ],
+            "example": "http://www.opengis.net/def/crs/EPSG/0/3857"
+          },
+          "links": {
+            "type": "array",
+            "description": "Links to related resources. A 'self' link to the tile matrix set definition is required.",
+            "items": {
+              "$ref": "#/components/schemas/link"
+            }
+          }
+        },
+        "required": [
+          "links"
+        ]
+      },
+      "crs": {
+        "title": "CRS",
+        "oneOf": [
+          {
+            "type": "string",
+            "description": "Simplification of the object into a url if the other properties are not present"
+          },
+          {
+            "type": "object",
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "uri": {
+                    "type": "string",
+                    "description": "Reference to one coordinate reference system (CRS)",
+                    "format": "uri"
+                  }
+                },
+                "required": [
+                  "uri"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "wkt": {
+                    "allOf": [
+                      {
+                        "description": "An object defining the CRS using the JSON encoding for Well-known text representation of coordinate reference systems 2.0"
+                      },
+                      {
+                        "type": "object"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "wkt"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "referenceSystem": {
+                    "type": "object",
+                    "description": "A reference system data structure as defined in the MD_ReferenceSystem of the ISO 19115"
+                  }
+                },
+                "required": [
+                  "referenceSystem"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "tileMatrixSet": {
+        "type": "object",
+        "title": "Tile Matrix Set Definition",
+        "description": "A definition of a tile matrix set following the Tile Matrix Set standard. For tileset metadata, such a description (in `tileMatrixSet` property) is only required for offline use, as an alternative to a link with a `http://www.opengis.net/def/rel/ogc/1.0/tiling-scheme` relation type.",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Title of this tile matrix set, normally used for display to a human",
+            "example": "WebMercatorQuad Tile Matrix Set"
+          },
+          "description": {
+            "type": "string",
+            "description": "Brief narrative description of this tile matrix set, normally available for display to a human",
+            "example": "Definition of the WebMercatorQuad TileMatrixSet"
+          },
+          "keywords": {
+            "type": "array",
+            "description": "Unordered list of one or more commonly used or formalized word(s) or phrase(s) used to describe this tile matrix set",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "string",
+            "description": "Tile matrix set identifier. Implementation of 'identifier'",
+            "example": "Tile-matrix-set-id-1"
+          },
+          "uri": {
+            "type": "string",
+            "description": "Reference to an official source for this tileMatrixSet",
+            "format": "uri",
+            "example": "http://www.opengis.net/def/tilematrixset/OGC/1.0/WebMercatorQuad"
+          },
+          "orderedAxes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "crs": {
+            "allOf": [
+              {
+                "description": "Coordinate Reference System (CRS)"
+              },
+              {
+                "$ref": "#/components/schemas/crs"
+              }
+            ],
+            "example": "http://www.opengis.net/def/crs/EPSG/0/3857"
+          },
+          "wellKnownScaleSet": {
+            "type": "string",
+            "description": "Reference to a well-known scale set",
+            "format": "uri",
+            "example": "http://www.opengis.net/def/wkss/OGC/1.0/GoogleMapsCompatible"
+          },
+          "tileMatrices": {
+            "type": "array",
+            "description": "Describes scale levels and its tile matrices",
+            "items": {
+              "type": "object",
+              "description": "A tile matrix, usually corresponding to a particular zoom level of a TileMatrixSet.",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Title of this tile matrix, normally used for display to a human"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Brief narrative description of this tile matrix set, normally available for display to a human"
+                },
+                "keywords": {
+                  "type": "array",
+                  "description": "Unordered list of one or more commonly used or formalized word(s) or phrase(s) used to describe this dataset",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "id": {
+                  "type": "string",
+                  "description": "Identifier selecting one of the scales defined in the TileMatrixSet and representing the scaleDenominator the tile. Implementation of 'identifier'"
+                },
+                "scaleDenominator": {
+                  "type": "number",
+                  "description": "Scale denominator of this tile matrix"
+                },
+                "cellSize": {
+                  "type": "number",
+                  "description": "Cell size of this tile matrix"
+                },
+                "cornerOfOrigin": {
+                  "enum": [
+                    "topLeft",
+                    "bottomLeft"
+                  ],
+                  "description": "The corner of the tile matrix (_topLeft_ or _bottomLeft_) used as the origin for numbering tile rows and columns. This corner is also a corner of the (0, 0) tile.",
+                  "default": "topLeft"
+                },
+                "pointOfOrigin": {
+                  "allOf": [
+                    {
+                      "description": "Precise position in CRS coordinates of the corner of origin (e.g. the top-left corner) for this tile matrix. This position is also a corner of the (0, 0) tile. In previous version, this was 'topLeftCorner' and 'cornerOfOrigin' did not exist."
+                    },
+                    {
+                      "$ref": "#/components/schemas/2DPoint"
+                    }
+                  ]
+                },
+                "tileWidth": {
+                  "type": "number",
+                  "description": "Width of each tile of this tile matrix in pixels",
+                  "format": "integer",
+                  "minimum": 1,
+                  "multipleOf": 1
+                },
+                "tileHeight": {
+                  "type": "number",
+                  "description": "Height of each tile of this tile matrix in pixels",
+                  "format": "integer",
+                  "minimum": 1,
+                  "multipleOf": 1
+                },
+                "matrixHeight": {
+                  "type": "number",
+                  "description": "Width of the matrix (number of tiles in width)",
+                  "format": "integer",
+                  "minimum": 1,
+                  "multipleOf": 1
+                },
+                "matrixWidth": {
+                  "type": "number",
+                  "description": "Height of the matrix (number of tiles in height)",
+                  "format": "integer",
+                  "minimum": 1,
+                  "multipleOf": 1
+                },
+                "variableMatrixWidths": {
+                  "type": "array",
+                  "description": "Describes the rows that has variable matrix width",
+                  "items": {
+                    "type": "object",
+                    "description": "Variable Matrix Width data structure",
+                    "properties": {
+                      "coalesce": {
+                        "type": "number",
+                        "description": "Number of tiles in width that coalesce in a single tile for these rows",
+                        "format": "integer",
+                        "minimum": 2,
+                        "multipleOf": 1
+                      },
+                      "minTileRow": {
+                        "type": "number",
+                        "description": "First tile row where the coalescence factor applies for this tilematrix",
+                        "format": "integer",
+                        "minimum": 0,
+                        "multipleOf": 1
+                      },
+                      "maxTileRow": {
+                        "type": "number",
+                        "description": "Last tile row where the coalescence factor applies for this tilematrix",
+                        "format": "integer",
+                        "minimum": 0,
+                        "multipleOf": 1
+                      }
+                    },
+                    "required": [
+                      "coalesce",
+                      "minTileRow",
+                      "maxTileRow"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "scaleDenominator",
+                "cellSize",
+                "pointOfOrigin",
+                "tileWidth",
+                "tileHeight",
+                "matrixHeight",
+                "matrixWidth"
+              ]
+            }
+          }
+        },
+        "required": [
+          "crs",
+          "tileMatrices"
+        ]
+      },
+      "2DPoint": {
+        "type": "array",
+        "description": "A 2D Point in the CRS indicated elsewhere",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+          "type": "number"
+        }
+      },
+      "tileSet-item": {
+        "type": "object",
+        "title": "Tile Set Metadata item",
+        "description": "A minimal tileset element for use within a list of tilesets linking to full description of those tilesets.",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "A title for this tileset",
+            "example": "TileSet Id #1"
+          },
+          "dataType": {
+            "allOf": [
+              {
+                "description": "Type of data represented in the tileset"
+              },
+              {
+                "$ref": "#/components/schemas/dataType"
+              }
+            ],
+            "example": "map"
+          },
+          "crs": {
+            "allOf": [
+              {
+                "description": "Coordinate Reference System (CRS)"
+              },
+              {
+                "$ref": "#/components/schemas/crs"
+              }
+            ],
+            "example": "http://www.opengis.net/def/crs/EPSG/0/3857"
+          },
+          "tileMatrixSetURI": {
+            "type": "string",
+            "description": "Reference to a Tile Matrix Set on an offical source for Tile Matrix Sets such as the OGC NA definition server (http://www.opengis.net/def/tms/). Required if the tile matrix set is registered on an open official source.",
+            "format": "uri",
+            "example": "http://www.opengis.net/def/tilematrixset/OGC/1.0/WebMercatorQuad"
+          },
+          "links": {
+            "type": "array",
+            "description": "Links to related resources. A 'self' link to the tileset as well as a 'http://www.opengis.net/def/rel/ogc/1.0/tiling-scheme' link to a definition of the TileMatrixSet are required.",
+            "items": {
+              "$ref": "#/components/schemas/link"
+            }
+          }
+        },
+        "required": [
+          "dataType",
+          "crs",
+          "links"
+        ]
+      },
+      "dataType": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "enum": [
+              "map",
+              "vector",
+              "coverage"
+            ]
+          }
+        ]
+      },
+      "tileSet": {
+        "type": "object",
+        "title": "Tile Set Metadata",
+        "description": "A resource describing a tileset based on the OGC TileSet Metadata Standard. At least one of the 'TileMatrixSet',  or a link with 'rel' http://www.opengis.net/def/rel/ogc/1.0/tiling-scheme",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "A title for this tileset",
+            "example": "TileSet Id #1"
+          },
+          "description": {
+            "type": "string",
+            "description": "Brief narrative description of this tile set"
+          },
+          "dataType": {
+            "allOf": [
+              {
+                "description": "Type of data represented in the tileset"
+              },
+              {
+                "$ref": "#/components/schemas/dataType"
+              }
+            ],
+            "example": "map"
+          },
+          "crs": {
+            "allOf": [
+              {
+                "description": "Coordinate Reference System (CRS)"
+              },
+              {
+                "$ref": "#/components/schemas/crs"
+              }
+            ],
+            "example": "http://www.opengis.net/def/crs/EPSG/0/3857"
+          },
+          "tileMatrixSetURI": {
+            "type": "string",
+            "description": "Reference to a Tile Matrix Set on an offical source for Tile Matrix Sets such as the OGC NA definition server (http://www.opengis.net/def/tms/). Required if the tile matrix set is registered on an open official source.",
+            "format": "uri",
+            "example": "http://www.opengis.net/def/tilematrixset/OGC/1.0/WebMercatorQuad"
+          },
+          "links": {
+            "type": "array",
+            "description": "Links to related resources. Possible link 'rel' values are: 'http://www.opengis.net/def/rel/ogc/1.0/dataset' for a URL pointing to the dataset, 'item' for a URL template to get a tile; 'alternate' for a URL pointing to another representation of the TileSetMetadata (e.g a TileJSON file); 'http://www.opengis.net/def/rel/ogc/1.0/tiling-scheme' for a definition of the TileMatrixSet; 'http://www.opengis.net/def/rel/ogc/1.0/geodata' for pointing to a single collection (if the tileset represents a single collection)",
+            "items": {
+              "$ref": "#/components/schemas/link"
+            }
+          },
+          "tileMatrixSetLimits": {
+            "type": "array",
+            "description": "Limits for the TileRow and TileCol values for each TileMatrix in the tileMatrixSet. If missing, there are no limits other that the ones imposed by the TileMatrixSet. If present the TileMatrices listed are limited and the rest not available at all",
+            "items": {
+              "$ref": "#/components/schemas/tileMatrixLimits"
+            }
+          }
+        },
+        "required": [
+          "dataType",
+          "crs",
+          "links"
+        ]
+      },
+      "tileMatrixLimits": {
+        "type": "object",
+        "title": "TileMatrixLimits",
+        "description": "The limits for an individual tile matrix of a TileSet's TileMatrixSet, as defined in the OGC 2D TileMatrixSet and TileSet Metadata Standard",
+        "properties": {
+          "tileMatrix": {
+            "type": "string"
+          },
+          "minTileRow": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "maxTileRow": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "minTileCol": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "maxTileCol": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "tileMatrix",
+          "minTileRow",
+          "maxTileRow",
+          "minTileCol",
+          "maxTileCol"
+        ]
+      },
+      "process": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/processSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "inputs": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/inputDescription"
+                }
+              },
+              "outputs": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/outputDescription"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "processList": {
+        "required": [
+          "links",
+          "processes"
+        ],
+        "type": "object",
+        "properties": {
+          "processes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/processSummary"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/processesLink"
+            }
+          }
+        }
+      },
+      "processSummary": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/descriptionType"
+          },
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "version"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "fd6ef7c5-b18c-48e6-94e3-81037706763d"
+              },
+              "version": {
+                "type": "string",
+                "example": "1.0.0"
+              },
+              "jobControlOptions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/jobControlOptions"
+                }
+              },
+              "outputTransmission": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/transmissionMode"
+                }
+              },
+              "links": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/processLink"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "descriptionType": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metadata": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/metadata"
+            }
+          },
+          "additionalParameters": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/metadata"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "parameters": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/additionalParameter"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "additionalParameter": {
+        "required": [
+          "name",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                {
+                  "type": "object"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          }
+        }
+      },
+      "jobControlOptions": {
+        "type": "string",
+        "enum": [
+          "sync-execute",
+          "async-execute",
+          "dismiss"
+        ]
+      },
+      "transmissionMode": {
+        "type": "string",
+        "default": "value",
+        "enum": [
+          "value",
+          "reference"
+        ]
+      },
+      "processLink": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "example": "${HOSTNAME}/processes/fd6ef7c5-b18c-48e6-94e3-81037706763d"
+          },
+          "rel": {
+            "type": "string",
+            "example": "self"
+          },
+          "type": {
+            "type": "string",
+            "example": "application/json"
+          },
+          "title": {
+            "type": "string",
+            "example": "Echo Process"
+          }
+        }
+      },
+      "processesLink": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "example": "${HOSTNAME}/processes?f=json"
+          },
+          "rel": {
+            "type": "string",
+            "example": "self"
+          },
+          "type": {
+            "type": "string",
+            "example": "application/json"
+          }
+        }
+      },
+      "inputDescription": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/descriptionType"
+          },
+          {
+            "required": [
+              "schema"
+            ],
+            "type": "object",
+            "properties": {
+              "minOccurs": {
+                "type": "integer",
+                "default": 1
+              },
+              "maxOccurs": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "default": 1
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "unbounded"
+                    ]
+                  }
+                ]
+              },
+              "schema": {
+                "$ref": "#/components/schemas/schema"
+              }
+            }
+          }
+        ]
+      },
+      "outputDescription": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/descriptionType"
+          },
+          {
+            "required": [
+              "schema"
+            ],
+            "type": "object",
+            "properties": {
+              "schema": {
+                "$ref": "#/components/schemas/schema"
+              }
+            }
+          }
+        ]
+      },
+      "schema": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/reference"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "multipleOf": {
+                "minimum": 0,
+                "exclusiveMinimum": true,
+                "type": "number"
+              },
+              "maximum": {
+                "type": "number"
+              },
+              "exclusiveMaximum": {
+                "type": "boolean",
+                "default": false
+              },
+              "minimum": {
+                "type": "number"
+              },
+              "exclusiveMinimum": {
+                "type": "boolean",
+                "default": false
+              },
+              "maxLength": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "minLength": {
+                "minimum": 0,
+                "type": "integer",
+                "default": 0
+              },
+              "pattern": {
+                "type": "string",
+                "format": "regex"
+              },
+              "maxItems": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "minItems": {
+                "minimum": 0,
+                "type": "integer",
+                "default": 0
+              },
+              "uniqueItems": {
+                "type": "boolean",
+                "default": false
+              },
+              "maxProperties": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "minProperties": {
+                "minimum": 0,
+                "type": "integer",
+                "default": 0
+              },
+              "required": {
+                "minItems": 1,
+                "uniqueItems": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "enum": {
+                "minItems": 1,
+                "uniqueItems": false,
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "array",
+                  "boolean",
+                  "integer",
+                  "number",
+                  "object",
+                  "string"
+                ]
+              },
+              "not": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/schema"
+                  },
+                  {
+                    "$ref": "#/components/schemas/reference"
+                  }
+                ]
+              },
+              "allOf": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/schema"
+                    },
+                    {
+                      "$ref": "#/components/schemas/reference"
+                    }
+                  ]
+                }
+              },
+              "oneOf": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/schema"
+                    },
+                    {
+                      "$ref": "#/components/schemas/reference"
+                    }
+                  ]
+                }
+              },
+              "anyOf": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/schema"
+                    },
+                    {
+                      "$ref": "#/components/schemas/reference"
+                    }
+                  ]
+                }
+              },
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/schema"
+                  },
+                  {
+                    "$ref": "#/components/schemas/reference"
+                  }
+                ]
+              },
+              "properties": {
+                "type": "object",
+                "additionalProperties": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/schema"
+                    },
+                    {
+                      "$ref": "#/components/schemas/reference"
+                    }
+                  ]
+                }
+              },
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/schema"
+                  },
+                  {
+                    "$ref": "#/components/schemas/reference"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ],
+                "default": true
+              },
+              "description": {
+                "type": "string"
+              },
+              "format": {
+                "type": "string"
+              },
+              "default": {
+                "type": "object"
+              },
+              "nullable": {
+                "type": "boolean",
+                "default": false
+              },
+              "readOnly": {
+                "type": "boolean",
+                "default": false
+              },
+              "writeOnly": {
+                "type": "boolean",
+                "default": false
+              },
+              "example": {
+                "type": "object"
+              },
+              "deprecated": {
+                "type": "boolean",
+                "default": false
+              },
+              "contentMediaType": {
+                "type": "string"
+              },
+              "contentEncoding": {
+                "type": "string"
+              },
+              "contentSchema": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      },
+      "reference": {
+        "required": [
+          "ref"
+        ],
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "format": "uri-reference"
+          }
+        }
+      },
+      "execute": {
+        "type": "object",
+        "properties": {
+          "inputs": {
+            "type": "object",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/inlineOrRefData"
+                }
+              ]
+            }
+          },
+          "response": {
+            "type": "string",
+            "default": "raw",
+            "enum": [
+              "raw",
+              "document"
+            ]
+          }
+        }
+      },
+      "inlineOrRefData": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/inputValueNoObject"
+          }
+        ]
+      },
+      "inputValueNoObject": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/inputValueNoObject"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "jobList": {
+        "required": [
+          "jobs",
+          "links"
+        ],
+        "type": "object",
+        "properties": {
+          "jobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/statusInfo"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/jobLinks"
+            }
+          }
+        }
+      },
+      "jobLinks": {
+        "required": [
+          "href"
+        ],
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "example": "${HOSTNAME}/jobs"
+          },
+          "rel": {
+            "type": "string",
+            "example": "self"
+          },
+          "type": {
+            "type": "string",
+            "example": "application/json"
+          },
+          "hreflang": {
+            "type": "string",
+            "example": "en"
+          },
+          "title": {
+            "type": "string",
+            "example": "Echo process"
+          }
+        }
+      },
+      "statusInfo": {
+        "required": [
+          "jobID",
+          "status",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "jobID": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "processId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "PROCESS"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/statusCode"
+          }
+        }
+      },
+      "statusCode": {
+        "type": "string",
+        "nullable": false,
+        "enum": [
+          "ACCEPTED",
+          "RUNNING",
+          "SUCCESSFUL",
+          "FAILED",
+          "DISMISSED"
+        ]
+      }
+    }
+  }
+}

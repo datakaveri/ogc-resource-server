@@ -1,0 +1,637 @@
+﻿{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.1",
+    "title": "DX Metering APIs",
+    "description": "DX Metering APIs for OGC/STAC Resource Server",
+    "contact": {
+      "name": "Integrated Geospatial Data-sharing Interface (GDI)",
+      "email": "info@iudx.org.in",
+      "url": "https://geospatial.org.in"
+    },
+    "license": {
+      "url": "https://opensource.org/license/apache-2-0",
+      "name": "Apache 2.0"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://ogc.iudx.io",
+      "description": "Development Server"
+    },
+    {
+      "url": "https://geoserver.dx.geospatial.org.in",
+      "description": "Production Server"
+    }
+  ],
+  "paths": {
+    "/ngsi-ld/v1/summary": {
+      "get": {
+        "tags": [
+          "Metering"
+        ],
+        "summary": "summary details",
+        "description": "Summary API is used to get summary details and count for a given resource within the given time frame. The consumer could provide `starttime` and `endtime` and get the frequency usage of the resources.",
+        "operationId": "summary",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "DX Auth token to process the request",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9\\/\\@\\.]*$",
+              "maxLength": 512
+            }
+          },
+          {
+            "$ref": "#/components/parameters/summary_starttime"
+          },
+          {
+            "$ref": "#/components/parameters/summary_endtime"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/summaryApiResponse"
+          },
+          "204": {
+            "description": "Empty Response"
+          },
+          "400": {
+            "$ref": "#/components/responses/summaryBadRequestErrorResponse400"
+          },
+          "401": {
+            "$ref": "#/components/responses/summaryBadRequestErrorResponse401"
+          }
+        }
+      }
+    },
+    "/ngsi-ld/v1/overview": {
+      "get": {
+        "tags": [
+          "Metering"
+        ],
+        "summary": "overview",
+        "description": "Overview API is used to get count based on month. Without parameter it will return last 12 months count data. This responds the number of times the API requests are made from OGC Resource Server within the given time frame when the user specifies `starttime` and `endtime`.",
+        "operationId": "overview",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "DX Auth token to process the request",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9\\/\\@\\.]*$",
+              "maxLength": 512
+            }
+          },
+          {
+            "$ref": "#/components/parameters/summary_starttime"
+          },
+          {
+            "$ref": "#/components/parameters/summary_endtime"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/overviewApiResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/summaryBadRequestErrorResponse400"
+          },
+          "401": {
+            "$ref": "#/components/responses/summaryBadRequestErrorResponse401"
+          }
+        }
+      }
+    },
+    "/ngsi-ld/v1/provider/audit": {
+      "get": {
+        "tags": [
+          "Metering"
+        ],
+        "summary": "provider search",
+        "description": "A provider could use `/provider/audit` API to get the detailed summary of the resources with the APIs associated with provider. The count query gives the sum total of calls by the provider to the OGC Resource Server when the user provides `count` in the options.",
+        "operationId": "provider/audit",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "DX Auth token to process the request",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9\\/\\@\\.]*$",
+              "maxLength": 512
+            }
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_options"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_id"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_api"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_timerel"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_time"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_endtime"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_consumer"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_providerId"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_offset"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/meteringApiResponse"
+          },
+          "204": {
+            "description": "Empty Response"
+          },
+          "400": {
+            "$ref": "#/components/responses/providerBadRequestErrorResponse400"
+          },
+          "401": {
+            "$ref": "#/components/responses/summaryBadRequestErrorResponse401"
+          }
+        }
+      }
+    },
+    "/ngsi-ld/v1/consumer/audit": {
+      "get": {
+        "tags": [
+          "Metering"
+        ],
+        "summary": "consumer search",
+        "description": "Consumer API can be used by a user to get detailed audit summary of all the APIs from OGC Resource Server when the user provides the required query parameters. This API could also give the total number of requests made to all the APIs from OGC Resource Server when the `option` is query parameter is count.",
+        "operationId": "consumer/audit",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "DX Auth token to process the request",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9\\/\\@\\.]*$",
+              "maxLength": 512
+            }
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_options"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_id"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_api"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_timerel"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_time"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_endtime"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_offset"
+          },
+          {
+            "$ref": "#/components/parameters/provider_audit_limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/meteringApiResponse"
+          },
+          "204": {
+            "description": "Empty Response"
+          },
+          "400": {
+            "$ref": "#/components/responses/providerBadRequestErrorResponse400"
+          },
+          "401": {
+            "$ref": "#/components/responses/summaryBadRequestErrorResponse401"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Metering",
+      "description": "Metering information available with the serverMetering APIs provide the ability to the user (Consumer/Provider) to query the audit data. Access Summary API is an extension of Metering API to provide summary and overview details."
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "DX-AAA-Token": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "A <b> valid Auth token </b> to process the request."
+      }
+    },
+    "parameters": {
+      "summary_starttime": {
+        "name": "starttime",
+        "in": "query",
+        "description": "This parameter specifies the <b>start time</b> for the summary-query in `ISO8601` format. <br/> Data exchange currently accepts `IST` and `UTC` time zones.",
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "summary_endtime": {
+        "name": "endtime",
+        "in": "query",
+        "description": "This parameter specifies the <b>end time</b> for the summary-query in `ISO8601` format. <br/> Data exchange currently accepts `IST` and `UTC` time zones.",
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "provider_audit_options": {
+        "name": "options",
+        "in": "header",
+        "description": "options parameter is used for obtaining the number of hits for a query",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "count"
+          ]
+        }
+      },
+      "provider_audit_id": {
+        "name": "id",
+        "in": "query",
+        "description": "id of the resource in catalogue",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "maxLength": 36
+        }
+      },
+      "provider_audit_api": {
+        "name": "api",
+        "in": "query",
+        "description": "Valid DX(Data exchange) api having base path as prefix appended to api",
+        "schema": {
+          "type": "string",
+          "maxLength": 512
+        }
+      },
+      "provider_audit_timerel": {
+        "name": "timerel",
+        "in": "query",
+        "description": "The temporal relation type of <b>timerel</b> to be performed.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "between"
+          ]
+        }
+      },
+      "provider_audit_time": {
+        "name": "time",
+        "in": "query",
+        "description": "This parameter specifies the <b>start time</b> for the temporal-query in `ISO8601` format. <br/> data exchange currently accepts `IST` and `UTC` time zones for the temporal query.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "provider_audit_endtime": {
+        "name": "endTime",
+        "in": "query",
+        "description": "This parameter specifies the <b>end time</b> for the temporal-query in `ISO8601` format. <br/> data exchange currently accepts `IST` and `UTC` time zones for the temporal query.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "provider_audit_consumer": {
+        "name": "consumer",
+        "in": "query",
+        "description": "Id of consumer",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "maxLength": 36
+        }
+      },
+      "provider_audit_providerId": {
+        "name": "providerId",
+        "in": "query",
+        "description": "Id of the provider",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "maxLength": 36
+        }
+      },
+      "provider_audit_offset": {
+        "name": "offset",
+        "in": "query",
+        "description": "This parameter specifies the <b>offset</b> for the read metering query. <br/> By default offset value is 0 and we can give offset value according our need.",
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        }
+      },
+      "provider_audit_limit": {
+        "name": "limit",
+        "in": "query",
+        "description": "This parameter specifies the <b>limit</b> for the read metering query. <br/> By default limit value is 2000 and we can give limit value according our need.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 2000
+        }
+      }
+    },
+    "responses": {
+      "summaryApiResponse": {
+        "description": "Summary details fetched successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "results": {
+                  "description": "An array of objects",
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              },
+              "example": {
+                "type": "urn:dx:rs:success",
+                "title": "success",
+                "results": [
+                  {
+                    "resourceid": "UUID",
+                    "resource_label": "description",
+                    "publisher": "pune-env-flood",
+                    "publisher_id": "UUID",
+                    "city": "pune",
+                    "count": 19
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "summaryBadRequestErrorResponse400": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "details": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "type": "urn:dx:rs:backend",
+                "title": "bad request",
+                "detail": "bad request"
+              }
+            }
+          }
+        }
+      },
+      "summaryBadRequestErrorResponse401": {
+        "description": "- Unauthorized - `token` invalid/expired\n- Unauthorized - `clientId` & `clientSecret` invalid/not match",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "details": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "type": "urn:dx:rs:invalidAuthorizationToken",
+                "title": "Not Authorized",
+                "detail": "Not Authorized"
+              }
+            }
+          }
+        }
+      },
+      "overviewApiResponse": {
+        "description": "Overview details fetched successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "results": {
+                  "description": "An array of objects",
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              },
+              "example": {
+                "type": "urn:dx:rs:success",
+                "title": "success",
+                "results": [
+                  {
+                    "month": "november",
+                    "year": "2022",
+                    "counts": 19
+                  },
+                  {
+                    "month": "december",
+                    "year": "2022",
+                    "counts": 156
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "getDataCountQuery": {
+        "description": "Count fetched successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "results": {
+                  "description": "An array of objects",
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              },
+              "example": {
+                "type": "urn:dx:rs:success",
+                "title": "success",
+                "results": [
+                  {
+                    "total": 1963
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "providerBadRequestErrorResponse400": {
+        "description": "Bad query - Missing/Invalid parameters",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "details": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "type": "urn:dx:rs:badRequest",
+                "title": "bad request",
+                "detail": "bad request"
+              }
+            }
+          }
+        }
+      },
+      "meteringApiResponse": {
+        "description": "Data fetched successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "results": {
+                  "description": "An array of objects",
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              },
+              "example": {
+                "type": "urn:dx:rs:success",
+                "title": "success",
+                "results": [
+                  {
+                    "id": "UUID",
+                    "api": "/{basePath}/entities",
+                    "userid": "15c7506f-c800-48d6-adeb-0542b03947c6",
+                    "epochtime": 1669385581658,
+                    "resourceid": "UUID",
+                    "isotime": "2022-11-25T19:43:01+05:30[Asia/Kolkata]",
+                    "providerid": "UUID",
+                    "size": 456,
+                    "time": "2022-11-25T14:13:01"
+                  }
+                ],
+                "limit": 2000,
+                "offset": 0,
+                "totalHits": 568
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
