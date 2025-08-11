@@ -2,8 +2,8 @@
   "openapi": "3.0.0",
   "info": {
     "version": "1.0.1",
-    "title": "OGC Compliant DX Resource Server",
-    "description": "OGC compliant Features and Common API definitions.\nIncludes Schema and Response Objects.\n\n <a href='/stac/api'>STAC API Documentation</a> \n\n <a href='/metering/api'>DX Metering API Documentation</a>",
+    "title": "OGC API GDI Resource Server",
+    "description": "OGC Features and Common API definitions.\nIncludes Schema and Response Objects.\n\n <a href='/stac/api'>STAC API Documentation</a> \n\n <a href='/metering/api'>DX Metering API Documentation</a>",
     "contact": {
       "name": "Integrated Geospatial Data-sharing Interface (GDI)",
       "email": "info@iudx.org.in",
@@ -27,7 +27,7 @@
           "Capabilities"
         ],
         "summary": "Landing page",
-        "description": "Landing page for the OGC compliant Resource Server.\nIt provides links to the API definition (link relations service-desc and service-doc), the Conformance declaration (path /conformance, link relation conformance), and the Feature Collections (path /collections, link relation data).\n",
+        "description": "Landing page for the OGC API Resource Server.\nIt provides links to the API definition (link relations service-desc and service-doc), the Conformance declaration (path /conformance, link relation conformance), and the Feature Collections (path /collections, link relation data).\n",
         "operationId": "getLandingPage",
         "responses": {
           "200": {
@@ -1291,8 +1291,8 @@
             "examples": {
               "default": {
                 "value": {
-                  "title": "OGC Compliant DX Geospatial Resource Server Landing Page",
-                  "description": "This landing page provides all the links as per the OGC compliance in JSON format",
+                  "title": "OGC API DX Geospatial Resource Server Landing Page",
+                  "description": "This landing page provides all the links as per the OGC standards in JSON format",
                   "links": [
                     {
                       "href": "${HOSTNAME}/",
@@ -1863,8 +1863,8 @@
           "links"
         ],
         "example": {
-          "title": "OGC Compliant DX Geospatial Resource Server Landing Page",
-          "description": "This landing page provides all the links as per the OGC compliance in JSON format",
+          "title": "OGC API DX Geospatial Resource Server Landing Page",
+          "description": "This landing page provides all the links as per the OGC standards in JSON format",
           "links": [
             {
               "href": "${HOSTNAME}/",
