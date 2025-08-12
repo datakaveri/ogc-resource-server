@@ -47,10 +47,10 @@ def fetch_resource_and_provider_metadata(resource_id):
 
     resource_result = resource_json["results"][0]
     output = {
-        "itemCreatedAt": resource_result.get("itemCreatedAt"),
-        "tags": resource_result.get("tags"),
-        "providerName": None,
-        "providerAdditionalInfo": None
+        "itemCreatedAt": resource_result.get("itemCreatedAt") or None,
+        "tags": resource_result.get("tags") or [],
+        "providerName": "",
+        "providerAdditionalInfo": ""
     }
 
     provider_id = resource_result.get("provider")
@@ -65,8 +65,8 @@ def fetch_resource_and_provider_metadata(resource_id):
             provider_json = provider_response.json()
             if provider_json.get("results"):
                 provider_result = provider_json["results"][0]
-                output["providerName"] = provider_result.get("name")
-                output["providerAdditionalInfo"] = provider_result.get("providerOrg", {}).get("additionalInfoURL")
+                output["providerName"] = provider_result.get("name") or ""
+                output["providerAdditionalInfo"] = provider_result.get("providerOrg", {}).get("additionalInfoURL") or ""
 
     return 200, output
 
@@ -91,8 +91,6 @@ SELECT
     END AS geometry
 FROM
     collections_details
-LEFT JOIN
-    collections_enclosure ON collections_details.id = collections_enclosure.collections_id
 JOIN
     collection_supported_crs ON collections_details.id = collection_supported_crs.collection_id
 JOIN
@@ -111,8 +109,6 @@ SELECT
     collections_details.id
 FROM
     collections_details
-LEFT JOIN
-    collections_enclosure ON collections_details.id = collections_enclosure.collections_id
 JOIN
     collection_supported_crs ON collections_details.id = collection_supported_crs.collection_id
 JOIN
@@ -139,6 +135,9 @@ def insert_into_collection_table(conn, data, table_name):
             print(f"Record with collection_id {data.get('id')} already exists. Skipping insert.")
             return
 
+        search_text = f"{data.get('title', '')} {data.get('description', '')} {data.get('providerName', '')} {' '.join(data.get('tags', []))}"
+
+
         insert_query = f"""
         INSERT INTO public."{table_name}" (
             created,
@@ -150,10 +149,12 @@ def insert_into_collection_table(conn, data, table_name):
             bbox,
             temporal,
             geometry,
-            collection_id
+            collection_id,
+            search_vector
         )
         VALUES (
-            %s, %s, %s, %s, %s, %s, %s, %s, ST_GeomFromWKB(%s, 4326), %s
+            %s, %s, %s, %s, %s, %s, %s, %s, ST_GeomFromWKB(%s, 4326), %s,
+             to_tsvector('english', %s)
         )
         """
 
@@ -167,7 +168,8 @@ def insert_into_collection_table(conn, data, table_name):
             data.get("bbox", []),
             data.get("temporal", []),
             bytes.fromhex(data["geometry"]) if data.get("geometry") else None,
-            data.get("id")
+            data.get("id"),
+            search_text
         )
 
         cursor.execute(insert_query, values)
