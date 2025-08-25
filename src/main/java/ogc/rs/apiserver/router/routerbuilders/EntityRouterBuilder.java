@@ -16,21 +16,30 @@ import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.AuthenticationHandler;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
+import java.util.List;
 import java.util.Set;
 import ogc.rs.apiserver.ApiServerVerticle;
+import ogc.rs.apiserver.authentication.handler.AAAJwtAuthHandler;
+import ogc.rs.apiserver.authentication.handler.KeycloakJwtAuthHandler;
+import ogc.rs.apiserver.authentication.util.ChainedJwtAuthHandler;
 import ogc.rs.apiserver.handlers.*;
 import ogc.rs.apiserver.util.OgcException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Abstract class to aid in configuration and building of routers using {@link RouterBuilder}.
  *
  */
 public abstract class EntityRouterBuilder {
+  private static final Logger LOGGER = LogManager.getLogger(EntityRouterBuilder.class);
 
   private static final Set<String> allowedHeaders =
       Set.of(HEADER_AUTHORIZATION, HEADER_CONTENT_LENGTH, HEADER_CONTENT_TYPE, HEADER_HOST, HEADER_ORIGIN,
@@ -62,15 +71,19 @@ public abstract class EntityRouterBuilder {
   public StacItemByIdAuthZHandler stacItemByIdAuthZHandler;
   public StacItemOnboardingAuthZHandler stacItemOnboardingAuthZHandler;
   public TokenLimitsEnforcementHandler tokenLimitsEnforcementHandler;
-
+  AuthenticationHandler keycloakJwtAuthHandler;
+  AuthenticationHandler aaaAuthHandler;
 
   EntityRouterBuilder(ApiServerVerticle apiServerVerticle, Vertx vertx, RouterBuilder routerBuilder,
-      JsonObject config) {
+                      JsonObject config) {
     this.apiServerVerticle = apiServerVerticle;
     this.vertx = vertx;
     this.routerBuilder = routerBuilder;
     this.config = config;
     tokenAuthenticationHandler = new DxTokenAuthenticationHandler(vertx, config);
+    /*TODO: jwtAuthProvider is needed here*/
+    keycloakJwtAuthHandler = new KeycloakJwtAuthHandler(config.getString("keycloakCertUrl"), config.getString("kcIss"), vertx);
+    aaaAuthHandler = new AAAJwtAuthHandler(config.getString("controlPanelCertUrl"), config.getString("controlPanelIssuer"), vertx);
     stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx);
     ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(vertx);
     tilesMeteringHandler = new TilesMeteringHandler(vertx, config);
@@ -93,13 +106,17 @@ public abstract class EntityRouterBuilder {
     }
 
     routerBuilder.setOptions(factoryOptions);
-    
+
+    AuthenticationHandler chainedAuth = new ChainedJwtAuthHandler(
+        List.of(keycloakJwtAuthHandler, aaaAuthHandler, tokenAuthenticationHandler));
+
+
     /*
      * Automatically adds the handler for any API that has the `security` block with
      * OAS_BEARER_SECURITY_SCHEME. See
      * https://swagger.io/docs/specification/authentication/bearer-authentication/
      */
-    routerBuilder.securityHandler(OAS_BEARER_SECURITY_SCHEME, tokenAuthenticationHandler);
+    routerBuilder.securityHandler(OAS_BEARER_SECURITY_SCHEME, chainedAuth);
     
     routerBuilder.rootHandler(
         CorsHandler.create().allowedHeaders(allowedHeaders).allowedMethods(allowedMethods));
