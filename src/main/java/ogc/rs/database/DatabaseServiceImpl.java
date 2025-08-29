@@ -1720,7 +1720,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                     if (!rows.iterator().hasNext()) {
                         ProcessException notFoundException = new ProcessException(
                                 404,
-                                "Process not found",
+                                "Not Found",
                                 "No process found with id: " + processId
                         );
                         promise.fail(notFoundException);

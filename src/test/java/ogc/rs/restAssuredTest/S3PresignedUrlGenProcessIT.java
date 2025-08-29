@@ -119,7 +119,7 @@ public class S3PresignedUrlGenProcessIT {
         .withCons(new JsonObject()).build();
 
     String url = sendExecutionRequest(processId, token, requestBody()).then().statusCode(200)
-        .body("status", equalTo(SUCCESSFUL.toString()))
+        .body("status", equalTo("successful"))
         .body("message", equalTo(S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE))
         .extract().jsonPath().get("S3PreSignedUrl");
     
@@ -142,7 +142,7 @@ public class S3PresignedUrlGenProcessIT {
         .withCons(new JsonObject()).build();
 
     String url = sendExecutionRequest(processId, token, requestBody()).then().statusCode(200)
-        .body("status", equalTo(SUCCESSFUL.toString()))
+        .body("status", equalTo("successful"))
         .body("message", equalTo(S3_PRE_SIGNED_URL_PROCESS_SUCCESS_MESSAGE))
         .extract().jsonPath().get("S3PreSignedUrl");
     
