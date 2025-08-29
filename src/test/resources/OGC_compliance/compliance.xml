@@ -3,4 +3,7 @@
 <properties version="1.0">
     <comment>Test run arguments</comment>
     <entry key="iut">http://jenkins-slave1:8443</entry>
+    <entry key="token">Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJzdWIiOiIwZmYzZDMwNi05NDAyLTQ0MzAtOGUxOC02Zjk1ZTRjMDNjOTciLCJhdWQiOiJvZ2MuaXVkeC5pbyIsInJvbGUiOiJwcm92aWRlciIsImlpZCI6InJzOm9nYy5pdWR4LmlvIiwiaXNzIjoiY29zLml1ZHguaW8iLCJleHAiOjIzODY0MTcyMjQsImlhdCI6MTc1NTY5NzIyNCwiY29ucyI6e319.0q8oTAmUBUW67IFCQJMltL_r_ZijY3xgV_Av7DNfnDgI22r1vFIzhIA5bNwHYJe2NRkPfRI34rQOvT-49zz6CA</entry>
+    <entry key="echoprocessid">550e8400-e29b-41d4-a716-446655440002</entry>
+    <entry key="processtestlimit">1</entry>
 </properties>

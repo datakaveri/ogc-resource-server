@@ -59,51 +59,103 @@ public class JobsServiceImpl implements JobsService {
     Promise<JsonObject> promise = Promise.promise();
     String userId = requestBody.getString("userId");
 
-    pgPool.withConnection(sqlClient ->
-            sqlClient.preparedQuery("SELECT * FROM jobs_table WHERE user_id = $1")
-                    .execute(Tuple.of(userId))
-                    .onSuccess(rows -> {
-                      if (!rows.iterator().hasNext()) {
-                        // No rows found for the given userId
-                        LOGGER.error("No jobs found for user ID: " + userId);
-                        promise.fail(Constants.processException404);
-                      } else {
-                        // Rows found, process each row
-                        JsonArray jobsArray = new JsonArray();
+      pgPool.withConnection(sqlClient ->
+              sqlClient.preparedQuery("SELECT * FROM jobs_table WHERE user_id = $1")
+                      .execute(Tuple.of(userId))
+                      .onSuccess(rows -> {
+                          if (!rows.iterator().hasNext()) {
+                              // No rows found for the given userId
+                              LOGGER.error("No jobs found for user ID: " + userId);
+                              promise.fail(Constants.processException404);
+                          } else {
+                              JsonArray jobsArray = new JsonArray();
 
-                        rows.forEach(row -> {
-                          JsonObject job = new JsonObject();
-                          job.put("processID", row.getUUID("process_id").toString());
-                          job.put("jobID", row.getUUID("id").toString());
-                          job.put("status", row.getString("status"));
-                          job.put("type", row.getString("type"));
-                          job.put("message", row.getString("message"));
-                          job.put("progress", row.getNumeric("progress"));
+                              rows.forEach(row -> {
+                                  JsonObject job = new JsonObject();
+                                  job.put("processID", row.getUUID("process_id").toString());
+                                  job.put("jobID", row.getUUID("id").toString());
 
-                          // Generate links for each job
-                          JsonArray links = new JsonArray();
-                          JsonObject link = new JsonObject();
-                          link.put("href", config.getString("hostName") + "/jobs/" + row.getUUID("id").toString());
-                          link.put("rel", "status");
-                          link.put("title", row.getJsonObject("input").getString("title"));
-                          link.put("type", "application/json");
-                          link.put("hreflang", "en");
-                          links.add(link);
+                                  // Convert status to lowercase to conform to OGC enum
+                                  String status = row.getString("status");
+                                  job.put("status", status != null ? status.toLowerCase() : "unknown");
 
-                          job.put("links", links);
-                          jobsArray.add(job);
-                        });
+                                  job.put("type", row.getString("type").toLowerCase());
+                                  String message = row.getString("message");
+                                  job.put("message", message != null ? message : "No message");
+                                  job.put("progress", row.getNumeric("progress").intValue());
 
-                        JsonObject response = new JsonObject();
-                        response.put("jobs", jobsArray);
-                        promise.complete(response);
-                      }
-                    })
-                    .onFailure(failureHandler -> {
-                      LOGGER.error("Failed to list jobs: " + failureHandler.toString());
-                      promise.fail(Constants.processException500);
-                    })
-    );
+                                  JsonArray links = new JsonArray();
+                                  JsonObject link = new JsonObject();
+                                  link.put("href", config.getString("hostName") + "/jobs/" + row.getUUID("id"));
+                                  link.put("rel", "status");
+                                  JsonObject input = row.getJsonObject("input");
+                                  String title = (input != null && input.getString("title") != null) ? input.getString("title") : "Job details";
+                                  link.put("title", title);
+                                  link.put("type", "application/json");
+                                  link.put("hreflang", "en");
+                                  links.add(link);
+
+                                  job.put("links", links);
+                                  jobsArray.add(job);
+                              });
+
+                              // Add OGC standard top-level links
+                              JsonArray topLevelLinks = new JsonArray();
+                              String baseUrl = config.getString("hostName");
+
+                              topLevelLinks.add(new JsonObject()
+                                      .put("href", baseUrl + "/jobs")
+                                      .put("rel", "self")
+                                      .put("type", "application/json")
+                                      .put("title", "This document"));
+
+                              topLevelLinks.add(new JsonObject()
+                                      .put("href", baseUrl + "/jobs?f=text/html")
+                                      .put("rel", "alternate")
+                                      .put("type", "text/html")
+                                      .put("title", "This document as HTML"));
+
+                              topLevelLinks.add(new JsonObject()
+                                      .put("href", baseUrl + "/api?f=application/json")
+                                      .put("rel", "service-desc")
+                                      .put("type", "application/json")
+                                      .put("title", "API definition for this endpoint as JSON"));
+
+                              topLevelLinks.add(new JsonObject()
+                                      .put("href", baseUrl + "/api?f=text/html")
+                                      .put("rel", "service-desc")
+                                      .put("type", "text/html")
+                                      .put("title", "API definition for this endpoint as HTML"));
+
+                              topLevelLinks.add(new JsonObject()
+                                      .put("href", baseUrl + "/conformance")
+                                      .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/conformance")
+                                      .put("type", "application/json")
+                                      .put("title", "OGC API - Processes conformance classes implemented by this server"));
+
+                              topLevelLinks.add(new JsonObject()
+                                      .put("href", baseUrl + "/processes")
+                                      .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/processes")
+                                      .put("type", "application/json")
+                                      .put("title", "Metadata about the processes"));
+
+                              topLevelLinks.add(new JsonObject()
+                                      .put("href", baseUrl + "/jobs")
+                                      .put("rel", "http://www.opengis.net/def/rel/ogc/1.0/job-list")
+                                      .put("title", "The endpoint for job monitoring"));
+
+                              JsonObject response = new JsonObject()
+                                      .put("jobs", jobsArray)
+                                      .put("links", topLevelLinks);
+
+                              promise.complete(response);
+                          }
+                      })
+                      .onFailure(failureHandler -> {
+                          LOGGER.error("Failed to list jobs: " + failureHandler.toString());
+                          promise.fail(Constants.processException500);
+                      })
+      );
     return promise.future();
   }
 

@@ -207,11 +207,42 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   public void executeJob(RoutingContext routingContext) {
     RequestParameters paramsFromOasValidation = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
-    JsonObject requestBody = paramsFromOasValidation.body().getJsonObject().getJsonObject("inputs");
-    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
-    requestBody.put("processId", paramsFromOasValidation.pathParameter("processId").getString())
-            .put("userId", authInfo.getString("userId"))
-            .put("role", authInfo.getString("role"));
+
+    // Add null checking for the request body
+    JsonObject bodyJson = null;
+    JsonObject requestBody = null;
+
+    try {
+      bodyJson = paramsFromOasValidation.body().getJsonObject();
+      if (bodyJson == null) {
+        throw new IllegalArgumentException("Request body is null or invalid");
+      }
+
+      requestBody = bodyJson.getJsonObject("inputs");
+      if (requestBody == null) {
+        throw new IllegalArgumentException("Missing 'inputs' field in request body");
+      }
+
+    } catch (Exception e) {
+      LOGGER.error("Invalid request body: {}", e.getMessage());
+
+      JsonObject error = new JsonObject()
+              .put("type", "Bad Request")
+              .put("title", "Invalid parameter")
+              .put("detail", "Request body is missing, malformed, or does not contain required 'inputs' field")
+              .put("status", 400);
+
+      routingContext.response()
+              .setStatusCode(400)
+              .putHeader("Content-Type", "application/json")
+              .end(error.encode());
+      return;
+    }
+
+      JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
+      requestBody.put("processId", paramsFromOasValidation.pathParameter("processId").getString())
+              .put("userId", authInfo.getString("userId"))
+              .put("role", authInfo.getString("role"));
 
     processService.run(requestBody, handler -> {
       if (handler.succeeded()) {
@@ -252,7 +283,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
     JsonObject requestBody = new JsonObject();
     requestBody.put("jobId", paramsFromOasValidation.pathParameter("jobId").getString())
-      .put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
+            .put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
 
     jobsService.getStatus(requestBody).onSuccess(handler -> {
       {
