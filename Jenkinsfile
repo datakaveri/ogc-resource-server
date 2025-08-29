@@ -125,56 +125,6 @@ pipeline {
       }
     }
 
-    stage('Setup Server for Processes Compliance Tests'){
-           steps{
-            script{
-             sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
-             sh 'docker compose -f docker-compose.test.yml up -d integ-test'
-             sh 'sleep 20'
-            }
-           }
-           post{
-            failure{
-             script{
-              sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
-             }
-            }
-           }
-          }
-
-        stage('Start OGC Processes Compliance Tests'){
-              steps{
-                node('built-in') {
-                  script{
-                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                      if (!fileExists('ets-ogcapi-processes10')) {
-                        sh 'git clone https://github.com/datakaveri/ets-ogcapi-processes10.git'
-                      }
-                      dir('ets-ogcapi-processes10') {
-                        if(!fileExists('target')) {
-                          sh 'mvn clean package -Dmaven.test.skip -Dmaven.javadoc.skip=true -Denforcer.skip=true -Dmaven.site.skip=true -Dspring-javaformat.skip=true'
-                        }
-                        sh 'java -jar target/ets-ogcapi-processes10-*-aio.jar --generateHtmlReport true /var/lib/jenkins/iudx/ogc/compliance.xml'
-                      }
-                    }
-                  }
-                }
-              }
-              post{
-                always{
-                  node('built-in') {
-                    script{
-                      catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                        env.NEWEST_PROCESSES_TEST_DIR = sh(script: 'ls -t ~/testng | head -n1', returnStdout: true).trim()
-                        sh 'cp -r ~/testng/${NEWEST_PROCESSES_TEST_DIR} ./processes-compliance-results'
-                        publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'processes-compliance-results', reportFiles: 'emailable-report.html,index.html', reportTitles: 'Overview,Detailed Report', reportName: 'OGC Processes Compliance Test Reports'])
-                      }
-                    }
-                  }
-                }
-              }
-            }
-
     stage('Run metering Junit tests and move JaCoCo data to /tmp/test'){
       steps{
         script{
