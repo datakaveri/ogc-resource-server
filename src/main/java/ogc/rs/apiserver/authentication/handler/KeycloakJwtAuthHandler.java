@@ -1,5 +1,7 @@
 package ogc.rs.apiserver.authentication.handler;
 
+import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
+
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import ogc.rs.apiserver.authentication.util.BearerTokenExtractor;
 import ogc.rs.apiserver.authentication.util.TokenIssuer;
+import ogc.rs.apiserver.util.AuthInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -96,6 +99,8 @@ public class KeycloakJwtAuthHandler implements AuthenticationHandler {
         .onComplete(ar -> {
           if (ar.succeeded()) {
             LOGGER.debug("auth successful for Keycloak JWT");
+            /* Creating auth info here and setting it in the routing context*/
+            ctx.put(USER_KEY, AuthInfo.map(ar.result().attributes().getJsonObject("accessToken")));
             ctx.setUser(ar.result());
             ctx.put("auth_failed", false);
             ctx.next();
@@ -107,8 +112,4 @@ public class KeycloakJwtAuthHandler implements AuthenticationHandler {
         });
   }
 
-  // Getter for jwtAuth if needed
-  public JWTAuth getJwtAuth() {
-    return jwtAuth;
-  }
 }

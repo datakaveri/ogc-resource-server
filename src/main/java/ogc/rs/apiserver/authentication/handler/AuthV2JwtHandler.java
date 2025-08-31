@@ -1,5 +1,7 @@
 package ogc.rs.apiserver.authentication.handler;
 
+import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
+
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
@@ -15,16 +17,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 import ogc.rs.apiserver.authentication.util.BearerTokenExtractor;
 import ogc.rs.apiserver.authentication.util.TokenIssuer;
+import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
+import ogc.rs.apiserver.util.AuthInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class AAAJwtAuthHandler implements AuthenticationHandler {
-  private static final Logger LOGGER = LogManager.getLogger(AAAJwtAuthHandler.class);
+public class AuthV2JwtHandler implements AuthenticationHandler {
+  private static final Logger LOGGER = LogManager.getLogger(AuthV2JwtHandler.class);
   private JWTAuth jwtAuth;
   private final String certUrl;
   private final WebClient client;
 
-  public AAAJwtAuthHandler(String certUrl, String issuer, Vertx vertx) {
+  public AuthV2JwtHandler(String certUrl, String issuer, Vertx vertx) {
     this.certUrl = certUrl;
     this.client =
         WebClient.create(
@@ -55,6 +59,7 @@ public class AAAJwtAuthHandler implements AuthenticationHandler {
             LOGGER.debug("Authentication successful for AAA JWT");
             ctx.setUser(ar.result());
             ctx.put("auth_failed", false);
+            ctx.put(USER_KEY, AuthInfo.map(ar.result().attributes().getJsonObject("accessToken")));
             ctx.next();
           } else {
             LOGGER.warn("Auth failed: {}", ar.cause().getMessage());

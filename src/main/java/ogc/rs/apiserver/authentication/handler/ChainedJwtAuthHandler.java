@@ -1,4 +1,4 @@
-package ogc.rs.apiserver.authentication.util;
+package ogc.rs.apiserver.authentication.handler;
 
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 public class ChainedJwtAuthHandler implements AuthenticationHandler {
   private static final Logger LOGGER = LogManager.getLogger(ChainedJwtAuthHandler.class);
   private final List<AuthenticationHandler> handlers;
-  // Constructor
+
   public ChainedJwtAuthHandler(List<AuthenticationHandler> handlers) {
     this.handlers = handlers;
   }
@@ -19,11 +19,17 @@ public class ChainedJwtAuthHandler implements AuthenticationHandler {
     verifyNext(ctx, 0);
   }
   private void verifyNext(RoutingContext ctx, int index) {
+    if(ctx.get("auth_error") != null && ctx.get("auth_error").toString().contains("token expired")) {
+      ctx.fail(new OgcException(401, "Invalid Token", "Token Expired"));
+      return;
+    }
+
     if (index >= handlers.size()) {
       LOGGER.debug("Authentication failed at all handlers, returning 401");
       ctx.fail(new OgcException(401, "Invalid Token", "Unauthorized"));
       return;
     }
+
     AuthenticationHandler handler = handlers.get(index);
     LOGGER.debug("Handling authentication with handler {}", handler.getClass().getSimpleName());
     handler.handle(ctx);
@@ -34,7 +40,7 @@ public class ChainedJwtAuthHandler implements AuthenticationHandler {
       verifyNext(ctx, index + 1); // try next handler
     }
   }
-  // Getter for handlers if needed
+
   public List<AuthenticationHandler> getHandlers() {
     return handlers;
   }

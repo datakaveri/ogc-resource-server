@@ -16,7 +16,6 @@ import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.AuthenticationHandler;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -26,9 +25,10 @@ import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import java.util.List;
 import java.util.Set;
 import ogc.rs.apiserver.ApiServerVerticle;
-import ogc.rs.apiserver.authentication.handler.AAAJwtAuthHandler;
+import ogc.rs.apiserver.authentication.handler.AuthV2JwtHandler;
 import ogc.rs.apiserver.authentication.handler.KeycloakJwtAuthHandler;
-import ogc.rs.apiserver.authentication.util.ChainedJwtAuthHandler;
+import ogc.rs.apiserver.authentication.handler.ChainedJwtAuthHandler;
+import ogc.rs.apiserver.authorization.CheckResourceAccess;
 import ogc.rs.apiserver.handlers.*;
 import ogc.rs.apiserver.util.OgcException;
 import org.apache.logging.log4j.LogManager;
@@ -73,7 +73,7 @@ public abstract class EntityRouterBuilder {
   public TokenLimitsEnforcementHandler tokenLimitsEnforcementHandler;
   AuthenticationHandler keycloakJwtAuthHandler;
   AuthenticationHandler aaaAuthHandler;
-
+  CheckResourceAccess resourceAccessHandler;
   EntityRouterBuilder(ApiServerVerticle apiServerVerticle, Vertx vertx, RouterBuilder routerBuilder,
                       JsonObject config) {
     this.apiServerVerticle = apiServerVerticle;
@@ -81,11 +81,14 @@ public abstract class EntityRouterBuilder {
     this.routerBuilder = routerBuilder;
     this.config = config;
     tokenAuthenticationHandler = new DxTokenAuthenticationHandler(vertx, config);
-    /*TODO: jwtAuthProvider is needed here*/
+
     keycloakJwtAuthHandler = new KeycloakJwtAuthHandler(config.getString("keycloakCertUrl"), config.getString("kcIss"), vertx);
-    aaaAuthHandler = new AAAJwtAuthHandler(config.getString("controlPanelCertUrl"), config.getString("controlPanelIssuer"), vertx);
-    stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx);
-    ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(vertx);
+    aaaAuthHandler = new AuthV2JwtHandler(config.getString("controlPanelCertUrl"), config.getString("controlPanelIssuer"), vertx);
+    resourceAccessHandler = new CheckResourceAccess(vertx, config.getInteger("controlPanelPort"),
+        config.getString("controlPanelHost"), config.getString("controlPanelSearchPath"));
+
+    stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx, resourceAccessHandler);
+    ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(vertx, resourceAccessHandler);
     tilesMeteringHandler = new TilesMeteringHandler(vertx, config);
     stacCollectionOnboardingAuthZHandler = new StacCollectionOnboardingAuthZHandler(vertx, config);
     stacItemByIdAuthZHandler = new StacItemByIdAuthZHandler(vertx);
