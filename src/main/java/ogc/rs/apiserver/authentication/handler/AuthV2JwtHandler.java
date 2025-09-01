@@ -17,17 +17,27 @@ import java.util.List;
 import java.util.stream.Collectors;
 import ogc.rs.apiserver.authentication.util.BearerTokenExtractor;
 import ogc.rs.apiserver.authentication.util.TokenIssuer;
-import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.AuthInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Authentication handler for AAA JWT tokens.
+ * Fetches JWKs from a remote endpoint and validates JWT tokens in incoming requests.
+ */
 public class AuthV2JwtHandler implements AuthenticationHandler {
   private static final Logger LOGGER = LogManager.getLogger(AuthV2JwtHandler.class);
   private JWTAuth jwtAuth;
   private final String certUrl;
   private final WebClient client;
 
+  /**
+   * Constructs the handler with the JWKs URL, issuer, and Vertx instance.
+   *
+   * @param certUrl JWKs endpoint URL
+   * @param issuer  expected JWT issuer
+   * @param vertx   Vertx instance
+   */
   public AuthV2JwtHandler(String certUrl, String issuer, Vertx vertx) {
     this.certUrl = certUrl;
     this.client =
@@ -41,6 +51,12 @@ public class AuthV2JwtHandler implements AuthenticationHandler {
           err.printStackTrace();
         });
   }
+  /**
+   * Handles authentication for incoming requests.
+   * Extracts the Bearer token, validates it, and sets user info in the context.
+   *
+   * @param ctx RoutingContext for the request
+   */
 
   @Override
   public void handle(RoutingContext ctx) {
@@ -59,7 +75,7 @@ public class AuthV2JwtHandler implements AuthenticationHandler {
             LOGGER.debug("Authentication successful for AAA JWT");
             ctx.setUser(ar.result());
             ctx.put("auth_failed", false);
-            ctx.put(USER_KEY, AuthInfo.map(ar.result().attributes().getJsonObject("accessToken")));
+            ctx.put(USER_KEY, AuthInfo.fromKeycloakOrAuthV2Token(ar.result().attributes().getJsonObject("accessToken")));
             ctx.next();
           } else {
             LOGGER.warn("Auth failed: {}", ar.cause().getMessage());
@@ -69,6 +85,11 @@ public class AuthV2JwtHandler implements AuthenticationHandler {
           }
         });
   }
+  /**
+   * Fetches JWK keys from the configured URL.
+   *
+   * @return Future with the JWKs JSON object
+   */
 
   public Future<JsonObject> fetchJwkKeys() {
     LOGGER.info("Fetching JWKs from {}", certUrl);
@@ -91,6 +112,13 @@ public class AuthV2JwtHandler implements AuthenticationHandler {
             });
   }
 
+  /**
+   * Refreshes the JWTAuth instance by fetching new JWKs and updating options.
+   *
+   * @param vertx  Vertx instance
+   * @param config configuration with issuer and expiry options
+   * @return Future with the initialized JWTAuth
+   */
   private Future<JWTAuth> refresh(Vertx vertx, JsonObject config) {
     return this.fetchJwkKeys().compose(jwk -> {
       List<JsonObject> keys = jwk.getJsonArray("keys").stream()

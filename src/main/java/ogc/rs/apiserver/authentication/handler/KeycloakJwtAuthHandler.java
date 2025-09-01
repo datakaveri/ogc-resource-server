@@ -21,12 +21,24 @@ import ogc.rs.apiserver.util.AuthInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Returns the list of chained handlers.
+ *
+ * @return list of AuthenticationHandlers
+ */
 public class KeycloakJwtAuthHandler implements AuthenticationHandler {
   private static final Logger LOGGER = LogManager.getLogger(KeycloakJwtAuthHandler.class);
   private JWTAuth jwtAuth;
   private final String certUrl;
   private final WebClient client;
 
+  /**
+   * Constructs the handler with the JWKs URL, issuer, and Vertx instance.
+   *
+   * @param certUrl JWKs endpoint URL
+   * @param issuer  expected JWT issuer
+   * @param vertx   Vertx instance
+   */
   public KeycloakJwtAuthHandler(String certUrl, String issuer, Vertx vertx) {
     this.certUrl = certUrl;
     this.client =
@@ -40,6 +52,12 @@ public class KeycloakJwtAuthHandler implements AuthenticationHandler {
           err.printStackTrace();
         });
   }
+
+  /**
+   * Fetches JWK keys from the configured Keycloak URL.
+   *
+   * @return Future with the JWKs JSON object
+   */
 
   public Future<JsonObject> fetchJwkKeys() {
     LOGGER.info("Fetching JWKs from {}", certUrl);
@@ -62,6 +80,13 @@ public class KeycloakJwtAuthHandler implements AuthenticationHandler {
             });
   }
 
+  /**
+   * Refreshes the JWTAuth instance by fetching new JWKs and updating options.
+   *
+   * @param vertx  Vertx instance
+   * @param config configuration with issuer and expiry options
+   * @return Future with the initialized JWTAuth
+   */
   private Future<JWTAuth> refresh(Vertx vertx, JsonObject config) {
     return this.fetchJwkKeys().compose(jwk -> {
       List<JsonObject> keys = jwk.getJsonArray("keys").stream()
@@ -85,6 +110,12 @@ public class KeycloakJwtAuthHandler implements AuthenticationHandler {
     });
   }
 
+  /**
+   * Handles authentication for incoming requests.
+   * Extracts the Bearer token, validates it, and sets user info in the context.
+   *
+   * @param ctx RoutingContext for the request
+   */
   @Override
   public void handle(RoutingContext ctx) {
     LOGGER.debug("Handling authentication for Keycloak JWT");
@@ -100,7 +131,7 @@ public class KeycloakJwtAuthHandler implements AuthenticationHandler {
           if (ar.succeeded()) {
             LOGGER.debug("auth successful for Keycloak JWT");
             /* Creating auth info here and setting it in the routing context*/
-            ctx.put(USER_KEY, AuthInfo.map(ar.result().attributes().getJsonObject("accessToken")));
+            ctx.put(USER_KEY, AuthInfo.fromKeycloakOrAuthV2Token(ar.result().attributes().getJsonObject("accessToken")));
             ctx.setUser(ar.result());
             ctx.put("auth_failed", false);
             ctx.next();

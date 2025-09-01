@@ -61,7 +61,6 @@ public class StacAssetsAuthZHandler implements Handler<RoutingContext> {
                         : asset.containsKey("collection_id")
                         ? asset.getString("collection_id")
                         : asset.getString("collections_id");
-                LOGGER.info("Whats the collectionId here {}", collectionId);
                 /* add collectionId in the routingContext */
                 RoutingContextHelper.addCollectionId(routingContext, collectionId);
                 if (resourceId!=null &&!user.isRsToken()

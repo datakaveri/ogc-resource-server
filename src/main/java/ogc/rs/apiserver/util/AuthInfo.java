@@ -44,7 +44,7 @@ public class AuthInfo {
     return user;
   }
 
-  public static AuthInfo map(JsonObject tokenDetails){
+  public static AuthInfo fromKeycloakOrAuthV2Token(JsonObject tokenDetails){
     AuthInfo user = new AuthInfo();
     user.userId = UUID.fromString(tokenDetails.getString("sub"));
     boolean isProvider = (tokenDetails.getJsonObject("realm_access").getJsonArray("roles").contains("provider"));

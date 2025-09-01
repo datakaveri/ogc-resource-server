@@ -7,6 +7,10 @@ import ogc.rs.apiserver.util.OgcException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Authentication handler that chains multiple AuthenticationHandlers.
+ * Tries each handler in order until one succeeds or all fail.
+ */
 public class ChainedJwtAuthHandler implements AuthenticationHandler {
   private static final Logger LOGGER = LogManager.getLogger(ChainedJwtAuthHandler.class);
   private final List<AuthenticationHandler> handlers;
@@ -14,10 +18,22 @@ public class ChainedJwtAuthHandler implements AuthenticationHandler {
   public ChainedJwtAuthHandler(List<AuthenticationHandler> handlers) {
     this.handlers = handlers;
   }
+  /**
+   * Handles authentication by delegating to the next handler in the chain.
+   *
+   * @param ctx RoutingContext for the request
+   */
   @Override
   public void handle(RoutingContext ctx) {
     verifyNext(ctx, 0);
   }
+
+  /**
+   * Recursively tries each handler in the chain.
+   *
+   * @param ctx   RoutingContext
+   * @param index current handler index
+   */
   private void verifyNext(RoutingContext ctx, int index) {
     if(ctx.get("auth_error") != null && ctx.get("auth_error").toString().contains("token expired")) {
       ctx.fail(new OgcException(401, "Invalid Token", "Token Expired"));
@@ -41,6 +57,11 @@ public class ChainedJwtAuthHandler implements AuthenticationHandler {
     }
   }
 
+  /**
+   * Returns the list of chained handlers.
+   *
+   * @return list of AuthenticationHandlers
+   */
   public List<AuthenticationHandler> getHandlers() {
     return handlers;
   }

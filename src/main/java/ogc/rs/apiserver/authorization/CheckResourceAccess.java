@@ -8,6 +8,9 @@ import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Utility class to check resource access by making a POST request to a control panel has_access endpoint.
+ */
 public class CheckResourceAccess {
   private static final Logger LOGGER = LogManager.getLogger(CheckResourceAccess.class);
   private final int port;
@@ -16,7 +19,14 @@ public class CheckResourceAccess {
   private final WebClient webClient;
   private WebClientOptions webClientOptions;
 
-
+  /**
+   * Constructs the access checker with endpoint details.
+   *
+   * @param vertx                  Vertx instance
+   * @param port                   control panel port
+   * @param controlPanelHost       control panel host
+   * @param controlPanelSearchPath control panel path
+   */
   public CheckResourceAccess(Vertx vertx, int port, String controlPanelHost, String controlPanelSearchPath) {
     this.port = port;
     this.controlPanelHost = controlPanelHost;
@@ -26,6 +36,13 @@ public class CheckResourceAccess {
     webClient = WebClient.create(vertx, webClientOptions);
   }
 
+  /**
+   * Checks if the given itemId is accessible using the provided token.
+   *
+   * @param itemId resource UUID to check
+   * @param token  Bearer token for authorization
+   * @return Future with true if resource access is granted, false otherwise
+   */
   public Future<Boolean> checkAccess(String itemId, String token) {
     return
         webClient
