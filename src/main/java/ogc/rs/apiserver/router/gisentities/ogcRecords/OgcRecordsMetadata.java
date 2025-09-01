@@ -115,7 +115,7 @@ public class OgcRecordsMetadata {
              .add(new JsonObject().put("$ref", "#/components/parameters/created"))
              .add(new JsonObject().put("$ref", "#/components/parameters/q"))
              .add(new JsonObject().put("$ref", "#/components/parameters/ids"))
-             .add(new JsonObject().put("$ref", "#/components/parameters/offset"))
+             .add(new JsonObject().put("$ref", "#/components/parameters/recordOffset"))
              .add(new JsonObject().put("$ref", "#/components/parameters/datetime"));
 
     recordItems.put("parameters", parameters);

@@ -1162,6 +1162,20 @@
           "default": 1
         }
       },
+      "recordOffset": {
+        "name": "offset",
+        "in": "query",
+        "description": "OGC Resource server also offers way to paginate the result for queries. \nIf a query returns large number of records then user can use additional parameters in query parameters to limit numbers of records \nto be returned.\n\nMinimum = 0. Maximum = 1000. Default = 10.",
+        "required": false,
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2000000,
+          "default": 1
+        }
+      },
       "collections": {
         "name": "collections",
         "in": "query",
