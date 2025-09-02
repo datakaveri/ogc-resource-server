@@ -21,6 +21,7 @@ public class CatalogueService {
   final int port;
   final String catBasePath;
   final String path;
+  final String catalogueItemPath;
 
   public CatalogueService(Vertx vertx, JsonObject config) {
     WebClientOptions options = new WebClientOptions();
@@ -30,6 +31,7 @@ public class CatalogueService {
     port = config.getInteger("catServerPort");
     this.catBasePath = config.getString("dxCatalogueBasePath");
     this.path = catBasePath + CAT_SEARCH_PATH;
+    this.catalogueItemPath = config.getString("catRequestItemsUri");
   }
 
   public Future<JsonObject> getCatItem(String id) {
@@ -63,6 +65,36 @@ public class CatalogueService {
 
         return promise.future();
     }
+
+  public Future<String> getCatalogueItemAccessPolicy(String itemId) {
+    LOGGER.debug("Calling catalogue item endpoint for id: {} ", itemId);
+    Promise<String> promise = Promise.promise();
+
+    catWebClient
+        .get(port, host, catalogueItemPath)
+        .addQueryParam("id", itemId)
+        .expect(ResponsePredicate.JSON)
+        .send(relHandler -> {
+          if (relHandler.succeeded()) {
+            JsonObject body = relHandler.result().bodyAsJsonObject();
+            JsonArray resultArray = body.getJsonArray("result");
+            if (resultArray != null && !resultArray.isEmpty()) {
+              JsonObject response = resultArray.getJsonObject(0);
+              String accessPolicy = response.getString("accessPolicy");
+              LOGGER.debug("Access policy for item {} is {}", itemId, accessPolicy);
+              promise.complete(accessPolicy);
+            } else {
+              LOGGER.debug("Item not found in catalogue : {}", itemId);
+              promise.fail("Item not found in catalogue : " + itemId);
+            }
+          } else {
+            LOGGER.debug("catalogue call to item api failed: " + relHandler.cause());
+            promise.fail("catalogue call to item api failed");
+          }
+        });
+
+    return promise.future();
+  }
 
     public Future<JsonObject> getCatItemUsingFilter(String id, String filter) {
         LOGGER.debug("get item for id: {} ", id);
