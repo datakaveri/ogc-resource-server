@@ -212,32 +212,40 @@ public class ApiServerVerticle extends AbstractVerticle {
     JsonObject bodyJson = null;
     JsonObject requestBody = null;
 
-    try {
-      bodyJson = paramsFromOasValidation.body().getJsonObject();
-      if (bodyJson == null) {
-        throw new IllegalArgumentException("Request body is null or invalid");
+      try {
+          bodyJson = paramsFromOasValidation.body().getJsonObject();
+          if (bodyJson == null) {
+              throw new OgcException(400, "InvalidParameterValue", "Request body is null or invalid");
+          }
+          requestBody = bodyJson.getJsonObject("inputs");
+          if (requestBody == null) {
+              throw new OgcException(400, "InvalidParameterValue", "Missing 'inputs' field in request body");
+          }
+      } catch (OgcException e) {
+          LOGGER.error("Invalid request body: {}", e.getMessage());
+          JsonObject error = new JsonObject()
+                  .put("type", "Bad Request")
+                  .put("title", "Invalid parameter")
+                  .put("detail", e.getMessage())
+                  .put("status", e.getStatusCode());
+          routingContext.response()
+                  .setStatusCode(e.getStatusCode())
+                  .putHeader("Content-Type", "application/json")
+                  .end(error.encode());
+          return;
+      } catch (Exception e) {
+          LOGGER.error("Unexpected error processing request body: {}", e.getMessage());
+          JsonObject error = new JsonObject()
+                  .put("type", "Internal Server Error")
+                  .put("title", "Processing Error")
+                  .put("detail", "An unexpected error occurred while processing the request")
+                  .put("status", 500);
+          routingContext.response()
+                  .setStatusCode(500)
+                  .putHeader("Content-Type", "application/json")
+                  .end(error.encode());
+          return;
       }
-
-      requestBody = bodyJson.getJsonObject("inputs");
-      if (requestBody == null) {
-        throw new IllegalArgumentException("Missing 'inputs' field in request body");
-      }
-
-    } catch (Exception e) {
-      LOGGER.error("Invalid request body: {}", e.getMessage());
-
-      JsonObject error = new JsonObject()
-              .put("type", "Bad Request")
-              .put("title", "Invalid parameter")
-              .put("detail", "Request body is missing, malformed, or does not contain required 'inputs' field")
-              .put("status", 400);
-
-      routingContext.response()
-              .setStatusCode(400)
-              .putHeader("Content-Type", "application/json")
-              .end(error.encode());
-      return;
-    }
 
       JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
       requestBody.put("processId", paramsFromOasValidation.pathParameter("processId").getString())
