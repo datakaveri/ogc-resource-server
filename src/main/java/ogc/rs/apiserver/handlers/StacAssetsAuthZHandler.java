@@ -7,15 +7,19 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.RoutingContext;
 import ogc.rs.apiserver.authentication.util.BearerTokenExtractor;
 import ogc.rs.apiserver.authorization.CheckResourceAccess;
+import ogc.rs.apiserver.authorization.util.AccessPolicy;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.AuthInfo;
+import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.UUID;
 
+import static ogc.rs.apiserver.authorization.util.AccessPolicy.OPEN;
+import static ogc.rs.apiserver.authorization.util.AccessPolicy.RESTRICTED;
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
@@ -25,10 +29,12 @@ public class StacAssetsAuthZHandler implements Handler<RoutingContext> {
   private static final Logger LOGGER = LogManager.getLogger(StacAssetsAuthZHandler.class);
   private final DatabaseService databaseService;
   private final CheckResourceAccess resourceAccessHandler;
+  private CatalogueService catalogueService;
 
-  public StacAssetsAuthZHandler(Vertx vertx, CheckResourceAccess resourceAccessHandler) {
+  public StacAssetsAuthZHandler(Vertx vertx, CheckResourceAccess resourceAccessHandler, CatalogueService catalogueService) {
     this.databaseService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
     this.resourceAccessHandler = resourceAccessHandler;
+    this.catalogueService = catalogueService;
   }
 
   /**
@@ -73,24 +79,27 @@ public class StacAssetsAuthZHandler implements Handler<RoutingContext> {
               LOGGER.debug("Collection ID in token validated.");
 
 
-                databaseService
-                    .getAccess(collectionId)
-                    .onSuccess(
-                        isOpenResource -> {
-                          user.setResourceId(UUID.fromString(collectionId));
-                          if (isOpenResource && user.isRsToken()) {
-                            LOGGER.debug("Resource is open, access granted.");
-                            routingContext.next();
-                          } else {
-                            handleSecureResource(routingContext, user, isOpenResource);
-                          }
-                        })
-                    .onFailure(
-                        failure -> {
-                          LOGGER.error(
-                              "Failed to retrieve collection access: {}", failure.getMessage());
-                          routingContext.fail(failure);
-                        });
+
+             Future<String> accessPolicyFuture =  catalogueService.getCatalogueItemAccessPolicy(RoutingContextHelper.getCollectionId(routingContext));
+             accessPolicyFuture.onSuccess(accessPolicy -> {
+                if(AccessPolicy.fromValue(accessPolicy).equalsPolicy(OPEN)){
+                  user.setResourceId(UUID.fromString(collectionId));
+                  LOGGER.debug("Resource is open, access granted.");
+                  routingContext.next();
+                }else if(AccessPolicy.fromValue(accessPolicy).equalsPolicy(RESTRICTED)){
+                  handleSecureResource(routingContext, user, false);
+                }
+                else {
+                    LOGGER.error("Access policy not recognized: {}", accessPolicy);
+                    routingContext.fail(new OgcException(500, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR));
+                }
+             }).onFailure(
+                 failure -> {
+                   LOGGER.error(
+                       "Failed to get collection access from catalogue: {}", failure.getMessage());
+                   routingContext.fail(new OgcException(500, INTERNAL_SERVER_ERROR, failure.getMessage()));
+                 });
+
               } catch (Exception e) {
                 LOGGER.error("Something went wrong here! {}",e.getMessage());
                 routingContext.fail(e.getCause());

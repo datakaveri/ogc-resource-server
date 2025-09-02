@@ -31,6 +31,7 @@ import ogc.rs.apiserver.authentication.handler.ChainedJwtAuthHandler;
 import ogc.rs.apiserver.authorization.CheckResourceAccess;
 import ogc.rs.apiserver.handlers.*;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -74,6 +75,7 @@ public abstract class EntityRouterBuilder {
   AuthenticationHandler keycloakJwtAuthHandler;
   AuthenticationHandler aaaAuthHandler;
   CheckResourceAccess resourceAccessHandler;
+  CatalogueService catalogueService;
   EntityRouterBuilder(ApiServerVerticle apiServerVerticle, Vertx vertx, RouterBuilder routerBuilder,
                       JsonObject config) {
     this.apiServerVerticle = apiServerVerticle;
@@ -86,8 +88,8 @@ public abstract class EntityRouterBuilder {
     aaaAuthHandler = new AuthV2JwtHandler(config.getString("controlPanelCertUrl"), config.getString("controlPanelIssuer"), vertx);
     resourceAccessHandler = new CheckResourceAccess(vertx, config.getInteger("controlPanelPort"),
         config.getString("controlPanelHost"), config.getString("controlPanelSearchPath"));
-
-    stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx, resourceAccessHandler);
+    catalogueService = new CatalogueService(vertx, config);
+    stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx, resourceAccessHandler,catalogueService);
     ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(vertx, resourceAccessHandler);
     tilesMeteringHandler = new TilesMeteringHandler(vertx, config);
     stacCollectionOnboardingAuthZHandler = new StacCollectionOnboardingAuthZHandler(vertx, config);
