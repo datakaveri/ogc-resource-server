@@ -162,7 +162,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                 Promise<Void> bboxPromise = Promise.promise();
 
                 if (queryBbox != null && tokenBbox != null) {
-                    // Use PostGIS to check bbox intersection
+                    // Use PostGIS to check if query bbox intersects token bbox using ST_Intersects
                     String sql = "SELECT ST_Intersects(" +
                             "ST_Transform(ST_MakeEnvelope(" + queryBbox + ", " + srid + "), 4326), " +
                             "ST_MakeEnvelope(" + tokenBbox + ", 4326)" +
@@ -173,8 +173,8 @@ public class DatabaseServiceImpl implements DatabaseService{
                             .onSuccess(rows -> {
                                 if (rows.iterator().hasNext()) {
                                     Row row = rows.iterator().next();
-                                    boolean intersects = row.getBoolean(0);
-                                    if (intersects) {
+                                    boolean isIntersecting = row.getBoolean(0);
+                                    if (isIntersecting) {
                                         LOGGER.debug("Both token bbox and query param bbox are getting intersected...");
                                         featureQuery.setBboxWhenTokenBboxExists(finalQueryBbox, finalTokenBbox, srid);
                                         bboxPromise.complete();
@@ -187,7 +187,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                                 }
                             })
                             .onFailure(err -> {
-                                LOGGER.debug("PostGIS intersection check failed: {}", err.getMessage());
+                                LOGGER.debug("PostGIS ST_Intersects check failed: {}", err.getMessage());
                                 bboxPromise.fail(err);
                             });
                 } else {
@@ -205,7 +205,7 @@ public class DatabaseServiceImpl implements DatabaseService{
             }
         });
 
-        // Enhanced feature limits handling with intersection check
+        // Feature limits handling with ST_Within check
         Future<Void> featLimitsFuture = bboxFuture.compose(v -> {
             // Check for feature limits from token
             if (limits != null && limits.getFeatLimit() != null && !limits.getFeatLimit().isEmpty()) {
@@ -219,38 +219,38 @@ public class DatabaseServiceImpl implements DatabaseService{
 
                 Promise<Void> featLimitsPromise = Promise.promise();
 
-                // Check if there's any intersection between request collection and token feature geometries
-                String intersectionCheckSql =
+                // Check if there are any features from request collection that are within token feature geometries
+                String withinCheckSql =
                         "SELECT EXISTS(" +
                                 "SELECT 1 FROM \"" + collectionId + "\" request_feature " +
                                 "JOIN \"" + tokenFeatCollectionId + "\" token_feature " +
-                                "ON ST_Intersects(request_feature.geom, token_feature.geom) " +
+                                "ON ST_Within(request_feature.geom, token_feature.geom) " +
                                 "WHERE token_feature.id IN (" + tokenFeatIds + ")" +
                                 ")";
 
-                LOGGER.debug("Feature intersection check SQL: {}", intersectionCheckSql);
+                LOGGER.debug("Feature ST_Within check SQL: {}", withinCheckSql);
 
-                client.query(intersectionCheckSql).execute()
+                client.query(withinCheckSql).execute()
                         .onSuccess(rows -> {
                             if (rows.iterator().hasNext()) {
                                 Row row = rows.iterator().next();
-                                boolean hasIntersection = row.getBoolean(0);
-                                if (hasIntersection) {
-                                    LOGGER.debug("Feature intersection found, proceeding with feature limits enforcement");
+                                boolean hasWithin = row.getBoolean(0);
+                                if (hasWithin) {
+                                    LOGGER.debug("Features within token boundaries found, proceeding with feature limits enforcement");
                                     // Set feature limits in the query builder
                                     featureQuery.setFeatLimits(tokenFeatCollectionId, tokenFeatIds);
                                     featLimitsPromise.complete();
                                 } else {
-                                    LOGGER.debug("No intersection found between request collection and token feature boundaries");
+                                    LOGGER.debug("No features found within the allowed token feature boundaries");
                                     featLimitsPromise.fail(new OgcException(403, "Forbidden",
                                             "Feature not found within the allowed feature boundaries"));
                                 }
                             } else {
-                                featLimitsPromise.fail("No result from feature intersection check.");
+                                featLimitsPromise.fail("No result from feature ST_Within check.");
                             }
                         })
                         .onFailure(err -> {
-                            LOGGER.error("Feature intersection check failed: {}", err.getMessage());
+                            LOGGER.error("Feature ST_Within check failed: {}", err.getMessage());
                             featLimitsPromise.fail(err);
                         });
 
@@ -427,7 +427,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         boolean hasBboxLimit = limits != null && limits.getBboxLimitAsList() != null && !limits.getBboxLimitAsList().isEmpty();
 
         if (hasFeatLimit) {
-            // Use spatial intersection with boundary collection
+            // Use ST_Within with boundary collection
             Map<String, List<String>> featLimits = limits.getFeatLimitAsMap();
             String boundaryCollectionId = featLimits.keySet().iterator().next();
             List<String> allowedFeatureIds = featLimits.get(boundaryCollectionId);
@@ -435,11 +435,11 @@ public class DatabaseServiceImpl implements DatabaseService{
 
             sqlBuilder.append("FROM \"").append(collectionId).append("\" AS request_feature ")
                     .append("JOIN \"").append(boundaryCollectionId).append("\" AS token_feature ")
-                    .append("ON ST_Intersects(request_feature.geom, token_feature.geom) ")
+                    .append("ON ST_Within(request_feature.geom, token_feature.geom) ")
                     .append("WHERE request_feature.id = $1::int ")
                     .append("AND token_feature.id IN (").append(featLimit).append(")");
         } else if (hasBboxLimit) {
-            // Only bbox filter
+            // Only bbox filter using ST_Within
             List<Double> bboxList = limits.getBboxLimitAsList();
             String tokenBbox = bboxList.stream()
                     .map(String::valueOf)
@@ -447,7 +447,7 @@ public class DatabaseServiceImpl implements DatabaseService{
 
             sqlBuilder.append("FROM \"").append(collectionId).append("\" AS request_feature ")
                     .append("WHERE request_feature.id = $1::int ")
-                    .append("AND ST_Intersects(ST_Transform(request_feature.geom, 4326), ST_MakeEnvelope(")
+                    .append("AND ST_Within(ST_Transform(request_feature.geom, 4326), ST_MakeEnvelope(")
                     .append(tokenBbox).append(", 4326))");
         } else {
             // No filters, just get the feature
