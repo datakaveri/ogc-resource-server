@@ -115,7 +115,7 @@ public class FeatureAttributesExtractionProcessIT {
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         sendExecutionRequest.then().statusCode(200)
                 .and().body("features", notNullValue())
-                .and().body("status", equalTo("SUCCESSFUL"))
+                .and().body("status", equalTo("successful"))
                 .and().body("features[0].properties.geom", nullValue())
                 .and().body("features[0].geom", nullValue());
     }
@@ -132,7 +132,7 @@ public class FeatureAttributesExtractionProcessIT {
                 .and().body("features[0].id", notNullValue())
                 .and().body("features[0].properties.NAME", notNullValue())
                 .and().body("features[0].properties.CONTINENT", notNullValue())
-                .and().body("status", equalTo("SUCCESSFUL"));
+                .and().body("status", equalTo("successful"));
     }
 
 }

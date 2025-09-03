@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import ogc.rs.apiserver.router.RouterManager;
 import ogc.rs.apiserver.util.Limits;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.apiserver.util.ProcessException;
 import ogc.rs.apiserver.util.StacItemSearchParams;
 import ogc.rs.database.util.FeatureQueryBuilder;
 import ogc.rs.database.util.RecordQueryBuilder;
@@ -1705,17 +1706,38 @@ public class DatabaseServiceImpl implements DatabaseService{
     executeQueryAndHandleResult(limit, promise, sqlQuery);
     return promise.future();
   }
-  @Override
-  public Future<JsonObject> getProcess(String processId) {
-    Promise<JsonObject> promise = Promise.promise();
-    String sqlQuery =
-      "SELECT version, id, title, description, mode AS \"jobControlOptions\", keywords, response AS \"outputTransmission\"," +
-        " input as inputs, output as outputs FROM " + PROCESSES_TABLE_NAME + " WHERE id=$1::UUID;";
-    executeQueryAndHandleResult(UUID.fromString(processId), promise, sqlQuery);
-    return promise.future();
-  }
+    @Override
+    public Future<JsonObject> getProcess(String processId) {
+        Promise<JsonObject> promise = Promise.promise();
+        String baseUrl = config.getString("hostName");
+        String sqlQuery =
+                "SELECT version, id, title, description, mode AS \"jobControlOptions\", keywords, response AS \"outputTransmission\"," +
+                        " input as inputs, output as outputs FROM " + PROCESSES_TABLE_NAME + " WHERE id=$1::UUID;";
 
-  private void executeQueryAndHandleResult(Object parameter, Promise<JsonObject> promise,
+        client.preparedQuery(sqlQuery)
+                .execute(Tuple.of(UUID.fromString(processId)))
+                .onSuccess(rows -> {
+                    if (!rows.iterator().hasNext()) {
+                        ProcessException notFoundException = new ProcessException(
+                                404,
+                                "Not Found",
+                                "No process found with id: " + processId
+                        );
+                        promise.fail(notFoundException);
+                    } else {
+                        Row row = rows.iterator().next();
+                        JsonObject processJson = row.toJson();
+                        JsonArray linkArray = createLinkArray(baseUrl, row);
+                        processJson.put("links", linkArray);
+                        promise.complete(processJson);
+                    }
+                })
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    private void executeQueryAndHandleResult(Object parameter, Promise<JsonObject> promise,
                                            String sqlQuery) {
     client.withConnection(
       conn -> conn.preparedQuery(sqlQuery).execute(Tuple.of(parameter)).onSuccess(rowSet -> {

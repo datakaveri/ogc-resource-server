@@ -48,7 +48,7 @@ public class ProcessesTestIT {
     String EXISTING_ID = "cc0eb191-7f66-4663-8afa-cfd644de5839";
     endpoint = endpoint.concat("/").concat(EXISTING_ID);
     Response response = requestSpecification.get(endpoint);
-    String idFromResponse = response.then().extract().body().path("processes[0].id");
+    String idFromResponse = response.then().extract().body().path("id");
 
     assertEquals(200, response.statusCode());
     assertEquals(EXISTING_ID, idFromResponse);

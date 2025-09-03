@@ -207,11 +207,50 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   public void executeJob(RoutingContext routingContext) {
     RequestParameters paramsFromOasValidation = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
-    JsonObject requestBody = paramsFromOasValidation.body().getJsonObject().getJsonObject("inputs");
-    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
-    requestBody.put("processId", paramsFromOasValidation.pathParameter("processId").getString())
-            .put("userId", authInfo.getString("userId"))
-            .put("role", authInfo.getString("role"));
+
+    // Add null checking for the request body
+    JsonObject bodyJson = null;
+    JsonObject requestBody = null;
+
+      try {
+          bodyJson = paramsFromOasValidation.body().getJsonObject();
+          if (bodyJson == null) {
+              throw new OgcException(400, "InvalidParameterValue", "Request body is null or invalid");
+          }
+          requestBody = bodyJson.getJsonObject("inputs");
+          if (requestBody == null) {
+              throw new OgcException(400, "InvalidParameterValue", "Missing 'inputs' field in request body");
+          }
+      } catch (OgcException e) {
+          LOGGER.error("Invalid request body: {}", e.getMessage());
+          JsonObject error = new JsonObject()
+                  .put("type", "Bad Request")
+                  .put("title", "Invalid parameter")
+                  .put("detail", e.getMessage())
+                  .put("status", e.getStatusCode());
+          routingContext.response()
+                  .setStatusCode(e.getStatusCode())
+                  .putHeader("Content-Type", "application/json")
+                  .end(error.encode());
+          return;
+      } catch (Exception e) {
+          LOGGER.error("Unexpected error processing request body: {}", e.getMessage());
+          JsonObject error = new JsonObject()
+                  .put("type", "Internal Server Error")
+                  .put("title", "Processing Error")
+                  .put("detail", "An unexpected error occurred while processing the request")
+                  .put("status", 500);
+          routingContext.response()
+                  .setStatusCode(500)
+                  .putHeader("Content-Type", "application/json")
+                  .end(error.encode());
+          return;
+      }
+
+      JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
+      requestBody.put("processId", paramsFromOasValidation.pathParameter("processId").getString())
+              .put("userId", authInfo.getString("userId"))
+              .put("role", authInfo.getString("role"));
 
     processService.run(requestBody, handler -> {
       if (handler.succeeded()) {
@@ -252,7 +291,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
     JsonObject requestBody = new JsonObject();
     requestBody.put("jobId", paramsFromOasValidation.pathParameter("jobId").getString())
-      .put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
+            .put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
 
     jobsService.getStatus(requestBody).onSuccess(handler -> {
       {
