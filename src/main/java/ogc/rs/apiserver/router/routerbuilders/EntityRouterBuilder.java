@@ -1,13 +1,6 @@
 package ogc.rs.apiserver.router.routerbuilders;
 
-import static ogc.rs.apiserver.util.Constants.HEADER_ACCEPT;
-import static ogc.rs.apiserver.util.Constants.HEADER_ALLOW_ORIGIN;
-import static ogc.rs.apiserver.util.Constants.HEADER_AUTHORIZATION;
-import static ogc.rs.apiserver.util.Constants.HEADER_CONTENT_LENGTH;
-import static ogc.rs.apiserver.util.Constants.HEADER_CONTENT_TYPE;
-import static ogc.rs.apiserver.util.Constants.HEADER_HOST;
-import static ogc.rs.apiserver.util.Constants.HEADER_ORIGIN;
-import static ogc.rs.apiserver.util.Constants.HEADER_REFERER;
+import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.OAS_BEARER_SECURITY_SCHEME;
 
 import io.vertx.core.Vertx;
@@ -17,18 +10,16 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.AuthenticationHandler;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
-import java.util.List;
 import java.util.Set;
 import ogc.rs.apiserver.ApiServerVerticle;
-import ogc.rs.apiserver.authentication.handler.AuthV2JwtHandler;
-import ogc.rs.apiserver.authentication.handler.KeycloakJwtAuthHandler;
-import ogc.rs.apiserver.authentication.handler.ChainedJwtAuthHandler;
-import ogc.rs.apiserver.authorization.CheckResourceAccess;
+import ogc.rs.apiserver.authentication.client.AclClient;
+import ogc.rs.apiserver.authentication.client.JwksResolver;
+import ogc.rs.apiserver.authentication.handler.MultiIssuerJwtAuthHandler;
+import ogc.rs.apiserver.authorization.AuthorizationHandler;
 import ogc.rs.apiserver.handlers.*;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.catalogue.CatalogueService;
@@ -40,14 +31,13 @@ import org.apache.logging.log4j.Logger;
  *
  */
 public abstract class EntityRouterBuilder {
+  public static final String API_DOC_FILE_PATH = "docs/apidoc.html";
   private static final Logger LOGGER = LogManager.getLogger(EntityRouterBuilder.class);
-
   private static final Set<String> allowedHeaders =
       Set.of(HEADER_AUTHORIZATION, HEADER_CONTENT_LENGTH, HEADER_CONTENT_TYPE, HEADER_HOST, HEADER_ORIGIN,
           HEADER_REFERER, HEADER_ACCEPT, HEADER_ALLOW_ORIGIN);
-
-  private static final Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
-  public static final String API_DOC_FILE_PATH = "docs/apidoc.html";
+  private static final Set<HttpMethod> allowedMethods =
+      Set.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
   private static final String OPENAPI_V3_JSON_CONTENT_TYPE = "application/vnd.oai.openapi+json;version=3.0";
   private static final String HTML_CONTENT_TYPE = "text/html";
 
@@ -61,8 +51,6 @@ public abstract class EntityRouterBuilder {
   public FailureHandler failureHandler = new FailureHandler();
 
   public RouterBuilder routerBuilder;
-  private JsonObject config;
-  private DxTokenAuthenticationHandler tokenAuthenticationHandler;
   public StacAssetsAuthZHandler stacAssetsAuthZHandler;
   public MeteringAuthZHandler meteringAuthZHandler = new MeteringAuthZHandler();
   public OgcFeaturesAuthZHandler ogcFeaturesAuthZHandler;
@@ -72,29 +60,27 @@ public abstract class EntityRouterBuilder {
   public StacItemByIdAuthZHandler stacItemByIdAuthZHandler;
   public StacItemOnboardingAuthZHandler stacItemOnboardingAuthZHandler;
   public TokenLimitsEnforcementHandler tokenLimitsEnforcementHandler;
-  AuthenticationHandler keycloakJwtAuthHandler;
-  AuthenticationHandler aaaAuthHandler;
-  CheckResourceAccess resourceAccessHandler;
+  AuthorizationHandler authorizationHandler;
   CatalogueService catalogueService;
+  AclClient aclClient;
+  private final JsonObject config;
+
   EntityRouterBuilder(ApiServerVerticle apiServerVerticle, Vertx vertx, RouterBuilder routerBuilder,
                       JsonObject config) {
     this.apiServerVerticle = apiServerVerticle;
     this.vertx = vertx;
     this.routerBuilder = routerBuilder;
     this.config = config;
-    tokenAuthenticationHandler = new DxTokenAuthenticationHandler(vertx, config);
-
-    keycloakJwtAuthHandler = new KeycloakJwtAuthHandler(config.getString("keycloakCertUrl"), config.getString("kcIss"), vertx);
-    aaaAuthHandler = new AuthV2JwtHandler(config.getString("controlPanelCertUrl"), config.getString("controlPanelIssuer"), vertx);
-    resourceAccessHandler = new CheckResourceAccess(vertx, config.getInteger("controlPanelPort"),
+    aclClient = new AclClient(vertx, config.getInteger("controlPanelPort"),
         config.getString("controlPanelHost"), config.getString("controlPanelSearchPath"));
     catalogueService = new CatalogueService(vertx, config);
-    stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx, resourceAccessHandler,catalogueService);
-    ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(vertx, resourceAccessHandler);
+    authorizationHandler = new AuthorizationHandler(catalogueService, aclClient);
+    stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx, catalogueService, aclClient);
+    ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(catalogueService, aclClient);
     tilesMeteringHandler = new TilesMeteringHandler(vertx, config);
-    stacCollectionOnboardingAuthZHandler = new StacCollectionOnboardingAuthZHandler(vertx, config);
-    stacItemByIdAuthZHandler = new StacItemByIdAuthZHandler(vertx);
-    stacItemOnboardingAuthZHandler = new StacItemOnboardingAuthZHandler(vertx);
+    stacCollectionOnboardingAuthZHandler = new StacCollectionOnboardingAuthZHandler(catalogueService);
+    stacItemByIdAuthZHandler = new StacItemByIdAuthZHandler(catalogueService, aclClient);
+    stacItemOnboardingAuthZHandler = new StacItemOnboardingAuthZHandler(catalogueService);
     tokenLimitsEnforcementHandler = new TokenLimitsEnforcementHandler(vertx);
   }
 
@@ -105,24 +91,26 @@ public abstract class EntityRouterBuilder {
 
     RouterBuilderOptions factoryOptions =
         new RouterBuilderOptions().setMountResponseContentTypeHandler(true);
-    
-    if(System.getProperty("disable.auth") != null) {
+
+    if (System.getProperty("disable.auth") != null) {
       factoryOptions.setRequireSecurityHandlers(false);
     }
 
     routerBuilder.setOptions(factoryOptions);
 
-    AuthenticationHandler chainedAuth = new ChainedJwtAuthHandler(
-        List.of(keycloakJwtAuthHandler, aaaAuthHandler, tokenAuthenticationHandler));
+    // Create JWKS resolver (reads config -> jwks URLs)
+    JwksResolver jwksResolver =
+        new JwksResolver(vertx, config.getJsonObject("issuers"));
 
+    MultiIssuerJwtAuthHandler authHandler = new MultiIssuerJwtAuthHandler(jwksResolver);
 
     /*
      * Automatically adds the handler for any API that has the `security` block with
      * OAS_BEARER_SECURITY_SCHEME. See
      * https://swagger.io/docs/specification/authentication/bearer-authentication/
      */
-    routerBuilder.securityHandler(OAS_BEARER_SECURITY_SCHEME, chainedAuth);
-    
+    routerBuilder.securityHandler(OAS_BEARER_SECURITY_SCHEME, authHandler);
+
     routerBuilder.rootHandler(
         CorsHandler.create().allowedHeaders(allowedHeaders).allowedMethods(allowedMethods));
     routerBuilder.rootHandler(BodyHandler.create());
@@ -152,9 +140,9 @@ public abstract class EntityRouterBuilder {
             routingContext -> {
               HttpServerResponse response = routingContext.response();
               String queryParam = routingContext.request().getParam("f");
-              
+
               String contentType;
-              
+
               if ("html".equals(queryParam)) {
                 contentType = HTML_CONTENT_TYPE;
               } else if ("json".equals(queryParam)) {
@@ -171,7 +159,7 @@ public abstract class EntityRouterBuilder {
                         "Invalid query param for OpenAPI spec format"));
                 return;
               }
-              
+
               response.putHeader("Content-type", contentType);
 
               if (HTML_CONTENT_TYPE.equals(contentType)) {
@@ -186,7 +174,7 @@ public abstract class EntityRouterBuilder {
                 } catch (Exception e) {
                   throw new RuntimeException(e);
                 }
-              } else if(OPENAPI_V3_JSON_CONTENT_TYPE.equals(contentType)) {
+              } else if (OPENAPI_V3_JSON_CONTENT_TYPE.equals(contentType)) {
                 response.send(oasJson.toBuffer());
               } else {
                 routingContext.fail(new OgcException(500, "Internal Error", "Internal Error"));

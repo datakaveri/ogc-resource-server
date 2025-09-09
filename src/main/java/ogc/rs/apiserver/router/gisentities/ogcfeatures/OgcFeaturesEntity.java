@@ -51,10 +51,11 @@ public class OgcFeaturesEntity implements GisEntityInterface {
 
     collectionSpecificOpIds.forEach(opId -> {
 
+      //TODO: add metering handler back in
       if (opId.matches(OgcFeaturesMetadata.OGC_GET_COLLECTION_ITEMS_OP_ID_REGEX)) {
         builder.operation(opId)
                 .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
-                .handler(ogcRouterBuilder.tokenLimitsEnforcementHandler)
+//                .handler(ogcRouterBuilder.tokenLimitsEnforcementHandler)
                 .handler(apiServerVerticle::auditAfterApiEnded)
                 .handler(apiServerVerticle::validateQueryParams)
                 .handler(apiServerVerticle::getFeatures)
@@ -65,7 +66,7 @@ public class OgcFeaturesEntity implements GisEntityInterface {
       } else if (opId.matches(OgcFeaturesMetadata.OGC_GET_SPECIFIC_FEATURE_OP_ID_REGEX)) {
             builder.operation(opId)
                     .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
-                    .handler(ogcRouterBuilder.tokenLimitsEnforcementHandler)
+//                    .handler(ogcRouterBuilder.tokenLimitsEnforcementHandler)
                     .handler(apiServerVerticle::auditAfterApiEnded)
                     .handler(apiServerVerticle::validateQueryParams)
                     .handler(apiServerVerticle::getFeature)
@@ -123,6 +124,10 @@ public class OgcFeaturesEntity implements GisEntityInterface {
               .getInteger(type.toString(), OgcFeaturesMetadata.OGC_LIMIT_PARAM_MAX_DEFAULT)));
       
       list.forEach(obj -> {
+        JsonObject oasBlock = obj.generateOgcOasBlock(geomSpecificMaxLimits);
+        LOGGER.debug("Generated OAS block:@@@@@@@@@@\n{}", oasBlock.encodePrettily());
+        LOGGER.info("hereee : {}", oasBlock);
+
         ogcFrags.add(obj.generateOgcOasBlock(geomSpecificMaxLimits));
       });
 

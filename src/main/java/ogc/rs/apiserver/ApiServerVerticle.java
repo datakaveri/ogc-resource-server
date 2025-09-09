@@ -13,7 +13,10 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.RequestParameters;
 import io.vertx.ext.web.validation.ValidationHandler;
-import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
+import ogc.rs.apiserver.authentication.util.DxUser;
+import ogc.rs.apiserver.authorization.model.Asset;
+import ogc.rs.apiserver.authorization.model.DxRole;
+import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.AuthInfo;
 import ogc.rs.apiserver.util.AuthInfo.RoleEnum;
 import ogc.rs.apiserver.util.Limits;
@@ -208,10 +211,11 @@ public class ApiServerVerticle extends AbstractVerticle {
   public void executeJob(RoutingContext routingContext) {
     RequestParameters paramsFromOasValidation = routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
     JsonObject requestBody = paramsFromOasValidation.body().getJsonObject().getJsonObject("inputs");
-    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
+    DxUser user = RoutingContextHelper.fromPrincipal(routingContext);
+    /* Assuming the role to be provider as the authz only allows providers */
     requestBody.put("processId", paramsFromOasValidation.pathParameter("processId").getString())
-            .put("userId", authInfo.getString("userId"))
-            .put("role", authInfo.getString("role"));
+            .put("userId", user.getSub().toString())
+            .put("role", DxRole.PROVIDER.toString());
 
     processService.run(requestBody, handler -> {
       if (handler.succeeded()) {
@@ -249,10 +253,11 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     RequestParameters paramsFromOasValidation =
       routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
-    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
+    DxUser user = RoutingContextHelper.fromPrincipal(routingContext);
     JsonObject requestBody = new JsonObject();
+    /* Assuming the role to be provider as the authz only allows providers */
     requestBody.put("jobId", paramsFromOasValidation.pathParameter("jobId").getString())
-      .put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
+      .put("userId", user.getSub().toString()).put("role", DxRole.PROVIDER.toString());
 
     jobsService.getStatus(requestBody).onSuccess(handler -> {
       {
@@ -266,9 +271,10 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   public void listAllJobs(RoutingContext routingContext) {
 
-    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
+    DxUser user = RoutingContextHelper.fromPrincipal(routingContext);
     JsonObject requestBody = new JsonObject();
-    requestBody.put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
+    /*Assuming the role is provider as the API only allows provider users to access it via authz handler*/
+    requestBody.put("userId", user.getSub().toString()).put("role", DxRole.PROVIDER.toString());
 
     jobsService.listAllJobs(requestBody).onSuccess(handler -> {
       {
@@ -283,10 +289,12 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     RequestParameters paramsFromOasValidation =
             routingContext.get(ValidationHandler.REQUEST_CONTEXT_KEY);
-    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
+
+    DxUser user = RoutingContextHelper.fromPrincipal(routingContext);
     JsonObject requestBody = new JsonObject();
+    /* Assuming the role to be provider as the authz only allows providers */
     requestBody.put("jobId", paramsFromOasValidation.pathParameter("jobId").getString())
-            .put("userId", authInfo.getString("userId")).put("role", authInfo.getString("role"));
+            .put("userId", user.getSub().toString()).put("role", DxRole.PROVIDER.toString());
 
     jobsService.retrieveJobResults(requestBody).onSuccess(handler -> {
       {
@@ -1437,8 +1445,8 @@ public class ApiServerVerticle extends AbstractVerticle {
         .onSuccess(stacItem -> {
               try {
                 // Retrieve user authentication info
-                AuthInfo userKey = routingContext.get(USER_KEY);
-                long expiry = (userKey != null) ? userKey.getExpiry() : 0;
+                DxUser userKey = RoutingContextHelper.fromPrincipal(routingContext);
+                long expiry = (userKey != null) ? userKey.getTokenExpiry() : 0;
                 boolean shouldCreate = routingContext.get(SHOULD_CREATE_KEY);
                 JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
                     allLinksInFeature
@@ -1999,9 +2007,14 @@ public class ApiServerVerticle extends AbstractVerticle {
               });
 
     } else {
-      requestBody.put("accessPolicy", routingContext.data().get("accessPolicy"));
-      requestBody.put("ownerUserId", routingContext.data().get("ownerUserId"));
-      requestBody.put("role", routingContext.data().get("role"));
+      String accessPolicy = RoutingContextHelper.getAsset(routingContext).getAccessPolicy();
+      DxUser user = RoutingContextHelper.fromPrincipal(routingContext);
+      String ownerUserId = user.getSub().toString();
+
+      requestBody.put("accessPolicy", accessPolicy);
+      requestBody.put("ownerUserId", ownerUserId);
+      /*Since this API is only meant for provider, and authorization is done, adding role as provider directly*/
+      requestBody.put("role", DxRole.PROVIDER.toString());
 
       dbService
           .postStacCollection(requestBody)
@@ -2229,9 +2242,11 @@ public class ApiServerVerticle extends AbstractVerticle {
       return Future.succeededFuture();
     }
 
-    AuthInfo authInfo = (AuthInfo) context.data().get(DxTokenAuthenticationHandler.USER_KEY);
-
-    String resourceId = authInfo.getResourceId().toString();
+    Asset asset = RoutingContextHelper.getAsset(context);
+    String resourceId = asset.getItemId();
+    DxUser user = RoutingContextHelper.fromPrincipal(context);
+    List<String> roles = user.getRoles();
+    boolean isProvider = roles.contains(DxRole.PROVIDER.toString());
 
     Promise<Void> promise = Promise.promise();
     JsonObject request = new JsonObject();
@@ -2240,48 +2255,34 @@ public class ApiServerVerticle extends AbstractVerticle {
     request.put(REQUEST_JSON, reqBody != null ? reqBody : new JsonObject());
 
     catalogueService
-        .getCatItem(resourceId)
+        .getCatalogueAsset(resourceId)
         .onComplete(
             relHandler -> {
               if (relHandler.succeeded()) {
-                JsonObject cacheResult = relHandler.result();
-                // Comment here , if we need type (item_type) then we can use this
-                /*String type =
-                cacheResult.containsKey(RESOURCE_GROUP) ? "RESOURCE" : "RESOURCE_GROUP";*/
-                String resourceGroup =
-                    cacheResult.containsKey(RESOURCE_GROUP)
-                        ? cacheResult.getString(RESOURCE_GROUP)
-                        : cacheResult.getString(ID);
-                String providerId = cacheResult.getString("provider");
-                RoleEnum role = authInfo.getRole();
-                RoleEnum drl = authInfo.getDelegatorRole();
-                if (RoleEnum.delegate.equals(role) && drl != null) {
-                  request.put(DELEGATOR_ID, authInfo.getDelegatorUserId().toString());
+                Asset cacheResult = relHandler.result();
+                String providerId = cacheResult.getProviderId();
+                if(isProvider) {
+                  request.put(DELEGATOR_ID, RoleEnum.provider.toString());
                 } else {
-                  request.put(DELEGATOR_ID, authInfo.getUserId().toString());
+                  request.put(DELEGATOR_ID, RoleEnum.consumer.toString());
                 }
-
                 ZonedDateTime zst = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
                 long epochTime = zst.toInstant().toEpochMilli();
                 String isoTime = zst.truncatedTo(ChronoUnit.SECONDS).toString();
                 long responseSize = context.response().bytesWritten();
                 String apiPath = context.request().path();
-
-                request.put(RESOURCE_GROUP, resourceGroup);
-                /*request.put(TYPE_KEY, type);*/
-                // Comment here , if we need type (item_type) then we can use this
                 request.put(EPOCH_TIME, epochTime);
                 request.put(ISO_TIME, isoTime);
-                request.put(USER_ID, authInfo.getUserId().toString());
-                request.put(ID, authInfo.getResourceId().toString());
+                request.put(USER_ID, user.getSub().toString());
+                request.put(ID, asset.getItemId());
                 request.put(API, apiPath);
                 request.put(RESPONSE_SIZE, responseSize);
                 request.put(PROVIDER_ID, providerId);
 
                 // Insert into PostgreSQL metering table
                 JsonObject postgresAuditPayload = new JsonObject()
-                        .put("user_id", authInfo.getUserId().toString())
-                        .put("collection_id", authInfo.getResourceId().toString())
+                        .put("user_id", user.getSub().toString())
+                        .put("collection_id", asset.getItemId())
                         .put("api_path", apiPath)
                         .put("timestamp", isoTime)
                         .put("resp_size", responseSize);

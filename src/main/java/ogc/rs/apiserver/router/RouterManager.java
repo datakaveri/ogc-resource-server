@@ -259,6 +259,7 @@ public class RouterManager {
 
     List<Future<Void>> updateInstancesFut = apiServerVerticleInstances.stream().map(instance -> {
 
+      // Hereeeeeeeeeeee
       Future<Router> ogc =
           OgcRouterBuilder.create(instance, vertx, config).map(OgcRouterBuilder::getRouter);
       Future<Router> stac =
