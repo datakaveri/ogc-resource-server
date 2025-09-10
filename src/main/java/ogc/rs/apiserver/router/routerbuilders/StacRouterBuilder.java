@@ -100,7 +100,7 @@ public class StacRouterBuilder extends EntityRouterBuilder {
 
     routerBuilder
         .operation(STAC_ITEM_BY_ID_API)
-//        .handler(stacItemByIdAuthZHandler)
+        .handler(stacItemByIdAuthZHandler)
         .handler(apiServerVerticle::getStacItemById)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)
