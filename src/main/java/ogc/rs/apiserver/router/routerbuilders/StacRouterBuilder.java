@@ -108,7 +108,7 @@ public class StacRouterBuilder extends EntityRouterBuilder {
 
     routerBuilder
         .operation(STAC_ITEMS_POST_API)
-//        .handler(stacItemOnboardingAuthZHandler)
+        .handler(stacItemOnboardingAuthZHandler)
         .handler(apiServerVerticle::createStacItems)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)
@@ -116,7 +116,7 @@ public class StacRouterBuilder extends EntityRouterBuilder {
 
     routerBuilder
         .operation(STAC_ITEMS_PATCH_API)
-//        .handler(stacItemOnboardingAuthZHandler)
+        .handler(stacItemOnboardingAuthZHandler)
         .handler(apiServerVerticle::updateStacItem)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)
@@ -124,7 +124,7 @@ public class StacRouterBuilder extends EntityRouterBuilder {
 
     routerBuilder
         .operation(STAC_ITEMS_DELETE_API)
-//        .handler(stacItemOnboardingAuthZHandler)
+        .handler(stacItemOnboardingAuthZHandler)
         .handler(apiServerVerticle::deleteStacItem)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)
