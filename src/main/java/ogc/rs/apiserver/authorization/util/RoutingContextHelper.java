@@ -7,9 +7,13 @@ import java.util.List;
 import java.util.UUID;
 import ogc.rs.apiserver.authentication.util.DxUser;
 import ogc.rs.apiserver.authorization.model.Asset;
+import ogc.rs.apiserver.handlers.StacItemByIdAuthZHandler;
 import ogc.rs.apiserver.util.OgcException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class RoutingContextHelper {
+  private static final Logger LOGGER = LogManager.getLogger(RoutingContextHelper.class);
 
   public static void addCollectionId(RoutingContext routingContext, String collectionId) {
     routingContext.put("collectionId", collectionId);
@@ -61,7 +65,11 @@ public class RoutingContextHelper {
     } catch (IllegalArgumentException | NullPointerException e) {
       throw new OgcException(401,"Unauthorized","Invalid or missing 'sub' UUID in token");
     }
-    Long tokenExpiry = principal.getLong("exp");
+    Long tokenExpiry = ctx.user().attributes().getLong("exp");
+
+    if (tokenExpiry == null) {
+      throw new OgcException(401, "Unauthorized", "Missing 'exp' in token");
+    }
 
     return new DxUser(
         roles,

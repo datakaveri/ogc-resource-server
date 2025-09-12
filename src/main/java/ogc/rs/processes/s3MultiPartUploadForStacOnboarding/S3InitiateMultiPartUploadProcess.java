@@ -13,6 +13,7 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
@@ -67,12 +68,12 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
      * @param s3conf          S3 config of the bucket to be operated upon.
      * @param vertx           The Vertx instance for asynchronous operations.
      */
-    public S3InitiateMultiPartUploadProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx) {
+    public S3InitiateMultiPartUploadProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx, CatalogueInterface catalogueService) {
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.s3conf = s3conf;
         this.dataFromS3 = new DataFromS3(vertx.createHttpClient(new HttpClientOptions().setShared(true)), s3conf);
-        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
+        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx, catalogueService);
 
         // Initialize S3 Client & S3 Presigner
         this.s3Client = S3Client.builder()

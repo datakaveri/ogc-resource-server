@@ -22,6 +22,7 @@ import ogc.rs.apiserver.util.AuthInfo.RoleEnum;
 import ogc.rs.apiserver.util.Limits;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.StacItemSearchParams;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3BucketReadAccess;
@@ -90,7 +91,7 @@ import static ogc.rs.metering.util.MeteringConstant.*;
 public class ApiServerVerticle extends AbstractVerticle {
   private static final Logger LOGGER = LogManager.getLogger(ApiServerVerticle.class);
   private S3ConfigsHolder s3conf;
-  CatalogueService catalogueService;
+  private CatalogueInterface catalogueService;
   MeteringService meteringService;
   private Router router;
   private String ogcBasePath;
@@ -121,7 +122,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     ogcBasePath = config().getString("ogcBasePath");
     hostName = config().getString("hostName");
 
-    catalogueService = new CatalogueService(vertx, config());
+    catalogueService = CatalogueInterface.createProxy(vertx, CATALOGUE_SERVICE_ADDRESS);
     meteringService = MeteringService.createProxy(vertx, METERING_SERVICE_ADDRESS);
 
     /* Initialize OGC landing page buffer - since configured hostname needs to be in it */
@@ -215,7 +216,8 @@ public class ApiServerVerticle extends AbstractVerticle {
     /* Assuming the role to be provider as the authz only allows providers */
     requestBody.put("processId", paramsFromOasValidation.pathParameter("processId").getString())
             .put("userId", user.getSub().toString())
-            .put("role", DxRole.PROVIDER.toString());
+            .put("role", DxRole.PROVIDER.toString())
+             .put("user", user.toJson());
 
     processService.run(requestBody, handler -> {
       if (handler.succeeded()) {

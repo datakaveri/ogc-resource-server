@@ -1,6 +1,7 @@
 package ogc.rs.apiserver.router.routerbuilders;
 
 import static ogc.rs.apiserver.util.Constants.*;
+import static ogc.rs.common.Constants.CATALOGUE_SERVICE_ADDRESS;
 import static ogc.rs.common.Constants.OAS_BEARER_SECURITY_SCHEME;
 
 import io.vertx.core.Vertx;
@@ -22,6 +23,7 @@ import ogc.rs.apiserver.authentication.handler.MultiIssuerJwtAuthHandler;
 import ogc.rs.apiserver.authorization.AuthorizationHandler;
 import ogc.rs.apiserver.handlers.*;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.catalogue.CatalogueService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,14 +56,14 @@ public abstract class EntityRouterBuilder {
   public StacAssetsAuthZHandler stacAssetsAuthZHandler;
   public MeteringAuthZHandler meteringAuthZHandler = new MeteringAuthZHandler();
   public OgcFeaturesAuthZHandler ogcFeaturesAuthZHandler;
-  public ProcessAuthZHandler processAuthZHandler = new ProcessAuthZHandler();
+  public ProcessAuthZHandler processAuthZHandler ;
   public TilesMeteringHandler tilesMeteringHandler;
   public StacCollectionOnboardingAuthZHandler stacCollectionOnboardingAuthZHandler;
   public StacItemByIdAuthZHandler stacItemByIdAuthZHandler;
   public StacItemOnboardingAuthZHandler stacItemOnboardingAuthZHandler;
   public TokenLimitsEnforcementHandler tokenLimitsEnforcementHandler;
   AuthorizationHandler authorizationHandler;
-  CatalogueService catalogueService;
+  CatalogueInterface catalogueService;
   AclClient aclClient;
   private final JsonObject config;
 
@@ -73,7 +75,7 @@ public abstract class EntityRouterBuilder {
     this.config = config;
     aclClient = new AclClient(vertx, config.getInteger("controlPanelPort"),
         config.getString("controlPanelHost"), config.getString("controlPanelSearchPath"));
-    catalogueService = new CatalogueService(vertx, config);
+    catalogueService = CatalogueInterface.createProxy(vertx, CATALOGUE_SERVICE_ADDRESS);
     authorizationHandler = new AuthorizationHandler(catalogueService, aclClient);
     stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx, catalogueService, aclClient);
     ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(catalogueService, aclClient);
@@ -81,6 +83,7 @@ public abstract class EntityRouterBuilder {
     stacCollectionOnboardingAuthZHandler = new StacCollectionOnboardingAuthZHandler(catalogueService);
     stacItemByIdAuthZHandler = new StacItemByIdAuthZHandler(catalogueService, aclClient);
     stacItemOnboardingAuthZHandler = new StacItemOnboardingAuthZHandler(catalogueService);
+    processAuthZHandler = new ProcessAuthZHandler(catalogueService);
     tokenLimitsEnforcementHandler = new TokenLimitsEnforcementHandler(vertx);
   }
 

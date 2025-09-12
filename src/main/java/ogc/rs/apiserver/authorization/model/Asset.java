@@ -3,6 +3,7 @@ package ogc.rs.apiserver.authorization.model;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
+import java.util.List;
 
 @DataObject
 @JsonGen
@@ -14,6 +15,8 @@ public class Asset {
   String organizationId;
   String shortDescription;
   String accessPolicy;
+  String createdAt;
+  List<String> tags;
 
   public Asset() {
   }
@@ -36,6 +39,8 @@ public class Asset {
     this.organizationId = other.getOrganizationId();
     this.shortDescription = other.getShortDescription();
     this.accessPolicy = other.getAccessPolicy();
+    this.tags = other.getTags();
+    this.createdAt = other.getCreatedAt();
   }
 
   public String getOrganizationId() {
@@ -101,6 +106,24 @@ public class Asset {
     return this;
   }
 
+  public List<String> getTags() {
+    return tags;
+  }
+
+  public Asset setTags(List<String> tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  public String getCreatedAt() {
+    return createdAt;
+  }
+
+  public Asset setCreatedAt(String createdAt) {
+    this.createdAt = createdAt;
+    return this;
+  }
+
   @Override
   public String toString() {
     return "Asset{" +
@@ -111,6 +134,8 @@ public class Asset {
         ", organizationId='" + organizationId + '\'' +
         ", shortDescription='" + shortDescription + '\'' +
         ", accessPolicy='" + accessPolicy + '\'' +
+        ", tags = '" + tags + '\'' +
+        ", createdAt = '" + createdAt + "'" +
         '}';
   }
 }

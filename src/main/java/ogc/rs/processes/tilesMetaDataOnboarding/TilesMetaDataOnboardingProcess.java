@@ -11,6 +11,8 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
+import ogc.rs.catalogue.CatalogueInterface;
+import ogc.rs.catalogue.CatalogueService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.math.BigInteger;
@@ -55,11 +57,12 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      * @param config       Configuration JSON object containing database and other settings
      * @param s3conf       The S3Config instance i.e. config to access bucket requested in process input.
      * @param vertx        Vert.x instance for asynchronous event-driven programming
+     *
      */
-    public TilesMetaDataOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx){
+    public TilesMetaDataOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx, CatalogueInterface catalogueService){
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
-        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
+        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx, catalogueService);
         this.dataFromS3 = new DataFromS3(vertx.createHttpClient(new HttpClientOptions().setShared(true)), s3conf);
 
     }

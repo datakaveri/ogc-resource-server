@@ -11,6 +11,7 @@ import ogc.rs.apiserver.authorization.model.DxRole;
 import ogc.rs.apiserver.authorization.util.AccessPolicy;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.catalogue.CatalogueService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,11 +19,11 @@ import org.apache.logging.log4j.Logger;
 public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LogManager.getLogger(OgcFeaturesAuthZHandler.class);
-  private final CatalogueService catalogueService;
+  private final CatalogueInterface catalogueService;
   private final AclClient aclClient;
   Vertx vertx;
 
-  public OgcFeaturesAuthZHandler(CatalogueService catalogueService, AclClient aclClient) {
+  public OgcFeaturesAuthZHandler(CatalogueInterface catalogueService, AclClient aclClient) {
     this.catalogueService = catalogueService;
     this.aclClient = aclClient;
   }

@@ -7,6 +7,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Tuple;
+import ogc.rs.catalogue.CatalogueInterface;
+import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
@@ -51,14 +53,15 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
      * @param config                 the configuration object containing necessary properties
      * @param dataFromS3             the DataFromS3 instance for handling S3-related operations
      * @param vertx                  the Vertx instance for asynchronous operations
+     * @param catalogueService       CatalogueService object to get asset / resource related information
      */
-    public TilesOnboardingFromExistingFeatureProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx){
+    public TilesOnboardingFromExistingFeatureProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx, CatalogueInterface catalogueService){
         this.vertx = vertx;
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.s3conf = s3conf;
-        this.featureCollectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
-        this.tilesMetaDataOnboarding = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
+        this.featureCollectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx, catalogueService);
+        this.tilesMetaDataOnboarding = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, s3conf, vertx, catalogueService);
         initializeConfig(config);
     }
 

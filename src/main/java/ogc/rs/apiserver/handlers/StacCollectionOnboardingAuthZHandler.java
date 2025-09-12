@@ -14,6 +14,7 @@ import ogc.rs.apiserver.authentication.util.DxUser;
 import ogc.rs.apiserver.authorization.model.DxRole;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
@@ -22,9 +23,9 @@ import org.apache.logging.log4j.Logger;
 public class StacCollectionOnboardingAuthZHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LogManager.getLogger(StacCollectionOnboardingAuthZHandler.class);
-  CatalogueService catalogueService;
+  CatalogueInterface catalogueService;
 
-  public StacCollectionOnboardingAuthZHandler(CatalogueService catalogueService) {
+  public StacCollectionOnboardingAuthZHandler(CatalogueInterface catalogueService) {
 
     this.catalogueService = catalogueService;
   }

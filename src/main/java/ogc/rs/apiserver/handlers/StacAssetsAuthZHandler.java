@@ -13,6 +13,7 @@ import ogc.rs.apiserver.authorization.model.DxRole;
 import ogc.rs.apiserver.authorization.util.AccessPolicy;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.database.DatabaseService;
 import org.apache.logging.log4j.LogManager;
@@ -22,9 +23,9 @@ public class StacAssetsAuthZHandler implements Handler<RoutingContext> {
   private static final Logger LOGGER = LogManager.getLogger(StacAssetsAuthZHandler.class);
   private final DatabaseService databaseService;
   private final AclClient aclClient;
-  private final CatalogueService catalogueService;
+  private final CatalogueInterface catalogueService;
 
-  public StacAssetsAuthZHandler(Vertx vertx, CatalogueService catalogueService, AclClient aclClient) {
+  public StacAssetsAuthZHandler(Vertx vertx, CatalogueInterface catalogueService, AclClient aclClient) {
     this.databaseService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
     this.aclClient = aclClient;
     this.catalogueService = catalogueService;

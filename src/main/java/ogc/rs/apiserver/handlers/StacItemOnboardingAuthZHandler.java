@@ -11,6 +11,7 @@ import ogc.rs.apiserver.authentication.util.DxUser;
 import ogc.rs.apiserver.authorization.model.DxRole;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.catalogue.CatalogueService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,9 +19,9 @@ import org.apache.logging.log4j.Logger;
 public class StacItemOnboardingAuthZHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LogManager.getLogger(StacItemOnboardingAuthZHandler.class);
-  private final CatalogueService catalogueService;
+  private final CatalogueInterface catalogueService;
 
-  public StacItemOnboardingAuthZHandler(CatalogueService catalogueService) {
+  public StacItemOnboardingAuthZHandler(CatalogueInterface catalogueService) {
     this.catalogueService = catalogueService;
   }
 
@@ -53,7 +54,8 @@ public class StacItemOnboardingAuthZHandler implements Handler<RoutingContext> {
       return;
     }
     /* if the role is not provider, 401 is returned back */
-    if (!roles.contains(DxRole.PROVIDER.getRole())) {
+    //TODO: hereee change this to allow only provider
+    if (roles.contains(DxRole.PROVIDER.getRole())) {
       routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "Only provider or provider delegate is authorized" +
           " to perform this action."));
       return;

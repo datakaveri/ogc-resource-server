@@ -1,26 +1,21 @@
 package ogc.rs.catalogue;
 
 import static ogc.rs.apiserver.authorization.util.Constants.*;
-import static ogc.rs.common.Constants.CAT_SEARCH_PATH;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.client.predicate.ResponsePredicate;
-import java.util.Map;
+import java.util.List;
 import ogc.rs.apiserver.authorization.model.Asset;
 import ogc.rs.apiserver.authorization.model.AssetType;
 import ogc.rs.apiserver.util.OgcException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class CatalogueService {
+public class CatalogueService implements CatalogueInterface {
   private static final Logger LOGGER = LogManager.getLogger(CatalogueService.class);
   public static WebClient catWebClient;
   final String host;
@@ -29,17 +24,17 @@ public class CatalogueService {
   final String path;
   final String catalogueItemPath;
 
-  public CatalogueService(Vertx vertx, JsonObject config) {
-    WebClientOptions options = new WebClientOptions();
-    options.setTrustAll(false).setVerifyHost(true).setSsl(true);
-    catWebClient = WebClient.create(vertx, options);
-    host = config.getString("catServerHost");
-    port = config.getInteger("catServerPort");
-    this.catBasePath = config.getString("dxCatalogueBasePath");
-    this.path = catBasePath + CAT_SEARCH_PATH;
-    this.catalogueItemPath = config.getString("catRequestItemsUri");
+  public CatalogueService(WebClient webclient, String host, int port, String catBasePath, String catalogueItemPath,
+                          String catSearchPath) {
+    catWebClient = webclient;
+    this.host = host;
+    this.port = port;
+    this.catBasePath = catBasePath;
+    this.path = catBasePath + catSearchPath;
+    this.catalogueItemPath = catalogueItemPath;
   }
 
+  @Override
   public Future<JsonObject> getCatItem(String id) {
     LOGGER.debug("get item for id: {} ", id);
     Promise<JsonObject> promise = Promise.promise();
@@ -69,14 +64,15 @@ public class CatalogueService {
               }
             });
 
-        return promise.future();
-    }
+    return promise.future();
+  }
 
-
+  @Override
   public Future<Asset> getCatalogueAsset(String itemId) {
     LOGGER.info("Fetching asset from catalogue for id: {}", itemId);
     Promise<Asset> promise = Promise.promise();
     //TODO: Remove the hardcoded item id
+    LOGGER.info("hereee : port {}, host: {}, catalogueItemPath: {}", port, host, catalogueItemPath);
 
     catWebClient
         .get(port, host, catalogueItemPath)
@@ -94,7 +90,7 @@ public class CatalogueService {
               promise.fail(new OgcException(404, "Not Found", "Catalogue item not found"));
             }
           } else {
-            LOGGER.debug("catalogue call to item api failed:{} " , relHandler.cause());
+            LOGGER.debug("catalogue call to item api failed:{} ", relHandler.cause());
             promise.fail(new OgcException(500, "Internal Server Error", "catalogue call to item api failed"));
 
           }
@@ -111,6 +107,9 @@ public class CatalogueService {
       String organizationId = result.getString(ORGANIZATION_ID);
       String shortDescription = result.getString(SHORT_DESCRIPTION, "").trim();
       String accessPolicy = result.getString(ACCESS_POLICY);
+      List<String> tags = result.getJsonArray(TAGS).getList();
+      String createdAt = result.getString(CREATED_AT);
+
 
       AssetType catAssetType = null;
       JsonArray typeArray = result.getJsonArray(TYPE);
@@ -127,17 +126,22 @@ public class CatalogueService {
           || catAssetType == null
           || organizationId == null
           || shortDescription == null
-      || accessPolicy == null) {
+          || tags.isEmpty()
+          || createdAt == null
+          || accessPolicy == null) {
         LOGGER.error("Asset metadata invalid for id: {}", id);
         LOGGER.error(
-            "Provider: {}, AssetName: {}, AssetType: {}, OrgId: {}, shortDescription : {}, accessPolicy : {}",
+            "Provider: {}, AssetName: {}, AssetType: {}, OrgId: {}, shortDescription : {}, accessPolicy : {}, " +
+                "tags: {}, createdAt : {}",
             provider,
             assetName,
             catAssetType,
             organizationId,
             shortDescription,
-            accessPolicy);
-        throw new OgcException(500, "Internal Server Error","Incomplete asset metadata from catalogue");
+            accessPolicy,
+            tags,
+            createdAt);
+        throw new OgcException(500, "Internal Server Error", "Incomplete asset metadata from catalogue");
       }
 
       return new Asset()
@@ -147,11 +151,13 @@ public class CatalogueService {
           .setAssetType(catAssetType.getAssetType())
           .setAssetName(assetName)
           .setShortDescription(shortDescription)
-          .setAccessPolicy(accessPolicy);
+          .setAccessPolicy(accessPolicy)
+          .setTags(tags)
+          .setCreatedAt(createdAt);
 
     } catch (Exception e) {
       LOGGER.error("Error building asset from catalogue metadata: {}", e.getMessage(), e);
-      throw new OgcException(500, "Internal Server Error","Incomplete asset metadata from catalogue");
+      throw new OgcException(500, "Internal Server Error", "Incomplete asset metadata from catalogue");
     }
   }
 }

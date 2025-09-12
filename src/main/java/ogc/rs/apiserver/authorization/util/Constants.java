@@ -13,9 +13,10 @@ public class Constants {
   public static final String RESOURCE_SERVER_TAG = "iudx:ResourceServer";
   public static final String ASSET_NAME_KEY = "name";
   public static final String RESOURCE_ITEM_TAG = "iudx:Resource";
-
+  public static final String TAGS = "tags";
   public static final String ORGANIZATION_ID = "organizationId";
   public static final String SHORT_DESCRIPTION = "shortDescription";
   public static final String ACCESS_POLICY = "accessPolicy";
+  public static final String CREATED_AT = "itemCreatedAt";
 
 }

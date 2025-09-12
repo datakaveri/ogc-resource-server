@@ -10,6 +10,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import ogc.rs.catalogue.CatalogueInterface;
+import ogc.rs.catalogue.CatalogueService;
 
 @VertxGen
 @ProxyGen

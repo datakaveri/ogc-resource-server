@@ -1,6 +1,7 @@
 package ogc.rs.apiserver.handlers;
 
 import static ogc.rs.apiserver.util.Constants.ECHO_PROCESS_EXECUTION_ENDPOINT;
+import static ogc.rs.apiserver.util.Constants.NOT_AUTHORIZED;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
@@ -9,6 +10,8 @@ import ogc.rs.apiserver.authentication.util.DxUser;
 import ogc.rs.apiserver.authorization.model.DxRole;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
+import ogc.rs.catalogue.CatalogueService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,6 +20,11 @@ public class ProcessAuthZHandler implements Handler<RoutingContext> {
   // Check if fake token is enabled (set via JVM option -Dfake-token=true)
   private static final boolean FAKE_TOKEN_ENABLED =
       Boolean.parseBoolean(System.getProperty("fake-token", "false"));
+
+      private final CatalogueInterface catalogueService;
+    public ProcessAuthZHandler(CatalogueInterface catalogueService) {
+      this.catalogueService = catalogueService;
+    }
 
   /**
    * Handles the routing context to authorize access to process APIs.

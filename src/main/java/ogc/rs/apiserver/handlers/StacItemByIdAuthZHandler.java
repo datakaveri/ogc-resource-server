@@ -12,6 +12,7 @@ import ogc.rs.apiserver.authorization.model.DxRole;
 import ogc.rs.apiserver.authorization.util.AccessPolicy;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.catalogue.CatalogueService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,9 +27,8 @@ public class StacItemByIdAuthZHandler implements Handler<RoutingContext> {
   // Key used to store authorization result in the RoutingContext
   private static final int TOKEN_EXPIRY_THRESHOLD_SECONDS = 10; // token expiry threshold
   private static final Logger LOGGER = LogManager.getLogger(StacItemByIdAuthZHandler.class);
-  private final CatalogueService catalogueService;
+  private final CatalogueInterface catalogueService;
   private final AclClient aclClient;
-  Vertx vertx;
 
   /**
    * Constructs the handler with Vert.x and initializes the database service.
@@ -36,7 +36,7 @@ public class StacItemByIdAuthZHandler implements Handler<RoutingContext> {
    * @param catalogueService catalogueService service to fetch asset metadata
    * @param aclClient        client to check access permissions
    */
-  public StacItemByIdAuthZHandler(CatalogueService catalogueService, AclClient aclClient) {
+  public StacItemByIdAuthZHandler(CatalogueInterface catalogueService, AclClient aclClient) {
     this.catalogueService = catalogueService;
     this.aclClient = aclClient;
   }

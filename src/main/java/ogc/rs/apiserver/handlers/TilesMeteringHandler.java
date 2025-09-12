@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import ogc.rs.apiserver.util.AuthInfo;
 import ogc.rs.apiserver.util.MeteringInfo;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.metering.MeteringService;
 import org.apache.logging.log4j.LogManager;
@@ -21,7 +22,7 @@ public class TilesMeteringHandler implements Handler<Void> {
 
   private static final Logger LOGGER = LogManager.getLogger(TilesMeteringHandler.class);
 
-  private final CatalogueService catalogueService;
+  private final CatalogueInterface catalogueService;
   private final MeteringService meteringService;
   private final Vertx vertx;
   private final LocalMap<MeteringInfo, Integer> meteringDataMap;
@@ -41,7 +42,7 @@ public class TilesMeteringHandler implements Handler<Void> {
    */
   public TilesMeteringHandler(Vertx vertx, JsonObject config) {
     this.vertx = vertx;
-    this.catalogueService = new CatalogueService(vertx, config);
+    this.catalogueService = CatalogueInterface.createProxy(vertx, CATALOGUE_SERVICE_ADDRESS);
     this.meteringService = MeteringService.createProxy(vertx, METERING_SERVICE_ADDRESS);
     this.meteringDataMap = vertx.sharedData().getLocalMap("MeteringDataMap");
 

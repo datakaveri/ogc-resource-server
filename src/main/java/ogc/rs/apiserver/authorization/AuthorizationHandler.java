@@ -7,6 +7,7 @@ import ogc.rs.apiserver.authorization.model.Asset;
 import ogc.rs.apiserver.authorization.util.AccessPolicy;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.catalogue.CatalogueService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,7 +18,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class AuthorizationHandler implements Handler<RoutingContext> {
   private static final Logger LOGGER = LogManager.getLogger(AuthorizationHandler.class);
-  private final CatalogueService catalogueService;
+  private final CatalogueInterface catalogueService;
   private final AclClient aclClient;
 
   /**
@@ -26,7 +27,7 @@ public class AuthorizationHandler implements Handler<RoutingContext> {
    * @param catalogueService service to fetch asset metadata
    * @param aclClient        client to check access permissions
    */
-  public AuthorizationHandler(CatalogueService catalogueService, AclClient aclClient) {
+  public AuthorizationHandler(CatalogueInterface catalogueService, AclClient aclClient) {
     this.catalogueService = catalogueService;
     this.aclClient = aclClient;
   }

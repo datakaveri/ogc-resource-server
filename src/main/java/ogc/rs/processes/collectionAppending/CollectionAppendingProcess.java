@@ -10,6 +10,7 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.ProcessException;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
@@ -68,12 +69,12 @@ public class CollectionAppendingProcess implements ProcessService {
      * @param vertx              The Vert.x instance for executing asynchronous and event-driven tasks.
      */
 
-    public CollectionAppendingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx) {
+    public CollectionAppendingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx, CatalogueInterface catalogueService) {
 
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.s3conf = s3conf;
-        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
+        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx, catalogueService);
         this.vertx = vertx;
         initializeConfig(config);
     }

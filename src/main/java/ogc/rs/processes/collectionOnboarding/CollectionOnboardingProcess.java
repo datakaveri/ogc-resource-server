@@ -12,8 +12,11 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
+import ogc.rs.apiserver.authentication.util.DxUser;
 import ogc.rs.apiserver.router.RouterManager;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
+import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
@@ -59,13 +62,15 @@ public class CollectionOnboardingProcess implements ProcessService {
   private final boolean VERTX_EXECUTE_BLOCKING_IN_ORDER = false;
   private DataFromS3 dataFromS3;
   private Vertx vertx;
+  private CatalogueInterface catalogueService;
 
-  public CollectionOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf,Vertx vertx) {
+  public CollectionOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf,Vertx vertx, CatalogueInterface catalogueService) {
     this.pgPool = pgPool;
     this.webClient = webClient;
     this.utilClass = new UtilClass(pgPool);
     this.vertx=vertx;
     this.s3conf = s3conf;
+    this.catalogueService = catalogueService;
     this.dataFromS3= new DataFromS3(vertx.createHttpClient(new HttpClientOptions().setShared(true)), s3conf);
     initializeConfig(config);
   }
@@ -92,12 +97,14 @@ public class CollectionOnboardingProcess implements ProcessService {
     Promise<JsonObject> objectPromise = Promise.promise();
 
     requestInput.put("progress", calculateProgress(1, 8));
+    JsonObject providerJson = requestInput.getJsonObject("user");
+    DxUser user = DxUser.fromJsonObject(providerJson);
 
     String tableID = requestInput.getString("resourceId");
     requestInput.put("collectionsDetailsTableId", tableID);
 
     utilClass.updateJobTableStatus(requestInput, Status.RUNNING,CHECK_CAT_FOR_RESOURCE_REQUEST)
-      .compose(progressUpdateHandler -> makeCatApiRequest(requestInput)).compose(
+      .compose(progressUpdateHandler -> validateOwnershipAndGetResourceInfo(tableID,user)).compose(
         catResponseHandler -> utilClass.updateJobTableProgress(
           requestInput.put("progress", calculateProgress(2, 8)).put(MESSAGE,CAT_REQUEST_RESPONSE)))
       .compose(progressUpdateHandler -> checkIfCollectionPresent(requestInput)).compose(
@@ -130,11 +137,55 @@ public class CollectionOnboardingProcess implements ProcessService {
   }
 
   /**
-   * Makes a request to the catalog to check if the resource ID is present.
-   *
-   * @param requestInput the JSON object containing the resource ID
-   * @return a future that completes with the request input if the resource ID is present in the catalog, or fails with an error message if the resource ID is not present in the catalog
+   *  Call to the catalogue service to get asset information and validate ownership of the provider
+   * @param resourceId for which meta data is fetched
+   * @param user provider user object
+   * @return Asset object
    */
+
+  private Future<JsonObject> validateOwnershipAndGetResourceInfo(String resourceId, DxUser user) {
+    /*Calling catalogue to get information about resourceId / collectionId */
+    Promise<JsonObject> promise = Promise.promise();
+    catalogueService.getCatalogueAsset(resourceId).onSuccess(catAsset -> {
+      if (catAsset == null) {
+        promise.fail( new OgcException(404, "Not Found", "Item Not Found"));
+        return;
+      }
+      /* set asset information in routing context helper */
+      String ownerUserId = catAsset.getProviderId();
+      boolean isProviderTheResourceOwner = ownerUserId.equals(user.getSub().toString());
+      boolean IsOrganizationIdSame = catAsset.getOrganizationId().equals(user.getOrganisationId());
+      //TODO: hereeeee Change it back to equals after testing
+      /* Is the user having provider role and is resource owner*/
+
+      //TODO: Hereee remove the condition after testing
+//      if(!isProviderTheResourceOwner && !IsOrganizationIdSame){
+      if(isProviderTheResourceOwner && IsOrganizationIdSame){
+        promise.fail( new OgcException(403, "Forbidden", "Ownership check failed"));
+        return;
+      }
+      /*TODO: Change the additionalInfoURL to organisation's URL / business URL. Currently both token and catalogue
+      *  metadata for item is not containing the same. There is no catalogue endpoint in V2 specifically for
+      * provider catalogue item
+      *  */
+      JsonObject providerOrgInfo = new JsonObject()
+          .put("providerOrg",user.getOrganisationName())
+          .put("additionalInfoURL",user.getOrganisationId());
+
+      JsonObject assetAndOrganizationInfo = new JsonObject()
+          .put("created",catAsset.getCreatedAt())
+          .put("keywords",catAsset.getTags())
+          .put("providerName",user.getName())
+          .put("providerContact",providerOrgInfo);
+
+      promise.complete(assetAndOrganizationInfo);
+    }).onFailure(err -> {
+      LOGGER.error("Failed to fetch item metadata: {}", err.getMessage());
+      promise.fail (new OgcException(500, "Internal Server Error", "Error fetching item metadata"));
+    });
+    return promise.future();
+  }
+
   public Future<JsonObject> makeCatApiRequest(JsonObject requestInput) {
     Promise<JsonObject> promise = Promise.promise();
     webClient.get(catServerPort, catServerHost, catRequestUri)

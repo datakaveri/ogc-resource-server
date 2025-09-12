@@ -4,10 +4,15 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
+import ogc.rs.apiserver.handlers.OgcFeaturesAuthZHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DxUser {
+  private static final Logger LOGGER = LogManager.getLogger(DxUser.class);
   private List<String> roles;
   private String organisationId;
   private String organisationName;
@@ -145,6 +150,48 @@ public class DxUser {
         .put("tokenExpiry", tokenExpiry);
 
   }
+
+  //fromJsonObject method
+  public static DxUser fromJsonObject(JsonObject jsonObject) {
+    // check if the roles is not equal to null and then extract the json array
+//    similar to this : roles != null ? new JsonArray(roles) : new JsonArray())
+    String createdAtStr = jsonObject.getString("createdAt");
+    LocalDateTime createdAt = null;
+    if (createdAtStr != null && !createdAtStr.isBlank()) {
+      try {
+        createdAt = LocalDateTime.parse(createdAtStr, DateTimeFormatter.ISO_DATE_TIME);
+      } catch (Exception e) {
+        LOGGER.warn("Invalid createdAt format: {}", createdAtStr, e);
+      }
+    }
+
+    LOGGER.info("Hereeee JsonObject for user : {}", jsonObject.encodePrettily());
+    return new DxUser(
+        jsonObject.getJsonArray("roles", new JsonArray()).getList(),
+        jsonObject.getString("organisationId"),
+        jsonObject.getString("organisationName"),
+        jsonObject.containsKey("sub") ? UUID.fromString(jsonObject.getString("sub")) : null,
+        jsonObject.getBoolean("emailVerified", false),
+        jsonObject.getBoolean("kycVerified", false),
+        jsonObject.getString("name"),
+        jsonObject.getString("preferredUsername"),
+        jsonObject.getString("givenName"),
+        jsonObject.getString("familyName"),
+        jsonObject.getString("email"),
+        jsonObject.getJsonArray("pending_roles", new JsonArray()).getList(),
+        jsonObject.getJsonObject("organisation", new JsonObject()),
+        createdAt,
+        jsonObject.getJsonObject("kycInformation", new JsonObject()),
+        jsonObject.getString("twitter_account"),
+        jsonObject.getString("linkedin_account"),
+        jsonObject.getString("github_account"),
+        jsonObject.getBoolean("account_enabled"),
+        jsonObject.getLong("tokenExpiry")
+    );
+  }
+
+
+
 
   // Factory method (like record copy)
   public static DxUser withPendingRoles(DxUser user, List<String> pendingRoles, JsonObject organisation) {

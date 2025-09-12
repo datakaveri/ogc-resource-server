@@ -1,5 +1,6 @@
 package ogc.rs.metering;
 
+import static ogc.rs.common.Constants.CATALOGUE_SERVICE_ADDRESS;
 import static ogc.rs.metering.util.MeteringConstant.*;
 
 import io.vertx.core.*;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.metering.util.DateValidation;
 import ogc.rs.metering.util.ParamsValidation;
@@ -29,7 +31,7 @@ public class MeteringServiceImpl implements MeteringService {
   private final DateValidation dateValidation = new DateValidation();
   private final ParamsValidation paramValidation = new ParamsValidation();
   DataBrokerService dataBrokerService;
-  CatalogueService catalogueService;
+  CatalogueInterface catalogueService;
   JsonObject validationCheck = new JsonObject();
   String queryCount;
   long total;
@@ -51,7 +53,7 @@ public class MeteringServiceImpl implements MeteringService {
     this.dataBrokerService = dataBrokerService;
     this.meteringPgClient = meteringPgClient;
     this.ogcPgClient = ogcPgClient;
-    catalogueService = new CatalogueService(vertx, config);
+    catalogueService = CatalogueInterface.createProxy(vertx, CATALOGUE_SERVICE_ADDRESS);
   }
 
   @Override

@@ -11,6 +11,8 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
+import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.common.S3Config;
 import ogc.rs.common.S3ConfigsHolder;
 import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
@@ -30,8 +32,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import static ogc.rs.common.Constants.processException404;
-import static ogc.rs.common.Constants.processException500;
+
+import static ogc.rs.common.Constants.*;
 import static ogc.rs.processes.util.Constants.PROCESS_EXIST_CHECK_QUERY;
 import static ogc.rs.processes.util.Constants.NO_S3_CONF_FOUND_FOR_BUCKET_ID;
 
@@ -50,6 +52,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
   private final JsonObject config;
   private final Vertx vertx;
   private final S3ConfigsHolder s3conf;
+  private final CatalogueInterface catalogueSerice;
   Logger LOGGER = LogManager.getLogger(ProcessesRunnerImpl.class);
 
   /**
@@ -67,6 +70,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
     this.config = config;
     this.vertx = vertx;
     this.s3conf = S3ConfigsHolder.createFromServerConfig(config.getJsonObject(S3ConfigsHolder.S3_CONFIGS_BLOCK_KEY_NAME));
+    this.catalogueSerice = CatalogueInterface.createProxy(vertx, CATALOGUE_SERVICE_ADDRESS);
   }
 
   /**
@@ -145,25 +149,25 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
       // Switch case to handle different processes
       switch (processName) {
         case "CollectionOnboarding":
-          processService = new CollectionOnboardingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
+          processService = new CollectionOnboardingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx, this.catalogueSerice);
           break;
         case "CollectionAppending":
-          processService = new CollectionAppendingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
+          processService = new CollectionAppendingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx, this.catalogueSerice);
           break;
         case "S3PreSignedURLGeneration":
           processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, config, processSpecificS3Conf);
           break;
         case "S3InitiateMultipartUpload":
-          processService = new S3InitiateMultiPartUploadProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
+          processService = new S3InitiateMultiPartUploadProcess(pgPool, webClient, config, processSpecificS3Conf, vertx, this.catalogueSerice);
           break;
         case "S3CompleteMultipartUpload":
           processService = new S3CompleteMultiPartUploadProcess(pgPool, processSpecificS3Conf);
           break;
         case "TilesMetaDataOnboarding":
-          processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
+          processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx, this.catalogueSerice);
           break;
         case "TilesOnboardingFromExistingFeature":
-          processService = new TilesOnboardingFromExistingFeatureProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
+          processService = new TilesOnboardingFromExistingFeatureProcess(pgPool, webClient, config, processSpecificS3Conf, vertx, this.catalogueSerice);
           break;
         case "FeatureAttributesExtraction":
           processService = new FeatureAttributesExtractionProcess(pgPool);
