@@ -4,7 +4,6 @@ import static ogc.rs.apiserver.util.Constants.HEADER_AUTHORIZATION;
 import static ogc.rs.common.Constants.UUID_REGEX;
 
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import ogc.rs.apiserver.authentication.client.AclClient;
 import ogc.rs.apiserver.authentication.util.DxUser;
@@ -21,7 +20,6 @@ public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
   private static final Logger LOGGER = LogManager.getLogger(OgcFeaturesAuthZHandler.class);
   private final CatalogueInterface catalogueService;
   private final AclClient aclClient;
-  Vertx vertx;
 
   public OgcFeaturesAuthZHandler(CatalogueInterface catalogueService, AclClient aclClient) {
     this.catalogueService = catalogueService;

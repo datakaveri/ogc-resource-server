@@ -1,5 +1,6 @@
 package ogc.rs.apiserver.util;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.UUID;
@@ -41,6 +42,27 @@ public class AuthInfo {
       throw new OgcException(401, "Invalid Token", "Invalid Audience Value");
     }
     return user;
+  }
+
+  public static AuthInfo fromKeycloakOrAuthV2Token(JsonObject tokenDetails){
+    AuthInfo user = new AuthInfo();
+    user.userId = UUID.fromString(tokenDetails.getString("sub"));
+    boolean isProvider = (tokenDetails.getJsonObject("realm_access").getJsonArray("roles").contains("provider"));
+    if(isProvider){
+      user.role = RoleEnum.provider;
+    } else {
+      user.role = RoleEnum.consumer;
+    }
+    /*TODO: Set required constraints here*/
+    user.constraints = new JsonObject().put("access", new JsonArray().add("api")) ;
+//    user.constraints = new JsonObject().put("access", new JsonArray().add("api"));
+    user.expiry = tokenDetails.containsKey("exp") ? tokenDetails.getLong("exp") : 0L;
+    // No iid present in the token to extract resourceId or isRsToken
+    user.isRsToken = false;
+    // No audience validation as audience is CLAIM_AUDIENCE in Keycloak token
+
+    return user;
+
   }
 
   public UUID getUserId() {
