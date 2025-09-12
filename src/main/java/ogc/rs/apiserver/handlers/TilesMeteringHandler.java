@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import ogc.rs.apiserver.util.AuthInfo;
 import ogc.rs.apiserver.util.MeteringInfo;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.catalogue.CatalogueService;
 import ogc.rs.metering.MeteringService;
 import org.apache.logging.log4j.LogManager;
@@ -21,17 +22,15 @@ public class TilesMeteringHandler implements Handler<Void> {
 
   private static final Logger LOGGER = LogManager.getLogger(TilesMeteringHandler.class);
 
-  private final CatalogueService catalogueService;
+  private final CatalogueInterface catalogueService;
   private final MeteringService meteringService;
-  private final Vertx vertx;
   private final LocalMap<MeteringInfo, Integer> meteringDataMap;
 
   /**
    * Constructs a TilesMeteringHandler instance.
    *
    * @param vertx the Vert.x instance used for shared data and scheduling periodic tasks.
-   * @param config a JsonObject containing configuration for initializing CatalogueService. This
-   *     handler initializes: 1. A connection to the CatalogueService using the provided
+   *     This handler initializes: 1. A connection to the CatalogueService using the provided
    *     configuration. 2. A metering service proxy for publishing data to RMQ.
    *     <p>A periodic task is scheduled every 2 seconds, which: - Retrieves the shared data map
    *     (LocalMap) storing metering information. - Iterates through each entry in the map: -
@@ -39,9 +38,8 @@ public class TilesMeteringHandler implements Handler<Void> {
    *     Publishes the metering data (converted to JSON) to RMQ. - Logs success or failure for each
    *     message published to RMQ.
    */
-  public TilesMeteringHandler(Vertx vertx, JsonObject config) {
-    this.vertx = vertx;
-    this.catalogueService = new CatalogueService(vertx, config);
+  public TilesMeteringHandler(Vertx vertx) {
+    this.catalogueService = CatalogueInterface.createProxy(vertx, CATALOGUE_SERVICE_ADDRESS);
     this.meteringService = MeteringService.createProxy(vertx, METERING_SERVICE_ADDRESS);
     this.meteringDataMap = vertx.sharedData().getLocalMap("MeteringDataMap");
 

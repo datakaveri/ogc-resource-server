@@ -1,36 +1,29 @@
 package ogc.rs.apiserver.handlers;
 
-import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
-import static ogc.rs.apiserver.util.Constants.NOT_AUTHORIZED;
-import static ogc.rs.apiserver.util.Constants.USER_NOT_AUTHORIZED;
-import static ogc.rs.common.Constants.*;
+import static ogc.rs.apiserver.util.Constants.HEADER_AUTHORIZATION;
+import static ogc.rs.common.Constants.UUID_REGEX;
 
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.RoutingContext;
-import java.util.UUID;
-import ogc.rs.apiserver.authentication.util.BearerTokenExtractor;
-import ogc.rs.apiserver.authorization.CheckResourceAccess;
+import ogc.rs.apiserver.authentication.client.AclClient;
+import ogc.rs.apiserver.authentication.util.DxUser;
+import ogc.rs.apiserver.authorization.model.DxRole;
+import ogc.rs.apiserver.authorization.util.AccessPolicy;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
-import ogc.rs.apiserver.util.AuthInfo;
 import ogc.rs.apiserver.util.OgcException;
-import ogc.rs.database.DatabaseService;
+import ogc.rs.catalogue.CatalogueInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
 
   private static final Logger LOGGER = LogManager.getLogger(OgcFeaturesAuthZHandler.class);
-  private final DatabaseService databaseService;
-  private final CheckResourceAccess resourceAccessHandler;
-  Vertx vertx;
+  private final CatalogueInterface catalogueService;
+  private final AclClient aclClient;
 
-  public OgcFeaturesAuthZHandler(Vertx vertx, CheckResourceAccess resourceAccessHandler) {
-    this.vertx = vertx;
-    this.databaseService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
-    this.resourceAccessHandler = resourceAccessHandler;
+  public OgcFeaturesAuthZHandler(CatalogueInterface catalogueService, AclClient aclClient) {
+    this.catalogueService = catalogueService;
+    this.aclClient = aclClient;
   }
 
   /**
@@ -46,88 +39,62 @@ public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
       return;
     }
 
-    LOGGER.debug("OGC Features Authorization");
+    LOGGER.debug("Inside OgcFeaturesAuthZHandler");
     String collectionId = routingContext.normalizedPath().split("/")[2];
     if (collectionId == null || !collectionId.matches(UUID_REGEX)) {
       routingContext.fail(new OgcException(404, "Not Found", "Collection Not Found"));
       return;
     }
-    AuthInfo user = routingContext.get(USER_KEY);
-//    UUID iid = user.getResourceId();
-//    TODO: Revisit this check
-//    if (!user.isRsToken() && !collectionId.equals(iid.toString())) {
-//      LOGGER.error("Resource Ids don't match! id- {}, jwtId- {}", collectionId, iid);
-//      routingContext.fail(
-//          new OgcException(
-//              401, "Not Authorized", "User is not authorised. Please contact DX AAA "));
-//      return;
-//    }
-    databaseService
-        .getAccess(collectionId)
-        .onSuccess(
-            isOpen -> {
+    DxUser user = RoutingContextHelper.fromPrincipal(routingContext);
+    /*Access policy is fetched for the given collection ID or resource ID*/
+    /* If access policy is open allow access */
+    /* Else */
+    /*Calling catalogue to get information about resourceId / collectionId */
+    catalogueService.getCatalogueAsset(collectionId).onSuccess(catAsset -> {
+      if (catAsset == null) {
+        routingContext.fail(new OgcException(404, "Not Found", "Item Not Found"));
+        return;
+      }
+      /* set asset information in routing context helper */
+      RoutingContextHelper.setAsset(routingContext, catAsset);
+      String accessPolicy = catAsset.getAccessPolicy();
+      LOGGER.debug("Access policy for item is: {}", accessPolicy);
+      if (AccessPolicy.fromValue(accessPolicy) == AccessPolicy.OPEN) {
+        LOGGER.debug("Access policy is open, access granted.");
+        routingContext.next();
+        return;
+      }
+      /* If access policy is not open, check if user has access */
+      LOGGER.debug("Item accessPolicy is {}. Performing access check.", accessPolicy);
+      /* If the role is provider go to the next handler */
+      if (user.getRoles().contains(DxRole.PROVIDER.toString())) {
+        routingContext.next();
+      } else {
+        /* Call control panel's has access endpoint to check if the consumer
+         * has access to the given collection ID or resource */
+        String bearerToken = routingContext.request().getHeader(HEADER_AUTHORIZATION);
 
-              user.setResourceId(UUID.fromString(collectionId));
-              RoutingContextHelper.addCollectionId(routingContext, collectionId);
-
-              if (isOpen && user.isRsToken()) {
-                authorizeUser(routingContext);
+        aclClient.checkAccess(collectionId, bearerToken)
+            .onSuccess(accessGranted -> {
+              if (accessGranted) {
+                routingContext.next();
+                LOGGER.debug("Access was granted for itemId: {}", collectionId);
               } else {
-                if (user.getRole() == AuthInfo.RoleEnum.consumer) {
-                  handleConsumerAccess(routingContext, user);
-                } else {
-                  authorizeUser(routingContext);
-                }
+                routingContext.fail(
+                    new OgcException(403, "Forbidden",
+                        "User not authorized to access the resource : " + collectionId));
               }
             })
-        .onFailure(
-            fail -> {
-              LOGGER.error("Collection not present in table: {}", fail.getMessage());
-              routingContext.fail(fail);
+            .onFailure(err -> {
+              LOGGER.error("Access verification failed: {}", err.getMessage());
+              routingContext.fail(
+                  new OgcException(500, "Internal Server Error", "Error during access verification"));
             });
-  }
 
-  private void authorizeUser(RoutingContext routingContext) {
-    LOGGER.debug("Authorization info: {}", routingContext.data().values());
-    routingContext.next();
-  }
-
-  private void handleConsumerAccess(
-      RoutingContext routingContext, AuthInfo user) {
-    checkResourceAccess(routingContext);
-    JsonArray access =
-        user.getConstraints() != null ? user.getConstraints().getJsonArray("access") : null;
-    if (access == null || !access.contains("api")) {
-      LOGGER.debug("invalid constraints value");
-      routingContext.fail(
-          new OgcException(
-              401, "Not Authorized", "User is not authorised. Please contact DX AAA "));
-
-    } else {
-      authorizeUser(routingContext);
-    }
-  }
-
-
-  private void checkResourceAccess(RoutingContext routingContext) {
-    //Call the control panel to check if the user has access to the resource
-    String token = BearerTokenExtractor.extract(routingContext);
-    Future<Boolean> hasAccessFuture =
-        resourceAccessHandler.checkAccess(RoutingContextHelper.getCollectionId(routingContext), token);
-
-    hasAccessFuture.onSuccess(hasAccess -> {
-      if (hasAccess) {
-        LOGGER.debug("User has access to the resource.");
-
-      } else {
-        LOGGER.debug("User does not have access to the resource.");
-        routingContext.fail(new OgcException(403, NOT_AUTHORIZED, USER_NOT_AUTHORIZED));
       }
     }).onFailure(err -> {
-      LOGGER.error("Error checking access: {}", err.getMessage());
-      routingContext.fail(new OgcException(500, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR));
-
+      LOGGER.error("Failed to fetch item metadata: {}", err.getMessage());
+      routingContext.fail(new OgcException(500, "Internal Server Error", "Error fetching item metadata"));
     });
   }
-
 }

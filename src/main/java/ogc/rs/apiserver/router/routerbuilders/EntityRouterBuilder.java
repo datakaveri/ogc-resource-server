@@ -1,5 +1,6 @@
 package ogc.rs.apiserver.router.routerbuilders;
 
+import static ogc.rs.apiserver.authorization.util.Constants.*;
 import static ogc.rs.apiserver.util.Constants.HEADER_ACCEPT;
 import static ogc.rs.apiserver.util.Constants.HEADER_ALLOW_ORIGIN;
 import static ogc.rs.apiserver.util.Constants.HEADER_AUTHORIZATION;
@@ -8,6 +9,7 @@ import static ogc.rs.apiserver.util.Constants.HEADER_CONTENT_TYPE;
 import static ogc.rs.apiserver.util.Constants.HEADER_HOST;
 import static ogc.rs.apiserver.util.Constants.HEADER_ORIGIN;
 import static ogc.rs.apiserver.util.Constants.HEADER_REFERER;
+import static ogc.rs.common.Constants.CATALOGUE_SERVICE_ADDRESS;
 import static ogc.rs.common.Constants.OAS_BEARER_SECURITY_SCHEME;
 
 import io.vertx.core.Vertx;
@@ -17,29 +19,24 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.AuthenticationHandler;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
-import java.util.List;
 import java.util.Set;
 import ogc.rs.apiserver.ApiServerVerticle;
-import ogc.rs.apiserver.authentication.handler.AuthV2JwtHandler;
-import ogc.rs.apiserver.authentication.handler.KeycloakJwtAuthHandler;
-import ogc.rs.apiserver.authentication.handler.ChainedJwtAuthHandler;
-import ogc.rs.apiserver.authorization.CheckResourceAccess;
+import ogc.rs.apiserver.authentication.client.AclClient;
+import ogc.rs.apiserver.authentication.client.JwksResolver;
+import ogc.rs.apiserver.authentication.handler.MultiIssuerJwtAuthHandler;
 import ogc.rs.apiserver.handlers.*;
 import ogc.rs.apiserver.util.OgcException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import ogc.rs.catalogue.CatalogueInterface;
 
 /**
  * Abstract class to aid in configuration and building of routers using {@link RouterBuilder}.
  *
  */
 public abstract class EntityRouterBuilder {
-  private static final Logger LOGGER = LogManager.getLogger(EntityRouterBuilder.class);
 
   private static final Set<String> allowedHeaders =
       Set.of(HEADER_AUTHORIZATION, HEADER_CONTENT_LENGTH, HEADER_CONTENT_TYPE, HEADER_HOST, HEADER_ORIGIN,
@@ -60,40 +57,40 @@ public abstract class EntityRouterBuilder {
   public FailureHandler failureHandler = new FailureHandler();
 
   public RouterBuilder routerBuilder;
-  private JsonObject config;
+  private final JsonObject config;
   private DxTokenAuthenticationHandler tokenAuthenticationHandler;
   public StacAssetsAuthZHandler stacAssetsAuthZHandler;
   public MeteringAuthZHandler meteringAuthZHandler = new MeteringAuthZHandler();
   public OgcFeaturesAuthZHandler ogcFeaturesAuthZHandler;
-  public ProcessAuthZHandler processAuthZHandler = new ProcessAuthZHandler();
+  public ProcessAuthZHandler processAuthZHandler;
   public TilesMeteringHandler tilesMeteringHandler;
   public StacCollectionOnboardingAuthZHandler stacCollectionOnboardingAuthZHandler;
   public StacItemByIdAuthZHandler stacItemByIdAuthZHandler;
   public StacItemOnboardingAuthZHandler stacItemOnboardingAuthZHandler;
   public TokenLimitsEnforcementHandler tokenLimitsEnforcementHandler;
-  AuthenticationHandler keycloakJwtAuthHandler;
-  AuthenticationHandler aaaAuthHandler;
-  CheckResourceAccess resourceAccessHandler;
+  CatalogueInterface catalogueService;
+  AclClient aclClient;
+
   EntityRouterBuilder(ApiServerVerticle apiServerVerticle, Vertx vertx, RouterBuilder routerBuilder,
-                      JsonObject config) {
+      JsonObject config) {
     this.apiServerVerticle = apiServerVerticle;
     this.vertx = vertx;
     this.routerBuilder = routerBuilder;
     this.config = config;
+    this.aclClient = new AclClient(vertx, config.getInteger(CONTROL_PLANE_PORT),config.getString(CONTROL_PLANE_HOST), config.getString(
+        CONTROL_PLANE_SEARCH_PATH));
+    this.catalogueService = CatalogueInterface.createProxy(vertx, CATALOGUE_SERVICE_ADDRESS);
     tokenAuthenticationHandler = new DxTokenAuthenticationHandler(vertx, config);
 
-    keycloakJwtAuthHandler = new KeycloakJwtAuthHandler(config.getString("keycloakCertUrl"), config.getString("kcIss"), vertx);
-    aaaAuthHandler = new AuthV2JwtHandler(config.getString("controlPanelCertUrl"), config.getString("controlPanelIssuer"), vertx);
-    resourceAccessHandler = new CheckResourceAccess(vertx, config.getInteger("controlPanelPort"),
-        config.getString("controlPanelHost"), config.getString("controlPanelSearchPath"));
-
-    stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx, resourceAccessHandler);
-    ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(vertx, resourceAccessHandler);
-    tilesMeteringHandler = new TilesMeteringHandler(vertx, config);
-    stacCollectionOnboardingAuthZHandler = new StacCollectionOnboardingAuthZHandler(vertx, config);
-    stacItemByIdAuthZHandler = new StacItemByIdAuthZHandler(vertx);
-    stacItemOnboardingAuthZHandler = new StacItemOnboardingAuthZHandler(vertx);
+    stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx, catalogueService, aclClient);
+    ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(catalogueService, aclClient);
+    tilesMeteringHandler = new TilesMeteringHandler(vertx);
+    stacCollectionOnboardingAuthZHandler = new StacCollectionOnboardingAuthZHandler(catalogueService);
+    stacItemByIdAuthZHandler = new StacItemByIdAuthZHandler(catalogueService, aclClient);
+    stacItemOnboardingAuthZHandler = new StacItemOnboardingAuthZHandler(catalogueService);
+    processAuthZHandler = new ProcessAuthZHandler();
     tokenLimitsEnforcementHandler = new TokenLimitsEnforcementHandler(vertx);
+
   }
 
   /**
@@ -109,18 +106,16 @@ public abstract class EntityRouterBuilder {
     }
 
     routerBuilder.setOptions(factoryOptions);
-
-    AuthenticationHandler chainedAuth = new ChainedJwtAuthHandler(
-        List.of(keycloakJwtAuthHandler, aaaAuthHandler, tokenAuthenticationHandler));
-
-
+    // Create JWKS resolver (reads config -> jwks URLs)
+    JwksResolver jwksResolver =
+        new JwksResolver(vertx, config.getJsonObject(ISSUERS));
+    MultiIssuerJwtAuthHandler authHandler = new MultiIssuerJwtAuthHandler(jwksResolver);
     /*
      * Automatically adds the handler for any API that has the `security` block with
      * OAS_BEARER_SECURITY_SCHEME. See
      * https://swagger.io/docs/specification/authentication/bearer-authentication/
      */
-    routerBuilder.securityHandler(OAS_BEARER_SECURITY_SCHEME, chainedAuth);
-    
+    routerBuilder.securityHandler(OAS_BEARER_SECURITY_SCHEME, authHandler);
     routerBuilder.rootHandler(
         CorsHandler.create().allowedHeaders(allowedHeaders).allowedMethods(allowedMethods));
     routerBuilder.rootHandler(BodyHandler.create());

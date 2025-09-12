@@ -15,6 +15,7 @@ import ogc.rs.common.S3Config;
 import ogc.rs.common.S3ConfigsHolder;
 import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
+import ogc.rs.processes.echo.EchoProcess;
 import ogc.rs.processes.featureAttributesExtraction.FeatureAttributesExtractionProcess;
 import ogc.rs.processes.s3MultiPartUploadForStacOnboarding.S3CompleteMultiPartUploadProcess;
 import ogc.rs.processes.s3MultiPartUploadForStacOnboarding.S3InitiateMultiPartUploadProcess;
@@ -111,9 +112,9 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
 
     checkForProcess.onSuccess(processExist -> {
       String processName = processExist.getString("title");
-      boolean isAsync = processExist.getJsonArray("response")
+      boolean isAsync = processExist.getJsonArray("mode")
               .stream()
-              .anyMatch(item -> item.toString().equalsIgnoreCase("ASYNC"));
+              .anyMatch(item -> item.toString().equalsIgnoreCase("async-execute"));
       List<String> validateInput = validateInput(input, processExist);
 
       S3Config processSpecificS3Conf;
@@ -168,6 +169,9 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
         case "FeatureAttributesExtraction":
           processService = new FeatureAttributesExtractionProcess(pgPool);
           break;
+        case "Hello World":
+          processService = new EchoProcess(pgPool);
+          break;
         default:
           LOGGER.error("No method specified for process {}", processName);
           handler.handle(Future.failedFuture("Process could not be executed: no method specified for process " + processName));
@@ -201,7 +205,9 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
           finalProcessService.execute(input).onSuccess(result -> {
             JsonObject response = result.copy();
             response.put("sync", "true");
-            response.put("status", Status.SUCCESSFUL);
+            response.put("jobID", jobStarted.getValue("jobId"));
+            response.put("status", "successful");
+            response.put("type", "application/json");
             response.put("location",
                     config.getString("hostName")
                             .concat("/jobs/")

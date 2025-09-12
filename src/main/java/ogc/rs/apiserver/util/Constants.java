@@ -57,6 +57,8 @@ public class Constants {
     public static final String STAC_UPDATE_COLLECTION_API = "updateStacCollection";
     public static final String STAC_CONFORMANCE_CLASSES = "getConformanceDeclaration";
     public static final String STAC_ASSETS_BY_ID_REGEX = "^/stac/collections/[^/]+/items/[^/]+$";
+    // Execution endpoint for Echo process
+    public static final String ECHO_PROCESS_EXECUTION_ENDPOINT = "/processes/550e8400-e29b-41d4-a716-446655440002/execution";
     public static final String PROCESS_EXECUTION_REGEX = "/processes/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/execution";
     public static final String STATUS_API = "getStatus";
     public static final String LIST_JOBS_API = "listAllJobs";
