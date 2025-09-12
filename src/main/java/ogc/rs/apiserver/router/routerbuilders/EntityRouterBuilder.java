@@ -1,5 +1,6 @@
 package ogc.rs.apiserver.router.routerbuilders;
 
+import static ogc.rs.apiserver.authorization.util.Constants.*;
 import static ogc.rs.apiserver.util.Constants.HEADER_ACCEPT;
 import static ogc.rs.apiserver.util.Constants.HEADER_ALLOW_ORIGIN;
 import static ogc.rs.apiserver.util.Constants.HEADER_AUTHORIZATION;
@@ -8,6 +9,7 @@ import static ogc.rs.apiserver.util.Constants.HEADER_CONTENT_TYPE;
 import static ogc.rs.apiserver.util.Constants.HEADER_HOST;
 import static ogc.rs.apiserver.util.Constants.HEADER_ORIGIN;
 import static ogc.rs.apiserver.util.Constants.HEADER_REFERER;
+import static ogc.rs.common.Constants.CATALOGUE_SERVICE_ADDRESS;
 import static ogc.rs.common.Constants.OAS_BEARER_SECURITY_SCHEME;
 
 import io.vertx.core.Vertx;
@@ -23,8 +25,12 @@ import io.vertx.ext.web.openapi.RouterBuilder;
 import io.vertx.ext.web.openapi.RouterBuilderOptions;
 import java.util.Set;
 import ogc.rs.apiserver.ApiServerVerticle;
+import ogc.rs.apiserver.authentication.client.AclClient;
+import ogc.rs.apiserver.authentication.client.JwksResolver;
+import ogc.rs.apiserver.authentication.handler.MultiIssuerJwtAuthHandler;
 import ogc.rs.apiserver.handlers.*;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
 
 /**
  * Abstract class to aid in configuration and building of routers using {@link RouterBuilder}.
@@ -51,18 +57,19 @@ public abstract class EntityRouterBuilder {
   public FailureHandler failureHandler = new FailureHandler();
 
   public RouterBuilder routerBuilder;
-  private JsonObject config;
+  private final JsonObject config;
   private DxTokenAuthenticationHandler tokenAuthenticationHandler;
   public StacAssetsAuthZHandler stacAssetsAuthZHandler;
   public MeteringAuthZHandler meteringAuthZHandler = new MeteringAuthZHandler();
   public OgcFeaturesAuthZHandler ogcFeaturesAuthZHandler;
-  public ProcessAuthZHandler processAuthZHandler = new ProcessAuthZHandler();
+  public ProcessAuthZHandler processAuthZHandler;
   public TilesMeteringHandler tilesMeteringHandler;
   public StacCollectionOnboardingAuthZHandler stacCollectionOnboardingAuthZHandler;
   public StacItemByIdAuthZHandler stacItemByIdAuthZHandler;
   public StacItemOnboardingAuthZHandler stacItemOnboardingAuthZHandler;
   public TokenLimitsEnforcementHandler tokenLimitsEnforcementHandler;
-
+  CatalogueInterface catalogueService;
+  AclClient aclClient;
 
   EntityRouterBuilder(ApiServerVerticle apiServerVerticle, Vertx vertx, RouterBuilder routerBuilder,
       JsonObject config) {
@@ -70,14 +77,20 @@ public abstract class EntityRouterBuilder {
     this.vertx = vertx;
     this.routerBuilder = routerBuilder;
     this.config = config;
+    this.aclClient = new AclClient(vertx, config.getInteger(CONTROL_PLANE_PORT),config.getString(CONTROL_PLANE_HOST), config.getString(
+        CONTROL_PLANE_SEARCH_PATH));
+    this.catalogueService = CatalogueInterface.createProxy(vertx, CATALOGUE_SERVICE_ADDRESS);
     tokenAuthenticationHandler = new DxTokenAuthenticationHandler(vertx, config);
-    stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx);
-    ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(vertx);
-    tilesMeteringHandler = new TilesMeteringHandler(vertx, config);
-    stacCollectionOnboardingAuthZHandler = new StacCollectionOnboardingAuthZHandler(vertx, config);
-    stacItemByIdAuthZHandler = new StacItemByIdAuthZHandler(vertx);
-    stacItemOnboardingAuthZHandler = new StacItemOnboardingAuthZHandler(vertx);
+
+    stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx, catalogueService, aclClient);
+    ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(catalogueService, aclClient);
+    tilesMeteringHandler = new TilesMeteringHandler(vertx);
+    stacCollectionOnboardingAuthZHandler = new StacCollectionOnboardingAuthZHandler(catalogueService);
+    stacItemByIdAuthZHandler = new StacItemByIdAuthZHandler(catalogueService, aclClient);
+    stacItemOnboardingAuthZHandler = new StacItemOnboardingAuthZHandler(catalogueService);
+    processAuthZHandler = new ProcessAuthZHandler();
     tokenLimitsEnforcementHandler = new TokenLimitsEnforcementHandler(vertx);
+
   }
 
   /**
@@ -93,14 +106,16 @@ public abstract class EntityRouterBuilder {
     }
 
     routerBuilder.setOptions(factoryOptions);
-    
+    // Create JWKS resolver (reads config -> jwks URLs)
+    JwksResolver jwksResolver =
+        new JwksResolver(vertx, config.getJsonObject(ISSUERS));
+    MultiIssuerJwtAuthHandler authHandler = new MultiIssuerJwtAuthHandler(jwksResolver);
     /*
      * Automatically adds the handler for any API that has the `security` block with
      * OAS_BEARER_SECURITY_SCHEME. See
      * https://swagger.io/docs/specification/authentication/bearer-authentication/
      */
-    routerBuilder.securityHandler(OAS_BEARER_SECURITY_SCHEME, tokenAuthenticationHandler);
-    
+    routerBuilder.securityHandler(OAS_BEARER_SECURITY_SCHEME, authHandler);
     routerBuilder.rootHandler(
         CorsHandler.create().allowedHeaders(allowedHeaders).allowedMethods(allowedMethods));
     routerBuilder.rootHandler(BodyHandler.create());

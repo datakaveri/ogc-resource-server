@@ -1,48 +1,45 @@
 package ogc.rs.apiserver.handlers;
 
+import static ogc.rs.apiserver.util.Constants.NOT_AUTHORIZED;
+import static ogc.rs.common.Constants.UUID_REGEX;
+
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
-import ogc.rs.apiserver.util.AuthInfo;
+import java.util.ArrayList;
+import ogc.rs.apiserver.authentication.util.DxUser;
+import ogc.rs.apiserver.authorization.model.DxRole;
+import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.OgcException;
-import ogc.rs.catalogue.CatalogueService;
-import ogc.rs.database.DatabaseService;
+import ogc.rs.catalogue.CatalogueInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
-import static ogc.rs.apiserver.util.Constants.NOT_AUTHORIZED;
-import static ogc.rs.apiserver.util.Constants.USER_NOT_AUTHORIZED;
-import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
-import static ogc.rs.common.Constants.UUID_REGEX;
-
 public class StacCollectionOnboardingAuthZHandler implements Handler<RoutingContext> {
 
-    private final DatabaseService databaseService;
-    private static final Logger LOGGER = LogManager.getLogger(StacCollectionOnboardingAuthZHandler.class);
-    CatalogueService catalogueService;
+  private static final Logger LOGGER = LogManager.getLogger(StacCollectionOnboardingAuthZHandler.class);
+  CatalogueInterface catalogueService;
 
-    public StacCollectionOnboardingAuthZHandler(Vertx vertx, JsonObject config) {
+  public StacCollectionOnboardingAuthZHandler(CatalogueInterface catalogueService) {
 
-        this.databaseService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
-        catalogueService = new CatalogueService(vertx, config);
-    }
+    this.catalogueService = catalogueService;
+  }
 
-    /**
-     * Handles the routing context to authorize access to STAC Collection Onboarding APIs.
-     * The token should be open and either provider or delegate
-     *
-     * @param routingContext the routing context of the request
-     */
+  /**
+   * Handles the routing context to authorize access to STAC Collection Onboarding APIs.
+   * The token should be open and either provider  or delegate
+   * The authorization checks include:
+   * 1. Validates that the user has the 'provider' role.
+   * 2. Validates that the user is the owner of the collection(s) being onboarded.
+   *
+   * @param routingContext the routing context of the request
+   */
 
   @Override
   public void handle(RoutingContext routingContext) {
-    AuthInfo user = routingContext.get(USER_KEY);
-    LOGGER.debug("STAC Onboarding Authorization: " + routingContext.data());
-
+    LOGGER.debug("STAC Collection Onboarding Authorization");
+    DxUser user = RoutingContextHelper.fromPrincipal(routingContext);
     JsonObject requestBody = routingContext.body().asJsonObject();
     JsonArray collections = requestBody.getJsonArray("collections");
 
@@ -53,13 +50,6 @@ public class StacCollectionOnboardingAuthZHandler implements Handler<RoutingCont
       if (collectionId == null || !collectionId.matches(UUID_REGEX)) {
         routingContext.fail(
             new OgcException(400, "Invalid UUID", "Invalid Collection Id: " + collectionId));
-        return;
-      }
-
-      if (user.getRole() != AuthInfo.RoleEnum.provider
-          && user.getRole() != AuthInfo.RoleEnum.delegate) {
-        routingContext.fail(
-            new OgcException(401, NOT_AUTHORIZED, "Role Not Provider or delegate"));
         return;
       }
 
@@ -78,91 +68,66 @@ public class StacCollectionOnboardingAuthZHandler implements Handler<RoutingCont
           return; // Stop processing immediately
         }
 
-        if (user.getRole() != AuthInfo.RoleEnum.provider
-            && user.getRole() != AuthInfo.RoleEnum.delegate) {
-          routingContext.fail(
-              new OgcException(401, NOT_AUTHORIZED, "Role Not Provider or delegate"));
-          return;
-        }
-          checkCollectionOwnership(collectionId, user, routingContext, validatedCollectionId, collections.size());
+        checkCollectionOwnership(collectionId, user, routingContext, validatedCollectionId, collections.size());
       }
     }
-    }
+  }
+
+  private void validateCollectionOwnership(String collectionId, DxUser user, RoutingContext routingContext) {
+    /*Calling catalogue to get information about resourceId / collectionId */
+    catalogueService.getCatalogueAsset(collectionId).onSuccess(catAsset -> {
+      if (catAsset == null) {
+        routingContext.fail(new OgcException(404, "Not Found", "Item Not Found"));
+        return;
+      }
+      /* set asset information in routing context helper */
+      RoutingContextHelper.setAsset(routingContext, catAsset);
+      String ownerUserId = catAsset.getProviderId();
+      boolean isProviderTheResourceOwner = ownerUserId.equals(user.getSub().toString());
+      /* Is the user having provider role and is resource owner*/
+      LOGGER.debug("User roles: {}, isProviderTheResourceOwner: {}", user.getRoles(), isProviderTheResourceOwner);
+      if (!user.getRoles().contains(DxRole.PROVIDER.getRole()) || !isProviderTheResourceOwner) {
+        routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "Ownership check failed"));
+        return;
+      }
+      routingContext.next();
+    }).onFailure(err -> {
+      LOGGER.error("Failed to fetch item metadata: {}", err.getMessage());
+      routingContext.fail(new OgcException(500, "Internal Server Error", "Error fetching item metadata"));
+    });
+  }
 
 
-    private void validateCollectionOwnership(String collectionId, AuthInfo user, RoutingContext routingContext) {
-        String filter = "[id,provider,accessPolicy,type,iudxResourceAPIs,resourceGroup,ownerUserId]";
-        catalogueService
-                .getCatItemUsingFilter(collectionId, filter)
-                .onSuccess(
-                        success -> {
-                            if (user.getRole() == AuthInfo.RoleEnum.provider && !user.isRsToken()) {
-                                routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "open token should be used"));
-                                return;
-                            }
-                            if (user.getRole() == AuthInfo.RoleEnum.provider &&
-                                    !(success.getString("ownerUserId").trim().equals(user.getUserId().toString()))) {
-                                routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "Item belongs to different provider"));
-                                return;
-                            }
-                            if (user.getRole() == AuthInfo.RoleEnum.delegate && !success.getString("ownerUserId").equals(user.getDelegatorUserId().toString())) {
-                                routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "Item belongs to different provider"));
-                                return;
-                            }
-                            routingContext.data().put("ownerUserId", success.getString("ownerUserId"));
-                            routingContext.data().put("accessPolicy", success.getString("accessPolicy"));
-                            routingContext.data().put("role", user.getRole().toString());
-                            routingContext.next();
-                        })
-                .onFailure(failed -> {
-                    LOGGER.debug("cat item not found ");
-                    if (failed instanceof OgcException) {
-                        routingContext.put("response", ((OgcException) failed).getJson().toString());
-                        routingContext.put("statusCode", ((OgcException) failed).getStatusCode());
-                    } else {
-                        OgcException ogcException =
-                                new OgcException(500, "Internal Server Error", "Internal Server Error");
-                        routingContext.put("response", ogcException.getJson().toString());
-                        routingContext.put("statusCode", ogcException.getStatusCode());
-                    }
-                    routingContext.fail(failed);
-                });
-    }
+  private void checkCollectionOwnership(String collectionId, DxUser user, RoutingContext routingContext,
+                                        ArrayList<String> validatedCollectionId, int totalCollections) {
 
-    private void checkCollectionOwnership(String collectionId, AuthInfo user, RoutingContext routingContext,ArrayList<String> validatedcollecrionId ,int totalCollections) {
-        String filter = "[id,provider,accessPolicy,type,iudxResourceAPIs,resourceGroup,ownerUserId]";
-        catalogueService.getCatItemUsingFilter(collectionId, filter)
-                .onSuccess(success -> {
-                    if (user.getRole() == AuthInfo.RoleEnum.provider && !user.isRsToken()) {
-                        routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "Open token should be used"));
-                        return;
-                    }
-                    if (user.getRole() == AuthInfo.RoleEnum.provider &&
-                            !(success.getString("ownerUserId").trim().equals(user.getUserId().toString()))) {
-                        routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "Item belongs to different provider"));
-                        return;
-                    }
-                    if (user.getRole() == AuthInfo.RoleEnum.delegate &&
-                            !success.getString("ownerUserId").equals(user.getDelegatorUserId().toString())) {
-                        routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "Item belongs to different provider"));
-                        return;
-                    }
+    /*Calling catalogue to get information about resourceId / collectionId */
+    catalogueService.getCatalogueAsset(collectionId).onSuccess(catAsset -> {
+      if (catAsset == null) {
+        routingContext.fail(new OgcException(404, "Not Found", "Item Not Found"));
+        return;
+      }
+      /* set asset information in routing context helper */
+      RoutingContextHelper.setAsset(routingContext, catAsset);
+      String ownerUserId = catAsset.getProviderId();
+      boolean isProviderTheResourceOwner = ownerUserId.equals(user.getSub().toString());
+      /* Is the user having provider role and is resource owner*/
+      if (!user.getRoles().contains(DxRole.PROVIDER.getRole()) && !isProviderTheResourceOwner) {
+        routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "Ownership check failed"));
+        return;
+      }
+      // Move to next handler only after all validations succeed
+      validatedCollectionId.add(collectionId);
+      if (validatedCollectionId.size() == totalCollections) {
+        LOGGER.debug("All the collections are validated");
+        routingContext.next();
+      }
 
-                    routingContext.data().put("ownerUserId", success.getString("ownerUserId"));
-                    routingContext.data().put("accessPolicy", success.getString("accessPolicy"));
-                    routingContext.data().put("role", user.getRole().toString());
+    }).onFailure(err -> {
+      LOGGER.error("Failed to fetch item metadata: {}", err.getMessage());
+      routingContext.fail(new OgcException(500, "Internal Server Error", "Error fetching item metadata"));
+    });
 
-                    // Move to next handler only after all validations succeed
-                    validatedcollecrionId.add(collectionId);
+  }
 
-                    if (validatedcollecrionId.size() == totalCollections) {
-                        LOGGER.debug("All the collections are validated");
-                        routingContext.next();
-                        return;
-                    }
-                })
-                .onFailure(failed -> {
-                    routingContext.fail(new OgcException(500, "Internal Server Error", "Validation failed for collection: " + collectionId));
-                });
-    }
 }
