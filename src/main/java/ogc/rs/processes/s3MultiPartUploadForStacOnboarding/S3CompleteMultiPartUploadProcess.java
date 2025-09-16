@@ -5,6 +5,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Pool;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
@@ -41,7 +42,7 @@ public class S3CompleteMultiPartUploadProcess implements ProcessService {
      * @param pgPool  PgPool instance for database interactions.
      * @param s3conf  S3 config of the bucket to be operated upon.
      */
-    public S3CompleteMultiPartUploadProcess(PgPool pgPool, S3Config s3conf) {
+    public S3CompleteMultiPartUploadProcess(Pool pgPool, S3Config s3conf) {
         this.utilClass = new UtilClass(pgPool);
         this.s3conf = s3conf;
         this.s3Client = S3Client.builder()

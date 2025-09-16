@@ -17,15 +17,6 @@ public class CatalogueVerticle extends AbstractVerticle {
   private static final Logger LOGGER = LogManager.getLogger(CatalogueVerticle.class);
   private MessageConsumer<JsonObject> consumer;
   private ServiceBinder binder;
-  private PgConnectOptions connectOptions;
-  private PoolOptions poolOptions;
-  private PgPool pool;
-  private String databaseIp;
-  private int databasePort;
-  private String databaseName;
-  private String databaseUserName;
-  private String databasePassword;
-  private int poolSize;
 
   private CatalogueService catalogueService;
   private WebClient catWebClient;

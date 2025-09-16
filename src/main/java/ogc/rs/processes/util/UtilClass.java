@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import java.util.UUID;
@@ -17,9 +18,9 @@ import static ogc.rs.processes.util.Constants.*;
 public class UtilClass {
   Logger LOGGER = LogManager.getLogger(UtilClass.class);
 
-  PgPool pgPool;
+  Pool pgPool;
 
-  public UtilClass(PgPool pgPool) {
+  public UtilClass(Pool pgPool) {
     this.pgPool = pgPool;
   }
 

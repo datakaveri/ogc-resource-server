@@ -7,7 +7,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
-import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
@@ -45,7 +45,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
 
   public static final String S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY = "s3BucketIdentifier";
 
-  private final PgPool pgPool;
+  private final Pool pgPool;
   private final WebClient webClient;
   private final UtilClass utilClass;
   private final JsonObject config;
@@ -61,7 +61,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
    * @param config    the configuration object
    * @param vertx     the Vert.x instance
    */
-  ProcessesRunnerImpl(PgPool pgPool, WebClient webClient, JsonObject config, Vertx vertx) {
+  ProcessesRunnerImpl(Pool pgPool, WebClient webClient, JsonObject config, Vertx vertx) {
     this.pgPool = pgPool;
     this.webClient = webClient;
     this.utilClass = new UtilClass(pgPool);
@@ -146,7 +146,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
       // Switch case to handle different processes
       switch (processName) {
         case "CollectionOnboarding":
-          processService = new CollectionOnboardingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
+          processService = new CollectionOnboardingProcess(pgPool, config, processSpecificS3Conf, vertx);
           break;
         case "CollectionAppending":
           processService = new CollectionAppendingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
@@ -155,16 +155,16 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
           processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, config, processSpecificS3Conf);
           break;
         case "S3InitiateMultipartUpload":
-          processService = new S3InitiateMultiPartUploadProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
+          processService = new S3InitiateMultiPartUploadProcess(pgPool, config, processSpecificS3Conf, vertx);
           break;
         case "S3CompleteMultipartUpload":
           processService = new S3CompleteMultiPartUploadProcess(pgPool, processSpecificS3Conf);
           break;
         case "TilesMetaDataOnboarding":
-          processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
+          processService = new TilesMetaDataOnboardingProcess(pgPool, config, processSpecificS3Conf, vertx);
           break;
         case "TilesOnboardingFromExistingFeature":
-          processService = new TilesOnboardingFromExistingFeatureProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
+          processService = new TilesOnboardingFromExistingFeatureProcess(pgPool, config, processSpecificS3Conf, vertx);
           break;
         case "FeatureAttributesExtraction":
           processService = new FeatureAttributesExtractionProcess(pgPool);

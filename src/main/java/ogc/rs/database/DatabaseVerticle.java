@@ -5,8 +5,8 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgConnectOptions;
-import io.vertx.pgclient.PgPool;
 import io.vertx.serviceproxy.ServiceBinder;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.PoolOptions;
 import static ogc.rs.common.Constants.*;
 import org.apache.logging.log4j.LogManager;
@@ -18,7 +18,7 @@ public class DatabaseVerticle extends AbstractVerticle {
     private ServiceBinder binder;
     private PgConnectOptions connectOptions;
     private PoolOptions poolOptions;
-    private PgPool pool;
+    private Pool pool;
     private String databaseIp;
     private int databasePort;
     private String databaseName;
@@ -49,7 +49,7 @@ public class DatabaseVerticle extends AbstractVerticle {
                         .setReconnectInterval(1000L);
 
         this.poolOptions = new PoolOptions().setMaxSize(poolSize);
-        this.pool = PgPool.pool(vertx, connectOptions, poolOptions);
+        this.pool = Pool.pool(vertx, connectOptions, poolOptions);
 
         dbService = new DatabaseServiceImpl(this.pool,this.config());
 

@@ -5,6 +5,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.common.S3Config;
@@ -38,7 +39,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(S3PreSignedURLGenerationProcess.class);
     private final UtilClass utilClass;
     private final WebClient webClient;
-    private final PgPool pgPool;
+    private final Pool pgPool;
     private S3Config s3conf;
     private String catServerHost;
     private String catRequestUri;
@@ -52,7 +53,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
      * @param config  The configuration containing AWS and database details.
      * @param s3conf  The S3Config instance i.e. config to access bucket requested in process input.
      */
-    public S3PreSignedURLGenerationProcess(PgPool pgPool, WebClient webClient,  JsonObject config, S3Config s3conf) {
+    public S3PreSignedURLGenerationProcess(Pool pgPool, WebClient webClient, JsonObject config, S3Config s3conf) {
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.webClient = webClient;

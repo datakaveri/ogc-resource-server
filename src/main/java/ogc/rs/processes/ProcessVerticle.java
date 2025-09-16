@@ -13,6 +13,7 @@ import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.pgclient.PgPool;
 import io.vertx.serviceproxy.ServiceBinder;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.PoolOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +24,7 @@ public class ProcessVerticle extends AbstractVerticle {
   private ServiceBinder binder;
   private PgConnectOptions connectOptions;
   private PoolOptions poolOptions;
-  private PgPool pool;
+  private Pool pool;
   private String databaseIp;
   private int databasePort;
   private String databaseName;
@@ -67,7 +68,7 @@ public class ProcessVerticle extends AbstractVerticle {
         .setTcpKeepAlive(true);
 
     this.poolOptions = new PoolOptions().setMaxSize(poolSize);
-    this.pool = PgPool.pool(vertx, connectOptions, poolOptions);
+    this.pool = Pool.pool(vertx, connectOptions, poolOptions);
     this.httpClient = vertx.createHttpClient(new HttpClientOptions().setShared(true));
 
     processService = new ProcessesRunnerImpl(pool,createWebClient(vertx),config(),vertx);

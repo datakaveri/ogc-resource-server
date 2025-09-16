@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Pool;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
@@ -21,7 +22,7 @@ public class EchoProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(EchoProcess.class);
     private final UtilClass utilClass;
 
-    public EchoProcess(PgPool pgPool) {
+    public EchoProcess(Pool pgPool) {
         this.utilClass = new UtilClass(pgPool);
     }
 
