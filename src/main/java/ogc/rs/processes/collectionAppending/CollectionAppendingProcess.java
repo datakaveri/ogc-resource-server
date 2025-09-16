@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.authentication.util.DxUser;
 import ogc.rs.apiserver.util.ProcessException;
@@ -47,7 +48,7 @@ import static ogc.rs.processes.collectionAppending.Constants.*;
 public class CollectionAppendingProcess implements ProcessService {
 
     private static final Logger LOGGER = LogManager.getLogger(CollectionAppendingProcess.class);
-    private final PgPool pgPool;
+    private final Pool pgPool;
     private final UtilClass utilClass;
     private final CollectionOnboardingProcess collectionOnboarding;
     private S3Config s3conf;
@@ -69,12 +70,12 @@ public class CollectionAppendingProcess implements ProcessService {
      * @param vertx              The Vert.x instance for executing asynchronous and event-driven tasks.
      */
 
-    public CollectionAppendingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx) {
+    public CollectionAppendingProcess(Pool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx) {
 
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.s3conf = s3conf;
-        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
+        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, config, s3conf, vertx);
         this.vertx = vertx;
         initializeConfig(config);
     }

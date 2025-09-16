@@ -10,6 +10,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.authentication.util.DxUser;
@@ -47,13 +48,9 @@ import static ogc.rs.processes.collectionOnboarding.Constants.*;
 public class CollectionOnboardingProcess implements ProcessService {
 
   private static final Logger LOGGER = LogManager.getLogger(CollectionOnboardingProcess.class);
-  private final PgPool pgPool;
-  private final WebClient webClient;
+  private final Pool pgPool;
   private final UtilClass utilClass;
   private S3Config s3conf;
-  private String catServerHost;
-  private String catRequestUri;
-  private int catServerPort;
   private String databaseName;
   private String databaseHost;
   private String databasePassword;
@@ -64,9 +61,8 @@ public class CollectionOnboardingProcess implements ProcessService {
   private Vertx vertx;
   private CatalogueInterface catalogueService;
 
-  public CollectionOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf,Vertx vertx) {
+  public CollectionOnboardingProcess(Pool pgPool, JsonObject config, S3Config s3conf, Vertx vertx) {
     this.pgPool = pgPool;
-    this.webClient = webClient;
     this.utilClass = new UtilClass(pgPool);
     this.vertx=vertx;
     this.s3conf = s3conf;
@@ -81,10 +77,6 @@ public class CollectionOnboardingProcess implements ProcessService {
    * @param config the JSON object containing the configuration parameters
    */
   private void initializeConfig(JsonObject config) {
-
-    this.catRequestUri = config.getString("catRequestItemsUri");
-    this.catServerHost = config.getString("catServerHost");
-    this.catServerPort = config.getInteger("catServerPort");
     this.databaseName = config.getString("databaseName");
     this.databaseHost = config.getString("databaseHost");
     this.databasePassword = config.getString("databasePassword");
@@ -410,7 +402,6 @@ public class CollectionOnboardingProcess implements ProcessService {
     Promise<Void> promise = Promise.promise();
     LOGGER.debug("Starting Pre-onboarding of collection");
 
-    LOGGER.info("hereee input is : {}", input.encodePrettily());
     int srid = input.getInteger("srid");
     BigInteger fileSize = (BigInteger) input.getValue("fileSize");
     String fileName = input.getString("fileName");

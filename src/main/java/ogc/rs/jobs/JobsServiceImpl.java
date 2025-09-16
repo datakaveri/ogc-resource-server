@@ -5,6 +5,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.common.Constants;
 import org.apache.logging.log4j.LogManager;
@@ -12,10 +13,10 @@ import org.apache.logging.log4j.Logger;
 
 public class JobsServiceImpl implements JobsService {
   private static final Logger LOGGER = LogManager.getLogger(JobsServiceImpl.class);
-  private final PgPool pgPool;
+  private final Pool pgPool;
   private final JsonObject config;
 
-  public JobsServiceImpl(PgPool pgPool, JsonObject config) {
+  public JobsServiceImpl(Pool pgPool, JsonObject config) {
     this.pgPool = pgPool;
     this.config = config;
   }

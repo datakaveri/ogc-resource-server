@@ -7,8 +7,7 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.client.WebClient;
-import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
@@ -48,7 +47,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
     private final CollectionOnboardingProcess collectionOnboarding;
     private final DataFromS3 dataFromS3;
     private final S3Config s3conf;
-    private final PgPool pgPool;
+    private final Pool pgPool;
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
 
@@ -63,17 +62,16 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
      * Constructor to initialize the S3 multipart upload process.
      *
      * @param pgPool          The PostgreSQL connection pool for database interactions.
-     * @param webClient       The WebClient for making HTTP requests.
      * @param config          The configuration object containing S3 credentials and settings.
      * @param s3conf          S3 config of the bucket to be operated upon.
      * @param vertx           The Vertx instance for asynchronous operations.
      */
-    public S3InitiateMultiPartUploadProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx) {
+    public S3InitiateMultiPartUploadProcess(Pool pgPool, JsonObject config, S3Config s3conf, Vertx vertx) {
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.s3conf = s3conf;
         this.dataFromS3 = new DataFromS3(vertx.createHttpClient(new HttpClientOptions().setShared(true)), s3conf);
-        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
+        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, config, s3conf, vertx);
 
         // Initialize S3 Client & S3 Presigner
         this.s3Client = S3Client.builder()

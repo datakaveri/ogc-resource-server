@@ -7,8 +7,7 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.client.WebClient;
-import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.authentication.util.DxUser;
@@ -38,7 +37,7 @@ import ogc.rs.processes.util.UtilClass;
 
 public class TilesMetaDataOnboardingProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(TilesMetaDataOnboardingProcess.class);
-    private final PgPool pgPool;
+    private final Pool pgPool;
     private final UtilClass utilClass;
     private final CollectionOnboardingProcess collectionOnboarding;
     private final DataFromS3 dataFromS3;
@@ -52,15 +51,14 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
      * Constructs a TilesMetaDataOnboardingProcess.
      *
      * @param pgPool       Postgresql database connection pool
-     * @param webClient    Vert.x web client for making HTTP requests
      * @param config       Configuration JSON object containing database and other settings
      * @param s3conf       The S3Config instance i.e. config to access bucket requested in process input.
      * @param vertx        Vert.x instance for asynchronous event-driven programming
      */
-    public TilesMetaDataOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx){
+    public TilesMetaDataOnboardingProcess(Pool pgPool, JsonObject config, S3Config s3conf, Vertx vertx){
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
-        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
+        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, config, s3conf, vertx);
         this.dataFromS3 = new DataFromS3(vertx.createHttpClient(new HttpClientOptions().setShared(true)), s3conf);
 
     }

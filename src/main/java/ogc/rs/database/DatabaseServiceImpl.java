@@ -31,9 +31,9 @@ import static ogc.rs.database.util.Constants.UPDATE_COLLECTIONS_DETAILS;
 public class DatabaseServiceImpl implements DatabaseService{
     private static final Logger LOGGER = LogManager.getLogger(DatabaseServiceImpl.class);
 
-    private final PgPool client;
+    private final Pool client;
     private final JsonObject config;
-    public DatabaseServiceImpl(final PgPool pgClient,JsonObject config) {
+    public DatabaseServiceImpl(final Pool pgClient,JsonObject config) {
         this.client = pgClient;this.config=config;
     }
 

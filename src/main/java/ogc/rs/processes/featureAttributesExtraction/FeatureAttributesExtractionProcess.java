@@ -5,6 +5,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
@@ -28,9 +29,9 @@ public class FeatureAttributesExtractionProcess implements ProcessService {
 
     private static final Logger LOGGER = LogManager.getLogger(FeatureAttributesExtractionProcess.class);
     private final UtilClass utilClass;
-    private final PgPool pgPool;
+    private final Pool pgPool;
 
-    public FeatureAttributesExtractionProcess(PgPool pgPool) {
+    public FeatureAttributesExtractionProcess(Pool pgPool) {
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
     }

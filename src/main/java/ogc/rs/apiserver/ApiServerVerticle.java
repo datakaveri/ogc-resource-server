@@ -2059,9 +2059,13 @@ public class ApiServerVerticle extends AbstractVerticle {
               });
 
     } else {
-      requestBody.put("accessPolicy", routingContext.data().get("accessPolicy"));
-      requestBody.put("ownerUserId", routingContext.data().get("ownerUserId"));
-      requestBody.put("role", routingContext.data().get("role"));
+      DxUser user = RoutingContextHelper.fromPrincipal(routingContext);
+      String ownerUserId = user.getSub().toString();
+      String accessPolicy = RoutingContextHelper.getAsset(routingContext).getAccessPolicy();
+        /*Since this API is only meant for provider, and authorization is done, adding role as provider directly*/
+      requestBody.put("accessPolicy", accessPolicy);
+      requestBody.put("ownerUserId", ownerUserId);
+      requestBody.put("role", DxRole.PROVIDER.toString());
 
       dbService
           .postStacCollection(requestBody)

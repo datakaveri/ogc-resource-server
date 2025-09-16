@@ -99,7 +99,7 @@ public class CatalogueService implements CatalogueInterface {
   }
 
   private Asset parseAndGetAsset(JsonObject result, String id) {
-    LOGGER.debug("Asset info : {}", result.encodePrettily());
+    LOGGER.debug("Asset info : {}", result.encode());
     try {
       String assetName = result.getString(ASSET_NAME_KEY, "").trim();
       String provider = result.getString(OWNER_ID);
