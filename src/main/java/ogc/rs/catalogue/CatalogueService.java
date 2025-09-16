@@ -125,6 +125,7 @@ public class CatalogueService implements CatalogueInterface {
           || catAssetType == null
           || organizationId == null
           || shortDescription == null
+          || tags == null
           || tags.isEmpty()
           || createdAt == null
           || accessPolicy == null) {

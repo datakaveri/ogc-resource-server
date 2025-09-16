@@ -129,7 +129,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
         requestInput.put("progress", calculateProgress(1));
 
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, INITIATE_MULTIPART_UPLOAD_PROCESS_START_MESSAGE)
-                .compose(progressUpdate -> collectionOnboarding.validateOwnershipAndGetResourceInfo(resourceId,user))
+                .compose(progressUpdate -> collectionOnboarding.validateOwnershipAndGetResourceInfo(resourceId,user, requestInput))
                 .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2)).put(MESSAGE, RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdate -> checkResourceOnboardedAsStac(requestInput))

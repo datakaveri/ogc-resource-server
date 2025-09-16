@@ -104,7 +104,7 @@ public class CollectionOnboardingProcess implements ProcessService {
     DxUser user = DxUser.fromJsonObject(providerJson);
 
     utilClass.updateJobTableStatus(requestInput, Status.RUNNING,CHECK_CAT_FOR_RESOURCE_REQUEST)
-      .compose(progressUpdateHandler -> validateOwnershipAndGetResourceInfo(tableID,user)).compose(
+      .compose(progressUpdateHandler -> validateOwnershipAndGetResourceInfo(tableID,user, requestInput)).compose(
         catResponseHandler -> utilClass.updateJobTableProgress(
           requestInput.put("progress", calculateProgress(2, 8)).put(MESSAGE,CAT_REQUEST_RESPONSE)))
       .compose(progressUpdateHandler -> checkIfCollectionPresent(requestInput)).compose(
@@ -145,7 +145,7 @@ public class CollectionOnboardingProcess implements ProcessService {
    * @return Asset object
    */
 
-  public Future<JsonObject> validateOwnershipAndGetResourceInfo(String resourceId, DxUser user) {
+  public Future<JsonObject> validateOwnershipAndGetResourceInfo(String resourceId, DxUser user, JsonObject requestInput) {
     /*Calling catalogue to get information about resourceId / collectionId */
     Promise<JsonObject> promise = Promise.promise();
     catalogueService.getCatalogueAsset(resourceId).onSuccess(catAsset -> {
@@ -169,15 +169,12 @@ public class CollectionOnboardingProcess implements ProcessService {
       JsonObject providerOrgInfo = new JsonObject()
           .put("providerOrg",user.getOrganisationName())
           .put("additionalInfoURL",user.getOrganisationId());
-
-      JsonObject assetAndOrganizationInfo = new JsonObject()
-          .put("accessPolicy", catAsset.getAccessPolicy())
-          .put("created",catAsset.getCreatedAt())
-          .put("keywords",catAsset.getTags())
-          .put("providerName",user.getGivenName())
-          .put("providerContact",providerOrgInfo);
-
-      promise.complete(assetAndOrganizationInfo);
+      requestInput.put("accessPolicy", catAsset.getAccessPolicy());
+      requestInput.put("created",catAsset.getCreatedAt());
+      requestInput.put("keywords",new JsonArray(catAsset.getTags()));
+      requestInput.put("providerName",user.getGivenName());
+      requestInput.put("providerContact",providerOrgInfo);
+      promise.complete(requestInput);
     }).onFailure(err -> {
       LOGGER.error("Failed to fetch item metadata: {}", err.getMessage());
       promise.fail (new OgcException(500, "Internal Server Error", "Error fetching item metadata"));
@@ -265,8 +262,6 @@ public class CollectionOnboardingProcess implements ProcessService {
             })
         .onFailure(
             failureHandler -> {
-              //TODO: Heree remove this
-              failureHandler.printStackTrace();
               LOGGER.error("Failed in ogrInfo because {}", failureHandler.getMessage());
               promise.fail(OGR_INFO_FAILED);
             });
@@ -415,6 +410,7 @@ public class CollectionOnboardingProcess implements ProcessService {
     Promise<Void> promise = Promise.promise();
     LOGGER.debug("Starting Pre-onboarding of collection");
 
+    LOGGER.info("hereee input is : {}", input.encodePrettily());
     int srid = input.getInteger("srid");
     BigInteger fileSize = (BigInteger) input.getValue("fileSize");
     String fileName = input.getString("fileName");

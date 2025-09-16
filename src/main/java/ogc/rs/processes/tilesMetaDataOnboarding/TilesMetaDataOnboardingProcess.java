@@ -102,7 +102,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                 .compose(progressUpdateHandler -> checkTileMatrixSet(requestInput))
                 .compose(tileMatrixCheckHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(3)).put("message", TILE_MATRIX_SET_FOUND_MESSAGE)))
-                .compose(progressUpdateHandler -> collectionOnboarding.validateOwnershipAndGetResourceInfo(collectionId,user))
+                .compose(progressUpdateHandler -> collectionOnboarding.validateOwnershipAndGetResourceInfo(collectionId,user, requestInput))
                 .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(4)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkFileExistenceInS3(requestInput))
