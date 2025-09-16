@@ -93,7 +93,7 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
         requestInput.put("pureTile", false);
         requestInput.put("progress",calculateProgress(1));
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, START_TILES_ONBOARDING_PROCESS)
-                .compose(progressUpdateHandler -> featureCollectionOnboarding.validateOwnershipAndGetResourceInfo(requestInput.getString("resourceId"),user))
+                .compose(progressUpdateHandler -> featureCollectionOnboarding.validateOwnershipAndGetResourceInfo(requestInput.getString("resourceId"),user, requestInput))
                 .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress",calculateProgress(2)).put("message",RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkIfFeatureCollectionExists(requestInput))

@@ -122,7 +122,7 @@ public class CollectionAppendingProcess implements ProcessService {
                 .compose(progressUpdateHandler -> checkIfCollectionPresent(requestInput))
                 .compose(collectionCheckHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2, 7)).put("message", COLLECTION_EXISTS_MESSAGE)))
-                .compose(progressUpdateHandler->collectionOnboarding.validateOwnershipAndGetResourceInfo(tableID,user))
+                .compose(progressUpdateHandler->collectionOnboarding.validateOwnershipAndGetResourceInfo(tableID,user, requestInput))
                 .compose(resourceOwnershipCheckHandler->utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(3, 7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> validateSchemaAndCRS(requestInput))
