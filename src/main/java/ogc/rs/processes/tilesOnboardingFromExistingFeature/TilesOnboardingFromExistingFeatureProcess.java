@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Tuple;
+import ogc.rs.apiserver.authentication.util.DxUser;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
@@ -83,13 +84,16 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
      */
     public Future<JsonObject> execute(JsonObject requestInput){
         Promise<JsonObject> promise = Promise.promise();
+        JsonObject providerJson = requestInput.getJsonObject("user");
+        DxUser user = DxUser.fromJsonObject(providerJson);
+
 
         requestInput.put("tileMatrixSet","WorldCRS84Quad");
         requestInput.put("collectionType", "VECTOR");
         requestInput.put("pureTile", false);
         requestInput.put("progress",calculateProgress(1));
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, START_TILES_ONBOARDING_PROCESS)
-                .compose(progressUpdateHandler -> featureCollectionOnboarding.makeCatApiRequest(requestInput))
+                .compose(progressUpdateHandler -> featureCollectionOnboarding.validateOwnershipAndGetResourceInfo(requestInput.getString("resourceId"),user))
                 .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress",calculateProgress(2)).put("message",RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkIfFeatureCollectionExists(requestInput))

@@ -11,6 +11,7 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
+import ogc.rs.apiserver.authentication.util.DxUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.math.BigInteger;
@@ -85,7 +86,10 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
         String encoding = requestInput.getString("encoding");
         String collectionType = "MVT".equalsIgnoreCase(encoding) ? "VECTOR" : "MAP";
         requestInput.put("collectionType",collectionType);
-        // Determine file extension based on encoding
+        JsonObject providerJson = requestInput.getJsonObject("user");
+        DxUser user = DxUser.fromJsonObject(providerJson);
+
+      // Determine file extension based on encoding
         String fileExtension = "MVT".equalsIgnoreCase(encoding) ? ".pbf" : "." + encoding.toLowerCase();
         // Construct the file path
         String fileName = collectionId + "/" + tileMatrixSet +  "/" +testTileCoordinateIndexes + fileExtension;
@@ -98,7 +102,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
                 .compose(progressUpdateHandler -> checkTileMatrixSet(requestInput))
                 .compose(tileMatrixCheckHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(3)).put("message", TILE_MATRIX_SET_FOUND_MESSAGE)))
-                .compose(progressUpdateHandler -> collectionOnboarding.makeCatApiRequest(requestInput))
+                .compose(progressUpdateHandler -> collectionOnboarding.validateOwnershipAndGetResourceInfo(collectionId,user))
                 .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(4)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> checkFileExistenceInS3(requestInput))

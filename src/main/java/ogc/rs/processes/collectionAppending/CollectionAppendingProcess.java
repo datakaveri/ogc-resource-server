@@ -9,6 +9,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Tuple;
+import ogc.rs.apiserver.authentication.util.DxUser;
 import ogc.rs.apiserver.util.ProcessException;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
@@ -111,6 +112,8 @@ public class CollectionAppendingProcess implements ProcessService {
         Promise<JsonObject> objectPromise = Promise.promise();
 
         requestInput.put("progress", calculateProgress(1, 7));
+        JsonObject providerJson = requestInput.getJsonObject("user");
+        DxUser user = DxUser.fromJsonObject(providerJson);
 
         String tableID = requestInput.getString("resourceId");
         requestInput.put("collectionsDetailsTableId", tableID);
@@ -119,7 +122,7 @@ public class CollectionAppendingProcess implements ProcessService {
                 .compose(progressUpdateHandler -> checkIfCollectionPresent(requestInput))
                 .compose(collectionCheckHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2, 7)).put("message", COLLECTION_EXISTS_MESSAGE)))
-                .compose(progressUpdateHandler->collectionOnboarding.makeCatApiRequest(requestInput))
+                .compose(progressUpdateHandler->collectionOnboarding.validateOwnershipAndGetResourceInfo(tableID,user))
                 .compose(resourceOwnershipCheckHandler->utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(3, 7)).put("message", RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdateHandler -> validateSchemaAndCRS(requestInput))
