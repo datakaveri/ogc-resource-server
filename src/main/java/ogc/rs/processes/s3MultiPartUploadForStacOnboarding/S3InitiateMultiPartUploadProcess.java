@@ -12,6 +12,7 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
+import ogc.rs.apiserver.authentication.util.DxUser;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
@@ -115,8 +116,11 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
         String fileName = requestInput.getString("fileName").replaceAll("[^a-zA-Z0-9_.-]", "_");
         String fileType = requestInput.getString("fileType");
         long fileSize = requestInput.getLong("fileSize");
+        JsonObject providerJson = requestInput.getJsonObject("user");
+        DxUser user = DxUser.fromJsonObject(providerJson);
 
-        // Determine chunk size based on file size
+
+      // Determine chunk size based on file size
         long chunkSize = determineChunkSize(fileSize);
         int totalParts = (int) Math.ceil((double) fileSize / chunkSize);
 
@@ -125,7 +129,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
         requestInput.put("progress", calculateProgress(1));
 
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, INITIATE_MULTIPART_UPLOAD_PROCESS_START_MESSAGE)
-                .compose(progressUpdate -> collectionOnboarding.makeCatApiRequest(requestInput))
+                .compose(progressUpdate -> collectionOnboarding.validateOwnershipAndGetResourceInfo(resourceId,user))
                 .compose(resourceOwnershipHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2)).put(MESSAGE, RESOURCE_OWNERSHIP_CHECK_MESSAGE)))
                 .compose(progressUpdate -> checkResourceOnboardedAsStac(requestInput))

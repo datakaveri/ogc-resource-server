@@ -12,8 +12,10 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
+import ogc.rs.apiserver.authentication.util.DxUser;
 import ogc.rs.apiserver.router.RouterManager;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
@@ -35,6 +37,7 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ogc.rs.common.Constants.CATALOGUE_SERVICE_ADDRESS;
 import static ogc.rs.processes.collectionOnboarding.Constants.*;
 
 
@@ -59,6 +62,7 @@ public class CollectionOnboardingProcess implements ProcessService {
   private final boolean VERTX_EXECUTE_BLOCKING_IN_ORDER = false;
   private DataFromS3 dataFromS3;
   private Vertx vertx;
+  private CatalogueInterface catalogueService;
 
   public CollectionOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf,Vertx vertx) {
     this.pgPool = pgPool;
@@ -66,6 +70,7 @@ public class CollectionOnboardingProcess implements ProcessService {
     this.utilClass = new UtilClass(pgPool);
     this.vertx=vertx;
     this.s3conf = s3conf;
+    this.catalogueService = CatalogueInterface.createProxy(vertx, CATALOGUE_SERVICE_ADDRESS);
     this.dataFromS3= new DataFromS3(vertx.createHttpClient(new HttpClientOptions().setShared(true)), s3conf);
     initializeConfig(config);
   }
@@ -95,9 +100,11 @@ public class CollectionOnboardingProcess implements ProcessService {
 
     String tableID = requestInput.getString("resourceId");
     requestInput.put("collectionsDetailsTableId", tableID);
+    JsonObject providerJson = requestInput.getJsonObject("user");
+    DxUser user = DxUser.fromJsonObject(providerJson);
 
     utilClass.updateJobTableStatus(requestInput, Status.RUNNING,CHECK_CAT_FOR_RESOURCE_REQUEST)
-      .compose(progressUpdateHandler -> makeCatApiRequest(requestInput)).compose(
+      .compose(progressUpdateHandler -> validateOwnershipAndGetResourceInfo(tableID,user)).compose(
         catResponseHandler -> utilClass.updateJobTableProgress(
           requestInput.put("progress", calculateProgress(2, 8)).put(MESSAGE,CAT_REQUEST_RESPONSE)))
       .compose(progressUpdateHandler -> checkIfCollectionPresent(requestInput)).compose(
@@ -129,67 +136,52 @@ public class CollectionOnboardingProcess implements ProcessService {
     return objectPromise.future();
   }
 
+
+
   /**
-   * Makes a request to the catalog to check if the resource ID is present.
-   *
-   * @param requestInput the JSON object containing the resource ID
-   * @return a future that completes with the request input if the resource ID is present in the catalog, or fails with an error message if the resource ID is not present in the catalog
+   *  Call to the catalogue service to get asset information and validate ownership of the provider
+   * @param resourceId for which meta data is fetched
+   * @param user provider user object
+   * @return Asset object
    */
-  public Future<JsonObject> makeCatApiRequest(JsonObject requestInput) {
+
+  public Future<JsonObject> validateOwnershipAndGetResourceInfo(String resourceId, DxUser user) {
+    /*Calling catalogue to get information about resourceId / collectionId */
     Promise<JsonObject> promise = Promise.promise();
-    webClient.get(catServerPort, catServerHost, catRequestUri)
-      .addQueryParam("id", requestInput.getString("resourceId")).send()
-      .onSuccess(responseFromCat -> {
-        if (responseFromCat.statusCode() == 200) {
-          requestInput.put("owner",
-            responseFromCat.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
-              .getString("ownerUserId"));
-          if (!(requestInput.getValue("owner").toString().equals(requestInput.getValue("userId").toString()))) {
-            LOGGER.error(RESOURCE_OWNERSHIP_ERROR);
-            promise.fail(new OgcException(403, "Forbidden", RESOURCE_OWNERSHIP_ERROR));
-            return;
-          }
-          JsonObject result =  responseFromCat.bodyAsJsonObject()
-                  .getJsonArray("results").getJsonObject(0);
-          requestInput.put("accessPolicy", result.getString("accessPolicy"));
+    catalogueService.getCatalogueAsset(resourceId).onSuccess(catAsset -> {
+      if (catAsset == null) {
+        promise.fail( new OgcException(404, "Not Found", "Item Not Found"));
+        return;
+      }
+      /* set asset information in routing context helper */
+      String ownerUserId = catAsset.getProviderId();
+      boolean isProviderTheResourceOwner = ownerUserId.equals(user.getSub().toString());
+      boolean IsOrganizationIdSame = catAsset.getOrganizationId().equals(user.getOrganisationId());
 
-          String providerId = result.getString("provider");
+      if(!isProviderTheResourceOwner && !IsOrganizationIdSame){
+        promise.fail( new OgcException(403, "Forbidden", "Ownership check failed"));
+        return;
+      }
+      /*TODO: Change the additionalInfoURL to organisation's URL / business URL. Currently both token and catalogue
+       *  metadata for item is not containing the same. There is no catalogue endpoint in V2 specifically for
+       * provider catalogue item
+       *  */
+      JsonObject providerOrgInfo = new JsonObject()
+          .put("providerOrg",user.getOrganisationName())
+          .put("additionalInfoURL",user.getOrganisationId());
 
-          webClient.get(catServerPort, catServerHost, catRequestUri)
-                  .addQueryParam("id", providerId).send()
-                  .onSuccess(providerRes -> {
-                    if (providerRes.statusCode() == 200) {
-                      requestInput.put("created",
-                             result.getString("itemCreatedAt"));
-                      requestInput.put("keywords",
-                             result.getJsonArray("tags"));
-                      requestInput.put("providerName",
-                              providerRes.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
-                                      .getString("name"));
-                      requestInput.put("providerContact",
-                              providerRes.bodyAsJsonObject().getJsonArray("results").getJsonObject(0)
-                                      .getJsonObject( "providerOrg").getString("additionalInfoURL"));
-                      promise.complete(requestInput);
+      JsonObject assetAndOrganizationInfo = new JsonObject()
+          .put("accessPolicy", catAsset.getAccessPolicy())
+          .put("created",catAsset.getCreatedAt())
+          .put("keywords",catAsset.getTags())
+          .put("providerName",user.getGivenName())
+          .put("providerContact",providerOrgInfo);
 
-                    } else {
-                      LOGGER.error(ITEM_NOT_PRESENT_ERROR);
-                      promise.fail(new OgcException(404, "Not Found", ITEM_NOT_PRESENT_ERROR));
-                    }
-
-                  }).onFailure(fail->{
-                    LOGGER.error(CAT_RESPONSE_FAILURE + fail.getMessage());
-                    promise.fail(CAT_RESPONSE_FAILURE);
-
-                  });
-
-        } else {
-          LOGGER.error(ITEM_NOT_PRESENT_ERROR);
-          promise.fail(new OgcException(404, "Not Found", ITEM_NOT_PRESENT_ERROR));
-        }
-      }).onFailure(failureResponseFromCat -> {
-        LOGGER.error(CAT_RESPONSE_FAILURE + failureResponseFromCat.getMessage());
-        promise.fail(CAT_RESPONSE_FAILURE);
-      });
+      promise.complete(assetAndOrganizationInfo);
+    }).onFailure(err -> {
+      LOGGER.error("Failed to fetch item metadata: {}", err.getMessage());
+      promise.fail (new OgcException(500, "Internal Server Error", "Error fetching item metadata"));
+    });
     return promise.future();
   }
 
@@ -273,6 +265,8 @@ public class CollectionOnboardingProcess implements ProcessService {
             })
         .onFailure(
             failureHandler -> {
+              //TODO: Heree remove this
+              failureHandler.printStackTrace();
               LOGGER.error("Failed in ogrInfo because {}", failureHandler.getMessage());
               promise.fail(OGR_INFO_FAILED);
             });

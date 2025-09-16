@@ -248,7 +248,6 @@ public class ApiServerVerticle extends AbstractVerticle {
     }
     DxUser user = RoutingContextHelper.fromPrincipal(routingContext);
     /* Assuming the role to be provider as the authz only allows providers */
-    JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");
     requestBody.put("processId", paramsFromOasValidation.pathParameter("processId").getString())
         .put("userId", user.getSub().toString())
         .put("role", DxRole.PROVIDER.toString())
