@@ -2,10 +2,8 @@ package ogc.rs.processes.s3PreSignedURLGeneration;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
-import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
@@ -110,7 +108,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
 
        // Chain the process steps and handle success or failure
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, STARTING_PRE_SIGNED_URL_PROCESS_MESSAGE)
-                .compose(progressUpdateHandler -> checkResourceOwnershipAndBuildS3ObjectKey2(resourceId, user, requestInput))
+                .compose(progressUpdateHandler -> checkResourceOwnershipAndBuildS3ObjectKey(resourceId, user, requestInput))
                 .compose(catResponseHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2)).put(MESSAGE, CAT_REQUEST_RESPONSE)))
                 // Check if the resource has already been onboarded in collection_type table
@@ -154,7 +152,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
    * @param requestInput The input JSON object containing details like resourceId, userId, and fileType.
    * @return A Future containing the updated requestInput with objectKeyName, or an error message.
    */
-  public Future<JsonObject> checkResourceOwnershipAndBuildS3ObjectKey2(String resourceId, DxUser user, JsonObject requestInput) {
+  public Future<JsonObject> checkResourceOwnershipAndBuildS3ObjectKey(String resourceId, DxUser user, JsonObject requestInput) {
     /*Calling catalogue to get information about resourceId  */
     Promise<JsonObject> promise = Promise.promise();
     catalogueService.getCatalogueAsset(resourceId).onSuccess(catAsset -> {
@@ -173,8 +171,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
         promise.fail(new OgcException(403, "Forbidden", RESOURCE_OWNERSHIP_ERROR));
         return;
       }
-      /*TODO: No resource group
-       *  */
+      /*TODO: No resource group to add as a prefix to filename **/
 
       // Determine file extension based on file type
       String fileType = requestInput.getString("fileType").toLowerCase();
