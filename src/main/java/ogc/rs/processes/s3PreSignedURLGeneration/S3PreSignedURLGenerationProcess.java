@@ -2,12 +2,15 @@ package ogc.rs.processes.s3PreSignedURLGeneration;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
+import ogc.rs.apiserver.authentication.util.DxUser;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
 import ogc.rs.processes.util.Status;
@@ -44,6 +47,7 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
     private String catServerHost;
     private String catRequestUri;
     private int catServerPort;
+    private CatalogueInterface catalogueService;
 
     /**
      * Constructor to initialize the S3PreSignedURLGenerationProcess with PostgreSQL pool, WebClient and configuration.
@@ -53,7 +57,9 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
      * @param config  The configuration containing AWS and database details.
      * @param s3conf  The S3Config instance i.e. config to access bucket requested in process input.
      */
-    public S3PreSignedURLGenerationProcess(Pool pgPool, WebClient webClient, JsonObject config, S3Config s3conf) {
+    public S3PreSignedURLGenerationProcess(Pool pgPool, WebClient webClient, JsonObject config, S3Config s3conf,
+                                           CatalogueInterface catalogueService) {
+        this.catalogueService = catalogueService;
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.webClient = webClient;
@@ -95,13 +101,16 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
     @Override
     public Future<JsonObject> execute(JsonObject requestInput) {
         Promise<JsonObject> objectPromise = Promise.promise();
+      JsonObject providerJson = requestInput.getJsonObject("user");
+      DxUser user = DxUser.fromJsonObject(providerJson);
+      String resourceId = requestInput.getString("resourceId");
 
         // Update initial progress
         requestInput.put("progress", calculateProgress(1));
 
        // Chain the process steps and handle success or failure
         utilClass.updateJobTableStatus(requestInput, Status.RUNNING, STARTING_PRE_SIGNED_URL_PROCESS_MESSAGE)
-                .compose(progressUpdateHandler -> checkResourceOwnershipAndBuildS3ObjectKey(requestInput))
+                .compose(progressUpdateHandler -> checkResourceOwnershipAndBuildS3ObjectKey2(resourceId, user, requestInput))
                 .compose(catResponseHandler -> utilClass.updateJobTableProgress(
                         requestInput.put("progress", calculateProgress(2)).put(MESSAGE, CAT_REQUEST_RESPONSE)))
                 // Check if the resource has already been onboarded in collection_type table
@@ -137,86 +146,59 @@ public class S3PreSignedURLGenerationProcess implements ProcessService {
         return objectPromise.future();
     }
 
-    /**
-     * Makes a generic API call to the catalogue server with the provided resourceID.
-     *
-     * @param id The resourceID to include as a query parameter.
-     * @return A Future containing the response body as a JsonObject.
-     */
-    private Future<JsonObject> makeCatApiRequest(String id) {
-        Promise<JsonObject> promise = Promise.promise();
 
-        webClient.get(catServerPort, catServerHost, catRequestUri)
-                .addQueryParam("id", id).send()
-                .onSuccess(response -> {
-                    if (response.statusCode() == 200) {
-                        JsonObject result = response.bodyAsJsonObject().getJsonArray("results").getJsonObject(0);
-                        promise.complete(result);
-                    } else {
-                        promise.fail(new OgcException(404, "Not Found", ITEM_NOT_PRESENT_ERROR));
-                    }
-                })
-                .onFailure(failureResponseFromCat -> {
-                    LOGGER.error(CAT_RESPONSE_FAILURE + failureResponseFromCat.getMessage());
-                    promise.fail(new OgcException(500, "Internal Server Error", CAT_RESPONSE_FAILURE));
-                });
+  /**
+   * Handles the process of making catalogue API request, checking resource ownership,
+   * and constructing the object key name.
+   *
+   * @param requestInput The input JSON object containing details like resourceId, userId, and fileType.
+   * @return A Future containing the updated requestInput with objectKeyName, or an error message.
+   */
+  public Future<JsonObject> checkResourceOwnershipAndBuildS3ObjectKey2(String resourceId, DxUser user, JsonObject requestInput) {
+    /*Calling catalogue to get information about resourceId  */
+    Promise<JsonObject> promise = Promise.promise();
+    catalogueService.getCatalogueAsset(resourceId).onSuccess(catAsset -> {
+      if (catAsset == null) {
+        promise.fail(new OgcException(404, "Not Found", "Item Not Found"));
+        return;
+      }
+      /* set asset information in routing context helper */
+      String ownerUserId = catAsset.getProviderId();
+      boolean isProviderTheResourceOwner = ownerUserId.equals(user.getSub().toString());
+      boolean IsOrganizationIdSame = catAsset.getOrganizationId().equals(user.getOrganisationId());
 
-        return promise.future();
-    }
+      if (!isProviderTheResourceOwner && !IsOrganizationIdSame) {
+        LOGGER.error("Ownership check failed for resourceId:{} , isProviderTheResourceOwner:" +
+            " {}, IsOrganizationIdSame : {}", resourceId, isProviderTheResourceOwner, IsOrganizationIdSame);
+        promise.fail(new OgcException(403, "Forbidden", RESOURCE_OWNERSHIP_ERROR));
+        return;
+      }
+      /*TODO: No resource group
+       *  */
 
-    /**
-     * Handles the process of making catalogue API request, checking resource ownership,
-     * and constructing the object key name.
-     *
-     * @param requestInput The input JSON object containing details like resourceId, userId, and fileType.
-     * @return A Future containing the updated requestInput with objectKeyName, or an error message.
-     */
-    public Future<JsonObject> checkResourceOwnershipAndBuildS3ObjectKey(JsonObject requestInput) {
-        Promise<JsonObject> promise = Promise.promise();
+      // Determine file extension based on file type
+      String fileType = requestInput.getString("fileType").toLowerCase();
+      String fileExtension = fileTypeMap.getOrDefault(fileType, "");
+      if (fileExtension.isEmpty()) {
+        // Unsupported file type
+        promise.fail(new OgcException(415, "Unsupported Media Type", UNSUPPORTED_FILE_TYPE_ERROR));
+        return;
+      }
 
-        // Call catalogue API to get resource info (resourceGroup and other details)
-        makeCatApiRequest(requestInput.getString("resourceId"))
-                .compose(resourceInfo -> {
-                    // Check resource ownership using ownerUserId
-                    String ownerUserId = resourceInfo.getString("ownerUserId");
-                    if (!ownerUserId.equals(requestInput.getString("userId"))) {
-                        // Ownership check failed
-                        LOGGER.error(RESOURCE_OWNERSHIP_ERROR);
-                        return Future.failedFuture(new OgcException(403, "Forbidden", RESOURCE_OWNERSHIP_ERROR));
-                    }
+      // Construct object key name using resourceId, resourceGroup, and file extension
+      String objectKeyName = resourceId + fileExtension;
 
-                    // Extract resourceGroup and set it in requestInput
-                    String resourceGroup = resourceInfo.getString("resourceGroup");
-                    requestInput.put("resourceGroup", resourceGroup);
+      LOGGER.debug("Object key name is: {}", objectKeyName);
+      requestInput.put("objectKeyName", objectKeyName);
+      promise.complete(requestInput);
+    }).onFailure(err -> {
+      LOGGER.error("Failed to fetch item metadata: {}", err.getMessage());
+      promise.fail(new OgcException(500, "Internal Server Error", "Error fetching item metadata"));
+    });
 
-                    // Determine file extension based on file type
-                    String fileType = requestInput.getString("fileType").toLowerCase();
-                    String fileExtension = fileTypeMap.getOrDefault(fileType, "");
-                    if (fileExtension.isEmpty()) {
-                        // Unsupported file type
-                        return Future.failedFuture(new OgcException(415, "Unsupported Media Type", UNSUPPORTED_FILE_TYPE_ERROR));
-                    }
+    return promise.future();
+  }
 
-                    // Construct object key name using resourceId, resourceGroup, and file extension
-                    String resourceId = requestInput.getString("resourceId");
-                    String objectKeyName = resourceGroup + "/" + resourceId + fileExtension;
-
-                    LOGGER.debug("Object key name is: {}", objectKeyName);
-                    requestInput.put("objectKeyName", objectKeyName);
-
-                    return Future.succeededFuture(requestInput);
-                })
-
-                // Success case: complete the promise with the updated requestInput
-                .onSuccess(promise::complete)
-                .onFailure(failure -> {
-                    // Failure case: log the error and fail the promise
-                    LOGGER.error(failure.getMessage());
-                    promise.fail(failure);
-                });
-
-        return promise.future();
-    }
 
     /**
      * Checks if a resource has been onboarded by querying the `collection_type` table.
