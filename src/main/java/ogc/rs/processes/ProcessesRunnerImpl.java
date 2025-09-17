@@ -11,6 +11,7 @@ import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.common.S3Config;
 import ogc.rs.common.S3ConfigsHolder;
 import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
@@ -31,8 +32,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import static ogc.rs.common.Constants.processException404;
-import static ogc.rs.common.Constants.processException500;
+
+import static ogc.rs.common.Constants.*;
 import static ogc.rs.processes.util.Constants.PROCESS_EXIST_CHECK_QUERY;
 import static ogc.rs.processes.util.Constants.NO_S3_CONF_FOUND_FOR_BUCKET_ID;
 
@@ -51,7 +52,9 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
   private final JsonObject config;
   private final Vertx vertx;
   private final S3ConfigsHolder s3conf;
+  private final CatalogueInterface catalogueService;
   Logger LOGGER = LogManager.getLogger(ProcessesRunnerImpl.class);
+
 
   /**
    * Constructs a new {@code ProcessesRunnerImpl} instance.
@@ -67,6 +70,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
     this.utilClass = new UtilClass(pgPool);
     this.config = config;
     this.vertx = vertx;
+    this.catalogueService = CatalogueInterface.createProxy(vertx, CATALOGUE_SERVICE_ADDRESS);
     this.s3conf = S3ConfigsHolder.createFromServerConfig(config.getJsonObject(S3ConfigsHolder.S3_CONFIGS_BLOCK_KEY_NAME));
   }
 
@@ -152,7 +156,7 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
           processService = new CollectionAppendingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
           break;
         case "S3PreSignedURLGeneration":
-          processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, config, processSpecificS3Conf);
+          processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, config, processSpecificS3Conf, catalogueService);
           break;
         case "S3InitiateMultipartUpload":
           processService = new S3InitiateMultiPartUploadProcess(pgPool, config, processSpecificS3Conf, vertx);
