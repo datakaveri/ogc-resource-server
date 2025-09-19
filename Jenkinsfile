@@ -81,7 +81,7 @@ pipeline {
           script{
             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
           if (!fileExists('stac-validator-venv')) {
-            sh 'python3.10 -m venv stac-validator-venv'
+            sh 'python3 -m venv stac-validator-venv'
           }
             sh '''
             . stac-validator-venv/bin/activate
