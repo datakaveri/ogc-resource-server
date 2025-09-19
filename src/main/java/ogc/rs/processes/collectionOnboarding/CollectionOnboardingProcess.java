@@ -103,7 +103,7 @@ public class CollectionOnboardingProcess implements ProcessService {
       .compose(progressUpdateHandler -> checkIfCollectionPresent(requestInput)).compose(
         checkCollectionTableHandler -> utilClass.updateJobTableProgress(
           requestInput.put("progress", calculateProgress(3, 8)).put(MESSAGE,COLLECTION_RESPONSE)))
-            .compose(progressUpdateHandler -> checkForCrs(requestInput)).compose(
+            .compose(progressUpdateHandler -> checkForCrsAndDateTimeKey(requestInput)).compose(
         checkCollectionTableHandler -> utilClass.updateJobTableProgress(
           requestInput.put("progress", calculateProgress(4, 8)).put(MESSAGE,CRS_RESPONSE)))
             .compose(progressHandler->getMetaDataFromS3(requestInput)).compose(
@@ -224,7 +224,7 @@ public class CollectionOnboardingProcess implements ProcessService {
    * @param input the command line output
    * @return the feature properties
    */
-  private Future<JsonObject> checkForCrs(JsonObject input) {
+  private Future<JsonObject> checkForCrsAndDateTimeKey(JsonObject input) {
 
     Promise<JsonObject> promise = Promise.promise();
 
@@ -269,7 +269,21 @@ public class CollectionOnboardingProcess implements ProcessService {
               }
               int organizationCoOrdId = Integer.parseInt(authorityAndCode.get("code"));
               LOGGER.debug("organization " + organization + " crs " + organizationCoOrdId);
-              validSridFromDatabase(organizationCoOrdId, input, promise);
+                // Check for dateTimeKey
+                if (input.containsKey("dateTimeKey")) {
+                    String dateTimeKey = input.getString("dateTimeKey");
+                    boolean dateTimeKeyCheck = checkDateTimeKey(cmdOutput, dateTimeKey);
+                    if (!dateTimeKeyCheck) {
+                        LOGGER.error(DATE_TIME_KEY_ERROR);
+                        promise.fail(DATE_TIME_KEY_ERROR);
+                        return;
+                    }
+                    input.put("dateTimeKeyCheck", true);
+                    LOGGER.debug(VALID_DATE_TIME_KEY_MESSAGE);
+                } else {
+                    LOGGER.debug(NULL_DATE_TIME_KEY_MESSAGE);
+                }
+                validSridFromDatabase(organizationCoOrdId, input, promise);
             })
         .onFailure(
             failureHandler -> {
@@ -307,7 +321,22 @@ public class CollectionOnboardingProcess implements ProcessService {
     return authorityAndCode;
   }
 
-  private void validSridFromDatabase(int organizationCoordId, JsonObject input,
+    private boolean checkDateTimeKey(JsonObject cmdOutput, String dateTimeKey) {
+        JsonArray layers = cmdOutput.getJsonArray("layers");
+        for (int i = 0; i < layers.size(); i++) {
+            JsonObject layer = layers.getJsonObject(i);
+            JsonArray fields = layer.getJsonArray("fields");
+            for (int j = 0; j < fields.size(); j++) {
+                JsonObject field = fields.getJsonObject(j);
+                if (field.getString("name").equals(dateTimeKey) && field.getString("type").equals("String")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void validSridFromDatabase(int organizationCoordId, JsonObject input,
                                      Promise<JsonObject> onboardingPromise) {
     pgPool.withConnection(sqlConnection -> sqlConnection.preparedQuery(CRS_TO_SRID_SELECT_QUERY)
       .execute(Tuple.of(organizationCoordId)).onSuccess(rows -> {
@@ -433,7 +462,11 @@ public class CollectionOnboardingProcess implements ProcessService {
     String accessPolicy = input.getString("accessPolicy");
     String grantQuery = GRANT_QUERY.replace("collections_details_id", collectionsDetailsTableName)
       .replace("databaseUser", databaseUser);
-    JsonArray keywords = input.getJsonArray("keywords");
+    // Get the value for datetime_key if present and datetimeKeyCheck is true
+      String dateTimeKey = input.getString("dateTimeKey");
+      Boolean dateTimeKeyCheck = input.getBoolean("dateTimeKeyCheck", false);
+      String datetimeKeyValue = dateTimeKeyCheck && dateTimeKey != null ? dateTimeKey : null;
+      JsonArray keywords = input.getJsonArray("keywords");
     String[] keywordsArray = keywords.stream()
             .map(Object::toString)
             .toArray(String[]::new);
@@ -447,7 +480,7 @@ public class CollectionOnboardingProcess implements ProcessService {
     OffsetDateTime createdDate = OffsetDateTime.parse(created);
     pgPool.withTransaction(sqlClient -> sqlClient.preparedQuery(COLLECTIONS_DETAILS_INSERT_QUERY)
       .execute(
-        Tuple.of(collectionsDetailsTableName, title, description, DEFAULT_SERVER_CRS))
+        Tuple.of(collectionsDetailsTableName, title, description, DEFAULT_SERVER_CRS, datetimeKeyValue))
       .compose(
         collectionResult -> sqlClient.preparedQuery(COLLECTION_TYPE_INSERT_QUERY)
       .execute(Tuple.of(collectionsDetailsTableName,FEATURE)))
