@@ -254,9 +254,15 @@ public class CollectionOnboardingProcessIT {
                 .put("dateTimeKey", "hydro");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
-        Thread.sleep(40000);
-        Response getJobStatus = sendJobStatusRequest(jobId, token);
-        getJobStatus.then().statusCode(200).body("message", is(DB_CHECK_RESPONSE));
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(45, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(DATE_TIME_KEY_ERROR);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
     }
 
     @Disabled  
