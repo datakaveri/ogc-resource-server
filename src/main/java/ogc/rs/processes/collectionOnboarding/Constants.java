@@ -11,7 +11,8 @@ public class Constants {
       "INSERT INTO collections_enclosure (collections_id,title,href,type,size,s3_bucket_id) VALUES ($1::UUID, $2, $3, $4, $5, $6) returning id;";
 
   public static final String COLLECTIONS_DETAILS_INSERT_QUERY =
-      "INSERT INTO collections_details (id, title, description, crs) VALUES ($1::UUID, $2, $3, $4)";
+      "INSERT INTO collections_details (id, title, description, crs, datetime_key) VALUES ($1::UUID, $2, $3, $4, $5)";
+
    public static final String FIND_RECORD_COLLECTION =
       "SELECT\n"
           + "    collections_details.id\n"
@@ -72,6 +73,9 @@ public class Constants {
   public static final String CRS_ERROR="CRS not present as EPSG";
   public static final String CRS_FETCH_FAILED="Failed to fetch CRS.";
   public static final String OGR_INFO_FAILED="Failed in ogrInfo.";
+  public static final String DATE_TIME_KEY_ERROR="The date time key is invalid";
+  public static final String VALID_DATE_TIME_KEY_MESSAGE="The date-time key is present and valid";
+  public static final String NULL_DATE_TIME_KEY_MESSAGE="The date-time key value is not provided in the input JSON and is therefore null";
   public static final String TABLE_NOT_EXIST_ERROR="Table does not exist.";
   public static final String COLLECTION_NOT_PRESENT_ERROR ="Collection not present in collections_details";
   public static final String OGR_2_OGR_FAILED = "Failed to onboard the collection in OGR2OGR.";

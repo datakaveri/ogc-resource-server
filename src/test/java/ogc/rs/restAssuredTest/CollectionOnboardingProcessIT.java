@@ -79,6 +79,7 @@ public class CollectionOnboardingProcessIT {
         inputs.put("title", "Invalid File");
         inputs.put("description", "Invalid file for testing.");
         inputs.put("resourceId", "2cfc08b8-a43d-40d4-ba98-c6fdfa76a0c1");
+        inputs.put("dateTimeKey", "Type");
         inputs.put("version", "1.0.0");
         inputs.put(ProcessesRunnerImpl.S3_BUCKET_IDENTIFIER_PROCESS_INPUT_KEY, "default");
 
@@ -240,9 +241,33 @@ public class CollectionOnboardingProcessIT {
         }
     }
 
-    @Disabled  
     @Test
     @Order(9)
+    @Description("Failure: Invalid DateTimeKey")
+    public void testExecuteInvalidDateTimeKey() throws InterruptedException {
+        LOGGER.debug("Failure: Invalid DateTimeKey");
+
+        String token = getToken();
+        JsonObject requestBody = requestBody();
+        requestBody.getJsonObject("inputs").put("fileName", "bucket1/hydro_1000_features.gpkg")
+                .put("title", "Valid Hydro File").put("description", "Valid hydro file with 1000 features")
+                .put("dateTimeKey", "hydro");
+        Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
+        String jobId = sendExecutionRequest.body().path("jobId");
+        try {
+            // Use Awaitility to wait for the job status response
+            await().atMost(45, TimeUnit.SECONDS).until(() -> {
+                Response getJobStatus = sendJobStatusRequest(jobId, token);
+                return getJobStatus.body().path("message").equals(DATE_TIME_KEY_ERROR);
+            });
+        } catch (ConditionTimeoutException e) {
+            fail("Test failed due to timeout while waiting for job status indicating that the job status is not retrieved within time:" + " " +e.getMessage());
+        }
+    }
+
+    @Disabled  
+    @Test
+    @Order(10)
     @Description("Failure: Fail to get Meta data from S3 by passing an empty file.")
     public void testExecuteS3MetaDataFail() {
         LOGGER.debug("Failure: Fail to get Meta data from S3 by passing an empty file.");
@@ -250,7 +275,7 @@ public class CollectionOnboardingProcessIT {
         String token = getToken();
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("fileName", "no_features.gpkg").put("title", "Invalid File test")
-                .put("description", "Empty File for S3 failure testing.");
+                .put("description", "Empty File for S3 failure testing.").put("dateTimeKey", "country_code");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
 
@@ -266,7 +291,7 @@ public class CollectionOnboardingProcessIT {
     }
 
     @Test
-    @Order(10)
+    @Order(11)
     @Description("Failure: Invalid file having 2 layers with different geometry")
     public void testExecuteFail2DiffGeo() {
         LOGGER.debug("Failure: Invalid file having 2 layers with different geometry");
@@ -274,7 +299,8 @@ public class CollectionOnboardingProcessIT {
         String token = getToken();
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("fileName", "bucket1/2LayersWithDiffGeom.gpkg")
-                .put("title", "Invalid Geometry test").put("description", "File with 2 layers with different geometry.");
+                .put("title", "Invalid Geometry test").put("description", "File with 2 layers with different geometry.")
+                .put("dateTimeKey", "flow_direction");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
 
@@ -290,7 +316,7 @@ public class CollectionOnboardingProcessIT {
     }
 
     @Test
-    @Order(11)
+    @Order(12)
     @Description("Success: Onboarding a collection")
     public void testExecuteOnboardingSuccess() {
         LOGGER.debug("Success: Onboarding a collection");
@@ -298,7 +324,8 @@ public class CollectionOnboardingProcessIT {
         String token = getToken();
         JsonObject requestBody = requestBody();
         requestBody.getJsonObject("inputs").put("fileName", "bucket1/hydro_1000_features.gpkg")
-                .put("title", "Valid Hydro File").put("description", "Valid hydro file with 1000 features");
+                .put("title", "Valid Hydro File").put("description", "Valid hydro file with 1000 features")
+                .put("dateTimeKey", "hydro_node_category");
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         String jobId = sendExecutionRequest.body().path("jobId");
 
@@ -314,7 +341,7 @@ public class CollectionOnboardingProcessIT {
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     @Description("Failure: Collection already present")
     public void testExecuteFailItemAlreadyPresent() {
         LOGGER.debug("Failure: Collection already present in collection_details table");
