@@ -2315,7 +2315,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                 /*String type =
                 cacheResult.containsKey(RESOURCE_GROUP) ? "RESOURCE" : "RESOURCE_GROUP";*/
                 String providerId = cacheResult.getProviderId();
-                request.put(DELEGATOR_ID, user.getSub());
+                request.put(DELEGATOR_ID, user.getSub().toString());
                 ZonedDateTime zst = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
                 long epochTime = zst.toInstant().toEpochMilli();
                 String isoTime = zst.truncatedTo(ChronoUnit.SECONDS).toString();
@@ -2326,7 +2326,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                 // Comment here , if we need type (item_type) then we can use this
                 request.put(EPOCH_TIME, epochTime);
                 request.put(ISO_TIME, isoTime);
-                request.put(USER_ID, user.getSub());
+                request.put(USER_ID, user.getSub().toString());
                 request.put(ID, asset.getItemId().toString());
                 request.put(API, apiPath);
                 request.put(RESPONSE_SIZE, responseSize);
@@ -2335,7 +2335,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                 // Insert into PostgreSQL metering table
                 JsonObject postgresAuditPayload = new JsonObject()
                     .put("user_id", user.getSub().toString())
-                    .put("collection_id", asset.getItemId().toString())
+                    .put("collection_id", asset.getItemId())
                     .put("api_path", apiPath)
                     .put("timestamp", isoTime)
                     .put("resp_size", responseSize);
