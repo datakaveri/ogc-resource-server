@@ -858,6 +858,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                                                 id,
                                                 title,
                                                 description,
+                                                "datetime",
                                                 crs,
                                                 bboxArray,
                                                 temporalArray,
