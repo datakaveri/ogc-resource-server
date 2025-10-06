@@ -998,7 +998,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         String id = requestBody.getString("id");
         String title = requestBody.getString("title");
         String description = requestBody.getString("description");
-        String datetimeKey = requestBody.getString("datetimeKey");
+        String datetime = requestBody.getString("datetime");
         String crs = requestBody.getString("crs");
         String license = requestBody.getString("license");
 
@@ -1009,10 +1009,10 @@ public class DatabaseServiceImpl implements DatabaseService{
         String[] temporalArray = temporalJsonArray.stream().map(Object::toString).toArray(String[]::new);
 
         LOGGER.debug("id: {}, title: {}, description: {}, datetimeKey: {}, crs: {}, bboxArray: {}, temporalArray: {}, license: {}",
-                id, title, description, datetimeKey, crs, bboxArray, temporalArray, license);
+                id, title, description, datetime, crs, bboxArray, temporalArray, license);
 
         client.preparedQuery(UPDATE_COLLECTIONS_DETAILS)
-                .execute(Tuple.of(id, title, description, datetimeKey, crs, bboxArray, temporalArray, license))
+                .execute(Tuple.of(id, title, description, datetime, crs, bboxArray, temporalArray, license))
                 .onSuccess(res ->
                 {
                     LOGGER.debug("Update in collections_Details successful!");
