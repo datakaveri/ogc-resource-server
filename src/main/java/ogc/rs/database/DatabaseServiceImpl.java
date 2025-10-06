@@ -832,7 +832,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         String id = jsonObject.getString("id");
         String title = jsonObject.getString("title");
         String description = jsonObject.getString("description");
-        String datetimeKey = jsonObject.getString("datetimeKey");
+        String datetime = jsonObject.getString("datetime");
         String crs = jsonObject
                 .getJsonObject("extent")
                 .getJsonObject("spatial")
@@ -848,8 +848,8 @@ public class DatabaseServiceImpl implements DatabaseService{
         JsonArray temporalJsonArray = jsonObject.getJsonObject("extent").getJsonObject("temporal").getJsonArray("interval").getJsonArray(0);
         String[] temporalArray = temporalJsonArray.stream().map(Object::toString).toArray(String[]::new);
 
-        LOGGER.debug("id: {}, title: {}, description: {}, datetimeKey: {}, crs: {}, bboxArray: {}, temporalArray: {}, license: {}",
-                id, title, description, datetimeKey, crs, bboxArray, temporalArray, license);
+        LOGGER.debug("id: {}, title: {}, description: {}, datetime: {}, crs: {}, bboxArray: {}, temporalArray: {}, license: {}",
+                id, title, description, datetime, crs, bboxArray, temporalArray, license);
 
         client.withTransaction(
                 conn ->
@@ -859,7 +859,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                                                 id,
                                                 title,
                                                 description,
-                                                datetimeKey,
+                                                datetime,
                                                 crs,
                                                 bboxArray,
                                                 temporalArray,
@@ -939,7 +939,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                         UUID id = UUID.fromString(collectionData.getString("id"));
                         String title = collectionData.getString("title");
                         String description =  collectionData.getString("description");
-                        String dateTimeKey = collectionData.getString("datetimeKey");
+                        String dateTime = collectionData.getString("datetime");
                         String crs =   collectionData.getString("crs");
                         String license =   collectionData.getString("license");
                         String ownerUserId =  collectionData.getString("ownerUserId");
@@ -955,7 +955,7 @@ public class DatabaseServiceImpl implements DatabaseService{
                         LOGGER.debug("Processing collection ID: {}", id);
 
                         return conn.preparedQuery(INSERT_COLLECTIONS_DETAILS)
-                                .execute(Tuple.of(id,title, description,dateTimeKey, crs,bboxArray,temporalArray,license))
+                                .execute(Tuple.of(id,title, description,dateTime, crs,bboxArray,temporalArray,license))
                                 .mapEmpty()
                                 .compose(res -> conn.preparedQuery(INSERT_COLLECTION_TYPE).execute(Tuple.of(id)).mapEmpty())
                                 .compose(res -> conn.preparedQuery(INSERT_ROLES).execute(Tuple.of(ownerUserId, role)).mapEmpty())
