@@ -1006,10 +1006,10 @@ public class DatabaseServiceImpl implements DatabaseService{
         String[] temporalArray = temporalJsonArray.stream().map(Object::toString).toArray(String[]::new);
 
         LOGGER.debug("id: {}, title: {}, description: {}, datetimeKey: {}, crs: {}, bboxArray: {}, temporalArray: {}, license: {}",
-                id, title, description, "datetime", crs, bboxArray, temporalArray, license);
+                id, title, description, crs, bboxArray, temporalArray, license);
 
         client.preparedQuery(UPDATE_COLLECTIONS_DETAILS)
-                .execute(Tuple.of(id, title, description, "datetime", crs, bboxArray, temporalArray, license))
+                .execute(Tuple.of(id, title, description, crs, bboxArray, temporalArray, license))
                 .onSuccess(res ->
                 {
                     LOGGER.debug("Update in collections_Details successful!");
