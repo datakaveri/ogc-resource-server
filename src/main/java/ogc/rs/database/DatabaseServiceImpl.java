@@ -1005,7 +1005,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         JsonArray temporalJsonArray = requestBody.getJsonObject("extent").getJsonObject("temporal").getJsonArray("interval").getJsonArray(0);
         String[] temporalArray = temporalJsonArray.stream().map(Object::toString).toArray(String[]::new);
 
-        LOGGER.debug("id: {}, title: {}, description: {}, datetimeKey: {}, crs: {}, bboxArray: {}, temporalArray: {}, license: {}",
+        LOGGER.debug("id: {}, title: {}, description: {}, crs: {}, bboxArray: {}, temporalArray: {}, license: {}",
                 id, title, description, crs, bboxArray, temporalArray, license);
 
         client.preparedQuery(UPDATE_COLLECTIONS_DETAILS)
