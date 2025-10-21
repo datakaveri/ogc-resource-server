@@ -141,7 +141,7 @@ public class RecordQueryBuilder {
     coordinates = coordinates.concat(",").concat(DEFAULT_CRS_SRID.toString());
 
     LOGGER.debug("bbox coordinates " + coordinates);
-    this.bbox = "st_intersects(geometry, st_makeenvelope(" + coordinates + ")) ";
+    this.bbox = "st_within(geometry, st_makeenvelope(" + coordinates + ")) ";
     LOGGER.debug("bbox vale string bbox: " + bbox);
   }
 
