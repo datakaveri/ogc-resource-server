@@ -50,8 +50,7 @@ public class StacCollectionOnboardingIT {
                         .put("license", "proprietary")
                         .put("title", "IT Test Suite")
                         .put("description", "IT Test Suite")
-                        .put("extent", extent)
-                        .put("datetimeKey", "2023-11-10T14:30:00Z");
+                        .put("extent", extent);
         given()
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json") // Add this
@@ -112,8 +111,7 @@ public class StacCollectionOnboardingIT {
                         .put("license", "proprietary")
                         .put("title", "IT test Suite Updated")
                         .put("description", "IT test Suite Updated")
-                        .put("extent", extent)
-                        .put("datetimeKey", "2023-11-10T14:30:00Z");
+                        .put("extent", extent);
         given()
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json") // Add this
@@ -172,8 +170,7 @@ public class StacCollectionOnboardingIT {
                         .put("license", "proprietary")
                         .put("title", "IT Test Suite")
                         .put("description", "IT Test Suite")
-                        .put("extent", extent)
-                        .put("datetimeKey", "2023-11-10T14:30:00Z");
+                        .put("extent", extent);
         given()
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json") // Add this
@@ -234,8 +231,7 @@ public class StacCollectionOnboardingIT {
                         .put("license", "proprietary")
                         .put("title", "IT test Suite Updated")
                         .put("description", "IT test Suite Updated")
-                        .put("extent", extent)
-                        .put("datetimeKey", "2023-11-10T14:30:00Z");
+                        .put("extent", extent);
         given()
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json") // Add this
@@ -293,8 +289,7 @@ public class StacCollectionOnboardingIT {
                         .put("license", "proprietary")
                         .put("title", "IT Test Suite")
                         .put("description", "IT Test Suite")
-                        .put("extent", extent)
-                        .put("datetimeKey", "2023-11-10T14:30:00Z");
+                        .put("extent", extent);
         given()
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json") // Add this
@@ -339,8 +334,7 @@ public class StacCollectionOnboardingIT {
                         .put("license", "proprietary")
                         .put("title", "IT Test Suite")
                         .put("description", "IT Test Suite")
-                        .put("extent", extent)
-                        .put("datetimeKey", "2023-11-10T14:30:00Z");
+                        .put("extent", extent);
         given()
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json") // Add this
@@ -385,8 +379,7 @@ public class StacCollectionOnboardingIT {
                         .put("license", "proprietary")
                         .put("title", "IT Test Suite")
                         .put("description", "IT Test Suite")
-                        .put("extent", extent)
-                        .put("datetimeKey", "2023-11-10T14:30:00Z");
+                        .put("extent", extent);
         given()
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json") // Add this
@@ -430,8 +423,7 @@ public class StacCollectionOnboardingIT {
                         .put("license", "proprietary")
                         .put("title", "IT Test Suite")
                         .put("description", "IT Test Suite")
-                        .put("extent", extent)
-                        .put("datetimeKey", "2023-11-10T14:30:00Z");
+                        .put("extent", extent);
         given()
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json") // Add this
@@ -477,8 +469,7 @@ public class StacCollectionOnboardingIT {
                         .put("license", "proprietary")
                         .put("title", "IT Test Suite")
                         .put("description", "IT Test Suite")
-                        .put("extent", extent)
-                        .put("datetimeKey", "2023-11-10T14:30:00Z");
+                        .put("extent", extent);
         given()
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json") // Add this
@@ -522,8 +513,7 @@ public class StacCollectionOnboardingIT {
                         .put("license", "proprietary")
                         .put("title", "IT Test Suite")
                         .put("description", "IT Test Suite")
-                        .put("extent", extent)
-                        .put("datetimeKey", "2023-11-10T14:30:00Z");
+                        .put("extent", extent);
         given()
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json") // Add this
@@ -567,8 +557,7 @@ public class StacCollectionOnboardingIT {
                         .put("license", 123)
                         .put("title", "IT Test Suite")
                         .put("description", "IT Test Suite")
-                        .put("extent", extent)
-                        .put("datetimeKey", "2023-11-10T14:30:00Z");
+                        .put("extent", extent);
         given()
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json") // Add this
@@ -615,8 +604,7 @@ public class StacCollectionOnboardingIT {
                 .put("license", "proprietary")
                 .put("title", "IT Test Suite")
                 .put("description", "IT Test Suite")
-                .put("extent", extent)
-                .put("datetimeKey", "2023-11-10T14:30:00Z");
+                .put("extent", extent);
         JsonObject collectionTwo = new JsonObject();
         collectionTwo
                 .put("id", "0473a68a-c66a-42fb-93e3-ae9fd4c6e7dd")
@@ -624,8 +612,7 @@ public class StacCollectionOnboardingIT {
                 .put("license", "proprietary")
                 .put("title", "IT Test Suite")
                 .put("description", "IT Test Suite")
-                .put("extent", extent)
-                .put("datetimeKey", "2023-11-10T14:30:00Z");
+                .put("extent", extent);
         JsonArray collections = new JsonArray().add(colletonOne).add(collectionTwo);
         JsonObject requestBody =
                 new JsonObject().put("collections", collections);
@@ -675,8 +662,7 @@ public class StacCollectionOnboardingIT {
                 .put("license", "proprietary")
                 .put("title", "IT Test Suite")
                 .put("description", "IT Test Suite")
-                .put("extent", extent)
-                .put("datetimeKey", "2023-11-10T14:30:00Z");
+                .put("extent", extent);
         JsonObject collectionTwo = new JsonObject();
         collectionTwo
                 .put("id", "03cee7f4-d470-4d1d-b41b-c4dfcbf4ff50")
@@ -684,8 +670,7 @@ public class StacCollectionOnboardingIT {
                 .put("license", "proprietary")
                 .put("title", "IT Test Suite")
                 .put("description", "IT Test Suite")
-                .put("extent", extent)
-                .put("datetimeKey", "2023-11-10T14:30:00Z");
+                .put("extent", extent);
         JsonArray collections = new JsonArray().add(colletonOne).add(collectionTwo);
         JsonObject requestBody =
                 new JsonObject().put("collections", collections);

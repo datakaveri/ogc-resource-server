@@ -13,9 +13,9 @@ public class Constants {
     public static final String GRANT_PRIVILEGES = "GRANT SELECT, UPDATE, DELETE ON \"$1\" TO \"$2\"";
     public static final String DATABASE_USER = "databaseUser";
     public static final String UPDATE_COLLECTIONS_DETAILS = "UPDATE collections_Details SET title = COALESCE($2, title), " +
-            "description = COALESCE($3, description), datetime_key = COALESCE($4, datetime_key), " +
-            "crs = COALESCE($5, crs), bbox = COALESCE($6, bbox), temporal = COALESCE($7, temporal), " +
-            "license = COALESCE($8, license) WHERE id = $1";
+            "description = COALESCE($3, description), " +
+            "crs = COALESCE($4, crs), bbox = COALESCE($5, bbox), temporal = COALESCE($6, temporal), " +
+            "license = COALESCE($7, license) WHERE id = $1";
     public static final String STAC_ITEMS_DATETIME_KEY = "properties ->> 'datetime'";
 }
 

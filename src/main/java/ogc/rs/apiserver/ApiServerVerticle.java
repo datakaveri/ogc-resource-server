@@ -2121,9 +2121,6 @@ public class ApiServerVerticle extends AbstractVerticle {
                     if (requestBody.containsKey("crs")) {
                         existingCollection.put("crs", requestBody.getString("crs"));
                     }
-                    if (requestBody.containsKey("datetimeKey")) {
-                        existingCollection.put("datetimeKey", requestBody.getString("datetimeKey"));
-                    }
                     if (requestBody.containsKey("license")) {
                         existingCollection.put("license", requestBody.getString("license"));
                     }
