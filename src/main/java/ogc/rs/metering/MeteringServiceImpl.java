@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.catalogue.CatalogueInterface;
-import ogc.rs.catalogue.CatalogueService;
+import ogc.rs.databroker.service.DataBrokerService;
 import ogc.rs.metering.util.DateValidation;
 import ogc.rs.metering.util.ParamsValidation;
 import ogc.rs.metering.util.QueryBuilder;
@@ -212,7 +212,7 @@ public class MeteringServiceImpl implements MeteringService {
     JsonObject writeMessage = queryBuilder.buildMessageForRmq(request);
     LOGGER.info("write message =  {}", writeMessage);
     dataBrokerService
-        .publishMessage(EXCHANGE_NAME, ROUTING_KEY, writeMessage)
+        .publishMessageInternal(writeMessage,EXCHANGE_NAME, ROUTING_KEY )
         .onSuccess(
             successHandler -> {
               LOGGER.info("inserted into rmq");
