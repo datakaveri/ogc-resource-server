@@ -33,6 +33,7 @@ public class DataBrokerVerticle extends AbstractVerticle {
   private int handshakeTimeout;
   private int requestedChannelMax;
   private int networkRecoveryInterval;
+  private boolean automaticRecoveryEnabled;
   private WebClientOptions webConfig;
   private ServiceBinder binder;
   private MessageConsumer<JsonObject> consumer;
@@ -55,7 +56,7 @@ public class DataBrokerVerticle extends AbstractVerticle {
     handshakeTimeout = config().getInteger("handshakeTimeout");
     requestedChannelMax = config().getInteger("requestedChannelMax");
     networkRecoveryInterval = config().getInteger("networkRecoveryInterval");
-
+    automaticRecoveryEnabled=config().getBoolean("automaticRecoveryEnabled",true);
     // for rsp
     RabbitClient.publishEx = config().getString("adapterQueryPublishExchange");
 
@@ -70,7 +71,7 @@ public class DataBrokerVerticle extends AbstractVerticle {
     rabbitMQOptions.setHandshakeTimeout(handshakeTimeout);
     rabbitMQOptions.setRequestedChannelMax(requestedChannelMax);
     rabbitMQOptions.setNetworkRecoveryInterval(networkRecoveryInterval);
-    rabbitMQOptions.setAutomaticRecoveryEnabled(true);
+    rabbitMQOptions.setAutomaticRecoveryEnabled(automaticRecoveryEnabled);
 
     RabbitMQOptions iudxConfig = new RabbitMQOptions(rabbitMQOptions);
     String prodVhost = config().getString(Vhosts.IUDX_PROD.value);
