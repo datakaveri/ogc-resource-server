@@ -46,6 +46,8 @@ import ogc.rs.apiserver.util.AuthInfo;
 import ogc.rs.apiserver.util.Limits;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.StacItemSearchParams;
+import ogc.rs.audit.util.OgcRsAuditHelper;
+import ogc.rs.auditing.model.AuditLog;
 import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3BucketReadAccess;
@@ -103,7 +105,6 @@ public class ApiServerVerticle extends AbstractVerticle {
   private HttpClient httpClient;
   private ProcessesRunnerService processService;
   private JobsService jobsService;
-
   /**
    * This method is used to start the Verticle. It deploys a verticle in a cluster/single instance, reads the
    * configuration, obtains a proxy for the Event bus services exposed through service discovery,
@@ -2304,7 +2305,7 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     JsonObject reqBody = context.body().asJsonObject();
     request.put(REQUEST_JSON, reqBody != null ? reqBody : new JsonObject());
-
+    setAuditLog(asset,context);
     catalogueService
         .getCatalogueAsset(resourceId)
         .onComplete(
@@ -2369,7 +2370,14 @@ public class ApiServerVerticle extends AbstractVerticle {
     return promise.future();
   }
 
-  public void getSummary(RoutingContext routingContext) {
+    private void setAuditLog(Asset asset, RoutingContext context) {
+        AuditLog auditLog = OgcRsAuditHelper.createAuditingLogs(asset, RoutingContextHelper.getRequestPath(context),
+                RoutingContextHelper.getRequestMethod(context), UUID.fromString(context.user().subject()),
+                context.user().principal().getString("organisationName"),"OGC-RS", "consumer", "Download");
+        RoutingContextHelper.setAuditingLog(context,auditLog);
+    }
+
+    public void getSummary(RoutingContext routingContext) {
     HttpServerRequest request = routingContext.request();
     LOGGER.trace("Info: getSummary Started.");
     JsonObject authInfo = (JsonObject) routingContext.data().get("authInfo");

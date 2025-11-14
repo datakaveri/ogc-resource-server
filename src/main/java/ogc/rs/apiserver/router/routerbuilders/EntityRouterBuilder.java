@@ -9,8 +9,7 @@ import static ogc.rs.apiserver.util.Constants.HEADER_CONTENT_TYPE;
 import static ogc.rs.apiserver.util.Constants.HEADER_HOST;
 import static ogc.rs.apiserver.util.Constants.HEADER_ORIGIN;
 import static ogc.rs.apiserver.util.Constants.HEADER_REFERER;
-import static ogc.rs.common.Constants.CATALOGUE_SERVICE_ADDRESS;
-import static ogc.rs.common.Constants.OAS_BEARER_SECURITY_SCHEME;
+import static ogc.rs.common.Constants.*;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -30,7 +29,9 @@ import ogc.rs.apiserver.authentication.client.JwksResolver;
 import ogc.rs.apiserver.authentication.handler.MultiIssuerJwtAuthHandler;
 import ogc.rs.apiserver.handlers.*;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.auditing.handler.AuditingHandler;
 import ogc.rs.catalogue.CatalogueInterface;
+import ogc.rs.databroker.service.DataBrokerService;
 
 /**
  * Abstract class to aid in configuration and building of routers using {@link RouterBuilder}.
@@ -64,6 +65,8 @@ public abstract class EntityRouterBuilder {
   public OgcFeaturesAuthZHandler ogcFeaturesAuthZHandler;
   public ProcessAuthZHandler processAuthZHandler;
   public TilesMeteringHandler tilesMeteringHandler;
+  public AuditingHandler auditingHandler;
+  public DataBrokerService dataBrokerService;
   public StacCollectionOnboardingAuthZHandler stacCollectionOnboardingAuthZHandler;
   public StacItemByIdAuthZHandler stacItemByIdAuthZHandler;
   public StacItemOnboardingAuthZHandler stacItemOnboardingAuthZHandler;
@@ -80,6 +83,11 @@ public abstract class EntityRouterBuilder {
     this.aclClient = new AclClient(vertx, config.getInteger(CONTROL_PLANE_PORT),config.getString(CONTROL_PLANE_HOST), config.getString(
         CONTROL_PLANE_SEARCH_PATH));
     this.catalogueService = CatalogueInterface.createProxy(vertx, CATALOGUE_SERVICE_ADDRESS);
+    this.dataBrokerService = DataBrokerService.createProxy(vertx,DATA_BROKER_SERVICE_ADDRESS);
+    auditingHandler= new AuditingHandler(
+            dataBrokerService,
+            config.getString("auditingExchange", DEFAULT_AUDITING_EXCHANGE),
+            config.getString("auditingRoutingKey", DEFAULT_AUDITING_ROUTING_KEY));
     tokenAuthenticationHandler = new DxTokenAuthenticationHandler(vertx, config);
 
     stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx, catalogueService, aclClient);

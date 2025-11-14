@@ -13,6 +13,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import ogc.rs.auditing.handler.AuditingHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ogc.rs.apiserver.ApiServerVerticle;
@@ -44,7 +45,7 @@ public class OgcFeaturesEntity implements GisEntityInterface {
     RouterBuilder builder = ogcRouterBuilder.routerBuilder;
     ApiServerVerticle apiServerVerticle = ogcRouterBuilder.apiServerVerticle;
     FailureHandler failureHandler = ogcRouterBuilder.failureHandler;
-
+    AuditingHandler auditingHandler = ogcRouterBuilder.auditingHandler;
     List<String> collectionSpecificOpIds = builder.operations().stream()
         .filter(op -> op.getOperationId().matches(OgcFeaturesMetadata.OGC_OP_ID_PREFIX_REGEX))
         .map(op -> op.getOperationId()).collect(Collectors.toList());
@@ -55,6 +56,7 @@ public class OgcFeaturesEntity implements GisEntityInterface {
         builder.operation(opId)
                 .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
 //                .handler(ogcRouterBuilder.tokenLimitsEnforcementHandler)
+                .handler(auditingHandler::handleApiAudit)
                 .handler(apiServerVerticle::auditAfterApiEnded)
                 .handler(apiServerVerticle::validateQueryParams)
                 .handler(apiServerVerticle::getFeatures)
@@ -66,6 +68,7 @@ public class OgcFeaturesEntity implements GisEntityInterface {
             builder.operation(opId)
                     .handler(ogcRouterBuilder.ogcFeaturesAuthZHandler)
 //                    .handler(ogcRouterBuilder.tokenLimitsEnforcementHandler)
+                    .handler(auditingHandler::handleApiAudit)
                     .handler(apiServerVerticle::auditAfterApiEnded)
                     .handler(apiServerVerticle::validateQueryParams)
                     .handler(apiServerVerticle::getFeature)

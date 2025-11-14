@@ -30,6 +30,7 @@ import java.util.List;
 
 import io.vertx.pgclient.PgPool;
 import ogc.rs.catalogue.CatalogueService;
+import ogc.rs.databroker.service.DataBrokerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -117,7 +118,7 @@ public class MeteringServiceImplTest {
     databroker = mock(DataBrokerService.class);
     JsonArray jsonArray = mock(JsonArray.class);
     meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
-    when(databroker.publishMessage(anyString(), anyString(), any()))
+    when(databroker.publishMessageInternal(any(),anyString(), anyString()))
         .thenReturn(Future.succeededFuture());
 
     meteringService
@@ -130,7 +131,7 @@ public class MeteringServiceImplTest {
             failure -> {
               vertxTestContext.failNow(failure.getMessage());
             });
-    verify(databroker, times(1)).publishMessage(anyString(), anyString(), any());
+    verify(databroker, times(1)).publishMessageInternal(any(),anyString(), anyString());
   }
 
   @Test
@@ -152,7 +153,7 @@ public class MeteringServiceImplTest {
     databroker = mock(DataBrokerService.class);
     meteringService = new MeteringServiceImpl(vertxObj, meteringDatabaseService, ogcDatabaseService, config, databroker);
 
-    when(databroker.publishMessage(anyString(), anyString(), any()))
+    when(databroker.publishMessageInternal(any(),anyString(), anyString()))
         .thenReturn(Future.failedFuture("failed"));
 
     meteringService

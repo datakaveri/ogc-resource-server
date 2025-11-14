@@ -4,10 +4,12 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import ogc.rs.apiserver.authentication.util.DxUser;
 import ogc.rs.apiserver.authorization.model.Asset;
 import ogc.rs.apiserver.util.OgcException;
+import ogc.rs.auditing.model.AuditLog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -68,8 +70,24 @@ public class RoutingContextHelper {
     );
 
   }
+    public static Optional<List<AuditLog>> getAuditingLog(RoutingContext routingContext) {
+        return Optional.ofNullable(routingContext.get("auditingLog"));
+    }
 
-  public static void setAsset(RoutingContext routingContext, Asset asset) {
+    public static void setAuditingLog(RoutingContext routingContext, AuditLog auditingLog) {
+        List<AuditLog> logs = getAuditingLog(routingContext).orElseGet(ArrayList::new);
+        logs.add(auditingLog);
+        routingContext.put("auditingLog", logs);
+    }
+
+    public static String getRequestPath(RoutingContext routingContext) {
+        return routingContext.request().path();
+    }
+    public static String getRequestMethod(RoutingContext routingContext) {
+        return routingContext.request().method().toString();
+    }
+
+    public static void setAsset(RoutingContext routingContext, Asset asset) {
     routingContext.put("asset", asset);
   }
 

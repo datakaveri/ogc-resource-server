@@ -14,6 +14,9 @@ public class Constants {
     public static final String METERING_SERVICE_ADDRESS = "ogc.rs.metering.service";
     public static final String PROCESSING_SERVICE_ADDRESS = "ogc.rs.processes.service";
     public static final String JOBS_SERVICE_ADDRESS = "ogc.rs.jobs.service";
+    public static final String DATA_BROKER_SERVICE_ADDRESS = "ogc.rs.databroker.service";
+    public static String DEFAULT_AUDITING_EXCHANGE = "auditing";
+    public static String DEFAULT_AUDITING_ROUTING_KEY = "##";
     public static final String DEFAULT_SERVER_CRS = "http://www.opengis.net/def/crs/OGC/1.3/CRS84";
     public static final Integer DEFAULT_CRS_SRID = 4326;
     public static final Set<String> WELL_KNOWN_QUERY_PARAMETERS =
