@@ -1478,16 +1478,35 @@ public class ApiServerVerticle extends AbstractVerticle {
                 // Retrieve user authentication info
                 AuthInfo userKey = routingContext.get(USER_KEY);
                 long expiry = (userKey != null) ? userKey.getExpiry() : 0;
-                boolean shouldCreate = routingContext.get(SHOULD_CREATE_KEY);
-                JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
+                  long now = Instant.now().getEpochSecond();
+                  if (expiry <= now) {
+                      OgcException ogc = new OgcException(401, "AuthenticationError", "Token has expired");
+                      routingContext.put("response", ogc.getJson().toString());
+                      routingContext.put("statusCode", 401);
+                      routingContext.next();
+                      return;
+                  }
+                  boolean shouldCreate = routingContext.get(SHOULD_CREATE_KEY);
+                  String userId = null;
+                  if (userKey != null) {
+                      userId = String.valueOf(userKey.getUserId());
+                  }
+                  JsonArray allLinksInFeature = new JsonArray(commonLinksInFeature.toString());
                     allLinksInFeature
                         .add(new JsonObject()
                             .put("rel", "self")
                             .put("type", "application/geo+json")
                             .put("href", stacMetaJson.getString("hostname")
                                 + "/stac/collections/" + stacCollectionId + "/items/" + stacItem.getString("id")));
-                JsonObject assets = formatAssetObjectsForStacItemById(stacItem.getJsonArray("assetobjects"), shouldCreate, expiry);
-                    stacItem.put("assets", assets);
+                  JsonObject assets = formatAssetObjectsForStacItemById(
+                          stacItem.getJsonArray("assetobjects"),
+                          shouldCreate,
+                          expiry,
+                          userId,
+                          stacCollectionId,
+                          stacItem.getString("id")
+                  );
+                  stacItem.put("assets", assets);
                     stacItem.remove("assetobjects");
                     stacItem.put("links", allLinksInFeature);
                     stacItem.put("stac_version", stacMetaJson.getString("stacVersion"));
@@ -1521,8 +1540,15 @@ public class ApiServerVerticle extends AbstractVerticle {
 
   }
 
-  private String getPresignedUrlSupportForStacItemById(String objectKeyName, long expiry, S3Config conf) {
-    try {
+    private String getPresignedUrlSupportForStacItemById(
+            String objectKeyName,
+            long expiry,
+            S3Config conf,
+            String userId,
+            String stacCollectionId,
+            String stacItemId,
+            String stacAssetId) {
+        try {
       // Create AWS credentials and presigner
       Region region = Region.of(conf.getRegion());
       AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(conf.getAccessKey(), conf.getSecretKey());
@@ -1537,12 +1563,19 @@ public class ApiServerVerticle extends AbstractVerticle {
               .build()) {
 
         // Create the S3 GetObjectRequest
-        GetObjectRequest objectRequest = GetObjectRequest.builder()
-                .bucket(conf.getBucket())
-                .key(objectKeyName)
-                .build();
+          GetObjectRequest.Builder objReqBuilder = GetObjectRequest.builder()
+                  .bucket(conf.getBucket())
+                  .key(objectKeyName);
 
-        // Calculate expiry duration (seconds)
+          objReqBuilder.overrideConfiguration(o -> {
+              if (userId != null) o.putRawQueryParameter("userId", userId);
+              if (stacCollectionId != null) o.putRawQueryParameter("collectionId", stacCollectionId);
+              if (stacItemId != null) o.putRawQueryParameter("itemId", stacItemId);
+              if (stacAssetId != null) o.putRawQueryParameter("assetId", stacAssetId);
+          });
+          GetObjectRequest objectRequest = objReqBuilder.build();
+
+          // Calculate expiry duration (seconds)
         long expiryDuration = expiry - Instant.now().getEpochSecond();
 
         // Create the S3 Pre-Signed URL request
@@ -1561,7 +1594,7 @@ public class ApiServerVerticle extends AbstractVerticle {
     }
   }
 
-  private JsonObject formatAssetObjectsForStacItemById(JsonArray assetArray, boolean shouldCreate, long expiry) {
+  private JsonObject formatAssetObjectsForStacItemById(JsonArray assetArray, boolean shouldCreate, long expiry, String userId, String stacCollectionId, String stacItemId) {
     JsonObject assets = new JsonObject();
     if(assetArray.contains(null))
       return assets;
@@ -1587,8 +1620,11 @@ public class ApiServerVerticle extends AbstractVerticle {
                 return;
               }
 
-              String preSignedUrl = getPresignedUrlSupportForStacItemById(href, expiry, conf.get());
-              assetObj.put("href", preSignedUrl);
+                String preSignedUrl = getPresignedUrlSupportForStacItemById(
+                        href, expiry, conf.get(),
+                        userId, stacCollectionId, stacItemId, assetId
+                );
+                assetObj.put("href", preSignedUrl);
             }
           }
         } catch (URISyntaxException e) {
