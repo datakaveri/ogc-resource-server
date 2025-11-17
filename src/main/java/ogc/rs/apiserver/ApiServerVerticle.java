@@ -1477,16 +1477,8 @@ public class ApiServerVerticle extends AbstractVerticle {
               try {
                 // Retrieve user authentication info
                 AuthInfo userKey = routingContext.get(USER_KEY);
+                boolean shouldCreate = routingContext.get(SHOULD_CREATE_KEY);
                 long expiry = (userKey != null) ? userKey.getExpiry() : 0;
-                  long now = Instant.now().getEpochSecond();
-                  if (expiry <= now) {
-                      OgcException ogc = new OgcException(401, "AuthenticationError", "Token has expired");
-                      routingContext.put("response", ogc.getJson().toString());
-                      routingContext.put("statusCode", 401);
-                      routingContext.next();
-                      return;
-                  }
-                  boolean shouldCreate = routingContext.get(SHOULD_CREATE_KEY);
                   String userId = null;
                   if (userKey != null) {
                       userId = String.valueOf(userKey.getUserId());
