@@ -124,8 +124,10 @@ public class RouterManager {
     /* Replace ${HOSTNAME} values in spec with actual hostname */
     ogcOasTemplateStr = ogcOasTemplateStr.replace("${HOSTNAME}", config.getString("hostName"));
     stacOasTemplateStr = stacOasTemplateStr.replace("${HOSTNAME}", config.getString("hostName"));
-    
-    JsonObject ogcOasTemplate = new JsonObject(ogcOasTemplateStr);
+      ogcOasTemplateStr = ogcOasTemplateStr.replace("${SUPPORT_EMAIL}", config.getString("supportEmail"));
+      stacOasTemplateStr = stacOasTemplateStr.replace("${SUPPORT_EMAIL}", config.getString("supportEmail"));
+
+      JsonObject ogcOasTemplate = new JsonObject(ogcOasTemplateStr);
     JsonObject stacOasTemplate = new JsonObject(stacOasTemplateStr);
 
     DatabaseService dbService = DatabaseService.createProxy(vertx, DATABASE_SERVICE_ADDRESS);
