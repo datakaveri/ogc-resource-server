@@ -11,7 +11,7 @@
     "dxAuthBasePath": "/auth/v1",
 
     "hostName": "https://ogc.example.com/",
-
+    "supportEmail": "support-email@abc.com",
     "catServerHost": "controlplane.example.com",
     "catServerPort": 443,
     "catRequestItemsUri": "/iudx/v2/cat/item",
