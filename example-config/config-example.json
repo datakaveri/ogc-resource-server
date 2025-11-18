@@ -97,7 +97,10 @@
       "controlPanelHost": "controlplane.example.com",
       "controlPanelSearchPath": "/iudx/acl/apd/v2/access_request/has_access"
     },
-
+    {
+      "id": "ogc.rs.database.DatabaseVerticle",
+      "verticleInstances": 1
+    },
     {
       "id": "ogc.rs.metering.MeteringVerticle",
       "verticleInstances": 1,
@@ -137,10 +140,7 @@
       "verticleInstances": 1
     },
 
-    {
-      "id": "ogc.rs.database.DatabaseVerticle",
-      "verticleInstances": 1
-    },
+
 
     {
       "id": "ogc.rs.catalogue.CatalogueVerticle",

@@ -88,7 +88,7 @@ public abstract class EntityRouterBuilder {
             dataBrokerService,
             config.getString("auditingExchange", DEFAULT_AUDITING_EXCHANGE),
             config.getString("auditingRoutingKey", DEFAULT_AUDITING_ROUTING_KEY));
-    tokenAuthenticationHandler = new DxTokenAuthenticationHandler(vertx, config);
+//    tokenAuthenticationHandler = new DxTokenAuthenticationHandler(vertx, config);
 
     stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx, catalogueService, aclClient);
     ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(catalogueService, aclClient);
