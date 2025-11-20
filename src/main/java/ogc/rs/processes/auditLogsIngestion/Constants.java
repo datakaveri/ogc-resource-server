@@ -18,5 +18,6 @@ public class Constants {
     public static final String AUDIT_LOGS_INSERTION_FAILURE_MESSAGE =
             "Audit logs Insertion process failed.";
     public static final String AUDIT_LOG_INSERTION_QUERY = "INSERT INTO metering (user_id, collection_id, api_path, timestamp, resp_size) " +
-            "VALUES ($1, $2, $3, $4, $5)";
+            "VALUES ($1, $2, $3, $4, $5)" +
+            "ON CONFLICT DO NOTHING";
 }

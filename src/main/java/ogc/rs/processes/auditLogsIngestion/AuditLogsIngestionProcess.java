@@ -5,6 +5,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.processes.ProcessService;
@@ -16,6 +17,8 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import static ogc.rs.processes.auditLogsIngestion.Constants.*;
 
@@ -92,8 +95,9 @@ public class AuditLogsIngestionProcess implements ProcessService {
     }
 
     /**
-     * Handles array of log strings and inserts them sequentially.
+     * Handles array of log strings and inserts them using batch query with transaction.
      * Returns a JsonObject with the count of logs inserted.
+     * All inserts are atomic - either all succeed or all are rolled back.
      */
     private Future<JsonObject> insertLogs(JsonObject requestInput) {
         Promise<JsonObject> promise = Promise.promise();
@@ -106,26 +110,43 @@ public class AuditLogsIngestionProcess implements ProcessService {
                 return promise.future();
             }
 
-            LOGGER.info("Processing {} log entries", logsArray.size());
+            int logsSize = logsArray.size();
+            LOGGER.info("Processing {} log entries", logsSize);
 
-            // Process logs sequentially
-            Future<Void> future = Future.succeededFuture();
-            int totalLogs = logsArray.size();
+            // Parse all logs first
+            List<Tuple> batchParams = new ArrayList<>();
+            for (int i = 0; i < logsArray.size(); i++) {
+                String logString = logsArray.getString(i);
+                int logNumber = i + 1;
 
-            for (int i = 0; i < totalLogs; i++) {
-                final String logString = logsArray.getString(i);
-                final int logNumber = i + 1;
-
-                future = future.compose(v -> insertSingleLog(logString, logNumber));
+                try {
+                    Tuple params = parseLogEntry(logString, logNumber);
+                    batchParams.add(params);
+                } catch (OgcException oe) {
+                    LOGGER.error("Validation failed for log #{}: {}", logNumber, oe.getMessage());
+                    promise.fail(oe);
+                    return promise.future();
+                } catch (Exception e) {
+                    LOGGER.error("Unexpected error parsing log #{}", logNumber, e);
+                    promise.fail(new OgcException(500, "Internal Server Error", "Unexpected error while processing log entry"));
+                    return promise.future();
+                }
             }
 
-            future.onSuccess(v -> {
-                LOGGER.info("Successfully inserted {} log entries", totalLogs);
-                promise.complete(new JsonObject().put("logsInserted", totalLogs));
-            }).onFailure(err -> {
-                LOGGER.error("Failed during log insertion", err);
-                promise.fail(new OgcException(500, "Internal Server Error", AUDIT_LOGS_INSERTION_FAILURE_MESSAGE));
-            });
+            // Execute batch insert within a transaction
+            pgPool.withTransaction(conn ->
+                            conn.preparedQuery(AUDIT_LOG_INSERTION_QUERY)
+                                    .executeBatch(batchParams)
+                                    .map(SqlResult::rowCount)
+                    )
+                    .onSuccess(insertedCount -> {
+                        LOGGER.info("Successfully inserted {} log entries in this batch transaction", logsSize);
+                        promise.complete(new JsonObject().put("logsInserted", logsSize));
+                    })
+                    .onFailure(err -> {
+                        LOGGER.error("Failed during batch log insertion, transaction rolled back", err);
+                        promise.fail(new OgcException(500, "Internal Server Error", AUDIT_LOGS_INSERTION_FAILURE_MESSAGE));
+                    });
 
         } catch (Exception e) {
             LOGGER.error("Error processing logs array", e);
@@ -136,138 +157,104 @@ public class AuditLogsIngestionProcess implements ProcessService {
     }
 
     /**
-     * Parses a log string and inserts it into the metering table.
+     * Parses a log string and returns a Tuple for batch insertion.
      * Expected format: userId|collectionId|itemId|timestamp|respSize|storageBackend
      */
-    private Future<Void> insertSingleLog(String logString, int logNumber) {
-        Promise<Void> promise = Promise.promise();
-
-        try {
-            if (logString == null || logString.trim().isEmpty()) {
-                String error = String.format("Log entry #%d is empty", logNumber);
-                LOGGER.warn(error);
-                promise.fail(new OgcException(500, "Internal Server Error", LOG_ENTRY_EMPTY_MESSAGE));
-                return promise.future();
-            }
-
-            // Parse the log string
-            String[] parts = logString.split(LOG_DELIMITER, -1);
-            if (parts.length != 6) {
-                String error = String.format(
-                        "Invalid log format for entry #%d. Expected 6 fields (userId|collectionId|itemId|timestamp|respSize|storageBackend), got %d: %s",
-                        logNumber, parts.length, logString
-                );
-                LOGGER.error(error);
-                promise.fail(new OgcException(400, "Bad Request", INVALID_LOG_FORMAT_MESSAGE));
-                return promise.future();
-            }
-
-            String userIdStr = parts[0].trim();
-            String collectionIdStr = parts[1].trim();
-            String itemId = parts[2].trim();
-            String timestampStr = parts[3].trim();
-            String respSizeStr = parts[4].trim();
-            String storageBackend = parts[5].trim();
-
-            // Validate required fields are not empty
-            if (userIdStr.isEmpty() || collectionIdStr.isEmpty() ||
-                    itemId.isEmpty() || timestampStr.isEmpty() || respSizeStr.isEmpty()) {
-                String error = String.format(
-                        "Missing required fields in log entry #%d: %s",
-                        logNumber, logString
-                );
-                LOGGER.error(error);
-                promise.fail(new OgcException(400, "Bad Request", MISSING_REQUIRED_FIELDS_MESSAGE));
-                return promise.future();
-            }
-
-            // Validate UUIDs
-            UUID userId;
-            UUID collectionId;
-            try {
-                userId = UUID.fromString(userIdStr);
-                collectionId = UUID.fromString(collectionIdStr);
-            } catch (IllegalArgumentException e) {
-                String error = String.format(
-                        "Invalid UUID format in log entry #%d: userId=%s, collectionId=%s",
-                        logNumber, userIdStr, collectionIdStr
-                );
-                LOGGER.error(error, e);
-                promise.fail(new OgcException(400, "Bad Request", INVALID_UUID_FORMAT_MESSAGE));
-                return promise.future();
-            }
-
-            // Parse respSize
-            Long respSize;
-            try {
-                respSize = Long.parseLong(respSizeStr);
-            } catch (NumberFormatException e) {
-                String error = String.format(
-                        "Invalid respSize format in log entry #%d: %s",
-                        logNumber, respSizeStr
-                );
-                LOGGER.error(error, e);
-                promise.fail(new OgcException(400, "Bad Request", INVALID_RESPONSE_SIZE_FORMAT_MESSAGE));
-                return promise.future();
-            }
-
-            // Parse and format timestamp
-            LocalDateTime timestampObj;
-            try {
-                OffsetDateTime dateTime = OffsetDateTime.parse(timestampStr, ISO_FORMATTER);
-                timestampObj = dateTime.toLocalDateTime();
-            } catch (DateTimeParseException e) {
-                String error = String.format(
-                        "Invalid timestamp format in log entry #%d: %s. Expected ISO-8601 format (e.g., 2025-09-08T05:46:24Z)",
-                        logNumber, timestampStr
-                );
-                LOGGER.error(error, e);
-                promise.fail(new OgcException(400, "Bad Request", INVALID_TIME_STAMP_FORMAT_MESSAGE));
-                return promise.future();
-            }
-
-            // Construct API path
-            String apiPath = String.format(
-                    "stac/collections/%s/items/%s",
-                    collectionIdStr,
-                    itemId
-            );
-
-            LOGGER.debug("Processing log #{} from storage backend: {}", logNumber, storageBackend);
-
-            // Insert into database
-
-            Tuple params = Tuple.of(
-                    userId,
-                    collectionId,
-                    apiPath,
-                    timestampObj,
-                    respSize
-            );
-
-            pgPool.preparedQuery(AUDIT_LOG_INSERTION_QUERY)
-                    .execute(params)
-                    .onSuccess(rows -> {
-                        LOGGER.debug(
-                                "Inserted log #{}: user={}, collection={}, path={}, size={} bytes, backend={}",
-                                logNumber, userId, collectionId, apiPath, respSize, storageBackend
-                        );
-                        promise.complete();
-                    })
-                    .onFailure(err -> {
-                        LOGGER.error(
-                                "Failed to insert log #{} for user={}, collection={}: {}",
-                                logNumber, userId, collectionId, err.getMessage()
-                        );
-                        promise.fail(new OgcException(500, "Internal Server Error", "Database error during audit log insertion"));
-                    });
-
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error processing log entry #{}", logNumber, e);
-            promise.fail(new OgcException(500, "Internal Server Error", "Unexpected error while processing log entry"));
+    private Tuple parseLogEntry(String logString, int logNumber) throws OgcException {
+        if (logString == null || logString.trim().isEmpty()) {
+            String error = String.format("Log entry #%d is empty", logNumber);
+            LOGGER.warn(error);
+            throw new OgcException(500, "Internal Server Error", LOG_ENTRY_EMPTY_MESSAGE);
         }
 
-        return promise.future();
+        // Parse the log string
+        String[] parts = logString.split(LOG_DELIMITER, -1);
+        if (parts.length != 6) {
+            String error = String.format(
+                    "Invalid log format for entry #%d. Expected 6 fields (userId|collectionId|itemId|timestamp|respSize|storageBackend), got %d: %s",
+                    logNumber, parts.length, logString
+            );
+            LOGGER.error(error);
+            throw new OgcException(400, "Bad Request", INVALID_LOG_FORMAT_MESSAGE);
+        }
+
+        String userIdStr = parts[0].trim();
+        String collectionIdStr = parts[1].trim();
+        String itemId = parts[2].trim();
+        String timestampStr = parts[3].trim();
+        String respSizeStr = parts[4].trim();
+        String storageBackend = parts[5].trim();
+
+        // Validate required fields are not empty
+        if (userIdStr.isEmpty() || collectionIdStr.isEmpty() ||
+                itemId.isEmpty() || timestampStr.isEmpty() || respSizeStr.isEmpty()) {
+            String error = String.format(
+                    "Missing required fields in log entry #%d: %s",
+                    logNumber, logString
+            );
+            LOGGER.error(error);
+            throw new OgcException(400, "Bad Request", MISSING_REQUIRED_FIELDS_MESSAGE);
+        }
+
+        // Validate UUIDs
+        UUID userId;
+        UUID collectionId;
+        try {
+            userId = UUID.fromString(userIdStr);
+            collectionId = UUID.fromString(collectionIdStr);
+        } catch (IllegalArgumentException e) {
+            String error = String.format(
+                    "Invalid UUID format in log entry #%d: userId=%s, collectionId=%s",
+                    logNumber, userIdStr, collectionIdStr
+            );
+            LOGGER.error(error, e);
+            throw new OgcException(400, "Bad Request", INVALID_UUID_FORMAT_MESSAGE);
+        }
+
+        // Parse respSize
+        Long respSize;
+        try {
+            respSize = Long.parseLong(respSizeStr);
+        } catch (NumberFormatException e) {
+            String error = String.format(
+                    "Invalid respSize format in log entry #%d: %s",
+                    logNumber, respSizeStr
+            );
+            LOGGER.error(error, e);
+            throw new OgcException(400, "Bad Request", INVALID_RESPONSE_SIZE_FORMAT_MESSAGE);
+        }
+
+        // Parse and format timestamp
+        LocalDateTime timestampObj;
+        try {
+            OffsetDateTime dateTime = OffsetDateTime.parse(timestampStr, ISO_FORMATTER);
+            timestampObj = dateTime.toLocalDateTime();
+        } catch (DateTimeParseException e) {
+            String error = String.format(
+                    "Invalid timestamp format in log entry #%d: %s. Expected ISO-8601 format (e.g., 2025-09-08T05:46:24Z)",
+                    logNumber, timestampStr
+            );
+            LOGGER.error(error, e);
+            throw new OgcException(400, "Bad Request", INVALID_TIME_STAMP_FORMAT_MESSAGE);
+        }
+
+        // Construct API path
+        String apiPath = String.format(
+                "stac/collections/%s/items/%s",
+                collectionIdStr,
+                itemId
+        );
+
+        LOGGER.debug("Parsed log #{} from storage backend: {}", logNumber, storageBackend);
+
+        // Return Tuple for batch insert
+        return Tuple.of(
+                userId,
+                collectionId,
+                apiPath,
+                timestampObj,
+                respSize
+        );
     }
 
     private void handleFailure(JsonObject requestInput, Throwable failure, Promise<JsonObject> promise) {

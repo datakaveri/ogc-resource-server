@@ -60,10 +60,11 @@ MinIO → Webhook → FastAPI Audit Logs Processor → OGC RS /processes endpoin
 
 ---
 ##  AWS S3 Flow Setup
+In the AWS setup, all STAC assets are served through presigned URLs, and every download triggers an S3 GetObject event. To capture these access events, CloudTrail Data Events must be enabled for the S3 bucket. CloudTrail streams logs to a Lambda function, which extracts key fields like itemId, collectionId, userId, and bytesTransferred, and forwards them to the OGC Resource Server’s metering endpoint.
 
 ### 1. Configure S3 Event Notifications
 
-In target bucket’s **Properties → Event Notifications**, configure:
+In target CloudTrailLogs bucket's **Properties → Event Notifications**, configure:
 - **Event type**: `Object Accessed` or `GetObject`
 - **Destination**: AWS Lambda
 - **Prefix/Suffix filters**: Optional for asset paths
@@ -86,11 +87,167 @@ Example payload:
   }
 }
 ```
+**Example AWS Lambda Function (Python)**
 
+Below is an example implementation of the `ogc-s3-audit-logs-processor` Lambda.
+It consumes S3/CloudTrail GetObject events, extracts required fields, fetches an access token, and posts structured audit logs to the OGC RS `/processes/{process-id}/execution` endpoint.
+```declarative
+import json
+import gzip
+import boto3
+import urllib3
+import os
+
+# --- Configuration from environment variables ---
+AWS_CLOUDTRAIL_BUCKET = os.getenv("CLOUDTRAIL_BUCKET")     
+AWS_REGION = os.getenv("CLOUDTRAIL_REGION")                
+
+AUTH_URL = os.getenv("AUTH_URL")
+PROCESS_API_URL = os.getenv("PROCESS_API_URL")
+
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+
+# Token payload parameters (generalized)
+AUTH_ITEM_ID = os.getenv("AUTH_ITEM_ID")       
+AUTH_ITEM_TYPE = os.getenv("AUTH_ITEM_TYPE")    
+AUTH_ROLE = os.getenv("AUTH_ROLE")              
+
+# --- AWS and HTTP clients ---
+s3 = boto3.client("s3", region_name=AWS_REGION)
+http = urllib3.PoolManager()
+
+
+def get_access_token():
+"""
+Fetch an access token from the authorization server.
+All token details are taken from environment variables.
+"""
+payload = {
+"itemId": AUTH_ITEM_ID,
+"itemType": AUTH_ITEM_TYPE,
+"role": AUTH_ROLE
+}
+
+headers = {
+"clientId": CLIENT_ID,
+"clientSecret": CLIENT_SECRET,
+"Content-Type": "application/json"
+}
+
+resp = http.request(
+"POST",
+AUTH_URL,
+body=json.dumps(payload).encode("utf-8"),
+headers=headers
+)
+
+if resp.status != 200:
+raise Exception(f"Auth server returned {resp.status}: {resp.data}")
+
+token_data = json.loads(resp.data.decode("utf-8"))
+return token_data["results"]["accessToken"]
+
+
+def parse_cloudtrail_object(bucket, key):
+"""
+Parse a single CloudTrail log (.gz file) and return
+presigned URL access audit entries.
+"""
+print(f"[Lambda] Reading CloudTrail log from: s3://{bucket}/{key}")
+resp = s3.get_object(Bucket=bucket, Key=key)
+
+with gzip.GzipFile(fileobj=resp["Body"]) as f:
+data = json.load(f)
+
+logs = []
+
+for rec in data.get("Records", []):
+event_name = rec.get("eventName")
+additional = rec.get("additionalEventData", {})
+params = rec.get("requestParameters", {})
+
+if (
+event_name == "GetObject"
+and additional.get("AuthenticationMethod") == "QueryString"
+and "X-Amz-Expires" in json.dumps(params)
+and params.get("collectionId")
+and params.get("itemId")
+):
+user_id = params.get("userId")
+collection_id = params.get("collectionId")
+item_id = params.get("itemId")
+timestamp = rec.get("eventTime")
+resp_size = additional.get("bytesTransferredOut", 0)
+storage_backend = "aws_s3"
+
+log_entry = (
+f"{user_id}|{collection_id}|{item_id}|"
+f"{timestamp}|{resp_size}|{storage_backend}"
+)
+logs.append(log_entry)
+
+return logs
+
+
+def send_to_process_endpoint(token, logs):
+"""
+Send logs to the OGC Resource Server Process API.
+"""
+payload = {"inputs": {"logs": logs}}
+headers = {
+"Authorization": f"Bearer {token}",
+"Content-Type": "application/json"
+}
+
+print(f"[Lambda] Sending {len(logs)} logs to Process API")
+
+resp = http.request(
+"POST",
+PROCESS_API_URL,
+body=json.dumps(payload).encode("utf-8"),
+headers=headers
+)
+
+print(f"[Lambda] API Response: {resp.status}")
+return resp.status
+
+
+def lambda_handler(event, context):
+"""
+Lambda entrypoint — triggered when a CloudTrail log file
+is uploaded into the S3 bucket.
+"""
+print("[Lambda] CloudTrail ingestion triggered")
+all_logs = []
+
+for record in event["Records"]:
+bucket = record["s3"]["bucket"]["name"]
+key = record["s3"]["object"]["key"]
+
+logs = parse_cloudtrail_object(bucket, key)
+all_logs.extend(logs)
+
+if not all_logs:
+print("[Lambda] No presigned URL logs found.")
+return {"status": "no_logs_found"}
+
+token = get_access_token()
+status = send_to_process_endpoint(token, all_logs)
+
+return {
+"status": "completed",
+"logs_count": len(all_logs),
+"api_status": status
+}
+
+
+```
 ---
 
 ##  MinIO Flow Setup
-
+MinIO does not produce CloudTrail-like logs automatically. Instead, audit logs are emitted to a configured webhook target.
+The ogc-minio-audit-logs-processor (FastAPI service) listens to this webhook, processes logs, and forwards them to the OGC Resource Server.
 ### 1. Deploy the FastAPI Processor
 
 Clone the repository:
