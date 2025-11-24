@@ -23,6 +23,7 @@ import ogc.rs.processes.auditLogsIngestion.AuditLogsIngestionProcess;
 import ogc.rs.processes.tilesMetaDataOnboarding.TilesMetaDataOnboardingProcess;
 import ogc.rs.processes.s3PreSignedURLGeneration.S3PreSignedURLGenerationProcess;
 import ogc.rs.processes.tilesOnboardingFromExistingFeature.TilesOnboardingFromExistingFeatureProcess;
+import ogc.rs.processes.userDatasetUsageCheck.UserDatasetUsageCheckProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.logging.log4j.LogManager;
@@ -173,6 +174,9 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
         case "FeatureAttributesExtraction":
           processService = new FeatureAttributesExtractionProcess(pgPool);
           break;
+          case "UserDatasetUsageCheck":
+              processService = new UserDatasetUsageCheckProcess(pgPool);
+              break;
         case "Hello World":
           processService = new EchoProcess(pgPool);
           break;
