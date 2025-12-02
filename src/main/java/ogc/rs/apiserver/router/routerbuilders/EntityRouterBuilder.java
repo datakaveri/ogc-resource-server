@@ -57,6 +57,7 @@ public abstract class EntityRouterBuilder {
   public MeteringAuthZHandler meteringAuthZHandler = new MeteringAuthZHandler();
   public OgcFeaturesAuthZHandler ogcFeaturesAuthZHandler;
   public ProcessAuthZHandler processAuthZHandler;
+  public JobsAuthZHandler jobsAuthZHandler = new JobsAuthZHandler();
   public TilesMeteringHandler tilesMeteringHandler;
   public StacCollectionOnboardingAuthZHandler stacCollectionOnboardingAuthZHandler;
   public StacItemByIdAuthZHandler stacItemByIdAuthZHandler;
