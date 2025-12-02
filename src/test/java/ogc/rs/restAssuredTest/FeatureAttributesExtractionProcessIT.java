@@ -48,7 +48,7 @@ public class FeatureAttributesExtractionProcessIT {
         LOGGER.debug("Testing Failure: Process does not Exist");
         String invalidProcessId = String.valueOf(UUID.randomUUID());
         Response response = sendExecutionRequest(invalidProcessId, getToken(), requestBody());
-        response.then().statusCode(404).body(TYPE_KEY, is(NOT_FOUND));
+        response.then().statusCode(404).body(CODE_KEY, is(NOT_FOUND));
     }
 
     @Test

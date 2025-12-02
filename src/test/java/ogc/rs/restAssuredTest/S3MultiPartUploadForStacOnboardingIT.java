@@ -251,7 +251,7 @@ public class S3MultiPartUploadForStacOnboardingIT {
     public void testExecuteFailProcessNotPresent() {
         LOGGER.debug("Testing Failure: Process does not Exist");
         Response response = sendExecutionRequest(inValidProcessId, getToken(), initiateUploadRequestBody());
-        response.then().statusCode(404).body(TYPE_KEY, is(NOT_FOUND));
+        response.then().statusCode(404).body(CODE_KEY, is(NOT_FOUND));
     }
 
     @Test

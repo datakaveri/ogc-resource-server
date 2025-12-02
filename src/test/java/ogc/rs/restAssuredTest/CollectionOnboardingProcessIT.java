@@ -133,7 +133,7 @@ public class CollectionOnboardingProcessIT {
         LOGGER.debug("Testing Failure: Process does not Exist");
         String invalidProcessId = "cc0eb191-7f66-4663-8afa-cfd644de5830";
         Response response = sendExecutionRequest(invalidProcessId, getToken(), requestBody());
-        response.then().statusCode(404).body(TYPE_KEY, is(NOT_FOUND));
+        response.then().statusCode(404).body(CODE_KEY, is(NOT_FOUND));
     }
 
     @Test
