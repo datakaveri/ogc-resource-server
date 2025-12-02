@@ -56,7 +56,7 @@ public abstract class EntityRouterBuilder {
   public StacAssetsAuthZHandler stacAssetsAuthZHandler;
   public MeteringAuthZHandler meteringAuthZHandler = new MeteringAuthZHandler();
   public OgcFeaturesAuthZHandler ogcFeaturesAuthZHandler;
-  public ProcessAuthZHandler processAuthZHandler = new ProcessAuthZHandler();
+  public ProcessAuthZHandler processAuthZHandler;
   public TilesMeteringHandler tilesMeteringHandler;
   public StacCollectionOnboardingAuthZHandler stacCollectionOnboardingAuthZHandler;
   public StacItemByIdAuthZHandler stacItemByIdAuthZHandler;
@@ -73,6 +73,7 @@ public abstract class EntityRouterBuilder {
     tokenAuthenticationHandler = new DxTokenAuthenticationHandler(vertx, config);
     stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx);
     ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(vertx);
+    processAuthZHandler = new ProcessAuthZHandler(vertx, config);
     tilesMeteringHandler = new TilesMeteringHandler(vertx, config);
     stacCollectionOnboardingAuthZHandler = new StacCollectionOnboardingAuthZHandler(vertx, config);
     stacItemByIdAuthZHandler = new StacItemByIdAuthZHandler(vertx);
