@@ -23,6 +23,7 @@ public class MeteringVerticle extends AbstractVerticle {
   private PgConnectOptions meteringConnectOptions;
   private PgConnectOptions dbConnectOptions;
   private PoolOptions poolOptions;
+
   private PgPool meteringPool;
   private PgPool dbPool;
   private String meteringDatabaseHost;
@@ -30,6 +31,7 @@ public class MeteringVerticle extends AbstractVerticle {
   private String meteringDatabaseName;
   private String meteringDatabaseUserName;
   private String meteringDatabasePassword;
+
   private String ogcDatabaseHost;
   private int ogcDatabasePort;
   private String ogcDatabaseName;

@@ -6,7 +6,7 @@
     "description": "OGC compliant Features and Common API definitions.\nIncludes Schema and Response Objects.\n\n <a href='/stac/api'>STAC API Documentation</a> \n\n <a href='/metering/api'>DX Metering API Documentation</a>",
     "contact": {
       "name": "Integrated Geospatial Data-sharing Interface (GDI)",
-      "email": "info@iudx.org.in",
+      "email": "${SUPPORT_EMAIL}",
       "url": "https://geospatial.org.in"
     },
     "license": {
