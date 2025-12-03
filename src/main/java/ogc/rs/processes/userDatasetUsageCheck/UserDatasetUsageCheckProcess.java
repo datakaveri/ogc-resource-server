@@ -15,6 +15,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import static ogc.rs.processes.userDatasetUsageCheck.Constants.*;
+
 /**
  * UserDatasetUsageCheckProcess
 
@@ -41,18 +43,13 @@ public class UserDatasetUsageCheckProcess implements ProcessService {
     @Override
     public Future<JsonObject> execute(JsonObject input) {
         Promise<JsonObject> promise = Promise.promise();
-        LOGGER.info("Starting User Dataset Usage Check Process...");
+        LOGGER.info(STARTING_DATASET_USAGE_CHECK_PROCESS_MESSAGE);
 
         String userId = input.getString("user_id");
         String collectionId = input.getString("collection_id");
 
-        String query =
-                "SELECT MAX(timestamp) AS last_used "
-                        + "FROM metering "
-                        + "WHERE user_id = $1 AND collection_id = $2";
-
         client
-                .preparedQuery(query)
+                .preparedQuery(TIMESTAMP_QUERY)
                 .execute(Tuple.of(userId, collectionId))
                 .onSuccess(rows -> handleQueryResult(rows, promise))
                 .onFailure(

@@ -1,6 +1,7 @@
 package ogc.rs.processes.auditLogsIngestion;
 
 public class Constants {
+    public static final String AUDIT_LOGS_INGESTION_TITLE = "AuditLogsIngestion"; // Process title for authorization
     public static final String STARTING_AUDIT_LOGS_INGESTION_PROCESS_MESSAGE =
             "Starting Audit Logs Ingestion process.";
     public static final String LOG_ENTRY_EMPTY_MESSAGE =

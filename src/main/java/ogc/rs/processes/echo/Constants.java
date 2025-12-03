@@ -5,6 +5,9 @@ package ogc.rs.processes.echo;
  */
 public class Constants {
 
+    // Process title for authorization
+    public static final String ECHO_PROCESS_TITLE = "Hello World";
+
     // Process status messages
     public static final String STARTING_ECHO_MESSAGE =
             "Starting echo process";

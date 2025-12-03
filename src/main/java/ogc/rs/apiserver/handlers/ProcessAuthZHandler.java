@@ -19,6 +19,9 @@ import java.util.regex.Matcher;
 
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.apiserver.util.Constants.*;
+import static ogc.rs.processes.auditLogsIngestion.Constants.AUDIT_LOGS_INGESTION_TITLE;
+import static ogc.rs.processes.echo.Constants.ECHO_PROCESS_TITLE;
+import static ogc.rs.processes.userDatasetUsageCheck.Constants.USER_DATASET_USAGE_TITLE;
 
 public class ProcessAuthZHandler implements Handler<RoutingContext> {
     private static final Logger LOGGER = LogManager.getLogger(ProcessAuthZHandler.class);

@@ -61,10 +61,6 @@ public class Constants {
     public static final String STAC_ASSETS_BY_ID_REGEX = "^/stac/collections/[^/]+/items/[^/]+$";
     // Pattern to extract processId from path: /processes/{processId}/execution
     public static final Pattern PROCESS_ID_PATTERN = Pattern.compile("/processes/([^/]+)/execution");
-    // Process titles for authorization
-    public static final String AUDIT_LOGS_INGESTION_TITLE = "AuditLogsIngestion";
-    public static final String USER_DATASET_USAGE_TITLE = "UserDatasetUsageCheck";
-    public static final String ECHO_PROCESS_TITLE = "Hello World";
     public static final String PROCESS_EXECUTION_REGEX = "/processes/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/execution";
     public static final String STATUS_API = "getStatus";
     public static final String LIST_JOBS_API = "listAllJobs";
