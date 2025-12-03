@@ -189,7 +189,7 @@ public class TilesMetaDataOnboardingProcessIT {
         LOGGER.debug("Testing Failure: Process does not Exist");
         String invalidProcessId = "a512b49a-f8e9-4da1-99b0-13aa758c9102";
         Response response = sendExecutionRequest(invalidProcessId, getToken(), requestBody());
-        response.then().statusCode(404).body(TYPE_KEY, is(NOT_FOUND));
+        response.then().statusCode(404).body(CODE_KEY, is(NOT_FOUND));
     }
 
     @Test

@@ -82,6 +82,7 @@
       },
       "authServerHost": "",
       "audience": "",
+      "cosAdminAudience": "",
       "issuer": ""
     },
     {

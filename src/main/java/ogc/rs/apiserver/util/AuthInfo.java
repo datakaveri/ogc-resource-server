@@ -19,7 +19,8 @@ public class AuthInfo {
     provider,
     consumer,
     admin,
-    delegate
+    delegate,
+      cos_admin
   }
 
   public static AuthInfo createUser(JsonObject tokenDetails) throws OgcException {

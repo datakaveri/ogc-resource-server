@@ -47,21 +47,21 @@ public class OgcProcessesEntity implements GisEntityInterface{
 
     builder
         .operation(STATUS_API)
-        .handler(ogcRouterBuilder.processAuthZHandler)
+        .handler(ogcRouterBuilder.jobsAuthZHandler)
         .handler(apiServerVerticle::getStatus)
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse)
         .failureHandler(failureHandler);
 
     builder.operation(LIST_JOBS_API)
-            .handler(ogcRouterBuilder.processAuthZHandler)
+            .handler(ogcRouterBuilder.jobsAuthZHandler)
             .handler(apiServerVerticle::listAllJobs)
             .handler(apiServerVerticle::putCommonResponseHeaders)
             .handler(apiServerVerticle::buildResponse)
             .failureHandler(failureHandler);
 
     builder.operation(GET_JOB_RESULTS)
-            .handler(ogcRouterBuilder.processAuthZHandler)
+            .handler(ogcRouterBuilder.jobsAuthZHandler)
             .handler(apiServerVerticle::retrieveJobResults)
             .handler(apiServerVerticle::putCommonResponseHeaders)
             .handler(apiServerVerticle::buildResponse)

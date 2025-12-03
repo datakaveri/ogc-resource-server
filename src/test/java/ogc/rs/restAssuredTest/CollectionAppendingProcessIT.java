@@ -174,7 +174,7 @@ public class CollectionAppendingProcessIT {
         LOGGER.debug("Testing Failure: Process does not Exist");
         String invalidProcessId = "b118b4d4-0bc1-4d0b-b137-fdf5b0558c1b";
         Response response = sendExecutionRequest(invalidProcessId, getToken(), requestBody());
-        response.then().statusCode(404).body(TYPE_KEY, is(NOT_FOUND));
+        response.then().statusCode(404).body(CODE_KEY, is(NOT_FOUND));
     }
 
     @Test

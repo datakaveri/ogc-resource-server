@@ -16,6 +16,7 @@ import ogc.rs.apiserver.util.AuthInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import static ogc.rs.apiserver.util.Constants.*;
@@ -66,7 +67,12 @@ public class DxTokenAuthenticationHandler implements AuthenticationHandler {
               jwtAuthOptions
                   .getJWTOptions()
                   .setAudience(Collections.singletonList(config.getString("audience")));
-              jwtAuthOptions.getJWTOptions().setIssuer(config.getString("issuer"));
+                jwtAuthOptions
+                        .getJWTOptions()
+                        .setAudience(Arrays.asList(
+                                config.getString("audience"),
+                                config.getString("cosAdminAudience")
+                        ));
               jwtAuth = JWTAuth.create(vertx, jwtAuthOptions);
             })
         .onFailure(
