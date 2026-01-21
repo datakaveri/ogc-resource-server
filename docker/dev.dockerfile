@@ -33,6 +33,10 @@ COPY --from=gdal-latest /usr /usr
 # ldconfig creates the necessary links and cache to the most recent shared libraries found in the directories specified on the command line
 RUN ldconfig
 
+# ---- Download Elastic APM Java Agent ----
+RUN curl -sSL -o /usr/share/app/elastic-apm-agent.jar \
+    https://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/1.45.0/elastic-apm-agent-1.45.0.jar
+
 EXPOSE 8080 8443
 # Creating a non-root user
 RUN useradd -r -u 1001 -g root ogc-rs-user
