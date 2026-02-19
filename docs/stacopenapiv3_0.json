@@ -6,7 +6,7 @@
     "description": "STAC compliant Features and Common API definitions.\nIncludes Schema and Response Objects.",
     "contact": {
       "name": "Integrated Geospatial Data-sharing Interface (GDI)",
-      "email": "info@iudx.org.in",
+      "email": "${SUPPORT_EMAIL}",
       "url": "https://geospatial.org.in"
     },
     "license": {

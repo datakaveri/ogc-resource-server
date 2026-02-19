@@ -2349,16 +2349,16 @@ public class ApiServerVerticle extends AbstractVerticle {
                         LOGGER.debug("Inserted audit record into Postgres metering table.");
                       }
 
-                      // Publish to RabbitMQ
-                      meteringService.insertMeteringValuesInRmq(request)
-                          .onComplete(rmqHandler -> {
-                            if (rmqHandler.succeeded()) {
-                              LOGGER.debug("Message published in RMQ.");
-                            } else {
-                              LOGGER.error("Failed to publish message in RMQ.");
-                            }
-                            promise.complete();
-                          });
+//                      // Publish to RabbitMQ
+//                      meteringService.insertMeteringValuesInRmq(request)
+//                          .onComplete(rmqHandler -> {
+//                            if (rmqHandler.succeeded()) {
+//                              LOGGER.debug("Message published in RMQ.");
+//                            } else {
+//                              LOGGER.error("Failed to publish message in RMQ.");
+//                            }
+//                            promise.complete();
+//                          });
                     });
 
               } else {

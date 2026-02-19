@@ -70,10 +70,10 @@ public class TilesMeteringHandler implements Handler<Void> {
                                           .onFailure(e -> LOGGER.error("Failed to insert into Postgres metering table", e));
 
                                   // Then publish to RMQ
-                                  meteringService
-                                          .insertMeteringValuesInRmq(meteringJson)
-                                          .onSuccess(r -> LOGGER.debug("Message published in RMQ"))
-                                          .onFailure(e -> LOGGER.error("Failed to publish message in RMQ", e));
+//                                  meteringService
+//                                          .insertMeteringValuesInRmq(meteringJson)
+//                                          .onSuccess(r -> LOGGER.debug("Message published in RMQ"))
+//                                          .onFailure(e -> LOGGER.error("Failed to publish message in RMQ", e));
 
                               } else {
                                   LOGGER.error(this + " NOT removed " + key);
