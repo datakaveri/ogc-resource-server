@@ -16,13 +16,12 @@ public class OgcRsAuditHelper {
       UUID userId,
       String organizationName,
       String serverName,
-      String role, String operation) {
+      String role, String operation,String iss, String delegateId,String ipAddress,String userAgent) {
     UUID id = UUID.randomUUID();
     return new OgcRsAuditLog(
         id,
-        asset.getAssetName(),
         UUID.fromString(asset.getItemId()),
-        asset.getAssetType(),
+        "ASSET",
         operation,
         LocalDateTime.now().toString(),
         apiEndpoint,
@@ -33,8 +32,8 @@ public class OgcRsAuditHelper {
         serverName,
         asset.getOrganizationId(),
         organizationName,
-        true,
-        asset.getShortDescription());
+        iss,
+        delegateId,ipAddress,userAgent);
   }
 
 }
