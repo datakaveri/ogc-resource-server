@@ -2371,12 +2371,49 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
     private void setAuditLog(Asset asset, RoutingContext context) {
-        AuditLog auditLog = OgcRsAuditHelper.createAuditingLogs(asset, RoutingContextHelper.getRequestPath(context),
+      JsonArray userRoles =
+              context
+                      .user()
+                      .principal()
+                      .getJsonObject("realm_access")
+                      .getJsonArray("roles");
+      String role = userRoles.contains("delegate") ? "delegate" : "consumer";
+      String delegatorId;
+      if (role.equalsIgnoreCase("delegate")) {
+        delegatorId = context.request().getHeader("did");
+      } else {
+        delegatorId = context.user().subject();
+      }
+
+      String ipAddress = getClientIp(context);
+      String userAgent =getUserAgent(context);
+      String iss= context.user().principal().getString("iss");
+
+      AuditLog auditLog = OgcRsAuditHelper.createAuditingLogs(asset, RoutingContextHelper.getRequestPath(context),
                 RoutingContextHelper.getRequestMethod(context), UUID.fromString(context.user().subject()),
-                context.user().principal().getString("organisationName"),"OGC-RS", "consumer", "Download");
+                context.user().principal().getString("organisationName"),"OGC_RS", role, "Download",iss,delegatorId,ipAddress,userAgent);
         RoutingContextHelper.setAuditingLog(context,auditLog);
     }
 
+    private String getClientIp(RoutingContext ctx){
+      String forwarded = ctx.request().getHeader("X-Forwarded-For");
+      if (forwarded != null && !forwarded.isBlank()) {
+        return forwarded.split(",")[0].trim();
+      }
+
+      if (ctx.request().remoteAddress() != null) {
+        return ctx.request().remoteAddress().host();
+      }
+
+      return "unknown";
+    }
+  public static String getUserAgent(RoutingContext ctx) {
+    String ua = ctx.request().getHeader("User-Agent");
+    if (ua == null || ua.isBlank()) {
+      return "unknown";
+    }
+    return ua;
+  }
     public void getSummary(RoutingContext routingContext) {
     HttpServerRequest request = routingContext.request();
     LOGGER.trace("Info: getSummary Started.");
