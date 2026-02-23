@@ -1022,7 +1022,7 @@ public class ApiServerVerticle extends AbstractVerticle {
                     .put("title", "List of available map tilesets for the collection of "
                         + collection.getString("id"))));
     collection.put("extent", new JsonObject()
-            .put("spatial", collection.getJsonArray("bbox"))
+            .put("spatial", new JsonObject().put("bbox", new JsonArray().add(collection.getJsonArray("bbox"))))
             .put("temporal", collection.getJsonArray("temporal")));
     collection.remove("bbox");
     collection.remove("temporal");
