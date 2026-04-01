@@ -34,6 +34,19 @@ pipeline {
 
       stages {
 
+    stage('Build dx-common Dependency') {
+        steps {
+            script {
+                dir('dx-common') {
+                    git branch: 'origin/dev', 
+                        url: 'https://github.com/datakaveri/dx-common.git'
+                    
+                    sh 'mvn clean install -Dmaven.test.skip=true'
+                }
+            }
+        }
+    }
+
     stage('Build images') {
       steps{
         script {
@@ -262,7 +275,7 @@ pipeline {
         }
       }
     }
-    
+
     stage('Start ogc-Resource-Server for RESTAssured Integration Testing'){
       steps{
         script{
@@ -278,7 +291,7 @@ pipeline {
         }
       }
     }
-    
+
     stage('RESTAssured Integration Tests and Surefire reports'){
       steps{
           script{
@@ -309,7 +322,7 @@ pipeline {
         }
       }
     }
-    
+
     stage('Extract class files, dump JaCoCo data from container and make JaCoCo report'){
       steps{
         script{
@@ -401,7 +414,7 @@ pipeline {
         }
       }
     }
-  }
+
       }
     }
 
