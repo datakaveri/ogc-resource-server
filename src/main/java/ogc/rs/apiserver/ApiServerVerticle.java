@@ -1597,7 +1597,7 @@ public class ApiServerVerticle extends AbstractVerticle {
       String s3BucketId = assetObj.getString("s3_bucket_id");
 
         try {
-          URI hrefUri = new URI(href);
+          URI hrefUri = new URI(URLEncoder.encode(href));
           if (!shouldCreate && !hrefUri.isAbsolute()) {
             assetObj.put("href", "#");
           }
@@ -1613,8 +1613,8 @@ public class ApiServerVerticle extends AbstractVerticle {
               }
 
                 String preSignedUrl = getPresignedUrlSupportForStacItemById(
-                        href, expiry, conf.get(),
-                        userId, stacCollectionId, stacItemId, assetId
+                    href, expiry, conf.get(),
+                    userId, stacCollectionId, stacItemId, assetId
                 );
                 assetObj.put("href", preSignedUrl);
             }
