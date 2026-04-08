@@ -34,7 +34,7 @@ COPY --from=gdal-latest /usr /usr
 # Fix vulnerabilities (Pillow from GDAL image)
 RUN apt-get update && \
     apt-get install -y python3-pip && \
-    pip3 install --no-cache-dir --upgrade pillow && \
+    pip3 install --no-cache-dir "pillow>=10.3.0" && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # ldconfig creates the necessary links and cache to the most recent shared libraries found in the directories specified on the command line
