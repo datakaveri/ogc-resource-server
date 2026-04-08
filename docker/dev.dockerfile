@@ -35,7 +35,7 @@ COPY --from=gdal-latest /usr /usr
 RUN apt-get update && \
     apt-get install -y --no-install-recommends python3-pip && \
     python3 -m pip install --no-cache-dir --upgrade --force-reinstall "pillow>=12.1.1" && \
-    apt-get install -y --only-upgrade libwebp6 libwebp-dev libwebp-tools || true && \
+    apt-get install -y --only-upgrade libwebp6 libwebp-dev libwebp-tools && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # ldconfig creates the necessary links and cache to the most recent shared libraries found in the directories specified on the command line
