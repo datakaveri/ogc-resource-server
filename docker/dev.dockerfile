@@ -12,7 +12,7 @@ COPY src src
 RUN mvn clean package -Dmaven.test.skip=true
 
 # Getting GDAL latest image
-FROM ghcr.io/osgeo/gdal:ubuntu-small-3.7.3 as gdal-latest
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.12.3 as gdal-latest
 # Java Runtime as the base for final image
 FROM eclipse-temurin:11-jre-focal
 
@@ -30,14 +30,6 @@ COPY --from=builder /usr/share/app/target/${JAR} ./fatjar.jar
 
 # Copying binaries from gdal into the eclipse-image
 COPY --from=gdal-latest /usr /usr
-
-# Fix vulnerabilities (Pillow from GDAL image)
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3-pip && \
-    python3 -m pip install --no-cache-dir --upgrade --force-reinstall "pillow==10.4.0" && \
-    apt-get install -y --only-upgrade libwebp6 libwebp-dev && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
 # ldconfig creates the necessary links and cache to the most recent shared libraries found in the directories specified on the command line
 RUN ldconfig
 
