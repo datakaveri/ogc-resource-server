@@ -380,6 +380,11 @@ pipeline {
     }
 
     stage('Continuous Deployment') {
+      when {
+        expression {
+          return env.BRANCH_NAME == 'dev'
+        }
+      }
       stages {
         stage('Push Images') {
           steps {
