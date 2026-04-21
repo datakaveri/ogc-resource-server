@@ -16,6 +16,24 @@ pipeline {
 
   stages {
 
+    stage('Conditional Execution') {
+      when {
+        allOf {
+          anyOf {
+            changeset "docker/**"
+            changeset "docs/**"
+            changeset "pom.xml"
+            changeset "src/main/**"
+            triggeredBy cause: 'UserIdCause'
+          }
+          expression {
+            return env.BRANCH_NAME == 'dev'
+          }
+        }
+      }
+
+      stages {
+
     stage('Build images') {
       steps{
         script {
@@ -24,6 +42,51 @@ pipeline {
         }
       }
     }
+
+        stage('Trivy Code Scan (Dependencies)') {
+          steps {
+            script {
+              sh '''
+                trivy fs --scanners vuln,secret,misconfig --output trivy-fs-report.txt .
+              '''
+            }
+          }
+        }
+
+        stage('Trivy Scan') {
+          steps {
+            script {
+              try {
+                sh "trivy image --severity CRITICAL,HIGH --exit-code 1 ${devImage.imageName()}"
+                echo 'Trivy scan passed: No HIGH or CRITICAL vulnerabilities found.'
+              } catch (Exception e) {
+                echo 'Trivy scan failed: HIGH or CRITICAL vulnerabilities detected.'
+                currentBuild.result = 'FAILURE'
+                throw e
+              }
+            }
+          }
+        }
+
+        stage('Trivy Docker Image Scan and Report') {
+          steps {
+            script {
+              sh "trivy image --output trivy-dev-image-report.txt ${devImage.imageName()}"
+            }
+          }
+          post {
+            always {
+              archiveArtifacts artifacts: 'trivy-*.txt', allowEmptyArchive: true
+              publishHTML(target: [
+                allowMissing: true,
+                keepAll: true,
+                reportDir: '.',
+                reportFiles: 'trivy-fs-report.txt, trivy-dev-image-report.txt',
+                reportName: 'Trivy Reports'
+              ])
+            }
+          }
+        }
 
     stage('Setup Server for Compliance Tests and Code Coverage Test'){
       steps{
@@ -319,20 +382,6 @@ pipeline {
     }
 
     stage('Continuous Deployment') {
-      when {
-        allOf {
-          anyOf {
-            changeset "docker/**"
-            changeset "docs/**"
-            changeset "pom.xml"
-            changeset "src/main/**"
-            triggeredBy cause: 'UserIdCause'
-          }
-          expression {
-            return env.GIT_BRANCH == 'origin/main';
-          }
-        }
-      }
       stages {
         stage('Push Images') {
           steps {
@@ -353,5 +402,7 @@ pipeline {
       }
     }
   }
-}
+      }
+    }
 
+  }
