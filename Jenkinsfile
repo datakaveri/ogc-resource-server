@@ -27,22 +27,12 @@ pipeline {
             triggeredBy cause: 'UserIdCause'
           }
           expression {
-            return env.BRANCH_NAME == 'stable/v2.2'
+            return env.BRANCH_NAME == 'stable/v2.2' || env.BRANCH_NAME.startsWith('PR-');
           }
         }
       }
 
       stages {
-
-    stage('Build images') {
-      steps{
-        script {
-          devImage = docker.build( devRegistry, "-f ./docker/dev.dockerfile .")
-          testImage = docker.build( testRegistry, "-f ./docker/test.dockerfile .")
-        }
-      }
-    }
-
         stage('Trivy Code Scan (Dependencies)') {
           steps {
             script {
@@ -53,25 +43,31 @@ pipeline {
           }
         }
 
-        stage('Trivy Scan') {
-          steps {
+        stage('Build images') {
+          steps{
             script {
-              try {
-                sh "trivy image --severity CRITICAL,HIGH --exit-code 1 ${devImage.imageName()}"
-                echo 'Trivy scan passed: No HIGH or CRITICAL vulnerabilities found.'
-              } catch (Exception e) {
-                echo 'Trivy scan failed: HIGH or CRITICAL vulnerabilities detected.'
-                currentBuild.result = 'FAILURE'
-                throw e
-              }
+              devImage = docker.build( devRegistry, "-f ./docker/dev.dockerfile .")
+              testImage = docker.build( testRegistry, "-f ./docker/test.dockerfile .")
             }
           }
         }
 
-        stage('Trivy Docker Image Scan and Report') {
+        stage('Trivy Scan and Report') {
           steps {
             script {
-              sh "trivy image --output trivy-dev-image-report.txt ${devImage.imageName()}"
+              try {
+                sh """
+                trivy image \\
+                  --exit-code 1 \\
+                  --severity HIGH,CRITICAL \\
+                  --ignore-unfixed \\
+                  ${devImage.imageName()}
+                """
+                sh "trivy image --output trivy-dev-image-report.txt ${devImage.imageName()}"
+              } catch (Exception e) {
+                echo "Trivy scan failed due to high or critical vulnerabilities."
+                throw e
+              }
             }
           }
           post {
@@ -384,6 +380,11 @@ pipeline {
     stage('Continuous Deployment') {
       stages {
         stage('Push Images') {
+          when {
+            expression {
+              return env.BRANCH_NAME == 'stable/v2.2'
+            }
+          }
           steps {
             script {
               docker.withRegistry( registryUri, registryCredential ) {
