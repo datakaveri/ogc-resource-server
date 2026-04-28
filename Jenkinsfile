@@ -16,21 +16,80 @@ pipeline {
 
   stages {
 
-    stage('Build images') {
-      steps{
-        script {
-          devImage = docker.build( devRegistry, "-f ./docker/dev.dockerfile .")
-          testImage = docker.build( testRegistry, "-f ./docker/test.dockerfile .")
+    stage('Conditional Execution') {
+      when {
+        allOf {
+          anyOf {
+            changeset "docker/**"
+            changeset "docs/**"
+            changeset "pom.xml"
+            changeset "src/main/**"
+            triggeredBy cause: 'UserIdCause'
+          }
+          expression {
+            return env.BRANCH_NAME == 'stable/v2.2' || env.BRANCH_NAME.startsWith('PR-');
+          }
         }
       }
-    }
+
+      stages {
+        stage('Trivy Code Scan (Dependencies)') {
+          steps {
+            script {
+              sh '''
+                trivy fs --scanners vuln,secret,misconfig --output trivy-fs-report.txt .
+              '''
+            }
+          }
+        }
+
+        stage('Build images') {
+          steps{
+            script {
+              devImage = docker.build( devRegistry, "-f ./docker/dev.dockerfile .")
+              testImage = docker.build( testRegistry, "-f ./docker/test.dockerfile .")
+            }
+          }
+        }
+
+        stage('Trivy Scan and Report') {
+          steps {
+            script {
+              try {
+                sh """
+                trivy image \\
+                  --exit-code 1 \\
+                  --severity HIGH,CRITICAL \\
+                  --ignore-unfixed \\
+                  ${devImage.imageName()}
+                """
+                sh "trivy image --output trivy-dev-image-report.txt ${devImage.imageName()}"
+              } catch (Exception e) {
+                echo "Trivy scan failed due to high or critical vulnerabilities."
+                throw e
+              }
+            }
+          }
+          post {
+            always {
+              archiveArtifacts artifacts: 'trivy-*.txt', allowEmptyArchive: true
+              publishHTML(target: [
+                allowMissing: true,
+                keepAll: true,
+                reportDir: '.',
+                reportFiles: 'trivy-fs-report.txt, trivy-dev-image-report.txt',
+                reportName: 'Trivy Reports'
+              ])
+            }
+          }
+        }
 
     stage('Setup Server for Compliance Tests and Code Coverage Test'){
       steps{
         script{
           sh 'scp src/test/resources/OGC_compliance/compliance.xml jenkins@jenkins-master:/var/lib/jenkins/iudx/ogc/'
           sh 'docker compose -f docker-compose.test.yml up -d test'
-          sh 'sleep 20'
+          sh 'sleep 60'
         }
       }
       post{
@@ -319,39 +378,25 @@ pipeline {
     }
 
     stage('Continuous Deployment') {
-      when {
-        allOf {
-          anyOf {
-            changeset "docker/**"
-            changeset "docs/**"
-            changeset "pom.xml"
-            changeset "src/main/**"
-            triggeredBy cause: 'UserIdCause'
-          }
-          expression {
-            return env.GIT_BRANCH == 'origin/main';
-          }
-        }
-      }
       stages {
         stage('Push Images') {
+          when {
+            expression {
+              return env.BRANCH_NAME == 'stable/v2.2'
+            }
+          }
           steps {
             script {
               docker.withRegistry( registryUri, registryCredential ) {
-                devImage.push("1.0.0-alpha-${env.GIT_HASH}")
+                devImage.push("v2.2.RC1-${env.GIT_HASH}")
               }
-            }
-          }
-        }
-        stage('Deploy ogc-resource-server') {
-          steps{
-            script{
-              sh "ssh ubuntu@adex-swarm 'docker service update ogc-rs_ogc-rs --image ghcr.io/datakaveri/geoserver-dev:1.0.0-alpha-${env.GIT_HASH}'"
             }
           }
         }
       }
     }
+      }
+    }
+
   }
 }
-
