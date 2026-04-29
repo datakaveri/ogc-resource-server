@@ -41,4 +41,4 @@ RUN mkdir -p /usr/share/app/storage/temp-dir && chown ogc-rs-user /usr/share/app
 # hint for volume mount
 VOLUME /usr/share/app/storage/temp-dir
 # Setting non-root user to use when container starts
-USER ogc-rs-user
+#USER ogc-rs-user
