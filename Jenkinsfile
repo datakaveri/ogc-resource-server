@@ -16,6 +16,14 @@ pipeline {
 
   stages {
 
+    stage('Pre-flight Cleanup') {
+      steps {
+        script {
+          sh 'docker compose -f docker-compose.test.yml down --remove-orphans --volumes || true'
+        }
+      }
+    }
+
     stage('Conditional Execution') {
       when {
         allOf {
@@ -133,6 +141,11 @@ pipeline {
             }
           }
         }
+        failure{
+          script{
+            sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
+          }
+        }
       }
     }
 
@@ -181,6 +194,11 @@ pipeline {
                 publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'stac-compliance-reports', reportFiles: 'stacOutput.html', reportTitles: 'STAC', reportName: 'STAC Compliance Test Reports'])
               }
             }
+          }
+        }
+        failure{
+          script{
+            sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
           }
         }
       }
