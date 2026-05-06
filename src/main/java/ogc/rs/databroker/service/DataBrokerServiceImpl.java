@@ -17,6 +17,8 @@ public class DataBrokerServiceImpl implements DataBrokerService {
     LOGGER.trace("Info : DataBrokerServiceImpl#constructor() completed");
   }
 
+
+
   @Override
   public Future<Void> publishMessageInternal(
       JsonObject body, String exchangeName, String routingKey) {
