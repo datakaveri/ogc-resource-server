@@ -1,4 +1,3 @@
-/*
 package ogc.rs.metering;
 
 import static ogc.rs.common.Constants.ID;
@@ -57,4 +56,3 @@ class DataBrokerServiceImplTest {
             });
   }
 }
-*/
