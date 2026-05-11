@@ -6,11 +6,14 @@ import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.*;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.validation.RequestParameters;
 import io.vertx.ext.web.validation.ValidationHandler;
 import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
@@ -40,6 +43,13 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -65,6 +75,9 @@ import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.metering.util.MeteringConstant.USER_ID;
 import static ogc.rs.metering.util.MeteringConstant.*;
+import static ogc.rs.processes.collectionOnboarding.Constants.CAT_RESPONSE_FAILURE;
+import static ogc.rs.processes.collectionOnboarding.Constants.ITEM_NOT_PRESENT_ERROR;
+import static ogc.rs.processes.collectionOnboarding.Constants.RESOURCE_OWNERSHIP_ERROR;
 
 /**
  * The OGC Resource Server API Verticle.
@@ -96,6 +109,7 @@ public class ApiServerVerticle extends AbstractVerticle {
   private Buffer ogcLandingPageBuf;
   private JsonObject stacMetaJson;
   private HttpClient httpClient;
+  private WebClient catItemWebClient;
   private ProcessesRunnerService processService;
   private JobsService jobsService;
 
@@ -176,6 +190,101 @@ public class ApiServerVerticle extends AbstractVerticle {
     });
 
     httpClient = vertx.createHttpClient();
+    catItemWebClient =
+        WebClient.create(
+            vertx,
+            new WebClientOptions().setSsl(true).setTrustAll(false).setVerifyHost(true));
+  }
+
+  /**
+   * Calls the DX catalogue item API 
+   * enforces ownership for {@link AuthInfo.RoleEnum#provider} and {@link AuthInfo.RoleEnum#delegate}.
+   *
+   * @param user authenticated user from the token
+   * @param collectionId resource / collection id (catalogue {@code id} query param)
+   * @return a succeeded future if the item exists and ownership rules pass; otherwise fails with
+   * {@link OgcException}
+   */
+  public Future<Void> catalogueOwnershipCheck(AuthInfo user, String collectionId) {
+    Promise<Void> promise = Promise.promise();
+    String catHost = config().getString("catServerHost");
+    int catPort = config().getInteger("catServerPort");
+    String catItemsUri = config().getString("catRequestItemsUri");
+
+    catItemWebClient
+        .get(catPort, catHost, catItemsUri)
+        .addQueryParam("id", collectionId)
+        .send()
+        .onSuccess(
+            responseFromCat -> {
+              if (responseFromCat.statusCode() != 200) {
+                LOGGER.error("{} status={} collectionId={}", ITEM_NOT_PRESENT_ERROR, responseFromCat.statusCode(), collectionId);
+                promise.fail(new OgcException(404, "Not Found", "Not Found"));
+                return;
+              }
+              JsonObject body;
+              try {
+                body = responseFromCat.bodyAsJsonObject();
+              } catch (Exception e) {
+                LOGGER.error("catalogueOwnershipCheck: invalid JSON from catalogue collectionId={}", collectionId, e);
+                promise.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
+                return;
+              }
+              JsonArray results = body.getJsonArray("results");
+              if (results == null || results.isEmpty()) {
+                LOGGER.error("{} collectionId={}", ITEM_NOT_PRESENT_ERROR, collectionId);
+                promise.fail(new OgcException(404, "Not Found", "Not Found"));
+                return;
+              }
+              JsonObject result = results.getJsonObject(0);
+              String owner = result.getString("ownerUserId");
+
+              if (user.getRole() == RoleEnum.provider && !user.isRsToken()) {
+                promise.fail(
+                    new OgcException(
+                        401,
+                        "Not Authorized",
+                        "User is not authorised. Please contact DX AAA "));
+                return;
+              }
+
+              if (user.getRole() == RoleEnum.provider) {
+                if (owner == null || !owner.equals(user.getUserId().toString())) {
+                  LOGGER.error(RESOURCE_OWNERSHIP_ERROR);
+                  promise.fail(new OgcException(403, "Forbidden", RESOURCE_OWNERSHIP_ERROR));
+                  return;
+                }
+              } else if (user.getRole() == RoleEnum.delegate) {
+                if (user.getDelegatorUserId() == null
+                    || owner == null
+                    || !owner.equals(user.getDelegatorUserId().toString())) {
+                  LOGGER.error(
+                      "catalogueOwnershipCheck: delegate ownership mismatch collectionId={}",
+                      collectionId);
+                  promise.fail(
+                      new OgcException(
+                          401,
+                          "Not Authorized",
+                          "User is not authorised. Please contact DX AAA "));
+                  return;
+                }
+              }
+
+              LOGGER.info(
+                  "catalogueOwnershipCheck: ok collectionId={} role={} ownerUserId present={}",
+                  collectionId,
+                  user.getRole(),
+                  owner != null);
+              promise.complete();
+            })
+        .onFailure(
+            failureResponseFromCat -> {
+              LOGGER.error(CAT_RESPONSE_FAILURE + failureResponseFromCat.getMessage());
+              promise.fail(
+                  new OgcException(503, "Service Unavailable", "Service Unavailable"));
+            });
+
+    return promise.future();
   }
 
   /**
@@ -203,6 +312,386 @@ public class ApiServerVerticle extends AbstractVerticle {
   public void sendOgcLandingPage(RoutingContext routingContext) {
     HttpServerResponse response = routingContext.response();
     response.end(ogcLandingPageBuf);
+  }
+
+  public void getCollectionMap(RoutingContext routingContext) {
+    String collectionId = routingContext.pathParam("collectionId");
+    if (collectionId == null || collectionId.isBlank()) {
+      routingContext.fail(new OgcException(404, "Not Found", "Not Found"));
+      return;
+    }
+
+    HttpServerResponse response = routingContext.response();
+
+    String accept = routingContext.request().getHeader("Accept");
+    if (accept == null || accept.isBlank()) {
+      accept = "*/*";
+    }
+
+    if (!(accept.contains("*/*") || accept.contains("image/png"))) {
+      routingContext.put(
+          "response",
+          new OgcException(406, "Not Acceptable", "Content negotiation failed. Unsupported Media-Type.")
+              .getJson()
+              .toString());
+      routingContext.put("statusCode", 406);
+      routingContext.next();
+      return;
+    }
+
+    LOGGER.info("getCollectionMap: collectionId={} Accept={}", collectionId, accept);
+
+    Future<Void> catalogueStep =
+        System.getProperty("disable.auth") != null
+            ? Future.succeededFuture()
+            : catalogueOwnershipCheck(routingContext.get(USER_KEY), collectionId);
+
+    catalogueStep
+        .compose(v -> dbService.getCollection(collectionId))
+        .onSuccess(collectionRows -> {
+          if (collectionRows == null || collectionRows.isEmpty()) {
+            routingContext.fail(new OgcException(404, "Not Found", "Not Found"));
+            return;
+          }
+
+          JsonObject collection = collectionRows.get(0);
+          JsonArray types = collection.getJsonArray("type");
+          if (types == null || !types.contains("MAP")) {
+            LOGGER.debug(
+                "getCollectionMap: collection {} has no MAP type (types={}), responding with 404",
+                collectionId,
+                types);
+            routingContext.fail(new OgcException(404, "Not Found", "Not Found"));
+            return;
+          }
+
+          LOGGER.info(
+              "getCollectionMap: collection loaded with MAP type collectionId={} types={}",
+              collectionId,
+              types);
+
+          JsonArray enclosure = collection.getJsonArray("enclosure");
+          if (enclosure == null || enclosure.isEmpty()) {
+            routingContext.fail(new OgcException(404, "Not Found", "Not Found"));
+            return;
+          }
+
+          LOGGER.info(
+              "getCollectionMap: enclosure present collectionId={} enclosureCount={}",
+              collectionId,
+              enclosure.size());
+
+          JsonObject chosen = null;
+          for (Object o : enclosure) {
+            if (!(o instanceof JsonObject)) continue;
+            JsonObject e = (JsonObject) o;
+            String href = e.getString("href", "");
+            if (href.toLowerCase().endsWith(".tif") || href.toLowerCase().endsWith(".tiff")) {
+              chosen = e;
+              break;
+            }
+          }
+          if (chosen == null) {
+            chosen = enclosure.getJsonObject(0);
+          }
+
+          LOGGER.info(
+              "getCollectionMap: chosen map asset collectionId={} href={}",
+              collectionId,
+              chosen.getString("href"));
+
+          String s3BucketIdentifier = chosen.getString("s3_bucket_id", S3ConfigsHolder.DEFAULT_BUCKET_IDENTIFIER);
+          Optional<S3Config> confOpt = s3conf.getConfigByIdentifier(s3BucketIdentifier);
+          if (confOpt.isEmpty()) {
+            routingContext.fail(
+                new OgcException(403, "Forbidden", "No S3 config found for bucket id: " + s3BucketIdentifier));
+            return;
+          }
+
+          String href = chosen.getString("href");
+          if (href == null || href.isBlank()) {
+            routingContext.fail(new OgcException(404, "Not Found", "Not Found"));
+            return;
+          }
+
+          S3Config s3c = confOpt.get();
+          String objectKey = href.startsWith("/") ? href.substring(1) : href;
+          String vsis3Path = String.format("/vsis3/%s/%s", s3c.getBucket(), objectKey);
+
+          LOGGER.info(
+              "getCollectionMap: resolved S3 target collectionId={} bucket={} objectKey={} s3BucketIdentifier={}",
+              collectionId,
+              s3c.getBucket(),
+              objectKey,
+              s3BucketIdentifier);
+
+          mapAssetExistsInS3(s3c, objectKey)
+              .onSuccess(
+                  exists -> {
+                    if (!exists) {
+                      routingContext.fail(new OgcException(404, "Not Found", "Not Found"));
+                      return;
+                    }
+
+                    LOGGER.info(
+                        "getCollectionMap: S3 object exists, starting GDAL render collectionId={} vsis3Path={}",
+                        collectionId,
+                        vsis3Path);
+
+                    vertx
+                        .<JsonObject>executeBlocking(
+                            p -> {
+                              try {
+                                JsonObject info = runGdalInfoJson(s3c, vsis3Path);
+                                byte[] pngBytes = runGdalTranslatePngToStdout(s3c, vsis3Path);
+                                p.complete(new JsonObject().put("info", info).put("png", Buffer.buffer(pngBytes)));
+                              } catch (Exception ex) {
+                                p.fail(ex);
+                              }
+                            })
+                        .onSuccess(
+                            res -> {
+                              JsonObject info = res.getJsonObject("info");
+                              Buffer png = res.getBuffer("png");
+
+                              String bbox = extractWgs84BboxFromGdalInfo(info);
+                              if (bbox == null) {
+                                bbox = "-180,-90,180,90";
+                                LOGGER.info(
+                                    "getCollectionMap: using default Content-Bbox (no wgs84Extent) collectionId={}",
+                                    collectionId);
+                              } else {
+                                LOGGER.info(
+                                    "getCollectionMap: Content-Bbox from gdalinfo collectionId={} bbox={}",
+                                    collectionId,
+                                    bbox);
+                              }
+
+                              response.putHeader("Content-Type", "image/png");
+                              response.putHeader("Content-Bbox", bbox);
+                              response.setStatusCode(200).end(png);
+                              LOGGER.info(
+                                  "getCollectionMap: response sent 200 OK collectionId={} pngBytes={} Content-Bbox={}",
+                                  collectionId,
+                                  png.length(),
+                                  bbox);
+                            })
+                        .onFailure(
+                            err -> {
+                              Throwable cause = err.getCause() == null ? err : err.getCause();
+                              if (cause instanceof OgcException) {
+                                routingContext.fail(cause);
+                              } else {
+                                LOGGER.error(
+                                    "getCollectionMap: GDAL or map render failed",
+                                    cause);
+                                routingContext.fail(
+                                    new OgcException(500, "Internal Server Error", "Internal Server Error"));
+                              }
+                            });
+                  })
+              .onFailure(
+                  err -> {
+                    if (err instanceof OgcException) {
+                      routingContext.fail(err);
+                    } else {
+                      LOGGER.error("S3 existence check failed: {}", err.getMessage());
+                      routingContext.fail(
+                          new OgcException(500, "Internal Server Error", "Internal Server Error"));
+                    }
+                  });
+        })
+        .onFailure(failed -> {
+          if (failed instanceof OgcException) {
+            routingContext.fail(failed);
+          } else {
+            routingContext.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
+          }
+        });
+  }
+
+  private Future<Boolean> mapAssetExistsInS3(S3Config s3c, String objectKey) {
+    return vertx.executeBlocking(
+        () -> {
+          try (S3Client s3Client = buildS3ClientForMap(s3c)) {
+            s3Client.headObject(
+                HeadObjectRequest.builder().bucket(s3c.getBucket()).key(objectKey).build());
+            LOGGER.info(
+                "mapAssetExistsInS3: HEAD succeeded bucket={} key={}",
+                s3c.getBucket(),
+                objectKey);
+            return true;
+          } catch (S3Exception e) {
+            if (e.statusCode() == 404) {
+              LOGGER.error("file not found in s3 for bucket {} key {}", s3c.getBucket(), objectKey);
+              return false;
+            }
+            LOGGER.error(
+                "S3 headObject failed for bucket {} key {}: {}", s3c.getBucket(), objectKey, e.getMessage());
+            throw new OgcException(500, "Internal Server Error", "Internal Server Error");
+          }
+        },
+        false);
+  }
+
+  private static S3Client buildS3ClientForMap(S3Config s3Config) {
+    return S3Client.builder()
+        .region(Region.of(s3Config.getRegion()))
+        .endpointOverride(URI.create(s3Config.getEndpoint()))
+        .credentialsProvider(
+            StaticCredentialsProvider.create(
+                AwsBasicCredentials.create(s3Config.getAccessKey(), s3Config.getSecretKey())))
+        .serviceConfiguration(
+            S3Configuration.builder()
+                .pathStyleAccessEnabled(s3Config.isPathBasedAccess())
+                .build())
+        .build();
+  }
+
+  private void addGdalS3Options(CommandLine cmd, S3Config s3c) {
+    if (!s3c.isHttps()) {
+      cmd.addArgument("--config");
+      cmd.addArgument("AWS_HTTPS");
+      cmd.addArgument("NO");
+    }
+    if (s3c.isPathBasedAccess()) {
+      cmd.addArgument("--config");
+      cmd.addArgument("AWS_VIRTUAL_HOSTING");
+      cmd.addArgument("FALSE");
+    }
+    cmd.addArgument("--config");
+    cmd.addArgument("AWS_S3_ENDPOINT");
+    cmd.addArgument(s3c.getEndpoint().replaceFirst("https?://", ""));
+    cmd.addArgument("--config");
+    cmd.addArgument("AWS_ACCESS_KEY_ID");
+    cmd.addArgument(s3c.getAccessKey());
+    cmd.addArgument("--config");
+    cmd.addArgument("AWS_SECRET_ACCESS_KEY");
+    cmd.addArgument(s3c.getSecretKey());
+    // Avoid GDAL writing temp files by default where possible.
+    cmd.addArgument("--config");
+    cmd.addArgument("CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE");
+    cmd.addArgument("NO");
+  }
+
+  private JsonObject runGdalInfoJson(S3Config s3c, String vsis3Path) throws OgcException {
+    CommandLine cmd = new CommandLine("gdalinfo");
+    addGdalS3Options(cmd, s3c);
+    cmd.addArgument("-json");
+    cmd.addArgument(vsis3Path, false);
+
+    DefaultExecutor exec = DefaultExecutor.builder().get();
+    exec.setExitValue(0);
+    exec.setWatchdog(ExecuteWatchdog.builder().setTimeout(Duration.ofSeconds(60)).get());
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    ByteArrayOutputStream err = new ByteArrayOutputStream();
+    exec.setStreamHandler(new PumpStreamHandler(out, err));
+
+    try {
+      exec.execute(cmd);
+    } catch (ExecuteException e) {
+      LOGGER.error(
+          "gdalinfo failed exitValue={} path={} stderr={}",
+          e.getExitValue(),
+          vsis3Path,
+          err.toString(StandardCharsets.UTF_8));
+      throw new OgcException(500, "Internal Server Error", "Internal Server Error");
+    } catch (IOException e) {
+      LOGGER.error("gdalinfo IO failure path={}: {}", vsis3Path, e.getMessage());
+      throw new OgcException(500, "Internal Server Error", "Internal Server Error");
+    }
+    try {
+      JsonObject meta = new JsonObject(out.toString(StandardCharsets.UTF_8));
+      LOGGER.info("gdalinfo completed successfully path={}", vsis3Path);
+      return meta;
+    } catch (DecodeException e) {
+      LOGGER.error("gdalinfo output was not valid JSON for path={}", vsis3Path);
+      throw new OgcException(500, "Internal Server Error", "Internal Server Error");
+    }
+  }
+
+  private byte[] runGdalTranslatePngToStdout(S3Config s3c, String vsis3Path) throws OgcException {
+    CommandLine cmd = new CommandLine("gdal_translate");
+    addGdalS3Options(cmd, s3c);
+    cmd.addArgument("-of");
+    cmd.addArgument("PNG");
+    // Choose a reasonable default output size; Core allows server-chosen dimensions.
+    cmd.addArgument("-outsize");
+    cmd.addArgument("1024");
+    cmd.addArgument("0"); // preserve aspect ratio based on width
+    cmd.addArgument(vsis3Path, false);
+    cmd.addArgument("/vsistdout/", false);
+
+    DefaultExecutor exec = DefaultExecutor.builder().get();
+    exec.setExitValue(0);
+    exec.setWatchdog(ExecuteWatchdog.builder().setTimeout(Duration.ofSeconds(120)).get());
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    ByteArrayOutputStream err = new ByteArrayOutputStream();
+    exec.setStreamHandler(new PumpStreamHandler(out, err));
+
+    try {
+      exec.execute(cmd);
+    } catch (ExecuteException e) {
+      LOGGER.error(
+          "gdal_translate failed exitValue={} path={} stderr={}",
+          e.getExitValue(),
+          vsis3Path,
+          err.toString(StandardCharsets.UTF_8));
+      throw new OgcException(500, "Internal Server Error", "Internal Server Error");
+    } catch (IOException e) {
+      LOGGER.error("gdal_translate IO failure path={}: {}", vsis3Path, e.getMessage());
+      throw new OgcException(500, "Internal Server Error", "Internal Server Error");
+    }
+    byte[] png = out.toByteArray();
+    LOGGER.info(
+        "gdal_translate completed successfully path={} outputBytes={}",
+        vsis3Path,
+        png.length);
+    return png;
+  }
+
+  private String extractWgs84BboxFromGdalInfo(JsonObject info) {
+    // Prefer wgs84Extent if present. Structure varies by GDAL version; handle the common "wgs84Extent" form.
+    JsonObject wgs84Extent = info.getJsonObject("wgs84Extent");
+    if (wgs84Extent == null) {
+      return null;
+    }
+
+    Object coordinatesObj = wgs84Extent.getValue("coordinates");
+    if (!(coordinatesObj instanceof JsonArray)) {
+      return null;
+    }
+    JsonArray coordinates = (JsonArray) coordinatesObj;
+    if (coordinates.isEmpty()) return null;
+
+    // coordinates is typically: [ [ [lon,lat], [lon,lat], ... ] ]
+    Object ringObj = coordinates.getValue(0);
+    if (!(ringObj instanceof JsonArray)) return null;
+    JsonArray ring = (JsonArray) ringObj;
+
+    double minLon = Double.POSITIVE_INFINITY;
+    double minLat = Double.POSITIVE_INFINITY;
+    double maxLon = Double.NEGATIVE_INFINITY;
+    double maxLat = Double.NEGATIVE_INFINITY;
+
+    for (Object ptObj : ring) {
+      if (!(ptObj instanceof JsonArray)) continue;
+      JsonArray pt = (JsonArray) ptObj;
+      if (pt.size() < 2) continue;
+      Double lon = pt.getDouble(0);
+      Double lat = pt.getDouble(1);
+      if (lon == null || lat == null) continue;
+      minLon = Math.min(minLon, lon);
+      minLat = Math.min(minLat, lat);
+      maxLon = Math.max(maxLon, lon);
+      maxLat = Math.max(maxLat, lat);
+    }
+
+    if (!Double.isFinite(minLon) || !Double.isFinite(minLat) || !Double.isFinite(maxLon) || !Double.isFinite(maxLat)) {
+      return null;
+    }
+
+    return String.format(Locale.ROOT, "%s,%s,%s,%s", minLon, minLat, maxLon, maxLat);
   }
 
   public void executeJob(RoutingContext routingContext) {

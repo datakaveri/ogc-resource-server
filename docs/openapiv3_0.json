@@ -170,6 +170,48 @@
         }
       }
     },
+    "/collections/{collectionId}/map": {
+      "get": {
+        "tags": [
+          "Maps"
+        ],
+        "summary": "Map of a collection in default style",
+        "description": "OGC API - Maps Part 1: Core map resource representing a single collection in the default style.\nThe response body contains a map encoded in the negotiated format.\n",
+        "operationId": "getCollectionMap",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/collectionId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful map response",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/tileMatrixSets": {
       "get": {
         "tags": [
