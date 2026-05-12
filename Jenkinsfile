@@ -15,6 +15,14 @@ pipeline {
   }
 
   stages {
+   
+    stage('Pre-flight Cleanup') {
+      steps {
+        script {
+          sh 'docker compose -f docker-compose.test.yml down --remove-orphans --volumes || true'
+        }
+      }
+    }
 
     stage('Build images') {
       steps{
@@ -70,6 +78,11 @@ pipeline {
                 publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: env.NEWEST_TEST_DIR, reportFiles: 'emailable-report.html,index.html', reportTitles: 'Overview,Detailed Report', reportName: 'OGC Feature Compliance Test Reports'])
               }
             }
+          }
+        }
+        failure{
+          script{
+            sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
           }
         }
       }
