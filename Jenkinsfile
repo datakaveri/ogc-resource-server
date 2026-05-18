@@ -194,11 +194,6 @@ pipeline {
             }
           }
         }
-        failure{
-          script{
-            sh 'docker compose -f docker-compose.test.yml down --remove-orphans'
-          }
-        }
       }
     }
 
