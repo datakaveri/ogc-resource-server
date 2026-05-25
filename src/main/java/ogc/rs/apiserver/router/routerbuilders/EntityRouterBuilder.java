@@ -75,7 +75,7 @@ public abstract class EntityRouterBuilder {
     tokenAuthenticationHandler = new DxTokenAuthenticationHandler(vertx, config);
     stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx);
     ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(vertx);
-    ogcMapsAuthZHandler = new OgcMapsAuthZHandler(vertx);
+    ogcMapsAuthZHandler = new OgcMapsAuthZHandler(vertx, config);
     processAuthZHandler = new ProcessAuthZHandler(vertx, config);
     tilesMeteringHandler = new TilesMeteringHandler(vertx, config);
     stacCollectionOnboardingAuthZHandler = new StacCollectionOnboardingAuthZHandler(vertx, config);

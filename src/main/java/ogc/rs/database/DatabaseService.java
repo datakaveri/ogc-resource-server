@@ -26,6 +26,11 @@ public interface DatabaseService {
 
     Future<List<JsonObject>>  getCollection(final String collectionId);
 
+    /**
+     * Returns map metadata for a collection ({@code collection_map_metadata}), or {@code null} if none.
+     */
+    Future<JsonObject> getCollectionMapMetadata(String collectionId);
+
     Future<JsonObject> getFeatures(String collectionId, Map<String, String> queryParams, Limits limits, Map<String, Integer> crs);
 
     Future<JsonObject> getFeature(String collectionId, Integer featureId, Map<String, String> queryParams, Limits limits, Map<String, Integer> crs);
