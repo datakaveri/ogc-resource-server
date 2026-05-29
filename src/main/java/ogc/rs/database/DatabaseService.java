@@ -27,7 +27,11 @@ public interface DatabaseService {
     Future<List<JsonObject>>  getCollection(final String collectionId);
 
     /**
-     * Returns map metadata for a collection ({@code collection_map_metadata}), or {@code null} if none.
+     * Returns map raster metadata for a collection ({@code collection_map_metadata}), or {@code null}
+     * if none.
+     *
+     * <p>Collection native CRS and WGS84 bbox are on {@code collections_details} ({@code crs},
+     * {@code bbox}). The map row holds S3 {@code href}, {@code content_bbox} (native extent), etc.
      */
     Future<JsonObject> getCollectionMapMetadata(String collectionId);
 

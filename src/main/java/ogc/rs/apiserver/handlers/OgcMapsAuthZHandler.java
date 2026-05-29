@@ -30,6 +30,8 @@ import static ogc.rs.processes.collectionOnboarding.Constants.RESOURCE_OWNERSHIP
  */
 public class OgcMapsAuthZHandler implements Handler<RoutingContext> {
 
+  private static final String CATALOGUE_NON_2XX_RESPONSE = "Catalogue returned non-2XX response";
+
   private final JsonObject config;
   private final DatabaseService databaseService;
   private final WebClient catItemWebClient;
@@ -92,12 +94,12 @@ public class OgcMapsAuthZHandler implements Handler<RoutingContext> {
                   user.isRsToken());
 
               if (isOpen && user.isRsToken()) {
-                authorizeUser(routingContext, user, collectionId);
+                authorizeProviderOrDelegate(routingContext, user, collectionId);
               } else {
                 if (user.getRole() == AuthInfo.RoleEnum.consumer) {
-                  handleConsumerAccess(routingContext, user, collectionId);
+                  handleConsumerAccess(routingContext, collectionId);
                 } else {
-                  authorizeUser(routingContext, user, collectionId);
+                  authorizeProviderOrDelegate(routingContext, user, collectionId);
                 }
               }
             })
@@ -108,8 +110,10 @@ public class OgcMapsAuthZHandler implements Handler<RoutingContext> {
             });
   }
 
-  private void authorizeUser(RoutingContext routingContext, AuthInfo user, String collectionId) {
-    catalogueOwnershipCheck(user, collectionId)
+  private void authorizeProviderOrDelegate(
+      RoutingContext routingContext, AuthInfo user, String collectionId) {
+    catalogueItemExists(collectionId)
+        .compose(catalogueItem -> verifyCatalogueOwnership(user, catalogueItem))
         .onSuccess(
             v -> {
               LOGGER.info(
@@ -121,8 +125,8 @@ public class OgcMapsAuthZHandler implements Handler<RoutingContext> {
         .onFailure(routingContext::fail);
   }
 
-  private void handleConsumerAccess(
-      RoutingContext routingContext, AuthInfo user, String collectionId) {
+  private void handleConsumerAccess(RoutingContext routingContext, String collectionId) {
+    AuthInfo user = routingContext.get(USER_KEY);
     JsonArray access =
         user.getConstraints() != null ? user.getConstraints().getJsonArray("access") : null;
     if (access == null || !access.contains("api")) {
@@ -135,15 +139,26 @@ public class OgcMapsAuthZHandler implements Handler<RoutingContext> {
       LOGGER.info(
           "OgcMapsAuthZHandler: consumer constraints validated (api) collectionId={}",
           collectionId);
-      authorizeUser(routingContext, user, collectionId);
+      catalogueItemExists(collectionId)
+          .onSuccess(
+              v -> {
+                LOGGER.info(
+                    "OgcMapsAuthZHandler: consumer authorization passed collectionId={}",
+                    collectionId);
+                routingContext.next();
+              })
+          .onFailure(routingContext::fail);
     }
   }
 
   /**
-   * Calls the DX catalogue item API and enforces ownership for provider and delegate roles.
+   * Verifies the collection item exists in the DX catalogue.
+   *
+   * @param collectionId collection resource id
+   * @return catalogue item JSON when present
    */
-  private Future<Void> catalogueOwnershipCheck(AuthInfo user, String collectionId) {
-    Promise<Void> promise = Promise.promise();
+  private Future<JsonObject> catalogueItemExists(String collectionId) {
+    Promise<JsonObject> promise = Promise.promise();
     String catHost = config.getString("catServerHost");
     int catPort = config.getInteger("catServerPort");
     String catItemsUri = config.getString("catRequestItemsUri");
@@ -157,10 +172,10 @@ public class OgcMapsAuthZHandler implements Handler<RoutingContext> {
               if (responseFromCat.statusCode() != 200) {
                 LOGGER.error(
                     "{} status={} collectionId={}",
-                    ITEM_NOT_PRESENT_ERROR,
+                    CATALOGUE_NON_2XX_RESPONSE,
                     responseFromCat.statusCode(),
                     collectionId);
-                promise.fail(new OgcException(404, "Not Found", "Not Found"));
+                promise.fail(new OgcException(503, "Service Unavailable", CATALOGUE_NON_2XX_RESPONSE));
                 return;
               }
               JsonObject body;
@@ -168,7 +183,7 @@ public class OgcMapsAuthZHandler implements Handler<RoutingContext> {
                 body = responseFromCat.bodyAsJsonObject();
               } catch (Exception e) {
                 LOGGER.error(
-                    "catalogueOwnershipCheck: invalid JSON from catalogue collectionId={}",
+                    "catalogueItemExists: invalid JSON from catalogue collectionId={}",
                     collectionId,
                     e);
                 promise.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
@@ -180,46 +195,8 @@ public class OgcMapsAuthZHandler implements Handler<RoutingContext> {
                 promise.fail(new OgcException(404, "Not Found", "Not Found"));
                 return;
               }
-              JsonObject result = results.getJsonObject(0);
-              String owner = result.getString("ownerUserId");
-
-              if (user.getRole() == RoleEnum.provider && !user.isRsToken()) {
-                promise.fail(
-                    new OgcException(
-                        401,
-                        "Not Authorized",
-                        "User is not authorised. Please contact DX AAA "));
-                return;
-              }
-
-              if (user.getRole() == RoleEnum.provider) {
-                if (owner == null || !owner.equals(user.getUserId().toString())) {
-                  LOGGER.error(RESOURCE_OWNERSHIP_ERROR);
-                  promise.fail(new OgcException(403, "Forbidden", RESOURCE_OWNERSHIP_ERROR));
-                  return;
-                }
-              } else if (user.getRole() == RoleEnum.delegate) {
-                if (user.getDelegatorUserId() == null
-                    || owner == null
-                    || !owner.equals(user.getDelegatorUserId().toString())) {
-                  LOGGER.error(
-                      "catalogueOwnershipCheck: delegate ownership mismatch collectionId={}",
-                      collectionId);
-                  promise.fail(
-                      new OgcException(
-                          401,
-                          "Not Authorized",
-                          "User is not authorised. Please contact DX AAA "));
-                  return;
-                }
-              }
-
-              LOGGER.info(
-                  "catalogueOwnershipCheck: ok collectionId={} role={} ownerUserId present={}",
-                  collectionId,
-                  user.getRole(),
-                  owner != null);
-              promise.complete();
+              LOGGER.info("catalogueItemExists: ok collectionId={}", collectionId);
+              promise.complete(results.getJsonObject(0));
             })
         .onFailure(
             failureResponseFromCat -> {
@@ -228,6 +205,49 @@ public class OgcMapsAuthZHandler implements Handler<RoutingContext> {
                   new OgcException(503, "Service Unavailable", "Service Unavailable"));
             });
 
+    return promise.future();
+  }
+
+  /**
+   * Enforces catalogue ownership for provider and delegate roles.
+   *
+   * @param user authenticated user
+   * @param catalogueItem catalogue item returned by {@link #catalogueItemExists(String)}
+   */
+  private Future<Void> verifyCatalogueOwnership(AuthInfo user, JsonObject catalogueItem) {
+    Promise<Void> promise = Promise.promise();
+    String owner = catalogueItem.getString("ownerUserId");
+
+    if (user.getRole() == RoleEnum.provider && !user.isRsToken()) {
+      promise.fail(
+          new OgcException(
+              401, "Not Authorized", "User is not authorised. Please contact DX AAA "));
+      return promise.future();
+    }
+
+    if (user.getRole() == RoleEnum.provider) {
+      if (owner == null || !owner.equals(user.getUserId().toString())) {
+        LOGGER.error(RESOURCE_OWNERSHIP_ERROR);
+        promise.fail(new OgcException(403, "Forbidden", RESOURCE_OWNERSHIP_ERROR));
+        return promise.future();
+      }
+    } else if (user.getRole() == RoleEnum.delegate) {
+      if (user.getDelegatorUserId() == null
+          || owner == null
+          || !owner.equals(user.getDelegatorUserId().toString())) {
+        LOGGER.error(
+            "verifyCatalogueOwnership: delegate ownership mismatch ownerUserId present={}",
+            owner != null);
+        promise.fail(new OgcException(403, "Forbidden", "Forbidden"));
+        return promise.future();
+      }
+    }
+
+    LOGGER.info(
+        "verifyCatalogueOwnership: ok role={} ownerUserId present={}",
+        user.getRole(),
+        owner != null);
+    promise.complete();
     return promise.future();
   }
 }

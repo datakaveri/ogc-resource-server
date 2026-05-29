@@ -222,7 +222,8 @@ public class ApiServerVerticle extends AbstractVerticle {
   /**
    * OGC API Maps collection map resource ({@code GET /collections/{collectionId}/map}).
    *
-   * <p>Loads map metadata from {@code collection_map_metadata}, verifies the COG in S3, streams a
+   * <p>Loads map raster metadata from {@code collection_map_metadata} and CRS from
+   * {@code collections_details}, verifies the COG in S3, streams a
    * rendered GeoTIFF via {@code gdal_translate} (chunked response), and sets {@code Content-Crs},
    * {@code Content-Bbox}, and optional {@code Content-Datetime}.
    *
@@ -312,10 +313,10 @@ public class ApiServerVerticle extends AbstractVerticle {
               String vsis3Path = String.format("/vsis3/%s/%s", s3c.getBucket(), objectKey);
 
               LOGGER.info(
-                  "getCollectionMap: map metadata collectionId={} href={} native_crs={} bucket={}",
+                  "getCollectionMap: map metadata collectionId={} href={} crs={} bucket={}",
                   collectionId,
                   objectKey,
-                  mapMetadata.getString("native_crs"),
+                  collection.getString("storageCrs"),
                   s3c.getBucket());
 
               MapResponseGeoHeaders geoHeaders;
@@ -760,18 +761,24 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
   /**
-   * Builds OGC API Maps core response geo headers from {@code collection_map_metadata} and collection
-   * temporal extent.
+   * Builds OGC API Maps core response geo headers from collection CRS/bbox and map raster extent.
    *
-   * @param mapMetadata row from {@code collection_map_metadata} (native CRS and content bbox)
-   * @param collection collection row including optional {@code temporal} extent
+   * <p>Native CRS comes from {@code collections_details.crs} ({@code storageCrs} in API responses).
+   * WGS84 collection bbox is stored on {@code collections_details.bbox} at maps onboarding. Map
+   * {@code content_bbox} is the raster extent in native CRS for {@code Content-Bbox}.
+   *
+   * @param mapMetadata row from {@code collection_map_metadata} (content bbox in native CRS)
+   * @param collection collection row including {@code storageCrs} and optional {@code temporal}
    * @return header values for {@link #applyMapResponseHeaders}
-   * @throws OgcException HTTP 500 if native CRS or content bbox is missing or invalid
+   * @throws OgcException HTTP 500 if CRS or content bbox is missing or invalid
    */
   private MapResponseGeoHeaders buildMapResponseGeoHeaders(
       JsonObject mapMetadata, JsonObject collection) {
-    String nativeCrs = mapMetadata.getString("native_crs");
+    String nativeCrs = collection.getString("storageCrs");
     if (nativeCrs == null || nativeCrs.isBlank()) {
+      LOGGER.error(
+          "getCollectionMap: missing collections_details.crs collectionId={}",
+          collection.getString("id"));
       throw new OgcException(500, "Internal Server Error", "Internal Server Error");
     }
     nativeCrs = nativeCrs.trim();
