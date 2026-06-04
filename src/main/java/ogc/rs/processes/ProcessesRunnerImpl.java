@@ -13,13 +13,14 @@ import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.common.S3Config;
 import ogc.rs.common.S3ConfigsHolder;
-import ogc.rs.processes.collectionAppending.CollectionAppendingProcess;
-import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
+import ogc.rs.processes.featureCollectionAppending.FeatureCollectionAppendingProcess;
+import ogc.rs.processes.featureCollectionOnboarding.FeatureCollectionOnboardingProcess;
 import ogc.rs.processes.echo.EchoProcess;
 import ogc.rs.processes.featureAttributesExtraction.FeatureAttributesExtractionProcess;
 import ogc.rs.processes.s3MultiPartUploadForStacOnboarding.S3CompleteMultiPartUploadProcess;
 import ogc.rs.processes.s3MultiPartUploadForStacOnboarding.S3InitiateMultiPartUploadProcess;
 import ogc.rs.processes.auditLogsIngestion.AuditLogsIngestionProcess;
+import ogc.rs.processes.mapCollectionOnboarding.MapCollectionOnboardingProcess;
 import ogc.rs.processes.tilesMetaDataOnboarding.TilesMetaDataOnboardingProcess;
 import ogc.rs.processes.s3PreSignedURLGeneration.S3PreSignedURLGenerationProcess;
 import ogc.rs.processes.tilesOnboardingFromExistingFeature.TilesOnboardingFromExistingFeatureProcess;
@@ -148,10 +149,10 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
       // Switch case to handle different processes
       switch (processName) {
         case "CollectionOnboarding":
-          processService = new CollectionOnboardingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
+          processService = new FeatureCollectionOnboardingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
           break;
         case "CollectionAppending":
-          processService = new CollectionAppendingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
+          processService = new FeatureCollectionAppendingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
           break;
         case "S3PreSignedURLGeneration":
           processService = new S3PreSignedURLGenerationProcess(pgPool, webClient, config, processSpecificS3Conf);
@@ -167,6 +168,10 @@ public class ProcessesRunnerImpl implements ProcessesRunnerService {
               break;
         case "TilesMetaDataOnboarding":
           processService = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
+          break;
+        case "MapCollectionOnboarding":
+          processService =
+              new MapCollectionOnboardingProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);
           break;
         case "TilesOnboardingFromExistingFeature":
           processService = new TilesOnboardingFromExistingFeatureProcess(pgPool, webClient, config, processSpecificS3Conf, vertx);

@@ -1,4 +1,4 @@
-package ogc.rs.processes.collectionOnboarding;
+package ogc.rs.processes.featureCollectionOnboarding;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -35,15 +35,15 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ogc.rs.processes.collectionOnboarding.Constants.*;
+import static ogc.rs.processes.featureCollectionOnboarding.Constants.*;
 
 
 /**
  * This class implements the process of onboarding a collection.
  */
-public class CollectionOnboardingProcess implements ProcessService {
+public class FeatureCollectionOnboardingProcess implements ProcessService {
 
-  private static final Logger LOGGER = LogManager.getLogger(CollectionOnboardingProcess.class);
+  private static final Logger LOGGER = LogManager.getLogger(FeatureCollectionOnboardingProcess.class);
   private final PgPool pgPool;
   private final WebClient webClient;
   private final UtilClass utilClass;
@@ -60,7 +60,7 @@ public class CollectionOnboardingProcess implements ProcessService {
   private DataFromS3 dataFromS3;
   private Vertx vertx;
 
-  public CollectionOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf,Vertx vertx) {
+  public FeatureCollectionOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx) {
     this.pgPool = pgPool;
     this.webClient = webClient;
     this.utilClass = new UtilClass(pgPool);

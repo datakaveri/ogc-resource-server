@@ -9,7 +9,7 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
-import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
+import ogc.rs.processes.featureCollectionOnboarding.FeatureCollectionOnboardingProcess;
 import ogc.rs.processes.tilesMetaDataOnboarding.TilesMetaDataOnboardingProcess;
 import static ogc.rs.processes.tilesOnboardingFromExistingFeature.Constants.*;
 import ogc.rs.processes.util.Status;
@@ -34,7 +34,7 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
     private final Vertx vertx;
     private final PgPool pgPool;
     private final UtilClass utilClass;
-    private final CollectionOnboardingProcess featureCollectionOnboarding;
+    private final FeatureCollectionOnboardingProcess featureCollectionOnboarding;
     private final TilesMetaDataOnboardingProcess tilesMetaDataOnboarding;
     private final S3Config s3conf;
     private String databaseName;
@@ -49,7 +49,7 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
      * @param pgPool                 the PostgreSQL connection pool
      * @param webClient              the web client for HTTP requests
      * @param config                 the configuration object containing necessary properties
-     * @param dataFromS3             the DataFromS3 instance for handling S3-related operations
+     * @param s3conf                 S3 bucket settings for tile output and GDAL /vsis3/ access
      * @param vertx                  the Vertx instance for asynchronous operations
      */
     public TilesOnboardingFromExistingFeatureProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx){
@@ -57,7 +57,7 @@ public class TilesOnboardingFromExistingFeatureProcess implements ProcessService
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.s3conf = s3conf;
-        this.featureCollectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
+        this.featureCollectionOnboarding = new FeatureCollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
         this.tilesMetaDataOnboarding = new TilesMetaDataOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
         initializeConfig(config);
     }

@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 import static io.restassured.RestAssured.*;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.processes.tilesOnboardingFromExistingFeature.Constants.*;
-import static ogc.rs.processes.collectionOnboarding.Constants.*;
+import static ogc.rs.processes.featureCollectionOnboarding.Constants.*;
 import static ogc.rs.processes.util.Status.*;
 import static ogc.rs.processes.util.Constants.NO_S3_CONF_FOUND_FOR_BUCKET_ID;
 import static ogc.rs.restAssuredTest.Constant.*;

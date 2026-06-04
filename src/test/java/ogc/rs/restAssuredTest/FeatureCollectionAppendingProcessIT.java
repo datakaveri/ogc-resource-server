@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 import static io.restassured.RestAssured.given;
 import static ogc.rs.common.Constants.*;
-import static ogc.rs.processes.collectionAppending.Constants.*;
+import static ogc.rs.processes.featureCollectionAppending.Constants.*;
 import static ogc.rs.processes.util.Status.ACCEPTED;
 import static ogc.rs.restAssuredTest.Constant.*;
 import static org.awaitility.Awaitility.await;
@@ -28,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(RestAssuredConfigExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class CollectionAppendingProcessIT {
-    private static final Logger LOGGER = LogManager.getLogger(CollectionAppendingProcessIT.class);
+public class FeatureCollectionAppendingProcessIT {
+    private static final Logger LOGGER = LogManager.getLogger(FeatureCollectionAppendingProcessIT.class);
     String executionEndpoint = "/processes/{processId}/execution";
     String jobStatusEndpoint = "/jobs/{jobId}";
     String processId = "b118b4d4-0bc1-4d0b-b137-fdf5b0558c1d";

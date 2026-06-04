@@ -20,15 +20,15 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import static io.restassured.RestAssured.given;
 import static ogc.rs.common.Constants.*;
-import static ogc.rs.processes.collectionOnboarding.Constants.*;
+import static ogc.rs.processes.featureCollectionOnboarding.Constants.*;
 import static ogc.rs.processes.util.Status.ACCEPTED;
 import static ogc.rs.restAssuredTest.Constant.*;
 
 
 @ExtendWith(RestAssuredConfigExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class CollectionOnboardingProcessIT {
-    private static final Logger LOGGER = LogManager.getLogger(CollectionOnboardingProcessIT.class);
+public class FeatureCollectionOnboardingProcessIT {
+    private static final Logger LOGGER = LogManager.getLogger(FeatureCollectionOnboardingProcessIT.class);
     String executionEndpoint = "/processes/{processId}/execution";
     String jobStatusEndpoint = "/jobs/{jobId}";
     String processId = "cc0eb191-7f66-4663-8afa-cfd644de5839";

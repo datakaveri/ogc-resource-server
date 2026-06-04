@@ -1,4 +1,4 @@
-package ogc.rs.processes.collectionOnboarding;
+package ogc.rs.processes.featureCollectionOnboarding;
 
 public class Constants {
 

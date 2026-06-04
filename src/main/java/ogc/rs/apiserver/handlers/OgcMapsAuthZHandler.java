@@ -21,9 +21,9 @@ import java.util.UUID;
 import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.common.Constants.DATABASE_SERVICE_ADDRESS;
 import static ogc.rs.common.Constants.UUID_REGEX;
-import static ogc.rs.processes.collectionOnboarding.Constants.CAT_RESPONSE_FAILURE;
-import static ogc.rs.processes.collectionOnboarding.Constants.ITEM_NOT_PRESENT_ERROR;
-import static ogc.rs.processes.collectionOnboarding.Constants.RESOURCE_OWNERSHIP_ERROR;
+import static ogc.rs.processes.featureCollectionOnboarding.Constants.CAT_RESPONSE_FAILURE;
+import static ogc.rs.processes.featureCollectionOnboarding.Constants.ITEM_NOT_PRESENT_ERROR;
+import static ogc.rs.processes.featureCollectionOnboarding.Constants.RESOURCE_OWNERSHIP_ERROR;
 
 /**
  * Authorization for OGC Maps (collection map resource).

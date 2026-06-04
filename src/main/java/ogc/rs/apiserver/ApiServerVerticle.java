@@ -12,8 +12,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.validation.RequestParameters;
 import io.vertx.ext.web.validation.ValidationHandler;
 import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
@@ -78,7 +76,7 @@ import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.metering.util.MeteringConstant.USER_ID;
 import static ogc.rs.metering.util.MeteringConstant.*;
-import static ogc.rs.processes.collectionOnboarding.Constants.DEFAULT_SERVER_CRS;
+import static ogc.rs.processes.featureCollectionOnboarding.Constants.DEFAULT_SERVER_CRS;
 
 /**
  * The OGC Resource Server API Verticle.

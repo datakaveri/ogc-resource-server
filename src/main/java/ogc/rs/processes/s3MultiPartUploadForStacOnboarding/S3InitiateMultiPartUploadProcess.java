@@ -16,7 +16,7 @@ import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
-import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
+import ogc.rs.processes.featureCollectionOnboarding.FeatureCollectionOnboardingProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.logging.log4j.LogManager;
@@ -44,7 +44,7 @@ import static ogc.rs.processes.s3MultiPartUploadForStacOnboarding.Constants.*;
 public class S3InitiateMultiPartUploadProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(S3InitiateMultiPartUploadProcess.class);
     private final UtilClass utilClass;
-    private final CollectionOnboardingProcess collectionOnboarding;
+    private final FeatureCollectionOnboardingProcess collectionOnboarding;
     private final DataFromS3 dataFromS3;
     private final S3Config s3conf;
     private final PgPool pgPool;
@@ -72,7 +72,7 @@ public class S3InitiateMultiPartUploadProcess implements ProcessService {
         this.utilClass = new UtilClass(pgPool);
         this.s3conf = s3conf;
         this.dataFromS3 = new DataFromS3(vertx.createHttpClient(new HttpClientOptions().setShared(true)), s3conf);
-        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
+        this.collectionOnboarding = new FeatureCollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
 
         // Initialize S3 Client & S3 Presigner
         this.s3Client = S3Client.builder()
