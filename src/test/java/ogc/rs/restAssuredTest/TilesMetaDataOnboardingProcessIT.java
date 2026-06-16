@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 import static io.restassured.RestAssured.given;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.processes.tilesMetaDataOnboarding.MessageConstants.*;
-import static ogc.rs.processes.collectionOnboarding.Constants.RESOURCE_OWNERSHIP_ERROR;
+import static ogc.rs.processes.featureCollectionOnboarding.Constants.RESOURCE_OWNERSHIP_ERROR;
 import static ogc.rs.restAssuredTest.Constant.*;
 
 import static org.hamcrest.Matchers.is;

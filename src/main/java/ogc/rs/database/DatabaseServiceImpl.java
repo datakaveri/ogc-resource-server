@@ -83,6 +83,28 @@ public class DatabaseServiceImpl implements DatabaseService{
     }
 
     @Override
+    public Future<JsonObject> getCollectionMapMetadata(String collectionId) {
+        Promise<JsonObject> promise = Promise.promise();
+        client
+            .preparedQuery("SELECT * FROM collection_map_metadata WHERE collection_id = $1::uuid")
+            .execute(Tuple.of(UUID.fromString(collectionId)))
+            .onSuccess(
+                rows -> {
+                  if (rows.size() == 0) {
+                    promise.complete(null);
+                  } else {
+                    promise.complete(rows.iterator().next().toJson());
+                  }
+                })
+            .onFailure(
+                err -> {
+                  LOGGER.error("Failed at getCollectionMapMetadata - {}", err.getMessage());
+                  promise.fail("Error!");
+                });
+        return promise.future();
+    }
+
+    @Override
     public Future<List<JsonObject>> getCollections() {
         Promise<List<JsonObject>> result = Promise.promise();
         Collector<Row, ?, List<JsonObject>> collector = Collectors.mapping(Row::toJson, Collectors.toList());

@@ -170,6 +170,74 @@
         }
       }
     },
+    "/collections/{collectionId}/map": {
+      "get": {
+        "tags": [
+          "Maps"
+        ],
+        "summary": "Map of a collection in default style",
+        "description": "OGC API - Maps Part 1: Core map resource representing a single collection in the default style.\nThe response body contains a map encoded in the negotiated format.\n",
+        "operationId": "getCollectionMap",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/collectionId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful map response",
+            "headers": {
+              "Content-Crs": {
+                "description": "URI of the CRS used to render the map (omitted when the map is in http://www.opengis.net/def/crs/OGC/1.3/CRS84)",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "http://www.opengis.net/def/crs/EPSG/0/32644"
+              },
+              "Content-Bbox": {
+                "description": "Geospatial boundary of the rendered map in the response CRS (lower-left and upper-right, axis order of the CRS)",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "599569.438,2764806.700,702359.438,2877726.700"
+              },
+              "Content-Datetime": {
+                "description": "Datetime instant or interval of the rendered map when the collection has a temporal extent",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "2020-01-01T00:00:00Z / 2021-01-01T00:00:00Z"
+              }
+            },
+            "content": {
+              "image/tiff": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/tileMatrixSets": {
       "get": {
         "tags": [

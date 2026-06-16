@@ -6,6 +6,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.*;
+import io.vertx.core.streams.WriteStream;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
@@ -14,8 +15,8 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.RequestParameters;
 import io.vertx.ext.web.validation.ValidationHandler;
 import ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler;
-import ogc.rs.apiserver.util.AuthInfo;
 import ogc.rs.apiserver.util.AuthInfo.RoleEnum;
+import ogc.rs.apiserver.util.AuthInfo;
 import ogc.rs.apiserver.util.Limits;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.apiserver.util.StacItemSearchParams;
@@ -40,7 +41,17 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -65,6 +76,7 @@ import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.common.Constants.*;
 import static ogc.rs.metering.util.MeteringConstant.USER_ID;
 import static ogc.rs.metering.util.MeteringConstant.*;
+import static ogc.rs.processes.featureCollectionOnboarding.Constants.DEFAULT_SERVER_CRS;
 
 /**
  * The OGC Resource Server API Verticle.
@@ -203,6 +215,673 @@ public class ApiServerVerticle extends AbstractVerticle {
   public void sendOgcLandingPage(RoutingContext routingContext) {
     HttpServerResponse response = routingContext.response();
     response.end(ogcLandingPageBuf);
+  }
+
+  /**
+   * OGC API Maps collection map resource ({@code GET /collections/{collectionId}/map}).
+   *
+   * <p>Loads map raster metadata from {@code collection_map_metadata} and CRS from
+   * {@code collections_details}, verifies the COG in S3, streams a
+   * rendered GeoTIFF via {@code gdal_translate} (chunked response), and sets {@code Content-Crs},
+   * {@code Content-Bbox}, and optional {@code Content-Datetime}.
+   *
+   * @param routingContext request context (must pass {@link ogc.rs.apiserver.handlers.OgcMapsAuthZHandler})
+   */
+  public void getCollectionMap(RoutingContext routingContext) {
+    String collectionId = routingContext.pathParam("collectionId");
+    if (collectionId == null || collectionId.isBlank()) {
+      routingContext.fail(new OgcException(404, "Not Found", "Not Found"));
+      return;
+    }
+
+    HttpServerResponse response = routingContext.response();
+
+    String accept = routingContext.request().getHeader("Accept");
+    if (accept == null || accept.isBlank()) {
+      accept = "*/*";
+    }
+
+    if (!(accept.contains("*/*") || accept.contains("image/tiff") || accept.contains("image/png"))) {
+      routingContext.put(
+          "response",
+          new OgcException(406, "Not Acceptable", "Content negotiation failed. Unsupported Media-Type.")
+              .getJson()
+              .toString());
+      routingContext.put("statusCode", 406);
+      routingContext.next();
+      return;
+    }
+
+    LOGGER.info("getCollectionMap: collectionId={} Accept={}", collectionId, accept);
+
+    dbService
+        .getCollection(collectionId)
+        .compose(
+            collectionRows -> {
+              if (collectionRows == null || collectionRows.isEmpty()) {
+                return Future.failedFuture(new OgcException(404, "Not Found", "Not Found"));
+              }
+              JsonObject collection = collectionRows.get(0);
+              JsonArray types = collection.getJsonArray("type");
+              if (types == null || !types.contains("MAP")) {
+                LOGGER.debug(
+                    "getCollectionMap: collection {} has no MAP type (types={}), responding with 404",
+                    collectionId,
+                    types);
+                return Future.failedFuture(new OgcException(404, "Not Found", "Not Found"));
+              }
+              return dbService
+                  .getCollectionMapMetadata(collectionId)
+                  .map(
+                      mapMetadata -> {
+                        if (mapMetadata == null) {
+                          LOGGER.error(
+                              "getCollectionMap: no collection_map_metadata for collectionId={}",
+                              collectionId);
+                          throw new OgcException(404, "Not Found", "Not Found");
+                        }
+                        return new JsonObject()
+                            .put("collection", collection)
+                            .put("mapMetadata", mapMetadata);
+                      });
+            })
+        .onSuccess(
+            ctx -> {
+              JsonObject collection = ctx.getJsonObject("collection");
+              JsonObject mapMetadata = ctx.getJsonObject("mapMetadata");
+
+              String href = mapMetadata.getString("href");
+              if (href == null || href.isBlank()) {
+                routingContext.fail(new OgcException(404, "Not Found", "Not Found"));
+                return;
+              }
+
+              String s3BucketIdentifier =
+                  mapMetadata.getString("s3_bucket_id", S3ConfigsHolder.DEFAULT_BUCKET_IDENTIFIER);
+              Optional<S3Config> confOpt = s3conf.getConfigByIdentifier(s3BucketIdentifier);
+              if (confOpt.isEmpty()) {
+                routingContext.fail(
+                    new OgcException(
+                        403, "Forbidden", "No S3 config found for bucket id: " + s3BucketIdentifier));
+                return;
+              }
+
+              S3Config s3c = confOpt.get();
+              String objectKey = href.startsWith("/") ? href.substring(1) : href;
+              String vsis3Path = String.format("/vsis3/%s/%s", s3c.getBucket(), objectKey);
+
+              LOGGER.info(
+                  "getCollectionMap: map metadata collectionId={} href={} crs={} bucket={}",
+                  collectionId,
+                  objectKey,
+                  collection.getString("storageCrs"),
+                  s3c.getBucket());
+
+              MapResponseGeoHeaders geoHeaders;
+              try {
+                geoHeaders = buildMapResponseGeoHeaders(mapMetadata, collection);
+              } catch (OgcException e) {
+                routingContext.fail(e);
+                return;
+              }
+
+              mapAssetExistsInS3(s3c, objectKey)
+                  .onSuccess(
+                      exists -> {
+                        if (!exists) {
+                          routingContext.fail(new OgcException(404, "Not Found", "Not Found"));
+                          return;
+                        }
+
+                        LOGGER.info(
+                            "getCollectionMap: S3 object exists, starting GDAL render collectionId={} vsis3Path={}",
+                            collectionId,
+                            vsis3Path);
+
+                        LOGGER.info(
+                            "getCollectionMap: starting GDAL render collectionId={}",
+                            collectionId);
+
+                        applyMapResponseHeaders(response, geoHeaders);
+                        response.setChunked(true);
+                        response.setStatusCode(200);
+
+                        vertx
+                            .<Void>executeBlocking(
+                                p -> {
+                                  try {
+                                    long bytesSent =
+                                        streamGdalTranslateToResponse(
+                                            routingContext, response, s3c, vsis3Path);
+                                    endMapResponseOnContext(
+                                        response,
+                                        collectionId,
+                                        geoHeaders,
+                                        bytesSent,
+                                        p);
+                                  } catch (Exception ex) {
+                                    p.fail(ex);
+                                  }
+                                },
+                                false)
+                            .onFailure(
+                                err -> {
+                                  if (response.ended() || response.closed()) {
+                                    return;
+                                  }
+                                  Throwable cause = err.getCause() == null ? err : err.getCause();
+                                  if (cause instanceof OgcException) {
+                                    routingContext.fail(cause);
+                                  } else {
+                                    LOGGER.error("getCollectionMap: GDAL map render failed", cause);
+                                    routingContext.fail(
+                                        new OgcException(
+                                            500, "Internal Server Error", "Internal Server Error"));
+                                  }
+                                });
+                      })
+                  .onFailure(
+                      err -> {
+                        if (err instanceof OgcException) {
+                          routingContext.fail(err);
+                        } else {
+                          LOGGER.error("S3 existence check failed: {}", err.getMessage());
+                          routingContext.fail(
+                              new OgcException(500, "Internal Server Error", "Internal Server Error"));
+                        }
+                      });
+            })
+        .onFailure(
+            failed -> {
+              if (failed instanceof OgcException) {
+                routingContext.fail(failed);
+              } else {
+                routingContext.fail(new OgcException(500, "Internal Server Error", "Internal Server Error"));
+              }
+            });
+  }
+
+  /**
+   * Checks that the map COG object exists in S3 before starting GDAL.
+   *
+   * @param s3c bucket configuration
+   * @param objectKey object key (href from map metadata)
+   * @return {@code true} if {@code headObject} succeeds, {@code false} on 404
+   */
+  private Future<Boolean> mapAssetExistsInS3(S3Config s3c, String objectKey) {
+    return vertx.executeBlocking(
+        () -> {
+          try (S3Client s3Client = buildS3ClientForMap(s3c)) {
+            s3Client.headObject(
+                HeadObjectRequest.builder().bucket(s3c.getBucket()).key(objectKey).build());
+            LOGGER.info(
+                "mapAssetExistsInS3: HEAD succeeded bucket={} key={}",
+                s3c.getBucket(),
+                objectKey);
+            return true;
+          } catch (S3Exception e) {
+            if (e.statusCode() == 404) {
+              LOGGER.error("file not found in s3 for bucket {} key {}", s3c.getBucket(), objectKey);
+              return false;
+            }
+            LOGGER.error(
+                "S3 headObject failed for bucket {} key {}: {}", s3c.getBucket(), objectKey, e.getMessage());
+            throw new OgcException(500, "Internal Server Error", "Internal Server Error");
+          }
+        },
+        false);
+  }
+
+  /**
+   * Builds a synchronous AWS SDK S3 client for map asset HEAD checks.
+   *
+   * @param s3Config bucket configuration
+   * @return configured {@link S3Client} (caller must close)
+   */
+  private static S3Client buildS3ClientForMap(S3Config s3Config) {
+    return S3Client.builder()
+        .region(Region.of(s3Config.getRegion()))
+        .endpointOverride(URI.create(s3Config.getEndpoint()))
+        .credentialsProvider(
+            StaticCredentialsProvider.create(
+                AwsBasicCredentials.create(s3Config.getAccessKey(), s3Config.getSecretKey())))
+        .serviceConfiguration(
+            S3Configuration.builder()
+                .pathStyleAccessEnabled(s3Config.isPathBasedAccess())
+                .build())
+        .build();
+  }
+
+  /** Maximum time to wait for {@code gdal_translate} to finish after stdout is drained. */
+  private static final long GDAL_TRANSLATE_TIMEOUT_SECONDS = 120;
+
+  /**
+   * Sets OGC API Maps core response headers on a chunked map response before the body is streamed.
+   *
+   * @param response HTTP response (must already be in chunked mode for streaming)
+   * @param geoHeaders CRS, bbox, and optional datetime derived from collection map metadata
+   */
+  private static void applyMapResponseHeaders(
+      HttpServerResponse response, MapResponseGeoHeaders geoHeaders) {
+    response.putHeader("Content-Type", "image/tiff");
+    response.putHeader("Content-Bbox", geoHeaders.getContentBbox());
+    if (geoHeaders.getContentCrs() != null) {
+      response.putHeader("Content-Crs", geoHeaders.getContentCrs());
+    }
+    if (geoHeaders.getContentDatetime() != null) {
+      response.putHeader("Content-Datetime", geoHeaders.getContentDatetime());
+    }
+  }
+
+  /**
+   * Completes the map HTTP response on the Vert.x event loop after all GDAL output has been
+   * written.
+   *
+   * @param response chunked response to end
+   * @param collectionId collection identifier (for logging)
+   * @param geoHeaders headers already applied before streaming
+   * @param bytesSent total bytes written to the response body
+   * @param workerPromise {@code executeBlocking} promise to complete when {@code response.end()}
+   *     finishes
+   */
+  private void endMapResponseOnContext(
+      HttpServerResponse response,
+      String collectionId,
+      MapResponseGeoHeaders geoHeaders,
+      long bytesSent,
+      Promise<Void> workerPromise) {
+    vertx.runOnContext(
+        v ->
+            response.end(
+                ar -> {
+                  if (ar.failed()) {
+                    workerPromise.fail(ar.cause());
+                    return;
+                  }
+                  LOGGER.info(
+                      "getCollectionMap: response sent 200 OK collectionId={} bytes={} crs={} Content-Bbox={}",
+                      collectionId,
+                      bytesSent,
+                      geoHeaders.getResponseCrsUri(),
+                      geoHeaders.getContentBbox());
+                  workerPromise.complete(null);
+                }));
+  }
+
+  /**
+   * Writes one map body chunk on the event loop from a worker thread.
+   *
+   * <p>{@link WriteStream#write} must run on the Vert.x context;
+   * this method blocks the caller until the write completes or fails.
+   *
+   * @param response chunked HTTP response
+   * @param chunk GDAL stdout bytes to send
+   * @throws IOException if the write fails or the response is no longer writable
+   * @throws InterruptedException if interrupted while waiting for the event-loop write
+   */
+  private void writeMapChunkOnContext(HttpServerResponse response, Buffer chunk)
+      throws IOException, InterruptedException {
+    CountDownLatch latch = new CountDownLatch(1);
+    AtomicReference<Throwable> writeError = new AtomicReference<>();
+    vertx.runOnContext(
+        v -> {
+          if (response.closed() || response.ended()) {
+            latch.countDown();
+            return;
+          }
+          WriteStream<Buffer> body = response;
+          body.write(chunk)
+              .onComplete(
+                  ar -> {
+                    if (ar.failed()) {
+                      writeError.set(ar.cause());
+                    }
+                    latch.countDown();
+                  });
+        });
+    latch.await();
+    if (writeError.get() != null) {
+      throw new IOException("Failed to write map chunk to response", writeError.get());
+    }
+  }
+
+  /**
+   * Runs {@code gdal_translate} and pipes stdout to the HTTP response via {@link InputStream#transferTo(OutputStream)}.
+   *
+   * <p>Executes on a worker thread. GDAL stdout is copied with {@code transferTo} into a {@link
+   * VertxMapResponseOutputStream} that dispatches {@link WriteStream#write} on the event
+   * loop.
+   *
+   * @param routingContext used for connection close handling
+   * @param response chunked response with map headers already set
+   * @param s3c S3 credentials and endpoint for {@code /vsis3/} access
+   * @param cogPath GDAL virtual file path (e.g. {@code /vsis3/bucket/key.tif})
+   * @return number of bytes streamed to the response
+   * @throws IOException if GDAL fails, times out, or the client disconnects
+   * @throws InterruptedException if interrupted while waiting for the process or writes
+   */
+  private long streamGdalTranslateToResponse(
+      RoutingContext routingContext,
+      HttpServerResponse response,
+      S3Config s3c,
+      String cogPath)
+      throws IOException, InterruptedException {
+
+    List<String> cmd = buildGdalTranslateCommand(cogPath);
+
+    LOGGER.info("getCollectionMap: gdal_translate command: {}", cmd);
+
+    ProcessBuilder pb = new ProcessBuilder(cmd);
+    configureGdalS3Environment(pb.environment(), s3c);
+
+    Process process = pb.start();
+    routingContext
+        .request()
+        .connection()
+        .closeHandler(
+            v -> {
+              if (process.isAlive()) {
+                process.destroyForcibly();
+              }
+            });
+
+    consumeGdalErrorStream(process);
+
+    long bytesSent;
+    try (InputStream stdout = process.getInputStream();
+        OutputStream responseOut = new VertxMapResponseOutputStream(response)) {
+      bytesSent = stdout.transferTo(responseOut);
+    }
+
+    boolean finished = process.waitFor(GDAL_TRANSLATE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+    if (!finished) {
+      process.destroyForcibly();
+      throw new IOException("gdal_translate timed out after " + GDAL_TRANSLATE_TIMEOUT_SECONDS + "s");
+    }
+
+    int exitCode = process.exitValue();
+    if (exitCode != 0) {
+      throw new IOException("gdal_translate failed with exit code " + exitCode);
+    }
+
+    LOGGER.info("getCollectionMap: gdal_translate stream completed bytes={}", bytesSent);
+    return bytesSent;
+  }
+
+  /**
+   * {@link OutputStream} adapter that writes GDAL (or any) bytes to a chunked Vert.x HTTP response.
+   *
+   * <p>Used with {@link InputStream#transferTo(OutputStream)} from a worker thread. Does not call
+   * {@link HttpServerResponse#end()} on close; the caller ends the response separately.
+   */
+  private final class VertxMapResponseOutputStream extends OutputStream {
+
+    private final HttpServerResponse response;
+    private boolean closed;
+
+    private VertxMapResponseOutputStream(HttpServerResponse response) {
+      this.response = response;
+    }
+
+    @Override
+    public void write(int b) throws IOException {
+      write(new byte[] {(byte) b}, 0, 1);
+    }
+
+    @Override
+    public void write(byte[] buffer, int offset, int length) throws IOException {
+      if (closed) {
+        throw new IOException("Map response output stream is closed");
+      }
+      if (response.closed()) {
+        throw new IOException("Client closed connection during map streaming");
+      }
+      try {
+        writeMapChunkOnContext(response, Buffer.buffer(Arrays.copyOfRange(buffer, offset, offset + length)));
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new IOException("Interrupted while writing map response", e);
+      }
+    }
+
+    @Override
+    public void close() {
+      closed = true;
+    }
+  }
+
+  /**
+   * Builds the {@code gdal_translate} argument list for map rendering (8-bit GTiff to stdout).
+   *
+   * @param cogPath input path (typically {@code /vsis3/...})
+   * @return mutable command list starting with {@code gdal_translate}
+   */
+  private static List<String> buildGdalTranslateCommand(String cogPath) {
+    List<String> cmd = new ArrayList<>();
+    cmd.add("gdal_translate");
+    cmd.add("-of");
+    cmd.add("GTiff");
+    cmd.add("-scale");
+    cmd.add("60");
+    cmd.add("225");
+    cmd.add("0");
+    cmd.add("255");
+    cmd.add("-ot");
+    cmd.add("Byte");
+    cmd.add("-outsize");
+    cmd.add("1024");
+    cmd.add("0");
+    cmd.add(cogPath);
+    cmd.add("/vsistdout/");
+    return cmd;
+  }
+
+  /**
+   * Configures process environment variables so GDAL {@code /vsis3/} can read the source COG.
+   *
+   * @param env {@link ProcessBuilder} environment map to populate
+   * @param s3c bucket credentials and endpoint settings
+   */
+  private static void configureGdalS3Environment(Map<String, String> env, S3Config s3c) {
+    env.put("AWS_ACCESS_KEY_ID", s3c.getAccessKey());
+    env.put("AWS_SECRET_ACCESS_KEY", s3c.getSecretKey());
+    env.put("AWS_S3_ENDPOINT", s3c.getEndpoint().replaceFirst("https?://", ""));
+    if (!Boolean.TRUE.equals(s3c.isHttps())) {
+      env.put("AWS_HTTPS", "NO");
+    }
+    if (Boolean.TRUE.equals(s3c.isPathBasedAccess())) {
+      env.put("AWS_VIRTUAL_HOSTING", "FALSE");
+    }
+    env.put("CPL_VSIL_USE_TEMP_FILE_FOR_RANDOM_WRITE", "NO");
+  }
+
+  /**
+   * Drains {@code gdal_translate} stderr on a daemon thread so the process does not block on a full
+   * stderr pipe.
+   *
+   * @param process running GDAL process
+   */
+  private void consumeGdalErrorStream(Process process) {
+    Thread stderrConsumer =
+        new Thread(
+            () -> {
+              try (BufferedReader reader =
+                  new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                reader.lines().forEach(line -> LOGGER.debug("gdal_translate stderr: {}", line));
+              } catch (IOException e) {
+                LOGGER.debug("gdal_translate stderr consumer closed: {}", e.getMessage());
+              }
+            },
+            "gdal-stderr-consumer");
+    stderrConsumer.setDaemon(true);
+    stderrConsumer.start();
+  }
+
+  /**
+   * Values for OGC API Maps core response headers ({@code Content-Crs}, {@code Content-Bbox},
+   * {@code Content-Datetime}).
+   */
+  private static final class MapResponseGeoHeaders {
+    private final String responseCrsUri;
+    private final String contentCrs;
+    private final String contentBbox;
+    private final String contentDatetime;
+
+    /**
+     * @param responseCrsUri native CRS URI of the rendered map (for logging)
+     * @param contentCrs {@code Content-Crs} header value, or {@code null} when CRS is OGC CRS84
+     * @param contentBbox comma-separated lower-left and upper-right coordinates
+     * @param contentDatetime optional {@code Content-Datetime} value
+     */
+    MapResponseGeoHeaders(
+        String responseCrsUri, String contentCrs, String contentBbox, String contentDatetime) {
+      this.responseCrsUri = responseCrsUri;
+      this.contentCrs = contentCrs;
+      this.contentBbox = contentBbox;
+      this.contentDatetime = contentDatetime;
+    }
+
+    String getResponseCrsUri() {
+      return responseCrsUri;
+    }
+
+    String getContentCrs() {
+      return contentCrs;
+    }
+
+    String getContentBbox() {
+      return contentBbox;
+    }
+
+    String getContentDatetime() {
+      return contentDatetime;
+    }
+  }
+
+  /**
+   * Builds OGC API Maps core response geo headers from collection CRS/bbox and map raster extent.
+   *
+   * <p>Native CRS comes from {@code collections_details.crs} ({@code storageCrs} in API responses).
+   * WGS84 collection bbox is stored on {@code collections_details.bbox} at maps onboarding. Map
+   * {@code content_bbox} is the raster extent in native CRS for {@code Content-Bbox}.
+   *
+   * @param mapMetadata row from {@code collection_map_metadata} (content bbox in native CRS)
+   * @param collection collection row including {@code storageCrs} and optional {@code temporal}
+   * @return header values for {@link #applyMapResponseHeaders}
+   * @throws OgcException HTTP 500 if CRS or content bbox is missing or invalid
+   */
+  private MapResponseGeoHeaders buildMapResponseGeoHeaders(
+      JsonObject mapMetadata, JsonObject collection) {
+    String nativeCrs = collection.getString("storageCrs");
+    if (nativeCrs == null || nativeCrs.isBlank()) {
+      LOGGER.error(
+          "getCollectionMap: missing collections_details.crs collectionId={}",
+          collection.getString("id"));
+      throw new OgcException(500, "Internal Server Error", "Internal Server Error");
+    }
+    nativeCrs = nativeCrs.trim();
+    String contentBbox = formatContentBbox(mapMetadata.getValue("content_bbox"));
+    if (contentBbox == null) {
+      LOGGER.error(
+          "getCollectionMap: invalid content_bbox in collection_map_metadata collectionId={}",
+          collection.getString("id"));
+      throw new OgcException(500, "Internal Server Error", "Internal Server Error");
+    }
+    String contentCrs = isOgcCrs84(nativeCrs) ? null : nativeCrs;
+    String contentDatetime = formatContentDatetime(collection.getJsonArray("temporal"));
+    return new MapResponseGeoHeaders(nativeCrs, contentCrs, contentBbox, contentDatetime);
+  }
+
+  /**
+   * Formats a stored bbox as the OGC {@code Content-Bbox} header value ({@code minX,minY,maxX,maxY}).
+   *
+   * @param contentBboxValue bbox from metadata (several JDBC/Vert.x types)
+   * @return comma-separated coordinates, or {@code null} if not usable
+   */
+  private static String formatContentBbox(Object contentBboxValue) {
+    if (contentBboxValue == null) {
+      return null;
+    }
+    if (contentBboxValue instanceof JsonArray) {
+      JsonArray arr = (JsonArray) contentBboxValue;
+      if (arr.size() < 4) {
+        return null;
+      }
+      return String.format(
+          Locale.ROOT,
+          "%s,%s,%s,%s",
+          arr.getDouble(0),
+          arr.getDouble(1),
+          arr.getDouble(2),
+          arr.getDouble(3));
+    }
+    if (contentBboxValue instanceof Number[]) {
+      Number[] arr = (Number[]) contentBboxValue;
+      if (arr.length < 4) {
+        return null;
+      }
+      return String.format(
+          Locale.ROOT, "%s,%s,%s,%s", arr[0], arr[1], arr[2], arr[3]);
+    }
+    if (contentBboxValue instanceof java.util.List) {
+      java.util.List<?> list = (java.util.List<?>) contentBboxValue;
+      if (list.size() < 4) {
+        return null;
+      }
+      return String.format(
+          Locale.ROOT,
+          "%s,%s,%s,%s",
+          list.get(0),
+          list.get(1),
+          list.get(2),
+          list.get(3));
+    }
+    return null;
+  }
+
+  /**
+   * Returns whether the CRS URI denotes OGC CRS84 (for which {@code Content-Crs} is omitted).
+   *
+   * @param crsUri CRS URI or CURIE from collection map metadata
+   * @return {@code true} if the response should not include a {@code Content-Crs} header
+   */
+  private static boolean isOgcCrs84(String crsUri) {
+    if (crsUri == null || crsUri.isBlank()) {
+      return true;
+    }
+    String normalized = crsUri.trim().toLowerCase(Locale.ROOT);
+    return normalized.equals(DEFAULT_SERVER_CRS.toLowerCase(Locale.ROOT))
+        || normalized.contains("/ogc/1.3/crs84")
+        || normalized.contains("ogc:1.3:crs84")
+        || normalized.endsWith("/crs84");
+  }
+
+  /**
+   * Formats {@code Content-Datetime} per OGC API Maps core (RFC 3339 instant or {@code start / end}
+   * interval).
+   */
+  private String formatContentDatetime(JsonArray temporal) {
+    if (temporal == null || temporal.isEmpty()) {
+      return null;
+    }
+    String start = temporal.size() > 0 ? temporalString(temporal, 0) : null;
+    String end = temporal.size() > 1 ? temporalString(temporal, 1) : null;
+    if (start == null && end == null) {
+      return null;
+    }
+    if (start != null && end != null) {
+      return start + " / " + end;
+    }
+    return start != null ? start : end;
+  }
+
+  private static String temporalString(JsonArray temporal, int index) {
+    Object value = temporal.getValue(index);
+    if (value == null) {
+      return null;
+    }
+    String s = value.toString().trim();
+    return s.isEmpty() || "null".equalsIgnoreCase(s) ? null : s;
   }
 
   public void executeJob(RoutingContext routingContext) {

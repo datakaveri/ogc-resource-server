@@ -1,4 +1,4 @@
-package ogc.rs.processes.collectionAppending;
+package ogc.rs.processes.featureCollectionAppending;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -10,10 +10,9 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Tuple;
 import ogc.rs.apiserver.util.ProcessException;
-import ogc.rs.common.DataFromS3;
 import ogc.rs.common.S3Config;
 import ogc.rs.processes.ProcessService;
-import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
+import ogc.rs.processes.featureCollectionOnboarding.FeatureCollectionOnboardingProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 import org.apache.commons.exec.CommandLine;
@@ -32,7 +31,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static ogc.rs.processes.collectionAppending.Constants.*;
+import static ogc.rs.processes.featureCollectionAppending.Constants.*;
 
 
 /**
@@ -43,12 +42,12 @@ import static ogc.rs.processes.collectionAppending.Constants.*;
  * updating bbox values in collection table and deleting temporary table
  */
 
-public class CollectionAppendingProcess implements ProcessService {
+public class FeatureCollectionAppendingProcess implements ProcessService {
 
-    private static final Logger LOGGER = LogManager.getLogger(CollectionAppendingProcess.class);
+    private static final Logger LOGGER = LogManager.getLogger(FeatureCollectionAppendingProcess.class);
     private final PgPool pgPool;
     private final UtilClass utilClass;
-    private final CollectionOnboardingProcess collectionOnboarding;
+    private final FeatureCollectionOnboardingProcess collectionOnboarding;
     private S3Config s3conf;
     private String databaseName;
     private String databaseHost;
@@ -59,7 +58,7 @@ public class CollectionAppendingProcess implements ProcessService {
     private final boolean VERTX_EXECUTE_BLOCKING_IN_ORDER = false;
 
     /**
-     * Constructs a new instance of CollectionAppendingProcess.
+     * Constructs a new instance of FeatureCollectionAppendingProcess.
      *
      * @param pgPool             The PostgreSQL connection pool used for database operations.
      * @param webClient          The WebClient used for making HTTP requests.
@@ -68,12 +67,12 @@ public class CollectionAppendingProcess implements ProcessService {
      * @param vertx              The Vert.x instance for executing asynchronous and event-driven tasks.
      */
 
-    public CollectionAppendingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx) {
+    public FeatureCollectionAppendingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx) {
 
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
         this.s3conf = s3conf;
-        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
+        this.collectionOnboarding = new FeatureCollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
         this.vertx = vertx;
         initializeConfig(config);
     }

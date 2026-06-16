@@ -25,7 +25,7 @@ import ogc.rs.processes.ProcessesRunnerImpl;
 import static ogc.rs.processes.tilesMetaDataOnboarding.MessageConstants.*;
 import static ogc.rs.processes.tilesMetaDataOnboarding.SqlConstants.*;
 
-import ogc.rs.processes.collectionOnboarding.CollectionOnboardingProcess;
+import ogc.rs.processes.featureCollectionOnboarding.FeatureCollectionOnboardingProcess;
 import ogc.rs.processes.util.Status;
 import ogc.rs.processes.util.UtilClass;
 
@@ -39,7 +39,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     private static final Logger LOGGER = LogManager.getLogger(TilesMetaDataOnboardingProcess.class);
     private final PgPool pgPool;
     private final UtilClass utilClass;
-    private final CollectionOnboardingProcess collectionOnboarding;
+    private final FeatureCollectionOnboardingProcess collectionOnboarding;
     private final DataFromS3 dataFromS3;
 
     public enum EncodingFormatEnum {
@@ -59,7 +59,7 @@ public class TilesMetaDataOnboardingProcess implements ProcessService {
     public TilesMetaDataOnboardingProcess(PgPool pgPool, WebClient webClient, JsonObject config, S3Config s3conf, Vertx vertx){
         this.pgPool = pgPool;
         this.utilClass = new UtilClass(pgPool);
-        this.collectionOnboarding = new CollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
+        this.collectionOnboarding = new FeatureCollectionOnboardingProcess(pgPool, webClient, config, s3conf, vertx);
         this.dataFromS3 = new DataFromS3(vertx.createHttpClient(new HttpClientOptions().setShared(true)), s3conf);
 
     }

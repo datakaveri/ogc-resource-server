@@ -11,7 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import static ogc.rs.common.Constants.*;
-import static ogc.rs.processes.collectionOnboarding.Constants.RESOURCE_OWNERSHIP_ERROR;
+import static ogc.rs.processes.featureCollectionOnboarding.Constants.RESOURCE_OWNERSHIP_ERROR;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 

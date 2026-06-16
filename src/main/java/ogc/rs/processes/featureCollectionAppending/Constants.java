@@ -1,4 +1,4 @@
-package ogc.rs.processes.collectionAppending;
+package ogc.rs.processes.featureCollectionAppending;
 
 public class Constants {
     public static final String COLLECTIONS_DETAILS_SELECT_QUERY =
