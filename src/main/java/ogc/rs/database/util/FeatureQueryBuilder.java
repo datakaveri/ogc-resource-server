@@ -93,8 +93,8 @@ public class FeatureQueryBuilder {
   }
 
   public void setBboxWhenTokenBboxExists(String queryBbox, String tokenBbox, String storageCrs) {
-    LOGGER.debug("storage crs is : {}", storageCrs);
-    LOGGER.debug("bbox crs srid is: {}", bboxCrsSrid);
+    LOGGER.debug("Storage CRS is : {}", storageCrs);
+    LOGGER.debug("BBox CRS SRID is: {}", bboxCrsSrid);
     String queryBboxCondition = "";
     String tokenBboxCondition = "";
 
@@ -110,18 +110,18 @@ public class FeatureQueryBuilder {
               : "ST_Intersects(ST_Transform(geom, " + defaultCrsSrid + "), ST_Transform(ST_MakeEnvelope(" + queryCoordinates + "), " + defaultCrsSrid + "))";
     }
 
-    LOGGER.debug("query bbox condition is : {}", queryBboxCondition);
+    LOGGER.debug("Query BBox condition is : {}", queryBboxCondition);
 
     // Prepare token bbox condition if provided
     if (tokenBbox != null && !tokenBbox.isEmpty()) {
       String tokenCoordinates = tokenBbox + "," + defaultCrsSrid;
 
       tokenBboxCondition = storageCrs != null && storageCrs.equalsIgnoreCase(defaultCrsSrid)
-              ? "ST_Intersects(geom, ST_MakeEnvelope(" + tokenCoordinates + "))"
-              : "ST_Intersects(ST_Transform(geom, " + defaultCrsSrid + "), ST_MakeEnvelope(" + tokenCoordinates + "))";
+              ? "ST_Within(geom, ST_MakeEnvelope(" + tokenCoordinates + "))"
+              : "ST_Within(ST_Transform(geom, " + defaultCrsSrid + "), ST_MakeEnvelope(" + tokenCoordinates + "))";
     }
 
-    LOGGER.debug("token bbox condition is: {}", tokenBboxCondition);
+    LOGGER.debug("Token BBox condition is: {}", tokenBboxCondition);
 
     // Combine conditions
     if (!queryBboxCondition.isEmpty() && !tokenBboxCondition.isEmpty()) {
@@ -201,11 +201,9 @@ public class FeatureQueryBuilder {
     this.tokenFeatCollectionId = tokenCollectionId;
     this.tokenFeatIds = tokenFeatureIds;
 
-    // Build the feature limits condition using JOIN with individual geometries from token collection
-    String[] featureIds = tokenFeatureIds.split(",");
+    // Build the feature limits condition using JOIN with ST_Within for strict containment
     StringBuilder featCondition = new StringBuilder();
-
-    featCondition.append("ST_Intersects(request_feature.geom, token_feature.geom)");
+    featCondition.append("ST_Within(request_feature.geom, token_feature.geom)");
 
     this.featLimits = featCondition.toString();
     this.additionalParams = "where";
@@ -228,20 +226,20 @@ public class FeatureQueryBuilder {
   }
 
   /**
-   * Builds a SQL query to retrieve features from the requested collection table that spatially
-   * intersect with features from the token's feature collection. The result includes feature `id`,
-   * `geometry`, and a properties object excluding `id` and `geom`. The method applies additional
-   * filters such as bounding box, datetime range, custom attribute filters, and supports pagination
-   * via offset and limit.
+   * Builds a SQL query to retrieve features from the requested collection table that are spatially
+   * contained within features from the token's feature collection using ST_Within. The result includes
+   * feature `id`, `geometry`, and a properties object excluding `id` and `geom`. The method applies
+   * additional filters such as bounding box, datetime range, custom attribute filters, and supports
+   * pagination via offset and limit.
    *
-   * @return A SQL SELECT query string that fetches intersecting features with optional filters and pagination.
+   * @return A SQL SELECT query string that fetches contained features with optional filters and pagination.
    * <p>
    * The generated SQL query structure:
    * SELECT request_feature.id, 'Feature' AS type, request_feature.geom AS geometry,
    * (row_to_json(request_feature)::jsonb - 'id' - 'geom') AS properties
    * FROM "<requested_table>" request_feature
    * JOIN "<token_table>" token_feature
-   * ON ST_Intersects(request_feature.geom, token_feature.geom)
+   * ON ST_Within(request_feature.geom, token_feature.geom)
    * WHERE token_feature.id IN (...)
    *   [AND bbox filter]
    *   [AND datetime filter]
@@ -260,7 +258,7 @@ public class FeatureQueryBuilder {
             .append(" AS geometry, (row_to_json(request_feature)::jsonb - 'id' - 'geom') AS properties ")
             .append("FROM \"").append(tableName).append("\" request_feature ")
             .append("JOIN \"").append(tokenFeatCollectionId).append("\" token_feature ")
-            .append("ON ST_Intersects(request_feature.geom, token_feature.geom) ");
+            .append("ON ST_Within(request_feature.geom, token_feature.geom) ");
 
     // Build WHERE conditions
     StringBuilder whereConditions = new StringBuilder();
@@ -297,17 +295,17 @@ public class FeatureQueryBuilder {
 
   /**
    * Builds a SQL query to count the number of features from the requested collection table that
-   * spatially intersect with features from the token's feature collection. This method applies
-   * the same filtering conditions as {@link #buildJoinQuery()}, but returns only the count instead
-   * of actual feature data.
+   * are spatially contained within features from the token's feature collection using ST_Within.
+   * This method applies the same filtering conditions as {@link #buildJoinQuery()},
+   * but returns only the count instead of actual feature data.
    *
-   * @return A SQL COUNT query string that counts intersecting features with optional filters.
+   * @return A SQL COUNT query string that counts contained features with optional filters.
    * <p>
    * The generated SQL query structure:
    * SELECT COUNT(request_feature.id)
    * FROM "<requested_table>" request_feature
    * JOIN "<token_table>" token_feature
-   * ON ST_Intersects(request_feature.geom, token_feature.geom)
+   * ON ST_Within(request_feature.geom, token_feature.geom)
    * WHERE token_feature.id IN (...)
    *   [AND bbox filter]
    *   [AND datetime filter]
@@ -319,7 +317,7 @@ public class FeatureQueryBuilder {
     query.append("SELECT COUNT(request_feature.id) ")
             .append("FROM \"").append(tableName).append("\" request_feature ")
             .append("JOIN \"").append(tokenFeatCollectionId).append("\" token_feature ")
-            .append("ON ST_Intersects(request_feature.geom, token_feature.geom) ");
+            .append("ON ST_Within(request_feature.geom, token_feature.geom) ");
 
     // Build WHERE conditions
     StringBuilder whereConditions = new StringBuilder();
