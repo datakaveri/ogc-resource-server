@@ -392,13 +392,18 @@ pipeline {
             }
           }
         }
-        stage('Deploy ogc-resource-server') {
-          steps{
-            script{
-              sh "ssh ubuntu@adex-swarm 'docker service update ogc-rs_ogc-rs --image ghcr.io/datakaveri/geoserver-dev:1.0.0-alpha-${env.GIT_HASH}'"
-            }
-          }
-        }
+                stage('EKS Helm deployment') {
+                  steps {
+                    script {
+                      sh "ssh ubuntu@dev-eks 'cd v2-deployments/iudx/iudx-installer/K8s-deployment/Charts/geo-server-s3 && helm upgrade geo-server . -n geo-server-s3 --atomic --timeout 5m --reuse-values --set image.repository=${devRegistry} --set image.tag=1.0.0-alpha-${env.GIT_HASH}'"
+                    }
+                  }
+                  post{
+                    failure{
+                      error "Failed to deploy image to EKS via Helm"
+                    }
+                  }
+                }
       }
     }
   }
