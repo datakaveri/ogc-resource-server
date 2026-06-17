@@ -1,9 +1,9 @@
 # coding: utf-8
 
 """
-    OGC Compliant IUDX Resource Server
+   OGC API GDI Resource Server
 
-    OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
+    OGC Features and Common API definitions. Includes Schema and Response Objects.
 
     The version of the OpenAPI document: 1.0.1
     Contact: info@iudx.org.in

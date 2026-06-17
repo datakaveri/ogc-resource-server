@@ -2,7 +2,7 @@
 
 # flake8: noqa
 """
-    OGC Compliant IUDX Resource Server
+    OGC API GDI Resource Server
 
     OGC compliant Features and Common API definitions. Includes Schema and Response Objects.
 

@@ -1,6 +1,6 @@
 # openapi_client.CapabilitiesApi
 
-All URIs are relative to *https://geoserver.dx.ugix.org.in*
+All URIs are relative to *https://geoserver.dx.geospatial.org.in*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -144,7 +144,7 @@ No authorization required
 
 Landing page
 
-Landing page for the OGC compliant Resource Server. It provides links to the API definition (link relations service-desc and service-doc), the Conformance declaration (path /conformance, link relation conformance), and the Feature Collections (path /collections, link relation data). 
+Landing page for the OGC API GDI Resource Server. It provides links to the API definition (link relations service-desc and service-doc), the Conformance declaration (path /conformance, link relation conformance), and the Feature Collections (path /collections, link relation data). 
 
 ### Example
 
