@@ -395,7 +395,7 @@ pipeline {
                 stage('EKS Helm deployment') {
                   steps {
                     script {
-                      sh "ssh ubuntu@dev-eks 'cd v2-deployments/iudx/iudx-installer/K8s-deployment/Charts/geo-server-s3 && helm upgrade geo-server . -n geo-server-s3 --atomic --timeout 5m --reuse-values --set image.repository=${devRegistry} --set image.tag=1.0.0-alpha-${env.GIT_HASH}'"
+                      sh "ssh ubuntu@dev-eks 'cd v2-deployments/iudx/iudx-installer/K8s-deployment/Charts/geo-server-s3 && helm upgrade geo-server . -n geo-server-s3 --rollback-on-failure --timeout 5m --reuse-values --set image.repository=${devRegistry} --set image.tag=1.0.0-alpha-${env.GIT_HASH}'"
                     }
                   }
                   post{
