@@ -689,7 +689,7 @@ public class DatabaseServiceImpl implements DatabaseService{
             " geometry, item_table.bbox, item_table.properties, item_table.p_id" +
             ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb - 'item_id')) as assetobjects" +
             ", 'Feature' as type, '%1$s' as collection from \"%1$s\" as item_table left join stac_items_assets" +
-            " on item_table.id=stac_items_assets.item_id" +
+            " on item_table.id=stac_items_assets.item_id and item_table.collection_id = stac_items_assets.collection_id" +
             " group by item_table.id, item_table.geom, item_table.bbox, item_table.p_id, item_table.collection_id" +
             ", item_table.properties having p_id >= %2$d and item_table.collection_id = $1::uuid order by p_id limit " +
             "%3$d"
@@ -732,7 +732,7 @@ public class DatabaseServiceImpl implements DatabaseService{
         " geometry, item_table.bbox, item_table.properties" +
         ", jsonb_agg((row_to_json(stac_items_assets.*)::jsonb-'item_id')) as assetobjects, 'Feature' as type" +
         ", '%1$s' as collection from \"%1$s\" as item_table left join stac_items_assets" +
-        " on item_table.id=stac_items_assets.item_id" +
+        " on item_table.id=stac_items_assets.item_id and item_table.collection_id = stac_items_assets.collection_id" +
         " group by item_table.id, item_table.geom, item_table.bbox, item_table.properties, item_table.collection_id" +
         " having item_table.id = $1::text and item_table.collection_id = $2::uuid", collectionId);
     checkIfCollectionExist(collectionId)
