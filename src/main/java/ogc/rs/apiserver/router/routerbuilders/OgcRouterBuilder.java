@@ -79,6 +79,14 @@ public class OgcRouterBuilder extends EntityRouterBuilder {
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse).failureHandler(failureHandler);
 
+    routerBuilder.operation(MAP_AUTH)
+            .handler(ogcMapsAuthZHandler)
+            .handler(routingContext -> {
+              // Only reached if ogcMapsAuthZHandler called next() (i.e. authorized)
+              routingContext.response().setStatusCode(200).end();
+            })
+            .failureHandler(failureHandler);
+
     /**
      * For all implementers of GisEntityInterface, add the OGC routes to the RouterBuilder.
      */

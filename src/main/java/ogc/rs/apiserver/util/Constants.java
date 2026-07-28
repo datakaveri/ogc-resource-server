@@ -29,6 +29,7 @@ public class Constants {
     public static final String COLLECTION_API = "describeCollection";
     public static final String COLLECTION_MAP_API = "getCollectionMap";
     public static final String LIST_CONFIGURED_S3_BUCKETS_API = "listConfiguredS3Buckets";
+    public static final String MAP_AUTH = "mapAuth";
     public static final String FEATURES_API = "getFeatures";
     public static final String FEATURE_API = "getFeature";
     public static final String EXECUTE_API = "execute";
