@@ -50,7 +50,7 @@ public class MultiIssuerJwtAuthHandler implements AuthenticationHandler {
       issuer = extractIssuer(token);
     } catch (Exception e) {
       LOGGER.error("Failed to extract issuer: {}", e.getMessage());
-      ctx.fail(new OgcException(401, NOT_AUTHORIZED, "Invalid token format"));
+      ctx.fail(new OgcException(401, NOT_AUTHORIZED, e.getMessage()));
       return;
     }
 
@@ -65,7 +65,7 @@ public class MultiIssuerJwtAuthHandler implements AuthenticationHandler {
         .onFailure(
             err -> {
               LOGGER.error("Authentication failed for issuer {}: {}", issuer, err.getMessage());
-              ctx.fail(new OgcException(401, NOT_AUTHORIZED, "Invalid token format"));
+              ctx.fail(new OgcException(401, NOT_AUTHORIZED, err.getMessage()));
             });
   }
 
@@ -78,7 +78,6 @@ public class MultiIssuerJwtAuthHandler implements AuthenticationHandler {
         .resolve(issuer)
         .map(
             jwtAuth -> {
-              System.out.println("Cached JWTAuth for issuer: " + issuer);
               authProviders.put(issuer, jwtAuth);
               return jwtAuth;
             });
