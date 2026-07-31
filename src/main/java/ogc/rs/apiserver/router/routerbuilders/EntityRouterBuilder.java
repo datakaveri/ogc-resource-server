@@ -33,33 +33,33 @@ import ogc.rs.auditing.handler.AuditingHandler;
 import ogc.rs.catalogue.CatalogueInterface;
 import ogc.rs.databroker.service.DataBrokerService;
 
-/**
- * Abstract class to aid in configuration and building of routers using {@link RouterBuilder}.
- *
- */
+/** Abstract class to aid in configuration and building of routers using {@link RouterBuilder}. */
 public abstract class EntityRouterBuilder {
 
-  private static final Set<String> allowedHeaders =
-      Set.of(HEADER_AUTHORIZATION, HEADER_CONTENT_LENGTH, HEADER_CONTENT_TYPE, HEADER_HOST, HEADER_ORIGIN,
-          HEADER_REFERER, HEADER_ACCEPT, HEADER_ALLOW_ORIGIN);
-
-  private static final Set<HttpMethod> allowedMethods = Set.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
   public static final String API_DOC_FILE_PATH = "docs/apidoc.html";
-  private static final String OPENAPI_V3_JSON_CONTENT_TYPE = "application/vnd.oai.openapi+json;version=3.0";
+  private static final Set<String> allowedHeaders =
+      Set.of(
+          HEADER_AUTHORIZATION,
+          HEADER_CONTENT_LENGTH,
+          HEADER_CONTENT_TYPE,
+          HEADER_HOST,
+          HEADER_ORIGIN,
+          HEADER_REFERER,
+          HEADER_ACCEPT,
+          HEADER_ALLOW_ORIGIN);
+  private static final Set<HttpMethod> allowedMethods =
+      Set.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
+  private static final String OPENAPI_V3_JSON_CONTENT_TYPE =
+      "application/vnd.oai.openapi+json;version=3.0";
   private static final String HTML_CONTENT_TYPE = "text/html";
-
+  private final JsonObject config;
   /* this is used since all the API methods are implemented in the ApiServer verticle */
   public ApiServerVerticle apiServerVerticle;
-
   /* this is used to create handlers or anything that is initialized using a vert.x instance */
   public Vertx vertx;
-
   /* create all handlers here and make them public so that they can be accessed */
   public FailureHandler failureHandler = new FailureHandler();
-
   public RouterBuilder routerBuilder;
-  private final JsonObject config;
-  private DxTokenAuthenticationHandler tokenAuthenticationHandler;
   public StacAssetsAuthZHandler stacAssetsAuthZHandler;
   public MeteringAuthZHandler meteringAuthZHandler = new MeteringAuthZHandler();
   public OgcFeaturesAuthZHandler ogcFeaturesAuthZHandler;
@@ -74,49 +74,53 @@ public abstract class EntityRouterBuilder {
   CatalogueInterface catalogueService;
   AclClient aclClient;
 
-  EntityRouterBuilder(ApiServerVerticle apiServerVerticle, Vertx vertx, RouterBuilder routerBuilder,
+  EntityRouterBuilder(
+      ApiServerVerticle apiServerVerticle,
+      Vertx vertx,
+      RouterBuilder routerBuilder,
       JsonObject config) {
     this.apiServerVerticle = apiServerVerticle;
     this.vertx = vertx;
     this.routerBuilder = routerBuilder;
     this.config = config;
-    this.aclClient = new AclClient(vertx, config.getInteger(CONTROL_PLANE_PORT),config.getString(CONTROL_PLANE_HOST), config.getString(
-        CONTROL_PLANE_SEARCH_PATH));
+    this.aclClient =
+        new AclClient(
+            vertx,
+            config.getInteger(CONTROL_PLANE_PORT),
+            config.getString(CONTROL_PLANE_HOST),
+            config.getString(CONTROL_PLANE_SEARCH_PATH));
     this.catalogueService = CatalogueInterface.createProxy(vertx, CATALOGUE_SERVICE_ADDRESS);
-    this.dataBrokerService = DataBrokerService.createProxy(vertx,DATA_BROKER_SERVICE_ADDRESS);
-    auditingHandler= new AuditingHandler(
+    this.dataBrokerService = DataBrokerService.createProxy(vertx, DATA_BROKER_SERVICE_ADDRESS);
+    auditingHandler =
+        new AuditingHandler(
             dataBrokerService,
             config.getString("auditingExchange", DEFAULT_AUDITING_EXCHANGE),
             config.getString("auditingRoutingKey", DEFAULT_AUDITING_ROUTING_KEY));
-    tokenAuthenticationHandler = new DxTokenAuthenticationHandler(vertx, config);
 
     stacAssetsAuthZHandler = new StacAssetsAuthZHandler(vertx, catalogueService, aclClient);
     ogcFeaturesAuthZHandler = new OgcFeaturesAuthZHandler(catalogueService, aclClient);
     tilesMeteringHandler = new TilesMeteringHandler(vertx);
-    stacCollectionOnboardingAuthZHandler = new StacCollectionOnboardingAuthZHandler(catalogueService);
+    stacCollectionOnboardingAuthZHandler =
+        new StacCollectionOnboardingAuthZHandler(catalogueService);
     stacItemByIdAuthZHandler = new StacItemByIdAuthZHandler(catalogueService, aclClient);
     stacItemOnboardingAuthZHandler = new StacItemOnboardingAuthZHandler(catalogueService);
     processAuthZHandler = new ProcessAuthZHandler();
     tokenLimitsEnforcementHandler = new TokenLimitsEnforcementHandler(vertx);
-
   }
 
-  /**
-   * Any common {@link RouterBuilder} configuration to be added to any router to be built.
-   */
+  /** Any common {@link RouterBuilder} configuration to be added to any router to be built. */
   final void setCommonRouterBuilderConfiguration() {
 
     RouterBuilderOptions factoryOptions =
         new RouterBuilderOptions().setMountResponseContentTypeHandler(true);
-    
-    if(System.getProperty("disable.auth") != null) {
+
+    if (System.getProperty("disable.auth") != null) {
       factoryOptions.setRequireSecurityHandlers(false);
     }
 
     routerBuilder.setOptions(factoryOptions);
     // Create JWKS resolver (reads config -> jwks URLs)
-    JwksResolver jwksResolver =
-        new JwksResolver(vertx, config.getJsonObject(ISSUERS));
+    JwksResolver jwksResolver = new JwksResolver(vertx, config.getJsonObject(ISSUERS));
     MultiIssuerJwtAuthHandler authHandler = new MultiIssuerJwtAuthHandler(jwksResolver);
     /*
      * Automatically adds the handler for any API that has the `security` block with
@@ -146,16 +150,18 @@ public abstract class EntityRouterBuilder {
     /* Set the OpenAPI spec route */
     router
         .get(getOasApiPath())
-        .produces(HTML_CONTENT_TYPE) // order of produces matters - so here priority is given to HTML if Accept is */*
+        .produces(
+            HTML_CONTENT_TYPE) // order of produces matters - so here priority is given to HTML if
+        // Accept is */*
         .produces(OPENAPI_V3_JSON_CONTENT_TYPE)
         .failureHandler(failureHandler)
         .handler(
             routingContext -> {
               HttpServerResponse response = routingContext.response();
               String queryParam = routingContext.request().getParam("f");
-              
+
               String contentType;
-              
+
               if ("html".equals(queryParam)) {
                 contentType = HTML_CONTENT_TYPE;
               } else if ("json".equals(queryParam)) {
@@ -163,16 +169,19 @@ public abstract class EntityRouterBuilder {
               } else if (queryParam == null) {
                 // use whatever comes in Accept header (controlled by produces block) or HTML if
                 // Accept header is not passed
-                contentType = routingContext.getAcceptableContentType() != null
-                    ? routingContext.getAcceptableContentType()
-                    : HTML_CONTENT_TYPE;
+                contentType =
+                    routingContext.getAcceptableContentType() != null
+                        ? routingContext.getAcceptableContentType()
+                        : HTML_CONTENT_TYPE;
               } else {
-                routingContext
-                    .fail(new OgcException(400, "Invalid query param for OpenAPI spec format",
+                routingContext.fail(
+                    new OgcException(
+                        400,
+                        "Invalid query param for OpenAPI spec format",
                         "Invalid query param for OpenAPI spec format"));
                 return;
               }
-              
+
               response.putHeader("Content-type", contentType);
 
               if (HTML_CONTENT_TYPE.equals(contentType)) {
@@ -187,7 +196,7 @@ public abstract class EntityRouterBuilder {
                 } catch (Exception e) {
                   throw new RuntimeException(e);
                 }
-              } else if(OPENAPI_V3_JSON_CONTENT_TYPE.equals(contentType)) {
+              } else if (OPENAPI_V3_JSON_CONTENT_TYPE.equals(contentType)) {
                 response.send(oasJson.toBuffer());
               } else {
                 routingContext.fail(new OgcException(500, "Internal Error", "Internal Error"));
@@ -198,15 +207,13 @@ public abstract class EntityRouterBuilder {
   }
 
   /**
-   * Return the API path where the OpenAPI spec JSON is served. The route is created in the
-   * {@link #getRouter()} method.
+   * Return the API path where the OpenAPI spec JSON is served. The route is created in the {@link
+   * #getRouter()} method.
    *
    * @return the endpoint
    */
   abstract String getOasApiPath();
 
-  /**
-   * Add all implementation specific routes to the {@link RouterBuilder}.
-   */
+  /** Add all implementation specific routes to the {@link RouterBuilder}. */
   abstract void addImplSpecificRoutes();
 }
