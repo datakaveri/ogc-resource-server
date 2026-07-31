@@ -4,129 +4,120 @@
     "zookeeper"
   ],
   "clusterId": "ogc-rs-cluster",
-  "commonConfig" : {
-    "ogcBasePath" : "/",
-    "dxCatalogueBasePath": "/iudx/cat/v1",
-    "dxAuthBasePath": "/auth/v1",
-    "hostName": "https://server.url.com",
-    "catalogId": "stac"
+  "commonConfig": {
+    "ogcBasePath": "/",
+    "catalogId": "stac",
+    "dxCatalogueBasePath": "/controlplane/iudx/v2/cat",
+    "hostName": "https://dx.example.org/ogc",
+    "catServerHost": "dx.example.org",
+    "catServerPort": 443,
+    "catRequestItemsUri": "/controlplane/iudx/v2/cat/item",
+    "databaseHost": "",
+    "databasePort": 5432,
+    "databaseUser": "",
+    "databasePassword": "",
+    "databaseName": "ogc_rs_v2",
+    "jwtIgnoreExpiry": false,
+    "issuer": "dx.example.org/controlplane",
+    "auditingExchange": "auditing",
+    "auditingRoutingKey": "##",
+    "poolSize": 5
   },
-  "s3BucketsConfig" : {
-      "default" : {
-          "bucket": "bucketName",
-          "endpoint": "https://s3.ap-north-1.amazonaws.com",
-          "region": "ap-north-1",
-          "accessKey": "<accessKey>",
-          "secretKey": "<secretKey>",
-          "pathBasedAccess": false,
-          "readAccess" : "OPEN"
-      }
+  "s3BucketsConfig": {
+    "default": {
+      "bucket": "",
+      "endpoint": "https://s3.ap-south-1.amazonaws.com",
+      "region": "ap-south-1",
+      "accessKey": "",
+      "secretKey": "",
+      "pathBasedAccess": false,
+      "readAccess": "PRIVATE"
+    }
   },
+  "host": "ogc.example.org",
   "modules": [
     {
       "id": "ogc.rs.database.DatabaseVerticle",
-      "isWorkerVerticle":false,
-      "verticleInstances": 8,
-      "databaseIP": "",
-      "databasePort": 1234,
-      "dbUser": "",
-      "dbPassword": ""
+      "verticleInstances": 1,
+      "poolSize": 5
     },
     {
-      "id": "ogc.rs.databroker.DataBrokerVerticle",
-      "isWorkerVerticle":false,
+      "id": "ogc.rs.catalogue.CatalogueVerticle",
       "verticleInstances": 1,
-      "dataBrokerIP": "",
-      "dataBrokerPort": 1234,
-      "prodVhost":"",
-      "internalVhost": "",
-      "externalVhost":"",
-      "dataBrokerUserName": "",
-      "dataBrokerPassword": "",
-      "dataBrokerManagementPort": 30042,
-      "connectionTimeout": 6000,
-      "requestedHeartbeat": 60,
-      "handshakeTimeout": 6000,
-      "requestedChannelMax": 5,
-      "networkRecoveryInterval": 500,
-      "automaticRecoveryEnabled": "true"
+      "dxCatalogueBasePath": "/controlplane/iudx/v2/cat",
+      "catRequestItemsUri": "/controlplane/iudx/v2/cat/item"
     },
     {
       "id": "ogc.rs.apiserver.ApiServerVerticle",
-      "isWorkerVerticle":false,
+      "isWorkerVerticle": false,
       "ssl": true,
-      "keystore": "",
+      "keystore": "secrets/keystore.jks",
       "keystorePassword": "",
-      "httpPort" : 8080,
-      "verticleInstances": 8,
-      "catServerHost": "",
-      "catServerPort": 123,
-      "databaseIP": "",
-      "databasePort": 1234,
-      "dbUser": "",
-      "dbPassword": "",
-      "geomSpecificMaxLimits" : {
-        "MULTILINESTRING" : 100,
-        "LINESTRING" : 100,
-        "POINT" : 10000,
-        "MULTIPOLYGON" : 10000,
-        "POLYGON" : 10
+      "httpPort": 8080,
+      "verticleInstances": 2,
+      "geomSpecificMaxLimits": {
+        "MULTILINESTRING": 100,
+        "MULTIPOINT": 10000,
+        "LINESTRING": 100,
+        "POINT": 10000,
+        "MULTIPOLYGON": 10000,
+        "GEOMETRY": 120,
+        "POLYGON": 10
       },
-      "authServerHost": "",
-      "audience": "",
-      "issuer": ""
+      "audience": "dx.example.org/ogc",
+      "poolSize": 5,
+      "issuers": {
+        "jwtIgnoreExpiry": false,
+        "jwtLeeway": 60,
+        "dx.example.org/controlplane": {
+          "type": "remote",
+          "audience": [],
+          "jwksUrl": "https://dx.example.org/controlplane/iudx/v2/auth/jwks"
+        },
+        "https://dx.example.org/auth/realms/<realm>": {
+          "type": "remote",
+          "jwksUrl": "https://dx.example.org/auth/realms/<realm>/protocol/openid-connect/certs",
+          "audience": []
+        }
+      },
+      "controlPanelPort": 443,
+      "controlPanelHost": "dx.example.org",
+      "controlPanelSearchPath": "/controlplane/iudx/acl/apd/v2/access_request/has_access"
+    },
+    {
+      "id": "ogc.rs.databroker.DataBrokerVerticle",
+      "verticleInstances": 1,
+      "dataBrokerIP": "",
+      "dataBrokerPort": 24568,
+      "dataBrokerUserName": "",
+      "dataBrokerPassword": "",
+      "dataBrokerManagementPort": 443,
+      "connectionTimeout": 6000,
+      "requestedHeartbeat": 60,
+      "handshakeTimeout": 6000,
+      "requestedChannelMax": 5000,
+      "networkRecoveryInterval": 500,
+      "prodVhost": "IUDX-V2",
+      "internalVhost": "IUDX-V2-INTERNAL"
     },
     {
       "id": "ogc.rs.metering.MeteringVerticle",
       "verticleInstances": 1,
-      "catServerHost": "",
-      "catServerPort": 123,
-      "dataBrokerIP": "",
-      "dataBrokerPort": 123,
-      "dataBrokerUserName": "",
-      "dataBrokerPassword": "",
-      "dataBrokerManagementPort": 123,
-      "connectionTimeout": 6000,
-      "requestedHeartbeat": 60,
-      "handshakeTimeout": 6000,
-      "requestedChannelMax": 5,
-      "networkRecoveryInterval": 500,
-      "automaticRecoveryEnabled": true,
-      "prodVhost":"",
-      "internalVhost": "",
-      "externalVhost":"",
       "meteringDatabaseHost": "",
-      "meteringDatabasePort": 123,
+      "meteringDatabasePort": 5432,
       "meteringDatabaseUser": "",
       "meteringDatabasePassword": "",
-      "meteringDatabaseName": "",
-      "databaseHost": "",
-      "databasePort": 433,
-      "databaseUser": "",
-      "databasePassword": "",
-      "databaseName": "",
+      "meteringDatabaseName": "iudx_v2_rs",
       "poolSize": 5
     },
     {
-      "id": "ogc.rs.processes.ProcessVerticle",
-      "verticleInstances": 1,
-      "catServerHost": "",
-      "catServerPort": 123,
-      "catRequestItemsUri": "/iudx/cat/v1/item",
-      "databasePort": 152,
-      "databaseUser": "",
-      "databasePassword": "",
-      "databaseName": "",
-      "poolSize": 10
+      "id": "ogc.rs.jobs.JobsVerticle",
+      "verticleInstances": 1
     },
     {
-      "id": "ogc.rs.jobs.JobsVerticle",
-      "verticleInstances": 1,
-      "databasePort": 153,
-      "databaseUser": "",
-      "databasePassword": "",
-      "databaseName": "",
-      "poolSize": 10
+      "id": "ogc.rs.processes.ProcessVerticle",
+      "poolSize": 5,
+      "verticleInstances": 1
     }
   ]
 }
