@@ -238,6 +238,46 @@
         }
       }
     },
+    "/collections/{collectionId}/map/auth": {
+      "get": {
+        "tags": [
+          "Maps"
+        ],
+        "summary": "Check whether the caller is authorized to access a collection",
+        "description": "Authorization pre-check for a single collection. This operation retrieves **no data**. It only evaluates whether the bearer of the supplied DX AAA token is permitted to access the collection identified by `collectionId`, and reports the outcome through the HTTP **status code**.",
+        "operationId": "mapAuth",
+        "security": [
+          {
+            "DX-AAA-Token": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/collectionId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful map response"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "401": {
+            "$ref": "#/components/responses/NotAuthorized"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/tileMatrixSets": {
       "get": {
         "tags": [
@@ -1774,6 +1814,9 @@
             }
           }
         }
+      },
+      "NotAuthorized": {
+        "description": "Not authorized. The token is absent, expired or invalid"
       },
       "TileMatrixSetsList": {
         "description": "List of tile matrix sets (tiling schemes).",
