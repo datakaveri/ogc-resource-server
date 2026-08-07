@@ -16,24 +16,6 @@ pipeline {
 
   stages {
 
-    stage('Conditional Execution') {
-      when {
-        allOf {
-          anyOf {
-            changeset "docker/**"
-            changeset "docs/**"
-            changeset "pom.xml"
-            changeset "src/main/**"
-            triggeredBy cause: 'UserIdCause'
-          }
-          expression {
-            return env.BRANCH_NAME == 'dev'
-          }
-        }
-      }
-
-      stages {
-
     stage('Build images') {
       steps{
         script {
@@ -42,51 +24,6 @@ pipeline {
         }
       }
     }
-
-        stage('Trivy Code Scan (Dependencies)') {
-          steps {
-            script {
-              sh '''
-                trivy fs --scanners vuln,secret,misconfig --output trivy-fs-report.txt .
-              '''
-            }
-          }
-        }
-
-        stage('Trivy Scan') {
-          steps {
-            script {
-              try {
-                sh "trivy image --severity CRITICAL,HIGH --exit-code 1 ${devImage.imageName()}"
-                echo 'Trivy scan passed: No HIGH or CRITICAL vulnerabilities found.'
-              } catch (Exception e) {
-                echo 'Trivy scan failed: HIGH or CRITICAL vulnerabilities detected.'
-                currentBuild.result = 'FAILURE'
-                throw e
-              }
-            }
-          }
-        }
-
-        stage('Trivy Docker Image Scan and Report') {
-          steps {
-            script {
-              sh "trivy image --output trivy-dev-image-report.txt ${devImage.imageName()}"
-            }
-          }
-          post {
-            always {
-              archiveArtifacts artifacts: 'trivy-*.txt', allowEmptyArchive: true
-              publishHTML(target: [
-                allowMissing: true,
-                keepAll: true,
-                reportDir: '.',
-                reportFiles: 'trivy-fs-report.txt, trivy-dev-image-report.txt',
-                reportName: 'Trivy Reports'
-              ])
-            }
-          }
-        }
 
     stage('Setup Server for Compliance Tests and Code Coverage Test'){
       steps{
@@ -382,6 +319,20 @@ pipeline {
     }
 
     stage('Continuous Deployment') {
+      when {
+        allOf {
+          anyOf {
+            changeset "docker/**"
+            changeset "docs/**"
+            changeset "pom.xml"
+            changeset "src/main/**"
+            triggeredBy cause: 'UserIdCause'
+          }
+          expression {
+            return env.GIT_BRANCH == 'origin/stable/v2.3';
+          }
+        }
+      }
       stages {
         stage('Push Images') {
           steps {
@@ -392,22 +343,15 @@ pipeline {
             }
           }
         }
-                stage('EKS Helm deployment') {
-                  steps {
-                    script {
-                      sh "ssh ubuntu@dev-eks 'cd v2-deployments/iudx/iudx-installer/K8s-deployment/Charts/geo-server-s3 && helm upgrade geo-server . -n geo-server-s3 --rollback-on-failure --timeout 5m --reuse-values --set image.repository=${devRegistry} --set image.tag=1.0.0-alpha-${env.GIT_HASH}'"
-                    }
-                  }
-                  post{
-                    failure{
-                      error "Failed to deploy image to EKS via Helm"
-                    }
-                  }
-                }
+        stage('Deploy ogc-resource-server') {
+          steps{
+            script{
+              sh "ssh ubuntu@adex-swarm 'docker service update ogc-rs_ogc-rs --image ghcr.io/datakaveri/geoserver-dev:1.0.0-alpha-${env.GIT_HASH}'"
+            }
+          }
+        }
       }
     }
   }
-      }
-    }
+}
 
-  }
