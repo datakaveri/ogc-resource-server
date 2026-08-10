@@ -69,11 +69,6 @@ public class OgcRouterBuilder extends EntityRouterBuilder {
         .handler(apiServerVerticle::putCommonResponseHeaders)
         .handler(apiServerVerticle::buildResponse).failureHandler(failureHandler);
 
-    routerBuilder.operation(COLLECTION_MAP_API)
-        .handler(ogcMapsAuthZHandler)
-        .handler(apiServerVerticle::getCollectionMap)
-        .failureHandler(failureHandler);
-    
     routerBuilder.operation(LIST_CONFIGURED_S3_BUCKETS_API)
         .handler(apiServerVerticle::listConfiguredS3Buckets)
         .handler(apiServerVerticle::putCommonResponseHeaders)
