@@ -93,7 +93,7 @@ pipeline {
           steps {
             script {
               docker.withRegistry(registryUri, registryCredential) {
-                devImage.push("1.0.0-alpha-${env.GIT_HASH}")
+                devImage.push("1.0.0-alpha-stable-v2.3-${env.GIT_HASH}")
               }
             }
           }
