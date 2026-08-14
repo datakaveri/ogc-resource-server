@@ -15,60 +15,7 @@ pipeline {
 
   stages {
 
-    stage('Build images') {
-      steps{
-        script {
-          devImage = docker.build( devRegistry, "-f ./docker/dev.dockerfile .")
-        }
-      }
-    }
-
-    stage('Trivy Code Scan (Dependencies)') {
-      steps {
-        script {
-          sh '''
-            trivy fs --scanners vuln,secret,misconfig --output trivy-fs-report.txt .
-          '''
-        }
-      }
-    }
-
-    stage('Trivy Scan') {
-      steps {
-        script {
-          try {
-            sh "trivy image --severity CRITICAL,HIGH --exit-code 1 ${devImage.imageName()}"
-            echo 'Trivy scan passed: No HIGH or CRITICAL vulnerabilities found.'
-          } catch (Exception e) {
-            echo 'Trivy scan failed: HIGH or CRITICAL vulnerabilities detected.'
-            currentBuild.result = 'FAILURE'
-            throw e
-          }
-        }
-      }
-    }
-
-    stage('Trivy Docker Image Scan and Report') {
-      steps {
-        script {
-          sh "trivy image --output trivy-dev-image-report.txt ${devImage.imageName()}"
-        }
-      }
-      post {
-        always {
-          archiveArtifacts artifacts: 'trivy-*.txt', allowEmptyArchive: true
-          publishHTML(target: [
-            allowMissing: true,
-            keepAll: true,
-            reportDir: '.',
-            reportFiles: 'trivy-fs-report.txt, trivy-dev-image-report.txt',
-            reportName: 'Trivy Reports'
-          ])
-        }
-      }
-    }
-
-    stage('Continuous Deployment') {
+    stage('Conditional Execution') {
       when {
         allOf {
           anyOf {
@@ -79,20 +26,80 @@ pipeline {
             triggeredBy cause: 'UserIdCause'
           }
           expression {
-            return env.GIT_BRANCH == 'origin/stable/v2.3';
+            return env.GIT_BRANCH == 'origin/stable/v2.3'
           }
         }
       }
+
       stages {
-        stage('Push Images') {
+
+        stage('Build images') {
+          steps{
+            script {
+              devImage = docker.build( devRegistry, "-f ./docker/dev.dockerfile .")
+            }
+          }
+        }
+
+        stage('Trivy Code Scan (Dependencies)') {
           steps {
             script {
-              docker.withRegistry( registryUri, registryCredential ) {
-                devImage.push("1.0.0-alpha-${env.GIT_HASH}")
+              sh '''
+                trivy fs --scanners vuln,secret,misconfig --output trivy-fs-report.txt .
+              '''
+            }
+          }
+        }
+
+        stage('Trivy Scan') {
+          steps {
+            script {
+              try {
+                sh "trivy image --severity CRITICAL,HIGH --exit-code 1 ${devImage.imageName()}"
+                echo 'Trivy scan passed: No HIGH or CRITICAL vulnerabilities found.'
+              } catch (Exception e) {
+                echo 'Trivy scan failed: HIGH or CRITICAL vulnerabilities detected.'
+                currentBuild.result = 'FAILURE'
+                throw e
               }
             }
           }
         }
+
+        stage('Trivy Docker Image Scan and Report') {
+          steps {
+            script {
+              sh "trivy image --output trivy-dev-image-report.txt ${devImage.imageName()}"
+            }
+          }
+          post {
+            always {
+              archiveArtifacts artifacts: 'trivy-*.txt', allowEmptyArchive: true
+              publishHTML(target: [
+                allowMissing: true,
+                keepAll: true,
+                reportDir: '.',
+                reportFiles: 'trivy-fs-report.txt, trivy-dev-image-report.txt',
+                reportName: 'Trivy Reports'
+              ])
+            }
+          }
+        }
+
+        stage('Continuous Deployment') {
+          stages {
+            stage('Push Images') {
+              steps {
+                script {
+                  docker.withRegistry( registryUri, registryCredential ) {
+                    devImage.push("1.0.0-alpha-${env.GIT_HASH}")
+                  }
+                }
+              }
+            }
+          }
+        }
+
       }
     }
   }
