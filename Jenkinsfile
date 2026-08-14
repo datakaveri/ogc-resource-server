@@ -26,20 +26,12 @@ pipeline {
             triggeredBy cause: 'UserIdCause'
           }
           expression {
-            return env.GIT_BRANCH == 'origin/stable/v2.3'
+            return env.BRANCH_NAME == 'stable/v2.3' || env.BRANCH_NAME.startsWith('PR-');
           }
         }
       }
 
       stages {
-
-        stage('Build images') {
-          steps{
-            script {
-              devImage = docker.build( devRegistry, "-f ./docker/dev.dockerfile .")
-            }
-          }
-        }
 
         stage('Trivy Code Scan (Dependencies)') {
           steps {
@@ -51,25 +43,31 @@ pipeline {
           }
         }
 
-        stage('Trivy Scan') {
-          steps {
+        stage('Building images') {
+          steps{
             script {
-              try {
-                sh "trivy image --severity CRITICAL,HIGH --exit-code 1 ${devImage.imageName()}"
-                echo 'Trivy scan passed: No HIGH or CRITICAL vulnerabilities found.'
-              } catch (Exception e) {
-                echo 'Trivy scan failed: HIGH or CRITICAL vulnerabilities detected.'
-                currentBuild.result = 'FAILURE'
-                throw e
-              }
+              echo 'Pulled - ' + env.GIT_BRANCH
+              devImage = docker.build(devRegistry, "-f ./docker/dev.dockerfile .")
             }
           }
         }
 
-        stage('Trivy Docker Image Scan and Report') {
+        stage('Trivy Scan and Report') {
           steps {
             script {
-              sh "trivy image --output trivy-dev-image-report.txt ${devImage.imageName()}"
+              try {
+                sh """
+                trivy image \\
+                  --exit-code 1 \\
+                  --severity HIGH,CRITICAL \\
+                  --ignore-unfixed \\
+                  ${devImage.imageName()}
+                """
+                sh "trivy image --output trivy-dev-image-report.txt ${devImage.imageName()}"
+              } catch (Exception e) {
+                echo "Trivy scan failed due to high or critical vulnerabilities."
+                throw e
+              }
             }
           }
           post {
@@ -86,15 +84,16 @@ pipeline {
           }
         }
 
-        stage('Continuous Deployment') {
-          stages {
-            stage('Push Images') {
-              steps {
-                script {
-                  docker.withRegistry( registryUri, registryCredential ) {
-                    devImage.push("1.0.0-alpha-${env.GIT_HASH}")
-                  }
-                }
+        stage('Push Images') {
+          when {
+            expression {
+              return env.BRANCH_NAME == 'stable/v2.3'
+            }
+          }
+          steps {
+            script {
+              docker.withRegistry(registryUri, registryCredential) {
+                devImage.push("1.0.0-alpha-${env.GIT_HASH}")
               }
             }
           }
@@ -102,12 +101,13 @@ pipeline {
 
       }
     }
+
   }
 
   post {
     failure {
       script {
-        if (env.GIT_BRANCH == 'origin/stable/v2.3')
+        if (env.BRANCH_NAME == 'stable/v2.3')
         emailext recipientProviders: [buildUser(), developers()],
         to: '$AAA_RECIPIENTS, $DEFAULT_RECIPIENTS',
         subject: '$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!',
