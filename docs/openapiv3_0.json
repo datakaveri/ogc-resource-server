@@ -208,28 +208,52 @@
                 "format": "double"
               }
             },
-            "example": [
-              77.5,
-              12.9,
-              77.6,
-              13.0
-            ]
+            "examples": {
+              "lonLat": {
+                "summary": "Default OGC:CRS84 (degrees)",
+                "value": [
+                  77.5,
+                  12.9,
+                  77.6,
+                  13.0
+                ]
+              },
+              "utm": {
+                "summary": "Projected, matching the source CRS",
+                "value": [
+                  757503.502,
+                  2005365.945,
+                  760050.282,
+                  2008058.13
+                ]
+              }
+            }
           },
           {
             "name": "bbox-crs",
             "in": "query",
-            "description": "CRS in which the `bbox` values are expressed. `OGC:CRS84` is preferred over `EPSG:4326` for lon/lat because its axis order is unambiguous.",
+            "description": "CRS in which the `bbox` values are expressed. `OGC:CRS84` is preferred over `EPSG:4326` for lon/lat because its axis order is unambiguous. Any form the server's CRS parser accepts will do - authority code, OGC CRS URI or URN, PROJ string or WKT.\n\nSetting this to the source's own CRS and omitting `crs` is the cheapest combination - no reprojection occurs. Ignored when `bbox` is absent.",
             "required": false,
             "schema": {
               "type": "string",
               "default": "OGC:CRS84"
             },
-            "example": "EPSG:32644"
+            "examples": {
+              "crs84": {
+                "value": "OGC:CRS84"
+              },
+              "utm44n": {
+                "value": "EPSG:32644"
+              },
+              "webMercator": {
+                "value": "EPSG:3857"
+              }
+            }
           },
           {
             "name": "crs",
             "in": "query",
-            "description": "CRS of the output. Omit to render in the source CRS. Also sets the units of the resolution derived from `scale-denominator` - metres for a projected CRS, degrees for a geographic one.",
+            "description": "CRS of the **output**. Supplying it triggers reprojection; omit to keep the source CRS, which is the default and the cheaper path.\n\nAlso determines the units of the resolution derived from `scale-denominator` - metres for a projected CRS, degrees for a geographic one. When omitted, the collection's storage CRS supplies those units for validation purposes only; no reprojection is performed.",
             "required": false,
             "schema": {
               "type": "string"
@@ -239,7 +263,7 @@
           {
             "name": "width",
             "in": "query",
-            "description": "Output width in pixels. Cannot be combined with `scale-denominator`. Send only one of `width` and `height` and the other is derived from the raster dimensions, preserving aspect ratio.",
+            "description": "Output width in pixels. Cannot be combined with `scale-denominator`.\n\nSend only one of `width` and `height` and the other is derived from the collection's `raster_width` / `raster_height`, preserving aspect ratio. Send both and they are honoured exactly, even if that stretches the image. Send neither and the raster's aspect is scaled to a 500 px longest edge, falling back to a fixed 500 x 300 only when the row carries no raster dimensions.",
             "required": false,
             "schema": {
               "type": "integer",
@@ -251,7 +275,7 @@
           {
             "name": "height",
             "in": "query",
-            "description": "Output height in pixels. Cannot be combined with `scale-denominator`. `width * height` must not exceed 16777216.",
+            "description": "Output height in pixels. Cannot be combined with `scale-denominator`. See `width` for how a missing value is derived.\n\n`width * height` must not exceed 16777216 (4096 squared), which is enforced separately so a wide-and-short image cannot slip past the per-dimension caps. Exactly 4096 x 4096 is accepted.",
             "required": false,
             "schema": {
               "type": "integer",
@@ -263,7 +287,7 @@
           {
             "name": "scale-denominator",
             "in": "query",
-            "description": "Map scale as the N in a 1:N ratio. Requires `bbox` and cannot be combined with `width` or `height`. At the default `mm-per-pixel`, `scale-denominator = metres-per-pixel * 3571.4286`.",
+            "description": "Map scale as the N in a 1:N ratio - dimensionless. Converted to a ground resolution via `(mm-per-pixel / 1000) * scale-denominator` and passed to `gdalwarp -tr`.\n\nRequires `bbox`, and cannot be combined with `width` or `height`. Aspect ratio is preserved automatically, since both output dimensions derive from one resolution.\n\nAt the default `mm-per-pixel`, `scale-denominator = metres-per-pixel * 3571.4286`.",
             "required": false,
             "schema": {
               "type": "number",
@@ -271,12 +295,21 @@
               "minimum": 0,
               "exclusiveMinimum": true
             },
-            "example": 3571.4286
+            "examples": {
+              "oneMetre": {
+                "summary": "1 m/px at the default mm-per-pixel",
+                "value": 3571.4286
+              },
+              "twoMetres": {
+                "summary": "2 m/px at the default mm-per-pixel",
+                "value": 7142.8571
+              }
+            }
           },
           {
             "name": "mm-per-pixel",
             "in": "query",
-            "description": "Assumed physical size of one pixel in millimetres, used only with `scale-denominator`. The default 0.28 mm is the OGC/WMTS nominal pixel size. Setting it to 1000 makes `scale-denominator` read directly as metres-per-pixel.",
+            "description": "Assumed physical size of one pixel on the output medium, in millimetres. Used **only** with `scale-denominator`; ignored entirely on the `width`/`height` path.\n\nThe default 0.28 mm is the OGC/WMTS nominal pixel size (~90.7 DPI), chosen so a given scale means the same thing across implementations. Setting it to 1000 makes the conversion factor exactly 1, so `scale-denominator` reads directly as metres-per-pixel - convenient for testing, but use real denominators for anything user-facing.",
             "required": false,
             "schema": {
               "type": "number",
@@ -285,12 +318,20 @@
               "exclusiveMinimum": true,
               "default": 0.28
             },
-            "example": 0.28
+            "examples": {
+              "ogcDefault": {
+                "value": 0.28
+              },
+              "metresShortcut": {
+                "summary": "Makes scale-denominator mean metres-per-pixel",
+                "value": 1000
+              }
+            }
           },
           {
             "name": "f",
             "in": "query",
-            "description": "Output format. Case-insensitive; the media types `image/png`, `image/jpeg` and `image/tiff` are also accepted.",
+            "description": "Output format. Case-insensitive; the media types `image/png`, `image/jpeg` and `image/tiff` are also accepted.\n\nTIFF is produced by a single `gdalwarp` process. PNG and JPEG add a `gdal_translate` stage.",
             "required": false,
             "schema": {
               "type": "string",
@@ -308,7 +349,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The rendered image, streamed in chunks.",
+            "description": "The rendered image, streamed in 64 KB chunks.",
             "content": {
               "image/png": {
                 "schema": {
@@ -331,14 +372,69 @@
             }
           },
           "400": {
-            "description": "Invalid or out-of-range parameters: output exceeding the dimension or pixel limits, `scale-denominator` combined with `width` or `height`, `scale-denominator` without `bbox`, a malformed `bbox`, an unrecognised `f`, or a bbox that cannot be transformed into the output CRS.",
+            "description": "Invalid or out-of-range parameters. Includes: a query parameter this endpoint does not define (the set is closed - an unknown name is rejected, never ignored); a malformed `collectionId`; a `crs` or `bbox-crs` value that cannot be parsed; output exceeding the per-dimension or total pixel limits; `scale-denominator` combined with `width` or `height`; `scale-denominator` without `bbox`; a malformed `bbox`; an unrecognised `f`; a bbox that cannot be transformed into the output CRS; or a collection with no stored CRS to validate against.\n\n`description` lists the parameters at fault in brackets, followed by what is wrong with them.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MapError"
+                  "$ref": "#/components/schemas/exception400"
                 },
-                "example": {
-                  "error": "scale-denominator requires a bbox to determine output size"
+                "examples": {
+                  "unknownParam": {
+                    "summary": "A name the endpoint does not define",
+                    "value": {
+                      "code": "Bad Request",
+                      "description": "Invalid parameters in request [widht] - not a recognised query parameter; allowed: bbox, bbox-crs, crs, f, height, mm-per-pixel, scale-denominator, width"
+                    }
+                  },
+                  "badCrs": {
+                    "summary": "A CRS the server cannot resolve",
+                    "value": {
+                      "code": "Bad Request",
+                      "description": "Invalid parameters in request [crs] - 'EPSG:99999' is not a CRS this server can resolve - any form the CRS parser accepts will do (authority code, OGC CRS URI or URN, PROJ, WKT)"
+                    }
+                  },
+                  "badId": {
+                    "summary": "A collection id that is not a UUID",
+                    "value": {
+                      "code": "Bad Request",
+                      "description": "Invalid parameters in request [collectionId] - must be a UUID"
+                    }
+                  },
+                  "badBbox": {
+                    "summary": "A bbox whose corners are inverted",
+                    "value": {
+                      "code": "Bad Request",
+                      "description": "Invalid parameters in request [bbox] - max must be greater than min"
+                    }
+                  },
+                  "tooLarge": {
+                    "summary": "Output beyond the pixel budget",
+                    "value": {
+                      "code": "Bad Request",
+                      "description": "Invalid parameters in request [width, height] - requested image 5000x5000 exceeds max dimensions 4096x4096"
+                    }
+                  },
+                  "mutuallyExclusive": {
+                    "summary": "Both sizing modes at once",
+                    "value": {
+                      "code": "Bad Request",
+                      "description": "Invalid parameters in request [scale-denominator, width] - scale-denominator cannot be combined with width/height"
+                    }
+                  },
+                  "missingBbox": {
+                    "summary": "scale-denominator with no bbox",
+                    "value": {
+                      "code": "Bad Request",
+                      "description": "Invalid parameters in request [scale-denominator, bbox] - scale-denominator requires a bbox to determine output size"
+                    }
+                  },
+                  "unsizeable": {
+                    "summary": "The size guard cannot validate the request",
+                    "value": {
+                      "code": "Bad Request",
+                      "description": "Invalid parameters in request [crs, scale-denominator] - cannot size the request - the collection has no storage CRS; pass crs explicitly or use width/height instead"
+                    }
+                  }
                 }
               }
             }
@@ -347,53 +443,52 @@
             "$ref": "#/components/responses/NotAuthorized"
           },
           "404": {
-            "description": "No renderable map for this collection.",
+            "description": "No renderable map for this collection - either no row in `collection_map_metadata`, or a row naming no object. The two are not distinguished in the response.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MapError"
+                  "$ref": "#/components/schemas/exception"
                 },
                 "example": {
-                  "error": "collection 52a27851-ac2d-4196-8dce-9a05500cf12b has no map"
+                  "type": "Not Found",
+                  "title": "Not Found",
+                  "detail": "collection 52a27851-ac2d-4196-8dce-9a05500cf12b has no map"
                 }
               }
             }
           },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
           "429": {
-            "description": "Too many concurrent renders. Requests are not queued; retry with backoff.",
+            "description": "Too many concurrent renders. Rejected immediately - requests are not queued. Retry with backoff.\n\nThe limit is per server process and counts renders in flight, where a render holds its slot until the client has read the whole body or the render timeout expires.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MapError"
+                  "$ref": "#/components/schemas/exception"
                 },
                 "example": {
-                  "error": "server busy - too many concurrent renders"
+                  "type": "Too Many Requests",
+                  "title": "Too Many Requests",
+                  "detail": "server busy - too many concurrent renders; retry with backoff"
                 }
               }
             }
           },
           "500": {
-            "description": "A GDAL subprocess failed, or the render timed out before any bytes were produced.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MapError"
-                },
-                "example": {
-                  "error": "gdal exited with code 2"
-                }
-              }
-            }
+            "$ref": "#/components/responses/ServerError"
           },
           "503": {
-            "description": "The collection metadata store is unreachable.",
+            "description": "The collection metadata store is unreachable. Nothing can be rendered without it, since the source path itself comes from there.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MapError"
+                  "$ref": "#/components/schemas/exception"
                 },
                 "example": {
-                  "error": "metadata store unavailable"
+                  "type": "Service Unavailable",
+                  "title": "Service Unavailable",
+                  "detail": "metadata store unavailable"
                 }
               }
             }
@@ -2062,22 +2157,6 @@
       }
     },
     "schemas": {
-      "MapError": {
-        "title": "Map Error",
-        "type": "object",
-        "required": [
-          "error"
-        ],
-        "properties": {
-          "error": {
-            "type": "string",
-            "description": "Human-readable description of the failure."
-          }
-        },
-        "example": {
-          "error": "scale-denominator requires a bbox to determine output size"
-        }
-      },
       "exception": {
         "title": "Exception Schema",
         "required": [
