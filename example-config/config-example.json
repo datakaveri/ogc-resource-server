@@ -1,114 +1,99 @@
-{ 
-  "version": "1.0",
-  "zookeepers": [
-    "zookeeper"
-  ],
+{
   "clusterId": "ogc-rs-cluster",
   "commonConfig": {
-    "ogcBasePath": "/",
-    "catalogId": "stac",
-    "dxCatalogueBasePath": "/controlplane/iudx/v2/cat",
-    "hostName": "https://dx.example.org/ogc",
-    "catServerHost": "dx.example.org",
-    "catServerPort": 443,
-    "catRequestItemsUri": "/controlplane/iudx/v2/cat/item",
-    "databaseHost": "",
-    "databasePort": 5432,
-    "databaseUser": "",
-    "databasePassword": "",
-    "databaseName": "ogc_rs_v2",
-    "jwtIgnoreExpiry": false,
-    "issuer": "dx.example.org/controlplane",
     "auditingExchange": "auditing",
     "auditingRoutingKey": "##",
+    "catRequestItemsUri": "/controlplane/iudx/v2/cat/item",
+    "catServerHost": "dx.example.org",
+    "catServerPort": 443,
+    "catalogId": "stac",
+    "databaseHost": "",
+    "databaseName": "ogc_rs_v2",
+    "databasePassword": "",
+    "databasePort": 5432,
+    "databaseUser": "",
+    "dxCatalogueBasePath": "/controlplane/iudx/v2/cat",
+    "hostName": "https://dx.example.org/ogc",
+    "issuer": "dx.example.org/controlplane",
+    "jwtIgnoreExpiry": false,
+    "ogcBasePath": "/",
     "poolSize": 5
-  },
-  "s3BucketsConfig": {
-    "default": {
-      "bucket": "",
-      "endpoint": "https://s3.ap-south-1.amazonaws.com",
-      "region": "ap-south-1",
-      "accessKey": "",
-      "secretKey": "",
-      "pathBasedAccess": false,
-      "readAccess": "PRIVATE"
-    }
   },
   "host": "ogc.example.org",
   "modules": [
     {
       "id": "ogc.rs.database.DatabaseVerticle",
-      "verticleInstances": 1,
-      "poolSize": 5
+      "poolSize": 5,
+      "verticleInstances": 1
     },
     {
-      "id": "ogc.rs.catalogue.CatalogueVerticle",
-      "verticleInstances": 1,
+      "catRequestItemsUri": "/controlplane/iudx/v2/cat/item",
       "dxCatalogueBasePath": "/controlplane/iudx/v2/cat",
-      "catRequestItemsUri": "/controlplane/iudx/v2/cat/item"
+      "id": "ogc.rs.catalogue.CatalogueVerticle",
+      "verticleInstances": 1
     },
     {
-      "id": "ogc.rs.apiserver.ApiServerVerticle",
-      "isWorkerVerticle": false,
-      "ssl": true,
-      "keystore": "secrets/keystore.jks",
-      "keystorePassword": "",
-      "httpPort": 8080,
-      "verticleInstances": 2,
+      "audience": "dx.example.org/ogc",
+      "controlPanelHost": "dx.example.org",
+      "controlPanelPort": 443,
+      "controlPanelSearchPath": "/controlplane/iudx/acl/apd/v2/access_request/has_access",
       "geomSpecificMaxLimits": {
+        "GEOMETRY": 120,
+        "LINESTRING": 100,
         "MULTILINESTRING": 100,
         "MULTIPOINT": 10000,
-        "LINESTRING": 100,
-        "POINT": 10000,
         "MULTIPOLYGON": 10000,
-        "GEOMETRY": 120,
+        "POINT": 10000,
         "POLYGON": 10
       },
-      "audience": "dx.example.org/ogc",
-      "poolSize": 5,
+      "httpPort": 8080,
+      "id": "ogc.rs.apiserver.ApiServerVerticle",
+      "isWorkerVerticle": false,
       "issuers": {
-        "jwtIgnoreExpiry": false,
-        "jwtLeeway": 60,
         "dx.example.org/controlplane": {
-          "type": "remote",
           "audience": [],
-          "jwksUrl": "https://dx.example.org/controlplane/iudx/v2/auth/jwks"
+          "jwksUrl": "https://dx.example.org/controlplane/iudx/v2/auth/jwks",
+          "type": "remote"
         },
         "https://dx.example.org/auth/realms/<realm>": {
-          "type": "remote",
+          "audience": [],
           "jwksUrl": "https://dx.example.org/auth/realms/<realm>/protocol/openid-connect/certs",
-          "audience": []
-        }
+          "type": "remote"
+        },
+        "jwtIgnoreExpiry": false,
+        "jwtLeeway": 60
       },
-      "controlPanelPort": 443,
-      "controlPanelHost": "dx.example.org",
-      "controlPanelSearchPath": "/controlplane/iudx/acl/apd/v2/access_request/has_access"
+      "keystore": "secrets/keystore.jks",
+      "keystorePassword": "",
+      "poolSize": 5,
+      "ssl": true,
+      "verticleInstances": 2
     },
     {
-      "id": "ogc.rs.databroker.DataBrokerVerticle",
-      "verticleInstances": 1,
+      "connectionTimeout": 6000,
       "dataBrokerIP": "",
+      "dataBrokerManagementPort": 443,
+      "dataBrokerPassword": "",
       "dataBrokerPort": 24568,
       "dataBrokerUserName": "",
-      "dataBrokerPassword": "",
-      "dataBrokerManagementPort": 443,
-      "connectionTimeout": 6000,
-      "requestedHeartbeat": 60,
       "handshakeTimeout": 6000,
-      "requestedChannelMax": 5000,
+      "id": "ogc.rs.databroker.DataBrokerVerticle",
+      "internalVhost": "IUDX-V2-INTERNAL",
       "networkRecoveryInterval": 500,
       "prodVhost": "IUDX-V2",
-      "internalVhost": "IUDX-V2-INTERNAL"
+      "requestedChannelMax": 5000,
+      "requestedHeartbeat": 60,
+      "verticleInstances": 1
     },
     {
       "id": "ogc.rs.metering.MeteringVerticle",
-      "verticleInstances": 1,
       "meteringDatabaseHost": "",
+      "meteringDatabaseName": "iudx_v2_rs",
+      "meteringDatabasePassword": "",
       "meteringDatabasePort": 5432,
       "meteringDatabaseUser": "",
-      "meteringDatabasePassword": "",
-      "meteringDatabaseName": "iudx_v2_rs",
-      "poolSize": 5
+      "poolSize": 5,
+      "verticleInstances": 1
     },
     {
       "id": "ogc.rs.jobs.JobsVerticle",
@@ -119,5 +104,20 @@
       "poolSize": 5,
       "verticleInstances": 1
     }
+  ],
+  "s3BucketsConfig": {
+    "default": {
+      "accessKey": "",
+      "bucket": "",
+      "endpoint": "https://s3.ap-south-1.amazonaws.com",
+      "pathBasedAccess": false,
+      "readAccess": "PRIVATE",
+      "region": "ap-south-1",
+      "secretKey": ""
+    }
+  },
+  "version": 2,
+  "zookeepers": [
+    "zookeeper"
   ]
 }
