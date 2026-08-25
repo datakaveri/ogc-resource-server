@@ -11,8 +11,8 @@ services:
       - LOG_LEVEL=INFO
     volumes:
       - ./src/:/usr/share/app/src
-      - /home/ubuntu/configs/ogc-config-dev.json:/usr/share/app/configs/config.json
-      - /home/ubuntu/configs/ogc-config-test.json:/usr/share/app/configs/test.json
+      - /home/ubuntu/configs/stable/ogc-config-dev.json:/usr/share/app/configs/config.json
+      - /home/ubuntu/configs/stable/ogc-config-test.json:/usr/share/app/configs/test.json
       - ./docker/runTests.sh:/usr/share/app/docker/runTests.sh
       - ${WORKSPACE}:/tmp/test
       - type: volume
@@ -38,8 +38,8 @@ services:
       - LOG_LEVEL=INFO
     volumes:
       - ./src/:/usr/share/app/src
-      - /home/ubuntu/configs/ogc-config-dev.json:/usr/share/app/configs/config.json
-      - /home/ubuntu/configs/ogc-config-test.json:/usr/share/app/configs/test.json
+      - /home/ubuntu/configs/stable/ogc-config-dev.json:/usr/share/app/configs/config.json
+      - /home/ubuntu/configs/stable/ogc-config-test.json:/usr/share/app/configs/test.json
       - ./docker/runTests.sh:/usr/share/app/docker/runTests.sh
       - ${WORKSPACE}:/tmp/test
       - type: volume
@@ -64,7 +64,7 @@ services:
     environment:
       - LOG_LEVEL=INFO
     volumes:
-      - /home/ubuntu/configs/ogc-config-dev.json:/usr/share/app/configs/config.json
+      - /home/ubuntu/configs/stable/ogc-config-dev.json:/usr/share/app/configs/config.json
       - type: volume
         source: ogc-volume
         target: /usr/share/app/storage/temp-dir
