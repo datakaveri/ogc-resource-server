@@ -38,12 +38,8 @@ be added [secrets](./secrets/configs/dev.json).
 | Key Name            | Value Datatype | Value Example                      | Description                                                      |
 |:--------------------|:--------------:|:-----------------------------------|:-----------------------------------------------------------------|
 | id                  |     String     | ogc.rs.apiserver.ApiServerVerticle | Identifier for the API server verticle                           |
-| isWorkerVerticle    |    Boolean     | false                              | Specifies if this is a worker verticle (for blocking operations) |
 | verticleInstances   |    Integer     | 2                                  | Number of verticle instances to be deployed                      |
 | httpPort            |    Integer     | 8081                               | Port for running the instance of OGC Resource Server             |
-| ssl                 |    Boolean     | true                               | Indicates whether SSL is enabled                                 |
-| keystore            |     String     | keystore.jks                       | Path to the SSL keystore file                                    |
-| keystorePassword    |     String     | password                           | Password for the keystore file                                   |
 | authServerHost      |     String     | authvertx.iudx.io                  | Host name of DX AAA Server                                       |
 | issuer              |     String     | issuer                             | Issuer for JWT token validation                                  |
 | audience            |     String     | audience                           | Audience for JWT token validation                                |
@@ -64,7 +60,6 @@ be added [secrets](./secrets/configs/dev.json).
 | Key Name                         | Value Datatype | Value Example                    | Description                                                                                     |
 |:---------------------------------|:--------------:|:---------------------------------|:------------------------------------------------------------------------------------------------|
 | id                               |     String     | ogc.rs.database.DatabaseVerticle | Identifier for the Database Verticle                                                            |
-| isWorkerVerticle                 |    boolean     | false                            | To check if worker verticle needs to be deployed for blocking operations                        |
 | verticleInstances                |    Integer     | 1                                | Number of verticle instances to be deployed                                                     |
 | databaseHost                     |     String     | dbHost                           | Postgres Database IP address                                                                    |
 | databasePort                     |    integer     | 5433                             | Postgres Port number                                                                            |
