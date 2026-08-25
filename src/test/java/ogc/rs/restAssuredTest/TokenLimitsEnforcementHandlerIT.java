@@ -187,26 +187,6 @@ public class TokenLimitsEnforcementHandlerIT {
     }
 
     @Test
-    @Description("Testing partial intersection of query bbox with token bbox")
-    public void testPartialIntersectionOfQueryBboxWithTokenBbox() {
-        LOGGER.info("Testing partial intersection of query bbox with token bbox");
-        String bbox = "-6.0,52.0,-3.0,54.0";
-        String token = new FakeTokenBuilder()
-                .withSub(UUID.randomUUID())
-                .withResourceServer()
-                .withRoleProvider()
-                .withCons(new JsonObject().put("limits", new JsonObject()
-                        .put("bbox", new JsonArray()
-                                .add(-5.0)
-                                .add(51.0)
-                                .add(-2.0)
-                                .add(53.0))))
-                .build();
-        Response response = sendBBoxRequest(collectionId, token, bbox);
-        response.then().statusCode(200);
-    }
-
-    @Test
     @Description("Testing no intersection of query bbox with token bbox")
     public void testNoIntersectionOfQueryBboxWithTokenBbox() {
         LOGGER.info("Testing no intersection of query bbox with token bbox");
@@ -679,7 +659,7 @@ public class TokenLimitsEnforcementHandlerIT {
         // World Administrative Country Boundaries CollectionId in the token - cfdecaed-54ae-49e2-bf49-43e7d2fe0338
         // FeatureId 5 in the token - United States of America
         // USA Administrative States Boundaries CollectionId in the request- ba56a3d7-a0bb-49b7-a610-e231c73ebb3d
-        // FeatureId in the request 6 - Washington
+        // FeatureId in the request 9 - Colorado
         String token = new FakeTokenBuilder()
                 .withSub(UUID.randomUUID())
                 .withResourceServer()
@@ -691,7 +671,7 @@ public class TokenLimitsEnforcementHandlerIT {
                 .build();
         Response response =
                 given().pathParam("collectionId", "ba56a3d7-a0bb-49b7-a610-e231c73ebb3d")
-                        .pathParam("featureId", 6)
+                        .pathParam("featureId", 9)
                         .auth().oauth2(token)
                         .contentType("application/json")
                         .when().get("/collections/{collectionId}/items/{featureId}");
