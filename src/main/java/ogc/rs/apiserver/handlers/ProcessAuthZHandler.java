@@ -21,6 +21,7 @@ import static ogc.rs.apiserver.handlers.DxTokenAuthenticationHandler.USER_KEY;
 import static ogc.rs.apiserver.util.Constants.*;
 import static ogc.rs.processes.auditLogsIngestion.Constants.AUDIT_LOGS_INGESTION_TITLE;
 import static ogc.rs.processes.echo.Constants.ECHO_PROCESS_TITLE;
+import static ogc.rs.processes.featureAttributesExtraction.Constants.FEATURE_ATTRIBUTES_EXTRACTION_TITLE;
 import static ogc.rs.processes.userDatasetUsageCheck.Constants.USER_DATASET_USAGE_TITLE;
 
 public class ProcessAuthZHandler implements Handler<RoutingContext> {
@@ -176,6 +177,61 @@ public class ProcessAuthZHandler implements Handler<RoutingContext> {
                                 401,
                                 "Not Authorized",
                                 "Only COS admin is authorized to execute the UserDatasetUsageCheck process. Please contact DX AAA"));
+            }
+            return;
+        }
+
+        // FeatureAttributesExtraction - provider, provider delegate, consumer, and consumer delegate allowed
+        if (FEATURE_ATTRIBUTES_EXTRACTION_TITLE.equals(processTitle)) {
+            LOGGER.debug("Validating access for FeatureAttributesExtraction process");
+
+            if (!user.isRsToken()) {
+                LOGGER.error("Token is not an RS token for FeatureAttributesExtraction");
+                routingContext.fail(
+                        new OgcException(401, "Not Authorized", "User is not authorised. Please contact DX AAA"));
+                return;
+            }
+
+            if (user.getRole() == AuthInfo.RoleEnum.provider) {
+                JsonObject results = new JsonObject();
+                results.put("iid", iid);
+                results.put("userId", user.getUserId());
+                results.put("role", user.getRole());
+                routingContext.data().put("authInfo", results);
+                routingContext.next();
+            } else if (user.getRole() == AuthInfo.RoleEnum.delegate
+                    && user.getDelegatorRole() == AuthInfo.RoleEnum.provider) {
+                JsonObject results = new JsonObject();
+                results.put("iid", iid);
+                results.put("userId", user.getDelegatorUserId());
+                results.put("role", user.getDelegatorRole());
+                routingContext.data().put("authInfo", results);
+                routingContext.next();
+            } else if (user.getRole() == AuthInfo.RoleEnum.consumer) {
+                JsonObject results = new JsonObject();
+                results.put("iid", iid);
+                results.put("userId", user.getUserId());
+                results.put("role", user.getRole());
+                routingContext.data().put("authInfo", results);
+                routingContext.next();
+            } else if (user.getRole() == AuthInfo.RoleEnum.delegate
+                    && user.getDelegatorRole() == AuthInfo.RoleEnum.consumer) {
+                JsonObject results = new JsonObject();
+                results.put("iid", iid);
+                results.put("userId", user.getDelegatorUserId());
+                results.put("role", user.getDelegatorRole());
+                routingContext.data().put("authInfo", results);
+                routingContext.next();
+            } else {
+                LOGGER.error(
+                        "Only providers, provider delegates, consumers, and consumer delegates are authorized for FeatureAttributesExtraction. Role: {}, delegatorRole: {}",
+                        user.getRole(),
+                        user.getDelegatorRole());
+                routingContext.fail(
+                        new OgcException(
+                                401,
+                                "Not Authorized",
+                                "Only providers, provider delegates, consumers, and consumer delegates are authorized to execute the FeatureAttributesExtraction process. Please contact DX AAA"));
             }
             return;
         }

@@ -5,6 +5,8 @@ package ogc.rs.processes.featureAttributesExtraction;
  */
 public class Constants {
 
+    public static final String FEATURE_ATTRIBUTES_EXTRACTION_TITLE = "FeatureAttributesExtraction";
+
     // Process status messages
     public static final String STARTING_FEATURE_EXTRACTION_MESSAGE =
             "Starting feature attributes extraction process";

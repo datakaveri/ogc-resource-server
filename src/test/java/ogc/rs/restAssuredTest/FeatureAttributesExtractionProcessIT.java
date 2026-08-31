@@ -37,6 +37,11 @@ public class FeatureAttributesExtractionProcessIT {
                 .withResourceServer().withRoleProvider().withCons(new JsonObject()).build();
     }
 
+    private String getConsumerToken() {
+        return new FakeTokenBuilder().withSub(UUID.fromString("0ff3d306-9402-4430-8e18-6f95e4c03c97"))
+                .withResourceServer().withRoleConsumer().withCons(new JsonObject()).build();
+    }
+
     private Response sendExecutionRequest(String processId, String token, JsonObject requestBody) {
         return RestAssured.given().pathParam("processId", processId).auth().oauth2(token)
                 .contentType("application/json").body(requestBody.toString()).when().post(executionEndpoint);
@@ -125,6 +130,21 @@ public class FeatureAttributesExtractionProcessIT {
     public void testFeatureAttributesExtractionProcessSuccess() {
         LOGGER.debug("Testing success of feature attributes extraction process");
         String token = getToken();
+        JsonObject requestBody = requestBody();
+        Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
+        sendExecutionRequest.then().statusCode(200)
+                .and().body("features", notNullValue())
+                .and().body("features[0].id", notNullValue())
+                .and().body("features[0].properties.NAME", notNullValue())
+                .and().body("features[0].properties.CONTINENT", notNullValue())
+                .and().body("status", equalTo("successful"));
+    }
+
+    @Test
+    @Description("Success: Test feature attributes extraction process with consumer role")
+    public void testFeatureAttributesExtractionProcessSuccessWithConsumerRole() {
+        LOGGER.debug("Testing success of feature attributes extraction process with consumer role");
+        String token = getConsumerToken();
         JsonObject requestBody = requestBody();
         Response sendExecutionRequest = sendExecutionRequest(processId, token, requestBody);
         sendExecutionRequest.then().statusCode(200)
