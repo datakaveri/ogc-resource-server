@@ -24,6 +24,7 @@ pipeline {
             changeset "docs/**"
             changeset "pom.xml"
             changeset "src/main/**"
+            changeset "example-config/config-example.json"
             triggeredBy cause: 'UserIdCause'
           }
           expression {
@@ -84,6 +85,30 @@ pipeline {
                 reportFiles: 'trivy-fs-report.txt, trivy-dev-image-report.txt',
                 reportName: 'Trivy Reports'
               ])
+            }
+          }
+        }
+
+        stage('Detect config/migration change') {
+          when {
+            not { changeRequest() }
+          }
+          steps {
+            script {
+              def baseCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
+              if (!baseCommit) {
+                baseCommit = sh(script: 'git rev-list --max-parents=0 HEAD | tail -1', returnStdout: true).trim()
+              }
+
+              def changedFiles = sh(
+                script: "git diff --name-only ${baseCommit} HEAD",
+                returnStdout: true
+              ).trim().split('\n') as List
+
+              env.CONFIG_CHANGED = changedFiles.contains('example-config/config-example.json') ? 'true' : 'false'
+              env.MIGRATION_CHANGED = changedFiles.any { it.startsWith('src/main/resources/db/migration/') } ? 'true' : 'false'
+
+              echo "Diffing against ${baseCommit} (last successful build's commit): config changed=${env.CONFIG_CHANGED}, migration changed=${env.MIGRATION_CHANGED}"
             }
           }
         }
@@ -386,8 +411,16 @@ pipeline {
         stage('Push Images') {
           steps {
             script {
+              def tagSuffix = ''
+              if (env.CONFIG_CHANGED == 'true') {
+                tagSuffix += '-C'
+              }
+              if (env.MIGRATION_CHANGED == 'true') {
+                tagSuffix += '-M'
+              }
+              env.IMAGE_TAG = "v2.3.RC1-${env.GIT_HASH}${tagSuffix}"
               docker.withRegistry( registryUri, registryCredential ) {
-                devImage.push("1.0.0-alpha-${env.GIT_HASH}")
+                devImage.push(env.IMAGE_TAG)
               }
             }
           }
@@ -395,7 +428,7 @@ pipeline {
                 stage('EKS Helm deployment') {
                   steps {
                     script {
-                      sh "ssh ubuntu@dev-eks 'cd v2-deployments/iudx/iudx-installer/K8s-deployment/Charts/geo-server-s3 && helm upgrade geo-server . -n geo-server-s3 --rollback-on-failure --timeout 5m --reuse-values --set image.repository=${devRegistry} --set image.tag=1.0.0-alpha-${env.GIT_HASH}'"
+                      sh "ssh ubuntu@dev-eks 'cd v2-deployments/iudx/iudx-installer/K8s-deployment/Charts/geo-server-s3 && helm upgrade geo-server . -n geo-server-s3 --rollback-on-failure --timeout 5m --reuse-values --set image.repository=${devRegistry} --set image.tag=${env.IMAGE_TAG}'"
                     }
                   }
                   post{
