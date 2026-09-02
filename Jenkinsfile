@@ -326,6 +326,7 @@ pipeline {
             changeset "docs/**"
             changeset "pom.xml"
             changeset "src/main/**"
+            changeset "example-config/config-example.json"
             triggeredBy cause: 'UserIdCause'
           }
           expression {
@@ -334,11 +335,42 @@ pipeline {
         }
       }
       stages {
+        stage('Detect config/migration change') {
+          when {
+            not { changeRequest() }
+          }
+          steps {
+            script {
+              def baseCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
+              if (!baseCommit) {
+                baseCommit = sh(script: 'git rev-list --max-parents=0 HEAD | tail -1', returnStdout: true).trim()
+              }
+
+              def changedFiles = sh(
+                script: "git diff --name-only ${baseCommit} HEAD",
+                returnStdout: true
+              ).trim().split('\n') as List
+
+              env.CONFIG_CHANGED = changedFiles.contains('example-config/config-example.json') ? 'true' : 'false'
+              env.MIGRATION_CHANGED = changedFiles.any { it.startsWith('src/main/resources/db/migration/') } ? 'true' : 'false'
+
+              echo "Diffing against ${baseCommit} (last successful build's commit): config changed=${env.CONFIG_CHANGED}, migration changed=${env.MIGRATION_CHANGED}"
+            }
+          }
+        }
         stage('Push Images') {
           steps {
             script {
+              def tagSuffix = ''
+              if (env.CONFIG_CHANGED == 'true') {
+                tagSuffix += '-C'
+              }
+              if (env.MIGRATION_CHANGED == 'true') {
+                tagSuffix += '-M'
+              }
+              env.IMAGE_TAG = "v2.2.RC1-${env.GIT_HASH}${tagSuffix}"
               docker.withRegistry( registryUri, registryCredential ) {
-                devImage.push("1.0.0-alpha-${env.GIT_HASH}")
+                devImage.push(env.IMAGE_TAG)
               }
             }
           }
@@ -346,7 +378,7 @@ pipeline {
         stage('Deploy ogc-resource-server') {
           steps{
             script{
-              sh "ssh ubuntu@adex-swarm 'docker service update ogc-rs_ogc-rs --image ghcr.io/datakaveri/geoserver-dev:1.0.0-alpha-${env.GIT_HASH}'"
+              sh "ssh ubuntu@adex-swarm 'docker service update ogc-rs_ogc-rs --image ghcr.io/datakaveri/geoserver-dev:${env.IMAGE_TAG}'"
             }
           }
         }
