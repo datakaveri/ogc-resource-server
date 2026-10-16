@@ -1,26 +1,26 @@
 {
   "clusterId": "ogc-rs-cluster",
   "commonConfig": {
-    "grpcClientId": "svc-ogc-resource-server",
-    "grpcClientSecret": "",
-    "controlplaneGrpcHost": "dx.example.org",
-    "controlplaneGrpcPort": 9090,
-    "keycloakTokenUrl": "https://dx.example.org/auth/realms/<realm>/protocol/openid-connect/token",
     "auditingExchange": "auditing",
     "auditingRoutingKey": "##",
     "catRequestItemsUri": "/controlplane/iudx/v2/cat/item",
     "catServerHost": "dx.example.org",
     "catServerPort": 443,
     "catalogId": "stac",
+    "controlplaneGrpcHost": "dx.example.org",
+    "controlplaneGrpcPort": 9090,
     "databaseHost": "",
     "databaseName": "ogc_rs_v2",
     "databasePassword": "",
     "databasePort": 5432,
     "databaseUser": "",
     "dxCatalogueBasePath": "/controlplane/iudx/v2/cat",
+    "grpcClientId": "svc-ogc-resource-server",
+    "grpcClientSecret": "",
     "hostName": "https://dx.example.org/ogc",
     "issuer": "dx.example.org/controlplane",
     "jwtIgnoreExpiry": false,
+    "keycloakTokenUrl": "https://dx.example.org/auth/realms/<realm>/protocol/openid-connect/token",
     "ogcBasePath": "/",
     "poolSize": 5
   },
@@ -121,7 +121,7 @@
       "secretKey": ""
     }
   },
-  "version": 2,
+  "version": 3,
   "zookeepers": [
     "zookeeper"
   ]
