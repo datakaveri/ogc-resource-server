@@ -1,5 +1,6 @@
 package ogc.rs.apiserver.authentication.handler;
 
+import static ogc.rs.apiserver.util.Constants.HEADER_DID;
 import static ogc.rs.apiserver.util.Constants.NOT_AUTHORIZED;
 
 import io.vertx.core.Future;
@@ -12,7 +13,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import ogc.rs.apiserver.authentication.client.JwksResolver;
 import ogc.rs.apiserver.authentication.util.BearerTokenExtractor;
+import ogc.rs.apiserver.authorization.registry.SystemRoleScopeMap;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
+import ogc.rs.apiserver.delegation.DelegationResolver;
 import ogc.rs.apiserver.util.OgcException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,9 +25,11 @@ public class MultiIssuerJwtAuthHandler implements AuthenticationHandler {
 
   private final Map<String, JWTAuth> authProviders;
   private final JwksResolver jwksResolver;
+  private final DelegationResolver delegationResolver;
 
-  public MultiIssuerJwtAuthHandler(JwksResolver resolver) {
+  public MultiIssuerJwtAuthHandler(JwksResolver resolver, DelegationResolver delegationResolver) {
     this.jwksResolver = resolver;
+    this.delegationResolver = delegationResolver;
     this.authProviders = new ConcurrentHashMap<>();
   }
 
@@ -59,8 +64,35 @@ public class MultiIssuerJwtAuthHandler implements AuthenticationHandler {
         .onSuccess(
             user -> {
               LOGGER.debug("Authentication successful for issuer: {}", issuer);
-              ctx.setUser(user);
-              ctx.next();
+              SystemRoleScopeMap.enrichWithScopes(user.principal());
+
+              String did = ctx.request().getHeader(HEADER_DID);
+              if (did == null || did.isBlank()) {
+                ctx.setUser(user);
+                ctx.next();
+                return;
+              }
+              /* Delegation: act as the delegator, with the scopes controlplane allows for it */
+              delegationResolver
+                  .resolve(did, user)
+                  .onSuccess(
+                      delegator -> {
+                        LOGGER.debug(
+                            "Delegation resolved: delegatee={} acting as delegator={}",
+                            user.principal().getString("sub"),
+                            did);
+                        ctx.setUser(delegator);
+                        ctx.next();
+                      })
+                  .onFailure(
+                      err -> {
+                        LOGGER.warn("Delegation rejected for did={}: {}", did, err.getMessage());
+                        ctx.fail(
+                            err instanceof OgcException
+                                ? err
+                                : new OgcException(
+                                    500, "Internal Server Error", "Delegation could not be verified"));
+                      });
             })
         .onFailure(
             err -> {

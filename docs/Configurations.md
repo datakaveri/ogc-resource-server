@@ -25,7 +25,10 @@ be added [secrets](./secrets/configs/dev.json).
 | domain                            |     String     | ogc.iudx.io           | The domain URL of the OGC Resource Server, which indicates the server's address                  |
 | catServerHost                     |     String     | api.cat-test.iudx.io  | Host name of DX Catalogue server for fetching the information of resources, resource groups      |
 | catServerPort                     |    Integer     | 443                   | Port number to access HTTPS APIs of Catalogue Server                                             |
-| catRequestItemsUri                |     String     | /iudx/cat/v1/item     | API base path for DX Catalogue server items                                                      |
+| catRequestItemsUri                |     String     | /iudx/cat/v1/item     | Catalogue **item** API path — used by `CatalogueService.getCatalogueAsset` for every authZ/onboarding metadata lookup |
+| auditingExchange                  |     String     | auditing              | RabbitMQ exchange the audit log is published to                                                  |
+| auditingRoutingKey                |     String     | ##                    | Routing key used with `auditingExchange`                                                         |
+| issuer                            |     String     | dx.example.org/controlplane | Default token issuer (see the API-server `issuers` block for the live validation config)    |
 | databaseHost                      |     String     | dbHost                | Postgres Database IP address                                                                     |
 | databasePort                      |    integer     | 5433                  | Postgres Port number                                                                             |
 | databaseUser                      |     String     | dbUser                | Postgres Database user name                                                                      |
@@ -51,6 +54,61 @@ be added [secrets](./secrets/configs/dev.json).
 | s3Region            |     String     | aws-region                         | AWS region for the S3 bucket                                     |
 | s3AccessKey         |     String     | accessKey                          | AWS access key for S3 authentication                             |
 | s3SecretKey         |     String     | secretKey                          | AWS secret key for S3 authentication                             |
+
+> **Auth v2 keys.** Since the multi-issuer JWKS flow replaced the single-certificate flow, the
+> API-server module reads the keys below. `authServerHost` / a single `issuer`+`audience` pair
+> are no longer what authenticates a request — `issuers` is.
+
+| Key Name                | Value Datatype | Value Example                                                      | Description                                                                                       |
+|:------------------------|:--------------:|:-------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------|
+| issuers                 |     Object     | see below                                                          | Map of JWT issuer (`iss` claim) → `{type, jwksUrl}`. A token whose issuer is absent is rejected 401 |
+| issuers.\<iss\>.type    |     String     | remote                                                             | Only `remote` is supported today (JWKS fetched over HTTP)                                          |
+| issuers.\<iss\>.jwksUrl |     String     | https://dx.example.org/.../certs                                    | JWKS endpoint for that issuer; the key set is cached per issuer                                    |
+| issuers.jwtLeeway       |    Integer     | 60                                                                 | Clock-skew leeway in seconds when validating expiry                                                |
+| issuers.jwtIgnoreExpiry |    Boolean     | false                                                              | Skip expiry validation (non-production only)                                                       |
+| controlPanelHost        |     String     | dx.example.org                                                     | Host of the ACL control plane queried by `AclClient` for non-OPEN resources                        |
+| controlPanelPort        |    Integer     | 443                                                                | Port of the ACL control plane                                                                      |
+| controlPanelSearchPath  |     String     | /controlplane/iudx/acl/apd/v2/access_request/has_access            | "has access" endpoint path; HTTP 200 ⇒ access granted, anything else ⇒ 403. The caller's `did` header is forwarded, so a delegated request is checked for the delegator |
+| geomSpecificMaxLimits   |     Object     | {"POINT": 10000, "POLYGON": 10}                                    | Per-PostGIS-geometry cap (and default) for the `limit` query parameter, baked into the generated OpenAPI spec |
+| controlplaneGrpcHost    |     String     | dx.example.org                                                     | **Required.** dx-controlplane gRPC host used to resolve `did` delegations (`ResolveDelegation`); the server does not start without it |
+| controlplaneGrpcPort    |    Integer     | 9090                                                               | dx-controlplane gRPC port (default 9090)                                                           |
+| keycloakTokenUrl        |     String     | https://dx.example.org/auth/realms/\<realm\>/protocol/openid-connect/token | Keycloak token endpoint for the service's `client_credentials` token sent on every gRPC call |
+| grpcClientId            |     String     | svc-ogc-resource-server                                            | Keycloak service client id; must be listed in controlplane's `grpcAllowedServiceClients`           |
+| grpcClientSecret        |     String     | secret                                                             | Secret of `grpcClientId`                                                                           |
+
+> **Scopes and delegation.** After the JWT is verified, the token's `realm_access.roles` are mapped
+> to scopes (consumer → `data-access`, provider → `own-asset-management`, …; same table as dx-common)
+> and route authorization checks scopes only. When a request carries a `did` header, the server
+> calls controlplane's `ResolveDelegation` over gRPC; on an active delegation the request runs as the
+> delegator with the delegation's scopes (the caller is kept as `delegatee_sub` and audited as
+> `role=delegate`), otherwise it is rejected with 403.
+
+## Catalogue Verticle
+
+| Key Name            | Value Datatype | Value Example                        | Description                                                  |
+|:--------------------|:--------------:|:-------------------------------------|:-------------------------------------------------------------|
+| id                  |     String     | ogc.rs.catalogue.CatalogueVerticle   | Identifier for the Catalogue Verticle                        |
+| verticleInstances   |    Integer     | 1                                    | Number of verticle instances to be deployed                  |
+| catServerHost       |     String     | dx.example.org                       | DX Catalogue host                                            |
+| catServerPort       |    Integer     | 443                                  | DX Catalogue port                                            |
+| dxCatalogueBasePath |     String     | /controlplane/iudx/v2/cat            | Catalogue base path (search API is derived from it)          |
+| catRequestItemsUri  |     String     | /controlplane/iudx/v2/cat/item       | Catalogue item API path used for asset metadata lookups      |
+
+## S3 Buckets Configuration (`s3BucketsConfig`)
+
+Required at the top level — `Deployer` refuses to start without it. Each key is a **bucket
+identifier** referenced by process inputs (`s3BucketIdentifier`) and by `s3_bucket_id` columns
+in the database, so one deployment can serve datasets from several providers at once.
+
+| Key Name        | Value Datatype | Value Example                          | Description                                                      |
+|:----------------|:--------------:|:---------------------------------------|:------------------------------------------------------------------|
+| bucket          |     String     | my-bucket                              | Bucket name                                                       |
+| region          |     String     | ap-south-1                             | Region                                                            |
+| endpoint        |     String     | https://s3.ap-south-1.amazonaws.com    | Endpoint (GDAL is given this without the scheme)                  |
+| accessKey       |     String     | accessKey                              | Access key                                                        |
+| secretKey       |     String     | secretKey                              | Secret key                                                        |
+| pathBasedAccess |    Boolean     | false                                  | `true` for MinIO-style path addressing (`AWS_VIRTUAL_HOSTING=FALSE`) |
+| readAccess      |     String     | PRIVATE                                | `PUBLIC` or `PRIVATE`; reported by `GET /listConfiguredS3Buckets` |
 
 ## Jobs Verticle
 

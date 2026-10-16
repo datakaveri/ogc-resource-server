@@ -4,12 +4,7 @@ import static ogc.rs.apiserver.util.Constants.ECHO_PROCESS_EXECUTION_ENDPOINT;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
-import java.util.List;
-import ogc.rs.apiserver.authentication.util.DxUser;
-import ogc.rs.apiserver.authorization.model.DxRole;
-import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.OgcException;
-import ogc.rs.catalogue.CatalogueInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,8 +23,6 @@ public class ProcessAuthZHandler implements Handler<RoutingContext> {
   public void handle(RoutingContext routingContext) {
     LOGGER.debug("Inside ProcessAuthZHandler");
 
-    DxUser user = RoutingContextHelper.fromPrincipal(routingContext);
-    List<String> roles = user.getRoles();
     // Block echo process unless fake-token=true
     String requestPath = routingContext.normalizedPath();
     if (requestPath.contains(ECHO_PROCESS_EXECUTION_ENDPOINT)) {
@@ -45,16 +38,7 @@ public class ProcessAuthZHandler implements Handler<RoutingContext> {
         return;
       }
     }
-    LOGGER.debug("Validating access for execution ");
-    if (roles.contains(DxRole.PROVIDER.getRole())) {
-      routingContext.next();
-    } else {
-      LOGGER.debug("Not a provider token. It is of role {} ", roles);
-      routingContext.fail(
-          new OgcException(
-              401, "Not Authorized", "User is not authorised. Please contact DX AAA "));
-
-    }
-
+    /* Scope check (own-asset-management) is done at route level via AuthorizationHandler.forScopes */
+    routingContext.next();
   }
 }
