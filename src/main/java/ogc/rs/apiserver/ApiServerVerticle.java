@@ -42,6 +42,8 @@ import ogc.rs.apiserver.authentication.util.DxUser;
 import ogc.rs.apiserver.authorization.model.Asset;
 import ogc.rs.apiserver.authorization.model.DxRole;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
+import ogc.rs.apiserver.delegation.GrpcDelegationResolver;
+import ogc.rs.apiserver.delegation.KeycloakServiceTokenProvider;
 import ogc.rs.apiserver.util.AuthInfo;
 import ogc.rs.apiserver.util.Limits;
 import ogc.rs.apiserver.util.OgcException;
@@ -105,6 +107,7 @@ public class ApiServerVerticle extends AbstractVerticle {
   private HttpClient httpClient;
   private ProcessesRunnerService processService;
   private JobsService jobsService;
+  private GrpcDelegationResolver delegationResolver;
   /**
    * This method is used to start the Verticle. It deploys a verticle in a cluster/single instance, reads the
    * configuration, obtains a proxy for the Event bus services exposed through service discovery,
@@ -118,6 +121,8 @@ public class ApiServerVerticle extends AbstractVerticle {
     /* Get base paths from config */
     ogcBasePath = config().getString("ogcBasePath");
     hostName = config().getString("hostName");
+
+    delegationResolver = createDelegationResolver();
 
     catalogueService = CatalogueInterface.createProxy(vertx, CATALOGUE_SERVICE_ADDRESS);
     meteringService = MeteringService.createProxy(vertx, METERING_SERVICE_ADDRESS);
@@ -177,6 +182,46 @@ public class ApiServerVerticle extends AbstractVerticle {
     });
 
     httpClient = vertx.createHttpClient();
+  }
+
+  /**
+   * gRPC client for dx-controlplane's ResolveDelegation, used when a request carries a {@code did}
+   * header. Created once here (not per router rebuild) so the channel is not leaked on every
+   * {@link #resetRouter(List)}.
+   */
+  private GrpcDelegationResolver createDelegationResolver() {
+    JsonObject config = config();
+    String grpcHost = config.getString("controlplaneGrpcHost");
+    if (grpcHost == null || grpcHost.isBlank()) {
+      throw new IllegalStateException(
+          "Missing 'controlplaneGrpcHost' in ApiServerVerticle config; required for delegation (did)");
+    }
+    int grpcPort = config.getInteger("controlplaneGrpcPort", 9090);
+    KeycloakServiceTokenProvider tokenProvider =
+        new KeycloakServiceTokenProvider(
+            vertx,
+            config.getString("keycloakTokenUrl"),
+            config.getString("grpcClientId"),
+            config.getString("grpcClientSecret"));
+    LOGGER.info("Controlplane gRPC (delegation) configured: {}:{}", grpcHost, grpcPort);
+    return new GrpcDelegationResolver(grpcHost, grpcPort, tokenProvider);
+  }
+
+  /** Resolves {@code did} delegations; shared by all router builders. */
+  public GrpcDelegationResolver getDelegationResolver() {
+    return delegationResolver;
+  }
+
+  @Override
+  public void stop() {
+    if (delegationResolver != null) {
+      try {
+        delegationResolver.shutdown();
+      } catch (InterruptedException e) {
+        LOGGER.warn("Interrupted while shutting down controlplane gRPC client: {}", e.getMessage());
+        Thread.currentThread().interrupt();
+      }
+    }
   }
 
   /**
@@ -2371,26 +2416,20 @@ public class ApiServerVerticle extends AbstractVerticle {
   }
 
     private void setAuditLog(Asset asset, RoutingContext context) {
-      JsonArray userRoles =
-              context
-                      .user()
-                      .principal()
-                      .getJsonObject("realm_access")
-                      .getJsonArray("roles");
-      String role = userRoles.contains("delegate") ? "delegate" : "consumer";
-      String delegatorId;
-      if (role.equalsIgnoreCase("delegate")) {
-        delegatorId = context.request().getHeader("did");
-      } else {
-        delegatorId = context.user().subject();
-      }
+      /* After a did delegation is resolved, ctx.user() is the delegator and delegatee_sub is the
+       * actual caller (see GrpcDelegationResolver). */
+      String delegateeSub = context.user().principal().getString("delegatee_sub");
+      boolean isDelegated = delegateeSub != null;
+      String role = isDelegated ? "delegate" : "consumer";
+      String userId = isDelegated ? delegateeSub : context.user().subject();
+      String delegatorId = context.user().subject();
 
       String ipAddress = getClientIp(context);
       String userAgent =getUserAgent(context);
       String iss= context.user().principal().getString("iss");
 
       AuditLog auditLog = OgcRsAuditHelper.createAuditingLogs(asset, RoutingContextHelper.getRequestPath(context),
-                RoutingContextHelper.getRequestMethod(context), UUID.fromString(context.user().subject()),
+                RoutingContextHelper.getRequestMethod(context), UUID.fromString(userId),
                 context.user().principal().getString("organisationName"),"OGC_RS", role, "Download",iss,delegatorId,ipAddress,userAgent);
         RoutingContextHelper.setAuditingLog(context,auditLog);
     }

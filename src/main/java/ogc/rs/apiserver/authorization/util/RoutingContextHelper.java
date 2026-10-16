@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 import ogc.rs.apiserver.authentication.util.DxUser;
 import ogc.rs.apiserver.authorization.model.Asset;
+import ogc.rs.apiserver.authorization.registry.SystemRoleScopeMap;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.auditing.model.AuditLog;
 import org.apache.logging.log4j.LogManager;
@@ -46,7 +47,7 @@ public class RoutingContextHelper {
       throw new OgcException(401, "Unauthorized", "Missing 'exp' in token");
     }
 
-    return new DxUser(
+    DxUser user = new DxUser(
         roles,
         principal.getString("organisation_id", null),
         principal.getString("organisation_name", null), // assuming this is correct and intentional
@@ -68,6 +69,11 @@ public class RoutingContextHelper {
         null,
         tokenExpiry
     );
+    user.setScopes(
+        principal
+            .getJsonArray(SystemRoleScopeMap.CLAIM_SCOPES, new io.vertx.core.json.JsonArray())
+            .getList());
+    return user;
 
   }
     public static Optional<List<AuditLog>> getAuditingLog(RoutingContext routingContext) {

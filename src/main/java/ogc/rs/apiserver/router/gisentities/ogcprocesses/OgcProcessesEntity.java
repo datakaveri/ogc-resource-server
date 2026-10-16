@@ -6,6 +6,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import ogc.rs.apiserver.ApiServerVerticle;
+import ogc.rs.apiserver.authorization.handler.AuthorizationHandler;
+import ogc.rs.apiserver.authorization.model.Scopes;
 import ogc.rs.apiserver.handlers.FailureHandler;
 import ogc.rs.apiserver.router.gisentities.GisEntityInterface;
 import ogc.rs.apiserver.router.routerbuilders.OgcRouterBuilder;
@@ -30,6 +32,7 @@ public class OgcProcessesEntity implements GisEntityInterface{
     
     builder
         .operation(EXECUTE_API)
+        .handler(AuthorizationHandler.forScopes(Scopes.OWN_ASSET_MANAGEMENT))
         .handler(ogcRouterBuilder.processAuthZHandler)
         .handler(apiServerVerticle::executeJob)
         .handler(apiServerVerticle::putCommonResponseHeaders)
@@ -47,6 +50,7 @@ public class OgcProcessesEntity implements GisEntityInterface{
 
     builder
         .operation(STATUS_API)
+        .handler(AuthorizationHandler.forScopes(Scopes.OWN_ASSET_MANAGEMENT))
         .handler(ogcRouterBuilder.processAuthZHandler)
         .handler(apiServerVerticle::getStatus)
         .handler(apiServerVerticle::putCommonResponseHeaders)
@@ -54,6 +58,7 @@ public class OgcProcessesEntity implements GisEntityInterface{
         .failureHandler(failureHandler);
 
     builder.operation(LIST_JOBS_API)
+            .handler(AuthorizationHandler.forScopes(Scopes.OWN_ASSET_MANAGEMENT))
             .handler(ogcRouterBuilder.processAuthZHandler)
             .handler(apiServerVerticle::listAllJobs)
             .handler(apiServerVerticle::putCommonResponseHeaders)
@@ -61,6 +66,7 @@ public class OgcProcessesEntity implements GisEntityInterface{
             .failureHandler(failureHandler);
 
     builder.operation(GET_JOB_RESULTS)
+            .handler(AuthorizationHandler.forScopes(Scopes.OWN_ASSET_MANAGEMENT))
             .handler(ogcRouterBuilder.processAuthZHandler)
             .handler(apiServerVerticle::retrieveJobResults)
             .handler(apiServerVerticle::putCommonResponseHeaders)

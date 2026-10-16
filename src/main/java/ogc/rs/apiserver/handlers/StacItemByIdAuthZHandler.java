@@ -1,6 +1,7 @@
 package ogc.rs.apiserver.handlers;
 
 import static ogc.rs.apiserver.util.Constants.HEADER_AUTHORIZATION;
+import static ogc.rs.apiserver.util.Constants.HEADER_DID;
 import static ogc.rs.common.Constants.UUID_REGEX;
 
 import io.vertx.core.Handler;
@@ -9,7 +10,7 @@ import io.vertx.ext.web.RoutingContext;
 import java.time.Instant;
 import ogc.rs.apiserver.authentication.client.AclClient;
 import ogc.rs.apiserver.authentication.util.DxUser;
-import ogc.rs.apiserver.authorization.model.DxRole;
+import ogc.rs.apiserver.authorization.model.Scopes;
 import ogc.rs.apiserver.authorization.util.AccessPolicy;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.OgcException;
@@ -97,12 +98,12 @@ public class StacItemByIdAuthZHandler implements Handler<RoutingContext> {
         return;
       }
       LOGGER.debug("Not an open resource, it's a {} resource.", accessPolicy);
-      if (user.getRoles().contains(DxRole.PROVIDER.toString())) {
+      if (user.hasAnyScope(Scopes.OWN_ASSET_MANAGEMENT)) {
         routingContext.put(SHOULD_CREATE_KEY, true);
         routingContext.next();
-      } else if (user.getRoles().contains(DxRole.CONSUMER.toString())) {
+      } else if (user.hasAnyScope(Scopes.DATA_ACCESS)) {
         String bearerToken = routingContext.request().getHeader(HEADER_AUTHORIZATION);
-        aclClient.checkAccess(collectionId, bearerToken)
+        aclClient.checkAccess(collectionId, bearerToken, routingContext.request().getHeader(HEADER_DID))
             .onSuccess(accessGranted -> {
               if (accessGranted) {
                 routingContext.put(SHOULD_CREATE_KEY, true);
@@ -119,6 +120,11 @@ public class StacItemByIdAuthZHandler implements Handler<RoutingContext> {
               routingContext.put(SHOULD_CREATE_KEY, false);
               routingContext.next();
             });
+      } else {
+        /* neither provider nor data-access scope: item is still served, without pre-signed asset URLs */
+        LOGGER.debug("No data-access/own-asset-management scope. Pre-signed URL generation disabled.");
+        routingContext.put(SHOULD_CREATE_KEY, false);
+        routingContext.next();
       }
     }).onFailure(err -> {
       LOGGER.error("Failed to retrieve collection access: {}", err.getMessage());

@@ -9,7 +9,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import java.util.ArrayList;
 import ogc.rs.apiserver.authentication.util.DxUser;
-import ogc.rs.apiserver.authorization.model.DxRole;
+import ogc.rs.apiserver.authorization.model.Scopes;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.catalogue.CatalogueInterface;
@@ -30,7 +30,7 @@ public class StacCollectionOnboardingAuthZHandler implements Handler<RoutingCont
    * Handles the routing context to authorize access to STAC Collection Onboarding APIs.
    * The token should be open and either provider  or delegate
    * The authorization checks include:
-   * 1. Validates that the user has the 'provider' role.
+   * 1. Validates that the user has the 'own-asset-management' scope (provider).
    * 2. Validates that the user is the owner of the collection(s) being onboarded.
    *
    * @param routingContext the routing context of the request
@@ -84,9 +84,9 @@ public class StacCollectionOnboardingAuthZHandler implements Handler<RoutingCont
       RoutingContextHelper.setAsset(routingContext, catAsset);
       String ownerUserId = catAsset.getProviderId();
       boolean isProviderTheResourceOwner = ownerUserId.equals(user.getSub().toString());
-      /* Is the user having provider role and is resource owner*/
-      LOGGER.debug("User roles: {}, isProviderTheResourceOwner: {}", user.getRoles(), isProviderTheResourceOwner);
-      if (!user.getRoles().contains(DxRole.PROVIDER.getRole()) || !isProviderTheResourceOwner) {
+      /* Is the user having provider scope and is resource owner*/
+      LOGGER.debug("User scopes: {}, isProviderTheResourceOwner: {}", user.getScopes(), isProviderTheResourceOwner);
+      if (!user.hasAnyScope(Scopes.OWN_ASSET_MANAGEMENT) || !isProviderTheResourceOwner) {
         routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "Ownership check failed"));
         return;
       }
@@ -111,8 +111,8 @@ public class StacCollectionOnboardingAuthZHandler implements Handler<RoutingCont
       RoutingContextHelper.setAsset(routingContext, catAsset);
       String ownerUserId = catAsset.getProviderId();
       boolean isProviderTheResourceOwner = ownerUserId.equals(user.getSub().toString());
-      /* Is the user having provider role and is resource owner*/
-      if (!user.getRoles().contains(DxRole.PROVIDER.getRole()) && !isProviderTheResourceOwner) {
+      /* Is the user having provider scope and is resource owner*/
+      if (!user.hasAnyScope(Scopes.OWN_ASSET_MANAGEMENT) && !isProviderTheResourceOwner) {
         routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "Ownership check failed"));
         return;
       }

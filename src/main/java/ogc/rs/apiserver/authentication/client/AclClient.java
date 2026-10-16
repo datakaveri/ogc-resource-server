@@ -2,7 +2,9 @@ package ogc.rs.apiserver.authentication.client;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.logging.log4j.LogManager;
@@ -36,16 +38,25 @@ public class AclClient {
   /**
    * Checks if the given itemId is accessible using the provided token.
    *
+   * <p>The caller's {@code did} header is forwarded so controlplane resolves the delegation and
+   * checks access for the delegator rather than the delegatee.
+   *
    * @param itemId resource UUID to check
-   * @param token  Bearer token for authorization
+   * @param token  Authorization header value of the incoming request
+   * @param did    delegator id from the incoming {@code did} header, or null
    * @return Future with true if resource access is granted, false otherwise
    */
-  public Future<Boolean> checkAccess(String itemId, String token) {
-    LOGGER.info("Checking access for itemId: {}", itemId);
-    return
+  public Future<Boolean> checkAccess(String itemId, String token, String did) {
+    LOGGER.info("Checking access for itemId: {}, delegated: {}", itemId, did != null);
+    HttpRequest<Buffer> request =
         webClient
             .post(port, controlPanelHost, controlPanelSearchPath)
-            .putHeader("Authorization", token)
+            .putHeader("Authorization", token);
+    if (did != null && !did.isBlank()) {
+      request.putHeader("did", did);
+    }
+    return
+        request
             .sendJsonObject(new JsonObject().put("itemId", itemId))
             .compose(response -> {
               LOGGER.info("check access response : {}",

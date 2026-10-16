@@ -5,6 +5,8 @@ import io.vertx.core.json.JsonObject;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
@@ -13,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 public class DxUser {
   private static final Logger LOGGER = LogManager.getLogger(DxUser.class);
   private List<String> roles;
+  private List<String> scopes = new ArrayList<>();
   private String organisationId;
   private String organisationName;
   private UUID sub;
@@ -79,6 +82,12 @@ public class DxUser {
 
   // Getters
   public List<String> getRoles() { return roles; }
+  public List<String> getScopes() { return scopes; }
+
+  /** True if the user's effective scopes contain any of the given scopes. */
+  public boolean hasAnyScope(String... required) {
+    return scopes != null && Arrays.stream(required).anyMatch(scopes::contains);
+  }
   public String getOrganisationId() { return organisationId; }
   public String getOrganisationName() { return organisationName; }
   public UUID getSub() { return sub; }
@@ -102,6 +111,7 @@ public class DxUser {
 
   // Setters
   public void setRoles(List<String> roles) { this.roles = roles; }
+  public void setScopes(List<String> scopes) { this.scopes = scopes; }
   public void setOrganisationId(String organisationId) { this.organisationId = organisationId; }
   public void setOrganisationName(String organisationName) { this.organisationName = organisationName; }
   public void setSub(UUID sub) { this.sub = sub; }

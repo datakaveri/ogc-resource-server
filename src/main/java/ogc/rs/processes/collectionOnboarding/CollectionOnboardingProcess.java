@@ -236,6 +236,7 @@ public class CollectionOnboardingProcess implements ProcessService {
                         Buffer.buffer(output.replace("Had to open data source read-only.", "")));
                 crsPromise.complete(cmdOutput);
               } catch (IOException e1) {
+                LOGGER.error("ogrInfo stderr: {}", stderr.toString());
                 crsPromise.fail(e1.getMessage());
               }
             },VERTX_EXECUTE_BLOCKING_IN_ORDER)
