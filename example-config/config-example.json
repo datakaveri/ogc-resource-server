@@ -21,7 +21,12 @@
     "issuer": "dx.example.org/controlplane",
     "auditingExchange": "auditing",
     "auditingRoutingKey": "##",
-    "poolSize": 5
+    "poolSize": 5,
+    "controlplaneGrpcHost": "localhost",
+    "keycloakTokenUrl": "",
+    "controlplaneGrpcPort": 9090,
+    "grpcClientId": "svc-dx-dataplane-ogc",
+    "grpcClientSecret": ""
   },
   "s3BucketsConfig": {
     "default": {

@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+// Subset of dx-common src/main/proto/appid_verification.proto: only the ResolveDelegation RPC.
+// The proto package and service name must stay identical to dx-common's (they form the gRPC
+// method path /org.cdpg.dx.auth.appid.v1.AppIdVerificationService/ResolveDelegation); only the
+// generated Java package differs.
+package org.cdpg.dx.auth.appid.v1;
+
+option java_multiple_files  = true;
+option java_package         = "ogc.rs.apiserver.delegation.grpc";
+option java_outer_classname = "DelegationResolutionProto";
+
+message ResolveDelegationRequest {
+  string delegator_sub = 1;
+  string delegatee_sub = 2;
+}
+
+message ResolveDelegationResponse {
+  bool             success            = 1;
+  string           error_code         = 2;  // NO_ACTIVE_DELEGATION | EXPIRED | DELEGATOR_INACTIVE | INTERNAL_ERROR
+  string           sub                = 3;  // delegator's sub (UUID)
+  string           organisation_id    = 4;
+  string           organisation_name  = 5;
+  repeated string  roles              = 6;
+  repeated string  scopes             = 7;
+  bool             email_verified     = 8;
+  bool             kyc_verified       = 9;
+  string           name               = 10;
+  string           preferred_username = 11;
+  string           given_name         = 12;
+  string           family_name        = 13;
+  string           email              = 14;
+  bool             account_enabled    = 15;
+  string           delegatee_sub      = 16;  // echoed back for audit
+}
+
+service AppIdVerificationService {
+  rpc ResolveDelegation (ResolveDelegationRequest) returns (ResolveDelegationResponse);
+}

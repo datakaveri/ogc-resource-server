@@ -72,3 +72,12 @@ build/
 secrets/configs/*
 secrets/*
 
+
+### local docs (not for commit) ###
+docs/DATA_LIFECYCLE.md
+docs/DEVELOPER_GUIDE.md
+docs/DEVELOPER_GUIDE_2.md
+docs/LIBRARY_DIFFERENCE.md
+docs/api-flows/
+docs/eachApi/
+docs/working_guide.md

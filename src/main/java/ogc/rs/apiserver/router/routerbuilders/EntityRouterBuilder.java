@@ -6,6 +6,7 @@ import static ogc.rs.apiserver.util.Constants.HEADER_ALLOW_ORIGIN;
 import static ogc.rs.apiserver.util.Constants.HEADER_AUTHORIZATION;
 import static ogc.rs.apiserver.util.Constants.HEADER_CONTENT_LENGTH;
 import static ogc.rs.apiserver.util.Constants.HEADER_CONTENT_TYPE;
+import static ogc.rs.apiserver.util.Constants.HEADER_DID;
 import static ogc.rs.apiserver.util.Constants.HEADER_HOST;
 import static ogc.rs.apiserver.util.Constants.HEADER_ORIGIN;
 import static ogc.rs.apiserver.util.Constants.HEADER_REFERER;
@@ -46,7 +47,8 @@ public abstract class EntityRouterBuilder {
           HEADER_ORIGIN,
           HEADER_REFERER,
           HEADER_ACCEPT,
-          HEADER_ALLOW_ORIGIN);
+          HEADER_ALLOW_ORIGIN,
+          HEADER_DID);
   private static final Set<HttpMethod> allowedMethods =
       Set.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
   private static final String OPENAPI_V3_JSON_CONTENT_TYPE =
@@ -121,7 +123,8 @@ public abstract class EntityRouterBuilder {
     routerBuilder.setOptions(factoryOptions);
     // Create JWKS resolver (reads config -> jwks URLs)
     JwksResolver jwksResolver = new JwksResolver(vertx, config.getJsonObject(ISSUERS));
-    MultiIssuerJwtAuthHandler authHandler = new MultiIssuerJwtAuthHandler(jwksResolver);
+    MultiIssuerJwtAuthHandler authHandler =
+        new MultiIssuerJwtAuthHandler(jwksResolver, apiServerVerticle.getDelegationResolver());
     /*
      * Automatically adds the handler for any API that has the `security` block with
      * OAS_BEARER_SECURITY_SCHEME. See
