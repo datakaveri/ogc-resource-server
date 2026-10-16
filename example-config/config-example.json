@@ -1,6 +1,11 @@
 {
   "clusterId": "ogc-rs-cluster",
   "commonConfig": {
+    "grpcClientId": "svc-ogc-resource-server",
+    "grpcClientSecret": "",
+    "controlplaneGrpcHost": "dx.example.org",
+    "controlplaneGrpcPort": 9090,
+    "keycloakTokenUrl": "https://dx.example.org/auth/realms/<realm>/protocol/openid-connect/token",
     "auditingExchange": "auditing",
     "auditingRoutingKey": "##",
     "catRequestItemsUri": "/controlplane/iudx/v2/cat/item",

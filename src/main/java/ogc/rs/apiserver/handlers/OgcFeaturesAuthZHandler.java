@@ -1,13 +1,14 @@
 package ogc.rs.apiserver.handlers;
 
 import static ogc.rs.apiserver.util.Constants.HEADER_AUTHORIZATION;
+import static ogc.rs.apiserver.util.Constants.HEADER_DID;
 import static ogc.rs.common.Constants.UUID_REGEX;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import ogc.rs.apiserver.authentication.client.AclClient;
 import ogc.rs.apiserver.authentication.util.DxUser;
-import ogc.rs.apiserver.authorization.model.DxRole;
+import ogc.rs.apiserver.authorization.model.Scopes;
 import ogc.rs.apiserver.authorization.util.AccessPolicy;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.OgcException;
@@ -66,15 +67,15 @@ public class OgcFeaturesAuthZHandler implements Handler<RoutingContext> {
       }
       /* If access policy is not open, check if user has access */
       LOGGER.debug("Item accessPolicy is {}. Performing access check.", accessPolicy);
-      /* If the role is provider go to the next handler */
-      if (user.getRoles().contains(DxRole.PROVIDER.toString())) {
+      /* If the user can manage own assets (provider scope) go to the next handler */
+      if (user.hasAnyScope(Scopes.OWN_ASSET_MANAGEMENT)) {
         routingContext.next();
       } else {
         /* Call control panel's has access endpoint to check if the consumer
          * has access to the given collection ID or resource */
         String bearerToken = routingContext.request().getHeader(HEADER_AUTHORIZATION);
 
-        aclClient.checkAccess(collectionId, bearerToken)
+        aclClient.checkAccess(collectionId, bearerToken, routingContext.request().getHeader(HEADER_DID))
             .onSuccess(accessGranted -> {
               if (accessGranted) {
                 routingContext.next();
