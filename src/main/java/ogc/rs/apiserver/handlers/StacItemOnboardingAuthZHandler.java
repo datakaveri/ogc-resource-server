@@ -6,9 +6,8 @@ import static ogc.rs.common.Constants.UUID_REGEX;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
-import java.util.List;
 import ogc.rs.apiserver.authentication.util.DxUser;
-import ogc.rs.apiserver.authorization.model.DxRole;
+import ogc.rs.apiserver.authorization.model.Scopes;
 import ogc.rs.apiserver.authorization.util.RoutingContextHelper;
 import ogc.rs.apiserver.util.OgcException;
 import ogc.rs.catalogue.CatalogueInterface;
@@ -41,8 +40,6 @@ public class StacItemOnboardingAuthZHandler implements Handler<RoutingContext> {
     }
 
     DxUser user = RoutingContextHelper.fromPrincipal(routingContext);
-    List<String> roles = user.getRoles();
-
     LOGGER.debug("Inside StacItemOnboardingAuthZHandler");
 
     collectionId = routingContext.normalizedPath().split("/")[3];
@@ -52,8 +49,8 @@ public class StacItemOnboardingAuthZHandler implements Handler<RoutingContext> {
       routingContext.fail(new OgcException(400, "Not Found", "Invalid Collection Id"));
       return;
     }
-    /* if the role is not provider, 401 is returned back */
-    if (!roles.contains(DxRole.PROVIDER.getRole())) {
+    /* if the user lacks the provider scope, 401 is returned back */
+    if (!user.hasAnyScope(Scopes.OWN_ASSET_MANAGEMENT)) {
       routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "Only provider or provider delegate is authorized" +
           " to perform this action."));
       return;
@@ -68,8 +65,8 @@ public class StacItemOnboardingAuthZHandler implements Handler<RoutingContext> {
       RoutingContextHelper.setAsset(routingContext, catAsset);
       String ownerUserId = catAsset.getProviderId();
       boolean isProviderTheResourceOwner = ownerUserId.equals(user.getSub().toString());
-      /* Is the user having provider role the resource owner*/
-      LOGGER.debug("User roles: {}, isProviderTheResourceOwner: {}", user.getRoles(), isProviderTheResourceOwner);
+      /* Is the user having provider scope the resource owner*/
+      LOGGER.debug("User scopes: {}, isProviderTheResourceOwner: {}", user.getScopes(), isProviderTheResourceOwner);
       if (!isProviderTheResourceOwner) {
         routingContext.fail(new OgcException(401, NOT_AUTHORIZED, "Ownership check failed"));
         return;

@@ -1,5 +1,13 @@
 # Token Constraints
 
+> **Status (branch `dev`, Sept 2026): these constraints are currently NOT enforced.**
+> `TokenLimitsEnforcementHandler` is instantiated in `EntityRouterBuilder` but attached to no
+> route — it is commented out on both feature operations (`OgcFeaturesEntity.java:58,70`).
+> The enforcement code in `DatabaseServiceImpl.getFeatures` (bbox intersection, feature-geometry
+> JOIN, api-hit and data-usage counters) is complete but unreachable. This document therefore
+> describes the token format and the intended semantics.
+
+
 This section describes the structure and semantics of constraints in the authorization token used for accessing protected OGC-compliant API resources.
 
 ---
