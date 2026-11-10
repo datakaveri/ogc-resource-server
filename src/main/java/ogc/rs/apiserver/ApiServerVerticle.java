@@ -2417,20 +2417,26 @@ public class ApiServerVerticle extends AbstractVerticle {
 
     private void setAuditLog(Asset asset, RoutingContext context) {
       /* After a did delegation is resolved, ctx.user() is the delegator and delegatee_sub is the
-       * actual caller (see GrpcDelegationResolver). */
-      String delegateeSub = context.user().principal().getString("delegatee_sub");
-      boolean isDelegated = delegateeSub != null;
-      String role = isDelegated ? "delegate" : "consumer";
-      String userId = isDelegated ? delegateeSub : context.user().subject();
-      String delegatorId = context.user().subject();
+       * actual caller (see GrpcDelegationResolver). Same contract as controlplane's
+       * AuditContextExtractor: user_id = delegator, delegate_id = original caller (token sub),
+       * actor_type = DELEGATE | APP | SELF. */
+      JsonObject principal = context.user().principal();
+      String delegateId = principal.getString("delegatee_sub");
+      String userId = context.user().subject();
+      String role = OgcRsAuditHelper.resolveRole(principal);
+      String actorType = OgcRsAuditHelper.resolveActorType(principal, delegateId);
 
       String ipAddress = getClientIp(context);
       String userAgent =getUserAgent(context);
-      String iss= context.user().principal().getString("iss");
+      String iss= principal.getString("iss");
+      // Called from a body-end handler (auditAfterApiEnded), so the response body is fully
+      // written and bytesWritten() is the final size. Vert.x runs body-end handlers in reverse
+      // registration order, so this runs before AuditingHandler publishes the log.
+      long sizeBytes = context.response().bytesWritten();
 
       AuditLog auditLog = OgcRsAuditHelper.createAuditingLogs(asset, RoutingContextHelper.getRequestPath(context),
                 RoutingContextHelper.getRequestMethod(context), UUID.fromString(userId),
-                context.user().principal().getString("organisationName"),"OGC_RS", role, "Download",iss,delegatorId,ipAddress,userAgent);
+                principal.getString("organisation_name"),"OGC_RS", role, "Download",iss,delegateId,actorType,ipAddress,userAgent,sizeBytes);
         RoutingContextHelper.setAuditingLog(context,auditLog);
     }
 

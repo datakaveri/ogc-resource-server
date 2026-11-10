@@ -18,7 +18,8 @@ public class OgcRsAuditLog implements AuditLog {
   private final UUID userId;  //token
   private final String originServer; // ananjay se puco ya tabke me enum dekh lena
   private final String iss;
-  private final String delegationId; // token ya control plane
+  private final String delegateId; // original caller (token sub) when acting via delegation
+  private final String actorType; // SELF | DELEGATE | APP
   private final String
       organizationId; // Optional field  in auditing server [organization id of consumer, provider].
   // Can be null sometimes
@@ -45,7 +46,10 @@ public class OgcRsAuditLog implements AuditLog {
       String organizationId,
       String organizationName,
       String iss,
-      String delegateId,String ipAddress,String userAgent) {
+      String delegateId,
+      String actorType,
+      String ipAddress,
+      String userAgent) {
     this.id = id;
     this.assetId = assetId;
     this.logType = logType;
@@ -60,7 +64,8 @@ public class OgcRsAuditLog implements AuditLog {
     this.organizationId = organizationId;
     this.organizationName = organizationName;
     this.iss = iss;
-    this.delegationId = delegateId;
+    this.delegateId = delegateId;
+    this.actorType = actorType;
     this.ipAddress=ipAddress;
     this.userAgent=userAgent;
   }
@@ -75,14 +80,15 @@ public class OgcRsAuditLog implements AuditLog {
     json.put("created_at", createdAt);
     json.put("api", api);
     json.put("method", method);
-    json.put("size_byte", size);
+    json.put("size_bytes", size);
     json.put("role", role);
     json.put("user_id", userId.toString());
     json.put("origin_server", originServer);
     json.put("org_id", organizationId);
     json.put("org_name", organizationName);
     json.put("issuer", iss);
-    json.put("delegationId", delegationId);
+    json.put("delegate_id", delegateId);
+    json.put("actor_type", actorType);
     json.put("ip_address", ipAddress);
     json.put("user_agent",userAgent);
     return json;
